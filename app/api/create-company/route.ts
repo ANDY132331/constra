@@ -1,0 +1,94 @@
+import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+
+function generateInviteCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // omits confusable chars
+  let code = "CN-";
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  code += "-";
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+// POST /api/create-company
+// Creates the auth user, company, and admin profile in one server-side transaction.
+// Must be server-side because new users cannot INSERT into companies (no company_id yet).
+export async function POST(request: Request) {
+  const body = await request.json();
+  const { email, password, firstName, lastName, companyName, currency, language, industry } = body;
+
+  if (!email || !password || !firstName || !companyName) {
+    return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+  }
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false }, cookies: { getAll: () => [], setAll: () => {} } },
+  );
+
+  // 1. Create auth user (email confirmed immediately for admin flow)
+  const { data: authData, error: signUpErr } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+
+  if (signUpErr || !authData.user) {
+    return NextResponse.json({ error: signUpErr?.message ?? "Sign-up failed." }, { status: 400 });
+  }
+
+  const userId = authData.user.id;
+
+  // 2. Create company
+  const inviteCode = generateInviteCode();
+  const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: company, error: companyErr } = await supabase
+    .from("companies")
+    .insert({
+      name: companyName.trim(),
+      invite_code: inviteCode,
+      plan: "starter",
+      subscription_status: "trialing",
+      trial_ends_at: trialEndsAt,
+      currency: currency ?? "USD",
+      language: language ?? "en",
+      industry: industry ?? "Construction",
+    })
+    .select("id")
+    .single();
+
+  if (companyErr || !company) {
+    await supabase.auth.admin.deleteUser(userId);
+    return NextResponse.json({ error: "Failed to create company." }, { status: 500 });
+  }
+
+  // 3. Create admin profile
+  const full = [firstName.trim(), (lastName ?? "").trim()].filter(Boolean).join(" ");
+  const initials = [firstName[0], lastName?.[0]]
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
+
+  const { error: profileErr } = await supabase.from("profiles").insert({
+    id: userId,
+    company_id: company.id,
+    name: full,
+    initials,
+    role: "Admin",
+    custom_role: "Admin / Owner",
+    email: email.trim(),
+    phone: "",
+    color: "#f59e0b",
+    clocked_in: false,
+    hourly_rate: 0,
+  });
+
+  if (profileErr) {
+    await supabase.auth.admin.deleteUser(userId);
+    return NextResponse.json({ error: "Failed to create profile." }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, inviteCode });
+}
