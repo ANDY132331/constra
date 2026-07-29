@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import {
   FolderOpen, Upload, Trash2, FileText, FileImage, File,
   Download, Search, ChevronDown, History, RefreshCw,
@@ -8,6 +8,7 @@ import {
 import { format } from "date-fns";
 import { useStore } from "@/lib/store";
 import type { ProjectDocument, DocumentVersion } from "@/lib/mock-data";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { uploadDocument } from "@/lib/supabase/storage";
 
@@ -40,7 +41,16 @@ export default function DocumentsPage() {
 
   const [selectedProject, setSelectedProject] = useState<string>(projects[0]?.id ?? "");
   const [selectedCategory, setSelectedCategory] = useState<Category | "all">("all");
+
+  // Auto-select first project if none is selected
+  useEffect(() => {
+    if (!selectedProject && projects[0]?.id) {
+      setSelectedProject(projects[0].id);
+    }
+  }, [projects, selectedProject]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [downloadErrorMsg, setDownloadErrorMsg] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadCategory, setUploadCategory] = useState<Category>("blueprint");
   const [previewDoc, setPreviewDoc] = useState<ProjectDocument | null>(null);
@@ -107,7 +117,8 @@ export default function DocumentsPage() {
 
   function downloadDoc(doc: ProjectDocument) {
     if (!doc.dataUrl) {
-      alert(`"${doc.name}" was imported from a data source and has no stored file. Use real file upload to store downloadable copies.`);
+      setDownloadErrorMsg(`"${doc.name}" has no stored file. Upload a real file to enable downloads.`);
+      setTimeout(() => setDownloadErrorMsg(""), 4000);
       return;
     }
     const a = document.createElement("a");
@@ -135,6 +146,11 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-5 max-w-[1100px]">
+      {downloadErrorMsg && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-[12px] text-red-300">
+          {downloadErrorMsg}
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -264,7 +280,7 @@ export default function DocumentsPage() {
                     <Download size={11} /> {doc.dataUrl ? "Download" : "No File"}
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${doc.name}"?`)) deleteDocument(doc.id); }}
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm(doc.id); }}
                     className="flex-1 py-2 text-[11px] font-semibold text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-colors flex items-center justify-center gap-1.5 border-l border-white/[0.06]"
                   >
                     <Trash2 size={11} /> Delete
@@ -352,6 +368,15 @@ export default function DocumentsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Document"
+        body="Delete this document and all its versions? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) deleteDocument(deleteConfirm); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

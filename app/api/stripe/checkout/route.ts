@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         .eq("id", company.id);
     }
 
-    const origin = request.headers.get("origin") ?? "https://buildflow-ruddy-two.vercel.app";
+    const origin = request.headers.get("origin") ?? "https://constra-jc6xjjxfe-anandssandhu31-1336s-projects.vercel.app";
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

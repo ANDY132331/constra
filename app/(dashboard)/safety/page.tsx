@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { useT } from "@/lib/i18n";
 
 const TYPE_CONFIG = {
@@ -47,6 +48,7 @@ export default function SafetyPage() {
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<IncidentForm>(blank);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const filtered = safetyIncidents.filter((i) => {
     if (typeFilter !== "all" && i.type !== typeFilter) return false;
@@ -277,7 +279,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                         className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-all">
                         <Pencil size={12} />
                       </button>
-                      <button onClick={() => { if (confirm("Delete this incident log?")) deleteSafetyIncident(incident.id); }}
+                      <button onClick={() => setDeleteConfirm(incident.id)}
                         className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
                         <Trash2 size={12} />
                       </button>
@@ -403,6 +405,15 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Incident Log"
+        body="Delete this safety incident log? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) deleteSafetyIncident(deleteConfirm); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

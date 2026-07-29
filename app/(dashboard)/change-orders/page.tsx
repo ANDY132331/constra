@@ -7,6 +7,7 @@ import {
   Plus, Search, GitPullRequest, DollarSign, Trash2, X,
   ChevronRight, Download, CheckCircle2, Clock, XCircle, Ban, Pencil,
 } from "lucide-react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/currency";
 import type { ChangeOrder } from "@/lib/mock-data";
@@ -54,6 +55,7 @@ export default function ChangeOrdersPage() {
   const [editing, setEditing] = useState<ChangeOrder | null>(null);
   const [form, setForm] = useState<COForm>(emptyForm());
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAdmin) router.replace("/dashboard");
@@ -268,7 +270,7 @@ export default function ChangeOrdersPage() {
                 <Pencil size={14} />
               </button>
               <button
-                onClick={() => { if (confirm("Delete this change order?")) { deleteChangeOrder(selected.id); setSelected(null); } }}
+                onClick={() => setDeleteConfirm(selected.id)}
                 className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
               >
                 <Trash2 size={14} />
@@ -391,6 +393,15 @@ export default function ChangeOrdersPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Change Order"
+        body="Delete this change order permanently? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) { deleteChangeOrder(deleteConfirm); setSelected(null); } setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

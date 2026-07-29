@@ -13,6 +13,7 @@ import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import type { Invoice } from "@/lib/mock-data";
 import { exportInvoicePdf } from "@/lib/pdf-export";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 const STATUS_CONFIG = {
   draft:   { label: "Draft",   bg: "bg-zinc-700/60",       text: "text-zinc-300",   dot: "bg-zinc-400",   bar: "bg-zinc-600" },
@@ -63,6 +64,14 @@ function InvoiceDetail({
 }) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [sendLoading, setSendLoading] = useState(false);
+  const [sendStatus, setSendStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!sendStatus) return;
+    const t = setTimeout(() => setSendStatus(null), 4000);
+    return () => clearTimeout(t);
+  }, [sendStatus]);
   const sub   = invoice.items.reduce((s, i) => s + i.qty * i.rate, 0);
   const tax   = sub * (invoice.taxRate / 100);
   const total = sub + tax;
@@ -86,6 +95,11 @@ function InvoiceDetail({
           </span>
         </div>
         <div className="flex items-center gap-1">
+          {sendStatus && (
+            <span className={`text-[11px] font-semibold mr-2 ${sendStatus.ok ? "text-emerald-400" : "text-red-400"}`}>
+              {sendStatus.msg}
+            </span>
+          )}
           <button
             disabled={sendLoading || !invoice.clientEmail}
             onClick={async () => {
@@ -117,9 +131,9 @@ function InvoiceDetail({
                 });
                 if (res.ok) {
                   if (invoice.status === "draft") onUpdate(invoice.id, { status: "sent" });
-                  alert(`Invoice sent to ${invoice.clientEmail}`);
+                  setSendStatus({ ok: true, msg: `Sent to ${invoice.clientEmail}` });
                 } else {
-                  alert("Failed to send. Check your RESEND_API_KEY in Vercel.");
+                  setSendStatus({ ok: false, msg: "Failed to send. Check RESEND_API_KEY in Vercel." });
                 }
               } finally {
                 setSendLoading(false);
@@ -148,7 +162,7 @@ function InvoiceDetail({
           <button onClick={() => onEdit(invoice)} className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors" title="Edit">
             <Pencil size={14} />
           </button>
-          <button onClick={() => { if (confirm(`Delete invoice ${invoice.number}?`)) { onDelete(invoice.id); onClose(); } }}
+          <button onClick={() => setDeleteConfirm(true)}
             className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
             <Trash2 size={14} />
           </button>
@@ -359,6 +373,14 @@ function InvoiceDetail({
           {invoice.items.length} line item{invoice.items.length !== 1 ? "s" : ""}
         </div>
       </div>
+      <ConfirmModal
+        open={deleteConfirm}
+        title={`Delete ${invoice.number}?`}
+        body="This invoice will be permanently removed."
+        confirmLabel="Delete"
+        onConfirm={() => { onDelete(invoice.id); onClose(); }}
+        onCancel={() => setDeleteConfirm(false)}
+      />
     </div>
   );
 }

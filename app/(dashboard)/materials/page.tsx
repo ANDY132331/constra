@@ -8,6 +8,7 @@ import {
 import { exportMaterialsPdf } from "@/lib/pdf-export";
 import { format } from "date-fns";
 import { useStore } from "@/lib/store";
+import { ConfirmModal } from "@/components/confirm-modal";
 import type { MaterialEntry, MaterialType } from "@/lib/mock-data";
 import { TRADE_MATERIALS } from "@/lib/mock-data";
 
@@ -38,6 +39,7 @@ export default function MaterialsPage() {
   const [selectedTrade, setSelectedTrade] = useState<string>("all");
   const [entryType, setEntryType] = useState<"delivery" | "usage">("delivery");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
 
@@ -327,7 +329,7 @@ export default function MaterialsPage() {
                     </div>
                     <div className="text-[10px] text-white/30">{entry.unit}</div>
                   </div>
-                  <button onClick={() => { if (confirm(`Delete "${entry.materialName}" entry?`)) deleteMaterialEntry(entry.id); }}
+                  <button onClick={() => setDeleteConfirm(entry.id)}
                     className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
                     <Trash2 size={13} />
                   </button>
@@ -480,6 +482,15 @@ export default function MaterialsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Material Entry"
+        body="Delete this material log entry? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) deleteMaterialEntry(deleteConfirm); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

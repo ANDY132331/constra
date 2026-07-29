@@ -378,9 +378,10 @@ export default function ProjectsPage() {
                 </div>
                 <div className="flex items-center justify-end gap-1">
                   <button
-                    onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/share/${project.id}`; navigator.clipboard.writeText(url).then(() => alert("Share link copied!")); }}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/30 hover:text-emerald-400 transition-all"
-                    title="Copy client share link"
+                    onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 transition-all"
+                    style={{ color: shareCopied === project.id ? "#34d399" : "rgba(255,255,255,0.3)" }}
+                    title={shareCopied === project.id ? "Copied!" : "Copy client share link"}
                   >
                     <Share2 size={12} />
                   </button>
@@ -391,7 +392,7 @@ export default function ProjectsPage() {
                     <Pencil size={12} />
                   </button>
                   <button
-                    onClick={() => { if (confirm(`Delete "${project.name}"?`)) deleteProject(project.id); }}
+                    onClick={() => setDeleteConfirm(project.id)}
                     className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
                   >
                     <Trash2 size={12} />
@@ -423,14 +424,15 @@ export default function ProjectsPage() {
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
-                        onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/share/${project.id}`; navigator.clipboard.writeText(url).then(() => alert("Share link copied!")); }}
-                        className="p-1.5 rounded hover:bg-emerald-500/10 text-white/20 hover:text-emerald-400 transition-colors"
-                        title="Copy client share link"
+                        onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
+                        className="p-1.5 rounded hover:bg-emerald-500/10 transition-colors"
+                        style={{ color: shareCopied === project.id ? "#34d399" : "rgba(255,255,255,0.2)" }}
+                        title={shareCopied === project.id ? "Copied!" : "Copy client share link"}
                       >
                         <Share2 size={13} />
                       </button>
                       <button
-                        onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${project.name}"?`)) deleteProject(project.id); }}
+                        onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
                         className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
                       >
                         <Trash2 size={13} />
@@ -624,8 +626,14 @@ export default function ProjectsPage() {
                 </div>
               </div>
             </div>
+            {formError && (
+              <div className="mx-6 mb-4 flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <AlertCircle size={13} className="text-red-400 flex-shrink-0" />
+                <p className="text-[12px] text-red-300">{formError}</p>
+              </div>
+            )}
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); }}
+              <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); setFormError(""); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}
               </button>
@@ -637,6 +645,31 @@ export default function ProjectsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete project confirmation */}
+      {deleteConfirm && (() => {
+        const proj = projects.find((p) => p.id === deleteConfirm);
+        return proj ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+              <h3 className="text-[15px] font-bold text-white mb-1">Delete Project</h3>
+              <p className="text-[13px] text-white/50 mb-5">
+                Permanently delete <span className="text-white font-semibold">{proj.name}</span>? All tasks, time entries, and data for this project will be lost.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors">
+                  Cancel
+                </button>
+                <button onClick={() => { deleteProject(deleteConfirm); setDeleteConfirm(null); }}
+                  className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] py-2.5 rounded-xl transition-colors">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 }

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       to,
       subject: `You've been assigned: "${taskName}" — ${projectName}`,
       html: taskAssignedEmail({
-        company: companyName ?? "BuildFlow",
+        company: companyName ?? "Constra",
         assigneeName: assigneeName ?? "there",
         assignerName: assignerName ?? "Your manager",
         taskName,

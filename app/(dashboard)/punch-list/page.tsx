@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Search, Circle, Timer, CheckCircle2, AlertCircle, MapPin, Calendar, X, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 const PRIORITY_CONFIG = {
   high: { label: "HIGH", className: "bg-red-500/15 text-red-400" },
@@ -37,6 +38,7 @@ export default function PunchListPage() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<ItemForm>(blank);
 
@@ -188,7 +190,7 @@ export default function PunchListPage() {
                         className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-white/60 transition-all">
                         <Pencil size={13} />
                       </button>
-                      <button onClick={() => { if (confirm(`Delete "${item.title}"?`)) deletePunchItem(item.id); }}
+                      <button onClick={() => setDeleteConfirm(item.id)}
                         className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all">
                         <X size={13} />
                       </button>
@@ -336,6 +338,15 @@ export default function PunchListPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Punch Item"
+        body="Delete this punch list item? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) deletePunchItem(deleteConfirm); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

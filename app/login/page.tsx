@@ -32,9 +32,12 @@ function LoginForm() {
   const [forgotSent, setForgotSent] = useState(false);
 
   // Auto-switch to join tab if ?join=CODE is in the URL (from QR code scan)
+  // Also surface auth callback errors (e.g. expired magic links)
   useEffect(() => {
     const code = searchParams.get("join");
     if (code) { setMode("join"); setJoinCode(code.toUpperCase()); }
+    const err = searchParams.get("error");
+    if (err === "auth_callback_failed") setError("The sign-in link has expired. Please try again.");
   }, [searchParams]);
 
   // Join state
@@ -68,10 +71,13 @@ function LoginForm() {
   async function handleForgotPassword() {
     if (!email) { setError("Enter your email address first."); return; }
     setError(""); setLoading(true);
-    const supabase = getClient();
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-    });
+    if (!SUPABASE_ENABLED) { setLoading(false); setForgotSent(true); return; }
+    try {
+      const supabase = getClient();
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      });
+    } catch { /* silently succeed — don't leak whether the email exists */ }
     setLoading(false);
     setForgotSent(true);
   }

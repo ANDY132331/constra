@@ -7,6 +7,7 @@ import {
   Plus, Search, FileText, Cloud, Thermometer, Users, Trash2, X,
   ChevronRight, Download, Calendar, ClipboardList, Zap,
 } from "lucide-react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { useStore } from "@/lib/store";
 import type { DailyReport } from "@/lib/mock-data";
 
@@ -66,6 +67,7 @@ export default function DailyReportsPage() {
   const [form, setForm] = useState<ReportForm>(emptyForm());
   const [pdfLoading, setPdfLoading] = useState(false);
   const [fetchingWeather, setFetchingWeather] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isForeman) router.replace("/dashboard");
@@ -254,7 +256,7 @@ export default function DailyReportsPage() {
               </button>
               {isAdminOrAbove(currentUser.role) && (
                 <button
-                  onClick={() => { if (confirm("Delete this report?")) { deleteDailyReport(selected.id); setSelected(null); } }}
+                  onClick={() => setDeleteConfirm(selected.id)}
                   className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
                 >
                   <Trash2 size={14} />
@@ -399,6 +401,15 @@ export default function DailyReportsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Daily Report"
+        body="Delete this daily report? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) { deleteDailyReport(deleteConfirm); setSelected(null); } setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

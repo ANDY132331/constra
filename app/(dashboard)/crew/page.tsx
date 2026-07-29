@@ -15,6 +15,7 @@ import { getCurrencySymbol } from "@/lib/currency";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import type { Worker, HoursAdjustment, WorkerCertification } from "@/lib/mock-data";
 import { UpgradeGate, UsageBadge } from "@/components/upgrade-gate";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Admin: { label: "Admin", className: "bg-purple-500/15 text-purple-400" },
@@ -212,6 +213,7 @@ export default function CrewPage() {
   const [certifications, setCertifications] = useState<WorkerCertification[]>([]);
   const [showQR, setShowQR] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (prefill) setSearch(prefill); }, [prefill]);
@@ -283,7 +285,7 @@ export default function CrewPage() {
 
   const handleDelete = (id: string) => {
     if (id === currentUser.id) return;
-    if (confirm("Remove this crew member? They will lose access immediately.")) deleteWorker(id);
+    setDeleteConfirm(id);
   };
 
   const handleCopy = () => {
@@ -695,6 +697,15 @@ export default function CrewPage() {
           onClose={() => setHoursWorker(null)}
         />
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Remove Crew Member"
+        body="Remove this worker from your workspace? They will lose access immediately."
+        confirmLabel="Remove"
+        onConfirm={() => { if (deleteConfirm) deleteWorker(deleteConfirm); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

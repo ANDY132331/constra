@@ -70,7 +70,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
       {/* Header */}
       <div className="border-b border-white/[0.06] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-amber-400 font-black text-[16px] tracking-tight">⚡ BuildFlow</span>
+          <span className="text-amber-400 font-black text-[16px] tracking-tight">⚡ Constra</span>
           <span className="text-white/25 text-[13px]">· Project Status</span>
         </div>
         <span className="text-[11px] text-white/20">Shared view · Read-only</span>
@@ -164,7 +164,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
 
         <div className="text-center text-[11px] text-white/20 pt-4 pb-8">
           Powered by{" "}
-          <a href="/" className="text-amber-400/60 hover:text-amber-400 transition-colors">BuildFlow</a>
+          <a href="/" className="text-amber-400/60 hover:text-amber-400 transition-colors">Constra</a>
           {" "}· {project.companyName}
         </div>
       </div>

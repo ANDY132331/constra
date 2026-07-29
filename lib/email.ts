@@ -6,8 +6,8 @@ function getResend() {
   return _resend;
 }
 
-export const FROM = process.env.EMAIL_FROM ?? "BuildFlow <notifications@buildflow.app>";
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://buildflow-ruddy-two.vercel.app";
+export const FROM = process.env.EMAIL_FROM ?? "Constra <notifications@constra.app>";
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://constra-jc6xjjxfe-anandssandhu31-1336s-projects.vercel.app";
 
 type Attachment = { filename: string; content: string; type: string; disposition: "attachment" };
 
@@ -49,12 +49,12 @@ export function emailShell({
 <body>
 <div class="wrap">
   <div class="hd">
-    <span class="hd-logo">⚡ BuildFlow</span>
+    <span class="hd-logo">⚡ Constra</span>
     <span class="hd-co">· ${company}</span>
   </div>
   <div class="bd">${body}</div>
   <div class="ft">
-    You're receiving this because you're a member of <strong>${company}</strong> on BuildFlow.<br/>
+    You're receiving this because you're a member of <strong>${company}</strong> on Constra.<br/>
     Manage notification preferences in Settings → Notifications.
   </div>
 </div>

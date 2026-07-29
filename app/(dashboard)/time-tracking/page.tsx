@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation } from "lucide-react";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { useStore } from "@/lib/store";
 import { CameraCapture } from "@/components/camera-capture";
 import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
@@ -45,6 +46,7 @@ function EditEntryModal({
   const [inVal, setInVal] = useState(toLocal(entry.clockIn));
   const [outVal, setOutVal] = useState(entry.clockOut ? toLocal(entry.clockOut) : "");
   const [error, setError] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const handleSave = () => {
     const ci = new Date(inVal);
@@ -85,7 +87,7 @@ function EditEntryModal({
             </p>
           )}
           <div className="flex gap-3 pt-1">
-            <button onClick={() => { if (confirm("Delete this time entry? This cannot be undone.")) onDelete(entry.id); }}
+            <button onClick={() => setDeleteConfirm(true)}
               className="px-3 py-2.5 rounded-xl text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/15 transition-colors">
               Delete
             </button>
@@ -100,6 +102,14 @@ function EditEntryModal({
           </div>
         </div>
       </div>
+      <ConfirmModal
+        open={deleteConfirm}
+        title="Delete Time Entry"
+        body="Delete this time entry permanently? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { onDelete(entry.id); setDeleteConfirm(false); }}
+        onCancel={() => setDeleteConfirm(false)}
+      />
     </div>
   );
 }
@@ -315,6 +325,7 @@ export default function TimeTrackingPage() {
 
   // Edit entry state
   const [editEntry, setEditEntry] = useState<EditEntryState | null>(null);
+  const [clockOutAllConfirm, setClockOutAllConfirm] = useState(false);
 
   // Flag detail expansion (for touch/mobile accessibility)
   const [flagDetailId, setFlagDetailId] = useState<string | null>(null);
@@ -470,10 +481,7 @@ export default function TimeTrackingPage() {
         <div className="flex items-center gap-2">
           {clockedIn.length > 1 && (currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
             <button
-              onClick={() => {
-                if (!confirm(`Clock out all ${clockedIn.length} workers on site?`)) return;
-                clockedIn.forEach((w) => handleClockOut(w.id));
-              }}
+              onClick={() => setClockOutAllConfirm(true)}
               className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-white/50 hover:text-white font-bold text-[13px] px-4 py-2 rounded-lg transition-all"
             >
               <LogOut size={14} />
@@ -823,6 +831,16 @@ export default function TimeTrackingPage() {
           onClose={() => setEditEntry(null)}
         />
       )}
+
+      <ConfirmModal
+        open={clockOutAllConfirm}
+        title={`Clock Out All Workers`}
+        body={`Clock out all ${clockedIn.length} workers currently on site? This cannot be undone.`}
+        confirmLabel="Clock Out All"
+        danger={false}
+        onConfirm={() => { clockedIn.forEach((w) => handleClockOut(w.id)); setClockOutAllConfirm(false); }}
+        onCancel={() => setClockOutAllConfirm(false)}
+      />
     </div>
   );
 }

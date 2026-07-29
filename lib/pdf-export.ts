@@ -833,7 +833,7 @@ export async function exportDailyReportPdf({
   doc.setTextColor(245, 158, 11);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text(companyName ?? "BuildFlow", ML, 12);
+  doc.text(companyName ?? "Constra", ML, 12);
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
@@ -893,7 +893,7 @@ export async function exportDailyReportPdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(160, 160, 160);
-  doc.text(`${companyName ?? "BuildFlow"}  ·  Daily Report  ·  ${projectName}`, ML, PH - 3);
+  doc.text(`${companyName ?? "Constra"}  ·  Daily Report  ·  ${projectName}`, ML, PH - 3);
 
   const dateStr = report.date.toISOString().slice(0, 10);
   doc.save(`daily-report-${projectName.replace(/\s+/g, "-").toLowerCase()}-${dateStr}.pdf`);
@@ -941,7 +941,7 @@ export async function exportChangeOrderPdf({
   doc.setTextColor(245, 158, 11);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text(companyName ?? "BuildFlow", ML, 12);
+  doc.text(companyName ?? "Constra", ML, 12);
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
@@ -1037,7 +1037,7 @@ export async function exportChangeOrderPdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(160, 160, 160);
-  doc.text(`${companyName ?? "BuildFlow"}  ·  Change Order  ·  ${changeOrder.number}`, ML, PH - 3);
+  doc.text(`${companyName ?? "Constra"}  ·  Change Order  ·  ${changeOrder.number}`, ML, PH - 3);
 
   doc.save(`${changeOrder.number.replace(/\s+/g, "-")}.pdf`);
 }

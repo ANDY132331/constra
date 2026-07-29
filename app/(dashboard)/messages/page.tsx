@@ -18,6 +18,13 @@ export default function MessagesPage() {
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
+
+  // Auto-select first project if none is selected and projects are loaded
+  useEffect(() => {
+    if (!selectedProjectId && projects[0]?.id) {
+      setSelectedProjectId(projects[0].id);
+    }
+  }, [projects, selectedProjectId]);
   const [text, setText] = useState("");
   const [pendingAttachment, setPendingAttachment] = useState<{ name: string; data: string } | null>(null);
   const [lightboxData, setLightboxData] = useState<{ name: string; data: string } | null>(null);

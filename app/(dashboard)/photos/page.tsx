@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, ChevronRight, Layers } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 type View = "grid" | "list" | "album";
 
@@ -18,6 +19,7 @@ export default function PhotosPage() {
   const [tagFilter, setTagFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [form, setForm] = useState<PhotoForm>({ caption: "", projectId: "", uploadedById: "", tags: "" });
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -185,7 +187,7 @@ export default function PhotosPage() {
                           </div>
                         )}
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${photo.caption}"?`)) deletePhoto(photo.id); }}
+                      <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
                         <X size={11} className="text-white" />
                       </button>
@@ -494,6 +496,15 @@ export default function PhotosPage() {
           </div>
         );
       })()}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Photo"
+        body="Delete this photo? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) deletePhoto(deleteConfirm); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import type { Estimate } from "@/lib/mock-data";
 import { exportEstimatePdf } from "@/lib/pdf-export";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 const STATUS_CONFIG = {
   draft: { label: "Draft", className: "bg-white/8 text-white/45", icon: Clock },
@@ -38,6 +39,7 @@ const blank: EstForm = {
 
 function EstimateCard({ estimate, onUpdate, onDelete, onConvert, onEdit, currency, companyName }: { estimate: Estimate; onUpdate: (id: string, u: Partial<Estimate>) => void; onDelete: (id: string) => void; onConvert: (estimate: Estimate) => void; onEdit: (estimate: Estimate) => void; currency: string; companyName?: string }) {
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const subtotal = estimate.items.reduce((s, i) => s + i.qty * i.rate, 0);
   const tax = subtotal * (estimate.taxRate / 100);
   const total = subtotal + tax;
@@ -62,7 +64,7 @@ function EstimateCard({ estimate, onUpdate, onDelete, onConvert, onEdit, currenc
             <button onClick={() => onEdit(estimate)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-white/60 transition-all p-1">
               <Pencil size={13} />
             </button>
-            <button onClick={() => { if (confirm(`Delete estimate ${estimate.number}?`)) onDelete(estimate.id); }} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all p-1">
+            <button onClick={() => setDeleteConfirm(true)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all p-1">
               <Trash2 size={13} />
             </button>
           </div>
@@ -144,6 +146,14 @@ function EstimateCard({ estimate, onUpdate, onDelete, onConvert, onEdit, currenc
           {pdfLoading ? "…" : "PDF"}
         </button>
       </div>
+      <ConfirmModal
+        open={deleteConfirm}
+        title={`Delete ${estimate.number}?`}
+        body="This estimate will be permanently removed."
+        confirmLabel="Delete"
+        onConfirm={() => { onDelete(estimate.id); setDeleteConfirm(false); }}
+        onCancel={() => setDeleteConfirm(false)}
+      />
     </div>
   );
 }
@@ -158,8 +168,10 @@ export default function EstimatesPage() {
   }, [currentUser.role, router]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [convertedMsg, setConvertedMsg] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<EstForm>(blank);
+  const [convertedNotice, setConvertedNotice] = useState<string | null>(null);
 
   const openEdit = (estimate: Estimate) => {
     setEditId(estimate.id);
@@ -194,7 +206,7 @@ export default function EstimatesPage() {
       taxRate: estimate.taxRate,
       notes: estimate.notes,
     });
-    alert(`Invoice ${nextInvNum} created from estimate ${estimate.number}.`);
+    setConvertedNotice(nextInvNum);
   };
 
   const filtered = estimates.filter(
@@ -255,6 +267,12 @@ export default function EstimatesPage() {
 
   return (
     <div className="space-y-5 max-w-[1000px]">
+      {convertedNotice && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+          <p className="text-[13px] text-emerald-400 font-semibold">Invoice {convertedNotice} created — find it in Invoices.</p>
+          <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400 transition-colors">✕</button>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">

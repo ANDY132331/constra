@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind, AlertTriangle, MapPin, RefreshCw, X, Briefcase, Truck, ClipboardCheck, Calendar, Pencil } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, getDay, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 type CustomEventType = "meeting" | "inspection" | "delivery" | "permit" | "other";
 
@@ -117,6 +118,7 @@ export default function SchedulePage() {
   const [customEvents, setCustomEvents] = useState<CustomEvent[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEventId, setEditEventId] = useState<string | null>(null);
+  const [deleteEventConfirm, setDeleteEventConfirm] = useState<string | null>(null);
   const [addForm, setAddForm] = useState({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting" as CustomEventType, description: "" });
 
   useEffect(() => {
@@ -269,7 +271,6 @@ export default function SchedulePage() {
   }
 
   function deleteCustomEvent(id: string) {
-    if (!confirm("Delete this event?")) return;
     const updated = customEvents.filter((e) => e.id !== id);
     setCustomEvents(updated);
     saveCustomEvents(updated);
@@ -532,7 +533,7 @@ export default function SchedulePage() {
                           className="p-1 rounded text-white/25 hover:text-white/60 transition-colors">
                           <Pencil size={11} />
                         </button>
-                        <button onClick={() => deleteCustomEvent(e.id)}
+                        <button onClick={() => setDeleteEventConfirm(e.id)}
                           className="p-1 rounded text-white/25 hover:text-red-400 transition-colors">
                           <X size={12} />
                         </button>
@@ -602,6 +603,15 @@ export default function SchedulePage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteEventConfirm}
+        title="Delete Event"
+        body="Delete this scheduled event? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteEventConfirm) deleteCustomEvent(deleteEventConfirm); setDeleteEventConfirm(null); }}
+        onCancel={() => setDeleteEventConfirm(null)}
+      />
     </div>
   );
 }

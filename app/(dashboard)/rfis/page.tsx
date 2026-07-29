@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MessageSquare, Plus, Search, Clock, CheckCircle2, XCircle, ChevronDown, ChevronRight, X, Trash2, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 const STATUS_CONFIG = {
   open: { label: "Open", className: "bg-red-500/15 text-red-400", icon: Clock },
@@ -37,6 +38,8 @@ export default function RFIsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [closeNoAnswerConfirm, setCloseNoAnswerConfirm] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<RFIForm>(blank);
   const [answerRfiId, setAnswerRfiId] = useState<string | null>(null);
@@ -190,7 +193,7 @@ export default function RFIsPage() {
                     className="p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
                     <Pencil size={12} />
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); if (confirm(`Delete RFI "${rfi.number}"?`)) deleteRFI(rfi.id); }}
+                  <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(rfi.id); }}
                     className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
                     <Trash2 size={12} />
                   </button>
@@ -249,7 +252,7 @@ export default function RFIsPage() {
                             Submit Answer
                           </button>
                           <button onClick={() => {
-                            if (!rfi.answer && !confirm("This RFI has no answer yet. Close it anyway?")) return;
+                            if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
                             updateRFI(rfi.id, { status: "closed" });
                           }}
                             className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
@@ -367,6 +370,24 @@ export default function RFIsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete RFI"
+        body="Delete this RFI and all its responses? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) deleteRFI(deleteConfirm); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
+      <ConfirmModal
+        open={!!closeNoAnswerConfirm}
+        title="Close Without Answer?"
+        body="This RFI has no answer yet. Close it anyway?"
+        confirmLabel="Close RFI"
+        danger={false}
+        onConfirm={() => { if (closeNoAnswerConfirm) updateRFI(closeNoAnswerConfirm, { status: "closed" }); setCloseNoAnswerConfirm(null); }}
+        onCancel={() => setCloseNoAnswerConfirm(null)}
+      />
     </div>
   );
 }

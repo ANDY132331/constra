@@ -5,6 +5,7 @@ import { CheckCircle2, Circle, Clock, AlertTriangle, Plus, Search, X, Pencil, Tr
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { format, isBefore } from "date-fns";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
   completed: { label: "Completed", icon: CheckCircle2, className: "text-green-400" },
@@ -45,6 +46,7 @@ export default function TasksPage() {
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
   const [form, setForm] = useState<TaskForm>(blankTask);
+  const [deleteTaskConfirm, setDeleteTaskConfirm] = useState<{ projectId: string; taskId: string; name: string } | null>(null);
   const today = new Date();
 
   const allTasks = projects.flatMap((p) =>
@@ -110,7 +112,7 @@ export default function TasksPage() {
   };
 
   const handleDelete = (projectId: string, taskId: string, name: string) => {
-    if (confirm(`Delete "${name}"?`)) deleteTask(projectId, taskId);
+    setDeleteTaskConfirm({ projectId, taskId, name });
   };
 
   const cycleStatus = (projectId: string, taskId: string, current: string) => {
@@ -121,7 +123,6 @@ export default function TasksPage() {
       "delayed": "in-progress",
     };
     const next = cycle[current] ?? "in-progress";
-    if (next === "completed" && !confirm("Mark this task as completed?")) return;
     updateTask(projectId, taskId, { status: next });
   };
 
@@ -336,6 +337,15 @@ export default function TasksPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTaskConfirm}
+        title="Delete Task"
+        body={deleteTaskConfirm ? `Delete "${deleteTaskConfirm.name}"? This cannot be undone.` : ""}
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteTaskConfirm) deleteTask(deleteTaskConfirm.projectId, deleteTaskConfirm.taskId); setDeleteTaskConfirm(null); }}
+        onCancel={() => setDeleteTaskConfirm(null)}
+      />
     </div>
   );
 }

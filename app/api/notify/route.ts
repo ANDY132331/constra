@@ -70,7 +70,7 @@ export async function POST(request: Request) {
           recipients.map((w) =>
             sendEmail({
               to: w.email,
-              subject: `💬 ${data.senderName} in ${data.projectName} — BuildFlow`,
+              subject: `💬 ${data.senderName} in ${data.projectName} — Constra`,
               html: crewMessageEmail({
                 company,
                 senderName: data.senderName,
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
           recipients.map((w) =>
             sendEmail({
               to: w.email,
-              subject: `⚠️ Safety incident on ${data.projectName} — BuildFlow`,
+              subject: `⚠️ Safety incident on ${data.projectName} — Constra`,
               html: safetyIncidentEmail({
                 company,
                 reporterName: data.reporterName,
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
         if (assignee?.email) {
           await sendEmail({
             to: assignee.email,
-            subject: `📋 New task: ${data.taskName} — BuildFlow`,
+            subject: `📋 New task: ${data.taskName} — Constra`,
             html: taskAssignedEmail({
               company,
               assigneeName: assignee.name,
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
           recipients.map((w) =>
             sendEmail({
               to: w.email,
-              subject: `${action === "in" ? "🟢" : "🔴"} ${data.workerName} clocked ${action} — BuildFlow`,
+              subject: `${action === "in" ? "🟢" : "🔴"} ${data.workerName} clocked ${action} — Constra`,
               html: clockInEmail({
                 company,
                 workerName: data.workerName,

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Search, AlertTriangle, X, Pencil, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { ConfirmModal } from "@/components/confirm-modal";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
@@ -94,10 +95,10 @@ export default function EquipmentPage() {
     setShowModal(false);
   };
 
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
+
   const handleDelete = (id: string, name: string) => {
-    if (confirm(`Delete "${name}"? This cannot be undone.`)) {
-      deleteEquipment(id);
-    }
+    setDeleteConfirm({ id, name });
   };
 
   return (
@@ -301,6 +302,15 @@ export default function EquipmentPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Equipment"
+        body={deleteConfirm ? `Delete "${deleteConfirm.name}"? This cannot be undone.` : ""}
+        confirmLabel="Delete"
+        onConfirm={() => { if (deleteConfirm) deleteEquipment(deleteConfirm.id); setDeleteConfirm(null); }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }
