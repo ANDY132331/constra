@@ -172,7 +172,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
   const spent = project.spent;
   const budget = project.budget;
   const overBudget = spent > budget;
-  const budgetPct = Math.min(100, (spent / budget) * 100);
+  const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
   const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#f59e0b" : "#22c55e";
   return (
     <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors">
@@ -328,6 +328,35 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* New-user setup guide */}
+      {projects.length === 0 && workers.length <= 1 && (
+        <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap size={14} className="text-amber-400" />
+            <span className="text-[12px] font-black text-amber-400 uppercase tracking-widest">Get Started</span>
+          </div>
+          <p className="text-[14px] text-white/70 mb-4">Welcome to Constra! Complete these steps to set up your job site.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { n: "1", label: "Add your first project", sub: "Create a job site to track tasks, crew, and costs.", href: "/projects", done: projects.length > 0 },
+              { n: "2", label: "Invite crew members", sub: "Share your invite code so workers can join.", href: "/settings", done: workers.length > 1 },
+              { n: "3", label: "Clock in your first worker", sub: "Start tracking hours from the time tracking page.", href: "/time-tracking", done: workers.some((w) => w.clockedIn) },
+            ].map((step) => (
+              <Link key={step.n} href={step.href}
+                className={`flex items-start gap-3 p-4 rounded-xl border transition-colors ${step.done ? "border-green-500/20 bg-green-500/[0.05]" : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05]"}`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black ${step.done ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
+                  {step.done ? <CheckCircle2 size={14} /> : step.n}
+                </div>
+                <div>
+                  <p className={`text-[13px] font-semibold ${step.done ? "text-white/40 line-through" : "text-white/80"}`}>{step.label}</p>
+                  <p className="text-[11px] text-white/30 mt-0.5">{step.sub}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -694,7 +723,7 @@ export default function DashboardPage() {
             <button
               onClick={() => {
                 const hrs = (weeklyHours + todayActiveHours).toFixed(0);
-                const subject = encodeURIComponent(`BuildFlow Weekly Digest — ${now.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}`);
+                const subject = encodeURIComponent(`Constra Weekly Digest — ${now.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}`);
                 const body = encodeURIComponent([
                   `Weekly Summary — ${now.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}`,
                   "",
@@ -710,7 +739,7 @@ export default function DashboardPage() {
                   "Projects in progress:",
                   activeProjects.map((p) => `  • ${p.name}`).join("\n"),
                   "",
-                  "— BuildFlow",
+                  "— Constra",
                 ].filter(Boolean).join("\n"));
                 window.open(`mailto:${currentUser.email ?? ""}?subject=${subject}&body=${body}`, "_self");
               }}

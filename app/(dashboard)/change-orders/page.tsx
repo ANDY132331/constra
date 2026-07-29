@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
@@ -46,11 +46,6 @@ export default function ChangeOrdersPage() {
   const { currentUser, projects, workers, currency, changeOrders, addChangeOrder, updateChangeOrder, deleteChangeOrder } = useStore();
   const isAdmin = isAdminOrAbove(currentUser.role);
 
-  if (!isAdmin) {
-    router.replace("/dashboard");
-    return null;
-  }
-
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | ChangeOrder["status"]>("all");
   const [projectFilter, setProjectFilter] = useState("all");
@@ -59,6 +54,10 @@ export default function ChangeOrdersPage() {
   const [editing, setEditing] = useState<ChangeOrder | null>(null);
   const [form, setForm] = useState<COForm>(emptyForm());
   const [pdfLoading, setPdfLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
 
   const nextNumber = `CO-${String(changeOrders.length + 1).padStart(3, "0")}`;
 
@@ -148,6 +147,8 @@ export default function ChangeOrdersPage() {
 
   const projectMap = new Map(projects.map((p) => [p.id, p]));
   const workerMap = new Map(workers.map((w) => [w.id, w]));
+
+  if (!isAdmin) return null;
 
   return (
     <div className="flex h-full overflow-hidden">

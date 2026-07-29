@@ -15,6 +15,7 @@ function ResetPasswordForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
+  const [tokenExpired, setTokenExpired] = useState(false);
 
   // Supabase sends the recovery token as a fragment (#access_token=...) or query param.
   // When the page loads, the Supabase client auto-exchanges it for a session.
@@ -29,7 +30,14 @@ function ResetPasswordForm() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setSessionReady(true);
     });
-    return () => subscription.unsubscribe();
+    // If no recovery event fires in 6s, the link is expired or invalid
+    const timeout = setTimeout(() => {
+      setSessionReady((current) => {
+        if (!current) setTokenExpired(true);
+        return current;
+      });
+    }, 6000);
+    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -83,12 +91,23 @@ function ResetPasswordForm() {
               <p className="text-[15px] font-semibold text-white">Password updated!</p>
               <p className="text-[12px] text-white/40">Redirecting you to the dashboard…</p>
             </div>
+          ) : tokenExpired ? (
+            <div className="flex flex-col items-center gap-4 py-4 text-center">
+              <AlertCircle size={36} className="text-red-400" />
+              <div>
+                <p className="text-[14px] font-semibold text-white mb-1">Link expired or invalid</p>
+                <p className="text-[12px] text-white/40">Password reset links expire after 1 hour. Request a new one.</p>
+              </div>
+              <Link href="/login" className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[14px] rounded-xl transition-colors text-center block">
+                Back to Sign In
+              </Link>
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {!sessionReady && (
                 <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                   <AlertCircle size={14} className="text-amber-400 flex-shrink-0" />
-                  <p className="text-[12px] text-amber-300">Waiting for your reset link to authenticate…</p>
+                  <p className="text-[12px] text-amber-300">Verifying reset link…</p>
                 </div>
               )}
 

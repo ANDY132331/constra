@@ -61,8 +61,7 @@ function LoginForm() {
 
     const supabase = getClient();
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (err) { setError(err.message); return; }
+    if (err) { setLoading(false); setError(err.message); return; }
     router.push("/dashboard");
   }
 
@@ -71,7 +70,7 @@ function LoginForm() {
     setError(""); setLoading(true);
     const supabase = getClient();
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
     });
     setLoading(false);
     setForgotSent(true);

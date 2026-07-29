@@ -128,12 +128,6 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              href="/demo"
-              className="text-[13px] text-white/50 hover:text-white/80 transition-colors font-medium hidden sm:block"
-            >
-              Live Demo
-            </Link>
-            <Link
               href="/login"
               className="text-[13px] text-white/50 hover:text-white/80 transition-colors font-medium"
             >
@@ -189,11 +183,11 @@ export default function LandingPage() {
                   Get Started Free
                 </Link>
                 <Link
-                  href="/demo"
+                  href="/login"
                   className="w-full sm:w-auto bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.10] text-white font-bold text-[15px] px-7 py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"
                 >
                   <ArrowRight size={15} className="text-amber-400" />
-                  Try Live Demo
+                  Sign In
                 </Link>
               </div>
 
@@ -309,7 +303,7 @@ export default function LandingPage() {
                       <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
                     </div>
                     <div className="flex-1 bg-white/[0.04] rounded h-5 mx-2 flex items-center px-2">
-                      <span className="text-[9px] text-white/20">app.constra.com/dashboard</span>
+                      <span className="text-[9px] text-white/20">constra.app/dashboard</span>
                     </div>
                   </div>
                   {/* Dashboard content */}

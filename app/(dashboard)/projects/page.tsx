@@ -63,6 +63,17 @@ export default function ProjectsPage() {
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoQuery, setGeoQuery] = useState("");
   const [geoConfirmed, setGeoConfirmed] = useState("");
+  const [formError, setFormError] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [shareCopied, setShareCopied] = useState<string | null>(null);
+
+  const copyShare = (projectId: string) => {
+    const url = `${window.location.origin}/share/${projectId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setShareCopied(projectId);
+      setTimeout(() => setShareCopied(null), 2000);
+    });
+  };
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const openEdit = (project: typeof projects[0]) => {
@@ -156,9 +167,10 @@ export default function ProjectsPage() {
     }));
 
   const handleSave = () => {
+    setFormError("");
     if (!form.name.trim()) return;
     if (form.startDate && form.endDate && new Date(form.endDate) <= new Date(form.startDate)) {
-      alert("End date must be after start date.");
+      setFormError("End date must be after start date.");
       return;
     }
     const lat = parseFloat(form.gpsLat);
@@ -398,7 +410,7 @@ export default function ProjectsPage() {
             const manager = getWorkerById(project.managerId);
             const activeTasks = project.tasks.filter((t) => t.status === "in-progress").length;
             const overBudget = project.spent > project.budget;
-            const budgetPct = Math.min(100, (project.spent / project.budget) * 100);
+            const budgetPct = project.budget > 0 ? Math.min(100, (project.spent / project.budget) * 100) : 0;
             return (
               <div key={project.id} onClick={() => openEdit(project)} className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/10 transition-colors group cursor-pointer">
                 <div className="h-1" style={{ backgroundColor: project.color }} />

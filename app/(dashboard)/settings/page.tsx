@@ -89,7 +89,12 @@ export default function SettingsPage() {
   // ── Invite code ───────────────────────────────────────────────────────────────
   const [displayCode, setDisplayCode] = useState(inviteCode || "CN-XXXX-XXXX");
   const [regenerating, setRegenerating] = useState(false);
+  const [regenError, setRegenError] = useState("");
   useEffect(() => { if (inviteCode) setDisplayCode(inviteCode); }, [inviteCode]);
+
+  // ── Confirmation dialogs ──────────────────────────────────────────────────────
+  const [kickConfirm, setKickConfirm] = useState<{ id: string; name: string } | null>(null);
+  const [deleteRoleConfirm, setDeleteRoleConfirm] = useState<string | null>(null);
 
   // ── Handlers ──────────────────────────────────────────────────────────────────
 
@@ -119,17 +124,16 @@ export default function SettingsPage() {
       const json = await res.json();
       if (!res.ok || !json.inviteCode) throw new Error(json.error ?? "Failed to regenerate");
       setDisplayCode(json.inviteCode);
+      setRegenError("");
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Could not regenerate invite code. Please try again.");
+      setRegenError(err instanceof Error ? err.message : "Could not regenerate invite code. Please try again.");
     }
     setRegenerating(false);
   };
 
   const handleKick = (id: string, name: string) => {
     if (id === currentUser.id) return;
-    if (confirm(`Remove ${name} from your workspace? They will lose access immediately.`)) {
-      deleteWorker(id);
-    }
+    setKickConfirm({ id, name });
   };
 
   const toggleNotifPref = (cat: NotifCategory) => {
@@ -301,6 +305,11 @@ export default function SettingsPage() {
                   {regenerating ? "…" : "Regenerate"}
                 </button>
               </div>
+              {regenError && (
+                <p className="text-[11px] text-red-400 mt-2 flex items-center gap-1.5">
+                  <AlertCircle size={11} /> {regenError}
+                </p>
+              )}
               <p className="text-[11px] text-white/25 mt-3">
                 Regenerating creates a new code. The old code stops working immediately.
               </p>
@@ -484,7 +493,7 @@ export default function SettingsPage() {
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={() => { setEditingRole(role); setEditRoleValue(role); }}
                             className="w-5 h-5 flex items-center justify-center text-white/30 hover:text-white/60 rounded"><Edit2 size={10} /></button>
-                          <button onClick={() => { if (confirm(`Delete role "${role}"?`)) deleteCustomRole(role); }}
+                          <button onClick={() => setDeleteRoleConfirm(role)}
                             className="w-5 h-5 flex items-center justify-center text-white/20 hover:text-red-400 rounded"><Trash2 size={10} /></button>
                         </div>
                       </>
@@ -644,11 +653,11 @@ export default function SettingsPage() {
             <div className="bg-[#111111] border border-red-500/15 rounded-xl p-5">
               <h4 className="text-[14px] font-bold text-red-400 mb-1">Danger Zone</h4>
               <p className="text-[12px] text-white/40 mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
-              <button
-                onClick={() => alert("To delete your account, please contact support.")}
-                className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors">
-                Delete Account
-              </button>
+              <a
+                href="mailto:prableensandhu19@gmail.com?subject=Account Deletion Request"
+                className="inline-flex items-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors">
+                Request Account Deletion
+              </a>
             </div>
           </div>
         )}
@@ -658,6 +667,50 @@ export default function SettingsPage() {
           <BillingTab isPro={isPro} />
         )}
       </div>
+
+      {/* Kick confirmation */}
+      {kickConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-[15px] font-bold text-white mb-1">Remove Worker</h3>
+            <p className="text-[13px] text-white/50 mb-5">
+              Remove <span className="text-white font-semibold">{kickConfirm.name}</span> from your workspace? They will lose access immediately.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setKickConfirm(null)}
+                className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors">
+                Cancel
+              </button>
+              <button onClick={() => { deleteWorker(kickConfirm.id); setKickConfirm(null); }}
+                className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] py-2.5 rounded-xl transition-colors">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete role confirmation */}
+      {deleteRoleConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-[15px] font-bold text-white mb-1">Delete Role</h3>
+            <p className="text-[13px] text-white/50 mb-5">
+              Delete <span className="text-white font-semibold">&quot;{deleteRoleConfirm}&quot;</span>? Workers assigned this role will keep their current label but won&apos;t be able to select it again.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteRoleConfirm(null)}
+                className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors">
+                Cancel
+              </button>
+              <button onClick={() => { deleteCustomRole(deleteRoleConfirm); setDeleteRoleConfirm(null); }}
+                className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] py-2.5 rounded-xl transition-colors">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

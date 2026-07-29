@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import {
@@ -59,11 +59,6 @@ export default function DailyReportsPage() {
   const { currentUser, projects, workers, dailyReports, addDailyReport, deleteDailyReport } = useStore();
   const isForeman = isForemanOrAbove(currentUser.role);
 
-  if (!isForeman) {
-    router.replace("/dashboard");
-    return null;
-  }
-
   const [search, setSearch] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
   const [selected, setSelected] = useState<DailyReport | null>(null);
@@ -71,6 +66,10 @@ export default function DailyReportsPage() {
   const [form, setForm] = useState<ReportForm>(emptyForm());
   const [pdfLoading, setPdfLoading] = useState(false);
   const [fetchingWeather, setFetchingWeather] = useState(false);
+
+  useEffect(() => {
+    if (!isForeman) router.replace("/dashboard");
+  }, [isForeman, router]);
 
   const fetchWeather = useCallback(() => {
     if (!navigator.geolocation) return;
@@ -141,6 +140,8 @@ export default function DailyReportsPage() {
 
   const projectMap = new Map(projects.map((p) => [p.id, p]));
   const workerMap = new Map(workers.map((w) => [w.id, w]));
+
+  if (!isForeman) return null;
 
   return (
     <div className="flex h-full overflow-hidden">
