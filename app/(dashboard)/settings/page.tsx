@@ -15,6 +15,7 @@ import {
   CATEGORY_LABELS, type NotifPrefs, type NotifCategory,
 } from "@/lib/notifications";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 type Tab = "company" | "preferences" | "workers" | "roles" | "notifications" | "security" | "billing";
 
@@ -426,7 +427,7 @@ export default function SettingsPage() {
                           <Trash2 size={11} /> Kick
                         </button>
                       ) : (
-                        <span className="text-[11px] text-white/20">Owner</span>
+                        <span className="text-[11px] text-white/20">You</span>
                       )}
                     </div>
                   </div>
@@ -668,49 +669,25 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* Kick confirmation */}
-      {kickConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-[15px] font-bold text-white mb-1">Remove Worker</h3>
-            <p className="text-[13px] text-white/50 mb-5">
-              Remove <span className="text-white font-semibold">{kickConfirm.name}</span> from your workspace? They will lose access immediately.
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setKickConfirm(null)}
-                className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors">
-                Cancel
-              </button>
-              <button onClick={() => { deleteWorker(kickConfirm.id); setKickConfirm(null); }}
-                className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] py-2.5 rounded-xl transition-colors">
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={!!kickConfirm}
+        title="Remove Worker"
+        body={kickConfirm ? `Remove ${kickConfirm.name} from your workspace? They will lose access immediately.` : ""}
+        confirmLabel="Remove"
+        danger
+        onConfirm={() => { if (kickConfirm) { deleteWorker(kickConfirm.id); setKickConfirm(null); } }}
+        onCancel={() => setKickConfirm(null)}
+      />
 
-      {/* Delete role confirmation */}
-      {deleteRoleConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-[15px] font-bold text-white mb-1">Delete Role</h3>
-            <p className="text-[13px] text-white/50 mb-5">
-              Delete <span className="text-white font-semibold">&quot;{deleteRoleConfirm}&quot;</span>? Workers assigned this role will keep their current label but won&apos;t be able to select it again.
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteRoleConfirm(null)}
-                className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors">
-                Cancel
-              </button>
-              <button onClick={() => { deleteCustomRole(deleteRoleConfirm); setDeleteRoleConfirm(null); }}
-                className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] py-2.5 rounded-xl transition-colors">
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={!!deleteRoleConfirm}
+        title="Delete Role"
+        body={deleteRoleConfirm ? `Delete "${deleteRoleConfirm}"? Workers assigned this role will keep their current label but won't be able to select it again.` : ""}
+        confirmLabel="Delete"
+        danger
+        onConfirm={() => { if (deleteRoleConfirm) { deleteCustomRole(deleteRoleConfirm); setDeleteRoleConfirm(null); } }}
+        onCancel={() => setDeleteRoleConfirm(null)}
+      />
     </div>
   );
 }

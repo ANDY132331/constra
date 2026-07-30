@@ -30,13 +30,14 @@ function weatherMeta(code: number): { label: string; icon: React.ComponentType<{
   return                                                          { label: "Thunderstorm",  icon: Zap,       color: "#a78bfa" };
 }
 
-function useWeather(): WeatherData {
+function useWeather(useFahrenheit: boolean): WeatherData {
   const [weather, setWeather] = useState<WeatherData>(null);
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition(({ coords }) => {
       const { latitude: lat, longitude: lon } = coords;
+      const unit = useFahrenheit ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
       fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true${unit}`
       )
         .then((r) => r.json())
         .then((d) =>
@@ -48,7 +49,7 @@ function useWeather(): WeatherData {
         )
         .catch(() => {});
     }, () => {});
-  }, []);
+  }, [useFahrenheit]);
   return weather;
 }
 
@@ -223,7 +224,8 @@ export default function DashboardPage() {
     invoices, changeOrders,
   } = useStore();
   const t = useT();
-  const weather = useWeather();
+  const useFahrenheit = currency === "USD";
+  const weather = useWeather(useFahrenheit);
   const [refreshing, setRefreshing] = useState(false);
   const [liveTime, setLiveTime] = useState(new Date());
   const now = liveTime;
@@ -303,10 +305,10 @@ export default function DashboardPage() {
               return (
                 <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1 text-[12px]" style={{ color: meta.color }}>
                   <WeatherIcon size={13} />
-                  <span className="font-semibold">{weather.temp}°F</span>
+                  <span className="font-semibold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
                   <span className="text-white/30">{meta.label}</span>
                   <Wind size={10} className="text-white/25 ml-0.5" />
-                  <span className="text-white/25">{weather.windspeed} mph</span>
+                  <span className="text-white/25">{weather.windspeed} {useFahrenheit ? "mph" : "km/h"}</span>
                 </div>
               );
             })()}

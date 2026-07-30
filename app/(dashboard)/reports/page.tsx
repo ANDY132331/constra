@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import { Clock, DollarSign, TrendingUp, Users, FileDown, AlertCircle, BarChart2, ChevronDown, FileText } from "lucide-react";
@@ -45,12 +45,24 @@ export default function ReportsPage() {
   const router = useRouter();
   const [pdfLoading, setPdfLoading] = useState(false);
   const t = useT();
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isAdminOrAbove(currentUser.role)) router.replace("/dashboard");
   }, [currentUser.role, router]);
   const [period, setPeriod] = useState<"week" | "month" | "quarter">("week");
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!exportMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [exportMenuOpen]);
   const canSeeFinancials = currentUser.role === "Admin" || currentUser.role === "Project Manager";
 
   const { start: periodStart, end: periodEnd, label: periodLabel } = useMemo(
@@ -174,7 +186,7 @@ export default function ReportsPage() {
                 <FileText size={14} />
                 {pdfLoading ? "Generating…" : "Download PDF"}
               </button>
-              <div className="relative">
+              <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setExportMenuOpen((o) => !o)}
                   className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 font-bold text-[13px] px-4 py-2 rounded-lg transition-colors border border-white/[0.07]"

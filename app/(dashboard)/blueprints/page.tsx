@@ -5,6 +5,7 @@ import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus } from "lu
 import { useStore } from "@/lib/store";
 import { getClient } from "@/lib/supabase/client";
 import { BlueprintViewer } from "@/components/blueprint-viewer";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 const PIN_TYPE_LABELS = { issue: "Issues", safety: "Safety", rfi: "RFIs", info: "Info" } as const;
 
@@ -17,8 +18,10 @@ export default function BlueprintsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"all" | "issue" | "safety" | "rfi" | "info">("all");
   const [filterResolved, setFilterResolved] = useState<"all" | "open" | "resolved">("open");
+  const [deletePinConfirm, setDeletePinConfirm] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const project = projects.find((p) => p.id === selectedProjectId);
@@ -44,6 +47,7 @@ export default function BlueprintsPage() {
     if (!file || !companyId) return;
 
     setUploading(true);
+    setUploadError(null);
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
       const path = `${companyId}/blueprints/${Date.now()}.${ext}`;
@@ -63,7 +67,7 @@ export default function BlueprintsPage() {
         sizeBytes: file.size,
       });
     } catch (err) {
-      console.error("Upload failed", err);
+      setUploadError(err instanceof Error ? err.message : "Upload failed. Please try again.");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -136,7 +140,7 @@ export default function BlueprintsPage() {
             onChange={handleUpload}
           />
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => { setUploadError(null); fileInputRef.current?.click(); }}
             disabled={uploading}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-bold transition-colors disabled:opacity-50"
           >
@@ -144,6 +148,13 @@ export default function BlueprintsPage() {
           </button>
         </div>
       </div>
+      {uploadError && (
+        <div className="px-6 py-2 bg-red-500/10 border-b border-red-500/20 flex items-center gap-2">
+          <AlertTriangle size={13} className="text-red-400 flex-shrink-0" />
+          <p className="text-[12px] text-red-300">{uploadError}</p>
+          <button onClick={() => setUploadError(null)} className="ml-auto text-red-400/50 hover:text-red-400 transition-colors"><X size={12} /></button>
+        </div>
+      )}
 
       <div className="flex flex-1 min-h-0">
         {/* Left sidebar — blueprint list */}
@@ -246,7 +257,7 @@ export default function BlueprintsPage() {
                                 <Check size={9} />
                               </button>
                               <button
-                                onClick={() => deleteBlueprintPin(pin.id)}
+                                onClick={() => setDeletePinConfirm(pin.id)}
                                 className="w-5 h-5 rounded bg-white/[0.05] text-white/30 hover:bg-red-500/15 hover:text-red-400 flex items-center justify-center transition-colors"
                               >
                                 <X size={9} />
@@ -265,6 +276,16 @@ export default function BlueprintsPage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        open={!!deletePinConfirm}
+        title="Delete Pin"
+        body="Remove this pin from the blueprint? This cannot be undone."
+        confirmLabel="Delete"
+        danger
+        onConfirm={() => { if (deletePinConfirm) { deleteBlueprintPin(deletePinConfirm); setDeletePinConfirm(null); } }}
+        onCancel={() => setDeletePinConfirm(null)}
+      />
     </div>
   );
 }

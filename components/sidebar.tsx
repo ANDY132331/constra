@@ -184,24 +184,23 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
           </div>
         )}
 
-        {OPS_ITEMS.filter((item) => {
-          if (!item.minLevel) return true;
-          if (item.minLevel === "foreman") return isForeman;
-          if (item.minLevel === "admin") return isAdmin;
-          return true;
-        }).length > 0 && (
-          <div className="mt-4 pt-3 border-t border-white/[0.06]">
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Field Ops</p>
-            {OPS_ITEMS.filter((item) => {
-              if (!item.minLevel) return true;
-              if (item.minLevel === "foreman") return isForeman;
-              if (item.minLevel === "admin") return isAdmin;
-              return true;
-            }).map((item) => (
-              <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
-            ))}
-          </div>
-        )}
+        {(() => {
+          const visibleOps = OPS_ITEMS.filter((item) => {
+            if (!item.minLevel) return true;
+            if (item.minLevel === "foreman") return isForeman;
+            if (item.minLevel === "admin") return isAdmin;
+            return true;
+          });
+          if (visibleOps.length === 0) return null;
+          return (
+            <div className="mt-4 pt-3 border-t border-white/[0.06]">
+              <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Field Ops</p>
+              {visibleOps.map((item) => (
+                <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
+              ))}
+            </div>
+          );
+        })()}
 
         {isAdmin && (
           <div className="mt-4 pt-3 border-t border-white/[0.06]">

@@ -22,9 +22,12 @@ export function SearchModal() {
   const { workers, projects, punchItems, equipment, invoices, safetyIncidents } = useStore();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const activeItemRef = useRef<HTMLButtonElement>(null);
 
-  const close = useCallback(() => { setOpen(false); setQuery(""); }, []);
+  const close = useCallback(() => { setOpen(false); setQuery(""); setActiveIndex(-1); }, []);
 
   useEffect(() => {
     const onEvent = () => setOpen(true);
@@ -48,7 +51,32 @@ export function SearchModal() {
     if (open) setTimeout(() => inputRef.current?.focus(), 50);
   }, [open]);
 
+  // Reset active index when query changes
+  useEffect(() => { setActiveIndex(-1); }, [query]);
+
+  // Scroll active item into view
+  useEffect(() => {
+    if (activeIndex < 0 || !listRef.current) return;
+    const item = listRef.current.querySelectorAll("[data-item]")[activeIndex] as HTMLElement | undefined;
+    item?.scrollIntoView({ block: "nearest" });
+  }, [activeIndex]);
+
   const q = query.toLowerCase().trim();
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const items = q.length > 0 ? results : SHORTCUTS;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, items.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, -1));
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
+      const item = items[activeIndex];
+      if (item) go(item.href, "label" in item ? item.label : undefined);
+    }
+  };
 
   const results: Result[] = q.length < 1 ? [] : [
     ...workers
@@ -155,6 +183,7 @@ export function SearchModal() {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleInputKeyDown}
             placeholder="Search workers, projects, tasks, equipment…"
             className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none"
           />
@@ -167,17 +196,18 @@ export function SearchModal() {
         </div>
 
         {/* Results */}
-        <div className="max-h-[360px] overflow-y-auto">
+        <div className="max-h-[360px] overflow-y-auto" ref={listRef}>
           {q.length > 0 ? (
             results.length > 0 ? (
               <div className="py-2">
-                {results.map((r) => {
+                {results.map((r, i) => {
                   const Icon = r.icon;
                   return (
                     <button
                       key={r.id}
+                      data-item=""
                       onClick={() => go(r.href, r.label)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.05] transition-colors text-left"
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left ${activeIndex === i ? "bg-white/[0.08]" : "hover:bg-white/[0.05]"}`}
                     >
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: r.color + "18" }}>
@@ -199,13 +229,14 @@ export function SearchModal() {
           ) : (
             <div className="py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/20 px-4 pb-2">Quick Links</p>
-              {SHORTCUTS.map((s) => {
+              {SHORTCUTS.map((s, i) => {
                 const Icon = s.icon;
                 return (
                   <button
                     key={s.href}
+                    data-item=""
                     onClick={() => go(s.href)}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.05] transition-colors text-left"
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left ${activeIndex === i ? "bg-white/[0.08]" : "hover:bg-white/[0.05]"}`}
                   >
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: s.color + "18" }}>
