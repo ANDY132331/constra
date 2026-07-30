@@ -63,6 +63,8 @@ export function GanttChart({
   onTaskDatesChange?: (projectId: string, taskId: string, startDate: Date, endDate: Date) => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const leftRef   = useRef<HTMLDivElement>(null);
+  const syncingRef = useRef(false);
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [dragDelta, setDragDelta] = useState(0); // in days
 
@@ -111,6 +113,31 @@ export function GanttChart({
     if (cur) months.push({ label: cur, count });
     return months;
   }, [allDates]);
+
+  // Vertical scroll sync between left and right panels
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = scrollRef.current;
+    if (!left || !right) return;
+    const onLeftScroll = () => {
+      if (syncingRef.current) return;
+      syncingRef.current = true;
+      right.scrollTop = left.scrollTop;
+      syncingRef.current = false;
+    };
+    const onRightScroll = () => {
+      if (syncingRef.current) return;
+      syncingRef.current = true;
+      left.scrollTop = right.scrollTop;
+      syncingRef.current = false;
+    };
+    left.addEventListener("scroll", onLeftScroll);
+    right.addEventListener("scroll", onRightScroll);
+    return () => {
+      left.removeEventListener("scroll", onLeftScroll);
+      right.removeEventListener("scroll", onRightScroll);
+    };
+  }, []);
 
   // Global drag listeners
   useEffect(() => {
@@ -208,6 +235,7 @@ export function GanttChart({
     >
       {/* ─── Left panel (fixed) ─────────────────────────────────── */}
       <div
+        ref={leftRef}
         className="flex-shrink-0 border-r border-white/[0.07] overflow-y-auto"
         style={{ width: LEFT_PANEL_W }}
       >
@@ -256,9 +284,6 @@ export function GanttChart({
                   ? "#f59e0b"
                   : "rgba(255,255,255,0.25)";
               const isDragging = dragState?.taskId === task.id;
-              const displayDays = isDragging
-                ? days // days don't change for left panel
-                : days;
 
               return (
                 <div
@@ -309,7 +334,7 @@ export function GanttChart({
                       "MMM d"
                     )}
                   </span>
-                  <span className="text-[11px] text-white/25">{displayDays}d</span>
+                  <span className="text-[11px] text-white/25">{days}d</span>
                   {/* Predecessor name */}
                   {(() => {
                     if (!task.dependsOn) return <span className="text-[10px] text-white/15">—</span>;
