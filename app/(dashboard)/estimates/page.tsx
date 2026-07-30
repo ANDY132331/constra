@@ -190,7 +190,9 @@ export default function EstimatesPage() {
   };
 
   const handleConvertToInvoice = (estimate: Estimate) => {
-    const nextInvNum = `INV-${String(invoices.length + 1).padStart(3, "0")}`;
+    const nums = invoices.map((i) => parseInt(i.number.replace(/\D/g, ""), 10)).filter(Boolean);
+    const max = nums.length ? Math.max(...nums) : 0;
+    const nextInvNum = `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
     const now = new Date();
     const dueDate = new Date(now);
     dueDate.setDate(dueDate.getDate() + 30);

@@ -506,7 +506,7 @@ export default function CrewPage() {
                           <span key={c.id} className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${expired ? "bg-red-500/15 text-red-400" : expiringSoon ? "bg-amber-500/15 text-amber-400" : "bg-white/[0.06] text-white/40"}`}>
                             {(expired || expiringSoon) && <AlertTriangle size={8} />}
                             {c.name}
-                            {c.expiryDate && <span className="opacity-60">· {expired ? "Exp." : "Exp."} {c.expiryDate.toLocaleDateString("en-CA", { month: "short", year: "2-digit" })}</span>}
+                            {c.expiryDate && <span className="opacity-60">· Exp. {c.expiryDate.toLocaleDateString("en-CA", { month: "short", year: "2-digit" })}</span>}
                           </span>
                         );
                       })}
