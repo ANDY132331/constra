@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { use } from "react";
-import { CheckCircle2, Clock, Circle, AlertCircle, MapPin, Calendar, Building2, Loader2 } from "lucide-react";
+import { CheckCircle2, Clock, Circle, AlertCircle, MapPin, Calendar, Building2, Loader2, HardHat } from "lucide-react";
 
 type SharedTask = {
   id: string; name: string; status: string; progress: number;
@@ -70,7 +70,10 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
       {/* Header */}
       <div className="border-b border-white/[0.06] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-amber-400 font-black text-[16px] tracking-tight">⚡ Constra</span>
+          <div className="w-6 h-6 bg-amber-500 rounded-md flex items-center justify-center flex-shrink-0">
+            <HardHat size={13} className="text-black" />
+          </div>
+          <span className="text-white font-black text-[15px] tracking-tight">Constra</span>
           <span className="text-white/25 text-[13px]">· Project Status</span>
         </div>
         <span className="text-[11px] text-white/20">Shared view · Read-only</span>

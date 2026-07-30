@@ -37,7 +37,7 @@ const FEATURES = [
     icon: BarChart3,
     color: "#8b5cf6",
     title: "Reports & Payroll Export",
-    body: "Full payroll summaries, project cost reports, and timesheet detail — exportable to PDF, CSV, QuickBooks, or Sage 300.",
+    body: "Full payroll summaries, project cost reports, and timesheet detail — exportable to PDF, CSV, QuickBooks, or Gusto.",
   },
   {
     icon: Sparkles,
