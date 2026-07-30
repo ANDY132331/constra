@@ -234,13 +234,17 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
       </div>
 
       <div className="space-y-3">
-        {safetyIncidents.length === 0 && (
+        {filtered.length === 0 && (
           <div className="text-center py-16 text-white/25 space-y-2">
             <ShieldAlert size={36} className="mx-auto opacity-30" />
-            <p className="text-[14px]">No incidents logged</p>
-            <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-              + Log an incident
-            </button>
+            <p className="text-[14px]">
+              {safetyIncidents.length === 0 ? "No incidents logged" : "No incidents match your filters"}
+            </p>
+            {safetyIncidents.length === 0 && (
+              <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
+                + Log an incident
+              </button>
+            )}
           </div>
         )}
         {filtered.map((incident) => {

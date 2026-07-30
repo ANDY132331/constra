@@ -464,7 +464,9 @@ export default function InvoicesPage() {
     return !q || i.clientName.toLowerCase().includes(q) || i.number.toLowerCase().includes(q);
   });
 
-  const selectedInvoice = filtered.find((i) => i.id === selectedId) ?? filtered[0] ?? null;
+  const selectedInvoice = selectedId !== null
+    ? (filtered.find((i) => i.id === selectedId) ?? filtered[0] ?? null)
+    : null;
 
   const totalOutstanding = invoices
     .filter((i) => i.status === "sent" || i.status === "overdue")
@@ -580,7 +582,7 @@ export default function InvoicesPage() {
       <div className="flex flex-1 overflow-hidden">
 
         {/* Left: list panel */}
-        <div className={`flex flex-col border-r border-white/[0.06] flex-shrink-0 ${selectedInvoice ? "hidden lg:flex w-72 xl:w-80" : "flex w-full"}`}>
+        <div className={`flex flex-col border-r border-white/[0.06] flex-shrink-0 ${selectedId !== null ? "hidden lg:flex w-72 xl:w-80" : "flex w-full"}`}>
           {/* Search + filter */}
           <div className="px-3 py-3 border-b border-white/[0.05] space-y-2 flex-shrink-0">
             <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">

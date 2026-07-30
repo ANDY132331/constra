@@ -464,7 +464,7 @@ export default function CrewPage() {
                   {canSeeFinancials && worker.hourlyRate > 0 && (
                     <>
                       <span className="text-white/[0.12]">·</span>
-                      <span className="text-[11px] text-white/30">${worker.hourlyRate}/hr</span>
+                      <span className="text-[11px] text-white/30">{getCurrencySymbol(currency)}{worker.hourlyRate}/hr</span>
                     </>
                   )}
                 </div>
