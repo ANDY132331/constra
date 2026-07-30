@@ -9,6 +9,7 @@ import { formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { MapView } from "@/components/map-view";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 type View = "gantt" | "table" | "cards" | "map";
 
@@ -230,7 +231,7 @@ export default function ProjectsPage() {
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                   <button
-                    onClick={() => deleteProject(p.id)}
+                    onClick={() => setDeleteConfirm(p.id)}
                     className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                   >
                     Reject
@@ -646,30 +647,20 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {/* Delete project confirmation */}
-      {deleteConfirm && (() => {
-        const proj = projects.find((p) => p.id === deleteConfirm);
-        return proj ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-            <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-              <h3 className="text-[15px] font-bold text-white mb-1">Delete Project</h3>
-              <p className="text-[13px] text-white/50 mb-5">
-                Permanently delete <span className="text-white font-semibold">{proj.name}</span>? All tasks, time entries, and data for this project will be lost.
-              </p>
-              <div className="flex gap-3">
-                <button onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors">
-                  Cancel
-                </button>
-                <button onClick={() => { deleteProject(deleteConfirm); setDeleteConfirm(null); }}
-                  className="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] py-2.5 rounded-xl transition-colors">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null;
-      })()}
+      <ConfirmModal
+        open={!!deleteConfirm}
+        title="Delete Project"
+        body={(() => {
+          const proj = projects.find((p) => p.id === deleteConfirm);
+          return proj
+            ? `Permanently delete "${proj.name}"? All tasks, time entries, and data for this project will be lost.`
+            : "Delete this project? This cannot be undone.";
+        })()}
+        confirmLabel="Delete"
+        danger
+        onConfirm={() => { if (deleteConfirm) { deleteProject(deleteConfirm); setDeleteConfirm(null); } }}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

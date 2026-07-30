@@ -25,7 +25,6 @@ export function SearchModal() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const activeItemRef = useRef<HTMLButtonElement>(null);
 
   const close = useCallback(() => { setOpen(false); setQuery(""); setActiveIndex(-1); }, []);
 
