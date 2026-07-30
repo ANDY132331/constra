@@ -163,7 +163,7 @@ export default function PhotosPage() {
                 + Upload your first photo
               </button>
             </div>
-          ) : view === "grid" ? (
+          ) : view === "grid" && filtered.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {filtered.map((photo, idx) => {
                 const uploader = getWorkerById(photo.uploadedById);
@@ -299,7 +299,7 @@ export default function PhotosPage() {
                 </div>
               );
             })()
-          ) : (
+          ) : filtered.length > 0 ? (
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden">
               <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
                 style={{ gridTemplateColumns: "60px 2fr 1fr 120px 100px 80px" }}>
@@ -353,7 +353,7 @@ export default function PhotosPage() {
                 );
               })}
             </div>
-          )}
+          ) : null}
 
           {photos.length > 0 && filtered.length === 0 && (
             <div className="text-center py-16 text-white/25">

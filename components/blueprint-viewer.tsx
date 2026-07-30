@@ -114,11 +114,22 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
 
   const onMouseUp = useCallback(() => setPanning(false), []);
 
-  // ── Zoom handler ─────────────────────────────────────────────────────────────
+  // ── Zoom handler (zoom toward cursor position) ───────────────────────────────
   const onWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
     const factor = e.deltaY < 0 ? 1.1 : 0.91;
-    setZoom((z) => Math.min(8, Math.max(0.2, z * factor)));
+    const rect = outerRef.current!.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    setZoom((z) => {
+      const newZoom = Math.min(8, Math.max(0.2, z * factor));
+      const actualFactor = newZoom / z;
+      setPan((p) => ({
+        x: mx - (mx - p.x) * actualFactor,
+        y: my - (my - p.y) * actualFactor,
+      }));
+      return newZoom;
+    });
   }, []);
 
   // ── Place pin on click ───────────────────────────────────────────────────────
