@@ -218,7 +218,11 @@ export default function EstimatesPage() {
   const totalPending = estimates.filter((e) => e.status === "sent")
     .reduce((s, e) => s + e.items.reduce((ss, i) => ss + i.qty * i.rate, 0) * (1 + e.taxRate / 100), 0);
 
-  const nextNumber = `EST-${String(estimates.length + 1).padStart(3, "0")}`;
+  const nextNumber = (() => {
+    const nums = estimates.map((e) => parseInt(e.number.replace("EST-", "")) || 0);
+    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    return `EST-${String(max + 1).padStart(3, "0")}`;
+  })();
 
   const updateItem = (idx: number, field: keyof LineItem, val: string) => {
     setForm((f) => ({ ...f, items: f.items.map((it, i) => i === idx ? { ...it, [field]: val } : it) }));
