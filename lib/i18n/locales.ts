@@ -176,6 +176,7 @@ const locales: AllLocales = {
       noTasks: "Sin tareas próximas", noIssues: "Sin problemas abiertos",
       activity: "Actividad", projectStatus: "Estado del Proyecto",
       addProject: "Agrega tu primer proyecto →", seeAll: "Ver todo", viewAll: "Ver todo",
+      upcomingTasks: "Próximas Tareas", priorityIssues: "Problemas Prioritarios",
     },
   },
 
@@ -240,6 +241,7 @@ const locales: AllLocales = {
       noTasks: "Pas de tâches à venir", noIssues: "Pas de problèmes ouverts",
       activity: "Activité", projectStatus: "Statut des projets",
       addProject: "Ajoutez votre premier projet →", seeAll: "Voir tout", viewAll: "Voir tout",
+      upcomingTasks: "Tâches à venir", priorityIssues: "Problèmes prioritaires",
     },
   },
 
@@ -304,6 +306,7 @@ const locales: AllLocales = {
       noTasks: "Keine bevorstehenden Aufgaben", noIssues: "Keine offenen Mängel",
       activity: "Aktivität", projectStatus: "Projektstatus",
       addProject: "Erstes Projekt hinzufügen →", seeAll: "Alle ansehen", viewAll: "Alle ansehen",
+      upcomingTasks: "Bevorstehende Aufgaben", priorityIssues: "Prioritäre Probleme",
     },
   },
 
@@ -368,6 +371,7 @@ const locales: AllLocales = {
       noTasks: "Sem tarefas próximas", noIssues: "Sem problemas em aberto",
       activity: "Atividade", projectStatus: "Status dos Projetos",
       addProject: "Adicione seu primeiro projeto →", seeAll: "Ver tudo", viewAll: "Ver tudo",
+      upcomingTasks: "Próximas Tarefas", priorityIssues: "Problemas Prioritários",
     },
   },
 
@@ -432,6 +436,7 @@ const locales: AllLocales = {
       noTasks: "Nessun compito imminente", noIssues: "Nessun problema aperto",
       activity: "Attività", projectStatus: "Stato Progetti",
       addProject: "Aggiungi il tuo primo progetto →", seeAll: "Vedi tutto", viewAll: "Vedi tutto",
+      upcomingTasks: "Compiti Imminenti", priorityIssues: "Problemi Prioritari",
     },
   },
 
@@ -496,6 +501,7 @@ const locales: AllLocales = {
       noTasks: "Geen aankomende taken", noIssues: "Geen open problemen",
       activity: "Activiteit", projectStatus: "Projectstatus",
       addProject: "Voeg uw eerste project toe →", seeAll: "Alles bekijken", viewAll: "Alles bekijken",
+      upcomingTasks: "Aankomende taken", priorityIssues: "Prioritaire problemen",
     },
   },
 
@@ -560,6 +566,7 @@ const locales: AllLocales = {
       noTasks: "Brak nadchodzących zadań", noIssues: "Brak otwartych problemów",
       activity: "Aktywność", projectStatus: "Status projektów",
       addProject: "Dodaj swój pierwszy projekt →", seeAll: "Zobacz wszystko", viewAll: "Zobacz wszystko",
+      upcomingTasks: "Nadchodzące zadania", priorityIssues: "Priorytetowe problemy",
     },
   },
 
@@ -624,6 +631,7 @@ const locales: AllLocales = {
       noTasks: "Yaklaşan görev yok", noIssues: "Açık sorun yok",
       activity: "Aktivite", projectStatus: "Proje Durumu",
       addProject: "İlk projenizi ekleyin →", seeAll: "Tümünü gör", viewAll: "Tümünü gör",
+      upcomingTasks: "Yaklaşan Görevler", priorityIssues: "Öncelikli Sorunlar",
     },
   },
 
@@ -688,6 +696,7 @@ const locales: AllLocales = {
       noTasks: "لا توجد مهام قادمة", noIssues: "لا توجد مشكلات مفتوحة",
       activity: "النشاط", projectStatus: "حالة المشاريع",
       addProject: "أضف مشروعك الأول ←", seeAll: "عرض الكل", viewAll: "عرض الكل",
+      upcomingTasks: "المهام القادمة", priorityIssues: "المشكلات ذات الأولوية",
     },
   },
 
@@ -752,6 +761,7 @@ const locales: AllLocales = {
       noTasks: "कोई आगामी कार्य नहीं", noIssues: "कोई खुली समस्या नहीं",
       activity: "गतिविधि", projectStatus: "परियोजना स्थिति",
       addProject: "अपनी पहली परियोजना जोड़ें →", seeAll: "सभी देखें", viewAll: "सभी देखें",
+      upcomingTasks: "आगामी कार्य", priorityIssues: "प्राथमिकता समस्याएं",
     },
   },
 
@@ -816,6 +826,7 @@ const locales: AllLocales = {
       noTasks: "暂无待办任务", noIssues: "暂无待处理问题",
       activity: "活动", projectStatus: "项目状态",
       addProject: "添加您的第一个项目 →", seeAll: "查看全部", viewAll: "查看全部",
+      upcomingTasks: "待办任务", priorityIssues: "优先问题",
     },
   },
 
@@ -880,6 +891,7 @@ const locales: AllLocales = {
       noTasks: "沒有待辦任務", noIssues: "沒有待處理問題",
       activity: "活動", projectStatus: "專案狀態",
       addProject: "新增您的第一個專案 →", seeAll: "查看全部", viewAll: "查看全部",
+      upcomingTasks: "待辦任務", priorityIssues: "優先問題",
     },
   },
 
@@ -944,6 +956,7 @@ const locales: AllLocales = {
       noTasks: "予定のタスクなし", noIssues: "未解決の問題なし",
       activity: "アクティビティ", projectStatus: "プロジェクト状況",
       addProject: "最初のプロジェクトを追加 →", seeAll: "すべて見る", viewAll: "すべて見る",
+      upcomingTasks: "近日中のタスク", priorityIssues: "優先課題",
     },
   },
 
@@ -1008,6 +1021,7 @@ const locales: AllLocales = {
       noTasks: "예정된 작업 없음", noIssues: "미해결 문제 없음",
       activity: "활동", projectStatus: "프로젝트 현황",
       addProject: "첫 프로젝트 추가 →", seeAll: "모두 보기", viewAll: "모두 보기",
+      upcomingTasks: "예정 작업", priorityIssues: "우선 문제",
     },
   },
 };
