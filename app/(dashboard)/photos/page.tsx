@@ -324,7 +324,7 @@ export default function PhotosPage() {
                           </div>
                         )}
                       </div>
-                      <button onClick={() => deletePhoto(photo.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
+                      <button onClick={() => setDeleteConfirm(photo.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
                         <X size={12} />
                       </button>
                     </div>

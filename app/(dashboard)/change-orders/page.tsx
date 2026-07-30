@@ -61,7 +61,11 @@ export default function ChangeOrdersPage() {
     if (!isAdmin) router.replace("/dashboard");
   }, [isAdmin, router]);
 
-  const nextNumber = `CO-${String(changeOrders.length + 1).padStart(3, "0")}`;
+  const nextNumber = (() => {
+    const nums = changeOrders.map((c) => parseInt(c.number.replace("CO-", "")) || 0);
+    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    return `CO-${String(max + 1).padStart(3, "0")}`;
+  })();
 
   const filtered = changeOrders.filter((c) => {
     if (statusFilter !== "all" && c.status !== statusFilter) return false;

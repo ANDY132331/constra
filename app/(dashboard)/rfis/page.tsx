@@ -159,6 +159,12 @@ export default function RFIsPage() {
             </button>
           </div>
         )}
+        {rfis.length > 0 && filtered.length === 0 && (
+          <div className="text-center py-12 text-white/25 space-y-1">
+            <MessageSquare size={28} className="mx-auto opacity-20" />
+            <p className="text-[13px]">No RFIs match the current filter</p>
+          </div>
+        )}
         {filtered.map((rfi) => {
           const project = getProjectById(rfi.projectId);
           const submitter = getWorkerById(rfi.submittedById);

@@ -294,7 +294,9 @@ export default function SchedulePage() {
               {locationName}
             </button>
             {showLocationPicker && (
-              <div className="absolute right-0 top-full mt-2 z-20 bg-[#1a1a1a] border border-white/[0.1] rounded-xl p-3 w-72 shadow-2xl">
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => { setShowLocationPicker(false); setLocationInput(""); setGeoResults([]); }} />
+                <div className="absolute right-0 top-full mt-2 z-20 bg-[#1a1a1a] border border-white/[0.1] rounded-xl p-3 w-72 shadow-2xl">
                 <p className="text-[11px] text-white/40 mb-2">Search by city or town name</p>
                 <input
                   autoFocus value={locationInput}
@@ -322,6 +324,7 @@ export default function SchedulePage() {
                   <p className="text-[11px] text-white/25 mt-2 text-center">No results found</p>
                 )}
               </div>
+              </>
             )}
           </div>
 

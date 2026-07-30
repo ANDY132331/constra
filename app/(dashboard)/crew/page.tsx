@@ -701,7 +701,12 @@ export default function CrewPage() {
       <ConfirmModal
         open={!!deleteConfirm}
         title="Remove Crew Member"
-        body="Remove this worker from your workspace? They will lose access immediately."
+        body={(() => {
+          const w = workers.find((w) => w.id === deleteConfirm);
+          return w
+            ? `Remove ${w.name} from your workspace? They will lose access immediately.`
+            : "Remove this worker from your workspace? They will lose access immediately.";
+        })()}
         confirmLabel="Remove"
         onConfirm={() => { if (deleteConfirm) deleteWorker(deleteConfirm); setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
