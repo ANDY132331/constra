@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Search, Circle, Timer, CheckCircle2, AlertCircle, MapPin, Calendar, X, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { MicButton } from "@/components/mic-button";
 
 const PRIORITY_CONFIG = {
   high: { label: "HIGH", className: "bg-red-500/15 text-red-400" },
@@ -279,7 +280,10 @@ export default function PunchListPage() {
                   value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Description</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Description</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, description: (f.description ? f.description + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={inp + " resize-none"} rows={3} placeholder="Describe the issue..."
                   value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
               </div>

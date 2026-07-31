@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { useStore } from "@/lib/store";
+import { MicButton } from "@/components/mic-button";
 
 function formatTime(date: Date) {
   if (isToday(date)) return format(date, "h:mm a");
@@ -268,6 +269,7 @@ export default function MessagesPage() {
             className="flex-1 bg-[#1a1a1a] border border-white/[0.07] rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-white/25 outline-none focus:border-amber-500/30 resize-none max-h-28 leading-relaxed"
             style={{ overflowY: "auto" }}
           />
+          <MicButton onResult={(t) => setText((prev) => (prev ? prev + " " : "") + t.trim())} className="mb-0.5" />
 
           <button
             onClick={sendMessage}

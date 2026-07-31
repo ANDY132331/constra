@@ -8,6 +8,7 @@ import {
   ChevronRight, Download, Calendar, ClipboardList, Zap,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { MicButton } from "@/components/mic-button";
 import { useStore } from "@/lib/store";
 import type { DailyReport } from "@/lib/mock-data";
 
@@ -368,15 +369,24 @@ export default function DailyReportsPage() {
                 <textarea className={`${inp} resize-none`} rows={3} placeholder="John Smith&#10;Maria Garcia" value={form.crewOnSite} onChange={(e) => setForm((f) => ({ ...f, crewOnSite: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Work Completed *</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Work Completed *</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, workCompleted: (f.workCompleted ? f.workCompleted + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={`${inp} resize-none`} rows={4} placeholder="Describe work completed today…" value={form.workCompleted} onChange={(e) => setForm((f) => ({ ...f, workCompleted: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Materials Used</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Materials Used</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, materialsUsed: (f.materialsUsed ? f.materialsUsed + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={`${inp} resize-none`} rows={2} placeholder="Concrete, rebar, lumber…" value={form.materialsUsed} onChange={(e) => setForm((f) => ({ ...f, materialsUsed: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Delays / Issues</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Delays / Issues</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, delays: (f.delays ? f.delays + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={`${inp} resize-none`} rows={2} placeholder="Any delays or issues encountered…" value={form.delays} onChange={(e) => setForm((f) => ({ ...f, delays: e.target.value }))} />
               </div>
               <div>
@@ -384,7 +394,10 @@ export default function DailyReportsPage() {
                 <input className={inp} placeholder="Inspector, owner, etc." value={form.visitorLog} onChange={(e) => setForm((f) => ({ ...f, visitorLog: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Notes</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Notes</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, notes: (f.notes ? f.notes + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={`${inp} resize-none`} rows={2} placeholder="Additional notes…" value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
               </div>
             </div>

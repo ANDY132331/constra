@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
 
 const TYPE_CONFIG = {
@@ -342,12 +343,18 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                 </div>
               </div>
               <div>
-                <label className={lbl}>Description *</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Description *</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, description: (f.description ? f.description + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={inp + " resize-none"} rows={3} placeholder="Describe what happened..."
                   value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Corrective Action Taken</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Corrective Action Taken</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, actionTaken: (f.actionTaken ? f.actionTaken + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={inp + " resize-none"} rows={2} placeholder="What was done to address this..."
                   value={form.actionTaken} onChange={(e) => setForm((f) => ({ ...f, actionTaken: e.target.value }))} />
               </div>

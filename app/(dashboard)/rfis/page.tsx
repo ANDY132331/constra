@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MessageSquare, Plus, Search, Clock, CheckCircle2, XCircle, ChevronDown, ChevronRight, X, Trash2, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { MicButton } from "@/components/mic-button";
 
 const STATUS_CONFIG = {
   open: { label: "Open", className: "bg-red-500/15 text-red-400", icon: Clock },
@@ -314,7 +315,10 @@ export default function RFIsPage() {
                   value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Question</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Question</label>
+                  <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, question: (f.question ? f.question + " " : "") + t.trim() }))} />
+                </div>
                 <textarea className={inp + " resize-none"} rows={3} placeholder="Describe the issue or question..."
                   value={form.question} onChange={(e) => setForm((f) => ({ ...f, question: e.target.value }))} />
               </div>
