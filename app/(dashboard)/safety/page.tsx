@@ -158,15 +158,15 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
 
   return (
     <div className="space-y-5 max-w-[1000px]">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Safety Log</h2>
-          <p className="text-white/35 text-sm mt-0.5">
+          <p className="text-white/35 text-sm mt-0.5 hidden sm:block">
             {safetyIncidents.length} incidents logged · OSHA reporting required for injuries
           </p>
         </div>
         <button onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors flex-shrink-0">
           <Plus size={15} />
           Log Incident
         </button>
@@ -188,29 +188,29 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         })}
       </div>
 
-      <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 flex items-center gap-6">
-        <div className="flex-shrink-0">
-          <div className="w-16 h-16 rounded-full border-4 border-green-500/30 flex items-center justify-center">
-            <span className="text-xl font-black text-green-400">
+      <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+        <div className="flex items-center gap-4 sm:flex-col sm:gap-0 sm:flex-shrink-0">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-green-500/30 flex items-center justify-center">
+            <span className="text-lg sm:text-xl font-black text-green-400">
               {Math.max(0, 100 - safetyIncidents.filter((i) => i.severity === "critical" || i.severity === "high").length * 5)}
             </span>
           </div>
-          <p className="text-[10px] text-white/30 text-center mt-1.5">Safety Score</p>
+          <p className="text-[10px] text-white/30 sm:text-center sm:mt-1.5">Safety Score</p>
         </div>
-        <div className="flex-1 grid grid-cols-3 gap-4">
+        <div className="flex-1 grid grid-cols-3 gap-3 sm:gap-4">
           <div>
-            <p className="text-[11px] text-white/30 mb-1">Days without injury</p>
+            <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">Days w/o injury</p>
             {daysWithoutInjury === null
-              ? <p className="text-2xl font-bold text-green-400">∞</p>
-              : <p className="text-2xl font-bold text-green-400">{daysWithoutInjury}</p>}
+              ? <p className="text-xl sm:text-2xl font-bold text-green-400">∞</p>
+              : <p className="text-xl sm:text-2xl font-bold text-green-400">{daysWithoutInjury}</p>}
           </div>
           <div>
-            <p className="text-[11px] text-white/30 mb-1">OSHA Recordables YTD</p>
-            <p className="text-2xl font-bold text-white">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
+            <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">OSHA YTD</p>
+            <p className="text-xl sm:text-2xl font-bold text-white">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
           </div>
           <div>
-            <p className="text-[11px] text-white/30 mb-1">Total Incidents</p>
-            <p className="text-2xl font-bold text-white">{safetyIncidents.length}</p>
+            <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">Total</p>
+            <p className="text-xl sm:text-2xl font-bold text-white">{safetyIncidents.length}</p>
           </div>
         </div>
       </div>

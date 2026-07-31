@@ -1,26 +1,60 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { SearchModal } from "@/components/search-modal";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineBanner } from "@/components/offline-banner";
 import { NotifPermissionPrompt } from "@/components/notif-permission-prompt";
+import { MobileNav } from "@/components/mobile-nav";
 import { useStore } from "@/lib/store";
 import { I18nProvider } from "@/lib/i18n";
 import { RTL_LOCALES } from "@/lib/i18n/locales";
+import { isForemanOrAbove, isAdminOrAbove } from "@/lib/permissions";
+
+// Pages that are always accessible regardless of role/grants
+const ALWAYS_ALLOWED = ["/dashboard", "/time-tracking", "/safety", "/messages", "/photos", "/settings"];
+
+// Default role-based access for pages that require elevation
+const PAGE_MIN_LEVEL: Record<string, "foreman" | "admin"> = {
+  "/schedule": "foreman", "/projects": "foreman", "/tasks": "foreman",
+  "/punch-list": "foreman", "/rfis": "foreman", "/equipment": "foreman",
+  "/materials": "foreman", "/documents": "foreman", "/blueprints": "foreman",
+  "/daily-reports": "foreman",
+  "/crew": "admin", "/reports": "admin", "/estimates": "admin",
+  "/invoices": "admin", "/change-orders": "admin",
+};
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
-  const { language, onboarded, isLoading } = useStore();
+  const { language, onboarded, isLoading, currentUser } = useStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Redirect to onboarding only after Supabase finishes loading (avoids false redirects)
   useEffect(() => {
     if (!isLoading && !onboarded) router.push("/onboarding");
   }, [onboarded, isLoading, router]);
+
+  // Route guard — enforce grantedPages or role-based access
+  useEffect(() => {
+    if (isLoading || !onboarded) return;
+    const base = "/" + pathname.split("/")[1];
+    if (ALWAYS_ALLOWED.includes(base)) return;
+    const isForeman = isForemanOrAbove(currentUser.role);
+    const isAdmin = isAdminOrAbove(currentUser.role);
+    if (isAdmin) return; // admins always have full access
+    if (currentUser.grantedPages !== undefined) {
+      if (!currentUser.grantedPages.includes(base)) router.replace("/dashboard");
+      return;
+    }
+    const minLevel = PAGE_MIN_LEVEL[base];
+    if (!minLevel) return;
+    if (minLevel === "foreman" && !isForeman) router.replace("/dashboard");
+    if (minLevel === "admin" && !isAdmin) router.replace("/dashboard");
+  }, [pathname, isLoading, onboarded, currentUser, router]);
 
   // Set RTL direction on <html> element
   useEffect(() => {
@@ -72,10 +106,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           <Header onMenuClick={() => setSidebarOpen((v) => !v)} />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#0a0a0a]">
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 lg:pb-6 bg-[#0a0a0a]">
             <ErrorBoundary>{children}</ErrorBoundary>
           </main>
         </div>
+        <MobileNav />
         <SearchModal />
         <OfflineBanner />
         <NotifPermissionPrompt />

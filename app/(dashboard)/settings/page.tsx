@@ -1,11 +1,13 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  Users, Building2, Bell, BellOff, Shield, HardHat, Lock, CreditCard,
+  Users, Building2, Bell, BellOff, Shield, HardHat, Lock,
   Plus, Edit2, Trash2, Copy, CheckCircle2, Key, X, Check,
-  Crown, Globe, Briefcase, DollarSign, Eye, EyeOff, AlertCircle,
+  Globe, Briefcase, DollarSign, Eye, EyeOff, AlertCircle,
+  ShieldCheck, ChevronDown,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LOCALE_LABELS, type Locale } from "@/lib/i18n/locales";
@@ -14,19 +16,21 @@ import {
   loadPrefs, savePrefs, getPermission, requestPermission,
   CATEGORY_LABELS, type NotifPrefs, type NotifCategory,
 } from "@/lib/notifications";
+import { subscribeToPush } from "@/lib/push-client";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { isAdminOrAbove } from "@/lib/permissions";
 
-type Tab = "company" | "preferences" | "workers" | "roles" | "notifications" | "security" | "billing";
+type Tab = "company" | "preferences" | "workers" | "roles" | "notifications" | "security" | "access";
 
-const TABS: { id: Tab; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+const TABS: { id: Tab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; adminOnly?: boolean }[] = [
   { id: "company",       label: "Company",        icon: Building2 },
   { id: "preferences",   label: "Preferences",    icon: Globe },
   { id: "workers",       label: "Workers",         icon: Users },
   { id: "roles",         label: "Custom Roles",    icon: HardHat },
   { id: "notifications", label: "Notifications",   icon: Bell },
   { id: "security",      label: "Security",        icon: Shield },
-  { id: "billing",       label: "Billing",         icon: CreditCard },
+  { id: "access",        label: "Access Control",  icon: ShieldCheck, adminOnly: true },
 ];
 
 const INDUSTRIES = [
@@ -46,17 +50,30 @@ const inp = "w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 p
 const lbl = "text-[11px] font-semibold text-white/40 uppercase tracking-wide block mb-1.5";
 
 export default function SettingsPage() {
+  return (
+    <Suspense>
+      <SettingsInner />
+    </Suspense>
+  );
+}
+
+function SettingsInner() {
   const {
-    workers, currentUser, companyName, setCompanyName, deleteWorker,
-    isPro, language, setLanguage, currency, setCurrency, industry, setIndustry,
+    workers, currentUser, companyName, setCompanyName, deleteWorker, updateWorker,
+    language, setLanguage, currency, setCurrency, industry, setIndustry,
     customRoles, addCustomRole, deleteCustomRole,
     companyAddress, businessNumber, inviteCode,
     setCompanyAddress, setBusinessNumber,
     companyLogo, setCompanyLogo,
-    companyId,
+    companyId, permissionsPin, setPermissionsPin,
   } = useStore();
 
-  const [tab, setTab] = useState<Tab>("company");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = searchParams.get("tab");
+    return (t === "company" || t === "preferences" || t === "workers" ||
+      t === "roles" || t === "notifications" || t === "security" || t === "access") ? t as Tab : "company";
+  });
   const [codeCopied, setCodeCopied] = useState(false);
   const [savedBanner, setSavedBanner] = useState(false);
   const [companyForm, setCompanyForm] = useState({
@@ -70,34 +87,34 @@ export default function SettingsPage() {
     setCompanyForm({ name: companyName, businessNumber, address: companyAddress });
   }, [companyName, businessNumber, companyAddress]);
 
-  // ── Roles ─────────────────────────────────────────────────────────────────────
+  // â”€â”€ Roles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [newRole, setNewRole] = useState("");
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const [editRoleValue, setEditRoleValue] = useState("");
 
-  // ── Notifications ─────────────────────────────────────────────────────────────
+  // â”€â”€ Notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [notifPerms, setNotifPerms] = useState<NotificationPermission | "unsupported">("default");
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(() => loadPrefs());
   const [notifRequesting, setNotifRequesting] = useState(false);
   useEffect(() => { setNotifPerms(getPermission()); }, []);
 
-  // ── Security ──────────────────────────────────────────────────────────────────
+  // â”€â”€ Security â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
   const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pwError, setPwError] = useState("");
 
-  // ── Invite code ───────────────────────────────────────────────────────────────
+  // â”€â”€ Invite code â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [displayCode, setDisplayCode] = useState(inviteCode || "CN-XXXX-XXXX");
   const [regenerating, setRegenerating] = useState(false);
   const [regenError, setRegenError] = useState("");
   useEffect(() => { if (inviteCode) setDisplayCode(inviteCode); }, [inviteCode]);
 
-  // ── Confirmation dialogs ──────────────────────────────────────────────────────
+  // â”€â”€ Confirmation dialogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [kickConfirm, setKickConfirm] = useState<{ id: string; name: string } | null>(null);
   const [deleteRoleConfirm, setDeleteRoleConfirm] = useState<string | null>(null);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────────
+  // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const saveCompany = () => {
     setCompanyName(companyForm.name);
@@ -107,10 +124,19 @@ export default function SettingsPage() {
     setTimeout(() => setSavedBanner(false), 2500);
   };
 
+  const [linkCopied, setLinkCopied] = useState(false);
+
   const copyCode = () => {
     navigator.clipboard.writeText(displayCode);
     setCodeCopied(true);
     setTimeout(() => setCodeCopied(false), 2000);
+  };
+
+  const copyLink = () => {
+    const url = `${window.location.origin}/login?join=${displayCode}`;
+    navigator.clipboard.writeText(url);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   const regenerateCode = async () => {
@@ -147,6 +173,10 @@ export default function SettingsPage() {
     setNotifRequesting(true);
     const result = await requestPermission();
     setNotifPerms(result);
+    // Subscribe to Web Push so notifications arrive even when tab is closed
+    if (result === "granted" && companyId && currentUser.id) {
+      subscribeToPush(companyId, currentUser.id).catch(() => {});
+    }
     setNotifRequesting(false);
   };
 
@@ -168,7 +198,7 @@ export default function SettingsPage() {
       // First re-authenticate with current password
       const supabase = getClient();
       const email = currentUser.email;
-      if (!email || !pwForm.current) { setPwError("Cannot verify your identity — please re-log in."); setPwStatus("error"); return; }
+      if (!email || !pwForm.current) { setPwError("Cannot verify your identity â€” please re-log in."); setPwStatus("error"); return; }
       const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pwForm.current });
       if (signInErr) { setPwError("Current password is incorrect."); setPwStatus("error"); return; }
       const { error } = await supabase.auth.updateUser({ password: pwForm.next });
@@ -200,15 +230,14 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col sm:flex-row gap-6 max-w-[1100px]">
-      {/* Sidebar tabs — horizontal scroll on mobile */}
+      {/* Sidebar tabs â€” horizontal scroll on mobile */}
       <div className="w-full sm:w-48 flex-shrink-0">
         <div className="flex sm:flex-col gap-1 overflow-x-auto pb-1 sm:pb-0">
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {TABS.filter((t) => !t.adminOnly || isAdminOrAbove(currentUser.role)).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id)}
               className={`flex-shrink-0 sm:w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 rounded-lg text-[12px] sm:text-[13px] font-medium transition-colors text-left whitespace-nowrap ${tab === id ? "bg-amber-500/12 text-amber-400" : "text-white/45 hover:text-white/70 hover:bg-white/5"}`}>
               <Icon size={14} className={tab === id ? "text-amber-400" : "text-white/30"} />
               {label}
-              {id === "billing" && isPro && <Crown size={11} className="ml-auto text-amber-400" />}
             </button>
           ))}
         </div>
@@ -216,7 +245,7 @@ export default function SettingsPage() {
 
       <div className="flex-1 min-w-0">
 
-        {/* ── COMPANY ── */}
+        {/* â”€â”€ COMPANY â”€â”€ */}
         {tab === "company" && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
@@ -262,7 +291,7 @@ export default function SettingsPage() {
                         Remove logo
                       </button>
                     )}
-                    <p className="text-[10px] text-white/25">PNG or SVG recommended · Used on invoices & PDFs</p>
+                    <p className="text-[10px] text-white/25">PNG or SVG recommended Â· Used on invoices & PDFs</p>
                   </div>
                 </div>
               </div>
@@ -298,12 +327,17 @@ export default function SettingsPage() {
                 <button onClick={copyCode}
                   className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-lg transition-colors">
                   {codeCopied ? <CheckCircle2 size={15} className="text-green-400" /> : <Copy size={15} />}
-                  {codeCopied ? "Copied!" : "Copy"}
+                  {codeCopied ? "Copied!" : "Copy Code"}
+                </button>
+                <button onClick={copyLink}
+                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-lg transition-colors">
+                  {linkCopied ? <CheckCircle2 size={15} className="text-green-400" /> : <Copy size={15} />}
+                  {linkCopied ? "Copied!" : "Copy Link"}
                 </button>
                 <button onClick={regenerateCode} disabled={regenerating}
                   className="flex items-center gap-2 bg-white/8 hover:bg-white/12 disabled:opacity-50 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-lg transition-colors">
                   <Key size={15} className={regenerating ? "animate-spin" : ""} />
-                  {regenerating ? "…" : "Regenerate"}
+                  {regenerating ? "â€¦" : "Regenerate"}
                 </button>
               </div>
               {regenError && (
@@ -318,7 +352,7 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ── PREFERENCES ── */}
+        {/* â”€â”€ PREFERENCES â”€â”€ */}
         {tab === "preferences" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">App Preferences</h3>
@@ -356,7 +390,7 @@ export default function SettingsPage() {
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${currency === c.code ? "border-amber-500/50 bg-amber-500/10" : "border-white/[0.06] hover:border-white/12 hover:bg-white/[0.02]"}`}>
                     <span className="text-lg">{c.flag}</span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-[12px] font-semibold truncate ${currency === c.code ? "text-amber-300" : "text-white/70"}`}>{c.code} — {c.symbol}</p>
+                      <p className={`text-[12px] font-semibold truncate ${currency === c.code ? "text-amber-300" : "text-white/70"}`}>{c.code} â€” {c.symbol}</p>
                       <p className="text-[10px] text-white/30 truncate">{c.name}</p>
                     </div>
                     {currency === c.code && <Check size={12} className="text-amber-400 flex-shrink-0" />}
@@ -385,13 +419,13 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ── WORKERS ── */}
+        {/* â”€â”€ WORKERS â”€â”€ */}
         {tab === "workers" && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <h3 className="text-[17px] font-bold text-white">Workers & Crew</h3>
               <Link href="/crew" className="text-[12px] text-amber-400 hover:text-amber-300 transition-colors">
-                + Add new worker →
+                + Add new worker â†’
               </Link>
             </div>
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden">
@@ -415,7 +449,7 @@ export default function SettingsPage() {
                         <p className="text-[11px] text-white/35">{worker.customRole}</p>
                       </div>
                     </div>
-                    <div className="text-[11px] text-white/35 truncate pr-2">{worker.email || "—"}</div>
+                    <div className="text-[11px] text-white/35 truncate pr-2">{worker.email || "â€”"}</div>
                     <div>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                         style={{ backgroundColor: roleColor + "18", color: roleColor }}>{worker.role}</span>
@@ -435,14 +469,14 @@ export default function SettingsPage() {
               })}
               {workers.length === 0 && (
                 <div className="px-5 py-8 text-center text-white/25 text-[12px]">
-                  No workers yet — <Link href="/crew" className="text-amber-400 hover:text-amber-300">add from Crew page</Link>
+                  No workers yet â€” <Link href="/crew" className="text-amber-400 hover:text-amber-300">add from Crew page</Link>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* ── ROLES ── */}
+        {/* â”€â”€ ROLES â”€â”€ */}
         {tab === "roles" && (
           <div className="space-y-5">
             <div>
@@ -508,7 +542,7 @@ export default function SettingsPage() {
                 <input
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  placeholder="e.g. Pipe Layer, Grade Man, Operator…"
+                  placeholder="e.g. Pipe Layer, Grade Man, Operatorâ€¦"
                   className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/40 placeholder:text-white/20"
                 />
                 <button type="submit" disabled={!newRole.trim()}
@@ -520,7 +554,7 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ── NOTIFICATIONS ── */}
+        {/* â”€â”€ NOTIFICATIONS â”€â”€ */}
         {tab === "notifications" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">Notification Preferences</h3>
@@ -550,7 +584,7 @@ export default function SettingsPage() {
                 </div>
                 <button onClick={enableNotifs} disabled={notifRequesting}
                   className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-black text-[12px] font-bold px-4 py-2 rounded-lg transition-colors">
-                  {notifRequesting ? "Requesting…" : "Enable"}
+                  {notifRequesting ? "Requestingâ€¦" : "Enable"}
                 </button>
               </div>
             ) : (
@@ -582,7 +616,7 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ── SECURITY ── */}
+        {/* â”€â”€ SECURITY â”€â”€ */}
         {tab === "security" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">Security</h3>
@@ -632,13 +666,13 @@ export default function SettingsPage() {
 
                   <button type="submit" disabled={pwStatus === "loading"}
                     className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
-                    {pwStatus === "loading" ? "Updating…" : "Update Password"}
+                    {pwStatus === "loading" ? "Updatingâ€¦" : "Update Password"}
                   </button>
                 </form>
               )}
             </div>
 
-            {/* 2FA — informational only for now */}
+            {/* 2FA â€” informational only for now */}
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
               <h4 className="text-[14px] font-bold text-white mb-1">Two-Factor Authentication</h4>
               <p className="text-[12px] text-white/40 mb-4">
@@ -663,10 +697,17 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ── BILLING ── */}
-        {tab === "billing" && (
-          <BillingTab isPro={isPro} />
+        {/* â”€â”€ BILLING â”€â”€ */}
+        {tab === "access" && (
+          <AccessControlTab
+            workers={workers}
+            currentUser={currentUser}
+            permissionsPin={permissionsPin}
+            setPermissionsPin={setPermissionsPin}
+            updateWorker={updateWorker}
+          />
         )}
+
       </div>
 
       <ConfirmModal
@@ -692,69 +733,363 @@ export default function SettingsPage() {
   );
 }
 
-// ── Billing Tab ───────────────────────────────────────────────────────────────
-function BillingTab({ isPro: _isPro }: { isPro: boolean }) {
-  const ALL_FEATURES = [
-    "Unlimited projects & crew",
-    "Invoices & estimates (PDF export)",
-    "Payroll reports & exports",
-    "Equipment management",
-    "RFIs & punch lists",
-    "Document vault",
-    "Time tracking & GPS clock-in",
-    "Scheduling & safety logs",
-    "Crew messaging (real-time)",
-    "AI Daily Brief",
-    "Materials tracker",
-  ];
+// â”€â”€ Access Control Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+type ControllablePage = { href: string; label: string; group: "Core" | "Field Ops" | "Admin" | "Finance"; alwaysOn?: boolean };
+
+const ALL_CONTROLLABLE_PAGES: ControllablePage[] = [
+  { href: "/dashboard",     label: "Dashboard",      group: "Core",      alwaysOn: true },
+  { href: "/time-tracking", label: "Time Tracking",  group: "Core",      alwaysOn: true },
+  { href: "/safety",        label: "Safety Log",     group: "Core" },
+  { href: "/messages",      label: "Messages",       group: "Core" },
+  { href: "/photos",        label: "Photos",         group: "Core" },
+  { href: "/schedule",      label: "Schedule",       group: "Field Ops" },
+  { href: "/projects",      label: "Projects",       group: "Field Ops" },
+  { href: "/tasks",         label: "Tasks",          group: "Field Ops" },
+  { href: "/punch-list",    label: "Punch List",     group: "Field Ops" },
+  { href: "/rfis",          label: "RFIs",           group: "Field Ops" },
+  { href: "/equipment",     label: "Equipment",      group: "Field Ops" },
+  { href: "/materials",     label: "Materials",      group: "Field Ops" },
+  { href: "/documents",     label: "Documents",      group: "Field Ops" },
+  { href: "/blueprints",    label: "Blueprints",     group: "Field Ops" },
+  { href: "/daily-reports", label: "Daily Reports",  group: "Field Ops" },
+  { href: "/crew",          label: "Crew",           group: "Admin" },
+  { href: "/reports",       label: "Reports",        group: "Admin" },
+  { href: "/estimates",     label: "Estimates",      group: "Finance" },
+  { href: "/invoices",      label: "Invoices",       group: "Finance" },
+  { href: "/change-orders", label: "Change Orders",  group: "Finance" },
+];
+
+const PAGE_GROUPS = ["Core", "Field Ops", "Admin", "Finance"] as const;
+
+// Default granted pages by role (for initial toggle state)
+function defaultPagesForRole(role: string): string[] {
+  if (role === "Foreman") {
+    return ALL_CONTROLLABLE_PAGES.filter((p) => p.group === "Core" || p.group === "Field Ops").map((p) => p.href);
+  }
+  // Worker gets Core only
+  return ALL_CONTROLLABLE_PAGES.filter((p) => p.group === "Core").map((p) => p.href);
+}
+
+async function hashPin(pin: string): Promise<string> {
+  const data = new TextEncoder().encode("constra_pin_v1_" + pin);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+type Worker = import("@/lib/mock-data").Worker;
+
+function AccessControlTab({
+  workers, currentUser, permissionsPin, setPermissionsPin, updateWorker,
+}: {
+  workers: Worker[];
+  currentUser: Worker;
+  permissionsPin: string;
+  setPermissionsPin: (h: string) => void;
+  updateWorker: (id: string, u: Partial<Worker>) => void;
+}) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [draftPages, setDraftPages] = useState<Record<string, string[]>>({});
+  const [pinModal, setPinModal] = useState<{ workerId: string; action: "save" | "reset" } | null>(null);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [pinVerifying, setPinVerifying] = useState(false);
+  const [successId, setSuccessId] = useState<string | null>(null);
+
+  // PIN setup state
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [pinSetupError, setPinSetupError] = useState("");
+  const [pinSetupSuccess, setPinSetupSuccess] = useState(false);
+
+  const controllableWorkers = workers.filter(
+    (w) => w.id !== currentUser.id && w.role !== "Admin" && w.role !== "Project Manager"
+  );
+
+  const getDraft = (worker: Worker) => {
+    if (draftPages[worker.id] !== undefined) return draftPages[worker.id];
+    return worker.grantedPages ?? defaultPagesForRole(worker.role);
+  };
+
+  const togglePage = (workerId: string, href: string, currentDraft: string[]) => {
+    const page = ALL_CONTROLLABLE_PAGES.find((p) => p.href === href);
+    if (page?.alwaysOn) return;
+    const next = currentDraft.includes(href)
+      ? currentDraft.filter((p) => p !== href)
+      : [...currentDraft, href];
+    setDraftPages((d) => ({ ...d, [workerId]: next }));
+  };
+
+  const handleSaveClick = (workerId: string) => {
+    if (!permissionsPin) { setPinModal({ workerId, action: "save" }); return; }
+    setPinModal({ workerId, action: "save" });
+    setPinInput("");
+    setPinError("");
+  };
+
+  const handleResetClick = (workerId: string) => {
+    if (!permissionsPin) { setPinModal({ workerId, action: "reset" }); return; }
+    setPinModal({ workerId, action: "reset" });
+    setPinInput("");
+    setPinError("");
+  };
+
+  const verifyAndApply = async () => {
+    if (!pinModal) return;
+    if (!permissionsPin) {
+      setPinError("Set a Permissions PIN first using the button above.");
+      return;
+    }
+    setPinVerifying(true);
+    const hashed = await hashPin(pinInput);
+    if (hashed !== permissionsPin) {
+      setPinError("Incorrect PIN. Please try again.");
+      setPinVerifying(false);
+      return;
+    }
+    // PIN verified
+    const { workerId, action } = pinModal;
+    if (action === "save") {
+      updateWorker(workerId, { grantedPages: getDraft(workers.find((w) => w.id === workerId)!) });
+    } else {
+      updateWorker(workerId, { grantedPages: undefined });
+      setDraftPages((d) => { const n = { ...d }; delete n[workerId]; return n; });
+    }
+    setSuccessId(workerId);
+    setTimeout(() => setSuccessId(null), 2500);
+    setPinModal(null);
+    setPinInput("");
+    setPinVerifying(false);
+  };
+
+  const savePin = async () => {
+    setPinSetupError("");
+    if (newPin.length < 4) { setPinSetupError("PIN must be at least 4 digits."); return; }
+    if (!/^\d+$/.test(newPin)) { setPinSetupError("PIN must be digits only."); return; }
+    if (newPin !== confirmPin) { setPinSetupError("PINs don't match."); return; }
+    const hashed = await hashPin(newPin);
+    setPermissionsPin(hashed);
+    setNewPin(""); setConfirmPin(""); setPinSetupSuccess(true);
+    setTimeout(() => { setPinSetupSuccess(false); setShowPinSetup(false); }, 2000);
+  };
+
+  const inpCls = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/40 transition-colors placeholder:text-white/25";
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-[17px] font-bold text-white">Billing & Plan</h3>
-        <p className="text-[12px] text-white/35 mt-0.5">Your current plan and features</p>
+        <h3 className="text-[17px] font-bold text-white">Access Control</h3>
+        <p className="text-[12px] text-white/35 mt-0.5">Choose exactly which pages each worker can see. Changes require your Permissions PIN.</p>
       </div>
 
-      {/* Free launch banner */}
-      <div className="bg-gradient-to-br from-amber-500/10 to-amber-500/[0.03] border border-amber-500/30 rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
-            <Crown size={18} className="text-black" />
+      {/* Permissions PIN section */}
+      <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[13px] font-bold text-white">Permissions PIN</p>
+            <p className="text-[11px] text-white/40 mt-0.5">Required to apply any access changes</p>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <p className="text-[15px] font-bold text-white">Everything is free — for now</p>
-              <span className="text-[9px] font-black bg-amber-500 text-black px-2 py-0.5 rounded-full">LAUNCH PERIOD</span>
-            </div>
-            <p className="text-[12px] text-white/50 leading-relaxed">
-              We&apos;re in early access. All features are unlocked at no cost while we grow.
-              Pricing will be introduced later — and early users will get a discount.
-            </p>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {permissionsPin
+              ? <span className="flex items-center gap-1.5 text-[11px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-1 rounded-lg"><Check size={11} /> PIN Set</span>
+              : <span className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg"><AlertCircle size={11} /> No PIN</span>
+            }
+            <button
+              onClick={() => setShowPinSetup((v) => !v)}
+              className="flex items-center gap-1.5 text-[12px] font-bold bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.14] border border-white/[0.08] text-white/60 hover:text-white px-3 py-2 rounded-lg transition-all"
+            >
+              <Key size={13} />
+              {permissionsPin ? "Change PIN" : "Set PIN"}
+              <ChevronDown size={11} className={`transition-transform ${showPinSetup ? "rotate-180" : ""}`} />
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* What's included */}
-      <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
-        <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-4">Everything included, no limits</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {ALL_FEATURES.map((f) => (
-            <div key={f} className="flex items-center gap-2.5 text-[12px] text-white/65">
-              <div className="w-4 h-4 rounded-full bg-amber-500/15 flex items-center justify-center flex-shrink-0">
-                <Check size={9} className="text-amber-400" />
+        {showPinSetup && (
+          <div className="border-t border-white/[0.06] pt-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-bold text-white/35 uppercase tracking-wide block mb-1.5">New PIN (digits only)</label>
+                <input type="password" inputMode="numeric" value={newPin} onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  placeholder="â€¢â€¢â€¢â€¢" className={inpCls} />
               </div>
-              {f}
+              <div>
+                <label className="text-[10px] font-bold text-white/35 uppercase tracking-wide block mb-1.5">Confirm PIN</label>
+                <input type="password" inputMode="numeric" value={confirmPin} onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  placeholder="â€¢â€¢â€¢â€¢" className={inpCls} onKeyDown={(e) => e.key === "Enter" && savePin()} />
+              </div>
             </div>
-          ))}
-        </div>
+            {pinSetupError && <p className="text-[12px] text-red-400">{pinSetupError}</p>}
+            {pinSetupSuccess && <p className="text-[12px] text-green-400 font-semibold flex items-center gap-1.5"><Check size={12} /> PIN saved!</p>}
+            <button onClick={savePin} className="bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+              Save PIN
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
-        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-        <p className="text-[12px] text-white/40">
-          No credit card required · No trial expiry · Full access until pricing is announced
-        </p>
-      </div>
+      {/* Worker list */}
+      {controllableWorkers.length === 0 ? (
+        <div className="text-center py-12 text-white/25 space-y-2">
+          <Users size={32} className="mx-auto opacity-30" />
+          <p className="text-[13px]">No workers or foremen yet</p>
+          <p className="text-[11px]">Add crew members to manage their page access</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {controllableWorkers.map((worker) => {
+            const draft = getDraft(worker);
+            const isExpanded = expandedId === worker.id;
+            const hasCustom = worker.grantedPages !== undefined;
+            const isSuccess = successId === worker.id;
+
+            return (
+              <div key={worker.id} className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden">
+                {/* Worker row */}
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : worker.id)}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/[0.02] active:bg-white/[0.04] transition-colors text-left"
+                >
+                  <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-[12px] font-bold"
+                    style={{ backgroundColor: worker.color + "22", color: worker.color }}>
+                    {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold text-white">{worker.name}</p>
+                    <p className="text-[11px] text-white/40">{worker.customRole || worker.role}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {isSuccess && <span className="text-[11px] text-green-400 font-semibold flex items-center gap-1"><CheckCircle2 size={11} /> Saved</span>}
+                    {hasCustom
+                      ? <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">Custom Access</span>
+                      : <span className="text-[10px] font-bold text-white/30 bg-white/[0.05] px-2 py-0.5 rounded-full">Role Default</span>
+                    }
+                    <ChevronDown size={14} className={`text-white/30 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                  </div>
+                </button>
+
+                {/* Expanded permission editor */}
+                {isExpanded && (
+                  <div className="border-t border-white/[0.06] p-4 space-y-4">
+                    {PAGE_GROUPS.map((group) => {
+                      const pages = ALL_CONTROLLABLE_PAGES.filter((p) => p.group === group);
+                      return (
+                        <div key={group}>
+                          <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest mb-2">{group}</p>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {pages.map((page) => {
+                              const on = draft.includes(page.href);
+                              const locked = page.alwaysOn;
+                              return (
+                                <button
+                                  key={page.href}
+                                  onClick={() => togglePage(worker.id, page.href, draft)}
+                                  disabled={locked}
+                                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-[12px] font-semibold transition-all text-left ${
+                                    on
+                                      ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                                      : "bg-white/[0.03] border-white/[0.06] text-white/35"
+                                  } ${locked ? "opacity-60 cursor-not-allowed" : "hover:border-white/10 active:scale-[0.97]"}`}
+                                >
+                                  <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center flex-shrink-0 ${on ? "bg-amber-500 border-amber-500" : "border-white/20"}`}>
+                                    {on && <Check size={9} className="text-black font-black" />}
+                                  </div>
+                                  {page.label}
+                                  {locked && <Lock size={9} className="ml-auto text-white/20" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    <div className="flex items-center gap-3 pt-2 border-t border-white/[0.06]">
+                      <button
+                        onClick={() => handleSaveClick(worker.id)}
+                        className="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-5 py-2.5 rounded-lg transition-colors"
+                      >
+                        Save Access
+                      </button>
+                      {hasCustom && (
+                        <button
+                          onClick={() => handleResetClick(worker.id)}
+                          className="text-[12px] text-white/35 hover:text-white/60 active:text-white/80 transition-colors"
+                        >
+                          Reset to role defaults
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* PIN verification modal */}
+      {pinModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
+          <div className="bg-[#161616] border border-white/[0.10] rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="h-1 bg-amber-500 rounded-t-2xl" />
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck size={18} className="text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-bold text-white">Confirm Permission Change</h3>
+                  <p className="text-[11px] text-white/40 mt-0.5">
+                    {pinModal.action === "save" ? "Applying new access for" : "Resetting to role defaults for"}{" "}
+                    <span className="text-white/70 font-semibold">{workers.find((w) => w.id === pinModal.workerId)?.name}</span>
+                  </p>
+                </div>
+              </div>
+
+              {!permissionsPin ? (
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 text-[12px] text-amber-300">
+                  Set a Permissions PIN first using the button above before applying access changes.
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="text-[10px] font-bold text-white/35 uppercase tracking-wide block mb-2">Enter Permissions PIN</label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      value={pinInput}
+                      onChange={(e) => { setPinInput(e.target.value.replace(/\D/g, "").slice(0, 8)); setPinError(""); }}
+                      onKeyDown={(e) => e.key === "Enter" && verifyAndApply()}
+                      placeholder="â€¢â€¢â€¢â€¢"
+                      autoFocus
+                      className="w-full bg-[#0d0d0d] border border-white/[0.10] rounded-xl px-4 py-3 text-[20px] tracking-[0.3em] text-white text-center outline-none focus:border-amber-500/50 transition-colors placeholder:text-white/20 placeholder:tracking-normal placeholder:text-[14px]"
+                    />
+                    {pinError && <p className="text-[12px] text-red-400 mt-2">{pinError}</p>}
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => { setPinModal(null); setPinInput(""); setPinError(""); }}
+                      className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 active:bg-white/10 transition-colors">
+                      Cancel
+                    </button>
+                    <button onClick={verifyAndApply} disabled={pinVerifying || !pinInput}
+                      className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 disabled:opacity-40 transition-colors">
+                      {pinVerifying ? "Verifyingâ€¦" : "Verify & Save"}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {!permissionsPin && (
+                <button onClick={() => setPinModal(null)} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+                  Close
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

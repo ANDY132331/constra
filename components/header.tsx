@@ -193,11 +193,20 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           )}
         </div>
 
-        {/* Realtime dot */}
+        {/* Realtime status pill */}
         <div
           title={isRealtimeConnected ? "Live updates active" : "Offline"}
-          className={`w-1.5 h-1.5 rounded-full transition-colors flex-shrink-0 ${isRealtimeConnected ? "bg-green-400" : "bg-white/15"}`}
-        />
+          className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full transition-all flex-shrink-0 ${
+            isRealtimeConnected
+              ? "bg-green-500/10 border border-green-500/20"
+              : "bg-white/[0.04] border border-white/[0.06]"
+          }`}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isRealtimeConnected ? "bg-green-400 animate-pulse" : "bg-white/20"}`} />
+          <span className={`text-[10px] font-semibold ${isRealtimeConnected ? "text-green-400" : "text-white/25"}`}>
+            {isRealtimeConnected ? "Live" : "Offline"}
+          </span>
+        </div>
 
         <div className="w-px h-5 bg-white/10 mx-0.5 flex-shrink-0" />
 

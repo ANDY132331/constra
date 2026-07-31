@@ -14,7 +14,6 @@ import { useT } from "@/lib/i18n";
 import { getCurrencySymbol } from "@/lib/currency";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import type { Worker, HoursAdjustment, WorkerCertification } from "@/lib/mock-data";
-import { UpgradeGate, UsageBadge } from "@/components/upgrade-gate";
 import { ConfirmModal } from "@/components/confirm-modal";
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
@@ -288,8 +287,11 @@ export default function CrewPage() {
     setDeleteConfirm(id);
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(inviteCode);
+  const handleCopy = (fullUrl = false) => {
+    const text = fullUrl
+      ? `${window.location.origin}/login?join=${inviteCode}`
+      : inviteCode;
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -312,20 +314,17 @@ export default function CrewPage() {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold text-white tracking-tight">Crew & Workers</h2>
-            <UsageBadge feature="workers" count={workers.length} />
           </div>
           <p className="text-white/35 text-sm mt-0.5">
             {workers.length} member{workers.length !== 1 ? "s" : ""} · {clockedIn} clocked in now
           </p>
         </div>
         {canEdit && (
-          <UpgradeGate feature="workers" currentCount={workers.length} softWarn={false}>
-            <button onClick={openAdd}
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
-              <UserPlus size={15} />
-              Add Worker
-            </button>
-          </UpgradeGate>
+          <button onClick={openAdd}
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+            <UserPlus size={15} />
+            Add Worker
+          </button>
         )}
       </div>
 
@@ -345,21 +344,21 @@ export default function CrewPage() {
       </div>
 
       {/* Invite code */}
-      <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
+      <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-amber-400/70 mb-1">Company Invite Code</p>
           <p className="text-[13px] text-white/50">Share with workers so they can join your workspace</p>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-wrap">
           <code className="text-lg font-black font-mono tracking-[0.15em] text-amber-400">{inviteCode}</code>
           <button onClick={handleShowQR}
-            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 px-3 py-1.5 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 active:bg-amber-500/35 text-amber-400 px-3 py-2 rounded-lg transition-colors">
             <QrCode size={13} /> QR Code
           </button>
-          <button onClick={handleCopy}
-            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 px-3 py-1.5 rounded-lg transition-colors">
+          <button onClick={() => handleCopy(false)}
+            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 active:bg-amber-500/35 text-amber-400 px-3 py-2 rounded-lg transition-colors">
             {copied ? <Check size={13} /> : <Copy size={13} />}
-            {copied ? "Copied!" : "Copy"}
+            {copied ? "Copied!" : "Copy Code"}
           </button>
         </div>
       </div>
@@ -379,7 +378,7 @@ export default function CrewPage() {
               <p className="text-[13px] font-bold text-white/70">Scan to join workspace</p>
               <p className="text-[11px] text-white/30">Or share code: <span className="font-mono font-bold text-amber-400">{inviteCode}</span></p>
             </div>
-            <button onClick={handleCopy} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 transition-colors flex items-center justify-center gap-2">
+            <button onClick={() => handleCopy(true)} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 transition-colors flex items-center justify-center gap-2">
               {copied ? <Check size={14} /> : <Copy size={14} />}
               {copied ? "Link Copied!" : "Copy Invite Link"}
             </button>

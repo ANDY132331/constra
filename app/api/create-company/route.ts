@@ -49,9 +49,7 @@ export async function POST(request: Request) {
     .insert({
       name: companyName.trim(),
       invite_code: inviteCode,
-      plan: "starter",
-      subscription_status: "trialing",
-      trial_ends_at: trialEndsAt,
+      plan: "free",
       currency: currency ?? "USD",
       language: language ?? "en",
       industry: industry ?? "Construction",

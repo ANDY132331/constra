@@ -65,7 +65,12 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
 
   const pendingCount = projects.filter((p) => p.pendingApproval).length;
 
-  const canSee = (item: NavDef): boolean => {
+  const canSee = (item: { href: string; minLevel?: "foreman" | "admin" }): boolean => {
+    // If admin granted specific pages to this worker, use that list
+    if (currentUser.grantedPages !== undefined) {
+      return currentUser.grantedPages.includes(item.href);
+    }
+    // Otherwise fall back to role-based defaults
     if (!item.minLevel) return true;
     if (item.minLevel === "foreman") return isForeman;
     if (item.minLevel === "admin") return isAdmin;
@@ -91,10 +96,10 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
       <Link
         href={href}
         onClick={onClose}
-        className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-all mb-0.5 ${
+        className={`group flex items-center gap-3 py-2 rounded-lg text-[13px] transition-all mb-0.5 ${
           active
-            ? "bg-amber-500/12 text-amber-400"
-            : "text-white/45 hover:text-white/80 hover:bg-white/5"
+            ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-400/70 pl-[10px] pr-3"
+            : "text-white/45 hover:text-white/80 hover:bg-white/5 px-3"
         }`}
       >
         <Icon
@@ -185,12 +190,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
         )}
 
         {(() => {
-          const visibleOps = OPS_ITEMS.filter((item) => {
-            if (!item.minLevel) return true;
-            if (item.minLevel === "foreman") return isForeman;
-            if (item.minLevel === "admin") return isAdmin;
-            return true;
-          });
+          const visibleOps = OPS_ITEMS.filter(canSee);
           if (visibleOps.length === 0) return null;
           return (
             <div className="mt-4 pt-3 border-t border-white/[0.06]">

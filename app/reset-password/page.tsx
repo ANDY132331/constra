@@ -17,26 +17,39 @@ function ResetPasswordForm() {
   const [sessionReady, setSessionReady] = useState(false);
   const [tokenExpired, setTokenExpired] = useState(false);
 
-  // Supabase sends the recovery token as a fragment (#access_token=...) or query param.
-  // When the page loads, the Supabase client auto-exchanges it for a session.
   useEffect(() => {
     const supabase = getClient();
+
+    // PKCE: Supabase puts ?code= in the URL when redirected directly here.
+    // Exchange it client-side so PASSWORD_RECOVERY event fires properly.
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+    if (code) {
+      url.searchParams.delete("code");
+      window.history.replaceState({}, "", url.toString());
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) setTokenExpired(true);
+        else setSessionReady(true);
+      });
+      return;
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
         setSessionReady(true);
       }
     });
-    // Also check if already in a recovery session
+    // Fallback: if there's already an active session (e.g. server-side exchange)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setSessionReady(true);
     });
-    // If no recovery event fires in 6s, the link is expired or invalid
+    // If nothing resolves in 8s, treat link as expired
     const timeout = setTimeout(() => {
       setSessionReady((current) => {
         if (!current) setTokenExpired(true);
         return current;
       });
-    }, 6000);
+    }, 8000);
     return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 

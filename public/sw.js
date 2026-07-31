@@ -44,3 +44,34 @@ self.addEventListener("message", (e) => {
     e.ports[0]?.postMessage({ type: "QUEUE_ACK" });
   }
 });
+
+// ── Web Push ──────────────────────────────────────────────────────────────────
+
+self.addEventListener("push", (e) => {
+  if (!e.data) return;
+  let data = { title: "Constra", body: "You have a new notification.", url: "/dashboard" };
+  try { data = { ...data, ...e.data.json() }; } catch {}
+
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      tag: data.title + data.body,
+      requireInteraction: false,
+      data: { url: data.url },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = e.notification.data?.url ?? "/dashboard";
+  e.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((cs) => {
+      const match = cs.find((c) => c.url.includes(self.location.origin) && "focus" in c);
+      if (match) return match.focus().then((w) => w.navigate(url));
+      return clients.openWindow(url);
+    })
+  );
+});

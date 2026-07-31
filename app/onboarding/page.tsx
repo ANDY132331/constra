@@ -559,7 +559,8 @@ export default function OnboardingPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-[#080808] flex items-center justify-center p-4">
+    <div className="fixed inset-0 overflow-y-auto bg-[#080808]">
+    <div className="min-h-full flex items-center justify-center p-4">
       <div
         className="absolute inset-0 opacity-[0.02]"
         style={{
@@ -586,6 +587,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           <Link href="/login" className="text-amber-400/60 hover:text-amber-400 ml-0.5">Sign in</Link>
         </p>
       </div>
+    </div>
     </div>
   );
 }

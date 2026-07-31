@@ -92,6 +92,7 @@ type StoreState = {
   businessNumber: string;
   inviteCode: string;
   companyLogo: string;
+  permissionsPin: string;
 };
 
 type StoreCtx = StoreState & {
@@ -179,6 +180,7 @@ type StoreCtx = StoreState & {
   deleteCustomRole: (role: string) => void;
   setCompanyAddress: (a: string) => void;
   setBusinessNumber: (b: string) => void;
+  setPermissionsPin: (hashedPin: string) => void;
 
   setCompanyName: (name: string) => void;
   setCompanyLogo: (dataUrl: string) => void;
@@ -235,6 +237,7 @@ function defaultState(): StoreState {
     businessNumber: "",
     inviteCode: "",
     companyLogo: "",
+    permissionsPin: "",
   };
 }
 
@@ -264,6 +267,7 @@ function loadState(): StoreState {
       companyAddress: parsed.companyAddress ?? "",
       businessNumber: parsed.businessNumber ?? "",
       inviteCode: parsed.inviteCode ?? "",
+      permissionsPin: parsed.permissionsPin ?? "",
     };
   } catch {
     return defaultState();
@@ -377,8 +381,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string } | null;
 
-      // Everyone gets Pro during free launch period
-      const isPro = true;
+      const isPro = true; // free during launch period
 
       setState((s) => ({
         ...s,
@@ -1154,6 +1157,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     bg(() => getClient().from("companies").update({ business_number: b }).eq("id", companyIdRef.current!), "setBusinessNumber");
   }, [up]);
 
+  const setPermissionsPin = useCallback((hashedPin: string) => {
+    up((s) => ({ ...s, permissionsPin: hashedPin }));
+  }, [up]);
+
   // ── Company settings ──────────────────────────────────────────────────────────
 
   const setCompanyName = useCallback((name: string) => {
@@ -1237,7 +1244,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addDailyReport, updateDailyReport, deleteDailyReport,
       addChangeOrder, updateChangeOrder, deleteChangeOrder,
       addCustomRole, deleteCustomRole,
-      setCompanyAddress, setBusinessNumber,
+      setCompanyAddress, setBusinessNumber, setPermissionsPin,
       setCompanyName, setCompanyLogo, setIsPro,
       setLanguage, setCurrency, setIndustry, setOnboarded,
       getWorkerById, getProjectById,

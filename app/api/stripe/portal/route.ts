@@ -1,45 +1,58 @@
-export const dynamic = "force-dynamic";
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
-import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { stripe } from "@/lib/stripe";
-
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false }, cookies: { getAll: () => [], setAll: () => {} } },
-    );
+    const key = `stripe:portal:${user.id}`;
+    if (!rateLimit(key, 10, 60_000)) return rateLimitResponse();
 
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const { data: profile } = await supabase
-      .from("profiles").select("company_id").eq("id", user.id).single();
-    if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-
-    const { data: company } = await supabase
-      .from("companies").select("stripe_customer_id").eq("id", profile.company_id).single();
-
-    if (!company?.stripe_customer_id) {
-      return NextResponse.json({ error: "No billing account found" }, { status: 400 });
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
     }
 
-    const origin = request.headers.get("origin") ?? "https://constra-jc6xjjxfe-anandssandhu31-1336s-projects.vercel.app";
+    // Look up the company's Stripe customer ID server-side
+    const service = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
+    const { data: profile } = await service
+      .from("profiles")
+      .select("company_id")
+      .eq("id", user.id)
+      .single();
 
+    if (!profile?.company_id) {
+      return NextResponse.json({ error: "Company not found" }, { status: 404 });
+    }
+
+    const { data: company } = await service
+      .from("companies")
+      .select("stripe_customer_id")
+      .eq("id", profile.company_id)
+      .single();
+
+    const customerId = company?.stripe_customer_id as string | null;
+    if (!customerId) {
+      return NextResponse.json({ error: "No active subscription found" }, { status: 400 });
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-06-24.dahlia" });
+    const origin = req.headers.get("origin") ?? "https://constra.app";
     const session = await stripe.billingPortal.sessions.create({
-      customer: company.stripe_customer_id as string,
+      customer: customerId,
       return_url: `${origin}/settings?tab=billing`,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error("Stripe portal error:", err);
-    return NextResponse.json({ error: "Failed to open billing portal" }, { status: 500 });
+    console.error("stripe/portal error", err);
+    return NextResponse.json({ error: "Failed to create portal session" }, { status: 500 });
   }
 }

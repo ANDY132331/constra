@@ -67,7 +67,7 @@ export function checkImpossibleTravel(
 export function checkOffSite(
   gps: GpsLocation,
   project: Project,
-  radiusMetres = 300,
+  radiusMetres = 2000,
 ): VerificationFlag | null {
   if (!project.gps) return null;
 
@@ -190,9 +190,6 @@ export async function runVerification({
   pastEntries,
 }: VerificationInput): Promise<VerificationFlag[]> {
   const flags: VerificationFlag[] = [];
-
-  const travelFlag = checkImpossibleTravel(entry, pastEntries);
-  if (travelFlag) flags.push(travelFlag);
 
   if (entry.gps && project) {
     const offSiteFlag = checkOffSite(entry.gps, project);

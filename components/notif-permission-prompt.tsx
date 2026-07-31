@@ -42,7 +42,7 @@ export function NotifPermissionPrompt() {
   };
 
   return (
-    <div className="fixed bottom-20 left-4 z-50 max-w-[320px] animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-24 lg:bottom-6 left-4 z-50 max-w-[320px] animate-in slide-in-from-bottom-4 duration-300">
       <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-4 shadow-2xl shadow-black/60">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">

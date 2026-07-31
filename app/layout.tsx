@@ -23,15 +23,29 @@ export const metadata: Metadata = {
     title: "Constra — Field Workforce Management",
     description: "Run your entire job site from one app. Built for construction, civil, HVAC, electrical and every trade.",
     type: "website",
+    url: "https://constra.app",
     locale: "en_CA",
     siteName: "Constra",
+    images: [
+      {
+        url: "https://constra.app/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Constra — Field Workforce Management for Construction & Trades",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Constra — Field Workforce Management",
     description: "Time tracking, invoicing, punch lists, crew scheduling — all in one construction app.",
+    images: ["https://constra.app/opengraph-image"],
   },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Constra" },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/icon-192.png",
+  },
   robots: { index: true, follow: true },
   manifest: "/manifest.json",
 };
@@ -54,8 +68,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <body className="h-full bg-[#0a0a0a] text-foreground overflow-hidden">
-        <StoreProvider>{children}</StoreProvider>
-        <PwaInstall />
+        <StoreProvider>
+          {children}
+          <PwaInstall />
+        </StoreProvider>
       </body>
     </html>
   );

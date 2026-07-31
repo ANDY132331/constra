@@ -8,14 +8,16 @@ import {
   Activity, MessageSquare, FileText, Image as ImageIcon, Camera,
   RefreshCw, Mail, DollarSign, Cloud, Sun, CloudRain, Wind,
   Plus, GitPullRequest, Zap, BanknoteIcon, ReceiptText,
+  LogIn, LogOut,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
-import { formatCurrencyCompact, formatCurrency } from "@/lib/currency";
+import { formatCurrencyCompact } from "@/lib/currency";
 import type { Worker, Project, Invoice } from "@/lib/mock-data";
 import Link from "next/link";
 import { DailyBriefCard } from "@/components/daily-brief-card";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { isForemanOrAbove } from "@/lib/permissions";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -72,7 +74,8 @@ function StatCard({
   href?: string;
 }) {
   const inner = (
-    <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors">
+    <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors overflow-hidden relative">
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-xl opacity-40" style={{ backgroundColor: iconColor }} />
       <div className="flex items-start justify-between mb-3">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: iconColor + "18" }}>
           <span style={{ color: iconColor }}><Icon size={17} /></span>
@@ -221,7 +224,7 @@ export default function DashboardPage() {
   const {
     workers, projects, punchItems, clockEntries, activityFeed,
     currentUser, getWorkerById, getProjectById, currency,
-    invoices, changeOrders,
+    invoices, changeOrders, updateWorker, updateClockEntry,
   } = useStore();
   const t = useT();
   const useFahrenheit = currency === "USD";
@@ -290,15 +293,34 @@ export default function DashboardPage() {
     })),
   ].slice(0, 6);
 
-  return (
-    <div className="space-y-6 max-w-[1400px]">
+  // ── Worker simplified view ─────────────────────────────────────────────────
+  const isWorker = !isForemanOrAbove(currentUser.role);
+  if (isWorker) {
+    const myEntries = clockEntries.filter((e) => e.workerId === currentUser.id);
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0, 0, 0, 0);
+    const myWeekHours = myEntries
+      .filter((e) => e.clockOut && e.clockIn >= weekStart)
+      .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+    const myTodayHours = myEntries
+      .filter((e) => e.clockOut && e.clockIn >= new Date(now.toDateString()))
+      .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+    const liveElapsed = currentUser.clockedIn && currentUser.clockInTime
+      ? (now.getTime() - currentUser.clockInTime.getTime()) / 3600000
+      : 0;
+    const myProject = getProjectById(currentUser.projectIds?.[0] ?? "");
 
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+    const handleWorkerClockOut = () => {
+      const entry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
+      if (entry) updateClockEntry(entry.id, { clockOut: new Date() });
+      updateWorker(currentUser.id, { clockedIn: false, clockInTime: undefined });
+    };
+
+    return (
+      <div className="space-y-5 max-w-lg mx-auto">
+        {/* Greeting */}
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">{greeting}, {currentUser.name}</h2>
-          <div className="flex items-center gap-3 mt-1">
-            <p className="text-white/40 text-sm">Here&apos;s what&apos;s happening across your projects today.</p>
+          <h2 className="text-xl font-bold text-white">{greeting}, {currentUser.name.split(" ")[0]}</h2>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
             {weather && (() => {
               const meta = weatherMeta(weather.code);
               const WeatherIcon = meta.icon;
@@ -306,23 +328,147 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1 text-[12px]" style={{ color: meta.color }}>
                   <WeatherIcon size={13} />
                   <span className="font-semibold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
-                  <span className="text-white/30">{meta.label}</span>
-                  <Wind size={10} className="text-white/25 ml-0.5" />
-                  <span className="text-white/25">{weather.windspeed} {useFahrenheit ? "mph" : "km/h"}</span>
+                </div>
+              );
+            })()}
+            {myProject && (
+              <div className="flex items-center gap-1.5 text-[12px] text-white/35">
+                <MapPin size={11} />
+                {myProject.name}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Clock in/out hero */}
+        {currentUser.clockedIn ? (
+          <div className="bg-[#0a1a0a] border border-green-500/25 rounded-2xl p-6">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-16 h-16 rounded-2xl bg-green-500/15 flex items-center justify-center flex-shrink-0">
+                <span className="w-4 h-4 bg-green-400 rounded-full animate-pulse" />
+              </div>
+              <div>
+                <p className="text-[18px] font-black text-green-400">On Site</p>
+                {currentUser.clockInTime && (
+                  <p className="text-[13px] text-white/50 mt-0.5">
+                    Since {currentUser.clockInTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} · {liveElapsed.toFixed(1)}h elapsed
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={handleWorkerClockOut}
+              className="w-full py-4 rounded-xl bg-red-500/15 hover:bg-red-500/25 active:bg-red-500/30 border border-red-500/30 text-red-400 font-black text-[16px] flex items-center justify-center gap-3 transition-all"
+            >
+              <LogOut size={20} />
+              Clock Out
+            </button>
+          </div>
+        ) : (
+          <Link href="/time-tracking" className="block bg-[#0a140a] border-2 border-green-500/30 rounded-2xl p-6 active:border-green-500/50 transition-all">
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="w-20 h-20 rounded-full bg-green-500/15 flex items-center justify-center">
+                <LogIn size={34} className="text-green-400" />
+              </div>
+              <p className="text-[22px] font-black text-green-400">Clock In</p>
+              <p className="text-[13px] text-green-400/50">Tap to start your shift</p>
+            </div>
+          </Link>
+        )}
+
+        {/* Today's hours */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-2xl font-black text-white">{(myTodayHours + liveElapsed).toFixed(1)}h</p>
+            <p className="text-[12px] font-semibold text-blue-400 mt-0.5">Today</p>
+            <p className="text-[11px] text-white/30 mt-0.5">hours logged</p>
+          </div>
+          <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-2xl font-black text-white">{(myWeekHours + liveElapsed).toFixed(1)}h</p>
+            <p className="text-[12px] font-semibold text-amber-400 mt-0.5">This Week</p>
+            <p className="text-[11px] text-white/30 mt-0.5">hours logged</p>
+          </div>
+        </div>
+
+        {/* Quick links */}
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { href: "/messages", label: "Messages", icon: MessageSquare, color: "#3b82f6" },
+            { href: "/photos", label: "Photos", icon: ImageIcon, color: "#06b6d4" },
+            { href: "/safety", label: "Safety Log", icon: AlertTriangle, color: "#f59e0b" },
+            { href: "/time-tracking", label: "My Hours", icon: Clock, color: "#22c55e" },
+          ].map(({ href, label, icon: Icon, color }) => (
+            <Link key={href} href={href}
+              className="flex items-center gap-3 bg-[#111111] border border-white/[0.06] hover:border-white/10 active:bg-white/[0.04] rounded-xl p-4 transition-all">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: color + "18" }}>
+                <Icon size={17} style={{ color }} />
+              </div>
+              <span className="text-[13px] font-semibold text-white/75">{label}</span>
+              <ArrowRight size={13} className="text-white/20 ml-auto" />
+            </Link>
+          ))}
+        </div>
+
+        {/* Recent activity */}
+        {activityFeed.length > 0 && (
+          <div>
+            <h3 className="text-[14px] font-bold text-white mb-3">Recent Activity</h3>
+            <div className="bg-[#111111] border border-white/[0.06] rounded-xl divide-y divide-white/[0.04]">
+              {activityFeed.slice(0, 5).map((event) => {
+                const iconDef = ACTIVITY_ICONS[event.type] ?? ACTIVITY_ICONS["task-updated"];
+                const Icon = iconDef.icon;
+                return (
+                  <div key={event.id} className="flex gap-3 p-3">
+                    <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: iconDef.color + "18" }}>
+                      <span style={{ color: iconDef.color }}><Icon size={13} /></span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] text-white/70 leading-snug">{event.description}</p>
+                      <p className="text-[10px] text-white/25 mt-1">{timeAgo(event.timestamp)}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-[1400px]">
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight truncate">{greeting}, {currentUser.name.split(" ")[0]}</h2>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <p className="text-white/40 text-sm hidden sm:block">Here&apos;s what&apos;s happening across your projects today.</p>
+            {weather && (() => {
+              const meta = weatherMeta(weather.code);
+              const WeatherIcon = meta.icon;
+              return (
+                <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1 text-[12px]" style={{ color: meta.color }}>
+                  <WeatherIcon size={13} />
+                  <span className="font-semibold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
+                  <span className="text-white/30 hidden sm:inline">{meta.label}</span>
+                  <Wind size={10} className="text-white/25 ml-0.5 hidden sm:inline" />
+                  <span className="text-white/25 hidden sm:inline">{weather.windspeed} {useFahrenheit ? "mph" : "km/h"}</span>
                 </div>
               );
             })()}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handleRefresh}
             className="flex items-center gap-1.5 bg-[#111111] border border-white/[0.06] hover:border-white/10 rounded-xl px-3 py-2.5 text-[12px] text-white/40 hover:text-white/60 transition-all"
           >
             <RefreshCw size={13} className={refreshing ? "animate-spin text-amber-400" : ""} />
-            {refreshing ? `${t.common.refresh}…` : t.common.refresh}
+            <span className="hidden sm:inline">{refreshing ? `${t.common.refresh}…` : t.common.refresh}</span>
           </button>
-          <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm">
+          <div className="hidden sm:flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm">
             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
             <span className="text-white/50 font-mono text-[12px]">
               {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}

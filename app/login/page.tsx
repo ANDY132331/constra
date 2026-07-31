@@ -75,7 +75,7 @@ function LoginForm() {
     try {
       const supabase = getClient();
       await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
     } catch { /* silently succeed — don't leak whether the email exists */ }
     setLoading(false);

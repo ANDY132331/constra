@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { BarChart2, List, CalendarDays, Plus, Search, MapPin, ArrowUpRight, X, CheckCircle2, Clock, AlertCircle, Circle, Map, Trash2, Pencil, ShieldCheck, Share2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { GanttChart, type GanttProject } from "@/components/gantt-chart";
-import { UpgradeGate, UsageBadge } from "@/components/upgrade-gate";
 import { formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { MapView } from "@/components/map-view";
@@ -253,7 +252,6 @@ export default function ProjectsPage() {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold text-white tracking-tight">Projects</h2>
-            <UsageBadge feature="activeProjects" count={projects.filter((p) => p.status === "active").length} />
           </div>
           <p className="text-white/35 text-sm mt-0.5">
             {projects.filter((p) => p.status === "active" && !p.pendingApproval).length} active ·{" "}
@@ -262,15 +260,13 @@ export default function ProjectsPage() {
           </p>
         </div>
         {isForeman && (
-          <UpgradeGate feature="activeProjects" currentCount={projects.filter((p) => p.status === "active").length} softWarn={false}>
-            <button
-              onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
-            >
-              <Plus size={15} />
-              {isAdmin ? "New Project" : "Submit Project"}
-            </button>
-          </UpgradeGate>
+          <button
+            onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+          >
+            <Plus size={15} />
+            {isAdmin ? "New Project" : "Submit Project"}
+          </button>
         )}
       </div>
 

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation } from "lucide-react";
+import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation, Download } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useStore } from "@/lib/store";
 import { CameraCapture } from "@/components/camera-capture";
 import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
 import { runVerification } from "@/lib/verification";
+import { sendPushEvent } from "@/lib/push-client";
 
 function elapsed(start: Date, end?: Date): string {
   const ms = (end ?? new Date()).getTime() - start.getTime();
@@ -307,7 +308,7 @@ export default function TimeTrackingPage() {
   const {
     workers, clockEntries, projects, currentUser,
     addClockEntry, updateClockEntry, deleteClockEntry, updateWorker,
-    getWorkerById, getProjectById,
+    getWorkerById, getProjectById, companyId,
   } = useStore();
 
   const [search, setSearch] = useState("");
@@ -402,7 +403,16 @@ export default function TimeTrackingPage() {
 
     const newEntry = { workerId: worker.id, projectId, clockIn: now, clockInPhoto: dataUrl, gps, deviceInfo };
     const entryId = addClockEntry(newEntry);
-    updateWorker(worker.id, { clockedIn: true, clockInTime: now, photo: dataUrl });
+    updateWorker(worker.id, { clockedIn: true, clockInTime: now, photo: dataUrl, clockInGps: gps });
+
+    // Fire push notification to all subscribed devices
+    const proj = getProjectById(projectId);
+    sendPushEvent({
+      companyId: companyId ?? undefined,
+      title: `${worker.name} clocked in`,
+      body: `Working on ${proj?.name ?? "a project"}`,
+      url: "/time-tracking",
+    });
 
     // Update device history
     const existing = worker.deviceHistory ?? [];
@@ -424,9 +434,21 @@ export default function TimeTrackingPage() {
 
   const handleClockOut = useCallback((workerId: string) => {
     const entry = [...clockEntries].reverse().find((e) => e.workerId === workerId && !e.clockOut);
-    if (entry) updateClockEntry(entry.id, { clockOut: new Date() });
-    updateWorker(workerId, { clockedIn: false, clockInTime: undefined });
-  }, [clockEntries, updateClockEntry, updateWorker]);
+    const now = new Date();
+    if (entry) {
+      updateClockEntry(entry.id, { clockOut: now });
+      const worker = getWorkerById(workerId);
+      const project = getProjectById(entry.projectId);
+      const hrs = ((now.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1);
+      sendPushEvent({
+        companyId: companyId ?? undefined,
+        title: `${worker?.name ?? "Worker"} clocked out`,
+        body: `${hrs}h on ${project?.name ?? "project"}`,
+        url: "/time-tracking",
+      });
+    }
+    updateWorker(workerId, { clockedIn: false, clockInTime: undefined, clockInGps: undefined });
+  }, [clockEntries, updateClockEntry, updateWorker, getWorkerById, getProjectById, companyId]);
 
   const handleEditSave = useCallback((id: string, clockIn: Date, clockOut: Date | undefined) => {
     updateClockEntry(id, { clockIn, clockOut });
@@ -439,6 +461,38 @@ export default function TimeTrackingPage() {
   }, [deleteClockEntry]);
 
   const isCurrentUserClockedIn = currentUser.clockedIn;
+
+  const exportCsv = () => {
+    const rows = [
+      ["Worker", "Role", "Project", "Date", "Clock In", "Clock Out", "Hours"],
+    ];
+    const fmt12 = (d: Date) => d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    clockEntries
+      .filter((e) => e.clockOut && e.clockOut.getTime() !== 0)
+      .sort((a, b) => b.clockIn.getTime() - a.clockIn.getTime())
+      .forEach((e) => {
+        const w = getWorkerById(e.workerId);
+        const p = getProjectById(e.projectId);
+        const hrs = ((e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000).toFixed(2);
+        rows.push([
+          w?.name ?? e.workerId,
+          w?.customRole ?? "",
+          p?.name ?? e.projectId,
+          e.clockIn.toLocaleDateString("en-CA"),
+          fmt12(e.clockIn),
+          fmt12(e.clockOut!),
+          hrs,
+        ]);
+      });
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `constra-time-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const allEntries = [
     ...clockedIn.map((w) => ({
@@ -471,14 +525,23 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Time Tracking</h2>
           <p className="text-white/35 text-sm mt-0.5">
             {clockedIn.length} worker{clockedIn.length !== 1 ? "s" : ""} on site · {todayTotal}h logged today
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
+          {clockEntries.filter((e) => e.clockOut).length > 0 && (
+            <button
+              onClick={exportCsv}
+              className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-white/50 hover:text-white font-bold text-[13px] px-4 py-2 rounded-lg transition-all"
+            >
+              <Download size={14} />
+              Export CSV
+            </button>
+          )}
           {clockedIn.length > 1 && (currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
             <button
               onClick={() => setClockOutAllConfirm(true)}
@@ -502,6 +565,41 @@ export default function TimeTrackingPage() {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Mobile hero clock-in card */}
+      <div className="sm:hidden">
+        {isCurrentUserClockedIn ? (
+          <div className="bg-[#0f1a0f] border border-green-500/30 rounded-2xl p-5 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
+              <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[15px] font-bold text-green-400">You&apos;re clocked in</p>
+              {currentUser.clockInTime && (
+                <p className="text-[12px] text-white/40 mt-0.5">Since {currentUser.clockInTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
+              )}
+            </div>
+            <button
+              onClick={() => handleClockOut(currentUser.id)}
+              className="flex flex-col items-center gap-1 bg-red-500/15 active:bg-red-500/25 border border-red-500/30 text-red-400 font-bold text-[12px] px-4 py-3 rounded-xl transition-all"
+            >
+              <LogOut size={18} />
+              Clock Out
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => requestClockIn(currentUser)}
+            className="w-full bg-green-500/10 active:bg-green-500/20 border-2 border-green-500/40 text-green-400 rounded-2xl py-6 flex flex-col items-center gap-2 transition-all"
+          >
+            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+              <LogIn size={28} />
+            </div>
+            <span className="text-[18px] font-black tracking-tight">Clock In</span>
+            <span className="text-[12px] text-green-400/60">Tap to start your shift</span>
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -548,10 +646,18 @@ export default function TimeTrackingPage() {
                   </div>
                   <p className="text-[13px] font-bold text-white">{worker.name}</p>
                   <p className="text-[11px] text-white/40 mb-2">{worker.customRole}</p>
-                  <div className="flex items-center gap-1 text-[11px] text-white/30 mb-2">
+                  <div className="flex items-center gap-1 text-[11px] text-white/30 mb-1">
                     <MapPin size={9} />
                     <span className="truncate">{project?.name ?? "No project assigned"}</span>
                   </div>
+                  {worker.clockInGps ? (
+                    <div className="flex items-center gap-1 text-[10px] text-green-400/60 mb-2">
+                      <Navigation size={8} />
+                      <span>{worker.clockInGps.lat.toFixed(5)}, {worker.clockInGps.lng.toFixed(5)}</span>
+                    </div>
+                  ) : (
+                    <div className="mb-2" />
+                  )}
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-white/30">Since {fmt(ci)}</span>
                     <span className="text-amber-400 text-[12px] font-bold">{elapsed(ci)}</span>

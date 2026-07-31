@@ -13,7 +13,7 @@ const FEATURES = [
     icon: Clock,
     color: "#22c55e",
     title: "Time Tracking + Clock-In Photos",
-    body: "Workers clock in with a live selfie. GPS coordinates verified against site location. Impossible-travel detection flags suspicious entries automatically.",
+    body: "Workers clock in with a live selfie. GPS coordinates verified against the project site. Off-site and duplicate photo check-ins are flagged automatically.",
   },
   {
     icon: ShieldCheck,
@@ -103,7 +103,7 @@ const STEPS = [
   {
     n: "03",
     title: "Run your site",
-    body: "Crew clocks in from their phone. You see it live on your dashboard. Tasks, safety, materials, and billing all in one place.",
+    body: "Crew clocks in from their phone. You see it live on your dashboard. Tasks, safety, materials, invoices, and reports — all in one place.",
   },
 ];
 
@@ -145,8 +145,10 @@ export default function LandingPage() {
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <section className="pt-28 pb-10 px-5 relative overflow-hidden">
+        {/* Dot grid */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px)`, backgroundSize: "28px 28px" }} />
         {/* Background glows */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.04] blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.05] blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute top-20 right-1/4 w-[300px] h-[300px] bg-blue-500/[0.04] blur-[100px] rounded-full pointer-events-none" />
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
 
@@ -419,8 +421,10 @@ export default function LandingPage() {
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl p-5 hover:border-white/10 transition-all hover:bg-[#0f0f0f] group"
+                className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl p-5 hover:border-white/[0.10] transition-all hover:bg-[#0f0f0f] group relative overflow-hidden"
               >
+                {/* Colored top accent line */}
+                <div className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: f.color }} />
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
                   style={{ background: f.color + "18" }}
@@ -448,7 +452,12 @@ export default function LandingPage() {
                 {i < STEPS.length - 1 && (
                   <div className="hidden md:block absolute top-6 left-full w-full h-px bg-gradient-to-r from-white/[0.06] to-transparent z-0" style={{width:"calc(100% - 2rem)"}} />
                 )}
-                <div className="text-[48px] font-black text-white/[0.04] leading-none mb-3">{s.n}</div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[13px] font-black text-amber-400">{s.n}</span>
+                  </div>
+                  <div className="h-px flex-1 bg-white/[0.05]" />
+                </div>
                 <h3 className="text-[16px] font-bold text-white mb-2">{s.title}</h3>
                 <p className="text-[13px] text-white/40 leading-relaxed">{s.body}</p>
               </div>

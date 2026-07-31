@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Download, WifiOff, X, CheckCircle2 } from "lucide-react";
+import { subscribeToPush } from "@/lib/push-client";
+import { useStore } from "@/lib/store";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -42,11 +44,18 @@ export default function PwaInstall() {
   const [queueCount, setQueueCount] = useState(0);
   const [synced, setSynced] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const { currentUser, companyId } = useStore();
 
   useEffect(() => {
     // Register service worker
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.register("/sw.js").then((reg) => {
+        // If notifications are already granted, silently subscribe to push
+        if (Notification.permission === "granted" && companyId && currentUser?.id) {
+          subscribeToPush(companyId, currentUser.id).catch(() => {});
+        }
+        void reg;
+      }).catch(() => {});
     }
 
     // Capture install prompt

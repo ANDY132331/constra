@@ -32,9 +32,12 @@ export type Worker = {
   projectIds: string[];
   clockedIn: boolean;
   clockInTime?: Date;
+  clockInGps?: GpsLocation;
   hourlyRate: number;
   certifications?: WorkerCertification[];
   deviceHistory?: Array<{ ua: string; firstSeen: Date; lastSeen: Date }>;
+  /** Explicit page hrefs this worker can access. undefined = use role defaults. */
+  grantedPages?: string[];
 };
 
 export type Task = {

@@ -94,9 +94,40 @@ export default function PhotosPage() {
         </button>
       </div>
 
-      <div className="flex gap-5 flex-col sm:flex-row">
-        {/* Sidebar */}
-        <div className="w-full sm:w-48 flex-shrink-0 space-y-4">
+      {/* Mobile: horizontal project + tag filter strip */}
+      <div className="sm:hidden space-y-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4">
+          <button onClick={() => setProjectFilter("all")}
+            className={`flex-shrink-0 text-[12px] font-semibold px-3 py-1.5 rounded-full transition-colors ${projectFilter === "all" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-white/[0.06] text-white/45 border border-white/[0.06]"}`}>
+            All <span className="opacity-50">{photos.length}</span>
+          </button>
+          {projects.filter((p) => p.status !== "upcoming").map((project) => {
+            const count = photos.filter((ph) => ph.projectId === project.id).length;
+            return (
+              <button key={project.id} onClick={() => setProjectFilter(project.id)}
+                className={`flex-shrink-0 flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full transition-colors ${projectFilter === project.id ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-white/[0.06] text-white/45 border border-white/[0.06]"}`}>
+                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                {project.name}
+                <span className="opacity-50">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+        {topTags.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4">
+            {topTags.map(([tag, count]) => (
+              <button key={tag} onClick={() => setTagFilter(tagFilter === tag ? "" : tag)}
+                className={`flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-colors ${tagFilter === tag ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-white/[0.04] text-white/35 border border-white/[0.05]"}`}>
+                {tag} <span className="opacity-60">{count}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-5">
+        {/* Sidebar — desktop only */}
+        <div className="hidden sm:block w-48 flex-shrink-0 space-y-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">Projects</p>
             <div className="space-y-0.5">
@@ -137,7 +168,7 @@ export default function PhotosPage() {
         {/* Main */}
         <div className="flex-1 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 flex-1 max-w-64">
+            <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 flex-1 sm:max-w-64">
               <Search size={13} className="text-white/30" />
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
                 placeholder="Search photos, tags…" value={search} onChange={(e) => setSearch(e.target.value)} />
