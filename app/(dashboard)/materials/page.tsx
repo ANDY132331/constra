@@ -30,6 +30,9 @@ const TRADE_COLORS: Record<string, string> = {
   "Siding":              "#a3e635",
   "Windows & Doors":     "#c084fc",
   "Landscaping / Site Work": "#4ade80",
+  "Civil / Utilities":   "#06b6d4",
+  "Excavation":          "#78716c",
+  "Demolition":          "#ef4444",
 };
 
 export default function MaterialsPage() {
