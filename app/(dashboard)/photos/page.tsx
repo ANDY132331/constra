@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, ChevronRight, Layers } from "lucide-react";
+import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, ChevronRight, Layers, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 
 type View = "grid" | "list" | "album";
 
@@ -25,6 +26,8 @@ export default function PhotosPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isImageFile, setIsImageFile] = useState(true);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const filtered = photos.filter((p) => {
@@ -45,15 +48,31 @@ export default function PhotosPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [lightboxIdx, filtered.length]);
 
-  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const isImage = file.type.startsWith("image/");
     setIsImageFile(isImage);
     setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => setPhotoUrl(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    setUploadError(null);
+
+    if (SUPABASE_ENABLED) {
+      setUploading(true);
+      const ext = file.name.split(".").pop() ?? "bin";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error } = await getClient().storage.from("photos").upload(path, file, { upsert: false });
+      setUploading(false);
+      if (error) {
+        setUploadError("Upload failed — check that the 'photos' storage bucket exists in Supabase.");
+        return;
+      }
+      const { data: { publicUrl } } = getClient().storage.from("photos").getPublicUrl(data.path);
+      setPhotoUrl(publicUrl);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (ev) => setPhotoUrl(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
   }, []);
 
   const handleSave = () => {
@@ -425,12 +444,20 @@ export default function PhotosPage() {
                       <X size={11} className="text-white" />
                     </button>
                   </div>
+                ) : uploading ? (
+                  <div className="w-full h-32 border-2 border-dashed border-amber-500/30 rounded-xl flex flex-col items-center justify-center gap-2 bg-amber-500/[0.02]">
+                    <Loader2 size={20} className="text-amber-400 animate-spin" />
+                    <p className="text-[12px] text-amber-400/70">Uploading…</p>
+                  </div>
                 ) : (
                   <button onClick={() => fileRef.current?.click()}
                     className="w-full h-32 border-2 border-dashed border-white/[0.08] rounded-xl flex flex-col items-center justify-center gap-2 hover:border-amber-500/30 hover:bg-amber-500/[0.02] transition-all">
                     <Upload size={20} className="text-white/25" />
                     <p className="text-[12px] text-white/30">Click to upload photo or file</p>
                   </button>
+                )}
+                {uploadError && (
+                  <p className="text-[11px] text-red-400 mt-1.5">{uploadError}</p>
                 )}
               </div>
               <div>
@@ -465,9 +492,9 @@ export default function PhotosPage() {
             <div className="flex gap-3 px-6 pb-6">
               <button onClick={() => setShowModal(false)}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
-              <button onClick={handleSave} disabled={!form.caption.trim() || !photoUrl}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                Upload
+              <button onClick={handleSave} disabled={!form.caption.trim() || !photoUrl || uploading}
+                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
+                {uploading ? <><Loader2 size={14} className="animate-spin" /> Uploading…</> : "Upload"}
               </button>
             </div>
           </div>
