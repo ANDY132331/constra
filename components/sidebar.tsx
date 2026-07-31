@@ -224,7 +224,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
 
       {/* User profile */}
       <div className="border-t border-white/[0.06] p-3 flex-shrink-0">
-        <button className="w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.04] transition-colors">
+        <Link href="/settings" className="w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.04] transition-colors">
           <div
             className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
             style={{ backgroundColor: currentUser.color + "33", color: currentUser.color }}
@@ -237,8 +237,8 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
             <p className="text-[13px] font-semibold text-white/85 truncate">{currentUser.name}</p>
             <p className="text-[11px] text-white/35 truncate">{currentUser.customRole}</p>
           </div>
-          <ChevronRight size={13} className="text-white/20 flex-shrink-0" />
-        </button>
+          <Settings size={13} className="text-white/20 flex-shrink-0" />
+        </Link>
       </div>
     </aside>
   );

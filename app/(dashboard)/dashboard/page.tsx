@@ -21,15 +21,16 @@ import { isForemanOrAbove } from "@/lib/permissions";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
-type WeatherData = { temp: number; code: number; windspeed: number } | null;
+type ForecastDay = { date: string; code: number; high: number; low: number; rainChance: number };
+type WeatherData = { temp: number; code: number; windspeed: number; forecast: ForecastDay[] } | null;
 
 function weatherMeta(code: number): { label: string; icon: React.ComponentType<{ size?: number; className?: string }>; color: string } {
-  if (code === 0)                                           return { label: "Clear",         icon: Sun,       color: "#f59e0b" };
-  if (code <= 3)                                            return { label: "Partly Cloudy", icon: Cloud,     color: "#94a3b8" };
-  if (code <= 48)                                           return { label: "Foggy",         icon: Cloud,     color: "#6b7280" };
-  if (code <= 67 || (code >= 80 && code <= 82))            return { label: "Rain",          icon: CloudRain, color: "#60a5fa" };
-  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return { label: "Snow",    icon: Cloud,     color: "#bfdbfe" };
-  return                                                          { label: "Thunderstorm",  icon: Zap,       color: "#a78bfa" };
+  if (code === 0)                                                return { label: "Clear",        icon: Sun,       color: "#f59e0b" };
+  if (code <= 3)                                                 return { label: "Partly Cloudy",icon: Cloud,     color: "#94a3b8" };
+  if (code <= 48)                                                return { label: "Foggy",        icon: Cloud,     color: "#6b7280" };
+  if (code <= 67 || (code >= 80 && code <= 82))                 return { label: "Rain",         icon: CloudRain, color: "#60a5fa" };
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return { label: "Snow",         icon: Cloud,     color: "#bfdbfe" };
+  return                                                               { label: "Thunderstorm",  icon: Zap,       color: "#a78bfa" };
 }
 
 function useWeather(useFahrenheit: boolean): WeatherData {
@@ -39,16 +40,25 @@ function useWeather(useFahrenheit: boolean): WeatherData {
       const { latitude: lat, longitude: lon } = coords;
       const unit = useFahrenheit ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
       fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true${unit}`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto${unit}`
       )
         .then((r) => r.json())
-        .then((d) =>
+        .then((d) => {
+          const daily = d.daily ?? {};
+          const forecast: ForecastDay[] = (daily.time ?? []).map((date: string, i: number) => ({
+            date,
+            code: daily.weathercode?.[i] ?? 0,
+            high: Math.round(daily.temperature_2m_max?.[i] ?? 0),
+            low: Math.round(daily.temperature_2m_min?.[i] ?? 0),
+            rainChance: daily.precipitation_probability_max?.[i] ?? 0,
+          }));
           setWeather({
             temp: Math.round(d.current_weather.temperature),
             code: d.current_weather.weathercode,
             windspeed: Math.round(d.current_weather.windspeed),
-          })
-        )
+            forecast: forecast.slice(0, 7),
+          });
+        })
         .catch(() => {});
     }, () => {});
   }, [useFahrenheit]);
@@ -101,14 +111,14 @@ function StatCard({
 
 // ── Activity icons ─────────────────────────────────────────────────────────────
 
-const ACTIVITY_ICONS: Record<string, { icon: React.ComponentType<{ size?: number; className?: string }>; color: string }> = {
-  "clock-in":       { icon: Clock,        color: "#22c55e" },
-  "clock-out":      { icon: Clock,        color: "#94a3b8" },
-  "punch-added":    { icon: AlertTriangle, color: "#ef4444" },
-  "rfi-submitted":  { icon: MessageSquare, color: "#3b82f6" },
-  "invoice-sent":   { icon: FileText,      color: "#f59e0b" },
-  "task-updated":   { icon: CheckCircle2,  color: "#8b5cf6" },
-  "photo-uploaded": { icon: ImageIcon,     color: "#06b6d4" },
+const ACTIVITY_ICONS: Record<string, { icon: React.ComponentType<{ size?: number; className?: string }>; color: string; href: string }> = {
+  "clock-in":       { icon: Clock,         color: "#22c55e", href: "/time-tracking" },
+  "clock-out":      { icon: Clock,         color: "#94a3b8", href: "/time-tracking" },
+  "punch-added":    { icon: AlertTriangle, color: "#ef4444", href: "/punch-list"    },
+  "rfi-submitted":  { icon: MessageSquare, color: "#3b82f6", href: "/rfis"          },
+  "invoice-sent":   { icon: FileText,      color: "#f59e0b", href: "/invoices"      },
+  "task-updated":   { icon: CheckCircle2,  color: "#8b5cf6", href: "/tasks"         },
+  "photo-uploaded": { icon: ImageIcon,     color: "#06b6d4", href: "/photos"        },
 };
 
 function timeAgo(date: Date): string {
@@ -132,7 +142,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
   const mins = Math.floor((elapsed % 3600000) / 60000);
 
   return (
-    <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors">
+    <Link href="/crew" className="block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/20 transition-colors group">
       <div className="w-full h-28 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden"
         style={{ background: `${worker.color}15` }}>
         {worker.photo ? (
@@ -166,7 +176,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
         </div>
         <div className="text-amber-400 text-[12px] font-bold">{hours}h {mins}m</div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -179,7 +189,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
   const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
   const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#f59e0b" : "#22c55e";
   return (
-    <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors">
+    <Link href="/projects" className="block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors">
       <div className="flex items-start gap-3 mb-3">
         <div className="w-1.5 h-12 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: project.color }} />
         <div className="flex-1 min-w-0">
@@ -214,7 +224,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
           <div className="text-[10px] text-white/25">{formatCurrencyCompact(spent, currency as never)} of {formatCurrencyCompact(budget, currency as never)}</div>
         </>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -231,6 +241,7 @@ export default function DashboardPage() {
   const weather = useWeather(useFahrenheit);
   const [refreshing, setRefreshing] = useState(false);
   const [liveTime, setLiveTime] = useState(new Date());
+  const [weatherExpanded, setWeatherExpanded] = useState(false);
   const now = liveTime;
   const greeting = now.getHours() < 12 ? t.dashboard.goodMorning : now.getHours() < 17 ? t.dashboard.goodAfternoon : t.dashboard.goodEvening;
 
@@ -449,13 +460,18 @@ export default function DashboardPage() {
               const meta = weatherMeta(weather.code);
               const WeatherIcon = meta.icon;
               return (
-                <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1 text-[12px]" style={{ color: meta.color }}>
+                <button
+                  onClick={() => setWeatherExpanded(e => !e)}
+                  className="flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/10 rounded-lg px-2.5 py-1 text-[12px] transition-all"
+                  style={{ color: meta.color }}
+                >
                   <WeatherIcon size={13} />
                   <span className="font-semibold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
                   <span className="text-white/30 hidden sm:inline">{meta.label}</span>
                   <Wind size={10} className="text-white/25 ml-0.5 hidden sm:inline" />
                   <span className="text-white/25 hidden sm:inline">{weather.windspeed} {useFahrenheit ? "mph" : "km/h"}</span>
-                </div>
+                  <span className="text-white/20 hidden sm:inline ml-1">{weatherExpanded ? "▲" : "▼"}</span>
+                </button>
               );
             })()}
           </div>
@@ -476,6 +492,41 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* 7-day weather forecast panel */}
+      {weather && weatherExpanded && weather.forecast.length > 0 && (
+        <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[12px] font-bold text-white/50 uppercase tracking-widest">7-Day Forecast</span>
+            <Link href="/schedule" className="text-[11px] text-amber-400/70 hover:text-amber-400 transition-colors flex items-center gap-1">
+              Full schedule <ArrowRight size={10} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {weather.forecast.map((day, i) => {
+              const meta = weatherMeta(day.code);
+              const DayIcon = meta.icon;
+              const date = new Date(day.date + "T12:00:00");
+              const isToday = i === 0;
+              return (
+                <div key={day.date} className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors ${isToday ? "bg-white/[0.05] border border-white/[0.08]" : "hover:bg-white/[0.03]"}`}>
+                  <span className={`text-[10px] font-bold uppercase tracking-wide ${isToday ? "text-amber-400" : "text-white/30"}`}>
+                    {isToday ? "Today" : date.toLocaleDateString("en-CA", { weekday: "short" })}
+                  </span>
+                  <span style={{ color: meta.color }}><DayIcon size={16} /></span>
+                  {day.rainChance > 20 && (
+                    <span className="text-[9px] text-blue-400 font-semibold">{day.rainChance}%</span>
+                  )}
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-[11px] font-bold text-white/80">{day.high}°</span>
+                    <span className="text-[10px] text-white/25">{day.low}°</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* New-user setup guide */}
       {projects.length === 0 && workers.length <= 1 && (
@@ -663,7 +714,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {activeProjects.map((p) => <ProjectStatusCard key={p.id} project={p} currency={currency} showFinancials={canSeeFinancials} />)}
               {upcomingProjects.slice(0, 1).map((p) => (
-                <div key={p.id} className="bg-[#111111] border border-white/[0.06] rounded-xl p-4 opacity-70">
+                <Link key={p.id} href="/projects" className="block bg-[#111111] border border-white/[0.06] rounded-xl p-4 opacity-70 hover:opacity-90 hover:border-white/10 transition-all">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-1.5 h-12 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
                     <div className="flex-1 min-w-0">
@@ -680,7 +731,7 @@ export default function DashboardPage() {
                   {canSeeFinancials && (
                     <div className="text-[11px] text-white/30">Budget: {formatCurrencyCompact(p.budget, currency as never)}</div>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -711,15 +762,16 @@ export default function DashboardPage() {
               const iconDef = ACTIVITY_ICONS[event.type] ?? ACTIVITY_ICONS["task-updated"];
               const Icon = iconDef.icon;
               return (
-                <div key={event.id} className="flex gap-3 p-3 hover:bg-white/[0.02] transition-colors">
+                <Link key={event.id} href={iconDef.href} className="flex gap-3 p-3 hover:bg-white/[0.03] transition-colors group">
                   <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: iconDef.color + "18" }}>
                     <span style={{ color: iconDef.color }}><Icon size={13} /></span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] text-white/70 leading-snug">{event.description}</p>
+                    <p className="text-[12px] text-white/70 leading-snug group-hover:text-white/90 transition-colors">{event.description}</p>
                     <p className="text-[10px] text-white/25 mt-1">{timeAgo(event.timestamp)}</p>
                   </div>
-                </div>
+                  <ArrowRight size={11} className="text-white/0 group-hover:text-white/25 transition-colors flex-shrink-0 self-center" />
+                </Link>
               );
             })}
           </div>
@@ -742,10 +794,10 @@ export default function DashboardPage() {
               const worker = getWorkerById(task.workerId);
               const isLate = task.endDate < now && task.progress < 100;
               return (
-                <div key={task.id} className="flex items-center gap-3 p-3 hover:bg-white/[0.02] transition-colors">
+                <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-3 hover:bg-white/[0.03] transition-colors group">
                   <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: task.projectColor }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] text-white/80 font-medium truncate">{task.name}</p>
+                    <p className="text-[12px] text-white/80 font-medium truncate group-hover:text-white/95 transition-colors">{task.name}</p>
                     <p className="text-[10px] text-white/30 truncate">{task.projectName} · {worker?.name}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
@@ -754,7 +806,8 @@ export default function DashboardPage() {
                     </p>
                     <p className="text-[10px] text-white/25">{task.progress}%</p>
                   </div>
-                </div>
+                  <ArrowRight size={10} className="text-white/0 group-hover:text-white/20 transition-colors flex-shrink-0 ml-1" />
+                </Link>
               );
             })}
             {projects.flatMap((p) => p.tasks.filter((t) => t.status !== "completed")).length === 0 && (
@@ -782,16 +835,17 @@ export default function DashboardPage() {
                 resolved:    <CheckCircle2 size={10} className="text-green-400" />,
               };
               return (
-                <div key={item.id} className="flex items-center gap-3 p-3 hover:bg-white/[0.02] transition-colors">
+                <Link key={item.id} href="/punch-list" className="flex items-center gap-3 p-3 hover:bg-white/[0.03] transition-colors group">
                   <div className="mt-0.5">{statusIcons[item.status]}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] text-white/80 font-medium truncate">{item.title}</p>
+                    <p className="text-[12px] text-white/80 font-medium truncate group-hover:text-white/95 transition-colors">{item.title}</p>
                     <p className="text-[10px] text-white/30 truncate">{getProjectById(item.projectId)?.name ?? item.projectId}</p>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${prioColors[item.priority]}`}>
                     {item.priority.toUpperCase()}
                   </span>
-                </div>
+                  <ArrowRight size={10} className="text-white/0 group-hover:text-white/20 transition-colors flex-shrink-0" />
+                </Link>
               );
             })}
             {openPunchItems.length === 0 && (
