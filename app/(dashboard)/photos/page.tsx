@@ -14,7 +14,7 @@ const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider 
 type PhotoForm = { caption: string; projectId: string; uploadedById: string; tags: string; };
 
 export default function PhotosPage() {
-  const { photos, projects, workers, addPhoto, deletePhoto, getWorkerById, getProjectById } = useStore();
+  const { photos, projects, workers, addPhoto, deletePhoto, getWorkerById, getProjectById, currentUser, companyId } = useStore();
   const [view, setView] = useState<View>("grid");
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState("");
@@ -29,6 +29,27 @@ export default function PhotosPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const openModal = useCallback(() => {
+    setForm({ caption: "", projectId: projects[0]?.id ?? "", uploadedById: currentUser.id, tags: "" });
+    setPhotoUrl(null);
+    setFileName(null);
+    setIsImageFile(true);
+    setUploading(false);
+    setUploadError(null);
+    if (fileRef.current) fileRef.current.value = "";
+    setShowModal(true);
+  }, [currentUser.id, projects]);
+
+  const closeModal = useCallback(() => {
+    setShowModal(false);
+    setPhotoUrl(null);
+    setFileName(null);
+    setIsImageFile(true);
+    setUploading(false);
+    setUploadError(null);
+    if (fileRef.current) fileRef.current.value = "";
+  }, []);
 
   const filtered = photos.filter((p) => {
     const matchSearch = !search || p.caption.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
@@ -59,7 +80,8 @@ export default function PhotosPage() {
     if (SUPABASE_ENABLED) {
       setUploading(true);
       const ext = file.name.split(".").pop() ?? "bin";
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const prefix = companyId ?? "shared";
+      const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { data, error } = await getClient().storage.from("photos").upload(path, file, { upsert: false });
       setUploading(false);
       if (error) {
@@ -86,12 +108,7 @@ export default function PhotosPage() {
       gradient: `linear-gradient(135deg, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40)`,
       url: photoUrl ?? undefined,
     });
-    setForm({ caption: "", projectId: "", uploadedById: "", tags: "" });
-    setPhotoUrl(null);
-    setFileName(null);
-    setIsImageFile(true);
-    if (fileRef.current) fileRef.current.value = "";
-    setShowModal(false);
+    closeModal();
   };
 
   const tagCounts = photos.flatMap((p) => p.tags).reduce((acc, tag) => ({ ...acc, [tag]: (acc[tag] ?? 0) + 1 }), {} as Record<string, number>);
@@ -106,7 +123,7 @@ export default function PhotosPage() {
             {photos.length} photos across {projects.filter((p) => p.status === "active").length} active projects
           </p>
         </div>
-        <button onClick={() => setShowModal(true)}
+        <button onClick={openModal}
           className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
           <Upload size={15} />
           Upload Photos
@@ -209,7 +226,7 @@ export default function PhotosPage() {
             <div className="text-center py-20 text-white/25 space-y-2">
               <FolderOpen size={40} className="mx-auto opacity-30" />
               <p className="text-[14px] font-semibold">No photos yet</p>
-              <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
+              <button onClick={openModal} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
                 + Upload your first photo
               </button>
             </div>
@@ -273,7 +290,7 @@ export default function PhotosPage() {
                 );
               })}
 
-              <button onClick={() => setShowModal(true)}
+              <button onClick={openModal}
                 className="bg-[#111111] border-2 border-dashed border-white/[0.08] rounded-xl h-[240px] flex flex-col items-center justify-center gap-3 hover:border-amber-500/30 hover:bg-amber-500/[0.02] transition-all cursor-pointer group">
                 <div className="w-10 h-10 rounded-xl bg-white/5 group-hover:bg-amber-500/10 flex items-center justify-center transition-colors">
                   <Upload size={18} className="text-white/25 group-hover:text-amber-400 transition-colors" />
@@ -420,7 +437,7 @@ export default function PhotosPage() {
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">Upload Photo</h3>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={closeModal} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -490,7 +507,7 @@ export default function PhotosPage() {
               </div>
             </div>
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => setShowModal(false)}
+              <button onClick={closeModal}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={!form.caption.trim() || !photoUrl || uploading}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
