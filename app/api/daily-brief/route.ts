@@ -11,15 +11,15 @@ No workers have clocked in yet. Expected crew of 8 across your active projects o
 • 3 tasks are currently overdue and need immediate attention
 
 **Active Projects**
-All 3 active projects are progressing. Downtown Office Renovation leads at 72% complete. Watch the Riverside Apartments project — it's running slightly behind schedule.
+All 3 active projects are progressing. Lakeview Condo Development leads at 72% complete. Watch the North Bridge Overpass project — it's running slightly behind schedule.
 
 **Open Issues**
-4 punch list items remain open, including 1 high-priority electrical safety item on the Riverside site. Recommend resolving before end of day.
+4 punch list items remain open, including 1 high-priority electrical safety item on the North Bridge site. Recommend resolving before end of day.
 
 **What to Focus On**
 1. Follow up on the overdue tasks — delays compound fast
 2. Clear the high-priority safety punch item
-3. Check in with the Riverside foreman on schedule recovery
+3. Check in with the North Bridge foreman on schedule recovery
 
 Have a productive day on site.`;
 

@@ -50,12 +50,12 @@ const COUNTRIES = [
 ];
 
 const INDUSTRIES = [
-  "Construction", "Civil / Utilities", "Landscaping", "Cleaning", "HVAC", "Plumbing", "Electrical",
-  "Roofing", "Painting", "Concrete", "Framing", "Drywall", "Flooring", "Masonry",
-  "Steel / Structural", "Excavation", "General Contracting",
-  "Manufacturing", "Warehousing", "Logistics", "Delivery",
-  "Agriculture", "Restaurant & Hospitality", "Healthcare Support", "Retail",
-  "Security", "Maintenance", "Office & Admin", "Nonprofit", "Other",
+  "General Contracting", "Civil / Utilities", "Electrical", "Plumbing", "HVAC",
+  "Roofing", "Concrete", "Masonry", "Steel / Structural", "Framing", "Drywall",
+  "Flooring", "Painting", "Excavation", "Landscaping", "Insulation",
+  "Demolition", "Waterproofing", "Solar / Renewables", "Fire Protection",
+  "Glazing / Windows", "Maintenance", "Security", "Manufacturing", "Warehousing",
+  "Logistics / Delivery", "Other",
 ];
 
 const SIZES = [

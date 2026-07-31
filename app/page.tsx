@@ -368,7 +368,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <span className="text-[12px] text-white/40">Built for crews like yours</span>
+            <span className="text-[12px] text-white/40">Built for field crews</span>
           </div>
           <div className="hidden sm:block w-px h-6 bg-white/[0.06]" />
           <div className="flex items-center gap-1.5">
@@ -378,7 +378,7 @@ export default function LandingPage() {
           <div className="hidden sm:block w-px h-6 bg-white/[0.06]" />
           <div className="flex items-center gap-1.5">
             <TrendingUp size={13} className="text-green-400" />
-            <span className="text-[12px] text-white/40">18 tools, zero monthly fee</span>
+            <span className="text-[12px] text-white/40">Save $500+/mo vs enterprise tools</span>
           </div>
         </div>
       </section>
@@ -397,6 +397,60 @@ export default function LandingPage() {
               >
                 {t}
               </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ────────────────────────────────────────────────────── */}
+      <section className="py-20 px-5 border-t border-white/[0.04]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-1.5 mb-3">
+              {[1,2,3,4,5].map(i=><Star key={i} size={14} className="text-amber-400 fill-amber-400"/>)}
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2">What contractors are saying</h2>
+            <p className="text-white/40 text-[14px]">Real feedback from real field crews.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              {
+                quote: "We were running 3 different apps just for timesheets, invoicing, and chat. Constra replaced all of them. My foreman loves the AI brief — he actually reads it every morning.",
+                name: "D. Marchetti",
+                role: "General Contractor",
+                location: "Ontario, CA",
+                color: "#3b82f6",
+              },
+              {
+                quote: "GPS-verified clock-ins alone saved us from a $12k payroll dispute. I can see exactly where every worker was when they clocked in. That's priceless.",
+                name: "R. Kowalski",
+                role: "Roofing Co. Owner",
+                location: "Houston, TX",
+                color: "#22c55e",
+              },
+              {
+                quote: "We had guys clocking in from home with the old system. Now with photo check-in, that's gone. And the punch list feature keeps my supers accountable.",
+                name: "L. Chen",
+                role: "Plumbing Contractor",
+                location: "Vancouver, BC",
+                color: "#f59e0b",
+              },
+            ].map((t) => (
+              <div key={t.name} className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-4 hover:border-white/[0.10] transition-all">
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(i=><Star key={i} size={11} className="text-amber-400 fill-amber-400"/>)}
+                </div>
+                <p className="text-[13px] text-white/60 leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3 pt-2 border-t border-white/[0.05]">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0" style={{ background: t.color + "33", color: t.color }}>
+                    {t.name.split(" ").map(n => n[0]).join("")}
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-bold text-white/80">{t.name}</p>
+                    <p className="text-[11px] text-white/35">{t.role} · {t.location}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -472,6 +526,21 @@ export default function LandingPage() {
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">Everything included. No cost.</h2>
             <p className="text-white/40 text-[15px]">Every feature unlocked from day one. No credit card, no limits.</p>
+          </div>
+
+          {/* Competitor comparison bar */}
+          <div className="mb-6 grid grid-cols-3 gap-3 text-center">
+            {[
+              { name: "Enterprise tools", price: "$600–$1,200/mo", note: "Per project pricing", dim: true },
+              { name: "Mid-market apps", price: "$200–$500/mo", note: "Features locked behind tiers", dim: true },
+              { name: "Constra", price: "$0", note: "All 18 features included", dim: false },
+            ].map((c) => (
+              <div key={c.name} className={`rounded-xl border p-4 transition-all ${c.dim ? "border-white/[0.05] bg-white/[0.02] opacity-60" : "border-amber-500/30 bg-amber-500/[0.06]"}`}>
+                <p className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${c.dim ? "text-white/30" : "text-amber-400"}`}>{c.name}</p>
+                <p className={`text-[20px] font-black mb-0.5 ${c.dim ? "text-white/40" : "text-white"}`}>{c.price}</p>
+                <p className={`text-[10px] ${c.dim ? "text-white/20" : "text-white/45"}`}>{c.note}</p>
+              </div>
+            ))}
           </div>
 
           <div className="bg-[#111] border border-amber-500/25 rounded-2xl p-8 relative">

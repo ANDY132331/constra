@@ -357,7 +357,7 @@ export default function EstimatesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Project Name *</label>
-                  <input className={inp} placeholder="Office Renovation"
+                  <input className={inp} placeholder="Westside Condo Framing"
                     value={form.projectName} onChange={(e) => setForm((f) => ({ ...f, projectName: e.target.value }))} />
                 </div>
                 <div>
