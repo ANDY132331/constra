@@ -448,7 +448,328 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-[1400px]">
+    <>
+    {/* ── MOBILE DASHBOARD ──────────────────────────────────────────────── */}
+    <div className="lg:hidden -mx-4 -mt-4 pb-2">
+
+      {/* Hero panel — edge-to-edge, amber glow, blueprint grid */}
+      <div
+        className="relative overflow-hidden px-5 pt-6 pb-7"
+        style={{
+          background: "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)",
+          borderBottom: "1px solid rgba(245,158,11,0.18)",
+        }}
+      >
+        {/* Blueprint grid — clearly visible */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(0deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px)",
+          }}
+        />
+        {/* Diagonal accent cut — bottom-right triangle */}
+        <div
+          className="absolute bottom-0 right-0 pointer-events-none"
+          style={{
+            width: 0,
+            height: 0,
+            borderBottom: "72px solid rgba(245,158,11,0.07)",
+            borderLeft: "220px solid transparent",
+          }}
+        />
+        {/* Amber radial glow — strong, bottom-left */}
+        <div
+          className="absolute -bottom-16 -left-10 w-80 h-80 pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(245,158,11,0.22) 0%, rgba(217,119,6,0.06) 50%, transparent 70%)" }}
+        />
+        {/* Secondary glow — top-right accent */}
+        <div
+          className="absolute -top-12 -right-12 w-56 h-56 pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(234,88,12,0.10) 0%, transparent 65%)" }}
+        />
+        {/* Top hazard stripe */}
+        <div
+          className="absolute top-0 inset-x-0 h-[3px] pointer-events-none"
+          style={{
+            background: "repeating-linear-gradient(90deg, #f59e0b 0px, #f59e0b 14px, rgba(0,0,0,0) 14px, rgba(0,0,0,0) 28px)",
+          }}
+        />
+
+        {/* Greeting + live clock */}
+        <div className="relative flex items-start justify-between mb-5">
+          <div>
+            <p className="text-[11px] font-black text-amber-500/60 uppercase tracking-[0.14em] mb-0.5">
+              {greeting.split(",")[0]}
+            </p>
+            <h2 className="text-[24px] font-black text-white tracking-tight leading-tight">
+              {currentUser.name.split(" ")[0]}
+            </h2>
+          </div>
+          <div className="text-right mt-0.5">
+            <p className="text-[22px] font-black text-white tabular-nums leading-none">
+              {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+            </p>
+            <p className="text-[11px] text-white/35 mt-1">
+              {now.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+            </p>
+          </div>
+        </div>
+
+        {/* Big stat tiles */}
+        <div className="relative flex gap-3 mb-5">
+          <div className="flex-1 bg-white/[0.05] border border-amber-500/15 rounded-2xl p-4">
+            <div className="flex items-end gap-1 mb-1">
+              <span className="text-[44px] font-black text-white leading-none tabular-nums">{clockedInWorkers.length}</span>
+              <span className="text-[14px] font-bold text-amber-400/50 mb-2">/{workers.length}</span>
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-amber-500/70">Crew on Site</p>
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-[10px] text-green-400 font-bold">Live</span>
+            </div>
+          </div>
+          <div className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4">
+            <span className="text-[44px] font-black text-white leading-none tabular-nums block mb-1">{activeProjects.length}</span>
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-white/40">Active Jobs</p>
+            <p className="text-[10px] text-white/30 mt-2">{upcomingProjects.length} upcoming</p>
+          </div>
+        </div>
+
+        {/* Weather + urgent badge */}
+        <div className="relative flex items-center gap-2 flex-wrap">
+          {weather && (() => {
+            const wMeta = weatherMeta(weather.code);
+            const WIcon = wMeta.icon;
+            return (
+              <div
+                className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.07] rounded-lg px-3 py-1.5"
+                style={{ color: wMeta.color }}
+              >
+                <WIcon size={12} />
+                <span className="text-[12px] font-bold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
+                <span className="text-[11px] text-white/30 ml-0.5">{wMeta.label}</span>
+              </div>
+            );
+          })()}
+          {urgentItems.length > 0 && (
+            <Link
+              href={urgentItems[0].href}
+              className="flex items-center gap-1.5 bg-red-500/[0.12] border border-red-500/25 rounded-lg px-3 py-1.5"
+            >
+              <AlertTriangle size={11} className="text-red-400" />
+              <span className="text-[11px] font-bold text-red-400">{urgentItems.length} urgent</span>
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* Stat chips — horizontal scroll */}
+      <div className="px-4 pt-4">
+        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+          {(([
+            { label: "Hours/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9" },
+            { label: "Open Issues",   value: openPunchItems.length, color: "#f97316" },
+            { label: "High Priority", value: highPriority.length, color: "#ef4444" },
+            ...(canSeeFinancials
+              ? [
+                  { label: "Collected",   value: formatCurrencyCompact(totalPaid, currency as never), color: "#22c55e" },
+                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: "#f59e0b" },
+                ]
+              : []),
+          ]) as { label: string; value: string | number; color: string }[]).map((chip) => (
+            <div
+              key={chip.label}
+              className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3"
+            >
+              <p className="text-[20px] font-black tabular-nums" style={{ color: chip.color }}>{chip.value}</p>
+              <p className="text-[10px] text-white/35 font-semibold mt-0.5 whitespace-nowrap">{chip.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick actions — 2×2 grid */}
+      <div className="px-4 pt-4">
+        <p className="text-[10px] font-black text-white/25 uppercase tracking-[0.14em] mb-3">Quick Add</p>
+        <div className="grid grid-cols-2 gap-2.5">
+          {[
+            { label: "Daily Report",  icon: FileText,      href: "/daily-reports",  color: "#22c55e" },
+            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders", color: "#f59e0b" },
+            { label: "Invoice",       icon: ReceiptText,   href: "/invoices",       color: "#0ea5e9" },
+            { label: "Punch Item",    icon: AlertTriangle, href: "/punch-list",     color: "#ef4444" },
+          ].map(({ label, icon: Icon, href, color }) => (
+            <Link
+              key={label}
+              href={href}
+              className="flex items-center gap-3 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3.5 active:bg-white/[0.04] transition-colors"
+            >
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: color + "18" }}
+              >
+                <Icon size={15} style={{ color }} />
+              </div>
+              <div>
+                <p className="text-[12px] font-bold text-white/80 leading-tight">{label}</p>
+                <p className="text-[10px] text-white/30 mt-0.5">Add new</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Daily Brief */}
+      <div className="px-4 pt-4">
+        <ErrorBoundary fallback={
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 text-[12px] text-white/30">
+            AI Brief unavailable
+          </div>
+        }>
+          <DailyBriefCard />
+        </ErrorBoundary>
+      </div>
+
+      {/* Crew on site — horizontal avatar scroll */}
+      <div className="px-4 pt-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-[14px] font-black text-white">Crew on Site</h3>
+            {clockedInWorkers.length > 0 && (
+              <span className="flex items-center gap-1 text-[10px] bg-green-500/15 text-green-400 px-2 py-0.5 rounded-full font-bold">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                {clockedInWorkers.length} live
+              </span>
+            )}
+          </div>
+          <Link href="/time-tracking" className="text-[11px] text-amber-400/70 flex items-center gap-1">
+            All <ArrowRight size={11} />
+          </Link>
+        </div>
+        {clockedInWorkers.length === 0 ? (
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-6 text-center">
+            <Timer size={22} className="text-white/15 mx-auto mb-2" />
+            <p className="text-[12px] text-white/30">No one clocked in yet</p>
+          </div>
+        ) : (
+          <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+            {clockedInWorkers.slice(0, 6).map((w) => {
+              const hoursOn = w.clockInTime ? (Date.now() - w.clockInTime.getTime()) / 3600000 : 0;
+              return (
+                <Link
+                  key={w.id}
+                  href="/time-tracking"
+                  className="flex-shrink-0 flex flex-col items-center gap-1.5 bg-[#131110] border border-white/[0.07] rounded-2xl p-3 w-[84px] active:bg-white/[0.04]"
+                >
+                  <div className="relative">
+                    <div
+                      className="w-11 h-11 rounded-full flex items-center justify-center text-[13px] font-black"
+                      style={{ backgroundColor: w.color + "28", color: w.color }}
+                    >
+                      {w.photo
+                        ? <img src={w.photo} alt={w.name} className="w-full h-full rounded-full object-cover" />
+                        : w.initials}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-[#131110]" />
+                  </div>
+                  <p className="text-[11px] font-bold text-white/80 text-center truncate w-full">{w.name.split(" ")[0]}</p>
+                  <p className="text-[10px] text-green-400 font-bold">{hoursOn.toFixed(1)}h</p>
+                </Link>
+              );
+            })}
+            {clockedInWorkers.length > 6 && (
+              <Link
+                href="/time-tracking"
+                className="flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-[#131110] border border-white/[0.07] rounded-2xl p-3 w-[84px]"
+              >
+                <div className="w-11 h-11 rounded-full bg-white/[0.06] flex items-center justify-center">
+                  <span className="text-[14px] font-black text-white/50">+{clockedInWorkers.length - 6}</span>
+                </div>
+                <p className="text-[11px] text-white/30">more</p>
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Active projects */}
+      <div className="px-4 pt-5">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[14px] font-black text-white">Active Jobs</h3>
+          <Link href="/projects" className="text-[11px] text-amber-400/70 flex items-center gap-1">
+            All <ArrowRight size={11} />
+          </Link>
+        </div>
+        {activeProjects.length === 0 ? (
+          <Link href="/projects" className="flex items-center justify-center bg-[#131110] border border-white/[0.07] border-dashed rounded-2xl p-6">
+            <p className="text-[12px] text-white/30">No active jobs · Tap to add one</p>
+          </Link>
+        ) : (
+          <div className="space-y-2.5">
+            {activeProjects.slice(0, 3).map((p) => {
+              const doneTasks = p.tasks.filter((t) => t.status === "completed").length;
+              const totalTasks = p.tasks.length;
+              const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+              return (
+                <Link
+                  key={p.id}
+                  href="/projects"
+                  className="flex items-center gap-3.5 bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:bg-white/[0.04]"
+                >
+                  <div className="w-1 h-12 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-[13px] font-bold text-white truncate pr-2">{p.name}</p>
+                      <span className="text-[11px] font-black text-white/50 flex-shrink-0">{pct}%</span>
+                    </div>
+                    <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                    </div>
+                    <p className="text-[10px] text-white/30 mt-1.5">{p.client} · {doneTasks}/{totalTasks} tasks</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Recent activity */}
+      {activityFeed.length > 0 && (
+        <div className="px-4 pt-5 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[14px] font-black text-white">Recent Activity</h3>
+            <div className="flex items-center gap-1 text-[10px] text-white/25">
+              <Activity size={10} />
+              Today
+            </div>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
+            {activityFeed.slice(0, 5).map((event) => {
+              const iconDef = ACTIVITY_ICONS[event.type] ?? ACTIVITY_ICONS["task-updated"];
+              const AIcon = iconDef.icon;
+              return (
+                <Link key={event.id} href={iconDef.href} className="flex gap-3 p-3.5 active:bg-white/[0.03]">
+                  <div
+                    className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5"
+                    style={{ backgroundColor: iconDef.color + "18" }}
+                  >
+                    <span style={{ color: iconDef.color }}><AIcon size={13} /></span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] text-white/70 leading-snug">{event.description}</p>
+                    <p className="text-[10px] text-white/25 mt-1">{timeAgo(event.timestamp)}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* ── DESKTOP DASHBOARD ─────────────────────────────────────────────── */}
+    <div className="hidden lg:block space-y-6 max-w-[1400px]">
 
       {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -968,5 +1289,6 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
