@@ -4,7 +4,7 @@ import type {
   Worker, Project, Task, ClockEntry, PunchItem, SafetyIncident,
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   GpsLocation, VerificationFlag, Message, MaterialType, MaterialEntry, ProjectDocument,
-  DailyReport, ChangeOrder,
+  DailyReport, ChangeOrder, BlueprintPin,
 } from "@/lib/mock-data";
 
 // ── Geo helper ─────────────────────────────────────────────────────────────────
@@ -35,6 +35,7 @@ export type DbProfile = {
   clock_in_time: string | null;
   hourly_rate: number;
   device_history: Array<{ ua: string; firstSeen: string; lastSeen: string }> | null;
+  granted_pages: string[] | null;
   created_at?: string;
 };
 
@@ -58,6 +59,7 @@ export function dbToWorker(row: DbProfile): Worker {
       firstSeen: new Date(d.firstSeen),
       lastSeen: new Date(d.lastSeen),
     })),
+    grantedPages: row.granted_pages ?? undefined,
   };
 }
 
@@ -82,6 +84,7 @@ export function workerToDb(w: Worker, companyId: string): Omit<DbProfile, "creat
         firstSeen: d.firstSeen.toISOString(),
         lastSeen: d.lastSeen.toISOString(),
       })) ?? null,
+    granted_pages: w.grantedPages ?? null,
   };
 }
 
@@ -98,6 +101,8 @@ export type DbProject = {
   progress: number;
   budget: number;
   spent: number;
+  committed?: number | null;
+  forecast?: number | null;
   address: string;
   gps: unknown;
   color: string;
@@ -145,6 +150,8 @@ export function dbToProject(row: DbProject, tasks: DbTask[] = []): Project {
     progress: row.progress,
     budget: Number(row.budget),
     spent: Number(row.spent),
+    committed: row.committed != null ? Number(row.committed) : undefined,
+    forecast: row.forecast != null ? Number(row.forecast) : undefined,
     address: row.address,
     gps: gpsFromJson(row.gps),
     color: row.color,
@@ -171,6 +178,8 @@ export function projectToDb(
     progress: p.progress,
     budget: p.budget,
     spent: p.spent,
+    committed: p.committed ?? null,
+    forecast: p.forecast ?? null,
     address: p.address,
     gps: p.gps ?? null,
     color: p.color,
@@ -967,5 +976,54 @@ export function documentToDb(d: ProjectDocument, companyId: string): Omit<DbDocu
     size_bytes: d.sizeBytes,
     data_url: d.dataUrl ?? null,
     versions,
+  };
+}
+
+// ── BlueprintPin ───────────────────────────────────────────────────────────────
+
+export type DbBlueprintPin = {
+  id: string;
+  company_id: string;
+  document_id: string;
+  page: number;
+  x: number;
+  y: number;
+  type: "issue" | "info" | "safety" | "rfi";
+  note: string;
+  resolved: boolean;
+  created_by: string | null;
+  created_at: string;
+};
+
+export function dbToBlueprintPin(row: DbBlueprintPin): BlueprintPin {
+  return {
+    id: row.id,
+    documentId: row.document_id,
+    page: row.page,
+    x: Number(row.x),
+    y: Number(row.y),
+    type: row.type,
+    note: row.note,
+    resolved: row.resolved,
+    createdBy: row.created_by ?? undefined,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+export function blueprintPinToDb(
+  p: BlueprintPin,
+  companyId: string,
+): Omit<DbBlueprintPin, "created_at"> {
+  return {
+    id: p.id,
+    company_id: companyId,
+    document_id: p.documentId,
+    page: p.page,
+    x: p.x,
+    y: p.y,
+    type: p.type,
+    note: p.note,
+    resolved: p.resolved,
+    created_by: p.createdBy ?? null,
   };
 }

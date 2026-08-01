@@ -38,8 +38,9 @@ import {
   dbToDocument, documentToDb,
   dbToDailyReport, dailyReportToDb,
   dbToChangeOrder, changeOrderToDb,
+  dbToBlueprintPin, blueprintPinToDb,
   type DbTask, type DbMessage, type DbMaterialType, type DbMaterialEntry, type DbDocument,
-  type DbDailyReport, type DbChangeOrder,
+  type DbDailyReport, type DbChangeOrder, type DbBlueprintPin,
 } from "@/lib/supabase/db";
 
 function reviveDates(_key: string, value: unknown): unknown {
@@ -50,7 +51,11 @@ function reviveDates(_key: string, value: unknown): unknown {
 }
 
 export function genId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+  });
 }
 
 type StoreState = {
@@ -342,6 +347,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { data: documentsData },
         { data: dailyReportsData },
         { data: changeOrdersData },
+        { data: blueprintPinsData },
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("company_id", companyId),
         supabase.from("companies").select("*").eq("id", companyId).single(),
@@ -370,6 +376,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           .order("date", { ascending: false }).limit(200),
         supabase.from("change_orders").select("*").eq("company_id", companyId)
           .order("submitted_at", { ascending: false }),
+        supabase.from("blueprint_pins").select("*").eq("company_id", companyId),
       ]);
 
       // Group tasks by project_id for efficient lookup
@@ -412,6 +419,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         documents: (documentsData ?? []).map((d) => dbToDocument(d as DbDocument)),
         dailyReports: (dailyReportsData ?? []).map((r) => dbToDailyReport(r as DbDailyReport)),
         changeOrders: (changeOrdersData ?? []).map((c) => dbToChangeOrder(c as DbChangeOrder)),
+        blueprintPins: (blueprintPinsData ?? []).map((p) => dbToBlueprintPin(p as DbBlueprintPin)),
         inviteCode: co?.invite_code ?? "",
         companyAddress: co?.address ?? "",
         businessNumber: co?.business_number ?? "",
@@ -554,6 +562,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (p.eventType === "INSERT") setState((s) => ({ ...s, changeOrders: [dbToChangeOrder(p.new as DbChangeOrder), ...s.changeOrders.filter(x => x.id !== (p.new as {id:string}).id)] }));
           else if (p.eventType === "UPDATE") setState((s) => ({ ...s, changeOrders: s.changeOrders.map(x => x.id === (p.new as {id:string}).id ? dbToChangeOrder(p.new as DbChangeOrder) : x) }));
           else if (p.eventType === "DELETE") setState((s) => ({ ...s, changeOrders: s.changeOrders.filter(x => x.id !== (p.old as {id:string}).id) }));
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "blueprint_pins", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") setState((s) => ({ ...s, blueprintPins: [...s.blueprintPins.filter(x => x.id !== (p.new as {id:string}).id), dbToBlueprintPin(p.new as DbBlueprintPin)] }));
+          else if (p.eventType === "UPDATE") setState((s) => ({ ...s, blueprintPins: s.blueprintPins.map(x => x.id === (p.new as {id:string}).id ? dbToBlueprintPin(p.new as DbBlueprintPin) : x) }));
+          else if (p.eventType === "DELETE") setState((s) => ({ ...s, blueprintPins: s.blueprintPins.filter(x => x.id !== (p.old as {id:string}).id) }));
         })
         .subscribe((status) => {
           setState((s) => ({ ...s, isRealtimeConnected: status === "SUBSCRIBED" }));
@@ -1125,14 +1138,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addBlueprintPin = useCallback((pin: Omit<BlueprintPin, "id" | "createdAt">) => {
     const newPin: BlueprintPin = { ...pin, id: genId(), createdAt: new Date() };
     up((s) => ({ ...s, blueprintPins: [...s.blueprintPins, newPin] }));
+    bg(() => getClient().from("blueprint_pins").insert(blueprintPinToDb(newPin, companyIdRef.current!)), "addBlueprintPin");
   }, [up]);
 
   const updateBlueprintPin = useCallback((id: string, u: Partial<BlueprintPin>) => {
     up((s) => ({ ...s, blueprintPins: s.blueprintPins.map((p) => p.id === id ? { ...p, ...u } : p) }));
+    bg(() => {
+      const pin = stateRef.current.blueprintPins.find((p) => p.id === id);
+      if (pin) return getClient().from("blueprint_pins").update(blueprintPinToDb({ ...pin, ...u } as BlueprintPin, companyIdRef.current!)).eq("id", id);
+    }, "updateBlueprintPin");
   }, [up]);
 
   const deleteBlueprintPin = useCallback((id: string) => {
     up((s) => ({ ...s, blueprintPins: s.blueprintPins.filter((p) => p.id !== id) }));
+    bg(() => getClient().from("blueprint_pins").delete().eq("id", id), "deleteBlueprintPin");
   }, [up]);
 
   // ── Custom roles ──────────────────────────────────────────────────────────────
