@@ -515,6 +515,157 @@ export default function TimeTrackingPage() {
   });
 
   return (
+    <>
+    {/* ── MOBILE ── */}
+    <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      {!isOnline && (
+        <div className="mx-4 mt-4 mb-3 flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[12px] font-semibold px-4 py-2.5 rounded-xl">
+          <WifiOff size={14} />
+          You&apos;re offline — clock-ins queued.
+        </div>
+      )}
+
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+        <h2 className="text-[18px] font-bold text-white tracking-tight">Time Tracking</h2>
+        <button
+          onClick={() => requestClockIn(currentUser)}
+          className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
+        >
+          <LogIn size={14} />
+          Clock In
+        </button>
+      </div>
+
+      {/* Stats row */}
+      <div className="flex gap-3 px-4 pb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex items-center gap-2.5">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0" />
+          <div>
+            <p className="text-[20px] font-bold text-white leading-none">{clockedIn.length}</p>
+            <p className="text-[11px] text-green-400 font-semibold mt-0.5">On Site</p>
+          </div>
+        </div>
+        <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex items-center gap-2.5">
+          <Clock size={15} className="text-sky-400 flex-shrink-0" />
+          <div>
+            <p className="text-[20px] font-bold text-white leading-none">{todayTotal}h</p>
+            <p className="text-[11px] text-sky-400 font-semibold mt-0.5">Today</p>
+          </div>
+        </div>
+        <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex items-center gap-2.5">
+          <LogIn size={15} className="text-amber-400 flex-shrink-0" />
+          <div>
+            <p className="text-[20px] font-bold text-white leading-none">{clockEntries.filter((e) => e.clockIn >= todayStart).length}</p>
+            <p className="text-[11px] text-amber-400 font-semibold mt-0.5">Entries</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Clocked In Now */}
+      {clockedIn.length > 0 && (
+        <div className="px-4 mb-4">
+          <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+            Clocked In Now
+          </p>
+          {clockedIn.map((worker) => {
+            const project = getProjectById(worker.projectIds[0]);
+            const ci = worker.clockInTime ?? new Date();
+            return (
+              <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[13px] font-bold"
+                  style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                  {worker.photo
+                    ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
+                    : worker.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-bold text-white truncate">{worker.name}</p>
+                  <p className="text-[11px] text-white/40 truncate">{project?.name ?? "No project"}</p>
+                </div>
+                <span className="text-[12px] font-bold text-amber-400 flex-shrink-0 mr-1">{elapsed(ci)}</span>
+                <button
+                  onClick={() => handleClockOut(worker.id)}
+                  className="flex-shrink-0 bg-red-500/15 text-red-400 border border-red-500/20 rounded-lg px-3 py-1.5 text-[12px] font-bold active:bg-red-500/25 transition-colors"
+                >
+                  Out
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Clock In Worker (admin / PM / foreman only) */}
+      {(currentUser.role === "Admin" || currentUser.role === "Project Manager" || currentUser.role === "Foreman") && workers.filter((w) => !w.clockedIn).length > 0 && (
+        <div className="px-4 mb-4">
+          <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5">Clock In Worker</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden">
+            {workers.filter((w) => !w.clockedIn).map((worker, idx, arr) => (
+              <div key={worker.id} className={`flex items-center gap-3 px-4 py-2.5 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""}`}>
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
+                  style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                  {worker.photo
+                    ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
+                    : worker.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-white/80 truncate">{worker.name}</p>
+                  <p className="text-[11px] text-white/35 truncate">{worker.customRole}</p>
+                </div>
+                <button
+                  onClick={() => requestClockIn(worker)}
+                  className="flex-shrink-0 bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-lg px-3 py-1.5 text-[12px] font-bold active:bg-amber-500/25 transition-colors"
+                >
+                  Clock In
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Entries */}
+      {clockEntries.length > 0 && (
+        <div className="px-4">
+          <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5">Recent Entries</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden">
+            {[...clockEntries]
+              .sort((a, b) => b.clockIn.getTime() - a.clockIn.getTime())
+              .slice(0, 10)
+              .map((entry, idx, arr) => {
+                const worker = getWorkerById(entry.workerId);
+                const project = getProjectById(entry.projectId);
+                if (!worker) return null;
+                return (
+                  <div key={entry.id} className={`flex items-center gap-3 px-4 py-3 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""}`}>
+                    <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
+                      style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                      {worker.photo
+                        ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
+                        : worker.initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold text-white/80 truncate">{worker.name}</p>
+                      <p className="text-[10px] text-white/35 truncate">{project?.name ?? "—"}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-[11px] text-green-400">{fmt(entry.clockIn)}</p>
+                      <p className={`text-[11px] ${entry.clockOut ? "text-white/40" : "text-amber-400"}`}>
+                        {entry.clockOut ? fmt(entry.clockOut) : "Active"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* ── DESKTOP ── */}
+    <div className="hidden lg:block">
     <div className="space-y-5 max-w-[1200px]">
       {/* Offline banner */}
       {!isOnline && (
@@ -878,75 +1029,74 @@ export default function TimeTrackingPage() {
         </div>
       )}
 
-      {/* Project picker modal (step 1) */}
-      {projectPickerTarget && (
-        <ProjectPickerModal
-          worker={projectPickerTarget}
-          projects={activeProjects}
-          onSelect={handleProjectSelected}
-          onClose={() => setProjectPickerTarget(null)}
-        />
-      )}
+    </div>
+    </div>{/* end desktop */}
 
-      {/* Geofence checking overlay (step 1.5) */}
-      {geofenceChecking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl px-8 py-7 flex flex-col items-center gap-4 shadow-2xl">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <Navigation size={22} className="text-amber-400" />
-              </div>
-              <Loader2 size={14} className="text-amber-400 animate-spin absolute -bottom-1 -right-1" />
+    {/* ── MODALS (work on both breakpoints) ── */}
+    {projectPickerTarget && (
+      <ProjectPickerModal
+        worker={projectPickerTarget}
+        projects={activeProjects}
+        onSelect={handleProjectSelected}
+        onClose={() => setProjectPickerTarget(null)}
+      />
+    )}
+
+    {geofenceChecking && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <div className="bg-[#161616] border border-white/[0.08] rounded-2xl px-8 py-7 flex flex-col items-center gap-4 shadow-2xl">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <Navigation size={22} className="text-amber-400" />
             </div>
-            <div className="text-center">
-              <p className="text-[14px] font-bold text-white">Checking location…</p>
-              <p className="text-[11px] text-white/35 mt-1">Verifying you&apos;re on site</p>
-            </div>
+            <Loader2 size={14} className="text-amber-400 animate-spin absolute -bottom-1 -right-1" />
+          </div>
+          <div className="text-center">
+            <p className="text-[14px] font-bold text-white">Checking location…</p>
+            <p className="text-[11px] text-white/35 mt-1">Verifying you&apos;re on site</p>
           </div>
         </div>
-      )}
+      </div>
+    )}
 
-      {/* Geofence warning modal (step 1.5 fail) */}
-      {geofenceWarning && (
-        <GeofenceWarningModal
-          warning={geofenceWarning}
-          onOverride={() => {
-            const { worker, projectId } = geofenceWarning;
-            setGeofenceWarning(null);
-            setCameraTarget({ worker, projectId });
-          }}
-          onCancel={() => setGeofenceWarning(null)}
-        />
-      )}
-
-      {/* Camera modal (step 2) */}
-      {cameraTarget && (
-        <CameraCapture
-          workerName={cameraTarget.worker.name}
-          onCapture={handlePhotoConfirmed}
-          onClose={() => setCameraTarget(null)}
-        />
-      )}
-
-      {/* Edit entry modal */}
-      {editEntry && (
-        <EditEntryModal
-          entry={editEntry}
-          onSave={handleEditSave}
-          onDelete={handleEditDelete}
-          onClose={() => setEditEntry(null)}
-        />
-      )}
-
-      <ConfirmModal
-        open={clockOutAllConfirm}
-        title={`Clock Out All Workers`}
-        body={`Clock out all ${clockedIn.length} workers currently on site? This cannot be undone.`}
-        confirmLabel="Clock Out All"
-        danger={false}
-        onConfirm={() => { clockedIn.forEach((w) => handleClockOut(w.id)); setClockOutAllConfirm(false); }}
-        onCancel={() => setClockOutAllConfirm(false)}
+    {geofenceWarning && (
+      <GeofenceWarningModal
+        warning={geofenceWarning}
+        onOverride={() => {
+          const { worker, projectId } = geofenceWarning;
+          setGeofenceWarning(null);
+          setCameraTarget({ worker, projectId });
+        }}
+        onCancel={() => setGeofenceWarning(null)}
       />
-    </div>
+    )}
+
+    {cameraTarget && (
+      <CameraCapture
+        workerName={cameraTarget.worker.name}
+        onCapture={handlePhotoConfirmed}
+        onClose={() => setCameraTarget(null)}
+      />
+    )}
+
+    {editEntry && (
+      <EditEntryModal
+        entry={editEntry}
+        onSave={handleEditSave}
+        onDelete={handleEditDelete}
+        onClose={() => setEditEntry(null)}
+      />
+    )}
+
+    <ConfirmModal
+      open={clockOutAllConfirm}
+      title={`Clock Out All Workers`}
+      body={`Clock out all ${clockedIn.length} workers currently on site? This cannot be undone.`}
+      confirmLabel="Clock Out All"
+      danger={false}
+      onConfirm={() => { clockedIn.forEach((w) => handleClockOut(w.id)); setClockOutAllConfirm(false); }}
+      onCancel={() => setClockOutAllConfirm(false)}
+    />
+    </>
   );
 }

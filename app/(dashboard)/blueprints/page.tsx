@@ -78,7 +78,93 @@ export default function BlueprintsPage() {
     url?.toLowerCase().includes(".pdf") ? "pdf" : "image";
 
   return (
-    <div className="flex flex-col h-full gap-0 -m-4 md:-m-6">
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Header */}
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers size={18} className="text-amber-400" />
+            <h2 className="text-[22px] font-black text-white">Blueprints</h2>
+          </div>
+          <button
+            onClick={() => { setUploadError(null); fileInputRef.current?.click(); }}
+            disabled={uploading}
+            className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl disabled:opacity-50"
+          >
+            <Upload size={14} /> {uploading ? "…" : "Upload"}
+          </button>
+        </div>
+        {/* Project selector */}
+        <div className="px-4 mb-3">
+          <select
+            value={selectedProjectId}
+            onChange={(e) => { setSelectedProjectId(e.target.value); setSelectedDocId(null); }}
+            className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 text-[14px] text-white/80 outline-none focus:border-amber-500/30"
+          >
+            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+        {uploadError && (
+          <div className="px-4 mb-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl py-2.5 mx-4">
+            <AlertTriangle size={13} className="text-red-400 flex-shrink-0" />
+            <p className="text-[12px] text-red-300 flex-1">{uploadError}</p>
+            <button onClick={() => setUploadError(null)} className="text-red-400/50 hover:text-red-400"><X size={12} /></button>
+          </div>
+        )}
+        {/* Blueprint list */}
+        {projectBlueprints.length === 0 ? (
+          <div className="px-4 text-center py-16 text-white/25 space-y-2">
+            <FileImage size={36} className="mx-auto opacity-25" />
+            <p className="text-[14px] font-semibold">No blueprints yet</p>
+            <button onClick={() => fileInputRef.current?.click()} className="text-amber-400 text-[12px]">
+              Upload a blueprint
+            </button>
+          </div>
+        ) : (
+          <div className="px-4 space-y-2">
+            {projectBlueprints.map((doc) => {
+              const pins = blueprintPins.filter((p) => p.documentId === doc.id);
+              const openPins = pins.filter((p) => !p.resolved).length;
+              const isActive = (selectedDocId ?? projectBlueprints[0]?.id) === doc.id;
+              return (
+                <button
+                  key={doc.id}
+                  onClick={() => setSelectedDocId(doc.id)}
+                  className={`w-full text-left bg-[#131110] border rounded-xl p-4 transition-colors ${isActive ? "border-amber-500/30 bg-amber-500/[0.04]" : "border-white/[0.07]"}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0">
+                      <FilePlus size={18} className={isActive ? "text-amber-400" : "text-white/30"} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-bold text-white/90 truncate">{doc.name}</p>
+                      <p className="text-[11px] text-white/35 mt-0.5">
+                        {doc.uploadedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                        {doc.sizeBytes ? ` · ${(doc.sizeBytes / 1024 / 1024).toFixed(1)} MB` : ""}
+                      </p>
+                    </div>
+                    {openPins > 0 && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 flex-shrink-0">
+                        {openPins} open
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {selectedDoc && (
+          <div className="px-4 mt-4">
+            <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-2">Selected: {selectedDoc.name}</p>
+            <p className="text-[12px] text-amber-400/70">Open on desktop to view and annotate the blueprint.</p>
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:flex flex-col h-full gap-0 -m-4 md:-m-6">
       {/* Top bar */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06] bg-[#0a0a0a] flex-shrink-0">
         <Layers size={18} className="text-amber-400" />
@@ -286,6 +372,7 @@ export default function BlueprintsPage() {
         onConfirm={() => { if (deletePinConfirm) { deleteBlueprintPin(deletePinConfirm); setDeletePinConfirm(null); } }}
         onCancel={() => setDeletePinConfirm(null)}
       />
-    </div>
+      </div>
+    </>
   );
 }

@@ -208,310 +208,438 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="space-y-5 max-w-[1400px]">
-      {/* ── Pending Approval (admin only) ────────────────────────────────── */}
-      {isAdmin && pendingProjects.length > 0 && (
-        <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={15} className="text-amber-400 flex-shrink-0" />
-            <h3 className="text-[13px] font-bold text-amber-400">
-              {pendingProjects.length} project{pendingProjects.length !== 1 ? "s" : ""} awaiting your approval
-            </h3>
-          </div>
-          {pendingProjects.map((p) => {
-            const creator = workers.find((w) => w.id === p.createdBy);
-            return (
-              <div key={p.id} className="flex items-center justify-between gap-3 bg-[#0d0d0d] border border-white/[0.06] rounded-lg px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-white truncate">{p.name}</p>
-                  <p className="text-[11px] text-white/40 mt-0.5">
-                    {p.client ? `${p.client} · ` : ""}Submitted by {creator?.name ?? "Unknown"}
-                  </p>
-                </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => setDeleteConfirm(p.id)}
-                    className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                  >
-                    Reject
-                  </button>
-                  <button
-                    onClick={() => approveProject(p.id)}
-                    className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
-                  >
-                    Approve
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-white tracking-tight">Projects</h2>
-          </div>
-          <p className="text-white/35 text-sm mt-0.5">
-            {projects.filter((p) => p.status === "active" && !p.pendingApproval).length} active ·{" "}
-            {projects.filter((p) => p.status === "upcoming" && !p.pendingApproval).length} upcoming ·{" "}
-            {projects.filter((p) => p.status === "completed").length} completed
-          </p>
-        </div>
-        {isForeman && (
-          <button
-            onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
-            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
-          >
-            <Plus size={15} />
-            {isAdmin ? "New Project" : "Submit Project"}
-          </button>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-lg p-0.5 gap-0.5">
-          {VIEWS.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setView(id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all ${
-                view === id ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70 hover:bg-white/5"}`}>
-              <Icon size={13} />{label}
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Top bar */}
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+          <h1 className="text-[22px] font-black text-white">Projects</h1>
+          {isAdmin && (
+            <button
+              onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
+              className="bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
+            >
+              <Plus size={14} />
+              New Project
             </button>
-          ))}
+          )}
         </div>
-        <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-1.5 flex-1 max-w-64">
-          <Search size={13} className="text-white/30 flex-shrink-0" />
-          <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-            placeholder={`${t.common.search} projects or clients…`} value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        <div className="flex items-center gap-1">
-          {["all", "active", "upcoming", "completed"].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold capitalize transition-all ${
-                statusFilter === s ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60 hover:bg-white/5"}`}>
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {projects.length === 0 && (
-        <div className="text-center py-20 space-y-3">
-          <p className="text-white/20 text-[14px]">No projects yet</p>
-          <button onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }} className="text-amber-400 text-[13px] hover:text-amber-300 transition-colors">
-            + Create your first project
-          </button>
-        </div>
-      )}
-
-      {view === "gantt" && (
-        <div className="overflow-x-auto">
-          <div className="min-w-[860px]">
-            <GanttChart
-                projects={ganttProjects}
-                onTaskDatesChange={(projectId, taskId, startDate, endDate) =>
-                  updateTask(projectId, taskId, { startDate, endDate })
-                }
-              />
+        {/* Stats row */}
+        <div className="px-4 mb-3 flex gap-2 overflow-x-auto no-scrollbar">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
+            <span className="text-white font-bold">{projects.filter((p) => !p.pendingApproval).length}</span> Total
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+            <span className="text-white font-bold">{projects.filter((p) => p.status === "active" && !p.pendingApproval).length}</span> Active
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+            <span className="text-white font-bold">{projects.filter((p) => p.status === "upcoming" && !p.pendingApproval).length}</span> Upcoming
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/35 whitespace-nowrap flex items-center gap-1.5">
+            {projects.filter((p) => p.status === "completed").length} Completed
           </div>
         </div>
-      )}
 
-      {view === "table" && (
-        <div className="overflow-x-auto rounded-xl">
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[760px]">
-          <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
-            style={{ gridTemplateColumns: "2fr 1fr 80px 120px 100px 100px 80px 64px" }}>
-            <span>Project</span><span>Client</span><span className="text-center">Status</span>
-            <span>Progress</span><span>Budget</span><span>Deadline</span><span className="text-center">Team</span><span></span>
+        {/* Search + filter */}
+        <div className="px-4 mb-3 space-y-2">
+          <input
+            className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 text-[14px] text-white/80 placeholder:text-white/30 outline-none"
+            placeholder="Search projects or clients…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            {["all", "active", "upcoming", "completed"].map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 rounded-full text-[12px] font-bold capitalize whitespace-nowrap transition-all ${
+                  statusFilter === s
+                    ? "bg-amber-500 text-black"
+                    : "bg-[#131110] border border-white/[0.07] text-white/50"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
-          {filtered.map((project) => {
-            const overBudget = project.spent > project.budget;
-            return (
-              <div key={project.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
-                style={{ gridTemplateColumns: "2fr 1fr 80px 120px 100px 100px 80px 64px" }}>
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-bold text-white/85 truncate">{project.name}</p>
-                    <p className="text-[11px] text-white/30 truncate flex items-center gap-1">
-                      <MapPin size={9} />{project.address.split(",")[0]}
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[12px] text-white/50 truncate pr-2">{project.client}</span>
-                <div className="flex justify-center"><StatusBadge status={project.status} /></div>
-                <div className="pr-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] text-white/40">{project.progress}%</span>
-                  </div>
-                  <div className="h-1 bg-white/8 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
-                  </div>
-                </div>
-                <div>
-                  <p className={`text-[12px] font-semibold ${overBudget ? "text-red-400" : "text-white/70"}`}>
-                    {formatCurrencyCompact(project.spent, currency as never)}
-                  </p>
-                  <p className="text-[10px] text-white/25">/ {formatCurrencyCompact(project.budget, currency as never)}</p>
-                </div>
-                <span className="text-[12px] text-white/45">
-                  {project.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
-                </span>
-                <div className="flex justify-center items-center gap-1">
-                  <div className="flex -space-x-1.5">
-                    {project.workerIds.slice(0, 3).map((wid) => {
-                      const w = getWorkerById(wid);
-                      return w ? (
-                        <div key={wid} className="w-6 h-6 rounded-full border border-[#111111] flex items-center justify-center text-[9px] font-bold overflow-hidden"
-                          style={{ backgroundColor: w.color + "30", color: w.color }} title={w.name}>
-                          {w.photo ? <img src={w.photo} alt={w.name} className="w-full h-full object-cover" /> : w.initials}
-                        </div>
-                      ) : null;
-                    })}
-                  </div>
-                  {project.workerIds.length > 3 && <span className="text-[10px] text-white/30">+{project.workerIds.length - 3}</span>}
-                </div>
-                <div className="flex items-center justify-end gap-1">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 transition-all"
-                    style={{ color: shareCopied === project.id ? "#34d399" : "rgba(255,255,255,0.3)" }}
-                    title={shareCopied === project.id ? "Copied!" : "Copy client share link"}
-                  >
-                    <Share2 size={12} />
-                  </button>
-                  <button
-                    onClick={() => openEdit(project)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all"
-                  >
-                    <Pencil size={12} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteConfirm(project.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
         </div>
-        </div>
-      )}
 
-      {view === "cards" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((project) => {
-            const manager = getWorkerById(project.managerId);
-            const activeTasks = project.tasks.filter((t) => t.status === "in-progress").length;
-            const overBudget = project.spent > project.budget;
-            const budgetPct = project.budget > 0 ? Math.min(100, (project.spent / project.budget) * 100) : 0;
+        {/* Project cards */}
+        <div className="px-4 space-y-2">
+          {filtered.length === 0 && (
+            <div className="text-center py-16 text-white/25 text-[14px]">No projects found</div>
+          )}
+          {filtered.map((p) => {
+            const manager = getWorkerById(p.managerId);
+            const completedTasks = p.tasks.filter((t) => t.status === "completed").length;
+            const totalTasks = p.tasks.length;
             return (
-              <div key={project.id} onClick={() => openEdit(project)} className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/10 transition-colors group cursor-pointer">
-                <div className="h-1" style={{ backgroundColor: project.color }} />
-                <div className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1"><StatusBadge status={project.status} /></div>
-                      <h3 className="text-[14px] font-bold text-white group-hover:text-amber-300 transition-colors truncate">{project.name}</h3>
-                      <p className="text-[12px] text-white/40 truncate">{project.client}</p>
-                    </div>
+              <div
+                key={p.id}
+                className="bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden"
+                style={{ borderLeft: `3px solid ${p.color}` }}
+              >
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-[14px] font-bold text-white flex-1 min-w-0 truncate">{p.name}</p>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
-                        className="p-1.5 rounded hover:bg-emerald-500/10 transition-colors"
-                        style={{ color: shareCopied === project.id ? "#34d399" : "rgba(255,255,255,0.2)" }}
-                        title={shareCopied === project.id ? "Copied!" : "Copy client share link"}
-                      >
-                        <Share2 size={13} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
-                        className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 text-[11px] text-white/30 mb-4">
-                    <MapPin size={10} /><span className="truncate">{project.address}</span>
-                  </div>
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] text-white/40">Overall Progress</span>
-                      <span className="text-[13px] font-bold text-white">{project.progress}%</span>
-                    </div>
-                    <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="text-center"><p className="text-[14px] font-bold text-white">{activeTasks}</p><p className="text-[10px] text-white/30">In Progress</p></div>
-                    <div className="text-center border-x border-white/[0.06]"><p className="text-[14px] font-bold text-white">{project.tasks.length}</p><p className="text-[10px] text-white/30">Total Tasks</p></div>
-                    <div className="text-center"><p className="text-[14px] font-bold text-white">{project.workerIds.length}</p><p className="text-[10px] text-white/30">Workers</p></div>
-                  </div>
-                  <div className="bg-white/[0.03] rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-white/25">Budget</span>
-                      <span className={`text-[10px] font-bold ${overBudget ? "text-red-400" : "text-white/40"}`}>
-                        {overBudget ? "OVER BUDGET" : `${(100 - budgetPct).toFixed(0)}% remaining`}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-bold text-white">{formatCurrencyCompact(project.spent, currency as never)}</span>
-                      <span className="text-[11px] text-white/30">/ {formatCurrencyCompact(project.budget, currency as never)}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
-                    <div className="flex items-center gap-2">
-                      {manager && (
+                      <StatusBadge status={p.status} pending={p.pendingApproval} />
+                      {isAdmin && (
                         <>
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold overflow-hidden"
-                            style={{ backgroundColor: manager.color + "30", color: manager.color }}>
-                            {manager.photo ? <img src={manager.photo} alt={manager.name} className="w-full h-full object-cover" /> : manager.initials}
-                          </div>
-                          <span className="text-[11px] text-white/35">{manager.name}</span>
+                          <button
+                            onClick={() => openEdit(p)}
+                            className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-white/70 transition-colors"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(p.id)}
+                            className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-red-400 transition-colors"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </>
                       )}
                     </div>
-                    <span className="text-[11px] text-white/30">
-                      Due {project.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[12px] text-white/35 truncate flex-1">{p.client}</p>
+                    {manager && <p className="text-[12px] text-white/35 flex-shrink-0 ml-2">{manager.name}</p>}
+                  </div>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <p className="text-[12px] text-white/50 font-medium">{formatCurrencyCompact(p.budget, currency as never)}</p>
+                    <p className="text-[12px] text-white/35">
+                      {p.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                    </p>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-[11px] text-white/35">{completedTasks}/{totalTasks} tasks</p>
+                      <p className="text-[11px] font-bold text-white/50">{p.progress}%</p>
+                    </div>
+                    <div className="h-1 bg-white/[0.08] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${p.progress}%`, backgroundColor: p.color }} />
+                    </div>
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
-      )}
+      </div>
 
-      {view === "map" && (
-        <div className="space-y-3">
-          {mapPins.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-4">
-                <Map size={20} className="text-white/25" />
+      {/* DESKTOP - keep ALL existing content exactly as-is */}
+      <div className="hidden lg:block">
+        <div className="space-y-5 max-w-[1400px]">
+          {/* ── Pending Approval (admin only) ────────────────────────────────── */}
+          {isAdmin && pendingProjects.length > 0 && (
+            <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={15} className="text-amber-400 flex-shrink-0" />
+                <h3 className="text-[13px] font-bold text-amber-400">
+                  {pendingProjects.length} project{pendingProjects.length !== 1 ? "s" : ""} awaiting your approval
+                </h3>
               </div>
-              <p className="text-white/40 text-[14px] font-medium">No GPS locations set</p>
-              <p className="text-white/20 text-[12px] mt-1">Add latitude & longitude when creating a project to see it here.</p>
+              {pendingProjects.map((p) => {
+                const creator = workers.find((w) => w.id === p.createdBy);
+                return (
+                  <div key={p.id} className="flex items-center justify-between gap-3 bg-[#0d0d0d] border border-white/[0.06] rounded-lg px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-white truncate">{p.name}</p>
+                      <p className="text-[11px] text-white/40 mt-0.5">
+                        {p.client ? `${p.client} · ` : ""}Submitted by {creator?.name ?? "Unknown"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => setDeleteConfirm(p.id)}
+                        className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => approveProject(p.id)}
+                        className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ) : (
-            <>
-              <div className="w-full rounded-xl overflow-hidden" style={{ height: 480 }}>
-                <MapView pins={mapPins} className="w-full h-full" />
+          )}
+
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-white tracking-tight">Projects</h2>
               </div>
-              <p className="text-[11px] text-white/25 text-center">
-                {mapPins.length} of {filtered.length} project{filtered.length !== 1 ? "s" : ""} have GPS coordinates
+              <p className="text-white/35 text-sm mt-0.5">
+                {projects.filter((p) => p.status === "active" && !p.pendingApproval).length} active ·{" "}
+                {projects.filter((p) => p.status === "upcoming" && !p.pendingApproval).length} upcoming ·{" "}
+                {projects.filter((p) => p.status === "completed").length} completed
               </p>
-            </>
+            </div>
+            {isForeman && (
+              <button
+                onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
+                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+              >
+                <Plus size={15} />
+                {isAdmin ? "New Project" : "Submit Project"}
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-lg p-0.5 gap-0.5">
+              {VIEWS.map(({ id, label, icon: Icon }) => (
+                <button key={id} onClick={() => setView(id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all ${
+                    view === id ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70 hover:bg-white/5"}`}>
+                  <Icon size={13} />{label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-1.5 flex-1 max-w-64">
+              <Search size={13} className="text-white/30 flex-shrink-0" />
+              <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+                placeholder={`${t.common.search} projects or clients…`} value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+            <div className="flex items-center gap-1">
+              {["all", "active", "upcoming", "completed"].map((s) => (
+                <button key={s} onClick={() => setStatusFilter(s)}
+                  className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold capitalize transition-all ${
+                    statusFilter === s ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60 hover:bg-white/5"}`}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {projects.length === 0 && (
+            <div className="text-center py-20 space-y-3">
+              <p className="text-white/20 text-[14px]">No projects yet</p>
+              <button onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }} className="text-amber-400 text-[13px] hover:text-amber-300 transition-colors">
+                + Create your first project
+              </button>
+            </div>
+          )}
+
+          {view === "gantt" && (
+            <div className="overflow-x-auto">
+              <div className="min-w-[860px]">
+                <GanttChart
+                    projects={ganttProjects}
+                    onTaskDatesChange={(projectId, taskId, startDate, endDate) =>
+                      updateTask(projectId, taskId, { startDate, endDate })
+                    }
+                  />
+              </div>
+            </div>
+          )}
+
+          {view === "table" && (
+            <div className="overflow-x-auto rounded-xl">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[760px]">
+              <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
+                style={{ gridTemplateColumns: "2fr 1fr 80px 120px 100px 100px 80px 64px" }}>
+                <span>Project</span><span>Client</span><span className="text-center">Status</span>
+                <span>Progress</span><span>Budget</span><span>Deadline</span><span className="text-center">Team</span><span></span>
+              </div>
+              {filtered.map((project) => {
+                const overBudget = project.spent > project.budget;
+                return (
+                  <div key={project.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
+                    style={{ gridTemplateColumns: "2fr 1fr 80px 120px 100px 100px 80px 64px" }}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-bold text-white/85 truncate">{project.name}</p>
+                        <p className="text-[11px] text-white/30 truncate flex items-center gap-1">
+                          <MapPin size={9} />{project.address.split(",")[0]}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[12px] text-white/50 truncate pr-2">{project.client}</span>
+                    <div className="flex justify-center"><StatusBadge status={project.status} /></div>
+                    <div className="pr-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[11px] text-white/40">{project.progress}%</span>
+                      </div>
+                      <div className="h-1 bg-white/8 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className={`text-[12px] font-semibold ${overBudget ? "text-red-400" : "text-white/70"}`}>
+                        {formatCurrencyCompact(project.spent, currency as never)}
+                      </p>
+                      <p className="text-[10px] text-white/25">/ {formatCurrencyCompact(project.budget, currency as never)}</p>
+                    </div>
+                    <span className="text-[12px] text-white/45">
+                      {project.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                    </span>
+                    <div className="flex justify-center items-center gap-1">
+                      <div className="flex -space-x-1.5">
+                        {project.workerIds.slice(0, 3).map((wid) => {
+                          const w = getWorkerById(wid);
+                          return w ? (
+                            <div key={wid} className="w-6 h-6 rounded-full border border-[#111111] flex items-center justify-center text-[9px] font-bold overflow-hidden"
+                              style={{ backgroundColor: w.color + "30", color: w.color }} title={w.name}>
+                              {w.photo ? <img src={w.photo} alt={w.name} className="w-full h-full object-cover" /> : w.initials}
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                      {project.workerIds.length > 3 && <span className="text-[10px] text-white/30">+{project.workerIds.length - 3}</span>}
+                    </div>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 transition-all"
+                        style={{ color: shareCopied === project.id ? "#34d399" : "rgba(255,255,255,0.3)" }}
+                        title={shareCopied === project.id ? "Copied!" : "Copy client share link"}
+                      >
+                        <Share2 size={12} />
+                      </button>
+                      <button
+                        onClick={() => openEdit(project)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirm(project.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            </div>
+          )}
+
+          {view === "cards" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filtered.map((project) => {
+                const manager = getWorkerById(project.managerId);
+                const activeTasks = project.tasks.filter((t) => t.status === "in-progress").length;
+                const overBudget = project.spent > project.budget;
+                const budgetPct = project.budget > 0 ? Math.min(100, (project.spent / project.budget) * 100) : 0;
+                return (
+                  <div key={project.id} onClick={() => openEdit(project)} className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/10 transition-colors group cursor-pointer">
+                    <div className="h-1" style={{ backgroundColor: project.color }} />
+                    <div className="p-5">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1"><StatusBadge status={project.status} /></div>
+                          <h3 className="text-[14px] font-bold text-white group-hover:text-amber-300 transition-colors truncate">{project.name}</h3>
+                          <p className="text-[12px] text-white/40 truncate">{project.client}</p>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
+                            className="p-1.5 rounded hover:bg-emerald-500/10 transition-colors"
+                            style={{ color: shareCopied === project.id ? "#34d399" : "rgba(255,255,255,0.2)" }}
+                            title={shareCopied === project.id ? "Copied!" : "Copy client share link"}
+                          >
+                            <Share2 size={13} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
+                            className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] text-white/30 mb-4">
+                        <MapPin size={10} /><span className="truncate">{project.address}</span>
+                      </div>
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[11px] text-white/40">Overall Progress</span>
+                          <span className="text-[13px] font-bold text-white">{project.progress}%</span>
+                        </div>
+                        <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        <div className="text-center"><p className="text-[14px] font-bold text-white">{activeTasks}</p><p className="text-[10px] text-white/30">In Progress</p></div>
+                        <div className="text-center border-x border-white/[0.06]"><p className="text-[14px] font-bold text-white">{project.tasks.length}</p><p className="text-[10px] text-white/30">Total Tasks</p></div>
+                        <div className="text-center"><p className="text-[14px] font-bold text-white">{project.workerIds.length}</p><p className="text-[10px] text-white/30">Workers</p></div>
+                      </div>
+                      <div className="bg-white/[0.03] rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wide text-white/25">Budget</span>
+                          <span className={`text-[10px] font-bold ${overBudget ? "text-red-400" : "text-white/40"}`}>
+                            {overBudget ? "OVER BUDGET" : `${(100 - budgetPct).toFixed(0)}% remaining`}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[13px] font-bold text-white">{formatCurrencyCompact(project.spent, currency as never)}</span>
+                          <span className="text-[11px] text-white/30">/ {formatCurrencyCompact(project.budget, currency as never)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
+                        <div className="flex items-center gap-2">
+                          {manager && (
+                            <>
+                              <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold overflow-hidden"
+                                style={{ backgroundColor: manager.color + "30", color: manager.color }}>
+                                {manager.photo ? <img src={manager.photo} alt={manager.name} className="w-full h-full object-cover" /> : manager.initials}
+                              </div>
+                              <span className="text-[11px] text-white/35">{manager.name}</span>
+                            </>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-white/30">
+                          Due {project.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {view === "map" && (
+            <div className="space-y-3">
+              {mapPins.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-4">
+                    <Map size={20} className="text-white/25" />
+                  </div>
+                  <p className="text-white/40 text-[14px] font-medium">No GPS locations set</p>
+                  <p className="text-white/20 text-[12px] mt-1">Add latitude & longitude when creating a project to see it here.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="w-full rounded-xl overflow-hidden" style={{ height: 480 }}>
+                    <MapView pins={mapPins} className="w-full h-full" />
+                  </div>
+                  <p className="text-[11px] text-white/25 text-center">
+                    {mapPins.length} of {filtered.length} project{filtered.length !== 1 ? "s" : ""} have GPS coordinates
+                  </p>
+                </>
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
 
-      {/* Modal */}
+      {/* Modals — fixed position, work on all screen sizes */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -657,6 +785,6 @@ export default function ProjectsPage() {
         onConfirm={() => { if (deleteConfirm) { deleteProject(deleteConfirm); setDeleteConfirm(null); } }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }

@@ -115,7 +115,106 @@ export default function PhotosPage() {
   const topTags = Object.entries(tagCounts).sort(([, a], [, b]) => b - a).slice(0, 8);
 
   return (
-    <div className="space-y-5 max-w-[1200px]">
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Header */}
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-[22px] font-black text-white">Photos</h2>
+            <p className="text-white/35 text-[12px] mt-0.5">{photos.length} photos</p>
+          </div>
+          <button onClick={openModal}
+            className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl">
+            <Upload size={15} /> Upload
+          </button>
+        </div>
+        {/* Project filter */}
+        <div className="px-4 mb-2 flex gap-2 overflow-x-auto no-scrollbar">
+          <button onClick={() => setProjectFilter("all")}
+            className={`flex-shrink-0 text-[12px] font-bold px-3 py-1.5 rounded-full border transition-colors ${projectFilter === "all" ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
+            All <span className="opacity-50">{photos.length}</span>
+          </button>
+          {projects.filter((p) => p.status !== "upcoming").map((project) => {
+            const count = photos.filter((ph) => ph.projectId === project.id).length;
+            return (
+              <button key={project.id} onClick={() => setProjectFilter(project.id)}
+                className={`flex-shrink-0 flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-full border transition-colors ${projectFilter === project.id ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} />
+                {project.name} <span className="opacity-50">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+        {/* Tag filter */}
+        {topTags.length > 0 && (
+          <div className="px-4 mb-2 flex gap-1.5 overflow-x-auto no-scrollbar">
+            {topTags.map(([tag]) => (
+              <button key={tag} onClick={() => setTagFilter(tagFilter === tag ? "" : tag)}
+                className={`flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-colors ${tagFilter === tag ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/35 border-white/[0.06]"}`}>
+                #{tag}
+              </button>
+            ))}
+          </div>
+        )}
+        {/* Search */}
+        <div className="px-4 mb-3">
+          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3">
+            <Search size={14} className="text-white/30" />
+            <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
+              placeholder="Search photos..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+        </div>
+        {/* Photo grid */}
+        {filtered.length === 0 ? (
+          <div className="px-4 text-center py-16 text-white/25 space-y-2">
+            <FolderOpen size={36} className="mx-auto opacity-30" />
+            <p className="text-[14px] font-semibold">{photos.length === 0 ? "No photos yet" : "No photos found"}</p>
+          </div>
+        ) : (
+          <div className="px-3 grid grid-cols-2 gap-2">
+            {filtered.map((photo, idx) => {
+              const mProject = getProjectById(photo.projectId);
+              return (
+                <div key={photo.id} onClick={() => setLightboxIdx(idx)}
+                  className="bg-[#131110] border border-white/[0.06] rounded-xl overflow-hidden cursor-pointer group relative">
+                  <div className="w-full aspect-square relative overflow-hidden" style={!photo.url ? { background: photo.gradient } : {}}>
+                    {photo.url
+                      ? <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" />
+                      : <div className="absolute inset-0 flex items-center justify-center opacity-25"><FolderOpen size={32} className="text-white" /></div>
+                    }
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <p className="absolute bottom-2 left-2 right-2 text-[11px] font-semibold text-white drop-shadow-lg line-clamp-1">{photo.caption}</p>
+                    {mProject && (
+                      <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/50 rounded-full px-2 py-0.5">
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: mProject.color }} />
+                        <span className="text-[9px] text-white/70 font-medium truncate max-w-[60px]">{mProject.name}</span>
+                      </div>
+                    )}
+                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X size={11} className="text-white" />
+                    </button>
+                  </div>
+                  <div className="px-3 py-2">
+                    <p className="text-[10px] text-white/35">
+                      {photo.uploadedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+            <button onClick={openModal}
+              className="bg-[#131110] border-2 border-dashed border-white/[0.08] rounded-xl aspect-square flex flex-col items-center justify-center gap-2 hover:border-amber-500/30 transition-all">
+              <Upload size={20} className="text-white/20" />
+              <p className="text-[11px] text-white/25">Upload</p>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Photos & Files</h2>
@@ -431,6 +530,8 @@ export default function PhotosPage() {
         </div>
       </div>
 
+      </div>
+
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
@@ -580,6 +681,6 @@ export default function PhotosPage() {
         onConfirm={() => { if (deleteConfirm) deletePhoto(deleteConfirm); setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }

@@ -127,7 +127,99 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="space-y-5 max-w-[1000px]">
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+          <h2 className="text-[22px] font-black text-white">Tasks</h2>
+          <button
+            onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask); setShowModal(true); }}
+            className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl"
+          >
+            <Plus size={15} /> New
+          </button>
+        </div>
+        <div className="px-4 mb-3 flex gap-2 overflow-x-auto no-scrollbar">
+          {FILTER_TABS.map((tab) => (
+            <button key={tab.key} onClick={() => setFilterStatus(tab.key)}
+              className={`flex-shrink-0 text-[12px] font-bold px-3 py-1.5 rounded-full border transition-colors ${filterStatus === tab.key ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
+              {tab.label} <span className="opacity-60">{counts[tab.key] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+        <div className="px-4 mb-3">
+          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3">
+            <Search size={14} className="text-white/30" />
+            <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
+              placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+        </div>
+        <div className="px-4 space-y-2">
+          {filtered.length === 0 && (
+            <div className="text-center py-12 text-white/25 text-[13px]">
+              {allTasks.length === 0 ? "No tasks yet" : "No tasks match filters"}
+            </div>
+          )}
+          {filtered.map((task) => {
+            const mProject = getProjectById(task.projectId);
+            const mWorker = getWorkerById(task.workerId);
+            const cfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG["not-started"];
+            const MIcon = cfg.icon;
+            const isOverdueMobile = task.status !== "completed" && isBefore(task.endDate, today);
+            return (
+              <div key={task.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+                <div className="flex items-start gap-3 mb-2">
+                  <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} className="mt-0.5 flex-shrink-0">
+                    <MIcon size={16} className={cfg.className} />
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-bold text-white/90 leading-tight">{task.name}</p>
+                    {mProject && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: mProject.color }} />
+                        <span className="text-[12px] text-amber-400/80">{mProject.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    {isOverdueMobile && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full mr-1">OVERDUE</span>}
+                    <button onClick={() => openEdit(task)} className="p-1.5 text-white/25 hover:text-white/60 transition-colors">
+                      <Pencil size={13} />
+                    </button>
+                    <button onClick={() => handleDelete(task.projectId, task.id, task.name)} className="p-1.5 text-white/25 hover:text-red-400 transition-colors">
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  {mWorker ? (
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-black flex-shrink-0"
+                        style={{ backgroundColor: mWorker.color + "25", color: mWorker.color }}>
+                        {mWorker.photo ? <img src={mWorker.photo} alt={mWorker.name} className="w-full h-full object-cover" /> : mWorker.initials}
+                      </div>
+                      <span className="text-[11px] text-white/40">{mWorker.name.split(" ")[0]}</span>
+                    </div>
+                  ) : <span />}
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{
+                        width: `${task.progress}%`,
+                        backgroundColor: task.status === "completed" ? "#22c55e" : task.status === "delayed" ? "#ef4444" : "#f59e0b"
+                      }} />
+                    </div>
+                    <span className="text-[10px] text-white/30">{task.progress}%</span>
+                    <span className="text-[11px] text-white/25">{format(task.endDate, "MMM d")}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block space-y-5 max-w-[1000px]">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Tasks</h2>
@@ -246,6 +338,8 @@ export default function TasksPage() {
       </div>
       </div>
 
+      </div>
+
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
@@ -346,6 +440,6 @@ export default function TasksPage() {
         onConfirm={() => { if (deleteTaskConfirm) deleteTask(deleteTaskConfirm.projectId, deleteTaskConfirm.taskId); setDeleteTaskConfirm(null); }}
         onCancel={() => setDeleteTaskConfirm(null)}
       />
-    </div>
+    </>
   );
 }

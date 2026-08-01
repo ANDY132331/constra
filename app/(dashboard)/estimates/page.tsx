@@ -272,7 +272,91 @@ export default function EstimatesPage() {
   const previewTotal = form.items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0) * (1 + (parseFloat(form.taxRate) || 0) / 100);
 
   return (
-    <div className="space-y-5 max-w-[1000px]">
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {convertedNotice && (
+          <div className="flex items-center justify-between gap-3 mx-4 mt-4 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+            <p className="text-[13px] text-emerald-400 font-semibold">Invoice {convertedNotice} created — find it in Invoices.</p>
+            <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400 transition-colors">✕</button>
+          </div>
+        )}
+        <div className="flex items-center justify-between px-4 py-3 bg-[#0d0c0b] border-b border-white/[0.06]">
+          <div>
+            <h1 className="text-[15px] font-bold text-white">Estimates</h1>
+            <p className="text-[11px] text-white/35">{estimates.filter((e) => e.status === "sent").length} awaiting &bull; {formatCurrencyCompact(totalPending, currency as never)} pending</p>
+          </div>
+          <button
+            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors">
+            <Plus size={13} /> New
+          </button>
+        </div>
+
+        <div className="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar">
+          {[
+            { label: "Draft", count: estimates.filter((e) => e.status === "draft").length, color: "text-white/50" },
+            { label: "Sent", count: estimates.filter((e) => e.status === "sent").length, color: "text-blue-400" },
+            { label: "Accepted", count: estimates.filter((e) => e.status === "accepted").length, color: "text-green-400" },
+            { label: "Declined", count: estimates.filter((e) => e.status === "declined").length, color: "text-red-400" },
+          ].map(({ label, count, color }) => (
+            <div key={label} className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-2 text-center">
+              <p className={`text-[18px] font-bold ${color}`}>{count}</p>
+              <p className="text-[10px] text-white/30">{label}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="px-4 mb-4">
+          <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
+            <Search size={13} className="text-white/30 flex-shrink-0" />
+            <input className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/25 outline-none"
+              placeholder="Search estimates..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="px-4 space-y-3">
+          {filtered.length === 0 ? (
+            <div className="text-center py-12 text-white/30 text-[13px]">No estimates found</div>
+          ) : filtered.map((e) => {
+            const total = e.items.reduce((s, i) => s + i.qty * i.rate, 0) * (1 + e.taxRate / 100);
+            const cfg = STATUS_CONFIG[e.status];
+            const StatusIcon = cfg.icon;
+            return (
+              <div key={e.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-mono text-white/30">{e.number}</p>
+                    <p className="text-[13px] font-bold text-white/90 mt-0.5">{e.projectName}</p>
+                    <p className="text-[11px] text-white/40">{e.clientName}</p>
+                  </div>
+                  <span className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${cfg.className}`}>
+                    <StatusIcon size={10} />
+                    {cfg.label}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[16px] font-bold text-white/85">{formatCurrency(Math.round(total), currency as never)}</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => openEdit(e)} className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.09] text-white/50 transition-colors">
+                      <Pencil size={13} />
+                    </button>
+                    <button onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }} className="hidden" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          <button
+            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            className="w-full py-4 border-2 border-dashed border-white/[0.07] rounded-2xl text-[13px] text-white/30 hover:text-white/50 hover:border-amber-500/30 transition-all">
+            + New Estimate
+          </button>
+        </div>
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block space-y-5 max-w-[1000px]">
       {convertedNotice && (
         <div className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
           <p className="text-[13px] text-emerald-400 font-semibold">Invoice {convertedNotice} created — find it in Invoices.</p>
@@ -340,6 +424,8 @@ export default function EstimatesPage() {
           </button>
         </div>
       )}
+
+      </div>
 
       {/* Modal */}
       {showModal && (
@@ -460,6 +546,6 @@ export default function EstimatesPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

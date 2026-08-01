@@ -153,7 +153,139 @@ export default function ReportsPage() {
   const activeWorkers = workers.filter((w) => w.clockedIn).length;
 
   return (
-    <div className="space-y-5">
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Header */}
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-[22px] font-black text-white">Reports</h2>
+            <p className="text-white/35 text-[12px] mt-0.5">{periodLabel}</p>
+          </div>
+          {canSeeFinancials && (
+            <button
+              onClick={async () => {
+                setPdfLoading(true);
+                try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName }); }
+                finally { setPdfLoading(false); }
+              }}
+              disabled={pdfLoading}
+              className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold text-[12px] px-3 py-2 rounded-xl disabled:opacity-50"
+            >
+              <FileText size={13} />
+              {pdfLoading ? "…" : "PDF"}
+            </button>
+          )}
+        </div>
+        {/* Period selector */}
+        <div className="px-4 mb-4">
+          <div className="flex gap-1 bg-[#131110] border border-white/[0.07] rounded-xl p-1">
+            {(["week", "month", "quarter"] as const).map((p) => (
+              <button key={p} onClick={() => setPeriod(p)}
+                className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${period === p ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
+                {p === "week" ? "Week" : p === "month" ? "Month" : "Quarter"}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* KPI cards 2-col */}
+        <div className="px-4 grid grid-cols-2 gap-2 mb-4">
+          {[
+            { label: "Total Hours", icon: Clock, color: "text-amber-400", value: hasHoursData ? `${totalHours.toFixed(1)}h` : "0h", sub: hasHoursData ? `${periodEntries.length} sessions` : "No sessions" },
+            { label: "On Site Now", icon: Users, color: "text-blue-400", value: activeWorkers.toString(), sub: `of ${workers.length} crew` },
+            { label: "Budget Used", icon: DollarSign, color: "text-green-400", value: totalBudget > 0 ? `${((totalSpent / totalBudget) * 100).toFixed(0)}%` : "—", sub: totalBudget > 0 ? `${formatCurrencyCompact(totalSpent, currency)} spent` : "No budgets" },
+            { label: "Avg Hrs/Worker", icon: TrendingUp, color: "text-purple-400", value: workers.length > 0 && hasHoursData ? `${(totalHours / workers.length).toFixed(1)}h` : "—", sub: "This period" },
+          ].map((kpi) => (
+            <div key={kpi.label} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+              <kpi.icon size={15} className={`${kpi.color} mb-2`} />
+              <p className="text-[24px] font-black text-white">{kpi.value}</p>
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-wide mt-0.5">{kpi.label}</p>
+              <p className="text-[10px] text-white/20 mt-0.5 leading-tight">{kpi.sub}</p>
+            </div>
+          ))}
+        </div>
+        {/* Hours bar chart */}
+        <div className="px-4 mb-4">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+            <p className="text-[13px] font-bold text-white mb-4">{period === "week" ? "Daily" : "Weekly"} Hours</p>
+            {!hasHoursData ? (
+              <div className="flex flex-col items-center justify-center h-24 gap-2">
+                <BarChart2 size={24} className="text-white/10" />
+                <p className="text-[11px] text-white/25 text-center">No hours this period</p>
+              </div>
+            ) : (
+              <div className="flex items-end gap-1 h-24 overflow-x-auto no-scrollbar">
+                {dailyBars.map((d, i) => {
+                  const pct = (d.hours / maxBarH) * 100;
+                  return (
+                    <div key={i} className="flex-1 min-w-[20px] flex flex-col items-center gap-1">
+                      <div className="w-full rounded-t bg-amber-500/70" style={{ height: `${Math.max(pct, d.hours > 0 ? 10 : 2)}%`, minHeight: "2px" }} />
+                      <span className="text-[8px] text-white/30 whitespace-nowrap">{d.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Budget bars */}
+        {projectBudgets.length > 0 && (
+          <div className="px-4 mb-4">
+            <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 space-y-4">
+              <p className="text-[13px] font-bold text-white">Budget Tracking</p>
+              {projectBudgets.map((p) => {
+                const over = p.pct > 90;
+                return (
+                  <div key={p.name}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                        <span className="text-[12px] font-semibold text-white/70 truncate max-w-[140px]">{p.name}</span>
+                      </div>
+                      <span className={`text-[11px] font-bold ${over ? "text-red-400" : "text-white/45"}`}>{p.pct.toFixed(0)}%</span>
+                    </div>
+                    <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.pct > 90 ? "#ef4444" : p.pct > 70 ? "#f59e0b" : p.color }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {/* Top workers */}
+        {topWorkers.length > 0 && (
+          <div className="px-4">
+            <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 space-y-3">
+              <p className="text-[13px] font-bold text-white">Top Workers</p>
+              {topWorkers.map((worker, i) => {
+                const maxH = topWorkers[0].hoursThisPeriod;
+                return (
+                  <div key={worker.id} className="flex items-center gap-3">
+                    <span className="text-[12px] font-black text-white/20 w-4 flex-shrink-0">{i + 1}</span>
+                    <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center text-[11px] font-black flex-shrink-0"
+                      style={{ backgroundColor: worker.color + "20", color: worker.color }}>
+                      {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[12px] font-semibold text-white/80">{worker.name}</span>
+                        <span className="text-[12px] font-black text-white">{worker.hoursThisPeriod}h</span>
+                      </div>
+                      <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${(worker.hoursThisPeriod / maxH) * 100}%`, backgroundColor: worker.color }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -430,5 +562,6 @@ export default function ReportsPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

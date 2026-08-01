@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, GitPullRequest, DollarSign, Trash2, X,
-  ChevronRight, Download, CheckCircle2, Clock, XCircle, Ban, Pencil,
+  ChevronRight, ChevronLeft, Download, CheckCircle2, Clock, XCircle, Ban, Pencil,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useStore } from "@/lib/store";
@@ -157,7 +157,142 @@ export default function ChangeOrdersPage() {
   if (!isAdmin) return null;
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        <div className="flex items-center justify-between px-4 py-3 bg-[#0d0c0b] border-b border-white/[0.06]">
+          {selected ? (
+            <button onClick={() => setSelected(null)} className="flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white/80 transition-colors">
+              <ChevronLeft size={16} /> Back
+            </button>
+          ) : (
+            <h1 className="text-[15px] font-bold text-white">Change Orders</h1>
+          )}
+          {!selected && (
+            <button onClick={openNew} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors">
+              <Plus size={13} /> New
+            </button>
+          )}
+        </div>
+
+        {!selected ? (
+          <>
+            <div className="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar">
+              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 text-center">
+                <p className="text-[10px] text-white/30 mb-0.5">Pending</p>
+                <p className="text-[12px] font-bold font-mono text-amber-400">{formatCurrency(totals.pending, currency as never)}</p>
+              </div>
+              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 text-center">
+                <p className="text-[10px] text-white/30 mb-0.5">Approved</p>
+                <p className="text-[12px] font-bold font-mono text-emerald-400">{formatCurrency(totals.approved, currency as never)}</p>
+              </div>
+              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 text-center">
+                <p className="text-[10px] text-white/30 mb-0.5">Total</p>
+                <p className="text-[12px] font-bold font-mono text-white/70">{formatCurrency(totals.all, currency as never)}</p>
+              </div>
+            </div>
+            <div className="px-4 mb-3">
+              <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
+                <Search size={13} className="text-white/30 flex-shrink-0" />
+                <input className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/25 outline-none"
+                  placeholder="Search change orders..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
+              {(["all", "pending", "approved", "rejected", "void"] as const).map((s) => (
+                <button key={s} onClick={() => setStatusFilter(s)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold capitalize transition-colors ${statusFilter === s ? "bg-amber-500 text-black" : "bg-white/[0.06] text-white/45 hover:bg-white/[0.09]"}`}>
+                  {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+            <div className="px-4 space-y-2">
+              {filtered.length === 0 ? (
+                <div className="text-center py-12 text-white/30 text-[13px]">No change orders found</div>
+              ) : filtered.map((co) => {
+                const proj = projectMap.get(co.projectId);
+                const cfg = STATUS_CONFIG[co.status];
+                return (
+                  <button key={co.id} onClick={() => setSelected(co)} className="w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-mono text-white/30">{co.number}</p>
+                        <p className="text-[13px] font-semibold text-white/85 mt-0.5 line-clamp-1">{co.title}</p>
+                        <p className="text-[11px] text-white/40 mt-0.5">{proj?.name ?? "Unknown project"}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-[13px] font-bold font-mono text-white/80">{formatCurrency(co.amount, currency as never)}</p>
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${cfg.bg} ${cfg.text}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                          {cfg.label}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div className="px-4 py-4 space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[11px] font-mono text-white/30">{selected.number}</span>
+                <StatusBadge status={selected.status} />
+              </div>
+              <h2 className="text-[16px] font-bold text-white/90">{selected.title}</h2>
+              <p className="text-[12px] text-white/40 mt-0.5">
+                {projectMap.get(selected.projectId)?.name ?? "Unknown project"} &bull;{" "}
+                {workerMap.get(selected.submittedById)?.name ?? "Unknown"} &bull;{" "}
+                {selected.submittedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+              </p>
+            </div>
+            <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-white/30 uppercase tracking-wider">Change Amount</p>
+                <p className="text-[22px] font-bold text-white/90">{formatCurrency(selected.amount, currency as never)}</p>
+              </div>
+              {selected.status === "pending" && (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); }}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                    <CheckCircle2 size={12} /> Approve
+                  </button>
+                  <button
+                    onClick={() => { updateChangeOrder(selected.id, { status: "rejected" }); setSelected((p) => p ? { ...p, status: "rejected" } : null); }}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                    <XCircle size={12} /> Reject
+                  </button>
+                </div>
+              )}
+            </div>
+            {selected.description && (
+              <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                <p className="text-[10px] font-bold text-white/25 uppercase tracking-wider mb-2">Description</p>
+                <p className="text-[13px] text-white/65 leading-relaxed whitespace-pre-wrap">{selected.description}</p>
+              </div>
+            )}
+            {selected.reason && (
+              <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                <p className="text-[10px] font-bold text-white/25 uppercase tracking-wider mb-2">Reason for Change</p>
+                <p className="text-[13px] text-white/65 leading-relaxed whitespace-pre-wrap">{selected.reason}</p>
+              </div>
+            )}
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => openEdit(selected)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.09] text-white/60 text-[12px] font-semibold transition-colors">
+                <Pencil size={13} /> Edit
+              </button>
+              <button onClick={() => setDeleteConfirm(selected.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[12px] font-semibold transition-colors">
+                <Trash2 size={13} /> Delete
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:flex h-full overflow-hidden">
       {/* Left list */}
       <div className={`flex flex-col ${selected ? "hidden lg:flex" : "flex"} w-full lg:w-[380px] lg:min-w-[380px] border-r border-white/[0.06]`}>
         {/* Toolbar */}
@@ -336,6 +471,8 @@ export default function ChangeOrdersPage() {
         </div>
       )}
 
+      </div>
+
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -406,7 +543,7 @@ export default function ChangeOrdersPage() {
         onConfirm={() => { if (deleteConfirm) { deleteChangeOrder(deleteConfirm); setSelected(null); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }
 

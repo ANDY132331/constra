@@ -109,191 +109,289 @@ export default function RFIsPage() {
   };
 
   return (
-    <div className="space-y-5 max-w-[900px]">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">RFIs</h2>
-          <p className="text-white/35 text-sm mt-0.5">Request For Information — formal clarification and design queries</p>
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <h1 className="text-[22px] font-black text-white">RFIs</h1>
+          <button
+            onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
+          >
+            <Plus size={13} /> New RFI
+          </button>
         </div>
-        <button onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
-          <Plus size={15} />
-          New RFI
-        </button>
-      </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        {(["open", "answered", "closed"] as const).map((status) => {
-          const cfg = STATUS_CONFIG[status];
-          const Icon = cfg.icon;
-          const count = rfis.filter((r) => r.status === status).length;
-          const active = statusFilter === status;
-          return (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(active ? "all" : status)}
-              className={`bg-[#111111] border rounded-xl p-4 flex items-center gap-3 transition-all text-left ${active ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-white/[0.06] hover:border-white/10"}`}
-            >
-              <Icon size={20} className={cfg.className.split(" ")[1]} />
-              <div>
-                <p className="text-2xl font-bold text-white">{count}</p>
-                <p className="text-[11px] text-white/40">{cfg.label}</p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-64">
-        <Search size={13} className="text-white/30" />
-        <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-          placeholder="Search RFIs…" value={search} onChange={(e) => setSearch(e.target.value)} />
-      </div>
-
-      <div className="space-y-2">
-        {rfis.length === 0 && (
-          <div className="text-center py-16 text-white/25 space-y-2">
-            <MessageSquare size={36} className="mx-auto opacity-30" />
-            <p className="text-[14px]">No RFIs yet</p>
-            <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-              + Submit your first RFI
-            </button>
-          </div>
-        )}
-        {rfis.length > 0 && filtered.length === 0 && (
-          <div className="text-center py-12 text-white/25 space-y-1">
-            <MessageSquare size={28} className="mx-auto opacity-20" />
-            <p className="text-[13px]">No RFIs match the current filter</p>
-          </div>
-        )}
-        {filtered.map((rfi) => {
-          const project = getProjectById(rfi.projectId);
-          const submitter = getWorkerById(rfi.submittedById);
-          const assignee = getWorkerById(rfi.assignedToId);
-          const statusCfg = STATUS_CONFIG[rfi.status];
-          const prioCfg = PRIORITY_CONFIG[rfi.priority];
-          const StatusIcon = statusCfg.icon;
-          const isOpen = expanded === rfi.id;
-          const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
-
-          return (
-            <div key={rfi.id} className={`bg-[#111111] border rounded-xl overflow-hidden transition-all ${isOverdue ? "border-red-500/20" : "border-white/[0.06] hover:border-white/10"}`}>
-              <button className="w-full flex items-center gap-4 px-5 py-4 text-left"
-                onClick={() => setExpanded(isOpen ? null : rfi.id)}>
-                <StatusIcon size={16} className={statusCfg.className.split(" ")[1]} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="text-[11px] text-white/30 font-mono">{rfi.number}</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
-                    {isOverdue && <span className="text-[10px] font-bold bg-red-500/15 text-red-400 px-2 py-0.5 rounded-full">OVERDUE</span>}
-                  </div>
-                  <p className="text-[14px] font-bold text-white/85 truncate">{rfi.subject}</p>
-                  <div className="flex items-center gap-3 mt-1 text-[11px] text-white/30">
-                    {project && <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} /><span>{project.name}</span></div>}
-                    <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
-                  {isOpen ? <ChevronDown size={15} className="text-white/30" /> : <ChevronRight size={15} className="text-white/20" />}
-                  <button onClick={(e) => { e.stopPropagation(); openEdit(rfi); }}
-                    className="p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
-                    <Pencil size={12} />
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(rfi.id); }}
-                    className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
-                    <Trash2 size={12} />
-                  </button>
-                </div>
+        {/* Status filter pills */}
+        <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => setStatusFilter("all")}
+            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${statusFilter === "all" ? "bg-white/15 text-white" : "bg-white/[0.05] text-white/40"}`}
+          >
+            All ({rfis.length})
+          </button>
+          {(["open", "answered", "closed"] as const).map((status) => {
+            const cfg = STATUS_CONFIG[status];
+            const count = rfis.filter((r) => r.status === status).length;
+            return (
+              <button key={status}
+                onClick={() => setStatusFilter(statusFilter === status ? "all" : status)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${statusFilter === status ? cfg.className : "bg-white/[0.05] text-white/40"}`}
+              >
+                {cfg.label} ({count})
               </button>
+            );
+          })}
+        </div>
 
-              {isOpen && (
-                <div className="px-5 pb-5 pt-0 border-t border-white/[0.05]">
-                  <div className="pt-4 space-y-4">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">Question</p>
-                      <p className="text-[13px] text-white/65 leading-relaxed">{rfi.question}</p>
-                    </div>
-                    {rfi.answer && (
-                      <div className="bg-green-500/[0.06] border border-green-500/15 rounded-xl p-4">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-green-400 mb-2">Response</p>
-                        <p className="text-[13px] text-white/65 leading-relaxed">{rfi.answer}</p>
+        {/* Search */}
+        <div className="flex items-center gap-2 bg-white/[0.05] mx-4 mb-3 px-3 py-2.5 rounded-xl">
+          <Search size={13} className="text-white/30" />
+          <input
+            className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+            placeholder="Search RFIs…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* List */}
+        <div className="divide-y divide-white/[0.05]">
+          {rfis.length === 0 && (
+            <div className="text-center py-16 text-white/25 space-y-2 px-4">
+              <MessageSquare size={32} className="mx-auto opacity-30" />
+              <p className="text-[13px]">No RFIs yet</p>
+              <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px]">
+                + Submit your first RFI
+              </button>
+            </div>
+          )}
+          {rfis.length > 0 && filtered.length === 0 && (
+            <div className="text-center py-12 text-white/25 px-4">
+              <p className="text-[13px]">No RFIs match the filter</p>
+            </div>
+          )}
+          {filtered.map((rfi) => {
+            const project = getProjectById(rfi.projectId);
+            const statusCfg = STATUS_CONFIG[rfi.status];
+            const prioCfg = PRIORITY_CONFIG[rfi.priority];
+            const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
+            return (
+              <div key={rfi.id} className={`px-4 py-3.5 active:bg-white/[0.03] transition-colors ${isOverdue ? "bg-red-500/[0.03]" : ""}`}>
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] text-white/30 font-mono">{rfi.number}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
+                    {isOverdue && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full">OVERDUE</span>}
+                  </div>
+                  <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
+                </div>
+                <p className="text-[14px] font-bold text-white/85 mb-1.5">{rfi.subject}</p>
+                <div className="flex items-center justify-between text-[11px] text-white/30">
+                  {project ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: project.color }} />
+                      {project.name}
+                    </span>
+                  ) : <span />}
+                  <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block">
+        <div className="space-y-5 max-w-[900px]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">RFIs</h2>
+              <p className="text-white/35 text-sm mt-0.5">Request For Information — formal clarification and design queries</p>
+            </div>
+            <button onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+              <Plus size={15} />
+              New RFI
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {(["open", "answered", "closed"] as const).map((status) => {
+              const cfg = STATUS_CONFIG[status];
+              const Icon = cfg.icon;
+              const count = rfis.filter((r) => r.status === status).length;
+              const active = statusFilter === status;
+              return (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(active ? "all" : status)}
+                  className={`bg-[#111111] border rounded-xl p-4 flex items-center gap-3 transition-all text-left ${active ? "border-amber-500/40 bg-amber-500/[0.04]" : "border-white/[0.06] hover:border-white/10"}`}
+                >
+                  <Icon size={20} className={cfg.className.split(" ")[1]} />
+                  <div>
+                    <p className="text-2xl font-bold text-white">{count}</p>
+                    <p className="text-[11px] text-white/40">{cfg.label}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-64">
+            <Search size={13} className="text-white/30" />
+            <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+              placeholder="Search RFIs…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+
+          <div className="space-y-2">
+            {rfis.length === 0 && (
+              <div className="text-center py-16 text-white/25 space-y-2">
+                <MessageSquare size={36} className="mx-auto opacity-30" />
+                <p className="text-[14px]">No RFIs yet</p>
+                <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
+                  + Submit your first RFI
+                </button>
+              </div>
+            )}
+            {rfis.length > 0 && filtered.length === 0 && (
+              <div className="text-center py-12 text-white/25 space-y-1">
+                <MessageSquare size={28} className="mx-auto opacity-20" />
+                <p className="text-[13px]">No RFIs match the current filter</p>
+              </div>
+            )}
+            {filtered.map((rfi) => {
+              const project = getProjectById(rfi.projectId);
+              const submitter = getWorkerById(rfi.submittedById);
+              const assignee = getWorkerById(rfi.assignedToId);
+              const statusCfg = STATUS_CONFIG[rfi.status];
+              const prioCfg = PRIORITY_CONFIG[rfi.priority];
+              const StatusIcon = statusCfg.icon;
+              const isOpen = expanded === rfi.id;
+              const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
+
+              return (
+                <div key={rfi.id} className={`bg-[#111111] border rounded-xl overflow-hidden transition-all ${isOverdue ? "border-red-500/20" : "border-white/[0.06] hover:border-white/10"}`}>
+                  <button className="w-full flex items-center gap-4 px-5 py-4 text-left"
+                    onClick={() => setExpanded(isOpen ? null : rfi.id)}>
+                    <StatusIcon size={16} className={statusCfg.className.split(" ")[1]} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-[11px] text-white/30 font-mono">{rfi.number}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
+                        {isOverdue && <span className="text-[10px] font-bold bg-red-500/15 text-red-400 px-2 py-0.5 rounded-full">OVERDUE</span>}
                       </div>
-                    )}
-                    <div className="flex items-center gap-6 text-[11px] text-white/30">
-                      {submitter && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"
-                            style={{ backgroundColor: submitter.color + "25", color: submitter.color }}>{submitter.initials}</div>
-                          <span>Submitted by {submitter.name}</span>
-                        </div>
-                      )}
-                      {assignee && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"
-                            style={{ backgroundColor: assignee.color + "25", color: assignee.color }}>{assignee.initials}</div>
-                          <span>Assigned to {assignee.name}</span>
-                        </div>
-                      )}
+                      <p className="text-[14px] font-bold text-white/85 truncate">{rfi.subject}</p>
+                      <div className="flex items-center gap-3 mt-1 text-[11px] text-white/30">
+                        {project && <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} /><span>{project.name}</span></div>}
+                        <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                      </div>
                     </div>
-                    {rfi.status === "open" && (
-                      answerRfiId === rfi.id ? (
-                        <div className="space-y-2">
-                          <textarea className={inp + " resize-none"} rows={3} placeholder="Type your response..."
-                            value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
-                          <div className="flex gap-2">
-                            <button onClick={() => handleAnswer(rfi.id)}
-                              className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-lg transition-colors">
-                              Submit Answer
-                            </button>
-                            <button onClick={() => setAnswerRfiId(null)}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
+                      {isOpen ? <ChevronDown size={15} className="text-white/30" /> : <ChevronRight size={15} className="text-white/20" />}
+                      <button onClick={(e) => { e.stopPropagation(); openEdit(rfi); }}
+                        className="p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
+                        <Pencil size={12} />
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(rfi.id); }}
+                        className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-5 pb-5 pt-0 border-t border-white/[0.05]">
+                      <div className="pt-4 space-y-4">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">Question</p>
+                          <p className="text-[13px] text-white/65 leading-relaxed">{rfi.question}</p>
+                        </div>
+                        {rfi.answer && (
+                          <div className="bg-green-500/[0.06] border border-green-500/15 rounded-xl p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-green-400 mb-2">Response</p>
+                            <p className="text-[13px] text-white/65 leading-relaxed">{rfi.answer}</p>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-6 text-[11px] text-white/30">
+                          {submitter && (
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"
+                                style={{ backgroundColor: submitter.color + "25", color: submitter.color }}>{submitter.initials}</div>
+                              <span>Submitted by {submitter.name}</span>
+                            </div>
+                          )}
+                          {assignee && (
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"
+                                style={{ backgroundColor: assignee.color + "25", color: assignee.color }}>{assignee.initials}</div>
+                              <span>Assigned to {assignee.name}</span>
+                            </div>
+                          )}
+                        </div>
+                        {rfi.status === "open" && (
+                          answerRfiId === rfi.id ? (
+                            <div className="space-y-2">
+                              <textarea className={inp + " resize-none"} rows={3} placeholder="Type your response..."
+                                value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
+                              <div className="flex gap-2">
+                                <button onClick={() => handleAnswer(rfi.id)}
+                                  className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                                  Submit Answer
+                                </button>
+                                <button onClick={() => setAnswerRfiId(null)}
+                                  className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2 pt-1">
+                              <button onClick={() => { setAnswerRfiId(rfi.id); setAnswerText(""); }}
+                                className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                                Submit Answer
+                              </button>
+                              <button onClick={() => {
+                                if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
+                                updateRFI(rfi.id, { status: "closed" });
+                              }}
+                                className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
+                                Close RFI
+                              </button>
+                            </div>
+                          )
+                        )}
+                        {rfi.status === "answered" && (
+                          <div className="flex gap-2 pt-1">
+                            <button onClick={() => updateRFI(rfi.id, { status: "closed" })}
                               className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
-                              Cancel
+                              Close RFI
+                            </button>
+                            <button onClick={() => updateRFI(rfi.id, { status: "open", answer: undefined })}
+                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                              Reopen
                             </button>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2 pt-1">
-                          <button onClick={() => { setAnswerRfiId(rfi.id); setAnswerText(""); }}
-                            className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-lg transition-colors">
-                            Submit Answer
-                          </button>
-                          <button onClick={() => {
-                            if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
-                            updateRFI(rfi.id, { status: "closed" });
-                          }}
-                            className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
-                            Close RFI
-                          </button>
-                        </div>
-                      )
-                    )}
-                    {rfi.status === "answered" && (
-                      <div className="flex gap-2 pt-1">
-                        <button onClick={() => updateRFI(rfi.id, { status: "closed" })}
-                          className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
-                          Close RFI
-                        </button>
-                        <button onClick={() => updateRFI(rfi.id, { status: "open", answer: undefined })}
-                          className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors">
-                          Reopen
-                        </button>
+                        )}
+                        {rfi.status === "closed" && (
+                          <div className="flex gap-2 pt-1">
+                            <button onClick={() => updateRFI(rfi.id, { status: "open" })}
+                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                              Reopen RFI
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {rfi.status === "closed" && (
-                      <div className="flex gap-2 pt-1">
-                        <button onClick={() => updateRFI(rfi.id, { status: "open" })}
-                          className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors">
-                          Reopen RFI
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Modal */}
@@ -398,6 +496,6 @@ export default function RFIsPage() {
         onConfirm={() => { if (closeNoAnswerConfirm) updateRFI(closeNoAnswerConfirm, { status: "closed" }); setCloseNoAnswerConfirm(null); }}
         onCancel={() => setCloseNoAnswerConfirm(null)}
       />
-    </div>
+    </>
   );
 }

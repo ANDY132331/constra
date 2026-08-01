@@ -158,158 +158,278 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
   };
 
   return (
-    <div className="space-y-5 max-w-[1000px]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Safety Log</h2>
-          <p className="text-white/35 text-sm mt-0.5 hidden sm:block">
-            {safetyIncidents.length} incidents logged · OSHA reporting required for injuries
-          </p>
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Top bar */}
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+          <h1 className="text-[22px] font-black text-white">Safety</h1>
+          <button
+            onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            className="bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
+          >
+            <Plus size={14} />
+            Report Incident
+          </button>
         </div>
-        <button onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors flex-shrink-0">
-          <Plus size={15} />
-          Log Incident
-        </button>
-      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {(["near-miss", "injury", "property-damage", "environmental"] as const).map((type) => {
-          const cfg = TYPE_CONFIG[type];
-          const Icon = cfg.icon;
-          const count = safetyIncidents.filter((i) => i.type === type).length;
-          return (
-            <button key={type} onClick={() => setTypeFilter(typeFilter === type ? "all" : type)}
-              className={`bg-[#111111] border rounded-xl p-4 text-left transition-all ${typeFilter === type ? "border-amber-500/40" : "border-white/[0.06] hover:border-white/10"}`}>
-              <span style={{ color: cfg.color }} className="mb-2 block"><Icon size={18} /></span>
-              <p className="text-2xl font-bold text-white">{count}</p>
-              <p className="text-[11px] text-white/40 mt-0.5">{cfg.label}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
-        <div className="flex items-center gap-4 sm:flex-col sm:gap-0 sm:flex-shrink-0">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-green-500/30 flex items-center justify-center">
-            <span className="text-lg sm:text-xl font-black text-green-400">
-              {Math.max(0, 100 - safetyIncidents.filter((i) => i.severity === "critical" || i.severity === "high").length * 5)}
-            </span>
+        {/* Stats row */}
+        <div className="px-4 mb-4 flex gap-2 overflow-x-auto no-scrollbar">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
+            <span className="text-white font-bold">{safetyIncidents.length}</span> Total
           </div>
-          <p className="text-[10px] text-white/30 sm:text-center sm:mt-1.5">Safety Score</p>
-        </div>
-        <div className="flex-1 grid grid-cols-3 gap-3 sm:gap-4">
-          <div>
-            <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">Days w/o injury</p>
-            {daysWithoutInjury === null
-              ? <p className="text-xl sm:text-2xl font-bold text-green-400">∞</p>
-              : <p className="text-xl sm:text-2xl font-bold text-green-400">{daysWithoutInjury}</p>}
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+            <span className="text-white font-bold">{safetyIncidents.filter((i) => i.severity === "critical").length}</span> Critical
           </div>
-          <div>
-            <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">OSHA YTD</p>
-            <p className="text-xl sm:text-2xl font-bold text-white">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
+            <span className="text-white font-bold">{safetyIncidents.filter((i) => i.severity === "high").length}</span> High
           </div>
-          <div>
-            <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">Total</p>
-            <p className="text-xl sm:text-2xl font-bold text-white">{safetyIncidents.length}</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-sky-500 flex-shrink-0" />
+            <span className="text-white font-bold">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</span> OSHA
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-64">
-          <Search size={13} className="text-white/30" />
-          <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-            placeholder={`${t.common.search} incidents…`} value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        <select
-          value={severityFilter}
-          onChange={(e) => setSeverityFilter(e.target.value)}
-          className="bg-[#111111] border border-white/[0.06] text-white/60 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
-        >
-          <option value="all">All Severities</option>
-          {(["low", "medium", "high", "critical"] as const).map((s) => (
-            <option key={s} value={s}>{SEVERITY_CONFIG[s].label}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="space-y-3">
-        {filtered.length === 0 && (
-          <div className="text-center py-16 text-white/25 space-y-2">
-            <ShieldAlert size={36} className="mx-auto opacity-30" />
-            <p className="text-[14px]">
-              {safetyIncidents.length === 0 ? "No incidents logged" : "No incidents match your filters"}
-            </p>
-            {safetyIncidents.length === 0 && (
-              <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                + Log an incident
+        {/* Type filter tabs */}
+        <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          {(["all", "near-miss", "injury", "property-damage", "environmental"] as const).map((type) => {
+            const isAll = type === "all";
+            const label = isAll ? "All" : TYPE_CONFIG[type].label;
+            return (
+              <button
+                key={type}
+                onClick={() => setTypeFilter(type)}
+                className={`px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${
+                  typeFilter === type
+                    ? "bg-amber-500 text-black"
+                    : "bg-[#131110] border border-white/[0.07] text-white/50"
+                }`}
+              >
+                {label}
               </button>
-            )}
-          </div>
-        )}
-        {filtered.map((incident) => {
-          const project = getProjectById(incident.projectId);
-          const reporter = getWorkerById(incident.reportedById);
-          const injured = incident.injuredId ? getWorkerById(incident.injuredId) : null;
-          const typeCfg = TYPE_CONFIG[incident.type];
-          const sevCfg = SEVERITY_CONFIG[incident.severity];
-          const TypeIcon = typeCfg.icon;
+            );
+          })}
+        </div>
 
-          return (
-            <div key={incident.id} className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 hover:border-white/10 transition-colors group">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center"
-                  style={{ backgroundColor: typeCfg.color + "18" }}>
-                  <span style={{ color: typeCfg.color }}><TypeIcon size={18} /></span>
+        {/* Incidents list */}
+        <div className="px-4 space-y-2">
+          {filtered.length === 0 && (
+            <div className="text-center py-16 space-y-2">
+              <ShieldAlert size={32} className="mx-auto text-white/20" />
+              <p className="text-white/25 text-[14px]">
+                {safetyIncidents.length === 0 ? "No incidents logged" : "No incidents match your filters"}
+              </p>
+            </div>
+          )}
+          {filtered.map((incident) => {
+            const project = getProjectById(incident.projectId);
+            const reporter = getWorkerById(incident.reportedById);
+            const typeCfg = TYPE_CONFIG[incident.type];
+            const sevCfg = SEVERITY_CONFIG[incident.severity];
+            const TypeIcon = typeCfg.icon;
+            return (
+              <div key={incident.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: typeCfg.color }}><TypeIcon size={15} /></span>
+                    <span className="text-[13px] font-bold text-white/80">{typeCfg.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
+                    <button
+                      onClick={() => openEdit(incident)}
+                      className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-white/70 transition-colors"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(incident.id)}
+                      className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-red-400 transition-colors"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[13px] font-bold text-white/80">{typeCfg.label}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
-                      {incident.reportedToOSHA && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">OSHA REPORTED</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-[11px] text-white/30">
-                        {incident.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                      </span>
-                      <button onClick={() => exportPdf(incident)} title="Export PDF"
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/8 text-white/20 hover:text-amber-400 transition-all">
-                        <FileText size={12} />
-                      </button>
-                      <button onClick={() => openEdit(incident)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-all">
-                        <Pencil size={12} />
-                      </button>
-                      <button onClick={() => setDeleteConfirm(incident.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
+                {project && (
+                  <p className="text-[12px] text-amber-400/80 mb-1.5">{project.name}</p>
+                )}
+                <p className="text-[13px] text-white/70 mb-2.5 leading-relaxed line-clamp-2">{incident.description}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-[11px] text-white/35 min-w-0">
+                    {reporter && <span className="truncate">{reporter.name}</span>}
+                    {reporter && <span>·</span>}
+                    <span className="flex-shrink-0">
+                      {incident.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                    </span>
                   </div>
-                  <p className="text-[13px] text-white/70 mb-3 leading-relaxed">{incident.description}</p>
-                  {incident.actionTaken && (
-                    <div className="bg-green-500/[0.07] border border-green-500/15 rounded-lg px-3 py-2 mb-3">
-                      <p className="text-[10px] font-bold text-green-400 uppercase tracking-wide mb-1">Corrective Action Taken</p>
-                      <p className="text-[12px] text-white/55">{incident.actionTaken}</p>
-                    </div>
+                  {incident.reportedToOSHA && (
+                    <span className="bg-sky-500/15 text-sky-400 text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">OSHA</span>
                   )}
-                  <div className="flex items-center gap-4 flex-wrap text-[11px] text-white/30">
-                    {project && <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} /><span>{project.name}</span></div>}
-                    {reporter && <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: reporter.color + "25", color: reporter.color }}>{reporter.initials}</div><span>Reported by {reporter.name}</span></div>}
-                    {injured && <div className="flex items-center gap-1 text-red-400/70"><User size={10} /><span>Injured: {injured.name}</span></div>}
-                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      {/* Modal */}
+      {/* DESKTOP - keep ALL existing content exactly as-is */}
+      <div className="hidden lg:block">
+        <div className="space-y-5 max-w-[1000px]">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Safety Log</h2>
+              <p className="text-white/35 text-sm mt-0.5 hidden sm:block">
+                {safetyIncidents.length} incidents logged · OSHA reporting required for injuries
+              </p>
+            </div>
+            <button onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors flex-shrink-0">
+              <Plus size={15} />
+              Log Incident
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {(["near-miss", "injury", "property-damage", "environmental"] as const).map((type) => {
+              const cfg = TYPE_CONFIG[type];
+              const Icon = cfg.icon;
+              const count = safetyIncidents.filter((i) => i.type === type).length;
+              return (
+                <button key={type} onClick={() => setTypeFilter(typeFilter === type ? "all" : type)}
+                  className={`bg-[#111111] border rounded-xl p-4 text-left transition-all ${typeFilter === type ? "border-amber-500/40" : "border-white/[0.06] hover:border-white/10"}`}>
+                  <span style={{ color: cfg.color }} className="mb-2 block"><Icon size={18} /></span>
+                  <p className="text-2xl font-bold text-white">{count}</p>
+                  <p className="text-[11px] text-white/40 mt-0.5">{cfg.label}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+            <div className="flex items-center gap-4 sm:flex-col sm:gap-0 sm:flex-shrink-0">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-green-500/30 flex items-center justify-center">
+                <span className="text-lg sm:text-xl font-black text-green-400">
+                  {Math.max(0, 100 - safetyIncidents.filter((i) => i.severity === "critical" || i.severity === "high").length * 5)}
+                </span>
+              </div>
+              <p className="text-[10px] text-white/30 sm:text-center sm:mt-1.5">Safety Score</p>
+            </div>
+            <div className="flex-1 grid grid-cols-3 gap-3 sm:gap-4">
+              <div>
+                <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">Days w/o injury</p>
+                {daysWithoutInjury === null
+                  ? <p className="text-xl sm:text-2xl font-bold text-green-400">∞</p>
+                  : <p className="text-xl sm:text-2xl font-bold text-green-400">{daysWithoutInjury}</p>}
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">OSHA YTD</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">Total</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{safetyIncidents.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-64">
+              <Search size={13} className="text-white/30" />
+              <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+                placeholder={`${t.common.search} incidents…`} value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+            <select
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+              className="bg-[#111111] border border-white/[0.06] text-white/60 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
+            >
+              <option value="all">All Severities</option>
+              {(["low", "medium", "high", "critical"] as const).map((s) => (
+                <option key={s} value={s}>{SEVERITY_CONFIG[s].label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-3">
+            {filtered.length === 0 && (
+              <div className="text-center py-16 text-white/25 space-y-2">
+                <ShieldAlert size={36} className="mx-auto opacity-30" />
+                <p className="text-[14px]">
+                  {safetyIncidents.length === 0 ? "No incidents logged" : "No incidents match your filters"}
+                </p>
+                {safetyIncidents.length === 0 && (
+                  <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
+                    + Log an incident
+                  </button>
+                )}
+              </div>
+            )}
+            {filtered.map((incident) => {
+              const project = getProjectById(incident.projectId);
+              const reporter = getWorkerById(incident.reportedById);
+              const injured = incident.injuredId ? getWorkerById(incident.injuredId) : null;
+              const typeCfg = TYPE_CONFIG[incident.type];
+              const sevCfg = SEVERITY_CONFIG[incident.severity];
+              const TypeIcon = typeCfg.icon;
+
+              return (
+                <div key={incident.id} className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 hover:border-white/10 transition-colors group">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center"
+                      style={{ backgroundColor: typeCfg.color + "18" }}>
+                      <span style={{ color: typeCfg.color }}><TypeIcon size={18} /></span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[13px] font-bold text-white/80">{typeCfg.label}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
+                          {incident.reportedToOSHA && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">OSHA REPORTED</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-[11px] text-white/30">
+                            {incident.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                          </span>
+                          <button onClick={() => exportPdf(incident)} title="Export PDF"
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/8 text-white/20 hover:text-amber-400 transition-all">
+                            <FileText size={12} />
+                          </button>
+                          <button onClick={() => openEdit(incident)}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-all">
+                            <Pencil size={12} />
+                          </button>
+                          <button onClick={() => setDeleteConfirm(incident.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-[13px] text-white/70 mb-3 leading-relaxed">{incident.description}</p>
+                      {incident.actionTaken && (
+                        <div className="bg-green-500/[0.07] border border-green-500/15 rounded-lg px-3 py-2 mb-3">
+                          <p className="text-[10px] font-bold text-green-400 uppercase tracking-wide mb-1">Corrective Action Taken</p>
+                          <p className="text-[12px] text-white/55">{incident.actionTaken}</p>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-4 flex-wrap text-[11px] text-white/30">
+                        {project && <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} /><span>{project.name}</span></div>}
+                        {reporter && <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: reporter.color + "25", color: reporter.color }}>{reporter.initials}</div><span>Reported by {reporter.name}</span></div>}
+                        {injured && <div className="flex items-center gap-1 text-red-400/70"><User size={10} /><span>Injured: {injured.name}</span></div>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Modals — fixed position, work on all screen sizes */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -425,6 +545,6 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         onConfirm={() => { if (deleteConfirm) deleteSafetyIncident(deleteConfirm); setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }

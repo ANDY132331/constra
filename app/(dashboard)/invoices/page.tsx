@@ -541,10 +541,110 @@ export default function InvoicesPage() {
   ];
 
   return (
-    <div className="h-full flex flex-col -m-4 md:-m-6">
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <h1 className="text-[22px] font-black text-white">Invoices</h1>
+          <button
+            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
+          >
+            <Plus size={13} /> New Invoice
+          </button>
+        </div>
 
-      {/* ── Top stats bar ── */}
-      <div className="flex items-stretch gap-0 border-b border-white/[0.06] flex-shrink-0 overflow-x-auto">
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2 px-4 mb-3">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-3">
+            <p className="text-[9px] font-bold text-white/30 uppercase tracking-wider mb-0.5">Outstanding</p>
+            <p className="text-[15px] font-black text-amber-400">{formatCurrencyCompact(Math.round(totalOutstanding), currency as never)}</p>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-3">
+            <p className="text-[9px] font-bold text-white/30 uppercase tracking-wider mb-0.5">Collected</p>
+            <p className="text-[15px] font-black text-emerald-400">{formatCurrencyCompact(Math.round(totalPaid), currency as never)}</p>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-3">
+            <p className="text-[9px] font-bold text-white/30 uppercase tracking-wider mb-0.5">Overdue</p>
+            <p className={`text-[15px] font-black ${overdueCount > 0 ? "text-red-400" : "text-white/30"}`}>{overdueCount}</p>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="flex items-center gap-2 bg-white/[0.05] mx-4 mb-3 px-3 py-2.5 rounded-xl">
+          <Search size={13} className="text-white/30" />
+          <input
+            className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+            placeholder="Search client or number…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Status filter pills */}
+        <div className="flex gap-1.5 px-4 pb-3 overflow-x-auto no-scrollbar">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`flex-shrink-0 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors ${statusFilter === tab.key ? "bg-amber-500/15 text-amber-400" : "text-white/35 bg-white/[0.04]"}`}
+            >
+              {tab.label}
+              {tab.count > 0 && (
+                <span className={`text-[9px] px-1 py-0.5 rounded-full ${statusFilter === tab.key ? "bg-amber-500/25 text-amber-300" : "bg-white/[0.07] text-white/25"}`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Invoice list */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 text-white/25 space-y-2 px-4">
+            <FileText size={32} className="mx-auto opacity-30" />
+            <p className="text-[13px]">No invoices</p>
+            <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px]">+ Create one</button>
+          </div>
+        ) : (
+          <div className="divide-y divide-white/[0.05]">
+            {filtered.map((inv) => {
+              const total = invoiceTotal(inv);
+              const cfg = STATUS_CONFIG[inv.status];
+              const isOverdue = inv.status === "overdue";
+              const isPaid = inv.status === "paid";
+              return (
+                <div key={inv.id} className="px-4 py-3.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-mono text-[10px] text-white/30">{inv.number}</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
+                      </div>
+                      <p className="text-[14px] font-semibold text-white/90 truncate">{inv.clientName}</p>
+                      <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/35"}`}>
+                        {isOverdue ? "Overdue · " : "Due "}
+                        {inv.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      </p>
+                    </div>
+                    <p className={`text-[16px] font-black flex-shrink-0 ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
+                      {formatCurrencyCompact(Math.round(total), currency as never)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block h-full">
+        <div className="h-full flex flex-col -m-4 md:-m-6">
+
+          {/* ── Top stats bar ── */}
+          <div className="flex items-stretch gap-0 border-b border-white/[0.06] flex-shrink-0 overflow-x-auto">
         <div className="flex items-center gap-3 px-5 py-3.5 border-r border-white/[0.05] min-w-[160px]">
           <div className="flex-1">
             <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Outstanding</p>
@@ -663,6 +763,9 @@ export default function InvoicesPage() {
         )}
       </div>
 
+        </div>
+      </div>
+
       {/* ── New Invoice Modal ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
@@ -778,6 +881,6 @@ export default function InvoicesPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

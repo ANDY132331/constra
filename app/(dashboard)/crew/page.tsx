@@ -308,6 +308,126 @@ export default function CrewPage() {
   };
 
   return (
+    <>
+    {/* ── MOBILE ── */}
+    <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+        <h2 className="text-[18px] font-bold text-white tracking-tight">Crew</h2>
+        {canEdit && (
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
+          >
+            <UserPlus size={14} />
+            Add Member
+          </button>
+        )}
+      </div>
+
+      {/* Stats row */}
+      <div className="flex gap-3 px-4 pb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+          <p className="text-[20px] font-bold text-white leading-none">{workers.length}</p>
+          <p className="text-[11px] text-white/50 font-semibold mt-0.5">Total</p>
+        </div>
+        <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex items-center gap-2.5">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0" />
+          <div>
+            <p className="text-[20px] font-bold text-white leading-none">{clockedIn}</p>
+            <p className="text-[11px] text-green-400 font-semibold mt-0.5">On Site</p>
+          </div>
+        </div>
+        <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+          <p className="text-[20px] font-bold text-purple-400 leading-none">{workers.filter((w) => w.role === "Admin").length}</p>
+          <p className="text-[11px] text-purple-400/70 font-semibold mt-0.5">Admins</p>
+        </div>
+        <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+          <p className="text-[20px] font-bold text-amber-400 leading-none">{workers.filter((w) => w.role === "Foreman").length}</p>
+          <p className="text-[11px] text-amber-400/70 font-semibold mt-0.5">Foremen</p>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="px-4 mb-4">
+        <input
+          placeholder="Search crew..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 text-[14px] text-white/80 placeholder:text-white/30 outline-none focus:border-amber-500/30 transition-colors"
+        />
+      </div>
+
+      {/* Worker list */}
+      <div className="px-4">
+        {filtered.map((worker) => {
+          const roleCfg = ROLE_CONFIG[worker.role] ?? ROLE_CONFIG.Worker;
+          return (
+            <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 mb-2">
+              {/* Row 1: Avatar + Name + Role badge */}
+              <div className="flex items-center gap-3 mb-1.5">
+                <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[14px] font-black"
+                  style={{ backgroundColor: worker.color + "20", color: worker.color }}>
+                  {worker.photo
+                    ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
+                    : worker.initials}
+                </div>
+                <p className="text-[14px] font-bold text-white flex-1 min-w-0 truncate">{worker.name}</p>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${roleCfg.className}`}>
+                  {roleCfg.label}
+                </span>
+              </div>
+              {/* Row 2: custom role + clock status */}
+              <div className="flex items-center justify-between pl-14 mb-1.5">
+                <p className="text-[12px] text-white/35 truncate">{worker.customRole}</p>
+                {worker.clockedIn ? (
+                  <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                    <span className="text-[11px] text-green-400 font-semibold">Clocked In</span>
+                  </div>
+                ) : (
+                  <span className="text-[11px] text-white/30 flex-shrink-0 ml-2">Off</span>
+                )}
+              </div>
+              {/* Row 3: email + edit/delete */}
+              <div className="flex items-center justify-between pl-14">
+                {worker.email ? (
+                  <a href={`mailto:${worker.email}`} className="text-[11px] text-white/30 truncate max-w-[180px]">
+                    {worker.email}
+                  </a>
+                ) : <span />}
+                {canEdit && (
+                  <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
+                    <button
+                      onClick={() => openEdit(worker)}
+                      className="p-1.5 rounded-lg text-white/30 hover:text-white/70 active:bg-white/5 transition-all"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    {worker.id !== currentUser.id && (
+                      <button
+                        onClick={() => handleDelete(worker.id)}
+                        className="p-1.5 rounded-lg text-white/30 hover:text-red-400 active:bg-red-500/10 transition-all"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {filtered.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-white/20 text-[13px]">No crew members found</p>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* ── DESKTOP ── */}
+    <div className="hidden lg:block">
     <div className="space-y-5 max-w-[1000px]">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -362,29 +482,6 @@ export default function CrewPage() {
           </button>
         </div>
       </div>
-
-      {/* QR Code Modal */}
-      {showQR && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl p-8 flex flex-col items-center gap-5 w-72">
-            <div className="flex items-center justify-between w-full">
-              <h3 className="text-[15px] font-bold text-white">Invite Workers</h3>
-              <button onClick={() => setShowQR(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5">
-                <X size={16} />
-              </button>
-            </div>
-            {qrDataUrl && <img src={qrDataUrl} alt="Invite QR code" className="w-48 h-48 rounded-xl" />}
-            <div className="text-center space-y-1">
-              <p className="text-[13px] font-bold text-white/70">Scan to join workspace</p>
-              <p className="text-[11px] text-white/30">Or share code: <span className="font-mono font-bold text-amber-400">{inviteCode}</span></p>
-            </div>
-            <button onClick={() => handleCopy(true)} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 transition-colors flex items-center justify-center gap-2">
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-              {copied ? "Link Copied!" : "Copy Invite Link"}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -526,6 +623,34 @@ export default function CrewPage() {
               + Add your first crew member
             </button>
           )}
+        </div>
+      )}
+
+    </div>
+    </div>{/* end desktop */}
+
+    {/* ── MODALS (work on both breakpoints) ── */}
+
+      {/* QR Code Modal */}
+      {showQR && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl p-8 flex flex-col items-center gap-5 w-72">
+            <div className="flex items-center justify-between w-full">
+              <h3 className="text-[15px] font-bold text-white">Invite Workers</h3>
+              <button onClick={() => setShowQR(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5">
+                <X size={16} />
+              </button>
+            </div>
+            {qrDataUrl && <img src={qrDataUrl} alt="Invite QR code" className="w-48 h-48 rounded-xl" />}
+            <div className="text-center space-y-1">
+              <p className="text-[13px] font-bold text-white/70">Scan to join workspace</p>
+              <p className="text-[11px] text-white/30">Or share code: <span className="font-mono font-bold text-amber-400">{inviteCode}</span></p>
+            </div>
+            <button onClick={() => handleCopy(true)} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 transition-colors flex items-center justify-center gap-2">
+              {copied ? <Check size={14} /> : <Copy size={14} />}
+              {copied ? "Link Copied!" : "Copy Invite Link"}
+            </button>
+          </div>
         </div>
       )}
 
@@ -710,6 +835,6 @@ export default function CrewPage() {
         onConfirm={() => { if (deleteConfirm) deleteWorker(deleteConfirm); setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }

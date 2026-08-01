@@ -147,9 +147,155 @@ export default function DailyReportsPage() {
   if (!isForeman) return null;
 
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Left list */}
-      <div className={`flex flex-col ${selected ? "hidden lg:flex" : "flex"} w-full lg:w-[360px] lg:min-w-[360px] border-r border-white/[0.06]`}>
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {selected ? (
+          /* Mobile detail view */
+          <div>
+            <div className="flex items-center gap-2 px-4 pt-4 pb-3 border-b border-white/[0.06]">
+              <button onClick={() => setSelected(null)} className="p-1.5 -ml-1 rounded-lg text-white/50 active:bg-white/[0.06]">
+                <X size={18} />
+              </button>
+              <span className="text-[15px] font-bold text-white/90 flex-1 truncate">
+                {selected.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+              </span>
+              <button
+                onClick={() => handleExportPdf(selected)}
+                disabled={pdfLoading}
+                className="flex items-center gap-1.5 text-[12px] text-white/50 bg-white/[0.05] px-3 py-1.5 rounded-lg disabled:opacity-40"
+              >
+                <Download size={12} /> {pdfLoading ? "…" : "PDF"}
+              </button>
+              {isAdminOrAbove(currentUser.role) && (
+                <button
+                  onClick={() => setDeleteConfirm(selected.id)}
+                  className="p-1.5 rounded-lg text-white/20 hover:text-red-400 active:bg-red-500/[0.08]"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+            <div className="px-4 py-4 space-y-4">
+              <p className="text-[12px] text-white/40">{projectMap.get(selected.projectId)?.name}</p>
+              <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-lg px-3 py-1.5">
+                  <Cloud size={13} className="text-blue-400" />
+                  <span className="text-[12px] text-white/70">{selected.weather}</span>
+                </div>
+                {selected.temperatureF > 0 && (
+                  <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-lg px-3 py-1.5">
+                    <Thermometer size={13} className="text-orange-400" />
+                    <span className="text-[12px] text-white/70">{selected.temperatureF}°F</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-lg px-3 py-1.5">
+                  <Users size={13} className="text-emerald-400" />
+                  <span className="text-[12px] text-white/70">{selected.crewCount} crew</span>
+                </div>
+              </div>
+              <Section title="Work Completed" content={selected.workCompleted} />
+              {selected.delays && <Section title="Delays / Issues" content={selected.delays} color="amber" />}
+              {selected.materialsUsed && <Section title="Materials Used" content={selected.materialsUsed} />}
+              {selected.notes && <Section title="Notes" content={selected.notes} />}
+            </div>
+          </div>
+        ) : (
+          /* Mobile list view */
+          <div>
+            <div className="flex items-center justify-between px-4 pt-4 pb-3">
+              <h1 className="text-[22px] font-black text-white">Daily Reports</h1>
+              <button
+                onClick={() => { setForm(emptyForm()); setShowForm(true); }}
+                className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
+              >
+                <Plus size={13} /> New
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="flex items-center gap-2 bg-white/[0.05] mx-4 mb-3 px-3 py-2.5 rounded-xl">
+              <Search size={13} className="text-white/30" />
+              <input
+                className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+                placeholder="Search reports…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {/* Project filter */}
+            <div className="px-4 mb-3">
+              <select
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-[12px] text-white/60 outline-none"
+                value={projectFilter}
+                onChange={(e) => setProjectFilter(e.target.value)}
+              >
+                <option value="all">All projects</option>
+                {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+
+            {/* Stats pill */}
+            <div className="px-4 mb-2">
+              <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+                <ClipboardList size={14} className="text-amber-400" />
+                <span className="text-[13px] font-bold text-white">{filtered.length}</span>
+                <span className="text-[12px] text-white/40">report{filtered.length !== 1 ? "s" : ""}</span>
+              </div>
+            </div>
+
+            {/* List */}
+            <div className="divide-y divide-white/[0.05]">
+              {filtered.length === 0 ? (
+                <div className="text-center py-16 text-white/25 space-y-2 px-4">
+                  <FileText size={32} className="mx-auto opacity-30" />
+                  <p className="text-[13px]">No daily reports yet</p>
+                </div>
+              ) : (
+                filtered.map((report) => {
+                  const proj = projectMap.get(report.projectId);
+                  return (
+                    <button
+                      key={report.id}
+                      onClick={() => setSelected(report)}
+                      className="w-full text-left px-4 py-3.5 active:bg-white/[0.03] transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[13px] font-bold text-white/85">
+                          {report.date.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+                        </span>
+                        <ChevronRight size={14} className="text-white/25" />
+                      </div>
+                      <p className="text-[11px] text-white/40 mb-1">{proj?.name ?? "Unknown project"}</p>
+                      <p className="text-[12px] text-white/55 line-clamp-2">{report.workCompleted}</p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="flex items-center gap-1 text-[10px] text-white/30">
+                          <Cloud size={10} /> {report.weather}
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] text-white/30">
+                          <Users size={10} /> {report.crewCount} crew
+                        </span>
+                        {report.temperatureF > 0 && (
+                          <span className="flex items-center gap-1 text-[10px] text-white/30">
+                            <Thermometer size={10} /> {report.temperatureF}°F
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block h-full">
+        <div className="flex h-full overflow-hidden">
+          {/* Left list */}
+          <div className={`flex flex-col ${selected ? "hidden lg:flex" : "flex"} w-full lg:w-[360px] lg:min-w-[360px] border-r border-white/[0.06]`}>
         {/* Toolbar */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
           <div className="flex-1 flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
@@ -315,6 +461,9 @@ export default function DailyReportsPage() {
         </div>
       )}
 
+        </div>
+      </div>
+
       {/* New Report Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -423,7 +572,7 @@ export default function DailyReportsPage() {
         onConfirm={() => { if (deleteConfirm) { deleteDailyReport(deleteConfirm); setSelected(null); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }
 

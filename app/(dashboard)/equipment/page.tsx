@@ -102,122 +102,246 @@ export default function EquipmentPage() {
   };
 
   return (
-    <div className="space-y-5 max-w-[1100px]">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Equipment</h2>
-          <p className="text-white/35 text-sm mt-0.5">
-            {equipment.filter((e) => e.status === "in-use").length} units deployed · {formatCurrencyCompact(totalDailyValue, currency as never)}/day active cost
-          </p>
-        </div>
-        <button onClick={openAdd}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
-          <Plus size={15} />
-          Add Equipment
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {(["available", "in-use", "maintenance", "off-site"] as const).map((status) => {
-          const cfg = STATUS_CONFIG[status];
-          const count = equipment.filter((e) => e.status === status).length;
-          return (
-            <button key={status} onClick={() => setStatusFilter(statusFilter === status ? "all" : status)}
-              className={`bg-[#111111] border rounded-xl p-4 text-left transition-all ${statusFilter === status ? "border-amber-500/40" : "border-white/[0.06] hover:border-white/10"}`}>
-              <div className="w-2.5 h-2.5 rounded-full mb-2" style={{ backgroundColor: cfg.dot }} />
-              <p className="text-2xl font-bold text-white">{count}</p>
-              <p className="text-[11px] text-white/40 mt-0.5">{cfg.label}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      {needsService.length > 0 && (
-        <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 flex items-center gap-3">
-          <AlertTriangle size={18} className="text-amber-400 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-[13px] font-bold text-amber-300">{needsService.length} unit{needsService.length > 1 ? "s" : ""} due for service</p>
-            <p className="text-[12px] text-amber-400/60 mt-0.5">{needsService.map((e) => e.name).join(", ")}</p>
-          </div>
-          <button onClick={() => { const first = needsService[0]; if (first) openEdit(first); }}
-            className="text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg transition-colors">
-            Update Service Date
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <h2 className="text-xl font-bold text-white tracking-tight">Equipment</h2>
+          <button onClick={openAdd}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors">
+            <Plus size={14} />
+            Add
           </button>
         </div>
-      )}
 
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-56">
-          <Search size={13} className="text-white/30" />
-          <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-            placeholder={`${t.common.search} equipment…`} value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-      </div>
-
-      {equipment.length === 0 ? (
-        <div className="text-center py-16 text-white/25 space-y-2">
-          <p className="text-[14px]">No equipment added yet</p>
-          <button onClick={openAdd} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-            + Add your first piece of equipment
-          </button>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-xl">
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[860px]">
-          <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
-            style={{ gridTemplateColumns: "2fr 120px 100px 1fr 100px 100px 80px 64px" }}>
-            <span>Equipment</span><span>Type</span><span>Status</span>
-            <span>Deployed To</span><span>Last Service</span><span>Next Service</span>
-            <span className="text-right">Daily Rate</span><span></span>
-          </div>
-          {filtered.map((eq) => {
-            const project = eq.projectId ? getProjectById(eq.projectId) : null;
-            const cfg = STATUS_CONFIG[eq.status];
-            const serviceOverdue = eq.nextService <= new Date();
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-2 px-4 mb-3">
+          {(["available", "in-use", "maintenance", "off-site"] as const).map((status) => {
+            const cfg = STATUS_CONFIG[status];
+            const count = equipment.filter((e) => e.status === status).length;
             return (
-              <div key={eq.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
-                style={{ gridTemplateColumns: "2fr 120px 100px 1fr 100px 100px 80px 64px" }}>
-                <div>
-                  <p className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">{eq.name}</p>
-                  {eq.certExpiry && (
-                    <p className={`text-[10px] mt-0.5 ${eq.certExpiry < new Date() ? "text-red-400" : "text-white/30"}`}>
-                      Cert expires {eq.certExpiry.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
-                  )}
-                </div>
-                <span className="text-[12px] text-white/45">{eq.type}</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${cfg.className}`}>{cfg.label}</span>
-                <span className="text-[12px] text-white/45 truncate pr-2">
-                  {project ? (
-                    <span className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} />
-                      {project.name}
-                    </span>
-                  ) : "—"}
-                </span>
-                <span className="text-[12px] text-white/40">
-                  {eq.lastService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
-                </span>
-                <span className={`text-[12px] font-semibold ${serviceOverdue ? "text-red-400" : "text-white/40"}`}>
-                  {serviceOverdue ? "OVERDUE" : eq.nextService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
-                </span>
-                <span className="text-right text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/d</span>
-                <div className="flex items-center justify-end gap-1">
-                  <button onClick={() => openEdit(eq)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all">
-                    <Pencil size={12} />
-                  </button>
-                  <button onClick={() => handleDelete(eq.id, eq.name)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              </div>
+              <button key={status}
+                onClick={() => setStatusFilter(statusFilter === status ? "all" : status)}
+                className={`bg-[#131110] border rounded-xl p-3 text-center transition-all ${statusFilter === status ? "border-amber-500/40" : "border-white/[0.07]"}`}>
+                <div className="w-2 h-2 rounded-full mx-auto mb-1" style={{ backgroundColor: cfg.dot }} />
+                <p className="text-xl font-bold text-white">{count}</p>
+                <p className="text-[9px] text-white/40 mt-0.5 leading-tight">{cfg.label}</p>
+              </button>
             );
           })}
         </div>
+
+        {/* Service alert */}
+        {needsService.length > 0 && (
+          <div className="mx-4 mb-3 bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-3 flex items-center gap-3">
+            <AlertTriangle size={16} className="text-amber-400 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-bold text-amber-300">{needsService.length} unit{needsService.length > 1 ? "s" : ""} due for service</p>
+              <p className="text-[11px] text-amber-400/60 truncate">{needsService.map((e) => e.name).join(", ")}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Search */}
+        <div className="px-4 mb-3">
+          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2.5">
+            <Search size={13} className="text-white/30 flex-shrink-0" />
+            <input
+              className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+              placeholder="Search equipment…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
-      )}
+
+        {/* Equipment cards */}
+        <div className="px-4 space-y-2">
+          {filtered.length === 0 && equipment.length === 0 ? (
+            <div className="text-center py-16 text-white/25 space-y-2">
+              <p className="text-[14px]">No equipment added yet</p>
+              <button onClick={openAdd} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
+                + Add your first piece of equipment
+              </button>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-10 text-white/25">
+              <p className="text-[13px]">No equipment matches your filters</p>
+            </div>
+          ) : (
+            filtered.map((eq) => {
+              const project = eq.projectId ? getProjectById(eq.projectId) : null;
+              const cfg = STATUS_CONFIG[eq.status];
+              const serviceOverdue = eq.nextService <= new Date();
+              return (
+                <div key={eq.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-bold text-white/85">{eq.name}</p>
+                      {eq.type && <p className="text-[11px] text-white/35 mt-0.5">{eq.type}</p>}
+                    </div>
+                    <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.className}`}>{cfg.label}</span>
+                  </div>
+                  {project && (
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                      <span className="text-[12px] text-amber-400/80">{project.name}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-4 text-[11px] text-white/35 mb-3 flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <span className="text-white/25">Next svc:</span>
+                      <span className={serviceOverdue ? "text-red-400 font-semibold" : ""}>
+                        {serviceOverdue ? "OVERDUE" : eq.nextService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                    {eq.certExpiry && (
+                      <div className={eq.certExpiry < new Date() ? "text-red-400" : ""}>
+                        Cert: {eq.certExpiry.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
+                    <span className="text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/day</span>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => openEdit(eq)}
+                        className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                        <Pencil size={13} />
+                      </button>
+                      <button onClick={() => handleDelete(eq.id, eq.name)}
+                        className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block">
+        <div className="space-y-5 max-w-[1100px]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Equipment</h2>
+              <p className="text-white/35 text-sm mt-0.5">
+                {equipment.filter((e) => e.status === "in-use").length} units deployed · {formatCurrencyCompact(totalDailyValue, currency as never)}/day active cost
+              </p>
+            </div>
+            <button onClick={openAdd}
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+              <Plus size={15} />
+              Add Equipment
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {(["available", "in-use", "maintenance", "off-site"] as const).map((status) => {
+              const cfg = STATUS_CONFIG[status];
+              const count = equipment.filter((e) => e.status === status).length;
+              return (
+                <button key={status} onClick={() => setStatusFilter(statusFilter === status ? "all" : status)}
+                  className={`bg-[#111111] border rounded-xl p-4 text-left transition-all ${statusFilter === status ? "border-amber-500/40" : "border-white/[0.06] hover:border-white/10"}`}>
+                  <div className="w-2.5 h-2.5 rounded-full mb-2" style={{ backgroundColor: cfg.dot }} />
+                  <p className="text-2xl font-bold text-white">{count}</p>
+                  <p className="text-[11px] text-white/40 mt-0.5">{cfg.label}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          {needsService.length > 0 && (
+            <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-4 flex items-center gap-3">
+              <AlertTriangle size={18} className="text-amber-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-[13px] font-bold text-amber-300">{needsService.length} unit{needsService.length > 1 ? "s" : ""} due for service</p>
+                <p className="text-[12px] text-amber-400/60 mt-0.5">{needsService.map((e) => e.name).join(", ")}</p>
+              </div>
+              <button onClick={() => { const first = needsService[0]; if (first) openEdit(first); }}
+                className="text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                Update Service Date
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-56">
+              <Search size={13} className="text-white/30" />
+              <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+                placeholder={`${t.common.search} equipment…`} value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+          </div>
+
+          {equipment.length === 0 ? (
+            <div className="text-center py-16 text-white/25 space-y-2">
+              <p className="text-[14px]">No equipment added yet</p>
+              <button onClick={openAdd} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
+                + Add your first piece of equipment
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-xl">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[860px]">
+              <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
+                style={{ gridTemplateColumns: "2fr 120px 100px 1fr 100px 100px 80px 64px" }}>
+                <span>Equipment</span><span>Type</span><span>Status</span>
+                <span>Deployed To</span><span>Last Service</span><span>Next Service</span>
+                <span className="text-right">Daily Rate</span><span></span>
+              </div>
+              {filtered.map((eq) => {
+                const project = eq.projectId ? getProjectById(eq.projectId) : null;
+                const cfg = STATUS_CONFIG[eq.status];
+                const serviceOverdue = eq.nextService <= new Date();
+                return (
+                  <div key={eq.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
+                    style={{ gridTemplateColumns: "2fr 120px 100px 1fr 100px 100px 80px 64px" }}>
+                    <div>
+                      <p className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">{eq.name}</p>
+                      {eq.certExpiry && (
+                        <p className={`text-[10px] mt-0.5 ${eq.certExpiry < new Date() ? "text-red-400" : "text-white/30"}`}>
+                          Cert expires {eq.certExpiry.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-[12px] text-white/45">{eq.type}</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${cfg.className}`}>{cfg.label}</span>
+                    <span className="text-[12px] text-white/45 truncate pr-2">
+                      {project ? (
+                        <span className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} />
+                          {project.name}
+                        </span>
+                      ) : "—"}
+                    </span>
+                    <span className="text-[12px] text-white/40">
+                      {eq.lastService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                    </span>
+                    <span className={`text-[12px] font-semibold ${serviceOverdue ? "text-red-400" : "text-white/40"}`}>
+                      {serviceOverdue ? "OVERDUE" : eq.nextService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                    </span>
+                    <span className="text-right text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/d</span>
+                    <div className="flex items-center justify-end gap-1">
+                      <button onClick={() => openEdit(eq)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all">
+                        <Pencil size={12} />
+                      </button>
+                      <button onClick={() => handleDelete(eq.id, eq.name)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Add / Edit Modal */}
       {showModal && (
@@ -311,6 +435,6 @@ export default function EquipmentPage() {
         onConfirm={() => { if (deleteConfirm) deleteEquipment(deleteConfirm.id); setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }

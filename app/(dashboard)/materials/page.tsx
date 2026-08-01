@@ -163,184 +163,303 @@ export default function MaterialsPage() {
   const color = (trade: string) => TRADE_COLORS[trade] ?? "#f59e0b";
 
   return (
-    <div className="space-y-5 max-w-[1100px]">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Materials</h2>
-          <p className="text-[12px] text-white/35 mt-0.5">Track deliveries and usage across all job sites</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {projectSummary && Object.keys(projectSummary).length > 0 && (
-            <button
-              onClick={async () => {
-                setPdfLoading(true);
-                try {
-                  const proj = projects.find((p) => p.id === selectedProject);
-                  await exportMaterialsPdf(proj?.name ?? "Project", projectSummary, companyName);
-                } finally {
-                  setPdfLoading(false); }
-              }}
-              disabled={pdfLoading}
-              className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.07] text-white/60 font-bold text-[13px] px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-            >
-              <FileText size={14} />
-              {pdfLoading ? "Generating…" : "Export PDF"}
-            </button>
-          )}
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <h2 className="text-xl font-bold text-white tracking-tight">Materials</h2>
           <button
             onClick={() => { setShowAddModal(true); setEntryProjectId(projects[0]?.id ?? ""); }}
-            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors"
           >
-            <Plus size={15} />
+            <Plus size={14} />
             Log Material
           </button>
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative">
-          <Search size={13} className="absolute start-3 top-1/2 -translate-y-1/2 text-white/30" />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search materials…"
-            className="bg-[#111] border border-white/[0.07] rounded-lg ps-8 pe-3 py-2 text-[13px] text-white placeholder-white/25 outline-none focus:border-amber-500/40 w-48"
-          />
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-2 px-4 mb-3">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
+            <p className="text-xl font-bold text-white">{materialEntries.length}</p>
+            <p className="text-[10px] text-white/40 mt-0.5">Total</p>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
+            <p className="text-xl font-bold text-emerald-400">{materialEntries.filter((e) => e.type === "delivery").length}</p>
+            <p className="text-[10px] text-white/40 mt-0.5">Deliveries</p>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
+            <p className="text-xl font-bold text-amber-400">{materialEntries.filter((e) => e.type === "usage").length}</p>
+            <p className="text-[10px] text-white/40 mt-0.5">Usage</p>
+          </div>
         </div>
 
-        <select
-          value={selectedProject}
-          onChange={(e) => setSelectedProject(e.target.value)}
-          className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
-        >
-          <option value="all">All Projects</option>
-          {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-
-        <select
-          value={selectedTrade}
-          onChange={(e) => setSelectedTrade(e.target.value)}
-          className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
-        >
-          <option value="all">All Trades</option>
-          {TRADES.map((t) => <option key={t} value={t}>{t}</option>)}
-        </select>
-
-        <div className="flex items-center gap-1 bg-[#111] border border-white/[0.07] rounded-lg p-1">
+        {/* Delivery / Usage tabs */}
+        <div className="flex gap-2 px-4 mb-3">
           {(["delivery", "usage"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setEntryType(t)}
-              className={`px-3 py-1 rounded-md text-[12px] font-semibold capitalize transition-colors ${entryType === t ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70"}`}
-            >
+            <button key={t} onClick={() => setEntryType(t)}
+              className={`flex-1 py-2 rounded-xl text-[13px] font-bold capitalize transition-colors ${
+                entryType === t ? "bg-amber-500 text-black" : "bg-white/[0.06] text-white/40"
+              }`}>
               {t === "delivery" ? "Deliveries" : "Usage"}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Project Summary */}
-      {projectSummary && Object.keys(projectSummary).length > 0 && (
-        <div className="bg-[#111] border border-white/[0.06] rounded-xl p-5">
-          <h3 className="text-[13px] font-bold text-white/70 mb-4 uppercase tracking-wider">
-            Project Summary — {projects.find((p) => p.id === selectedProject)?.name}
-          </h3>
-          <div className="space-y-4">
-            {Object.entries(projectSummary).map(([trade, items]) => (
-              <div key={trade}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color(trade) }} />
-                  <span className="text-[12px] font-bold uppercase tracking-wider" style={{ color: color(trade) }}>{trade}</span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-[12px]">
-                    <thead>
-                      <tr className="text-white/25">
-                        <th className="text-left py-1 pr-4 font-semibold">Material</th>
-                        <th className="text-right py-1 pr-4 font-semibold">Delivered</th>
-                        <th className="text-right py-1 pr-4 font-semibold">Used</th>
-                        <th className="text-right py-1 font-semibold">On Hand</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item) => {
-                        const onHand = item.deliveries - item.usage;
-                        return (
-                          <tr key={item.name} className="border-t border-white/[0.04]">
-                            <td className="py-1.5 pr-4 text-white/80">{item.name}</td>
-                            <td className="py-1.5 pr-4 text-right text-emerald-400">{item.deliveries} {item.unit}</td>
-                            <td className="py-1.5 pr-4 text-right text-amber-400">{item.usage} {item.unit}</td>
-                            <td className={`py-1.5 text-right font-semibold ${onHand < 0 ? "text-red-400" : "text-white/60"}`}>
-                              {onHand} {item.unit}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Project filter */}
+        <div className="px-4 mb-3">
+          <select
+            value={selectedProject}
+            onChange={(e) => setSelectedProject(e.target.value)}
+            className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2.5 text-[13px] text-white/70 outline-none"
+          >
+            <option value="all">All Projects</option>
+            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
         </div>
-      )}
 
-      {/* Log entries */}
-      <div className="bg-[#111] border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-          <span className="text-[12px] font-bold text-white/40 uppercase tracking-wider">
-            {filteredEntries.filter((e) => e.type === entryType).length} {entryType === "delivery" ? "deliveries" : "usage entries"}
-          </span>
-        </div>
-        {filteredEntries.filter((e) => e.type === entryType).length === 0 ? (
-          <div className="py-16 text-center">
-            <Package size={28} className="text-white/15 mx-auto mb-3" />
-            <p className="text-[13px] text-white/25">No {entryType} logs yet</p>
-            <p className="text-[11px] text-white/15 mt-1">Click "Log Material" to get started</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-white/[0.04]">
-            {filteredEntries.filter((e) => e.type === entryType).map((entry) => {
+        {/* Entry cards */}
+        <div className="px-4 space-y-2">
+          {filteredEntries.filter((e) => e.type === entryType).length === 0 ? (
+            <div className="text-center py-16">
+              <Package size={28} className="text-white/15 mx-auto mb-3" />
+              <p className="text-[13px] text-white/25">No {entryType} logs yet</p>
+              <p className="text-[11px] text-white/15 mt-1">Tap "Log Material" to get started</p>
+            </div>
+          ) : (
+            filteredEntries.filter((e) => e.type === entryType).map((entry) => {
               const project = projects.find((p) => p.id === entry.projectId);
               const tradeColor = color(entry.trade);
               return (
-                <div key={entry.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.02] group transition-colors">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: tradeColor + "18" }}>
-                    {entry.type === "delivery"
-                      ? <TrendingUp size={15} style={{ color: tradeColor }} />
-                      : <TrendingDown size={15} className="text-amber-400" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-semibold text-white/90">{entry.materialName}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
-                        style={{ backgroundColor: tradeColor + "22", color: tradeColor }}>
-                        {entry.trade}
-                      </span>
+                <div key={entry.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: tradeColor + "18" }}>
+                        {entry.type === "delivery"
+                          ? <TrendingUp size={15} style={{ color: tradeColor }} />
+                          : <TrendingDown size={15} className="text-amber-400" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-bold text-white/85 truncate">{entry.materialName}</p>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
+                          style={{ backgroundColor: tradeColor + "22", color: tradeColor }}>
+                          {entry.trade}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-[11px] text-white/35 mt-0.5">
-                      {project?.name ?? "Unknown"} · {format(new Date(entry.date), "MMM d, yyyy")}
-                      {entry.note && <span className="ml-2 italic">"{entry.note}"</span>}
+                    <div className="text-right flex-shrink-0">
+                      <div className={`text-[16px] font-bold ${entry.type === "delivery" ? "text-emerald-400" : "text-amber-400"}`}>
+                        {entry.type === "delivery" ? "+" : "-"}{entry.quantity}
+                      </div>
+                      <div className="text-[10px] text-white/30">{entry.unit}</div>
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className={`text-[15px] font-bold ${entry.type === "delivery" ? "text-emerald-400" : "text-amber-400"}`}>
-                      {entry.type === "delivery" ? "+" : "-"}{entry.quantity}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-[11px] text-white/35">
+                      {project && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
+                          <span className="text-amber-400/70">{project.name}</span>
+                        </div>
+                      )}
+                      <span>{format(new Date(entry.date), "MMM d, yyyy")}</span>
                     </div>
-                    <div className="text-[10px] text-white/30">{entry.unit}</div>
+                    <button onClick={() => setDeleteConfirm(entry.id)}
+                      className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                      <Trash2 size={12} />
+                    </button>
                   </div>
-                  <button onClick={() => setDeleteConfirm(entry.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
-                    <Trash2 size={13} />
-                  </button>
+                  {entry.note && <p className="text-[11px] text-white/35 mt-1.5 italic">"{entry.note}"</p>}
                 </div>
               );
-            })}
+            })
+          )}
+        </div>
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden lg:block">
+        <div className="space-y-5 max-w-[1100px]">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Materials</h2>
+              <p className="text-[12px] text-white/35 mt-0.5">Track deliveries and usage across all job sites</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {projectSummary && Object.keys(projectSummary).length > 0 && (
+                <button
+                  onClick={async () => {
+                    setPdfLoading(true);
+                    try {
+                      const proj = projects.find((p) => p.id === selectedProject);
+                      await exportMaterialsPdf(proj?.name ?? "Project", projectSummary, companyName);
+                    } finally {
+                      setPdfLoading(false); }
+                  }}
+                  disabled={pdfLoading}
+                  className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.07] text-white/60 font-bold text-[13px] px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  <FileText size={14} />
+                  {pdfLoading ? "Generating…" : "Export PDF"}
+                </button>
+              )}
+              <button
+                onClick={() => { setShowAddModal(true); setEntryProjectId(projects[0]?.id ?? ""); }}
+                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+              >
+                <Plus size={15} />
+                Log Material
+              </button>
+            </div>
           </div>
-        )}
+
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <Search size={13} className="absolute start-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search materials…"
+                className="bg-[#111] border border-white/[0.07] rounded-lg ps-8 pe-3 py-2 text-[13px] text-white placeholder-white/25 outline-none focus:border-amber-500/40 w-48"
+              />
+            </div>
+
+            <select
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
+            >
+              <option value="all">All Projects</option>
+              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+
+            <select
+              value={selectedTrade}
+              onChange={(e) => setSelectedTrade(e.target.value)}
+              className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
+            >
+              <option value="all">All Trades</option>
+              {TRADES.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+
+            <div className="flex items-center gap-1 bg-[#111] border border-white/[0.07] rounded-lg p-1">
+              {(["delivery", "usage"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setEntryType(t)}
+                  className={`px-3 py-1 rounded-md text-[12px] font-semibold capitalize transition-colors ${entryType === t ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70"}`}
+                >
+                  {t === "delivery" ? "Deliveries" : "Usage"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Project Summary */}
+          {projectSummary && Object.keys(projectSummary).length > 0 && (
+            <div className="bg-[#111] border border-white/[0.06] rounded-xl p-5">
+              <h3 className="text-[13px] font-bold text-white/70 mb-4 uppercase tracking-wider">
+                Project Summary — {projects.find((p) => p.id === selectedProject)?.name}
+              </h3>
+              <div className="space-y-4">
+                {Object.entries(projectSummary).map(([trade, items]) => (
+                  <div key={trade}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color(trade) }} />
+                      <span className="text-[12px] font-bold uppercase tracking-wider" style={{ color: color(trade) }}>{trade}</span>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[12px]">
+                        <thead>
+                          <tr className="text-white/25">
+                            <th className="text-left py-1 pr-4 font-semibold">Material</th>
+                            <th className="text-right py-1 pr-4 font-semibold">Delivered</th>
+                            <th className="text-right py-1 pr-4 font-semibold">Used</th>
+                            <th className="text-right py-1 font-semibold">On Hand</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((item) => {
+                            const onHand = item.deliveries - item.usage;
+                            return (
+                              <tr key={item.name} className="border-t border-white/[0.04]">
+                                <td className="py-1.5 pr-4 text-white/80">{item.name}</td>
+                                <td className="py-1.5 pr-4 text-right text-emerald-400">{item.deliveries} {item.unit}</td>
+                                <td className="py-1.5 pr-4 text-right text-amber-400">{item.usage} {item.unit}</td>
+                                <td className={`py-1.5 text-right font-semibold ${onHand < 0 ? "text-red-400" : "text-white/60"}`}>
+                                  {onHand} {item.unit}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Log entries */}
+          <div className="bg-[#111] border border-white/[0.06] rounded-xl overflow-hidden">
+            <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
+              <span className="text-[12px] font-bold text-white/40 uppercase tracking-wider">
+                {filteredEntries.filter((e) => e.type === entryType).length} {entryType === "delivery" ? "deliveries" : "usage entries"}
+              </span>
+            </div>
+            {filteredEntries.filter((e) => e.type === entryType).length === 0 ? (
+              <div className="py-16 text-center">
+                <Package size={28} className="text-white/15 mx-auto mb-3" />
+                <p className="text-[13px] text-white/25">No {entryType} logs yet</p>
+                <p className="text-[11px] text-white/15 mt-1">Click "Log Material" to get started</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/[0.04]">
+                {filteredEntries.filter((e) => e.type === entryType).map((entry) => {
+                  const project = projects.find((p) => p.id === entry.projectId);
+                  const tradeColor = color(entry.trade);
+                  return (
+                    <div key={entry.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.02] group transition-colors">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: tradeColor + "18" }}>
+                        {entry.type === "delivery"
+                          ? <TrendingUp size={15} style={{ color: tradeColor }} />
+                          : <TrendingDown size={15} className="text-amber-400" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[13px] font-semibold text-white/90">{entry.materialName}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
+                            style={{ backgroundColor: tradeColor + "22", color: tradeColor }}>
+                            {entry.trade}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-white/35 mt-0.5">
+                          {project?.name ?? "Unknown"} · {format(new Date(entry.date), "MMM d, yyyy")}
+                          {entry.note && <span className="ml-2 italic">"{entry.note}"</span>}
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className={`text-[15px] font-bold ${entry.type === "delivery" ? "text-emerald-400" : "text-amber-400"}`}>
+                          {entry.type === "delivery" ? "+" : "-"}{entry.quantity}
+                        </div>
+                        <div className="text-[10px] text-white/30">{entry.unit}</div>
+                      </div>
+                      <button onClick={() => setDeleteConfirm(entry.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Add Material Modal */}
@@ -494,6 +613,6 @@ export default function MaterialsPage() {
         onConfirm={() => { if (deleteConfirm) deleteMaterialEntry(deleteConfirm); setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
-    </div>
+    </>
   );
 }

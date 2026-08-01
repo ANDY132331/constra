@@ -280,275 +280,512 @@ export default function SchedulePage() {
   const disruption = selectedWeather ? isWorkDisruptive(selectedWeather) : null;
 
   return (
-    <div className="space-y-5 max-w-[1000px]">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white tracking-tight">Schedule</h2>
-        <div className="flex items-center gap-2">
-          {/* Weather location */}
+    <>
+      {/* MOBILE */}
+      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-2">
+          <h2 className="text-xl font-bold text-white tracking-tight">Schedule</h2>
+          <button
+            onClick={() => {
+              setEditEventId(null);
+              setAddForm({
+                title: "",
+                date: selectedDay ? format(selectedDay, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+                type: "meeting",
+                description: "",
+              });
+              setShowAddModal(true);
+            }}
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <Plus size={14} />
+            Add Event
+          </button>
+        </div>
+
+        {/* Location + weather toggle */}
+        <div className="flex items-center gap-2 px-4 pb-3">
           <div className="relative">
             <button
               onClick={() => setShowLocationPicker(!showLocationPicker)}
-              className="flex items-center gap-1.5 bg-[#111] hover:bg-white/5 border border-white/[0.07] text-white/50 hover:text-white/80 text-[12px] px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1 text-[11px] text-white/35 hover:text-white/60 transition-colors"
             >
-              <MapPin size={12} />
+              <MapPin size={10} />
               {locationName}
             </button>
             {showLocationPicker && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => { setShowLocationPicker(false); setLocationInput(""); setGeoResults([]); }} />
-                <div className="absolute right-0 top-full mt-2 z-20 bg-[#1a1a1a] border border-white/[0.1] rounded-xl p-3 w-72 shadow-2xl">
-                <p className="text-[11px] text-white/40 mb-2">Search by city or town name</p>
-                <input
-                  autoFocus value={locationInput}
-                  onChange={(e) => { setLocationInput(e.target.value); searchLocation(e.target.value); }}
-                  placeholder="e.g. Toronto, Calgary…"
-                  className="w-full bg-[#111] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white outline-none focus:border-amber-500/40"
-                  onKeyDown={(e) => e.key === "Escape" && setShowLocationPicker(false)}
-                />
-                {geoLoading && <p className="text-[11px] text-white/30 mt-2 text-center">Searching…</p>}
-                {geoResults.length > 0 && (
-                  <div className="mt-2 space-y-0.5">
-                    {geoResults.map((r, i) => (
-                      <button key={i} onClick={() => applyGeoResult(r)}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-white/[0.05] transition-colors">
-                        <MapPin size={11} className="text-amber-400 flex-shrink-0" />
-                        <div>
-                          <p className="text-[12px] font-semibold text-white/80">{r.name}</p>
-                          <p className="text-[10px] text-white/35">{[r.admin1, r.country].filter(Boolean).join(", ")}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {!geoLoading && locationInput.length > 1 && geoResults.length === 0 && (
-                  <p className="text-[11px] text-white/25 mt-2 text-center">No results found</p>
-                )}
-              </div>
+                <div className="absolute left-0 top-full mt-2 z-20 bg-[#1a1a1a] border border-white/[0.1] rounded-xl p-3 w-64 shadow-2xl">
+                  <p className="text-[11px] text-white/40 mb-2">Search by city or town name</p>
+                  <input
+                    autoFocus value={locationInput}
+                    onChange={(e) => { setLocationInput(e.target.value); searchLocation(e.target.value); }}
+                    placeholder="e.g. Toronto, Calgary…"
+                    className="w-full bg-[#111] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white outline-none focus:border-amber-500/40"
+                    onKeyDown={(e) => e.key === "Escape" && setShowLocationPicker(false)}
+                  />
+                  {geoLoading && <p className="text-[11px] text-white/30 mt-2 text-center">Searching…</p>}
+                  {geoResults.length > 0 && (
+                    <div className="mt-2 space-y-0.5">
+                      {geoResults.map((r, i) => (
+                        <button key={i} onClick={() => applyGeoResult(r)}
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-white/[0.05] transition-colors">
+                          <MapPin size={11} className="text-amber-400 flex-shrink-0" />
+                          <div>
+                            <p className="text-[12px] font-semibold text-white/80">{r.name}</p>
+                            <p className="text-[10px] text-white/35">{[r.admin1, r.country].filter(Boolean).join(", ")}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {!geoLoading && locationInput.length > 1 && geoResults.length === 0 && (
+                    <p className="text-[11px] text-white/25 mt-2 text-center">No results found</p>
+                  )}
+                </div>
               </>
             )}
           </div>
-
           {weather && (
-            <>
-              <button
-                onClick={() => setImperial((v) => !v)}
-                className="text-[11px] font-bold text-white/40 hover:text-white/70 bg-white/[0.04] hover:bg-white/[0.07] px-2.5 py-1.5 rounded-lg transition-colors"
-                title="Toggle temperature units"
-              >
-                {imperial ? "°F" : "°C"}
-              </button>
-              <button onClick={() => fetchWeather(lat, lon)} disabled={weatherLoading}
-                className="p-2 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors" title="Refresh weather">
-                <RefreshCw size={14} className={weatherLoading ? "animate-spin" : ""} />
-              </button>
-            </>
+            <button
+              onClick={() => setImperial((v) => !v)}
+              className="text-[10px] font-bold text-white/30 hover:text-white/60 transition-colors ml-1"
+            >
+              {imperial ? "°F" : "°C"}
+            </button>
           )}
-
-          <span className="text-[12px] text-white/35">{calEvents.length} events</span>
-          <button
-            onClick={() => { setEditEventId(null); setAddForm({ title: "", date: selectedDay ? format(selectedDay, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); }}
-            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
-          >
-            <Plus size={15} />
-            Add Event
-          </button>
         </div>
-      </div>
 
-      {weatherError && !weatherLoading && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-red-500/8 border border-red-500/15 rounded-xl text-[12px] text-red-400">
-          <AlertTriangle size={14} className="flex-shrink-0" />
-          <span>Could not load weather — check your connection or try a different location.</span>
-          <button onClick={() => fetchWeather(lat, lon)} className="ms-auto text-red-300 hover:text-red-200 font-semibold underline">Retry</button>
-        </div>
-      )}
-
-      {weather && (
-        <div className="bg-[#111] border border-white/[0.06] rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider flex items-center gap-1.5">
-              <MapPin size={10} /> {weather.location} — 14-Day Forecast
-            </span>
-            <span className="text-[10px] text-white/25">Updated {format(weather.fetchedAt, "h:mm a")}</span>
-          </div>
-          <div className="overflow-x-auto -mx-1 px-1">
-            <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(14, minmax(46px, 1fr))", minWidth: 660 }}>
-              {weather.days.slice(0, 14).map((d) => {
-                const disrupts = isWorkDisruptive(d);
-                return (
-                  <div key={d.date}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-lg ${disrupts === "severe" ? "bg-red-500/10 border border-red-500/20" : disrupts === "moderate" ? "bg-amber-500/8 border border-amber-500/15" : "bg-white/[0.03]"}`}>
-                    <span className="text-[9px] text-white/30 font-semibold">{format(new Date(d.date + "T12:00:00"), "EEE")}</span>
-                    <span className="text-[9px] text-white/25">{format(new Date(d.date + "T12:00:00"), "d")}</span>
-                    <WeatherIcon code={d.weatherCode} size={14} className={disrupts === "severe" ? "text-red-400" : disrupts === "moderate" ? "text-amber-400" : "text-white/40"} />
-                    {d.precipMm > 0 && (
-                      <span className={`text-[9px] font-semibold ${disrupts === "severe" ? "text-red-400" : "text-blue-400"}`}>{d.precipMm.toFixed(0)}mm</span>
-                    )}
-                    <span className="text-[9px] text-white/30">{fmtTemp(d.maxTempC, imperial)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/[0.05]">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/30" />
-              <span className="text-[10px] text-white/35">Work disruption</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-amber-500/15 border border-amber-500/20" />
-              <span className="text-[10px] text-white/35">Possible delays</span>
-            </div>
-            <div className="flex items-center gap-1.5 ml-auto">
-              {Object.entries(EVENT_TYPE_CONFIG).map(([k, v]) => (
-                <div key={k} className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: v.color }} />
-                  <span className="text-[9px] text-white/30">{v.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Calendar */}
-      <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-x-auto">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        {/* Month navigation */}
+        <div className="flex items-center justify-between px-4 mb-3">
           <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors">
-            <ChevronLeft size={16} />
+            className="w-9 h-9 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-colors">
+            <ChevronLeft size={18} />
           </button>
           <h3 className="text-[15px] font-bold text-white">{format(currentMonth, "MMMM yyyy")}</h3>
           <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors">
-            <ChevronRight size={16} />
+            className="w-9 h-9 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-colors">
+            <ChevronRight size={18} />
           </button>
         </div>
-        <div className="min-w-[480px]">
-          <div className="grid grid-cols-7 border-b border-white/[0.06]">
-            {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-              <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-white/25 py-2.5">{d}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {paddingDays.map((i) => (
-              <div key={`pad-${i}`} className="h-24 border-r border-b border-white/[0.04] bg-white/[0.01]" />
-            ))}
+
+        {/* Day strip */}
+        <div className="overflow-x-auto scrollbar-none px-4 mb-4">
+          <div className="flex gap-1.5 pb-0.5" style={{ minWidth: "max-content" }}>
             {days.map((day) => {
+              const todayFlag = isToday(day);
+              const isSelected = selectedDay ? isSameDay(selectedDay, day) : false;
               const dayEvents = eventsOnDay(day);
-              const today = isToday(day);
-              const isSelected = selectedDay && isSameDay(selectedDay, day);
               const dayWeather = getWeatherForDay(day);
               const disrupts = dayWeather ? isWorkDisruptive(dayWeather) : null;
               return (
-                <div key={day.toISOString()}
-                  className={`h-24 border-r border-b border-white/[0.04] p-1.5 cursor-pointer transition-colors relative ${isSelected ? "bg-amber-500/[0.08]" : disrupts === "severe" ? "bg-red-500/[0.04] hover:bg-red-500/[0.07]" : disrupts === "moderate" ? "bg-amber-500/[0.03] hover:bg-amber-500/[0.06]" : "hover:bg-white/[0.02]"}`}
-                  onClick={() => setSelectedDay(isSameDay(day, selectedDay ?? new Date(0)) ? null : day)}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold ${today ? "bg-amber-500 text-black" : "text-white/50"}`}>
-                      {format(day, "d")}
-                    </div>
-                    {dayWeather && (disrupts || dayWeather.precipMm > 0) && (
-                      <div className="flex items-center gap-0.5" title={`${wmoToLabel(dayWeather.weatherCode)} · ${dayWeather.precipMm}mm`}>
-                        {disrupts === "severe" && <AlertTriangle size={9} className="text-red-400" />}
-                        <WeatherIcon code={dayWeather.weatherCode} size={10}
-                          className={disrupts === "severe" ? "text-red-400" : disrupts === "moderate" ? "text-amber-400" : "text-blue-400"} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-0.5">
-                    {dayEvents.slice(0, 2).map((e) => (
-                      <div key={e.id} className="text-[9px] font-semibold px-1.5 py-0.5 rounded truncate"
-                        style={{ backgroundColor: e.color + "25", color: e.color }}>
-                        {e.source === "task" ? e.title.replace(" (Start)", "★").replace(" (Due)", "✓") : e.title}
-                      </div>
-                    ))}
-                    {dayEvents.length > 2 && <p className="text-[9px] text-white/25 px-1">+{dayEvents.length - 2} more</p>}
-                  </div>
-                </div>
+                <button
+                  key={day.toISOString()}
+                  onClick={() => setSelectedDay(selectedDay && isSameDay(day, selectedDay) ? null : day)}
+                  className={`flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl transition-all min-w-[44px] ${
+                    isSelected
+                      ? "bg-amber-500 text-black"
+                      : todayFlag
+                      ? "bg-amber-500/15 text-amber-400"
+                      : disrupts === "severe"
+                      ? "bg-red-500/[0.08] text-white/60"
+                      : "bg-white/[0.04] text-white/50 hover:bg-white/[0.07]"
+                  }`}
+                >
+                  <span className={`text-[9px] font-bold uppercase ${isSelected ? "text-black/70" : "text-white/30"}`}>
+                    {format(day, "EEE")}
+                  </span>
+                  <span className={`text-[16px] font-bold leading-none ${isSelected ? "text-black" : todayFlag ? "text-amber-400" : "text-white/80"}`}>
+                    {format(day, "d")}
+                  </span>
+                  {dayEvents.length > 0 && (
+                    <div className={`w-1 h-1 rounded-full ${isSelected ? "bg-black/50" : "bg-amber-400"}`} />
+                  )}
+                  {dayWeather && (disrupts || dayWeather.precipMm > 0) && (
+                    <WeatherIcon
+                      code={dayWeather.weatherCode}
+                      size={9}
+                      className={isSelected ? "text-black/50" : disrupts === "severe" ? "text-red-400" : "text-blue-400"}
+                    />
+                  )}
+                </button>
               );
             })}
           </div>
         </div>
+
+        {/* Selected day content */}
+        {selectedDay ? (
+          <div className="px-4 space-y-2">
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="text-[13px] font-bold text-white/60">{format(selectedDay, "EEEE, MMMM d")}</h4>
+              <span className="text-[11px] text-white/30">{selectedEvents.length} event{selectedEvents.length !== 1 ? "s" : ""}</span>
+            </div>
+
+            {/* Selected day weather */}
+            {selectedWeather && (
+              <div className={`p-3 rounded-xl flex items-center gap-3 mb-1 ${
+                disruption === "severe"
+                  ? "bg-red-500/10 border border-red-500/20"
+                  : disruption === "moderate"
+                  ? "bg-amber-500/10 border border-amber-500/20"
+                  : "bg-white/[0.04]"
+              }`}>
+                <WeatherIcon code={selectedWeather.weatherCode} size={20}
+                  className={disruption === "severe" ? "text-red-400" : disruption === "moderate" ? "text-amber-400" : "text-white/50"} />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[13px] font-bold text-white/80">{wmoToLabel(selectedWeather.weatherCode)}</span>
+                    {disruption && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${disruption === "severe" ? "bg-red-500/20 text-red-300" : "bg-amber-500/20 text-amber-300"}`}>
+                        {disruption === "severe" ? "Work Disruption" : "Possible Delays"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-0.5 text-[11px] text-white/35">
+                    <span>{fmtTemp(selectedWeather.minTempC, imperial)} – {fmtTemp(selectedWeather.maxTempC, imperial)}</span>
+                    {selectedWeather.precipMm > 0 && (
+                      <span className="flex items-center gap-1"><CloudRain size={9} />{selectedWeather.precipMm.toFixed(1)}mm</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedEvents.length === 0 ? (
+              <div className="text-center py-8 text-white/25">
+                <p className="text-[13px]">No events on this day</p>
+                <button
+                  onClick={() => {
+                    setEditEventId(null);
+                    setAddForm({ title: "", date: format(selectedDay, "yyyy-MM-dd"), type: "meeting", description: "" });
+                    setShowAddModal(true);
+                  }}
+                  className="text-amber-400 text-[12px] mt-2 hover:text-amber-300 transition-colors"
+                >
+                  + Add event
+                </button>
+              </div>
+            ) : (
+              selectedEvents.map((e) => {
+                const customEvt = customEvents.find((c) => c.id === e.id);
+                const cfg = customEvt ? EVENT_TYPE_CONFIG[customEvt.type] : null;
+                return (
+                  <div key={e.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4"
+                    style={{ borderLeftColor: e.color, borderLeftWidth: 3 }}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-bold text-white/85">{e.title}</p>
+                        {customEvt?.description && (
+                          <p className="text-[12px] text-white/45 mt-0.5">{customEvt.description}</p>
+                        )}
+                        {cfg && (
+                          <span className="text-[10px] font-bold mt-1 inline-block px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: cfg.color + "22", color: cfg.color }}>
+                            {cfg.label}
+                          </span>
+                        )}
+                      </div>
+                      {customEvt && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button onClick={() => openEditEvent(customEvt)}
+                            className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                            <Pencil size={12} />
+                          </button>
+                          <button onClick={() => setDeleteEventConfirm(e.id)}
+                            className="p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            <X size={12} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <div className="px-4 text-center py-6 text-white/25">
+            <p className="text-[13px]">Tap a day to see events</p>
+          </div>
+        )}
       </div>
 
-      {calEvents.length === 0 && (
-        <div className="text-center py-6 text-white/25 text-[13px]">
-          No events yet — add tasks to projects or click "Add Event" above
-        </div>
-      )}
+      {/* DESKTOP */}
+      <div className="hidden lg:block">
+        <div className="space-y-5 max-w-[1000px]">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white tracking-tight">Schedule</h2>
+            <div className="flex items-center gap-2">
+              {/* Weather location */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowLocationPicker(!showLocationPicker)}
+                  className="flex items-center gap-1.5 bg-[#111] hover:bg-white/5 border border-white/[0.07] text-white/50 hover:text-white/80 text-[12px] px-3 py-2 rounded-lg transition-colors"
+                >
+                  <MapPin size={12} />
+                  {locationName}
+                </button>
+                {showLocationPicker && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => { setShowLocationPicker(false); setLocationInput(""); setGeoResults([]); }} />
+                    <div className="absolute right-0 top-full mt-2 z-20 bg-[#1a1a1a] border border-white/[0.1] rounded-xl p-3 w-72 shadow-2xl">
+                    <p className="text-[11px] text-white/40 mb-2">Search by city or town name</p>
+                    <input
+                      autoFocus value={locationInput}
+                      onChange={(e) => { setLocationInput(e.target.value); searchLocation(e.target.value); }}
+                      placeholder="e.g. Toronto, Calgary…"
+                      className="w-full bg-[#111] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white outline-none focus:border-amber-500/40"
+                      onKeyDown={(e) => e.key === "Escape" && setShowLocationPicker(false)}
+                    />
+                    {geoLoading && <p className="text-[11px] text-white/30 mt-2 text-center">Searching…</p>}
+                    {geoResults.length > 0 && (
+                      <div className="mt-2 space-y-0.5">
+                        {geoResults.map((r, i) => (
+                          <button key={i} onClick={() => applyGeoResult(r)}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-white/[0.05] transition-colors">
+                            <MapPin size={11} className="text-amber-400 flex-shrink-0" />
+                            <div>
+                              <p className="text-[12px] font-semibold text-white/80">{r.name}</p>
+                              <p className="text-[10px] text-white/35">{[r.admin1, r.country].filter(Boolean).join(", ")}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {!geoLoading && locationInput.length > 1 && geoResults.length === 0 && (
+                      <p className="text-[11px] text-white/25 mt-2 text-center">No results found</p>
+                    )}
+                  </div>
+                  </>
+                )}
+              </div>
 
-      {selectedDay && (
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-[14px] font-bold text-white">{format(selectedDay, "EEEE, MMMM d, yyyy")}</h4>
-            <button
-              onClick={() => { setEditEventId(null); setAddForm({ title: "", date: format(selectedDay, "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); }}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <Plus size={13} /> Add Event
-            </button>
+              {weather && (
+                <>
+                  <button
+                    onClick={() => setImperial((v) => !v)}
+                    className="text-[11px] font-bold text-white/40 hover:text-white/70 bg-white/[0.04] hover:bg-white/[0.07] px-2.5 py-1.5 rounded-lg transition-colors"
+                    title="Toggle temperature units"
+                  >
+                    {imperial ? "°F" : "°C"}
+                  </button>
+                  <button onClick={() => fetchWeather(lat, lon)} disabled={weatherLoading}
+                    className="p-2 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors" title="Refresh weather">
+                    <RefreshCw size={14} className={weatherLoading ? "animate-spin" : ""} />
+                  </button>
+                </>
+              )}
+
+              <span className="text-[12px] text-white/35">{calEvents.length} events</span>
+              <button
+                onClick={() => { setEditEventId(null); setAddForm({ title: "", date: selectedDay ? format(selectedDay, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); }}
+                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+              >
+                <Plus size={15} />
+                Add Event
+              </button>
+            </div>
           </div>
 
-          {selectedWeather && (
-            <div className={`mb-4 p-3 rounded-xl flex items-center gap-4 ${disruption === "severe" ? "bg-red-500/10 border border-red-500/20" : disruption === "moderate" ? "bg-amber-500/10 border border-amber-500/20" : "bg-white/[0.04]"}`}>
-              <WeatherIcon code={selectedWeather.weatherCode} size={24}
-                className={disruption === "severe" ? "text-red-400" : disruption === "moderate" ? "text-amber-400" : "text-white/50"} />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-bold text-white/80">{wmoToLabel(selectedWeather.weatherCode)}</span>
-                  {disruption && (
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${disruption === "severe" ? "bg-red-500/20 text-red-300" : "bg-amber-500/20 text-amber-300"}`}>
-                      {disruption === "severe" ? "⚠ Work Disruption" : "⚠ Possible Delays"}
-                    </span>
-                  )}
+          {weatherError && !weatherLoading && (
+            <div className="flex items-center gap-3 px-4 py-3 bg-red-500/8 border border-red-500/15 rounded-xl text-[12px] text-red-400">
+              <AlertTriangle size={14} className="flex-shrink-0" />
+              <span>Could not load weather — check your connection or try a different location.</span>
+              <button onClick={() => fetchWeather(lat, lon)} className="ms-auto text-red-300 hover:text-red-200 font-semibold underline">Retry</button>
+            </div>
+          )}
+
+          {weather && (
+            <div className="bg-[#111] border border-white/[0.06] rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider flex items-center gap-1.5">
+                  <MapPin size={10} /> {weather.location} — 14-Day Forecast
+                </span>
+                <span className="text-[10px] text-white/25">Updated {format(weather.fetchedAt, "h:mm a")}</span>
+              </div>
+              <div className="overflow-x-auto -mx-1 px-1">
+                <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(14, minmax(46px, 1fr))", minWidth: 660 }}>
+                  {weather.days.slice(0, 14).map((d) => {
+                    const disrupts = isWorkDisruptive(d);
+                    return (
+                      <div key={d.date}
+                        className={`flex flex-col items-center gap-1 p-2 rounded-lg ${disrupts === "severe" ? "bg-red-500/10 border border-red-500/20" : disrupts === "moderate" ? "bg-amber-500/8 border border-amber-500/15" : "bg-white/[0.03]"}`}>
+                        <span className="text-[9px] text-white/30 font-semibold">{format(new Date(d.date + "T12:00:00"), "EEE")}</span>
+                        <span className="text-[9px] text-white/25">{format(new Date(d.date + "T12:00:00"), "d")}</span>
+                        <WeatherIcon code={d.weatherCode} size={14} className={disrupts === "severe" ? "text-red-400" : disrupts === "moderate" ? "text-amber-400" : "text-white/40"} />
+                        {d.precipMm > 0 && (
+                          <span className={`text-[9px] font-semibold ${disrupts === "severe" ? "text-red-400" : "text-blue-400"}`}>{d.precipMm.toFixed(0)}mm</span>
+                        )}
+                        <span className="text-[9px] text-white/30">{fmtTemp(d.maxTempC, imperial)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-[11px] text-white/35">
-                  <span>{fmtTemp(selectedWeather.minTempC, imperial)} – {fmtTemp(selectedWeather.maxTempC, imperial)}</span>
-                  {selectedWeather.precipMm > 0 && <span className="flex items-center gap-1"><CloudRain size={10} />{selectedWeather.precipMm.toFixed(1)}mm</span>}
-                  {selectedWeather.windKph > 0 && <span className="flex items-center gap-1"><Wind size={10} />{fmtWind(selectedWeather.windKph, imperial)}</span>}
+              </div>
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/[0.05]">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/30" />
+                  <span className="text-[10px] text-white/35">Work disruption</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-amber-500/15 border border-amber-500/20" />
+                  <span className="text-[10px] text-white/35">Possible delays</span>
+                </div>
+                <div className="flex items-center gap-4 ml-auto">
+                  {Object.entries(EVENT_TYPE_CONFIG).map(([k, v]) => (
+                    <div key={k} className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: v.color }} />
+                      <span className="text-[9px] text-white/30">{v.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           )}
 
-          <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">
-            {selectedEvents.length} event{selectedEvents.length !== 1 ? "s" : ""}
-          </p>
-          {selectedEvents.length === 0 ? (
-            <p className="text-[12px] text-white/30 italic">No events on this day</p>
-          ) : (
-            <div className="space-y-2">
-              {selectedEvents.map((e) => {
-                const customEvt = customEvents.find((c) => c.id === e.id);
-                return (
-                  <div key={e.id} className="flex items-center gap-3 group">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: e.color }} />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[13px] text-white/70">{e.title}</span>
-                      {customEvt?.description && (
-                        <p className="text-[11px] text-white/35 truncate">{customEvt.description}</p>
+          {/* Calendar */}
+          <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-x-auto">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+              <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors">
+                <ChevronLeft size={16} />
+              </button>
+              <h3 className="text-[15px] font-bold text-white">{format(currentMonth, "MMMM yyyy")}</h3>
+              <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <div className="min-w-[480px]">
+              <div className="grid grid-cols-7 border-b border-white/[0.06]">
+                {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
+                  <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest text-white/25 py-2.5">{d}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7">
+                {paddingDays.map((i) => (
+                  <div key={`pad-${i}`} className="h-24 border-r border-b border-white/[0.04] bg-white/[0.01]" />
+                ))}
+                {days.map((day) => {
+                  const dayEvents = eventsOnDay(day);
+                  const today = isToday(day);
+                  const isSelected = selectedDay && isSameDay(selectedDay, day);
+                  const dayWeather = getWeatherForDay(day);
+                  const disrupts = dayWeather ? isWorkDisruptive(dayWeather) : null;
+                  return (
+                    <div key={day.toISOString()}
+                      className={`h-24 border-r border-b border-white/[0.04] p-1.5 cursor-pointer transition-colors relative ${isSelected ? "bg-amber-500/[0.08]" : disrupts === "severe" ? "bg-red-500/[0.04] hover:bg-red-500/[0.07]" : disrupts === "moderate" ? "bg-amber-500/[0.03] hover:bg-amber-500/[0.06]" : "hover:bg-white/[0.02]"}`}
+                      onClick={() => setSelectedDay(isSameDay(day, selectedDay ?? new Date(0)) ? null : day)}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold ${today ? "bg-amber-500 text-black" : "text-white/50"}`}>
+                          {format(day, "d")}
+                        </div>
+                        {dayWeather && (disrupts || dayWeather.precipMm > 0) && (
+                          <div className="flex items-center gap-0.5" title={`${wmoToLabel(dayWeather.weatherCode)} · ${dayWeather.precipMm}mm`}>
+                            {disrupts === "severe" && <AlertTriangle size={9} className="text-red-400" />}
+                            <WeatherIcon code={dayWeather.weatherCode} size={10}
+                              className={disrupts === "severe" ? "text-red-400" : disrupts === "moderate" ? "text-amber-400" : "text-blue-400"} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-0.5">
+                        {dayEvents.slice(0, 2).map((e) => (
+                          <div key={e.id} className="text-[9px] font-semibold px-1.5 py-0.5 rounded truncate"
+                            style={{ backgroundColor: e.color + "25", color: e.color }}>
+                            {e.source === "task" ? e.title.replace(" (Start)", "★").replace(" (Due)", "✓") : e.title}
+                          </div>
+                        ))}
+                        {dayEvents.length > 2 && <p className="text-[9px] text-white/25 px-1">+{dayEvents.length - 2} more</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {calEvents.length === 0 && (
+            <div className="text-center py-6 text-white/25 text-[13px]">
+              No events yet — add tasks to projects or click "Add Event" above
+            </div>
+          )}
+
+          {selectedDay && (
+            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[14px] font-bold text-white">{format(selectedDay, "EEEE, MMMM d, yyyy")}</h4>
+                <button
+                  onClick={() => { setEditEventId(null); setAddForm({ title: "", date: format(selectedDay, "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); }}
+                  className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <Plus size={13} /> Add Event
+                </button>
+              </div>
+
+              {selectedWeather && (
+                <div className={`mb-4 p-3 rounded-xl flex items-center gap-4 ${disruption === "severe" ? "bg-red-500/10 border border-red-500/20" : disruption === "moderate" ? "bg-amber-500/10 border border-amber-500/20" : "bg-white/[0.04]"}`}>
+                  <WeatherIcon code={selectedWeather.weatherCode} size={24}
+                    className={disruption === "severe" ? "text-red-400" : disruption === "moderate" ? "text-amber-400" : "text-white/50"} />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-bold text-white/80">{wmoToLabel(selectedWeather.weatherCode)}</span>
+                      {disruption && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${disruption === "severe" ? "bg-red-500/20 text-red-300" : "bg-amber-500/20 text-amber-300"}`}>
+                          {disruption === "severe" ? "⚠ Work Disruption" : "⚠ Possible Delays"}
+                        </span>
                       )}
                     </div>
-                    {customEvt && (
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                        <button onClick={() => openEditEvent(customEvt)}
-                          className="p-1 rounded text-white/25 hover:text-white/60 transition-colors">
-                          <Pencil size={11} />
-                        </button>
-                        <button onClick={() => setDeleteEventConfirm(e.id)}
-                          className="p-1 rounded text-white/25 hover:text-red-400 transition-colors">
-                          <X size={12} />
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-3 mt-1 text-[11px] text-white/35">
+                      <span>{fmtTemp(selectedWeather.minTempC, imperial)} – {fmtTemp(selectedWeather.maxTempC, imperial)}</span>
+                      {selectedWeather.precipMm > 0 && <span className="flex items-center gap-1"><CloudRain size={10} />{selectedWeather.precipMm.toFixed(1)}mm</span>}
+                      {selectedWeather.windKph > 0 && <span className="flex items-center gap-1"><Wind size={10} />{fmtWind(selectedWeather.windKph, imperial)}</span>}
+                    </div>
                   </div>
-                );
-              })}
+                </div>
+              )}
+
+              <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">
+                {selectedEvents.length} event{selectedEvents.length !== 1 ? "s" : ""}
+              </p>
+              {selectedEvents.length === 0 ? (
+                <p className="text-[12px] text-white/30 italic">No events on this day</p>
+              ) : (
+                <div className="space-y-2">
+                  {selectedEvents.map((e) => {
+                    const customEvt = customEvents.find((c) => c.id === e.id);
+                    return (
+                      <div key={e.id} className="flex items-center gap-3 group">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: e.color }} />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[13px] text-white/70">{e.title}</span>
+                          {customEvt?.description && (
+                            <p className="text-[11px] text-white/35 truncate">{customEvt.description}</p>
+                          )}
+                        </div>
+                        {customEvt && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <button onClick={() => openEditEvent(customEvt)}
+                              className="p-1 rounded text-white/25 hover:text-white/60 transition-colors">
+                              <Pencil size={11} />
+                            </button>
+                            <button onClick={() => setDeleteEventConfirm(e.id)}
+                              className="p-1 rounded text-white/25 hover:text-red-400 transition-colors">
+                              <X size={12} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
 
       {/* Add Event Modal */}
       {showAddModal && (
@@ -615,6 +852,6 @@ export default function SchedulePage() {
         onConfirm={() => { if (deleteEventConfirm) deleteCustomEvent(deleteEventConfirm); setDeleteEventConfirm(null); }}
         onCancel={() => setDeleteEventConfirm(null)}
       />
-    </div>
+    </>
   );
 }
