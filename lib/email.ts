@@ -7,7 +7,7 @@ function getResend() {
 }
 
 export const FROM = process.env.EMAIL_FROM ?? "Constra <notifications@constra.app>";
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://constra-jc6xjjxfe-anandssandhu31-1336s-projects.vercel.app";
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://constra.app";
 
 type Attachment = { filename: string; content: string; type: string; disposition: "attachment" };
 
@@ -166,6 +166,40 @@ export function clockInEmail({
       <h2>${action === "in" ? "🟢" : "🔴"} ${workerName} clocked ${action}</h2>
       <p><strong>${workerName}</strong> clocked ${action === "in" ? "in to" : "out of"} <strong>${projectName}</strong> at ${time}.</p>
       <a class="cta" href="${APP_URL}/time-tracking">View time tracking →</a>
+    `,
+  });
+}
+
+export function welcomeEmail({
+  firstName,
+  companyName,
+  inviteCode,
+}: {
+  firstName: string;
+  companyName: string;
+  inviteCode: string;
+}) {
+  return emailShell({
+    company: companyName,
+    preheader: `Welcome to Constra — your account is ready`,
+    body: `
+      <h2>Welcome to Constra, ${firstName}! 👋</h2>
+      <p>Your company <strong>${companyName}</strong> is set up and ready to go. Here's everything you need to start running your job site.</p>
+
+      <h3 style="font-size:14px;color:#111;margin:20px 0 8px">Your company invite code</h3>
+      <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:20px;font-weight:800;color:#92400e;letter-spacing:3px;text-align:center;margin-bottom:16px">${inviteCode}</div>
+      <p style="font-size:13px;color:#666">Share this code with your crew so they can join your workspace at <strong>constra.app/login</strong> → "Join Company".</p>
+
+      <h3 style="font-size:14px;color:#111;margin:20px 0 8px">What to do first</h3>
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="padding:6px 0;font-size:13px;color:#444">1.</td><td style="padding:6px 0;font-size:13px;color:#444">Add your first project with a budget and timeline</td></tr>
+        <tr><td style="padding:6px 0;font-size:13px;color:#444">2.</td><td style="padding:6px 0;font-size:13px;color:#444">Invite your crew using the invite code above</td></tr>
+        <tr><td style="padding:6px 0;font-size:13px;color:#444">3.</td><td style="padding:6px 0;font-size:13px;color:#444">Have workers clock in from their phone — GPS verified</td></tr>
+      </table>
+
+      <a class="cta" href="${APP_URL}/dashboard">Go to your dashboard →</a>
+
+      <p style="color:#aaa;font-size:12px;margin-top:24px">Questions? Reply to this email — we read every one.</p>
     `,
   });
 }

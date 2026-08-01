@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { sendEmail, welcomeEmail } from "@/lib/email";
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // omits confusable chars
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
       currency: currency ?? "USD",
       language: language ?? "en",
       industry: industry ?? "Construction",
+      trial_ends_at: trialEndsAt,
     })
     .select("id")
     .single();
@@ -86,6 +88,15 @@ export async function POST(request: Request) {
   if (profileErr) {
     await supabase.auth.admin.deleteUser(userId);
     return NextResponse.json({ error: "Failed to create profile." }, { status: 500 });
+  }
+
+  // Send welcome email (best-effort — don't fail signup if email fails)
+  if (process.env.RESEND_API_KEY) {
+    sendEmail({
+      to: email.trim(),
+      subject: `Welcome to Constra — ${companyName.trim()} is ready`,
+      html: welcomeEmail({ firstName: firstName.trim(), companyName: companyName.trim(), inviteCode }),
+    }).catch(() => {});
   }
 
   return NextResponse.json({ ok: true, inviteCode });

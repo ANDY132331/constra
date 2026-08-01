@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 
 // POST /api/join
 // Looks up a company by invite code (service-role bypass), signs up the user,
@@ -68,6 +69,25 @@ export async function POST(request: Request) {
     // Roll back the auth user to keep things consistent
     await supabase.auth.admin.deleteUser(authData.user.id);
     return NextResponse.json({ error: "Failed to create profile." }, { status: 500 });
+  }
+
+  // Send welcome-to-team email (best-effort)
+  if (process.env.RESEND_API_KEY) {
+    sendEmail({
+      to: email.trim(),
+      subject: `You've joined ${company.name} on Constra`,
+      html: emailShell({
+        company: company.name,
+        preheader: `You've been added to ${company.name} on Constra`,
+        body: `
+          <h2>Welcome to the team, ${firstName.trim()}! 🎉</h2>
+          <p>You've successfully joined <strong>${company.name}</strong> on Constra.</p>
+          <p>You can now clock in, view your tasks, and stay connected with your crew — all from your phone or desktop.</p>
+          <a class="cta" href="${APP_URL}/dashboard">Go to your dashboard →</a>
+          <p style="color:#aaa;font-size:12px;margin-top:24px">Questions? Contact your company admin or reply to this email.</p>
+        `,
+      }),
+    }).catch(() => {});
   }
 
   return NextResponse.json({ ok: true, companyName: company.name });
