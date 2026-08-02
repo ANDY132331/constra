@@ -15,6 +15,7 @@ import { getCurrencySymbol } from "@/lib/currency";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import type { Worker, HoursAdjustment, WorkerCertification } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Admin: { label: "Admin", className: "bg-purple-500/15 text-purple-400" },
@@ -698,13 +699,17 @@ export default function CrewPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>System Role</label>
-                  <select className={inp} value={form.role}
-                    onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as Worker["role"] }))}>
-                    <option value="Admin">Admin</option>
-                    <option value="Project Manager">Project Manager</option>
-                    <option value="Foreman">Foreman</option>
-                    <option value="Worker">Worker</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.role}
+                    onChange={(v) => setForm((f) => ({ ...f, role: v as Worker["role"] }))}
+                    options={[
+                      { value: "Admin", label: "Admin" },
+                      { value: "Project Manager", label: "Project Manager" },
+                      { value: "Foreman", label: "Foreman" },
+                      { value: "Worker", label: "Worker" },
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Job Title</label>

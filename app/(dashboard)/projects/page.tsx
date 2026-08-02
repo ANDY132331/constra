@@ -9,6 +9,7 @@ import { useT } from "@/lib/i18n";
 import { MapView } from "@/components/map-view";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 type View = "gantt" | "table" | "cards" | "map";
 
@@ -663,12 +664,16 @@ export default function ProjectsPage() {
                 </div>
                 <div>
                   <label className={lbl}>Status</label>
-                  <select className={inp} value={form.status}
-                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as FormState["status"] }))}>
-                    <option value="active">Active</option>
-                    <option value="upcoming">Upcoming</option>
-                    <option value="completed">Completed</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.status}
+                    onChange={(v) => setForm((f) => ({ ...f, status: v as FormState["status"] }))}
+                    options={[
+                      { value: "active", label: "Active" },
+                      { value: "upcoming", label: "Upcoming" },
+                      { value: "completed", label: "Completed" },
+                    ]}
+                  />
                 </div>
               </div>
               <div>
@@ -733,11 +738,15 @@ export default function ProjectsPage() {
                 </div>
                 <div>
                   <label className={lbl}>Project Manager</label>
-                  <select className={inp} value={form.managerId}
-                    onChange={(e) => setForm((f) => ({ ...f, managerId: e.target.value }))}>
-                    <option value="">Select manager</option>
-                    {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.managerId}
+                    onChange={(v) => setForm((f) => ({ ...f, managerId: v }))}
+                    options={[
+                      { value: "", label: "Select manager" },
+                      ...workers.map((w) => ({ value: w.id, label: w.name })),
+                    ]}
+                  />
                 </div>
               </div>
               <div>

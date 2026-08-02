@@ -5,6 +5,7 @@ import { MessageSquare, Plus, Search, Clock, CheckCircle2, XCircle, ChevronDown,
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG = {
   open: { label: "Open", className: "bg-red-500/15 text-red-400", icon: Clock },
@@ -424,41 +425,57 @@ export default function RFIsPage() {
                 {!editId && (
                   <div>
                     <label className={lbl}>Project</label>
-                    <select className={inp} value={form.projectId}
-                      onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}>
-                      <option value="">Select project</option>
-                      {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
+                    <CustomSelect
+                      className={inp}
+                      value={form.projectId}
+                      onChange={(v) => setForm((f) => ({ ...f, projectId: v }))}
+                      options={[
+                        { value: "", label: "Select project" },
+                        ...projects.map((p) => ({ value: p.id, label: p.name })),
+                      ]}
+                    />
                   </div>
                 )}
                 <div className={editId ? "col-span-2" : ""}>
                   <label className={lbl}>Priority</label>
-                  <select className={inp} value={form.priority}
-                    onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value as RFIForm["priority"] }))}>
-                    <option value="routine">Routine</option>
-                    <option value="urgent">Urgent</option>
-                    <option value="critical">Critical</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.priority}
+                    onChange={(v) => setForm((f) => ({ ...f, priority: v as RFIForm["priority"] }))}
+                    options={[
+                      { value: "routine", label: "Routine" },
+                      { value: "urgent", label: "Urgent" },
+                      { value: "critical", label: "Critical" },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {!editId && (
                   <div>
                     <label className={lbl}>Submitted By</label>
-                    <select className={inp} value={form.submittedById}
-                      onChange={(e) => setForm((f) => ({ ...f, submittedById: e.target.value }))}>
-                      <option value="">Select worker</option>
-                      {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                    </select>
+                    <CustomSelect
+                      className={inp}
+                      value={form.submittedById}
+                      onChange={(v) => setForm((f) => ({ ...f, submittedById: v }))}
+                      options={[
+                        { value: "", label: "Select worker" },
+                        ...workers.map((w) => ({ value: w.id, label: w.name })),
+                      ]}
+                    />
                   </div>
                 )}
                 <div>
                   <label className={lbl}>Assigned To</label>
-                  <select className={inp} value={form.assignedToId}
-                    onChange={(e) => setForm((f) => ({ ...f, assignedToId: e.target.value }))}>
-                    <option value="">Select worker</option>
-                    {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.assignedToId}
+                    onChange={(v) => setForm((f) => ({ ...f, assignedToId: v }))}
+                    options={[
+                      { value: "", label: "Select worker" },
+                      ...workers.map((w) => ({ value: w.id, label: w.name })),
+                    ]}
+                  />
                 </div>
               </div>
               <div>

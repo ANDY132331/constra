@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const TYPE_CONFIG = {
   "near-miss": { label: "Near Miss", icon: AlertTriangle, color: "#f59e0b" },
@@ -340,16 +341,18 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
                 placeholder={`${t.common.search} incidents…`} value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <select
+            <CustomSelect
               value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value)}
+              onChange={(v) => setSeverityFilter(v)}
               className="bg-[#111111] border border-white/[0.06] text-white/60 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
-            >
-              <option value="all">All Severities</option>
-              {(["low", "medium", "high", "critical"] as const).map((s) => (
-                <option key={s} value={s}>{SEVERITY_CONFIG[s].label}</option>
-              ))}
-            </select>
+              options={[
+                { value: "all", label: "All Severities" },
+                ...(["low", "medium", "high", "critical"] as const).map((s) => ({
+                  value: s,
+                  label: SEVERITY_CONFIG[s].label,
+                })),
+              ]}
+            />
           </div>
 
           <div className="space-y-3">
@@ -443,23 +446,31 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Type</label>
-                  <select className={inp} value={form.type}
-                    onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as IncidentForm["type"] }))}>
-                    <option value="near-miss">Near Miss</option>
-                    <option value="injury">Injury</option>
-                    <option value="property-damage">Property Damage</option>
-                    <option value="environmental">Environmental</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.type}
+                    onChange={(v) => setForm((f) => ({ ...f, type: v as IncidentForm["type"] }))}
+                    options={[
+                      { value: "near-miss", label: "Near Miss" },
+                      { value: "injury", label: "Injury" },
+                      { value: "property-damage", label: "Property Damage" },
+                      { value: "environmental", label: "Environmental" },
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Severity</label>
-                  <select className={inp} value={form.severity}
-                    onChange={(e) => setForm((f) => ({ ...f, severity: e.target.value as IncidentForm["severity"] }))}>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.severity}
+                    onChange={(v) => setForm((f) => ({ ...f, severity: v as IncidentForm["severity"] }))}
+                    options={[
+                      { value: "low", label: "Low" },
+                      { value: "medium", label: "Medium" },
+                      { value: "high", label: "High" },
+                      { value: "critical", label: "Critical" },
+                    ]}
+                  />
                 </div>
               </div>
               <div>
@@ -482,11 +493,15 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                 {!editId && (
                   <div>
                     <label className={lbl}>Project</label>
-                    <select className={inp} value={form.projectId}
-                      onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}>
-                      <option value="">Select project</option>
-                      {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
+                    <CustomSelect
+                      className={inp}
+                      value={form.projectId}
+                      onChange={(v) => setForm((f) => ({ ...f, projectId: v }))}
+                      options={[
+                        { value: "", label: "Select project" },
+                        ...projects.map((p) => ({ value: p.id, label: p.name })),
+                      ]}
+                    />
                   </div>
                 )}
                 <div className={editId ? "col-span-2" : ""}>
@@ -498,19 +513,27 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Reported By</label>
-                  <select className={inp} value={form.reportedById}
-                    onChange={(e) => setForm((f) => ({ ...f, reportedById: e.target.value }))}>
-                    <option value="">Select worker</option>
-                    {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.reportedById}
+                    onChange={(v) => setForm((f) => ({ ...f, reportedById: v }))}
+                    options={[
+                      { value: "", label: "Select worker" },
+                      ...workers.map((w) => ({ value: w.id, label: w.name })),
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Injured Worker</label>
-                  <select className={inp} value={form.injuredId}
-                    onChange={(e) => setForm((f) => ({ ...f, injuredId: e.target.value }))}>
-                    <option value="">None</option>
-                    {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.injuredId}
+                    onChange={(v) => setForm((f) => ({ ...f, injuredId: v }))}
+                    options={[
+                      { value: "", label: "None" },
+                      ...workers.map((w) => ({ value: w.id, label: w.name })),
+                    ]}
+                  />
                 </div>
               </div>
               <div className="space-y-1">

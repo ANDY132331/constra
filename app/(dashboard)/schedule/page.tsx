@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, getDay, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 type CustomEventType = "meeting" | "inspection" | "delivery" | "permit" | "other";
 
@@ -812,12 +813,12 @@ export default function SchedulePage() {
                 </div>
                 <div>
                   <label className={lbl}>Type</label>
-                  <select className={inp} value={addForm.type}
-                    onChange={(e) => setAddForm((f) => ({ ...f, type: e.target.value as CustomEventType }))}>
-                    {Object.entries(EVENT_TYPE_CONFIG).map(([k, v]) => (
-                      <option key={k} value={k}>{v.label}</option>
-                    ))}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={addForm.type}
+                    onChange={(v) => setAddForm((f) => ({ ...f, type: v as CustomEventType }))}
+                    options={Object.entries(EVENT_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))}
+                  />
                 </div>
               </div>
               <div>

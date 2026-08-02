@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { format, isBefore } from "date-fns";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
   completed: { label: "Completed", icon: CheckCircle2, className: "text-green-400" },
@@ -252,11 +253,15 @@ export default function TasksPage() {
           <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none w-48"
             placeholder={`${t.common.search} tasks…`} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <select className="bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white/60 outline-none"
-          value={filterProject} onChange={(e) => setFilterProject(e.target.value)}>
-          <option value="all">All Projects</option>
-          {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        <CustomSelect
+          className="bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white/60 outline-none"
+          value={filterProject}
+          onChange={(v) => setFilterProject(v)}
+          options={[
+            { value: "all", label: "All Projects" },
+            ...projects.map((p) => ({ value: p.id, label: p.name })),
+          ]}
+        />
       </div>
 
       <div className="overflow-x-auto rounded-xl">
@@ -354,11 +359,15 @@ export default function TasksPage() {
               {!editTaskId && (
                 <div>
                   <label className={lbl}>Project *</label>
-                  <select className={inp} value={form.projectId}
-                    onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}>
-                    <option value="">Select project</option>
-                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.projectId}
+                    onChange={(v) => setForm((f) => ({ ...f, projectId: v }))}
+                    options={[
+                      { value: "", label: "Select project" },
+                      ...projects.map((p) => ({ value: p.id, label: p.name })),
+                    ]}
+                  />
                 </div>
               )}
               <div>
@@ -369,28 +378,36 @@ export default function TasksPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Assign To</label>
-                  <select className={inp} value={form.workerId}
-                    onChange={(e) => setForm((f) => ({ ...f, workerId: e.target.value }))}>
-                    <option value="">Select worker</option>
-                    {(() => {
-                      const projectId = editProjectId ?? form.projectId;
-                      const project = projects.find((p) => p.id === projectId);
-                      const projectWorkerIds = project?.tasks.map((t) => t.workerId) ?? [];
-                      const projectWorkers = workers.filter((w) => w.projectIds.includes(projectId) || projectWorkerIds.includes(w.id));
-                      const list = projectWorkers.length > 0 ? projectWorkers : workers;
-                      return list.map((w) => <option key={w.id} value={w.id}>{w.name}</option>);
-                    })()}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.workerId}
+                    onChange={(v) => setForm((f) => ({ ...f, workerId: v }))}
+                    options={[
+                      { value: "", label: "Select worker" },
+                      ...(() => {
+                        const projectId = editProjectId ?? form.projectId;
+                        const project = projects.find((p) => p.id === projectId);
+                        const projectWorkerIds = project?.tasks.map((t) => t.workerId) ?? [];
+                        const projectWorkers = workers.filter((w) => w.projectIds.includes(projectId) || projectWorkerIds.includes(w.id));
+                        const list = projectWorkers.length > 0 ? projectWorkers : workers;
+                        return list.map((w) => ({ value: w.id, label: w.name }));
+                      })(),
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Status</label>
-                  <select className={inp} value={form.status}
-                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as TaskForm["status"] }))}>
-                    <option value="not-started">Not Started</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="delayed">Delayed</option>
-                    <option value="completed">Completed</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.status}
+                    onChange={(v) => setForm((f) => ({ ...f, status: v as TaskForm["status"] }))}
+                    options={[
+                      { value: "not-started", label: "Not Started" },
+                      { value: "in-progress", label: "In Progress" },
+                      { value: "delayed", label: "Delayed" },
+                      { value: "completed", label: "Completed" },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">

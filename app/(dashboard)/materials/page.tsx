@@ -11,6 +11,7 @@ import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import type { MaterialEntry, MaterialType } from "@/lib/mock-data";
 import { TRADE_MATERIALS } from "@/lib/mock-data";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const TRADES = Object.keys(TRADE_MATERIALS);
 
@@ -208,14 +209,15 @@ export default function MaterialsPage() {
 
         {/* Project filter */}
         <div className="px-4 mb-3">
-          <select
+          <CustomSelect
             value={selectedProject}
-            onChange={(e) => setSelectedProject(e.target.value)}
+            onChange={(v) => setSelectedProject(v)}
+            options={[
+              { value: "all", label: "All Projects" },
+              ...projects.map((p) => ({ value: p.id, label: p.name })),
+            ]}
             className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2.5 text-[13px] text-white/70 outline-none"
-          >
-            <option value="all">All Projects</option>
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          />
         </div>
 
         {/* Entry cards */}
@@ -327,23 +329,25 @@ export default function MaterialsPage() {
               />
             </div>
 
-            <select
+            <CustomSelect
               value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
+              onChange={(v) => setSelectedProject(v)}
+              options={[
+                { value: "all", label: "All Projects" },
+                ...projects.map((p) => ({ value: p.id, label: p.name })),
+              ]}
               className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
-            >
-              <option value="all">All Projects</option>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+            />
 
-            <select
+            <CustomSelect
               value={selectedTrade}
-              onChange={(e) => setSelectedTrade(e.target.value)}
+              onChange={(v) => setSelectedTrade(v)}
+              options={[
+                { value: "all", label: "All Trades" },
+                ...TRADES.map((t) => ({ value: t, label: t })),
+              ]}
               className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
-            >
-              <option value="all">All Trades</option>
-              {TRADES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+            />
 
             <div className="flex items-center gap-1 bg-[#111] border border-white/[0.07] rounded-lg p-1">
               {(["delivery", "usage"] as const).map((t) => (
@@ -489,14 +493,15 @@ export default function MaterialsPage() {
               {/* Project */}
               <div>
                 <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1.5 block">Project</label>
-                <select
+                <CustomSelect
                   value={entryProjectId}
-                  onChange={(e) => setEntryProjectId(e.target.value)}
+                  onChange={(v) => setEntryProjectId(v)}
+                  options={[
+                    { value: "", label: "Select project…" },
+                    ...projects.map((p) => ({ value: p.id, label: p.name })),
+                  ]}
                   className="w-full bg-[#1a1a1a] border border-white/[0.08] rounded-lg px-3 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/40"
-                >
-                  <option value="">Select project…</option>
-                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+                />
               </div>
 
               {/* Trade picker */}

@@ -7,6 +7,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG = {
   available:   { label: "Available",   className: "bg-green-500/15 text-green-400",  dot: "#22c55e" },
@@ -367,29 +368,37 @@ export default function EquipmentPage() {
                 </div>
                 <div>
                   <label className={lbl}>Status</label>
-                  <select className={inp} value={form.status}
-                    onChange={(e) => {
-                      const st = e.target.value as EqForm["status"];
+                  <CustomSelect
+                    className={inp}
+                    value={form.status}
+                    onChange={(v) => {
+                      const st = v as EqForm["status"];
                       setForm((f) => ({ ...f, status: st, projectId: st !== "in-use" ? "" : f.projectId }));
-                    }}>
-                    <option value="available">Available</option>
-                    <option value="in-use">In Use</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="off-site">Off Site</option>
-                  </select>
+                    }}
+                    options={[
+                      { value: "available", label: "Available" },
+                      { value: "in-use", label: "In Use" },
+                      { value: "maintenance", label: "Maintenance" },
+                      { value: "off-site", label: "Off Site" },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Deployed To</label>
-                  <select className={inp} value={form.projectId}
-                    onChange={(e) => {
-                      const pid = e.target.value;
+                  <CustomSelect
+                    className={inp}
+                    value={form.projectId}
+                    onChange={(v) => {
+                      const pid = v;
                       setForm((f) => ({ ...f, projectId: pid, status: pid ? "in-use" : f.status === "in-use" ? "available" : f.status }));
-                    }}>
-                    <option value="">None</option>
-                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                    }}
+                    options={[
+                      { value: "", label: "None" },
+                      ...projects.map((p) => ({ value: p.id, label: p.name })),
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Daily Rate ({currency})</label>

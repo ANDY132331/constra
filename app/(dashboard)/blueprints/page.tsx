@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { getClient } from "@/lib/supabase/client";
 import { BlueprintViewer } from "@/components/blueprint-viewer";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const PIN_TYPE_LABELS = { issue: "Issues", safety: "Safety", rfi: "RFIs", info: "Info" } as const;
 
@@ -97,13 +98,12 @@ export default function BlueprintsPage() {
         </div>
         {/* Project selector */}
         <div className="px-4 mb-3">
-          <select
+          <CustomSelect
             value={selectedProjectId}
-            onChange={(e) => { setSelectedProjectId(e.target.value); setSelectedDocId(null); }}
+            onChange={(v) => { setSelectedProjectId(v); setSelectedDocId(null); }}
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
             className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 text-[14px] text-white/80 outline-none focus:border-amber-500/30"
-          >
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          />
         </div>
         {uploadError && (
           <div className="px-4 mb-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl py-2.5 mx-4">
@@ -171,15 +171,12 @@ export default function BlueprintsPage() {
         <h1 className="text-[18px] font-black">Blueprints</h1>
 
         {/* Project selector */}
-        <select
+        <CustomSelect
           value={selectedProjectId}
-          onChange={(e) => { setSelectedProjectId(e.target.value); setSelectedDocId(null); }}
+          onChange={(v) => { setSelectedProjectId(v); setSelectedDocId(null); }}
+          options={projects.map((p) => ({ value: p.id, label: p.name }))}
           className="ml-4 bg-[#111] border border-white/[0.08] rounded-lg px-3 py-1.5 text-[12px] text-white/70 outline-none focus:border-amber-500/40"
-        >
-          {projects.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
-        </select>
+        />
 
         {selectedDoc && (
           <>

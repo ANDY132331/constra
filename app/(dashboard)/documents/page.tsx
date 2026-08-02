@@ -11,6 +11,7 @@ import type { ProjectDocument, DocumentVersion } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { uploadDocument } from "@/lib/supabase/storage";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 type Category = ProjectDocument["category"];
 
@@ -166,20 +167,18 @@ export default function DocumentsPage() {
 
         {/* Project + category selectors */}
         <div className="px-4 mb-3 flex gap-2">
-          <select
+          <CustomSelect
             value={selectedProject}
-            onChange={(e) => setSelectedProject(e.target.value)}
+            onChange={(v) => setSelectedProject(v)}
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
             className="flex-1 bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white/70 outline-none"
-          >
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-          <select
+          />
+          <CustomSelect
             value={uploadCategory}
-            onChange={(e) => setUploadCategory(e.target.value as Category)}
+            onChange={(v) => setUploadCategory(v as Category)}
+            options={CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
             className="flex-1 bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white/70 outline-none"
-          >
-            {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-          </select>
+          />
         </div>
 
         {/* Search */}
@@ -284,23 +283,21 @@ export default function DocumentsPage() {
 
       {/* Upload settings */}
       <div className="flex flex-wrap items-center gap-3">
-        <select
+        <CustomSelect
           value={selectedProject}
-          onChange={(e) => setSelectedProject(e.target.value)}
+          onChange={(v) => setSelectedProject(v)}
+          options={projects.map((p) => ({ value: p.id, label: p.name }))}
           className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
-        >
-          {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        />
 
         <div className="flex items-center gap-2">
           <span className="text-[11px] text-white/30 font-semibold uppercase tracking-wider">Upload as:</span>
-          <select
+          <CustomSelect
             value={uploadCategory}
-            onChange={(e) => setUploadCategory(e.target.value as Category)}
+            onChange={(v) => setUploadCategory(v as Category)}
+            options={CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
             className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
-          >
-            {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-          </select>
+          />
         </div>
 
         <div className="relative ms-auto">

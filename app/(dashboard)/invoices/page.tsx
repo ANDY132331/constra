@@ -14,6 +14,7 @@ import { useT } from "@/lib/i18n";
 import type { Invoice } from "@/lib/mock-data";
 import { exportInvoicePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG = {
   draft:   { label: "Draft",   bg: "bg-zinc-700/60",       text: "text-zinc-300",   dot: "bg-zinc-400",   bar: "bg-zinc-600" },
@@ -801,13 +802,17 @@ export default function InvoicesPage() {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className={lbl}>Status</label>
-                  <select className={inp} value={form.status}
-                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as InvForm["status"] }))}>
-                    <option value="draft">Draft</option>
-                    <option value="sent">Sent</option>
-                    <option value="paid">Paid</option>
-                    <option value="overdue">Overdue</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.status}
+                    onChange={(v) => setForm((f) => ({ ...f, status: v as InvForm["status"] }))}
+                    options={[
+                      { value: "draft", label: "Draft" },
+                      { value: "sent", label: "Sent" },
+                      { value: "paid", label: "Paid" },
+                      { value: "overdue", label: "Overdue" },
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Issue Date</label>

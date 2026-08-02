@@ -10,6 +10,7 @@ import { useT } from "@/lib/i18n";
 import type { Estimate } from "@/lib/mock-data";
 import { exportEstimatePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG = {
   draft: { label: "Draft", className: "bg-white/8 text-white/45", icon: Clock },
@@ -460,13 +461,17 @@ export default function EstimatesPage() {
                 </div>
                 <div>
                   <label className={lbl}>Status</label>
-                  <select className={inp} value={form.status}
-                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as EstForm["status"] }))}>
-                    <option value="draft">Draft</option>
-                    <option value="sent">Sent</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="declined">Declined</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.status}
+                    onChange={(v) => setForm((f) => ({ ...f, status: v as EstForm["status"] }))}
+                    options={[
+                      { value: "draft", label: "Draft" },
+                      { value: "sent", label: "Sent" },
+                      { value: "accepted", label: "Accepted" },
+                      { value: "declined", label: "Declined" },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -493,13 +498,17 @@ export default function EstimatesPage() {
                   </div>
                   {form.items.map((item, idx) => (
                     <div key={idx} className="grid grid-cols-[80px_1fr_60px_80px_20px] gap-1.5 items-center">
-                      <select className={inp} value={item.category}
-                        onChange={(e) => updateItem(idx, "category", e.target.value)}>
-                        <option>Labour</option>
-                        <option>Material</option>
-                        <option>Equipment</option>
-                        <option>Other</option>
-                      </select>
+                      <CustomSelect
+                        className={inp}
+                        value={item.category}
+                        onChange={(v) => updateItem(idx, "category", v)}
+                        options={[
+                          { value: "Labour", label: "Labour" },
+                          { value: "Material", label: "Material" },
+                          { value: "Equipment", label: "Equipment" },
+                          { value: "Other", label: "Other" },
+                        ]}
+                      />
                       <input className={inp} placeholder="Description…" value={item.description}
                         onChange={(e) => updateItem(idx, "description", e.target.value)} />
                       <input className={inp} type="number" placeholder="1" value={item.qty}

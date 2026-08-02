@@ -5,6 +5,7 @@ import { Plus, Search, Circle, Timer, CheckCircle2, AlertCircle, MapPin, Calenda
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const PRIORITY_CONFIG = {
   high: { label: "HIGH", className: "bg-red-500/15 text-red-400" },
@@ -295,25 +296,37 @@ export default function PunchListPage() {
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
                 placeholder="Search items…" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <select className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
-              value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="all">All Statuses</option>
-              <option value="open">Open</option>
-              <option value="in-progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-            </select>
-            <select className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
-              value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
-              <option value="all">All Priorities</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-            <select className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
-              value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}>
-              <option value="all">All Projects</option>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+            <CustomSelect
+              className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
+              value={statusFilter}
+              onChange={(v) => setStatusFilter(v)}
+              options={[
+                { value: "all", label: "All Statuses" },
+                { value: "open", label: "Open" },
+                { value: "in-progress", label: "In Progress" },
+                { value: "resolved", label: "Resolved" },
+              ]}
+            />
+            <CustomSelect
+              className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
+              value={priorityFilter}
+              onChange={(v) => setPriorityFilter(v)}
+              options={[
+                { value: "all", label: "All Priorities" },
+                { value: "high", label: "High" },
+                { value: "medium", label: "Medium" },
+                { value: "low", label: "Low" },
+              ]}
+            />
+            <CustomSelect
+              className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
+              value={projectFilter}
+              onChange={(v) => setProjectFilter(v)}
+              options={[
+                { value: "all", label: "All Projects" },
+                ...projects.map((p) => ({ value: p.id, label: p.name })),
+              ]}
+            />
             <span className="text-[12px] text-white/30 ml-auto">{filtered.length} item{filtered.length !== 1 ? "s" : ""}</span>
           </div>
 
@@ -446,31 +459,43 @@ export default function PunchListPage() {
                 {!editId && (
                   <div>
                     <label className={lbl}>Project *</label>
-                    <select className={inp} value={form.projectId}
-                      onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}>
-                      <option value="">Select project</option>
-                      {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
+                    <CustomSelect
+                      className={inp}
+                      value={form.projectId}
+                      onChange={(v) => setForm((f) => ({ ...f, projectId: v }))}
+                      options={[
+                        { value: "", label: "Select project" },
+                        ...projects.map((p) => ({ value: p.id, label: p.name })),
+                      ]}
+                    />
                   </div>
                 )}
                 <div className={editId ? "col-span-2" : ""}>
                   <label className={lbl}>Priority</label>
-                  <select className={inp} value={form.priority}
-                    onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value as ItemForm["priority"] }))}>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.priority}
+                    onChange={(v) => setForm((f) => ({ ...f, priority: v as ItemForm["priority"] }))}
+                    options={[
+                      { value: "low", label: "Low" },
+                      { value: "medium", label: "Medium" },
+                      { value: "high", label: "High" },
+                    ]}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Assign To</label>
-                  <select className={inp} value={form.assignedToId}
-                    onChange={(e) => setForm((f) => ({ ...f, assignedToId: e.target.value }))}>
-                    <option value="">Select worker</option>
-                    {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.assignedToId}
+                    onChange={(v) => setForm((f) => ({ ...f, assignedToId: v }))}
+                    options={[
+                      { value: "", label: "Select worker" },
+                      ...workers.map((w) => ({ value: w.id, label: w.name })),
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Due Date</label>

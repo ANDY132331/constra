@@ -8,6 +8,7 @@ import { CameraCapture } from "@/components/camera-capture";
 import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
 import { runVerification } from "@/lib/verification";
 import { sendPushEvent } from "@/lib/push-client";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 function elapsed(start: Date, end?: Date): string {
   const ms = (end ?? new Date()).getTime() - start.getTime();
@@ -855,11 +856,15 @@ export default function TimeTrackingPage() {
           <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
             placeholder="Search workers…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <select className="bg-[#111111] border border-white/[0.06] text-white/60 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
-          value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)}>
-          <option value="all">All Projects</option>
-          {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        <CustomSelect
+          className="bg-[#111111] border border-white/[0.06] text-white/60 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
+          value={selectedProject}
+          onChange={(v) => setSelectedProject(v)}
+          options={[
+            { value: "all", label: "All Projects" },
+            ...projects.map((p) => ({ value: p.id, label: p.name })),
+          ]}
+        />
       </div>
 
       {/* Overtime alerts */}

@@ -11,6 +11,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/currency";
 import type { ChangeOrder } from "@/lib/mock-data";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
@@ -316,25 +317,27 @@ export default function ChangeOrdersPage() {
 
         {/* Filters */}
         <div className="px-4 py-2 border-b border-white/[0.06] flex gap-2">
-          <select
+          <CustomSelect
             className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white/60 outline-none"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-          >
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="void">Void</option>
-          </select>
-          <select
+            onChange={(v) => setStatusFilter(v as typeof statusFilter)}
+            options={[
+              { value: "all", label: "All statuses" },
+              { value: "pending", label: "Pending" },
+              { value: "approved", label: "Approved" },
+              { value: "rejected", label: "Rejected" },
+              { value: "void", label: "Void" },
+            ]}
+          />
+          <CustomSelect
             className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white/60 outline-none"
             value={projectFilter}
-            onChange={(e) => setProjectFilter(e.target.value)}
-          >
-            <option value="all">All projects</option>
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+            onChange={(v) => setProjectFilter(v)}
+            options={[
+              { value: "all", label: "All projects" },
+              ...projects.map((p) => ({ value: p.id, label: p.name })),
+            ]}
+          />
         </div>
 
         {/* Summary cards */}
@@ -489,20 +492,30 @@ export default function ChangeOrdersPage() {
                 </div>
                 <div>
                   <label className={lbl}>Status</label>
-                  <select className={inp} value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ChangeOrder["status"] }))}>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="void">Void</option>
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.status}
+                    onChange={(v) => setForm((f) => ({ ...f, status: v as ChangeOrder["status"] }))}
+                    options={[
+                      { value: "pending", label: "Pending" },
+                      { value: "approved", label: "Approved" },
+                      { value: "rejected", label: "Rejected" },
+                      { value: "void", label: "Void" },
+                    ]}
+                  />
                 </div>
               </div>
               <div>
                 <label className={lbl}>Project *</label>
-                <select className={inp} value={form.projectId} onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}>
-                  <option value="">Select project…</option>
-                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+                <CustomSelect
+                  className={inp}
+                  value={form.projectId}
+                  onChange={(v) => setForm((f) => ({ ...f, projectId: v }))}
+                  options={[
+                    { value: "", label: "Select project…" },
+                    ...projects.map((p) => ({ value: p.id, label: p.name })),
+                  ]}
+                />
               </div>
               <div>
                 <label className={lbl}>Title *</label>

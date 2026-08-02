@@ -11,6 +11,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
 import { useStore } from "@/lib/store";
 import type { DailyReport } from "@/lib/mock-data";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
@@ -226,14 +227,15 @@ export default function DailyReportsPage() {
 
             {/* Project filter */}
             <div className="px-4 mb-3">
-              <select
+              <CustomSelect
                 className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-[12px] text-white/60 outline-none"
                 value={projectFilter}
-                onChange={(e) => setProjectFilter(e.target.value)}
-              >
-                <option value="all">All projects</option>
-                {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
+                onChange={(v) => setProjectFilter(v)}
+                options={[
+                  { value: "all", label: "All projects" },
+                  ...projects.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+              />
             </div>
 
             {/* Stats pill */}
@@ -317,14 +319,15 @@ export default function DailyReportsPage() {
 
         {/* Project filter */}
         <div className="px-4 py-2 border-b border-white/[0.06]">
-          <select
+          <CustomSelect
             className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white/60 outline-none"
             value={projectFilter}
-            onChange={(e) => setProjectFilter(e.target.value)}
-          >
-            <option value="all">All projects</option>
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+            onChange={(v) => setProjectFilter(v)}
+            options={[
+              { value: "all", label: "All projects" },
+              ...projects.map((p) => ({ value: p.id, label: p.name })),
+            ]}
+          />
         </div>
 
         {/* Summary stat */}
@@ -476,10 +479,15 @@ export default function DailyReportsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Project *</label>
-                  <select className={inp} value={form.projectId} onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}>
-                    <option value="">Select project…</option>
-                    {projects.filter((p) => p.status === "active").map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.projectId}
+                    onChange={(v) => setForm((f) => ({ ...f, projectId: v }))}
+                    options={[
+                      { value: "", label: "Select project…" },
+                      ...projects.filter((p) => p.status === "active").map((p) => ({ value: p.id, label: p.name })),
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Date *</label>
@@ -500,9 +508,12 @@ export default function DailyReportsPage() {
                       {fetchingWeather ? "Fetching…" : "Auto-fill"}
                     </button>
                   </div>
-                  <select className={inp} value={form.weather} onChange={(e) => setForm((f) => ({ ...f, weather: e.target.value }))}>
-                    {WEATHER_OPTIONS.map((w) => <option key={w}>{w}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.weather}
+                    onChange={(v) => setForm((f) => ({ ...f, weather: v }))}
+                    options={WEATHER_OPTIONS.map((w) => ({ value: w, label: w }))}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Temp (°F)</label>

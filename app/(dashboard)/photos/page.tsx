@@ -5,6 +5,7 @@ import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, Chev
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
+import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 type View = "grid" | "list" | "album";
 
@@ -586,19 +587,27 @@ export default function PhotosPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Project</label>
-                  <select className={inp} value={form.projectId}
-                    onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}>
-                    <option value="">Select project</option>
-                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.projectId}
+                    onChange={(v) => setForm((f) => ({ ...f, projectId: v }))}
+                    options={[
+                      { value: "", label: "Select project" },
+                      ...projects.map((p) => ({ value: p.id, label: p.name })),
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Uploaded By</label>
-                  <select className={inp} value={form.uploadedById}
-                    onChange={(e) => setForm((f) => ({ ...f, uploadedById: e.target.value }))}>
-                    <option value="">Select worker</option>
-                    {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    className={inp}
+                    value={form.uploadedById}
+                    onChange={(v) => setForm((f) => ({ ...f, uploadedById: v }))}
+                    options={[
+                      { value: "", label: "Select worker" },
+                      ...workers.map((w) => ({ value: w.id, label: w.name })),
+                    ]}
+                  />
                 </div>
               </div>
               <div>
