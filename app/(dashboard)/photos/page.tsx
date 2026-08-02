@@ -346,12 +346,19 @@ export default function PhotosPage() {
                       <div className="absolute bottom-2 left-3 right-3">
                         <p className="text-[12px] font-semibold text-white drop-shadow-lg truncate">{photo.caption}</p>
                         {photo.gps && (
-                          <div className="flex items-center gap-1 mt-0.5" title={`${photo.gps.lat.toFixed(5)}, ${photo.gps.lng.toFixed(5)} ±${photo.gps.accuracy}m`}>
+                          <a
+                            href={`https://www.google.com/maps?q=${photo.gps.lat},${photo.gps.lng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
+                            title={`±${photo.gps.accuracy}m — open in Google Maps`}
+                          >
                             <MapPin size={9} className="text-green-400 flex-shrink-0" />
                             <span className="text-[9px] text-green-400/80 truncate">
                               {photo.gps.lat.toFixed(4)}, {photo.gps.lng.toFixed(4)}
                             </span>
-                          </div>
+                          </a>
                         )}
                       </div>
                       <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
@@ -485,10 +492,17 @@ export default function PhotosPage() {
                       <div className="min-w-0 flex-1 pr-3">
                         <span className="text-[12px] text-white/70 truncate block">{photo.caption}</span>
                         {photo.gps && (
-                          <div className="flex items-center gap-1 mt-0.5" title={`${photo.gps.lat.toFixed(5)}, ${photo.gps.lng.toFixed(5)} ±${photo.gps.accuracy}m`}>
+                          <a
+                            href={`https://www.google.com/maps?q=${photo.gps.lat},${photo.gps.lng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 mt-0.5 hover:text-green-300 transition-colors"
+                            title={`${photo.gps.lat.toFixed(5)}, ${photo.gps.lng.toFixed(5)} ±${photo.gps.accuracy}m — open in Google Maps`}
+                          >
                             <MapPin size={8} className="text-green-400 flex-shrink-0" />
                             <span className="text-[9px] text-green-400/70">GPS verified</span>
-                          </div>
+                          </a>
                         )}
                       </div>
                       <button onClick={() => setDeleteConfirm(photo.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
