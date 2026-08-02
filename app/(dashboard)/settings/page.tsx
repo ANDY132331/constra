@@ -24,10 +24,10 @@ import { isAdminOrAbove } from "@/lib/permissions";
 type Tab = "company" | "preferences" | "workers" | "roles" | "notifications" | "security" | "access";
 
 const TABS: { id: Tab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; adminOnly?: boolean }[] = [
-  { id: "company",       label: "Company",        icon: Building2 },
+  { id: "company",       label: "Company",        icon: Building2,  adminOnly: true },
   { id: "preferences",   label: "Preferences",    icon: Globe },
-  { id: "workers",       label: "Workers",         icon: Users },
-  { id: "roles",         label: "Custom Roles",    icon: HardHat },
+  { id: "workers",       label: "Workers",         icon: Users,      adminOnly: true },
+  { id: "roles",         label: "Custom Roles",    icon: HardHat,    adminOnly: true },
   { id: "notifications", label: "Notifications",   icon: Bell },
   { id: "security",      label: "Security",        icon: Shield },
   { id: "access",        label: "Access Control",  icon: ShieldCheck, adminOnly: true },
@@ -69,10 +69,13 @@ function SettingsInner() {
   } = useStore();
 
   const searchParams = useSearchParams();
+  const isAdmin = isAdminOrAbove(currentUser.role);
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab");
-    return (t === "company" || t === "preferences" || t === "workers" ||
-      t === "roles" || t === "notifications" || t === "security" || t === "access") ? t as Tab : "company";
+    const valid = (t === "company" || t === "preferences" || t === "workers" ||
+      t === "roles" || t === "notifications" || t === "security" || t === "access") ? t as Tab : null;
+    if (valid && (isAdmin || valid === "preferences" || valid === "notifications" || valid === "security")) return valid;
+    return isAdmin ? "company" : "preferences";
   });
   const [codeCopied, setCodeCopied] = useState(false);
   const [savedBanner, setSavedBanner] = useState(false);
@@ -233,7 +236,7 @@ function SettingsInner() {
       {/* Sidebar tabs â€” horizontal scroll on mobile */}
       <div className="w-full sm:w-48 flex-shrink-0">
         <div className="flex sm:flex-col gap-1 overflow-x-auto pb-1 sm:pb-0">
-          {TABS.filter((t) => !t.adminOnly || isAdminOrAbove(currentUser.role)).map(({ id, label, icon: Icon }) => (
+          {TABS.filter((t) => !t.adminOnly || isAdmin).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id)}
               className={`flex-shrink-0 sm:w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 rounded-lg text-[12px] sm:text-[13px] font-medium transition-colors text-left whitespace-nowrap ${tab === id ? "bg-amber-500/12 text-amber-400" : "text-white/45 hover:text-white/70 hover:bg-white/5"}`}>
               <Icon size={14} className={tab === id ? "text-amber-400" : "text-white/30"} />

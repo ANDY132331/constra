@@ -30,8 +30,8 @@ export default function TermsPage() {
       body: `If you use Constra to track employee or contractor data (including time, location, and photos), you are responsible for obtaining any necessary consent from those individuals in accordance with applicable employment and privacy laws in your jurisdiction. GPS and photo data collected during clock-in is stored securely and used only for verification purposes.`,
     },
     {
-      title: "7. Free Access",
-      body: `The Service is currently provided at no cost during our early access period. All features are available to all users without a subscription. We reserve the right to introduce pricing in the future with at least 30 days' advance notice. Early users will be given preferential terms.`,
+      title: "7. Beta Access",
+      body: `The Service is currently provided at no cost during our public beta period. All features are available to all users without a subscription. We reserve the right to introduce pricing after the beta with at least 30 days' advance notice. Users who join during the beta will be given preferential early-adopter rates.`,
     },
     {
       title: "8. Intellectual Property",
