@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Camera, X, RotateCcw, AlertTriangle, CheckCircle2, Loader2, MapPin } from "lucide-react";
+import { Camera, X, RotateCcw, AlertTriangle, CheckCircle2, Loader2, MapPin, FlipHorizontal } from "lucide-react";
 import type { GpsLocation } from "@/lib/mock-data";
 
 type Props = {
@@ -22,6 +22,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
   const [preview, setPreview] = useState<string | null>(null);
   const [gps, setGps] = useState<GpsLocation | undefined>(undefined);
   const [gpsState, setGpsState] = useState<GpsState>("idle");
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -50,13 +51,14 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
     );
   }, []);
 
-  const startCamera = useCallback(async () => {
+  const startCamera = useCallback(async (facing?: "user" | "environment") => {
     stopStream();
     setCameraState("requesting");
     setErrorMsg("");
+    const mode = facing ?? facingMode;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       });
       streamRef.current = stream;
@@ -80,7 +82,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
       }
       setCameraState("error");
     }
-  }, [stopStream]);
+  }, [stopStream, facingMode]);
 
   useEffect(() => {
     startCamera();
@@ -88,7 +90,13 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
     return () => stopStream();
   }, [startCamera, requestGps, stopStream]);
 
-  const capture = useCallback(() => {
+  const flipCamera = useCallback(() => {
+    const next = facingMode === "user" ? "environment" : "user";
+    setFacingMode(next);
+    startCamera(next);
+  }, [facingMode, startCamera]);
+
+  const capture = useCallback((): void => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2) return;
@@ -101,11 +109,15 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Mirror the frame (undo CSS mirror so stored image is un-mirrored)
-    ctx.save();
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, -w, 0, w, h);
-    ctx.restore();
+    // Mirror the canvas for front camera (undoes CSS flip so stored image is correct)
+    if (facingMode === "user") {
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, -w, 0, w, h);
+      ctx.restore();
+    } else {
+      ctx.drawImage(video, 0, 0, w, h);
+    }
 
     // Burn timestamp + name + GPS into image
     const ts = new Date().toLocaleString("en-CA", {
@@ -130,7 +142,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
     setPreview(dataUrl);
     stopStream();
     setCameraState("captured");
-  }, [workerName, gps, stopStream]);
+  }, [workerName, gps, stopStream, facingMode]);
 
   const retake = useCallback(() => {
     setPreview(null);
@@ -199,7 +211,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
               </div>
               <p className="text-[13px] text-white/60 leading-snug">{errorMsg}</p>
               <button
-                onClick={startCamera}
+                onClick={() => startCamera()}
                 className="text-[12px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 px-4 py-2 rounded-lg transition-colors"
               >
                 Try Again
@@ -216,7 +228,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
             className="w-full h-full object-cover"
             style={{
               display: cameraState === "ready" ? "block" : "none",
-              transform: "scaleX(-1)",
+              transform: facingMode === "user" ? "scaleX(-1)" : "none",
             }}
           />
 
@@ -233,10 +245,20 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
             </div>
           )}
 
-          {/* GPS indicator overlay */}
+          {/* GPS indicator + flip camera button */}
           {cameraState === "ready" && (
-            <div className="absolute top-2 right-2 bg-black/60 px-2 py-1 rounded">
-              {gpsIndicator()}
+            <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5">
+              <button
+                onClick={flipCamera}
+                className="flex items-center gap-1 bg-black/60 hover:bg-black/80 text-white/70 hover:text-white px-2 py-1 rounded transition-colors"
+                title="Flip camera"
+              >
+                <FlipHorizontal size={13} />
+                <span className="text-[10px] font-medium">Flip</span>
+              </button>
+              <div className="bg-black/60 px-2 py-1 rounded">
+                {gpsIndicator()}
+              </div>
             </div>
           )}
 
