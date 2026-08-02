@@ -86,7 +86,7 @@ export default function PhotosPage() {
       const { data, error } = await getClient().storage.from("photos").upload(path, file, { upsert: false });
       setUploading(false);
       if (error) {
-        setUploadError("Upload failed — check that the 'photos' storage bucket exists in Supabase.");
+        setUploadError(error?.message ?? "Upload failed. Please try again or contact support.");
         return;
       }
       const { data: { publicUrl } } = getClient().storage.from("photos").getPublicUrl(data.path);
