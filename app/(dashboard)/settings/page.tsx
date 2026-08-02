@@ -90,34 +90,34 @@ function SettingsInner() {
     setCompanyForm({ name: companyName, businessNumber, address: companyAddress });
   }, [companyName, businessNumber, companyAddress]);
 
-  // â”€â”€ Roles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€ Roles â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   const [newRole, setNewRole] = useState("");
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const [editRoleValue, setEditRoleValue] = useState("");
 
-  // â”€â”€ Notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€ Notifications â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   const [notifPerms, setNotifPerms] = useState<NotificationPermission | "unsupported">("default");
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(() => loadPrefs());
   const [notifRequesting, setNotifRequesting] = useState(false);
   useEffect(() => { setNotifPerms(getPermission()); }, []);
 
-  // â”€â”€ Security â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€ Security â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
   const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pwError, setPwError] = useState("");
 
-  // â”€â”€ Invite code â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€ Invite code â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   const [displayCode, setDisplayCode] = useState(inviteCode || "CN-XXXX-XXXX");
   const [regenerating, setRegenerating] = useState(false);
   const [regenError, setRegenError] = useState("");
   useEffect(() => { if (inviteCode) setDisplayCode(inviteCode); }, [inviteCode]);
 
-  // â”€â”€ Confirmation dialogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€ Confirmation dialogs â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   const [kickConfirm, setKickConfirm] = useState<{ id: string; name: string } | null>(null);
   const [deleteRoleConfirm, setDeleteRoleConfirm] = useState<string | null>(null);
 
-  // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€ Handlers â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
   const saveCompany = () => {
     setCompanyName(companyForm.name);
@@ -201,7 +201,7 @@ function SettingsInner() {
       // First re-authenticate with current password
       const supabase = getClient();
       const email = currentUser.email;
-      if (!email || !pwForm.current) { setPwError(“Cannot verify your identity — please re-log in.”); setPwStatus(“error”); return; }
+      if (!email || !pwForm.current) { setPwError("Cannot verify your identity — please re-log in."); setPwStatus("error"); return; }
       const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pwForm.current });
       if (signInErr) { setPwError("Current password is incorrect."); setPwStatus("error"); return; }
       const { error } = await supabase.auth.updateUser({ password: pwForm.next });
@@ -248,7 +248,7 @@ function SettingsInner() {
 
       <div className="flex-1 min-w-0">
 
-        {/* â”€â”€ COMPANY â”€â”€ */}
+        {/* â"€â"€ COMPANY â"€â"€ */}
         {tab === "company" && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
@@ -355,7 +355,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â”€â”€ PREFERENCES â”€â”€ */}
+        {/* â"€â"€ PREFERENCES â"€â"€ */}
         {tab === "preferences" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">App Preferences</h3>
@@ -422,13 +422,13 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â”€â”€ WORKERS â”€â”€ */}
+        {/* â"€â"€ WORKERS â"€â"€ */}
         {tab === "workers" && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <h3 className="text-[17px] font-bold text-white">Workers & Crew</h3>
               <Link href="/crew" className="text-[12px] text-amber-400 hover:text-amber-300 transition-colors">
-                + Add new worker â†’
+                + Add new worker â†'
               </Link>
             </div>
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden">
@@ -479,7 +479,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â”€â”€ ROLES â”€â”€ */}
+        {/* â"€â"€ ROLES â"€â"€ */}
         {tab === "roles" && (
           <div className="space-y-5">
             <div>
@@ -557,7 +557,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â”€â”€ NOTIFICATIONS â”€â”€ */}
+        {/* â"€â"€ NOTIFICATIONS â"€â"€ */}
         {tab === "notifications" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">Notification Preferences</h3>
@@ -619,7 +619,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â”€â”€ SECURITY â”€â”€ */}
+        {/* â"€â"€ SECURITY â"€â"€ */}
         {tab === "security" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">Security</h3>
@@ -700,7 +700,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â”€â”€ BILLING â”€â”€ */}
+        {/* â"€â"€ BILLING â"€â"€ */}
         {tab === "access" && (
           <AccessControlTab
             workers={workers}
@@ -736,7 +736,7 @@ function SettingsInner() {
   );
 }
 
-// â”€â”€ Access Control Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Access Control Tab â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 type ControllablePage = { href: string; label: string; group: "Core" | "Field Ops" | "Admin" | "Finance"; alwaysOn?: boolean };
 

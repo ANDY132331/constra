@@ -22,6 +22,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
   }
 
+  if (email.length > 254 || password.length > 128 || firstName.length > 50 ||
+      (lastName && lastName.length > 50) || companyName.length > 100) {
+    return NextResponse.json({ error: "One or more fields exceed the maximum allowed length." }, { status: 400 });
+  }
+
+  if (password.length < 8) {
+    return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,

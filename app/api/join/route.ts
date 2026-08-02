@@ -12,6 +12,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
   }
 
+  if (email.length > 254 || password.length > 128 || firstName.length > 50 ||
+      (lastName && lastName.length > 50) || inviteCode.length > 20) {
+    return NextResponse.json({ error: "One or more fields exceed the maximum allowed length." }, { status: 400 });
+  }
+
+  if (password.length < 8) {
+    return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+  }
+
   // Service-role client — bypasses RLS so we can read company by invite_code
   // before the user exists.
   const supabase = createServerClient(
