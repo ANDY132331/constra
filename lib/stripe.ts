@@ -14,39 +14,4 @@ export const stripe = new Proxy({} as Stripe, {
   },
 });
 
-export const PLANS = {
-  starter: {
-    name: "Starter",
-    price: 0,
-    priceId: null,
-    limits: { projects: 2, workers: 5 },
-    features: [
-      "2 active projects",
-      "5 crew members",
-      "Time tracking & clock-in",
-      "Basic scheduling",
-      "Safety logs",
-      "Crew messaging",
-    ],
-  },
-  pro: {
-    name: "Pro",
-    price: 49,
-    priceId: process.env.STRIPE_PRO_PRICE_ID!,
-    limits: { projects: Infinity, workers: Infinity },
-    features: [
-      "Unlimited projects & crew",
-      "Invoices & estimates (PDF)",
-      "Payroll & reports export",
-      "Equipment management",
-      "RFIs & punch lists",
-      "Document vault",
-      "GPS clock-in verification",
-      "AI Daily Brief",
-      "Materials tracker",
-      "Priority support",
-    ],
-  },
-} as const;
-
-export type PlanKey = keyof typeof PLANS;
+// Plan/pricing config lives in config/plans.ts — do not add plan data here.
