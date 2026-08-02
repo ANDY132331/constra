@@ -202,11 +202,9 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
           );
         })()}
 
-        {isAdmin && (
-          <div className="mt-4 pt-3 border-t border-white/[0.06]">
-            <NavItem href="/settings" label={t.nav.settings} icon={Settings} />
-          </div>
-        )}
+        <div className="mt-4 pt-3 border-t border-white/[0.06]">
+          <NavItem href="/settings" label={t.nav.settings} icon={Settings} />
+        </div>
       </nav>
 
       {/* Role indicator */}

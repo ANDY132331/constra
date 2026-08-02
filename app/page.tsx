@@ -5,7 +5,7 @@ import {
   HardHat, Clock, ShieldCheck, FileText, BarChart3, Users, MapPin,
   Camera, Zap, Globe, ArrowRight, Check, Sparkles, CalendarDays,
   ClipboardList, Package, MessageSquare, Truck, Receipt,
-  ChevronRight, Star, TrendingUp, Layers,
+  ChevronRight, TrendingUp, Layers,
 } from "lucide-react";
 
 const FEATURES = [
@@ -37,7 +37,7 @@ const FEATURES = [
     icon: BarChart3,
     color: "#8b5cf6",
     title: "Reports & Payroll Export",
-    body: "Full payroll summaries, project cost reports, and timesheet detail — exportable to PDF, CSV, QuickBooks, or Gusto.",
+    body: "Full payroll summaries, project cost reports, and timesheet detail — exportable to PDF and CSV, ready to import into QuickBooks or Gusto.",
   },
   {
     icon: Sparkles,
@@ -110,7 +110,7 @@ const STEPS = [
 const STATS = [
   { value: "18+", label: "Tools in one app" },
   { value: "15", label: "Languages supported" },
-  { value: "$0", label: "No subscription fee" },
+  { value: "Free", label: "During beta" },
   { value: "100%", label: "Features included" },
 ];
 
@@ -159,7 +159,7 @@ export default function LandingPage() {
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-1.5 mb-6">
                 <Sparkles size={12} className="text-amber-400" />
-                <span className="text-[12px] text-amber-300 font-semibold">Early access · No credit card required</span>
+                <span className="text-[12px] text-amber-300 font-semibold">Free beta · Pricing starts after launch</span>
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-[56px] font-black tracking-tight leading-[1.05] mb-5">
@@ -372,8 +372,8 @@ export default function LandingPage() {
           </div>
           <div className="hidden sm:block w-px h-6 bg-white/[0.06]" />
           <div className="flex items-center gap-1.5">
-            {[1,2,3,4,5].map(i=><Star key={i} size={13} className="text-amber-400 fill-amber-400"/>)}
-            <span className="text-[12px] text-white/40 ml-1">Loved by contractors</span>
+            <Zap size={13} className="text-amber-400" />
+            <span className="text-[12px] text-white/40">Built for the field, not the office</span>
           </div>
           <div className="hidden sm:block w-px h-6 bg-white/[0.06]" />
           <div className="flex items-center gap-1.5">
@@ -402,54 +402,41 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Testimonials ────────────────────────────────────────────────────── */}
+      {/* ── Pain points ─────────────────────────────────────────────────────── */}
       <section className="py-20 px-5 border-t border-white/[0.04]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-1.5 mb-3">
-              {[1,2,3,4,5].map(i=><Star key={i} size={14} className="text-amber-400 fill-amber-400"/>)}
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2">What contractors are saying</h2>
-            <p className="text-white/40 text-[14px]">Real feedback from real field crews.</p>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Sound familiar?</h2>
+            <p className="text-white/40 text-[14px]">These are the problems Constra was built to eliminate.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                quote: "We were running 3 different apps just for timesheets, invoicing, and chat. Constra replaced all of them. My foreman loves the AI brief — he actually reads it every morning.",
-                name: "D. Marchetti",
-                role: "General Contractor",
-                location: "Ontario, CA",
-                color: "#3b82f6",
+                before: "Crew clocking in from the couch",
+                after: "GPS + selfie clock-in locks them to the site. Every check-in is time-stamped, location-verified, and photo-confirmed.",
+                color: "#ef4444",
               },
               {
-                quote: "GPS-verified clock-ins alone saved us from a $12k payroll dispute. I can see exactly where every worker was when they clocked in. That's priceless.",
-                name: "R. Kowalski",
-                role: "Roofing Co. Owner",
-                location: "Houston, TX",
-                color: "#22c55e",
-              },
-              {
-                quote: "We had guys clocking in from home with the old system. Now with photo check-in, that's gone. And the punch list feature keeps my supers accountable.",
-                name: "L. Chen",
-                role: "Plumbing Contractor",
-                location: "Vancouver, BC",
+                before: "Chasing timesheets every Friday",
+                after: "Live crew status on your dashboard. Payroll summary exports to CSV or PDF the second the week ends — no chasing required.",
                 color: "#f59e0b",
               },
-            ].map((t) => (
-              <div key={t.name} className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-4 hover:border-white/[0.10] transition-all">
-                <div className="flex gap-0.5">
-                  {[1,2,3,4,5].map(i=><Star key={i} size={11} className="text-amber-400 fill-amber-400"/>)}
+              {
+                before: "Juggling WhatsApp, spreadsheets, and email",
+                after: "Time tracking, invoicing, safety logs, scheduling, and crew chat — one app, one login, zero juggling.",
+                color: "#22c55e",
+              },
+            ].map((p) => (
+              <div key={p.before} className="bg-[#0d0d0d] border border-white/[0.06] rounded-2xl p-6 flex flex-col gap-4 hover:border-white/[0.10] transition-all">
+                <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/15 rounded-lg px-3 py-1.5 w-fit">
+                  <span className="text-[11px] font-bold text-red-400">The problem</span>
                 </div>
-                <p className="text-[13px] text-white/60 leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
-                <div className="flex items-center gap-3 pt-2 border-t border-white/[0.05]">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0" style={{ background: t.color + "33", color: t.color }}>
-                    {t.name.split(" ").map(n => n[0]).join("")}
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-bold text-white/80">{t.name}</p>
-                    <p className="text-[11px] text-white/35">{t.role} · {t.location}</p>
-                  </div>
+                <p className="text-[14px] font-bold text-white/80 leading-snug">{p.before}</p>
+                <div className="h-px bg-white/[0.05]" />
+                <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/15 rounded-lg px-3 py-1.5 w-fit">
+                  <span className="text-[11px] font-bold text-green-400">The fix</span>
                 </div>
+                <p className="text-[13px] text-white/50 leading-relaxed">{p.after}</p>
               </div>
             ))}
           </div>
@@ -524,8 +511,8 @@ export default function LandingPage() {
       <section className="py-20 px-5 border-t border-white/[0.04]" id="pricing">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">Everything included. No cost.</h2>
-            <p className="text-white/40 text-[15px]">Every feature unlocked from day one. No credit card, no limits.</p>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">Free during beta.</h2>
+            <p className="text-white/40 text-[15px]">Every feature unlocked from day one. Sign up now and lock in your early rate before pricing goes live.</p>
           </div>
 
           {/* Competitor comparison bar */}
@@ -545,13 +532,13 @@ export default function LandingPage() {
 
           <div className="bg-[#111] border border-amber-500/25 rounded-2xl p-8 relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-wide">
-              100% Free
+              Free Beta
             </div>
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
               <div>
                 <div className="text-5xl font-black text-white mb-1">$0</div>
-                <p className="text-[13px] text-white/35">No credit card · No catch · No limits</p>
+                <p className="text-[13px] text-white/35">Free during beta · Pricing starts after launch</p>
               </div>
               <Link
                 href="/onboarding"
