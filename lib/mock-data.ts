@@ -56,8 +56,8 @@ export type BlueprintPin = {
   id: string;
   documentId: string;
   page: number;
-  x: number; // 0â€“1 fraction of page width
-  y: number; // 0â€“1 fraction of page height
+  x: number; // 0—1 fraction of page width
+  y: number; // 0—1 fraction of page height
   type: "issue" | "info" | "safety" | "rfi";
   note: string;
   resolved: boolean;
@@ -323,7 +323,7 @@ export const TRADE_MATERIALS: Record<string, Array<{ name: string; unit: string 
     { name: "Drywall Screws 3\"", unit: "lbs" },
     { name: "Drywall Nails", unit: "lbs" },
     { name: "Sanding Screen 120-grit", unit: "sheets" },
-    { name: "Primer â€” Drywall", unit: "gallons" },
+    { name: "Primer — Drywall", unit: "gallons" },
   ],
   "Concrete": [
     { name: "Concrete Mix 80lb", unit: "bags" },
@@ -542,9 +542,9 @@ export const TRADE_MATERIALS: Record<string, Array<{ name: string; unit: string 
     { name: "Flashing Tape 4\"", unit: "rolls" },
   ],
   "Windows & Doors": [
-    { name: "Window â€” Casement", unit: "pieces" },
-    { name: "Window â€” Double Hung", unit: "pieces" },
-    { name: "Window â€” Awning", unit: "pieces" },
+    { name: "Window — Casement", unit: "pieces" },
+    { name: "Window — Double Hung", unit: "pieces" },
+    { name: "Window — Awning", unit: "pieces" },
     { name: "Sliding Glass Door", unit: "pieces" },
     { name: "Exterior Door Fiberglass", unit: "pieces" },
     { name: "Exterior Door Steel", unit: "pieces" },

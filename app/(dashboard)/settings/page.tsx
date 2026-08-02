@@ -201,7 +201,7 @@ function SettingsInner() {
       // First re-authenticate with current password
       const supabase = getClient();
       const email = currentUser.email;
-      if (!email || !pwForm.current) { setPwError("Cannot verify your identity â€” please re-log in."); setPwStatus("error"); return; }
+      if (!email || !pwForm.current) { setPwError(“Cannot verify your identity — please re-log in.”); setPwStatus(“error”); return; }
       const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: pwForm.current });
       if (signInErr) { setPwError("Current password is incorrect."); setPwStatus("error"); return; }
       const { error } = await supabase.auth.updateUser({ password: pwForm.next });
@@ -233,7 +233,7 @@ function SettingsInner() {
 
   return (
     <div className="flex flex-col sm:flex-row gap-6 max-w-[1100px]">
-      {/* Sidebar tabs â€” horizontal scroll on mobile */}
+      {/* Sidebar tabs — horizontal scroll on mobile */}
       <div className="w-full sm:w-48 flex-shrink-0">
         <div className="flex sm:flex-col gap-1 overflow-x-auto pb-1 sm:pb-0">
           {TABS.filter((t) => !t.adminOnly || isAdmin).map(({ id, label, icon: Icon }) => (
@@ -294,7 +294,7 @@ function SettingsInner() {
                         Remove logo
                       </button>
                     )}
-                    <p className="text-[10px] text-white/25">PNG or SVG recommended Â· Used on invoices & PDFs</p>
+                    <p className="text-[10px] text-white/25">PNG or SVG recommended · Used on invoices & PDFs</p>
                   </div>
                 </div>
               </div>
@@ -340,7 +340,7 @@ function SettingsInner() {
                 <button onClick={regenerateCode} disabled={regenerating}
                   className="flex items-center gap-2 bg-white/8 hover:bg-white/12 disabled:opacity-50 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-lg transition-colors">
                   <Key size={15} className={regenerating ? "animate-spin" : ""} />
-                  {regenerating ? "â€¦" : "Regenerate"}
+                  {regenerating ? "…" : "Regenerate"}
                 </button>
               </div>
               {regenError && (
@@ -393,7 +393,7 @@ function SettingsInner() {
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${currency === c.code ? "border-amber-500/50 bg-amber-500/10" : "border-white/[0.06] hover:border-white/12 hover:bg-white/[0.02]"}`}>
                     <span className="text-lg">{c.flag}</span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-[12px] font-semibold truncate ${currency === c.code ? "text-amber-300" : "text-white/70"}`}>{c.code} â€” {c.symbol}</p>
+                      <p className={`text-[12px] font-semibold truncate ${currency === c.code ? "text-amber-300" : "text-white/70"}`}>{c.code} — {c.symbol}</p>
                       <p className="text-[10px] text-white/30 truncate">{c.name}</p>
                     </div>
                     {currency === c.code && <Check size={12} className="text-amber-400 flex-shrink-0" />}
@@ -452,7 +452,7 @@ function SettingsInner() {
                         <p className="text-[11px] text-white/35">{worker.customRole}</p>
                       </div>
                     </div>
-                    <div className="text-[11px] text-white/35 truncate pr-2">{worker.email || "â€”"}</div>
+                    <div className="text-[11px] text-white/35 truncate pr-2">{worker.email || "—"}</div>
                     <div>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                         style={{ backgroundColor: roleColor + "18", color: roleColor }}>{worker.role}</span>
@@ -472,7 +472,7 @@ function SettingsInner() {
               })}
               {workers.length === 0 && (
                 <div className="px-5 py-8 text-center text-white/25 text-[12px]">
-                  No workers yet â€” <Link href="/crew" className="text-amber-400 hover:text-amber-300">add from Crew page</Link>
+                  No workers yet — <Link href="/crew" className="text-amber-400 hover:text-amber-300">add from Crew page</Link>
                 </div>
               )}
             </div>
@@ -545,7 +545,7 @@ function SettingsInner() {
                 <input
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  placeholder="e.g. Pipe Layer, Grade Man, Operatorâ€¦"
+                  placeholder="e.g. Pipe Layer, Grade Man, Operator…"
                   className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/40 placeholder:text-white/20"
                 />
                 <button type="submit" disabled={!newRole.trim()}
@@ -587,7 +587,7 @@ function SettingsInner() {
                 </div>
                 <button onClick={enableNotifs} disabled={notifRequesting}
                   className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-black text-[12px] font-bold px-4 py-2 rounded-lg transition-colors">
-                  {notifRequesting ? "Requestingâ€¦" : "Enable"}
+                  {notifRequesting ? "Requesting…" : "Enable"}
                 </button>
               </div>
             ) : (
@@ -669,13 +669,13 @@ function SettingsInner() {
 
                   <button type="submit" disabled={pwStatus === "loading"}
                     className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
-                    {pwStatus === "loading" ? "Updatingâ€¦" : "Update Password"}
+                    {pwStatus === "loading" ? "Updating…" : "Update Password"}
                   </button>
                 </form>
               )}
             </div>
 
-            {/* 2FA â€” informational only for now */}
+            {/* 2FA — informational only for now */}
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
               <h4 className="text-[14px] font-bold text-white mb-1">Two-Factor Authentication</h4>
               <p className="text-[12px] text-white/40 mb-4">
@@ -915,12 +915,12 @@ function AccessControlTab({
               <div>
                 <label className="text-[10px] font-bold text-white/35 uppercase tracking-wide block mb-1.5">New PIN (digits only)</label>
                 <input type="password" inputMode="numeric" value={newPin} onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
-                  placeholder="â€¢â€¢â€¢â€¢" className={inpCls} />
+                  placeholder="••••" className={inpCls} />
               </div>
               <div>
                 <label className="text-[10px] font-bold text-white/35 uppercase tracking-wide block mb-1.5">Confirm PIN</label>
                 <input type="password" inputMode="numeric" value={confirmPin} onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
-                  placeholder="â€¢â€¢â€¢â€¢" className={inpCls} onKeyDown={(e) => e.key === "Enter" && savePin()} />
+                  placeholder="••••" className={inpCls} onKeyDown={(e) => e.key === "Enter" && savePin()} />
               </div>
             </div>
             {pinSetupError && <p className="text-[12px] text-red-400">{pinSetupError}</p>}
@@ -1065,7 +1065,7 @@ function AccessControlTab({
                       value={pinInput}
                       onChange={(e) => { setPinInput(e.target.value.replace(/\D/g, "").slice(0, 8)); setPinError(""); }}
                       onKeyDown={(e) => e.key === "Enter" && verifyAndApply()}
-                      placeholder="â€¢â€¢â€¢â€¢"
+                      placeholder="••••"
                       autoFocus
                       className="w-full bg-[#0d0d0d] border border-white/[0.10] rounded-xl px-4 py-3 text-[20px] tracking-[0.3em] text-white text-center outline-none focus:border-amber-500/50 transition-colors placeholder:text-white/20 placeholder:tracking-normal placeholder:text-[14px]"
                     />
@@ -1078,7 +1078,7 @@ function AccessControlTab({
                     </button>
                     <button onClick={verifyAndApply} disabled={pinVerifying || !pinInput}
                       className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 disabled:opacity-40 transition-colors">
-                      {pinVerifying ? "Verifyingâ€¦" : "Verify & Save"}
+                      {pinVerifying ? "Verifying…" : "Verify & Save"}
                     </button>
                   </div>
                 </>
