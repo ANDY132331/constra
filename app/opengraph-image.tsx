@@ -182,7 +182,7 @@ export default function OGImage() {
             fontFamily: "system-ui, sans-serif",
           }}
         >
-          18 tools in one place — built for construction and trades.
+          Time tracking, invoicing, crew management, safety logs — built for construction.
         </div>
 
         {/* Feature pills */}
@@ -266,7 +266,7 @@ export default function OGImage() {
                 fontFamily: "system-ui, sans-serif",
               }}
             >
-              Free · No credit card · All features included
+              Free beta · All features included · No credit card
             </span>
           </div>
         </div>

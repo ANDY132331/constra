@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/server";
 import {
   sendEmail,
   crewMessageEmail,
@@ -37,6 +38,10 @@ async function getCompanyName(companyId: string) {
 }
 
 export async function POST(request: Request) {
+  const authClient = await createClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ skipped: "no RESEND_API_KEY" });
   }
