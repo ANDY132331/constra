@@ -170,7 +170,7 @@ export default function LandingPage() {
 
               <p className="text-[16px] md:text-[18px] text-white/45 leading-relaxed max-w-xl lg:max-w-none mb-4">
                 Time tracking, crew management, safety logs, invoicing, scheduling, materials, equipment, punch lists, and an AI daily brief —{" "}
-                <span className="text-white/65 font-semibold">18 tools in one place</span>, built for construction.
+                <span className="text-white/65 font-semibold">all your tools in one place</span>, built for construction.
               </p>
               <p className="text-[14px] text-white/30 leading-relaxed max-w-lg lg:max-w-none mb-8">
                 No more juggling WhatsApp, spreadsheets, and paper timesheets. Constra is the only platform built from the ground up to handle every part of your job site — from first clock-in to final invoice.
@@ -193,7 +193,7 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              <p className="text-[12px] text-white/20 text-center lg:text-left">No credit card required · All 18 features included · No limits</p>
+              <p className="text-[12px] text-white/20 text-center lg:text-left">No credit card required · All features included · No limits</p>
 
               {/* Stats row */}
               <div className="flex flex-wrap justify-center lg:justify-start gap-6 mt-8 pt-8 border-t border-white/[0.05]">
@@ -449,7 +449,7 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 bg-white/[0.04] border border-white/[0.06] rounded-full px-4 py-1.5 mb-4">
               <Layers size={12} className="text-white/40" />
-              <span className="text-[12px] text-white/40 font-semibold">18 features · one subscription · $0</span>
+              <span className="text-[12px] text-white/40 font-semibold">Every feature · one app · free beta</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">
               Every tool your crew needs
@@ -520,7 +520,7 @@ export default function LandingPage() {
             {[
               { name: "Enterprise tools", price: "$600–$1,200/mo", note: "Per project pricing", dim: true },
               { name: "Mid-market apps", price: "$200–$500/mo", note: "Features locked behind tiers", dim: true },
-              { name: "Constra", price: "$0", note: "All 18 features included", dim: false },
+              { name: "Constra", price: "Free", note: "All features · free beta", dim: false },
             ].map((c) => (
               <div key={c.name} className={`rounded-xl border p-4 transition-all ${c.dim ? "border-white/[0.05] bg-white/[0.02] opacity-60" : "border-amber-500/30 bg-amber-500/[0.06]"}`}>
                 <p className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${c.dim ? "text-white/30" : "text-amber-400"}`}>{c.name}</p>

@@ -339,6 +339,27 @@ export default function OnboardingPage() {
                 {showJoinPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
+            {joinPassword.length > 0 && (() => {
+              const score = [joinPassword.length >= 8, /[0-9]/.test(joinPassword), /[^a-zA-Z0-9]/.test(joinPassword), joinPassword.length >= 12].filter(Boolean).length;
+              const levels = [
+                { label: "Too short", color: "#ef4444", bars: 1 },
+                { label: "Weak", color: "#f97316", bars: 1 },
+                { label: "Fair", color: "#f59e0b", bars: 2 },
+                { label: "Good", color: "#22c55e", bars: 3 },
+                { label: "Strong", color: "#10b981", bars: 4 },
+              ];
+              const lvl = levels[Math.min(score, 4)];
+              return (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="h-1 flex-1 rounded-full transition-all" style={{ backgroundColor: i <= lvl.bars ? lvl.color : "rgba(255,255,255,0.08)" }} />
+                    ))}
+                  </div>
+                  <p className="text-[10px] font-semibold" style={{ color: lvl.color }}>{lvl.label}</p>
+                </div>
+              );
+            })()}
           </div>
 
           <button
@@ -528,6 +549,27 @@ export default function OnboardingPage() {
                 {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
+            {password.length > 0 && (() => {
+              const score = [password.length >= 8, /[0-9]/.test(password), /[^a-zA-Z0-9]/.test(password), password.length >= 12].filter(Boolean).length;
+              const levels = [
+                { label: "Too short", color: "#ef4444", bars: 1 },
+                { label: "Weak", color: "#f97316", bars: 1 },
+                { label: "Fair", color: "#f59e0b", bars: 2 },
+                { label: "Good", color: "#22c55e", bars: 3 },
+                { label: "Strong", color: "#10b981", bars: 4 },
+              ];
+              const lvl = levels[Math.min(score, 4)];
+              return (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1">
+                    {[1,2,3,4].map(i => (
+                      <div key={i} className="h-1 flex-1 rounded-full transition-all" style={{ backgroundColor: i <= lvl.bars ? lvl.color : "rgba(255,255,255,0.08)" }} />
+                    ))}
+                  </div>
+                  <p className="text-[10px] font-semibold" style={{ color: lvl.color }}>{lvl.label}</p>
+                </div>
+              );
+            })()}
           </div>
 
           <p className="text-[10px] text-white/25 leading-relaxed">
