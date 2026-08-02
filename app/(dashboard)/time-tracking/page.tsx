@@ -803,10 +803,15 @@ export default function TimeTrackingPage() {
                     <span className="truncate">{project?.name ?? "No project assigned"}</span>
                   </div>
                   {worker.clockInGps ? (
-                    <div className="flex items-center gap-1 text-[10px] text-green-400/60 mb-2">
+                    <a
+                      href={`https://www.google.com/maps?q=${worker.clockInGps.lat},${worker.clockInGps.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] text-green-400/60 hover:text-green-400 mb-2 transition-colors"
+                    >
                       <Navigation size={8} />
                       <span>{worker.clockInGps.lat.toFixed(5)}, {worker.clockInGps.lng.toFixed(5)}</span>
-                    </div>
+                    </a>
                   ) : (
                     <div className="mb-2" />
                   )}
@@ -973,7 +978,18 @@ export default function TimeTrackingPage() {
                     <p className="text-[13px] font-semibold text-white/85">{worker.name}</p>
                     <div className="flex items-center gap-1.5">
                       <p className="text-[11px] text-white/35">{worker.customRole}</p>
-                      {hasGps && <MapPin size={9} className="text-green-400/60" />}
+                      {hasGps && (
+                        <a
+                          href={`https://www.google.com/maps?q=${(entry as { gps?: GpsLocation }).gps!.lat},${(entry as { gps?: GpsLocation }).gps!.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="View clock-in location on Google Maps"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-green-400/60 hover:text-green-400 transition-colors"
+                        >
+                          <MapPin size={9} />
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
