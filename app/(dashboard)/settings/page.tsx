@@ -689,7 +689,7 @@ function SettingsInner() {
               <h4 className="text-[14px] font-bold text-red-400 mb-1">Danger Zone</h4>
               <p className="text-[12px] text-white/40 mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
               <a
-                href="mailto:prableensandhu19@gmail.com?subject=Account Deletion Request"
+                href="mailto:hello@constra.app?subject=Account Deletion Request"
                 className="inline-flex items-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors">
                 Request Account Deletion
               </a>

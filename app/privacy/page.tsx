@@ -55,7 +55,7 @@ export default function PrivacyPage() {
     },
     {
       title: "14. Contact Us",
-      body: `For privacy-related questions, requests, or complaints, please contact us through the in-app support channel or at the contact information listed on our website. We take all privacy concerns seriously and will respond promptly.`,
+      body: `For privacy-related questions, requests, or complaints, please contact us at hello@constra.app. We take all privacy concerns seriously and will respond within 30 days.`,
     },
   ];
 
