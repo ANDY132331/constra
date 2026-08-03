@@ -1,22 +1,27 @@
 import Link from "next/link";
-import { HardHat, Phone, Mail, MessageSquare, Clock, ArrowRight, ChevronRight } from "lucide-react";
+import { HardHat, Phone, Clock, ArrowRight, ChevronRight, ShieldCheck, Zap, Globe } from "lucide-react";
+
+export const metadata = {
+  title: "Support — Constra",
+  description: "Need help with Constra? Call us directly — real support, no bots.",
+};
 
 const FAQS = [
   {
     q: "How do I invite crew members?",
-    a: "Go to Crew → Add Worker, fill in their details and role, then share the generated invite code with them. They sign up at constra.app/join using that code.",
+    a: "Go to Crew → Add Worker, fill in their details and role, then share the generated invite code. They sign up using that code and are added to your workspace automatically.",
   },
   {
     q: "Can workers use Constra without a smartphone?",
-    a: "Constra is designed for smartphones. Workers need iOS or Android to clock in with GPS and photo verification. Foremen and admins can also use the desktop browser version.",
+    a: "Constra is built for smartphones. Workers need iOS or Android to clock in with GPS and photo verification. Admins and foremen can also use the full desktop browser version.",
   },
   {
     q: "What happens if there's no internet on site?",
-    a: "Constra works offline. Clock-ins, safety logs, and tasks queue locally and sync automatically the moment the device reconnects to any network.",
+    a: "Constra works fully offline. Clock-ins, safety logs, and tasks queue on the device and sync automatically the moment it reconnects to any network.",
   },
   {
     q: "How do I export payroll or timesheets?",
-    a: "Go to Time Tracking → Export CSV, or open Reports for a full payroll summary by worker and project. Both can be exported as PDF or CSV.",
+    a: "Go to Time Tracking → Export CSV for a raw data export, or open Reports for a full payroll summary by worker and project. Both export as PDF or CSV.",
   },
   {
     q: "Can I change a worker's role or permissions?",
@@ -24,155 +29,183 @@ const FAQS = [
   },
   {
     q: "How do I cancel or change my plan?",
-    a: "Go to Settings → Billing → Manage Subscription. You can upgrade, downgrade, or cancel at any time — no penalties.",
+    a: "Go to Settings → Billing → Manage Subscription. You can upgrade, downgrade, or cancel at any time with no penalties or hidden fees.",
   },
   {
     q: "Is my data secure?",
-    a: "Yes. Constra uses Supabase with row-level security, meaning each company's data is completely isolated. All data is encrypted in transit and at rest.",
+    a: "Yes. All company data is isolated using row-level security — no other company can ever access your records. Everything is encrypted in transit and at rest.",
   },
   {
     q: "Can I have multiple job sites or projects?",
-    a: "Unlimited projects and job sites are included on all plans. There are no per-project fees.",
+    a: "Unlimited projects and job sites are included on all plans. There are no per-project or per-seat fees.",
   },
 ];
 
-export const metadata = {
-  title: "Support — Constra",
-  description: "Get help with Constra. Contact our support team by phone or email.",
-};
-
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-[#080808] text-white">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#080808]/80 backdrop-blur-xl border-b border-white/[0.05]">
-        <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-              <HardHat size={16} className="text-black" />
+    <div className="min-h-screen bg-[#080808] text-white flex flex-col lg:flex-row">
+
+      {/* ── Left panel (desktop only) ── */}
+      <div className="hidden lg:flex flex-col w-[380px] xl:w-[420px] flex-shrink-0 relative overflow-hidden bg-[#0a0800]">
+        {/* Blueprint grid */}
+        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(rgba(245,158,11,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,0.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+        {/* Amber glow */}
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-500/10 blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-amber-600/5 blur-[80px] rounded-full pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col h-full p-10">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center">
+              <HardHat size={18} className="text-black" />
             </div>
-            <span className="text-[17px] font-black tracking-tight">Constra</span>
+            <span className="text-[17px] font-black text-white tracking-tight">Constra</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-[13px] text-white/50 hover:text-white/80 transition-colors font-medium">
-              Sign In
-            </Link>
-            <Link
-              href="/onboarding"
-              className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5"
-            >
-              Get Started <ArrowRight size={13} />
-            </Link>
+
+          <div className="flex-1 flex flex-col justify-center">
+            {/* Silhouette */}
+            <div className="flex items-end gap-2.5 mb-10 opacity-20">
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:36}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:64}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:48}} />
+              <div className="w-1 bg-amber-400 rounded-t" style={{height:28}} />
+              <div className="w-3 bg-amber-500 rounded-t" style={{height:88}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:56}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:44}} />
+              <div className="w-1 bg-amber-400 rounded-t" style={{height:72}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:52}} />
+              <div className="w-3 bg-amber-500 rounded-t" style={{height:100}} />
+            </div>
+
+            <h2 className="text-[34px] font-black text-white leading-[1.05] tracking-tight mb-4">
+              Need help?<br />
+              <span className="text-amber-400">We pick up.</span>
+            </h2>
+            <p className="text-white/40 text-[14px] leading-relaxed mb-10">
+              Real support from the people who built the app — not a chatbot, not a ticket queue.
+            </p>
+
+            <div className="space-y-4">
+              {[
+                { icon: Phone, text: "Call us directly — no hold music" },
+                { icon: Clock, text: "Available Mon – Fri, 8am – 6pm PT" },
+                { icon: ShieldCheck, text: "Your data stays private, always" },
+                { icon: Zap, text: "Most issues resolved in one call" },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                    <Icon size={13} className="text-amber-400" />
+                  </div>
+                  <span className="text-[13px] text-white/50">{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-white/[0.06]">
+            <p className="text-[11px] text-white/20">© 2026 Constra. All rights reserved.</p>
           </div>
         </div>
-      </nav>
+      </div>
 
-      {/* Hero */}
-      <section className="pt-28 pb-14 px-5">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-1.5 mb-6">
-            <MessageSquare size={12} className="text-amber-400" />
-            <span className="text-[12px] text-amber-300 font-semibold">We're here to help</span>
+      {/* ── Right panel ── */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Mobile background */}
+        <div className="fixed inset-0 lg:hidden opacity-[0.03] pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(245,158,11,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,1) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+
+        {/* Mobile nav */}
+        <nav className="lg:hidden sticky top-0 z-50 bg-[#080808]/90 backdrop-blur-xl border-b border-white/[0.05]">
+          <div className="px-5 h-14 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
+                <HardHat size={14} className="text-black" />
+              </div>
+              <span className="text-[15px] font-black">Constra</span>
+            </Link>
+            <Link href="/onboarding" className="bg-amber-500 text-black font-bold text-[12px] px-3 py-1.5 rounded-lg flex items-center gap-1">
+              Get Started <ArrowRight size={11} />
+            </Link>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Support</h1>
-          <p className="text-white/40 text-[16px] max-w-lg mx-auto">
-            Reach us by phone or email. We respond to all messages within a few hours during business hours.
-          </p>
-        </div>
-      </section>
+        </nav>
 
-      {/* Contact cards */}
-      <section className="pb-16 px-5">
-        <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="max-w-2xl mx-auto px-6 py-12 relative">
 
-          {/* Phone */}
+          {/* Header */}
+          <div className="mb-10">
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-3 py-1 mb-5">
+              <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+              <span className="text-[11px] text-amber-300 font-semibold">Support</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2">How can we help?</h1>
+            <p className="text-white/40 text-[14px]">Call us or browse the FAQ below — most answers are there.</p>
+          </div>
+
+          {/* Phone card */}
           <a
             href="tel:+16723389890"
-            className="group bg-[#0f0f0f] border border-white/[0.07] hover:border-amber-500/30 rounded-2xl p-6 transition-all hover:bg-[#121212]"
+            className="group flex items-center gap-5 bg-[#111] border border-amber-500/20 hover:border-amber-500/40 rounded-2xl p-6 mb-10 transition-all hover:bg-[#141208]"
           >
-            <div className="w-11 h-11 bg-amber-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-500/15 transition-colors">
-              <Phone size={20} className="text-amber-400" />
+            <div className="w-14 h-14 bg-amber-500/15 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
+              <Phone size={24} className="text-amber-400" />
             </div>
-            <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Call us</p>
-            <p className="text-[22px] font-black text-white tracking-tight">672-338-9890</p>
-            <p className="text-[12px] text-white/35 mt-1 flex items-center gap-1">
-              <Clock size={10} />
-              Mon – Fri, 8am – 6pm PT
-            </p>
+            <div className="flex-1">
+              <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Call us</p>
+              <p className="text-[26px] font-black text-white tracking-tight leading-none">672-338-9890</p>
+              <p className="text-[12px] text-white/35 mt-1.5 flex items-center gap-1.5">
+                <Clock size={11} />
+                Mon – Fri · 8am – 6pm PT
+              </p>
+            </div>
+            <ArrowRight size={18} className="text-amber-400/40 group-hover:text-amber-400 transition-colors flex-shrink-0" />
           </a>
 
-          {/* Email */}
-          <a
-            href="mailto:support@constra.app"
-            className="group bg-[#0f0f0f] border border-white/[0.07] hover:border-amber-500/30 rounded-2xl p-6 transition-all hover:bg-[#121212]"
-          >
-            <div className="w-11 h-11 bg-amber-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-500/15 transition-colors">
-              <Mail size={20} className="text-amber-400" />
+          {/* FAQ */}
+          <div>
+            <h2 className="text-[18px] font-black text-white mb-1">Frequently asked questions</h2>
+            <p className="text-[13px] text-white/35 mb-6">Quick answers to the most common questions.</p>
+
+            <div className="space-y-2">
+              {FAQS.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group bg-[#0f0f0f] border border-white/[0.06] hover:border-white/10 rounded-xl overflow-hidden transition-colors"
+                >
+                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none">
+                    <span className="text-[13px] font-semibold text-white/75 pr-4">{faq.q}</span>
+                    <ChevronRight size={14} className="text-white/25 flex-shrink-0 group-open:rotate-90 transition-transform duration-200" />
+                  </summary>
+                  <div className="px-5 pb-4 border-t border-white/[0.04]">
+                    <p className="text-[13px] text-white/45 leading-relaxed pt-3">{faq.a}</p>
+                  </div>
+                </details>
+              ))}
             </div>
-            <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Email us</p>
-            <p className="text-[18px] font-black text-white tracking-tight">support@constra.app</p>
-            <p className="text-[12px] text-white/35 mt-1 flex items-center gap-1">
-              <Clock size={10} />
-              Response within a few hours
-            </p>
-          </a>
 
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="pb-24 px-5 border-t border-white/[0.04]">
-        <div className="max-w-3xl mx-auto pt-14">
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Frequently asked questions</h2>
-          <p className="text-white/35 text-[14px] mb-10">Quick answers to the most common questions.</p>
-
-          <div className="space-y-3">
-            {FAQS.map((faq) => (
-              <details
-                key={faq.q}
-                className="group bg-[#0f0f0f] border border-white/[0.06] rounded-xl overflow-hidden"
+            <div className="mt-8 p-5 bg-[#0f0f0f] border border-white/[0.06] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-[13px] font-bold text-white/70">Still have a question?</p>
+                <p className="text-[12px] text-white/35">Call us directly and we'll sort it out.</p>
+              </div>
+              <a
+                href="tel:+16723389890"
+                className="flex-shrink-0 flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-5 py-2.5 rounded-xl transition-colors"
               >
-                <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none select-none hover:bg-white/[0.02] transition-colors">
-                  <span className="text-[14px] font-semibold text-white/80 pr-4">{faq.q}</span>
-                  <ChevronRight size={15} className="text-white/25 flex-shrink-0 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="px-5 pb-4">
-                  <p className="text-[13px] text-white/45 leading-relaxed">{faq.a}</p>
-                </div>
-              </details>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <p className="text-[13px] text-white/30 mb-3">Still have a question?</p>
-            <a
-              href="mailto:support@constra.app"
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-6 py-2.5 rounded-xl transition-colors"
-            >
-              <Mail size={14} />
-              Email Support
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-white/[0.05] py-8 px-5">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-amber-500 rounded-md flex items-center justify-center">
-              <HardHat size={12} className="text-black" />
+                <Phone size={13} />
+                672-338-9890
+              </a>
             </div>
-            <span className="text-[14px] font-black">Constra</span>
-          </Link>
-          <div className="flex items-center gap-5 text-[12px] text-white/30">
-            <Link href="/" className="hover:text-white/60 transition-colors">Home</Link>
-            <Link href="/terms" className="hover:text-white/60 transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-white/60 transition-colors">Privacy</Link>
-            <a href="mailto:support@constra.app" className="hover:text-white/60 transition-colors">support@constra.app</a>
+          </div>
+
+          {/* Footer links */}
+          <div className="mt-12 pt-6 border-t border-white/[0.05] flex flex-wrap items-center gap-5 text-[11px] text-white/25">
+            <Link href="/" className="hover:text-white/50 transition-colors flex items-center gap-1.5">
+              <Globe size={10} /> Home
+            </Link>
+            <Link href="/terms" className="hover:text-white/50 transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-white/50 transition-colors">Privacy</Link>
           </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 }
