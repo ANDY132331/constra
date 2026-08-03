@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Clock, MessagesSquare, Images, ShieldAlert,
+  LayoutDashboard, Clock, MessagesSquare, ShieldAlert, LifeBuoy,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 const ITEMS = [
-  { href: "/dashboard",     icon: LayoutDashboard, label: "Home"   },
-  { href: "/time-tracking", icon: Clock,           label: "Clock"  },
-  { href: "/messages",      icon: MessagesSquare,  label: "Chat"   },
-  { href: "/photos",        icon: Images,          label: "Photos" },
-  { href: "/safety",        icon: ShieldAlert,     label: "Safety" },
+  { href: "/dashboard",     icon: LayoutDashboard, label: "Home"    },
+  { href: "/time-tracking", icon: Clock,           label: "Clock"   },
+  { href: "/messages",      icon: MessagesSquare,  label: "Chat"    },
+  { href: "/safety",        icon: ShieldAlert,     label: "Safety"  },
+  { href: "/support",       icon: LifeBuoy,        label: "Support" },
 ];
 
 export function MobileNav() {

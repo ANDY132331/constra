@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, ChevronRight, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers,
+  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -204,6 +204,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
 
         <div className="mt-4 pt-3 border-t border-white/[0.06]">
           <NavItem href="/settings" label={t.nav.settings} icon={Settings} />
+          <NavItem href="/support" label="Support" icon={LifeBuoy} />
         </div>
       </nav>
 
