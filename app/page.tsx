@@ -634,7 +634,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-5 text-[12px] text-white/30">
             <Link href="/login" className="hover:text-white/60 transition-colors">Sign In</Link>
             <Link href="/onboarding" className="hover:text-white/60 transition-colors">Get Started</Link>
-            <a href="mailto:hello@constra.app" className="hover:text-white/60 transition-colors">Contact</a>
+            <Link href="/support" className="hover:text-white/60 transition-colors">Support</Link>
             <Link href="/terms" className="hover:text-white/60 transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-white/60 transition-colors">Privacy</Link>
           </div>
