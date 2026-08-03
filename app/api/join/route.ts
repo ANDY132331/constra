@@ -1,11 +1,18 @@
-import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+
+import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // POST /api/join
 // Looks up a company by invite code (service-role bypass), signs up the user,
 // and creates their profile row — all in one server-side transaction.
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // 10 join attempts per IP per hour
+  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+  if (!rateLimit(`join:${ip}`, 10, 3_600_000)) return rateLimitResponse();
+
   const { inviteCode, email, password, firstName, lastName } = await request.json();
 
   if (!inviteCode || !email || !password || !firstName) {

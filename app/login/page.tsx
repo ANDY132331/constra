@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { HardHat, Eye, EyeOff, ArrowRight, Globe, Loader2 } from "lucide-react";
+import { HardHat, Eye, EyeOff, ArrowRight, Globe, Loader2, WifiOff, MapPin, Zap } from "lucide-react";
 import Link from "next/link";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { useStore } from "@/lib/store";
@@ -284,7 +284,19 @@ function LoginForm() {
           </p>
         </div>
 
-        <p className="text-center text-[10px] text-white/15 mt-5 flex items-center justify-center gap-1.5">
+        <div className="flex items-center justify-center gap-3 mt-5 flex-wrap">
+          {[
+            { icon: WifiOff, label: "Works offline" },
+            { icon: MapPin, label: "GPS verified" },
+            { icon: Zap, label: "Free during beta" },
+          ].map(({ icon: Icon, label }) => (
+            <div key={label} className="flex items-center gap-1.5 text-[11px] text-white/20">
+              <Icon size={10} />
+              {label}
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-[10px] text-white/10 mt-3 flex items-center justify-center gap-1.5">
           <Globe size={10} />
           Available worldwide in any currency
         </p>

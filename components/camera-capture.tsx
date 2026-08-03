@@ -101,8 +101,12 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2) return;
 
-    const w = video.videoWidth || 640;
-    const h = video.videoHeight || 480;
+    const rawW = video.videoWidth || 640;
+    const rawH = video.videoHeight || 480;
+    const MAX = 1280;
+    const scale = Math.min(MAX / rawW, MAX / rawH, 1);
+    const w = Math.round(rawW * scale);
+    const h = Math.round(rawH * scale);
     canvas.width = w;
     canvas.height = h;
 
@@ -138,7 +142,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
       ctx.fillText(line, 10, h - barH + 14 + i * lineH);
     });
 
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
     setPreview(dataUrl);
     stopStream();
     setCameraState("captured");
@@ -177,7 +181,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+      <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-sm max-h-[90dvh] overflow-y-auto shadow-2xl">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06]">

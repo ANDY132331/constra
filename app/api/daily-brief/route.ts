@@ -1,6 +1,9 @@
+export const dynamic = "force-dynamic";
+
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 const MOCK_BRIEF = `**Good morning — here's your site snapshot for today.**
 
@@ -75,6 +78,10 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 10 AI brief requests per user per minute (each call hits Anthropic API)
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  if (!rateLimit(`daily-brief:${user.id}:${ip}`, 10, 60_000)) return rateLimitResponse();
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
 

@@ -86,7 +86,7 @@ function InvoiceDetail({
       {/* ── Toolbar ── */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         <div className="flex items-center gap-2.5">
-          <button onClick={onClose} className="lg:hidden p-1.5 rounded-lg text-white/30 hover:text-white/60 transition-colors">
+          <button onClick={onClose} aria-label="Back to invoices" className="lg:hidden p-1.5 rounded-lg text-white/30 hover:text-white/60 transition-colors">
             <ChevronRight size={15} className="rotate-180" />
           </button>
           <span className="font-mono text-[12px] text-white/35 tracking-wider">{invoice.number}</span>
@@ -160,10 +160,10 @@ function InvoiceDetail({
           >
             <Download size={13} /> {pdfLoading ? "…" : "PDF"}
           </button>
-          <button onClick={() => onEdit(invoice)} className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors" title="Edit">
+          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
             <Pencil size={14} />
           </button>
-          <button onClick={() => setDeleteConfirm(true)}
+          <button onClick={() => setDeleteConfirm(true)} aria-label="Delete invoice"
             className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
             <Trash2 size={14} />
           </button>
@@ -616,7 +616,11 @@ export default function InvoicesPage() {
               const isOverdue = inv.status === "overdue";
               const isPaid = inv.status === "paid";
               return (
-                <div key={inv.id} className="px-4 py-3.5">
+                <button
+                  key={inv.id}
+                  onClick={() => { openEdit(inv); setShowModal(true); }}
+                  className="px-4 py-3.5 w-full text-left active:bg-white/[0.03] transition-colors"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-0.5">
@@ -633,7 +637,7 @@ export default function InvoicesPage() {
                       {formatCurrencyCompact(Math.round(total), currency as never)}
                     </p>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

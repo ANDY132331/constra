@@ -5,7 +5,7 @@ import {
   HardHat, Clock, ShieldCheck, FileText, BarChart3, Users, MapPin,
   Camera, Zap, Globe, ArrowRight, Check, Sparkles, CalendarDays,
   ClipboardList, Package, MessageSquare, Truck, Receipt,
-  ChevronRight, TrendingUp, Layers,
+  ChevronRight, TrendingUp, Layers, WifiOff,
 } from "lucide-react";
 
 const FEATURES = [
@@ -80,6 +80,12 @@ const FEATURES = [
     color: "#a78bfa",
     title: "15-Language Support",
     body: "Full UI localization in English, French, Spanish, Portuguese, Arabic, Punjabi, Hindi, Tagalog, Polish, and more.",
+  },
+  {
+    icon: WifiOff,
+    color: "#22d3ee",
+    title: "Works Offline",
+    body: "Clock in, log tasks, and capture safety incidents even with no signal. Changes sync automatically the moment you're back online.",
   },
 ];
 
@@ -568,6 +574,7 @@ export default function LandingPage() {
                 "Custom roles & permissions",
                 "15-language support",
                 "Smart material tracker",
+                "Works offline — syncs on reconnect",
                 "Full admin tools & audit logs",
               ].map((f) => (
                 <div key={f} className="flex items-start gap-2 text-[12px] text-white/55">

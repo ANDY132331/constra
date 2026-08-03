@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
@@ -20,12 +22,20 @@ export async function POST(req: NextRequest) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-06-24.dahlia" });
     const { email, companyId, priceId } = await req.json();
 
+    // Always use the server-configured price — ignore any caller-supplied priceId
+    // unless it exactly matches the configured value (prevents price substitution attacks)
+    const configuredPrice = process.env.STRIPE_PRO_PRICE_ID;
+    const resolvedPrice = (!priceId || priceId === configuredPrice) ? configuredPrice : null;
+    if (!resolvedPrice) {
+      return NextResponse.json({ error: "Invalid price" }, { status: 400 });
+    }
+
     const origin = req.headers.get("origin") ?? "https://constra.app";
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       customer_email: email ?? user.email,
-      line_items: [{ price: priceId ?? process.env.STRIPE_PRO_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: resolvedPrice, quantity: 1 }],
       metadata: { companyId: companyId ?? "", userId: user.id },
       success_url: `${origin}/settings?tab=billing&success=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/settings?tab=billing`,

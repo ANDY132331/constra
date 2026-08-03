@@ -1,6 +1,9 @@
-import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+
+import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { sendEmail, welcomeEmail } from "@/lib/email";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // omits confusable chars
@@ -14,7 +17,11 @@ function generateInviteCode(): string {
 // POST /api/create-company
 // Creates the auth user, company, and admin profile in one server-side transaction.
 // Must be server-side because new users cannot INSERT into companies (no company_id yet).
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // 5 account creations per IP per hour
+  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+  if (!rateLimit(`create-company:${ip}`, 5, 3_600_000)) return rateLimitResponse();
+
   const body = await request.json();
   const { email, password, firstName, lastName, companyName, currency, language, industry } = body;
 

@@ -610,8 +610,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // SW registration removed — sw.js is now a poison pill that clears stale caches.
-  // The browser will fetch the updated sw.js and self-unregister on next visit.
+  // Service worker registration is handled in components/pwa-install.tsx
 
   const up = useCallback((fn: (s: StoreState) => StoreState) => setState(fn), []);
 
@@ -660,7 +659,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const deleteWorker = useCallback((id: string) => {
     up((s) => ({ ...s, workers: s.workers.filter((w) => w.id !== id) }));
-    bg(() => getClient().from("profiles").delete().eq("id", id), "deleteWorker");
+    // Delete the Supabase auth user (and their profile) via server route — auth.admin requires service role
+    fetch("/api/delete-worker", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ workerId: id }),
+    }).catch((err) => console.error("deleteWorker API error:", err));
   }, [up]);
 
   // ── Projects ─────────────────────────────────────────────────────────────────

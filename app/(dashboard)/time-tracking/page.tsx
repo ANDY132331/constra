@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation, Download } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useStore } from "@/lib/store";
-import { CameraCapture } from "@/components/camera-capture";
+const CameraCapture = dynamic(
+  () => import("@/components/camera-capture").then((m) => ({ default: m.CameraCapture })),
+  { ssr: false },
+);
 import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
 import { runVerification } from "@/lib/verification";
 import { sendPushEvent } from "@/lib/push-client";
@@ -424,6 +428,7 @@ export default function TimeTrackingPage() {
     updateWorker(worker.id, { deviceHistory: updatedHistory });
 
     setCameraTarget(null);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([80, 30, 80]);
 
     // Run background verification silently after UI is updated
     const project = getProjectById(projectId);
@@ -449,6 +454,7 @@ export default function TimeTrackingPage() {
       });
     }
     updateWorker(workerId, { clockedIn: false, clockInTime: undefined, clockInGps: undefined });
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(60);
   }, [clockEntries, updateClockEntry, updateWorker, getWorkerById, getProjectById, companyId]);
 
   const handleEditSave = useCallback((id: string, clockIn: Date, clockOut: Date | undefined) => {
@@ -684,7 +690,7 @@ export default function TimeTrackingPage() {
             {clockedIn.length} worker{clockedIn.length !== 1 ? "s" : ""} on site · {todayTotal}h logged today
           </p>
         </div>
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           {clockEntries.filter((e) => e.clockOut).length > 0 && (
             <button
               onClick={exportCsv}
@@ -694,6 +700,7 @@ export default function TimeTrackingPage() {
               Export CSV
             </button>
           )}
+          <div className="hidden sm:flex items-center gap-2">
           {clockedIn.length > 1 && (currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
             <button
               onClick={() => setClockOutAllConfirm(true)}
@@ -716,6 +723,7 @@ export default function TimeTrackingPage() {
               Clock In
             </button>
           )}
+          </div>
         </div>
       </div>
 
@@ -1027,6 +1035,7 @@ export default function TimeTrackingPage() {
                         });
                       }}
                       className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/5 rounded transition-all"
+                      aria-label="Edit time entry"
                     >
                       <Edit2 size={11} />
                     </button>

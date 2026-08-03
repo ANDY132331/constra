@@ -1,17 +1,22 @@
 export const dynamic = "force-dynamic";
 
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const authClient = await createClient();
   const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 20 invoice emails per user per hour
+  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+  if (!rateLimit(`invoice:email:${user.id}:${ip}`, 20, 3_600_000)) return rateLimitResponse();
 
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ skipped: "no RESEND_API_KEY" });

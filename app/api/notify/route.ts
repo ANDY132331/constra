@@ -51,11 +51,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing type or companyId" }, { status: 400 });
   }
 
+  // Verify the caller belongs to the company they're notifying
+  const { data: profile } = await authClient
+    .from("profiles")
+    .select("company_id")
+    .eq("id", user.id)
+    .single();
+  if (!profile || profile.company_id !== body.companyId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const { type, companyId, data } = body as {
     type: string;
     companyId: string;
     data: Record<string, string>;
   };
+
+  // Guard against oversized free-form fields
+  const trunc = (s: unknown, max: number) =>
+    typeof s === "string" ? s.slice(0, max) : "";
+  if (data && typeof data === "object") {
+    data.senderName   = trunc(data.senderName,   100);
+    data.projectName  = trunc(data.projectName,  100);
+    data.message      = trunc(data.message,      2000);
+    data.description  = trunc(data.description,  2000);
+    data.severity     = trunc(data.severity,     50);
+    data.reporterName = trunc(data.reporterName, 100);
+    data.taskName     = trunc(data.taskName,     200);
+    data.assignerName = trunc(data.assignerName, 100);
+    data.workerName   = trunc(data.workerName,   100);
+    data.time         = trunc(data.time,         50);
+    data.dueDate      = trunc(data.dueDate,      50);
+  }
 
   const [workers, company] = await Promise.all([
     getCompanyWorkers(companyId),

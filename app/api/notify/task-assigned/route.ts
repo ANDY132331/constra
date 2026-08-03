@@ -24,6 +24,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Verify `to` belongs to the caller's company (prevents using this as an open relay)
+  const { data: callerProfile } = await authClient
+    .from("profiles")
+    .select("company_id")
+    .eq("id", user.id)
+    .single();
+  if (callerProfile) {
+    const { data: targetProfile } = await authClient
+      .from("profiles")
+      .select("id")
+      .eq("company_id", callerProfile.company_id)
+      .eq("email", to)
+      .maybeSingle();
+    if (!targetProfile) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
+
   try {
     await sendEmail({
       to,

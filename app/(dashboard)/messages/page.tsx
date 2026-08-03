@@ -97,7 +97,7 @@ export default function MessagesPage() {
   const project = projects.find((p) => p.id === selectedProjectId);
 
   return (
-    <div className="flex h-[calc(100vh-112px)] lg:max-h-[780px] overflow-hidden rounded-xl border border-white/[0.06] bg-[#111]">
+    <div className="flex h-[calc(100dvh-168px)] md:h-[calc(100dvh-176px)] lg:h-auto lg:max-h-[780px] overflow-hidden rounded-xl border border-white/[0.06] bg-[#111]">
       {/* Sidebar — project list (full-screen on mobile when open, fixed-width on desktop) */}
       <div className={`flex-shrink-0 border-e border-white/[0.06] flex flex-col
         ${mobileSidebarOpen ? "flex" : "hidden"} sm:flex

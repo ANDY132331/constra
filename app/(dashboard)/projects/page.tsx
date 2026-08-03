@@ -627,7 +627,7 @@ export default function ProjectsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="w-full rounded-xl overflow-hidden" style={{ height: 480 }}>
+                  <div className="w-full rounded-xl overflow-hidden h-[480px] max-h-[50dvh]">
                     <MapView pins={mapPins} className="w-full h-full" />
                   </div>
                   <p className="text-[11px] text-white/25 text-center">
