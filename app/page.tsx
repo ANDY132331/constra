@@ -116,7 +116,7 @@ const STEPS = [
 const STATS = [
   { value: "18+", label: "Tools in one app" },
   { value: "15", label: "Languages supported" },
-  { value: "Free", label: "During beta" },
+  { value: "5 min", label: "To get started" },
   { value: "100%", label: "Features included" },
 ];
 
@@ -163,23 +163,21 @@ export default function LandingPage() {
 
             {/* ── Left: Text ── */}
             <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-1.5 mb-6">
-                <Sparkles size={12} className="text-amber-400" />
-                <span className="text-[12px] text-amber-300 font-semibold">Free beta · Pricing starts after launch</span>
+              <div className="inline-flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-full px-4 py-1.5 mb-6">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                <span className="text-[12px] text-white/50 font-semibold">Used on job sites across North America</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-[56px] font-black tracking-tight leading-[1.05] mb-5">
-                The first app that runs{" "}
-                <span className="text-amber-400">your entire</span>
-                <br />job site
+              <h1 className="text-4xl md:text-5xl lg:text-[58px] font-black tracking-tight leading-[1.02] mb-6">
+                Stop running<br />
+                your job site<br />
+                <span className="text-amber-400">on WhatsApp.</span>
               </h1>
 
-              <p className="text-[16px] md:text-[18px] text-white/45 leading-relaxed max-w-xl lg:max-w-none mb-4">
-                Time tracking, crew management, safety logs, invoicing, scheduling, materials, equipment, punch lists, and an AI daily brief —{" "}
-                <span className="text-white/65 font-semibold">all your tools in one place</span>, built for construction.
-              </p>
-              <p className="text-[14px] text-white/30 leading-relaxed max-w-lg lg:max-w-none mb-8">
-                No more juggling WhatsApp, spreadsheets, and paper timesheets. Constra is the only platform built from the ground up to handle every part of your job site — from first clock-in to final invoice.
+              <p className="text-[16px] md:text-[17px] text-white/50 leading-relaxed max-w-xl lg:max-w-none mb-8">
+                Constra replaces every tool you're duct-taping together —{" "}
+                <span className="text-white/80 font-semibold">GPS clock-ins, safety logs, AI daily briefs, invoices, scheduling, and crew messaging</span>{" "}
+                — one app, built from the ground up for the job site.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 mb-6">
@@ -455,7 +453,7 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 bg-white/[0.04] border border-white/[0.06] rounded-full px-4 py-1.5 mb-4">
               <Layers size={12} className="text-white/40" />
-              <span className="text-[12px] text-white/40 font-semibold">Every feature · one app · free beta</span>
+              <span className="text-[12px] text-white/40 font-semibold">Every feature · one app · no add-ons</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">
               Every tool your crew needs
@@ -517,8 +515,8 @@ export default function LandingPage() {
       <section className="py-20 px-5 border-t border-white/[0.04]" id="pricing">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">Free during beta.</h2>
-            <p className="text-white/40 text-[15px]">Every feature unlocked from day one. Sign up now and lock in your early rate before pricing goes live.</p>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">Free to start.</h2>
+            <p className="text-white/40 text-[15px]">Every feature unlocked from day one. No credit card required.</p>
           </div>
 
           {/* Competitor comparison bar */}
@@ -526,7 +524,7 @@ export default function LandingPage() {
             {[
               { name: "Enterprise tools", price: "$600–$1,200/mo", note: "Per project pricing", dim: true },
               { name: "Mid-market apps", price: "$200–$500/mo", note: "Features locked behind tiers", dim: true },
-              { name: "Constra", price: "Free", note: "All features · free beta", dim: false },
+              { name: "Constra", price: "Free", note: "All features included", dim: false },
             ].map((c) => (
               <div key={c.name} className={`rounded-xl border p-4 transition-all ${c.dim ? "border-white/[0.05] bg-white/[0.02] opacity-60" : "border-amber-500/30 bg-amber-500/[0.06]"}`}>
                 <p className={`text-[11px] font-bold uppercase tracking-wide mb-1 ${c.dim ? "text-white/30" : "text-amber-400"}`}>{c.name}</p>
@@ -538,13 +536,13 @@ export default function LandingPage() {
 
           <div className="bg-[#111] border border-amber-500/25 rounded-2xl p-8 relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-wide">
-              Free Beta
+              Early Access
             </div>
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
               <div>
                 <div className="text-5xl font-black text-white mb-1">$0</div>
-                <p className="text-[13px] text-white/35">Free during beta · Pricing starts after launch</p>
+                <p className="text-[13px] text-white/35">No credit card required · Start today</p>
               </div>
               <Link
                 href="/onboarding"
