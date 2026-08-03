@@ -349,6 +349,38 @@ export default function CrewPage() {
         </div>
       </div>
 
+      {/* Invite code */}
+      {canEdit && inviteCode && (
+        <div className="mx-4 mb-4 bg-[#131110] border border-amber-500/20 rounded-xl p-4">
+          <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Invite Code</p>
+          <div className="flex items-center justify-between gap-3">
+            <code className="text-[20px] font-black font-mono tracking-[0.15em] text-amber-400">{inviteCode}</code>
+            <div className="flex items-center gap-2">
+              <button onClick={() => handleShowQR()} className="p-2 rounded-lg bg-white/[0.05] text-white/40 active:text-white/70">
+                <QrCode size={14} />
+              </button>
+              <button onClick={() => handleCopy()} className="flex items-center gap-1.5 bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-lg px-3 py-1.5 text-[12px] font-bold">
+                {copied ? <Check size={12} /> : <Copy size={12} />}
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+          </div>
+          <p className="text-[10px] text-white/25 mt-2">Share this code with new crew members to join your workspace.</p>
+        </div>
+      )}
+
+      {/* Role filter */}
+      <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden pb-0.5">
+        {(["all", "Admin", "Project Manager", "Foreman", "Worker"] as const).map((role) => (
+          <button key={role} onClick={() => setFilterRole(role)}
+            className={`px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all flex-shrink-0 ${
+              filterRole === role ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/50"
+            }`}>
+            {role === "all" ? "All" : role}
+          </button>
+        ))}
+      </div>
+
       {/* Search */}
       <div className="px-4 mb-4">
         <input
@@ -390,31 +422,37 @@ export default function CrewPage() {
                   <span className="text-[11px] text-white/30 flex-shrink-0 ml-2">Off</span>
                 )}
               </div>
-              {/* Row 3: email + edit/delete */}
+              {/* Row 3: hours + email + actions */}
               <div className="flex items-center justify-between pl-14">
-                {worker.email ? (
-                  <a href={`mailto:${worker.email}`} className="text-[11px] text-white/30 truncate max-w-[180px]">
-                    {worker.email}
-                  </a>
-                ) : <span />}
-                {canEdit && (
-                  <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
-                    <button
-                      onClick={() => openEdit(worker)}
-                      className="p-1.5 rounded-lg text-white/30 hover:text-white/70 active:bg-white/5 transition-all"
-                    >
-                      <Pencil size={13} />
+                <div className="flex items-center gap-2 min-w-0">
+                  {worker.email ? (
+                    <a href={`mailto:${worker.email}`} className="text-[11px] text-white/30 truncate max-w-[120px]">
+                      {worker.email}
+                    </a>
+                  ) : null}
+                  <span className="text-[11px] text-white/25 flex-shrink-0">
+                    {(() => { const h = getWorkerTotalHours(worker.id); return h > 0 ? `${h.toFixed(1)}h total` : null; })()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
+                  {canEdit && isAdminOrAbove(currentUser.role) && (
+                    <button onClick={() => setHoursWorker(worker)} className="p-1.5 rounded-lg text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
+                      <Clock size={13} />
                     </button>
-                    {worker.id !== currentUser.id && (
-                      <button
-                        onClick={() => handleDelete(worker.id)}
-                        className="p-1.5 rounded-lg text-white/30 hover:text-red-400 active:bg-red-500/10 transition-all"
-                      >
-                        <Trash2 size={13} />
+                  )}
+                  {canEdit && (
+                    <>
+                      <button onClick={() => openEdit(worker)} className="p-1.5 rounded-lg text-white/30 active:bg-white/5 transition-all">
+                        <Pencil size={13} />
                       </button>
-                    )}
-                  </div>
-                )}
+                      {worker.id !== currentUser.id && (
+                        <button onClick={() => handleDelete(worker.id)} className="p-1.5 rounded-lg text-white/30 active:bg-red-500/10 transition-all">
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           );

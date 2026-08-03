@@ -215,16 +215,53 @@ export default function ProjectsPage() {
         {/* Top bar */}
         <div className="px-4 pt-5 pb-3 flex items-center justify-between">
           <h1 className="text-[22px] font-black text-white">Projects</h1>
-          {isAdmin && (
+          {isForeman && (
             <button
               onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
               className="bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
             >
               <Plus size={14} />
-              New Project
+              {isAdmin ? "New Project" : "Submit Project"}
             </button>
           )}
         </div>
+
+        {/* Pending Approval — admin only */}
+        {isAdmin && pendingProjects.length > 0 && (
+          <div className="px-4 mb-3">
+            <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl p-4 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <ShieldCheck size={14} className="text-amber-400 flex-shrink-0" />
+                <p className="text-[12px] font-bold text-amber-400">
+                  {pendingProjects.length} project{pendingProjects.length !== 1 ? "s" : ""} awaiting approval
+                </p>
+              </div>
+              {pendingProjects.map((p) => {
+                const creator = workers.find((w) => w.id === p.createdBy);
+                return (
+                  <div key={p.id} className="bg-[#0d0d0d] border border-white/[0.06] rounded-lg px-3 py-3">
+                    <p className="text-[13px] font-semibold text-white truncate mb-0.5">{p.name}</p>
+                    <p className="text-[11px] text-white/40 mb-2">Submitted by {creator?.name ?? "Unknown"}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setDeleteConfirm(p.id)}
+                        className="flex-1 text-[12px] font-bold py-1.5 rounded-lg bg-red-500/10 text-red-400 active:bg-red-500/20"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => approveProject(p.id)}
+                        className="flex-1 text-[12px] font-bold py-1.5 rounded-lg bg-green-500/15 text-green-400 active:bg-green-500/25"
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Stats row */}
         <div className="px-4 mb-3 flex gap-2 overflow-x-auto no-scrollbar">

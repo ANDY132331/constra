@@ -157,24 +157,53 @@ export default function ReportsPage() {
       {/* MOBILE */}
       <div className="lg:hidden -mx-4 -mt-4 pb-6">
         {/* Header */}
-        <div className="px-4 pt-5 pb-3 flex items-center justify-between gap-3">
+        <div className="px-4 pt-5 pb-3 flex items-center justify-between gap-2">
           <div>
             <h2 className="text-[22px] font-black text-white">Reports</h2>
             <p className="text-white/35 text-[12px] mt-0.5">{periodLabel}</p>
           </div>
           {canSeeFinancials && (
-            <button
-              onClick={async () => {
-                setPdfLoading(true);
-                try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName }); }
-                finally { setPdfLoading(false); }
-              }}
-              disabled={pdfLoading}
-              className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold text-[12px] px-3 py-2 rounded-xl disabled:opacity-50"
-            >
-              <FileText size={13} />
-              {pdfLoading ? "…" : "PDF"}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={async () => {
+                  setPdfLoading(true);
+                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName }); }
+                  finally { setPdfLoading(false); }
+                }}
+                disabled={pdfLoading}
+                className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold text-[12px] px-3 py-2 rounded-xl disabled:opacity-50"
+              >
+                <FileText size={13} />
+                {pdfLoading ? "…" : "PDF"}
+              </button>
+              <div className="relative" ref={exportMenuRef}>
+                <button
+                  onClick={() => setExportMenuOpen((o) => !o)}
+                  className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.07] text-white/60 font-bold text-[12px] px-3 py-2 rounded-xl"
+                >
+                  <FileDown size={13} />
+                  Payroll
+                  <ChevronDown size={11} className={`transition-transform ${exportMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+                {exportMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 bg-[#1a1a1a] border border-white/[0.08] rounded-xl shadow-xl z-20 min-w-[180px] overflow-hidden">
+                    {PAYROLL_ADAPTERS.map((adapter) => (
+                      <button
+                        key={adapter.id}
+                        onClick={() => {
+                          exportPayroll(adapter.id, clockEntries, workers, projects, periodStart, periodEnd, periodLabel);
+                          setExportMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors text-left"
+                      >
+                        <FileDown size={12} className="text-amber-400/60" />
+                        {adapter.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
         {/* Period selector */}
@@ -214,11 +243,12 @@ export default function ReportsPage() {
                 <p className="text-[11px] text-white/25 text-center">No hours this period</p>
               </div>
             ) : (
-              <div className="flex items-end gap-1 h-24 overflow-x-auto no-scrollbar">
+              <div className="flex items-end gap-1 h-28 overflow-x-auto no-scrollbar">
                 {dailyBars.map((d, i) => {
                   const pct = (d.hours / maxBarH) * 100;
                   return (
                     <div key={i} className="flex-1 min-w-[20px] flex flex-col items-center gap-1">
+                      {d.hours > 0 && <span className="text-[8px] text-white/30 whitespace-nowrap">{d.hours}h</span>}
                       <div className="w-full rounded-t bg-amber-500/70" style={{ height: `${Math.max(pct, d.hours > 0 ? 10 : 2)}%`, minHeight: "2px" }} />
                       <span className="text-[8px] text-white/30 whitespace-nowrap">{d.label}</span>
                     </div>
@@ -242,10 +272,17 @@ export default function ReportsPage() {
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
                         <span className="text-[12px] font-semibold text-white/70 truncate max-w-[140px]">{p.name}</span>
                       </div>
-                      <span className={`text-[11px] font-bold ${over ? "text-red-400" : "text-white/45"}`}>{p.pct.toFixed(0)}%</span>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {over && <AlertCircle size={10} className="text-red-400" />}
+                        <span className={`text-[11px] font-bold ${over ? "text-red-400" : "text-white/45"}`}>{p.pct.toFixed(0)}%</span>
+                      </div>
                     </div>
                     <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.pct > 90 ? "#ef4444" : p.pct > 70 ? "#f59e0b" : p.color }} />
+                    </div>
+                    <div className="flex justify-between mt-0.5">
+                      <span className="text-[9px] text-white/25">{formatCurrencyCompact(p.spent, currency)} spent</span>
+                      <span className="text-[9px] text-white/25">{formatCurrencyCompact(p.budget, currency)} budget</span>
                     </div>
                   </div>
                 );
@@ -272,8 +309,13 @@ export default function ReportsPage() {
                         <span className="text-[12px] font-semibold text-white/80">{worker.name}</span>
                         <span className="text-[12px] font-black text-white">{worker.hoursThisPeriod}h</span>
                       </div>
-                      <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${(worker.hoursThisPeriod / maxH) * 100}%`, backgroundColor: worker.color }} />
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${(worker.hoursThisPeriod / maxH) * 100}%`, backgroundColor: worker.color }} />
+                        </div>
+                        <span className="text-[9px] text-white/25 flex-shrink-0">
+                          {worker.projectCount} project{worker.projectCount !== 1 ? "s" : ""}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -282,6 +324,59 @@ export default function ReportsPage() {
             </div>
           </div>
         )}
+        {/* Cost per project — mobile */}
+        {canSeeFinancials && (() => {
+          const projectCosts = projects.map((p) => {
+            const pEntries = periodEntries.filter((e) => e.projectId === p.id);
+            const labourHours = pEntries.reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+            const labourCost = pEntries.reduce((s, e) => {
+              const w = workers.find((w) => w.id === e.workerId);
+              const hrs = (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000;
+              return s + hrs * (w?.hourlyRate ?? 0);
+            }, 0);
+            return { ...p, labourHours, labourCost };
+          }).filter((p) => p.labourHours > 0 || p.budget > 0);
+          if (projectCosts.length === 0) return null;
+          return (
+            <div className="px-4 mt-4">
+              <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+                <p className="text-[13px] font-bold text-white mb-3">Cost per Project</p>
+                <div className="overflow-x-auto no-scrollbar">
+                  <table className="w-full text-[11px] min-w-[420px]">
+                    <thead>
+                      <tr className="border-b border-white/[0.06]">
+                        {["Project", "Hrs", "Labour", "Total", "Budget"].map((h) => (
+                          <th key={h} className="text-left text-[9px] font-bold text-white/25 uppercase tracking-widest pb-2 pr-3 last:pr-0">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projectCosts.map((p) => {
+                        const materialsEst = Math.max(0, p.spent - p.labourCost);
+                        const totalEst = p.labourCost + materialsEst;
+                        const over = p.budget > 0 && totalEst > p.budget;
+                        return (
+                          <tr key={p.id} className="border-b border-white/[0.03] last:border-0">
+                            <td className="py-2 pr-3">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                                <span className="font-semibold text-white/70 truncate max-w-[90px]">{p.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-2 pr-3 text-white/45">{p.labourHours.toFixed(1)}h</td>
+                            <td className="py-2 pr-3 text-white/60 font-semibold">{formatCurrencyCompact(Math.round(p.labourCost), currency)}</td>
+                            <td className={`py-2 pr-3 font-bold ${over ? "text-red-400" : "text-white/60"}`}>{totalEst > 0 ? formatCurrencyCompact(Math.round(totalEst), currency) : "—"}</td>
+                            <td className="py-2 text-white/30">{p.budget > 0 ? formatCurrencyCompact(p.budget, currency) : "—"}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* DESKTOP */}

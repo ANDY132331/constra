@@ -541,16 +541,74 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h2 className="text-[18px] font-bold text-white tracking-tight">Time Tracking</h2>
-        <button
-          onClick={() => requestClockIn(currentUser)}
-          className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
-        >
-          <LogIn size={14} />
-          Clock In
-        </button>
+        <div className="flex items-center gap-2">
+          {clockEntries.filter((e) => e.clockOut).length > 0 && (
+            <button onClick={exportCsv} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-lg">
+              <Download size={12} /> CSV
+            </button>
+          )}
+          {clockedIn.length > 1 && (currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
+            <button onClick={() => setClockOutAllConfirm(true)} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-lg">
+              <LogOut size={12} /> All Out
+            </button>
+          )}
+          <button
+            onClick={() => requestClockIn(currentUser)}
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
+          >
+            <LogIn size={14} />
+            Clock In
+          </button>
+        </div>
       </div>
+
+      {/* Search + project filter */}
+      <div className="flex gap-2 px-4 pb-3">
+        <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 flex-1">
+          <Search size={13} className="text-white/30 flex-shrink-0" />
+          <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
+            placeholder="Search workers…" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <CustomSelect
+          className="bg-[#131110] border border-white/[0.07] text-white/60 text-[12px] rounded-xl px-3 py-2 outline-none cursor-pointer"
+          value={selectedProject}
+          onChange={(v) => setSelectedProject(v)}
+          options={[{ value: "all", label: "All" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]}
+        />
+      </div>
+
+      {/* Overtime alert */}
+      {(() => {
+        const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
+        const ot = workers.filter((w) => {
+          const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);
+          const todayHrs = wEntries.filter((e) => e.clockIn >= todayStart).reduce((s,e) => s + (e.clockOut!.getTime()-e.clockIn.getTime())/3600000, 0);
+          const weekHrs = wEntries.filter((e) => e.clockIn >= weekStart).reduce((s,e) => s + (e.clockOut!.getTime()-e.clockIn.getTime())/3600000, 0);
+          return todayHrs > 8 || weekHrs > 44;
+        });
+        if (ot.length === 0) return null;
+        return (
+          <div className="mx-4 mb-3 flex items-center gap-2 bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[12px] font-semibold px-4 py-2.5 rounded-xl">
+            <AlertTriangle size={13} className="flex-shrink-0 text-amber-400" />
+            Overtime: {ot.map(w => w.name).join(", ")}
+          </div>
+        );
+      })()}
+
+      {/* Flag banner */}
+      {(currentUser.role === "Admin" || currentUser.role === "Project Manager") && (() => {
+        const flagged = clockEntries.filter((e) => e.verificationFlags && e.verificationFlags.length > 0);
+        if (flagged.length === 0) return null;
+        const hasHigh = flagged.some((e) => e.verificationFlags!.some((f) => f.severity === "high"));
+        return (
+          <div className={`mx-4 mb-3 flex items-center gap-2 text-[12px] font-semibold px-4 py-2.5 rounded-xl border ${hasHigh ? "bg-red-500/[0.06] border-red-500/25 text-red-300" : "bg-amber-500/[0.06] border-amber-500/20 text-amber-300"}`}>
+            <AlertTriangle size={13} className="flex-shrink-0" />
+            {flagged.length} clock-in{flagged.length !== 1 ? "s" : ""} flagged — tap row for details
+          </div>
+        );
+      })()}
 
       {/* Stats row */}
       <div className="flex gap-3 px-4 pb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
@@ -642,38 +700,74 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Recent Entries */}
-      {clockEntries.length > 0 && (
+      {allEntries.length > 0 && (
         <div className="px-4">
-          <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5">Recent Entries</p>
+          <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5">Entries</p>
           <div className="bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden">
-            {[...clockEntries]
-              .sort((a, b) => b.clockIn.getTime() - a.clockIn.getTime())
-              .slice(0, 10)
-              .map((entry, idx, arr) => {
-                const worker = getWorkerById(entry.workerId);
-                const project = getProjectById(entry.projectId);
-                if (!worker) return null;
-                return (
-                  <div key={entry.id} className={`flex items-center gap-3 px-4 py-3 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""}`}>
+            {allEntries.map((entry, idx, arr) => {
+              const worker = getWorkerById(entry.workerId);
+              const project = getProjectById(entry.projectId);
+              if (!worker) return null;
+              const isLive = !!(entry as { live?: boolean }).live;
+              const entryFlags: VerificationFlag[] = (entry as { verificationFlags?: VerificationFlag[] }).verificationFlags || [];
+              const worstSev = entryFlags.some(f => f.severity === "high") ? "high" : entryFlags.some(f => f.severity === "medium") ? "medium" : entryFlags.length > 0 ? "low" : null;
+              const flagCol = worstSev === "high" ? "text-red-400" : worstSev === "medium" ? "text-amber-400" : "text-blue-400/70";
+              const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;
+              const hrs = entry.clockOut ? ((entry.clockOut.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1) : null;
+              return (
+                <div key={entry.id} className={`px-4 py-3 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""} ${worstSev === "high" ? "bg-red-500/[0.03]" : ""}`}>
+                  <div className="flex items-center gap-3">
                     <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[10px] font-bold"
                       style={{ backgroundColor: worker.color + "25", color: worker.color }}>
-                      {worker.photo
-                        ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
-                        : worker.initials}
+                      {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold text-white/80 truncate">{worker.name}</p>
+                      <div className="flex items-center gap-1.5">
+                        {isLive && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0" />}
+                        <p className="text-[12px] font-semibold text-white/80 truncate">{worker.name}</p>
+                        {worstSev && (
+                          <button onClick={() => setFlagDetailId(flagDetailId === entry.id ? null : entry.id)} className={`flex-shrink-0 ${flagCol}`}>
+                            <AlertTriangle size={11} />
+                          </button>
+                        )}
+                        {hasGps && (
+                          <a href={`https://www.google.com/maps?q=${(entry as { gps?: GpsLocation }).gps!.lat},${(entry as { gps?: GpsLocation }).gps!.lng}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-green-400/60 flex-shrink-0">
+                            <MapPin size={10} />
+                          </a>
+                        )}
+                      </div>
                       <p className="text-[10px] text-white/35 truncate">{project?.name ?? "—"}</p>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-[11px] text-green-400">{fmt(entry.clockIn)}</p>
-                      <p className={`text-[11px] ${entry.clockOut ? "text-white/40" : "text-amber-400"}`}>
-                        {entry.clockOut ? fmt(entry.clockOut) : "Active"}
+                    <div className="text-right flex-shrink-0 flex items-center gap-2">
+                      <div>
+                        <p className="text-[11px] text-green-400">{fmt(entry.clockIn)}</p>
+                        <p className={`text-[11px] ${entry.clockOut ? "text-white/40" : "text-amber-400"}`}>
+                          {entry.clockOut ? fmt(entry.clockOut) : "Live"}
+                        </p>
+                      </div>
+                      <p className={`text-[12px] font-bold w-10 text-right ${entry.clockOut ? "text-white/60" : "text-amber-400"}`}>
+                        {hrs ? `${hrs}h` : elapsed(entry.clockIn)}
                       </p>
+                      {!isLive && (
+                        <button onClick={() => { const w = getWorkerById(entry.workerId); setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: w?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut }); }} className="text-white/20 active:text-white/60">
+                          <Edit2 size={12} />
+                        </button>
+                      )}
                     </div>
                   </div>
-                );
-              })}
+                  {flagDetailId === entry.id && entryFlags.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-white/[0.05] space-y-1">
+                      {entryFlags.map((f, i) => (
+                        <div key={i} className="flex items-start gap-1.5">
+                          <AlertTriangle size={10} className={`flex-shrink-0 mt-0.5 ${f.severity === "high" ? "text-red-400" : f.severity === "medium" ? "text-amber-400" : "text-blue-400/70"}`} />
+                          <p className="text-[10px] text-white/40">{f.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

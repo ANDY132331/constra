@@ -736,7 +736,7 @@ export default function DashboardPage() {
 
       {/* Recent activity */}
       {activityFeed.length > 0 && (
-        <div className="px-4 pt-5 pb-2">
+        <div className="px-4 pt-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-[14px] font-black text-white">Recent Activity</h3>
             <div className="flex items-center gap-1 text-[10px] text-white/25">
@@ -763,6 +763,135 @@ export default function DashboardPage() {
                 </Link>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Upcoming tasks */}
+      {projects.flatMap((p) => p.tasks.filter((t) => t.status !== "completed")).length > 0 && (
+        <div className="px-4 pt-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[14px] font-black text-white">Upcoming Tasks</h3>
+            <Link href="/tasks" className="text-[11px] text-amber-400/70 flex items-center gap-1">
+              All <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
+            {projects.flatMap((p) =>
+              p.tasks.filter((t) => t.status !== "completed").map((t) => ({ ...t, projectName: p.name, projectColor: p.color }))
+            ).slice(0, 5).map((task) => {
+              const worker = getWorkerById(task.workerId);
+              const isLate = task.endDate < now && task.progress < 100;
+              return (
+                <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-3.5 active:bg-white/[0.03]">
+                  <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: task.projectColor }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] text-white/80 font-semibold truncate">{task.name}</p>
+                    <p className="text-[10px] text-white/30 truncate">{task.projectName} · {worker?.name}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className={`text-[11px] font-semibold ${isLate ? "text-red-400" : "text-white/40"}`}>
+                      {task.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                    </p>
+                    <p className="text-[10px] text-white/25">{task.progress}%</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Priority Issues */}
+      {openPunchItems.length > 0 && (
+        <div className="px-4 pt-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[14px] font-black text-white">Priority Issues</h3>
+            <Link href="/punch-list" className="text-[11px] text-amber-400/70 flex items-center gap-1">
+              Punch list <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
+            {openPunchItems.sort((a, b) => a.priority === "high" ? -1 : b.priority === "high" ? 1 : 0).slice(0, 4).map((item) => {
+              const prioColors: Record<string, string> = { high: "text-red-400 bg-red-500/12", medium: "text-amber-400 bg-amber-500/12", low: "text-white/40 bg-white/[0.06]" };
+              return (
+                <Link key={item.id} href="/punch-list" className="flex items-center gap-3 p-3.5 active:bg-white/[0.03]">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] text-white/80 font-semibold truncate">{item.title}</p>
+                    <p className="text-[10px] text-white/30 truncate">{getProjectById(item.projectId)?.name ?? item.projectId}</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${prioColors[item.priority]}`}>
+                    {item.priority.toUpperCase()}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Budget Health — mobile */}
+      {canSeeFinancials && activeProjects.some((p) => p.budget > 0) && (
+        <div className="px-4 pt-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[14px] font-black text-white">Budget Health</h3>
+            <Link href="/projects" className="text-[11px] text-amber-400/70 flex items-center gap-1">
+              Projects <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 space-y-4">
+            {activeProjects.filter((p) => p.budget > 0).map((p) => {
+              const committed = p.committed ?? p.spent;
+              const forecast = p.forecast ?? p.spent;
+              const variance = p.budget - forecast;
+              const overBudget = variance < 0;
+              const spentPct = Math.min(100, (p.spent / p.budget) * 100);
+              const commitPct = Math.min(100, (committed / p.budget) * 100);
+              const forecastPct = Math.min(100, (forecast / p.budget) * 100);
+              return (
+                <div key={p.id}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                      <span className="text-[12px] font-semibold text-white/70 truncate max-w-[130px]">{p.name}</span>
+                    </div>
+                    <span className={`text-[11px] font-bold ${overBudget ? "text-red-400" : "text-green-400"}`}>
+                      {overBudget ? "▲" : "▼"} {formatCurrencyCompact(Math.abs(variance), currency as never)} {overBudget ? "over" : "under"}
+                    </span>
+                  </div>
+                  <div className="relative h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                    <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${commitPct}%`, background: p.color + "50" }} />
+                    <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${spentPct}%`, background: p.color }} />
+                    <div className="absolute inset-y-0 w-0.5 rounded-full" style={{ left: `${Math.min(99, forecastPct)}%`, background: overBudget ? "#ef4444" : "rgba(255,255,255,0.5)" }} />
+                  </div>
+                  <div className="flex justify-between mt-1 text-[9px] text-white/25">
+                    <span>Spent {formatCurrencyCompact(p.spent, currency as never)}</span>
+                    <span>Budget {formatCurrencyCompact(p.budget, currency as never)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Weekly Summary — mobile */}
+      {canSeeFinancials && (
+        <div className="px-4 pt-5 pb-2">
+          <h3 className="text-[14px] font-black text-white mb-3">Weekly Summary</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "Hours This Week",   value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, sub: `${clockedInWorkers.length} workers active` },
+              { label: "Active Projects",   value: activeProjects.length, sub: `${upcomingProjects.length} upcoming` },
+              { label: "Open Items",        value: openPunchItems.length, sub: `${highPriority.length} high priority` },
+              { label: "Revenue Collected", value: formatCurrencyCompact(totalPaid, currency as never), sub: `${formatCurrencyCompact(totalOutstanding, currency as never)} outstanding` },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-1">{stat.label}</p>
+                <p className="text-[20px] font-black text-white">{stat.value}</p>
+                <p className="text-[10px] text-white/30 mt-0.5">{stat.sub}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}

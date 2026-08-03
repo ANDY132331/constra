@@ -193,8 +193,17 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
           </div>
         </div>
 
+        {/* Search */}
+        <div className="px-4 mb-3">
+          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-2.5">
+            <Search size={13} className="text-white/30 flex-shrink-0" />
+            <input className="bg-transparent text-[13px] text-white/70 placeholder:text-white/30 outline-none flex-1"
+              placeholder="Search incidents…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+        </div>
+
         {/* Type filter tabs */}
-        <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+        <div className="px-4 mb-2 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
           {(["all", "near-miss", "injury", "property-damage", "environmental"] as const).map((type) => {
             const isAll = type === "all";
             const label = isAll ? "All" : TYPE_CONFIG[type].label;
@@ -212,6 +221,18 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               </button>
             );
           })}
+        </div>
+
+        {/* Severity filter */}
+        <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+          {(["all", "critical", "high", "medium", "low"] as const).map((sev) => (
+            <button key={sev} onClick={() => setSeverityFilter(sev)}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap flex-shrink-0 transition-all ${
+                severityFilter === sev ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/50"
+              }`}>
+              {sev === "all" ? "All Severity" : sev.charAt(0).toUpperCase() + sev.slice(1)}
+            </button>
+          ))}
         </div>
 
         {/* Incidents list */}
@@ -256,7 +277,12 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                 {project && (
                   <p className="text-[12px] text-amber-400/80 mb-1.5">{project.name}</p>
                 )}
-                <p className="text-[13px] text-white/70 mb-2.5 leading-relaxed line-clamp-2">{incident.description}</p>
+                <p className="text-[13px] text-white/70 mb-1.5 leading-relaxed line-clamp-2">{incident.description}</p>
+                {incident.actionTaken && (
+                  <p className="text-[11px] text-white/35 mb-2 leading-relaxed line-clamp-2">
+                    <span className="text-white/25 font-bold">Action: </span>{incident.actionTaken}
+                  </p>
+                )}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 text-[11px] text-white/35 min-w-0">
                     {reporter && <span className="truncate">{reporter.name}</span>}
