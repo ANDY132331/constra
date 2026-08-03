@@ -43,7 +43,7 @@ const FAQS = [
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-[#080808] text-white flex flex-col lg:flex-row">
+    <div className="h-[100dvh] bg-[#080808] text-white flex flex-col lg:flex-row overflow-hidden">
 
       {/* ── Left panel (desktop only) ── */}
       <div className="hidden lg:flex flex-col w-[380px] xl:w-[420px] flex-shrink-0 relative overflow-hidden bg-[#0a0800]">
