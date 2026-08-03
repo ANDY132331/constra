@@ -122,27 +122,100 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage:
-            "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
+    <div className="min-h-screen bg-[#080808] flex flex-col lg:flex-row">
 
-      <div className="w-full max-w-sm relative">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
-            <HardHat size={22} className="text-black" />
+      {/* ── Left panel (desktop only) ── */}
+      <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden bg-[#0a0800]">
+        {/* Blueprint grid */}
+        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(rgba(245,158,11,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,0.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+        {/* Amber glow */}
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-500/10 blur-[140px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-amber-600/5 blur-[100px] rounded-full pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col h-full p-12">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
+              <HardHat size={22} className="text-black" />
+            </div>
+            <span className="text-xl font-black text-white tracking-tight">Constra</span>
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Constra</h1>
-            <p className="text-[10px] text-white/30 tracking-widest uppercase">Workforce OS</p>
+
+          {/* Main copy */}
+          <div className="flex-1 flex flex-col justify-center">
+            {/* Construction silhouette illustration */}
+            <div className="flex items-end gap-3 mb-10 opacity-20">
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:40}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:72}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:56}} />
+              <div className="w-1 bg-amber-400 rounded-t" style={{height:32}} />
+              <div className="w-3 bg-amber-500 rounded-t" style={{height:96}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:64}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:48}} />
+              <div className="w-1 bg-amber-400 rounded-t" style={{height:80}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:56}} />
+              <div className="w-3 bg-amber-500 rounded-t" style={{height:112}} />
+              <div className="w-2 bg-amber-500 rounded-t" style={{height:72}} />
+              <div className="w-1 bg-amber-400 rounded-t" style={{height:40}} />
+            </div>
+
+            <h2 className="text-[38px] font-black text-white leading-[1.05] tracking-tight mb-4">
+              Your crew.<br />
+              Your projects.<br />
+              <span className="text-amber-400">All under control.</span>
+            </h2>
+            <p className="text-white/40 text-[15px] leading-relaxed max-w-xs mb-10">
+              The job site app that actually works — GPS clock-ins, safety logs, AI briefs, and invoices. One login.
+            </p>
+
+            {/* Feature pills */}
+            <div className="space-y-3">
+              {[
+                { icon: "📍", text: "GPS-verified clock-ins with live selfie" },
+                { icon: "🛡️", text: "Safety incident logs on the spot" },
+                { icon: "⚡", text: "AI daily brief every morning" },
+                { icon: "📄", text: "Invoices & payroll exports in one tap" },
+              ].map((f) => (
+                <div key={f.text} className="flex items-center gap-3">
+                  <span className="text-[16px]">{f.icon}</span>
+                  <span className="text-[13px] text-white/50">{f.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom stat bar */}
+          <div className="flex items-center gap-6 pt-6 border-t border-white/[0.06]">
+            {[
+              { v: "18+", l: "Tools built in" },
+              { v: "15", l: "Languages" },
+              { v: "100%", l: "Features free" },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="text-[18px] font-black text-amber-400">{s.v}</div>
+                <div className="text-[10px] text-white/25 font-medium">{s.l}</div>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
+
+      {/* ── Right panel: form ── */}
+      <div className="flex-1 lg:max-w-[440px] flex items-center justify-center p-6 relative">
+        {/* Mobile background */}
+        <div className="absolute inset-0 lg:hidden opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(245,158,11,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,1) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+
+        <div className="w-full max-w-sm relative">
+          {/* Logo (mobile only) */}
+          <div className="flex items-center gap-3 mb-8 justify-center lg:hidden">
+            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
+              <HardHat size={22} className="text-black" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white tracking-tight">Constra</h1>
+              <p className="text-[10px] text-white/30 tracking-widest uppercase">Workforce OS</p>
+            </div>
+          </div>
 
         <div className="bg-[#111111] border border-white/[0.07] rounded-2xl p-7">
           {/* Tabs */}
@@ -288,7 +361,7 @@ function LoginForm() {
           {[
             { icon: WifiOff, label: "Works offline" },
             { icon: MapPin, label: "GPS verified" },
-            { icon: Zap, label: "Free during beta" },
+            { icon: Zap, label: "Get started free" },
           ].map(({ icon: Icon, label }) => (
             <div key={label} className="flex items-center gap-1.5 text-[11px] text-white/20">
               <Icon size={10} />
@@ -300,6 +373,7 @@ function LoginForm() {
           <Globe size={10} />
           Available worldwide in any currency
         </p>
+        </div>
       </div>
     </div>
   );
