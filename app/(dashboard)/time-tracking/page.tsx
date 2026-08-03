@@ -502,16 +502,24 @@ export default function TimeTrackingPage() {
   };
 
   const allEntries = [
-    ...clockedIn.map((w) => ({
-      id: `live-${w.id}`,
-      workerId: w.id,
-      projectId: w.projectIds[0] ?? "",
-      clockIn: w.clockInTime ?? new Date(),
-      clockOut: undefined as Date | undefined,
-      live: true,
-    })),
+    ...clockedIn.map((w) => {
+      const activeEntry = [...clockEntries].reverse().find((e) => e.workerId === w.id && !e.clockOut);
+      return {
+        id: `live-${w.id}`,
+        workerId: w.id,
+        projectId: w.projectIds[0] ?? "",
+        clockIn: w.clockInTime ?? new Date(),
+        clockOut: undefined as Date | undefined,
+        live: true,
+        verificationFlags: activeEntry?.verificationFlags,
+      };
+    }),
     ...clockEntries
-      .filter((e) => e.clockOut && e.clockOut.getTime() !== 0)
+      .filter((e) => {
+        if (e.clockOut && e.clockOut.getTime() !== 0) return true;
+        // Orphaned active entry: no clockOut but worker is no longer clocked in — show in table
+        return !clockedIn.some((w) => w.id === e.workerId);
+      })
       .sort((a, b) => b.clockIn.getTime() - a.clockIn.getTime()),
   ].filter((e) => {
     const worker = getWorkerById(e.workerId);
@@ -963,7 +971,7 @@ export default function TimeTrackingPage() {
               : null;
             const isLive = !!(entry as { live?: boolean }).live;
             const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;
-            const flags: VerificationFlag[] = (!isLive && (entry as { verificationFlags?: VerificationFlag[] }).verificationFlags) || [];
+            const flags: VerificationFlag[] = (entry as { verificationFlags?: VerificationFlag[] }).verificationFlags || [];
             const worstSeverity = flags.some((f) => f.severity === "high")
               ? "high"
               : flags.some((f) => f.severity === "medium")

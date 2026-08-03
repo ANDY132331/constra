@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HardHat, Phone, Clock, ArrowRight, ChevronRight, ShieldCheck, Zap, Globe } from "lucide-react";
+import { HardHat, Phone, Mail, Clock, ArrowRight, ChevronRight, ShieldCheck, Zap, Globe } from "lucide-react";
 
 export const metadata = {
   title: "Support — Constra",
@@ -140,24 +140,41 @@ export default function SupportPage() {
             <p className="text-white/40 text-[14px]">Call us or browse the FAQ below — most answers are there.</p>
           </div>
 
-          {/* Phone card */}
-          <a
-            href="tel:+16723389890"
-            className="group flex items-center gap-5 bg-[#111] border border-amber-500/20 hover:border-amber-500/40 rounded-2xl p-6 mb-10 transition-all hover:bg-[#141208]"
-          >
-            <div className="w-14 h-14 bg-amber-500/15 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
-              <Phone size={24} className="text-amber-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Call us</p>
-              <p className="text-[26px] font-black text-white tracking-tight leading-none">672-338-9890</p>
-              <p className="text-[12px] text-white/35 mt-1.5 flex items-center gap-1.5">
-                <Clock size={11} />
-                Mon – Fri · 8am – 6pm PT
-              </p>
-            </div>
-            <ArrowRight size={18} className="text-amber-400/40 group-hover:text-amber-400 transition-colors flex-shrink-0" />
-          </a>
+          {/* Contact cards */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-10">
+            <a
+              href="tel:+16723389890"
+              className="group flex items-center gap-4 bg-[#111] border border-amber-500/20 hover:border-amber-500/40 rounded-2xl p-5 transition-all hover:bg-[#141208]"
+            >
+              <div className="w-12 h-12 bg-amber-500/15 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/20 transition-colors">
+                <Phone size={20} className="text-amber-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Call us</p>
+                <p className="text-[20px] font-black text-white tracking-tight leading-none">672-338-9890</p>
+                <p className="text-[11px] text-white/35 mt-1 flex items-center gap-1">
+                  <Clock size={10} />
+                  Mon – Fri · 8am – 6pm PT
+                </p>
+              </div>
+              <ArrowRight size={16} className="text-amber-400/40 group-hover:text-amber-400 transition-colors flex-shrink-0" />
+            </a>
+
+            <a
+              href="mailto:support@getconstra.com"
+              className="group flex items-center gap-4 bg-[#111] border border-white/[0.06] hover:border-amber-500/20 rounded-2xl p-5 transition-all hover:bg-[#141208]"
+            >
+              <div className="w-12 h-12 bg-white/[0.04] rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/10 transition-colors">
+                <Mail size={20} className="text-white/40 group-hover:text-amber-400 transition-colors" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Email us</p>
+                <p className="text-[15px] font-black text-white tracking-tight leading-none truncate">support@getconstra.com</p>
+                <p className="text-[11px] text-white/35 mt-1">We reply within 1 business day</p>
+              </div>
+              <ArrowRight size={16} className="text-white/20 group-hover:text-amber-400 transition-colors flex-shrink-0" />
+            </a>
+          </div>
 
           {/* FAQ */}
           <div>
@@ -184,15 +201,24 @@ export default function SupportPage() {
             <div className="mt-8 p-5 bg-[#0f0f0f] border border-white/[0.06] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <p className="text-[13px] font-bold text-white/70">Still have a question?</p>
-                <p className="text-[12px] text-white/35">Call us directly and we'll sort it out.</p>
+                <p className="text-[12px] text-white/35">Reach us by phone or email — we'll sort it out.</p>
               </div>
-              <a
-                href="tel:+16723389890"
-                className="flex-shrink-0 flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-5 py-2.5 rounded-xl transition-colors"
-              >
-                <Phone size={13} />
-                672-338-9890
-              </a>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <a
+                  href="mailto:support@getconstra.com"
+                  className="flex items-center gap-2 bg-white/[0.06] hover:bg-white/[0.1] text-white/60 hover:text-white font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors"
+                >
+                  <Mail size={13} />
+                  Email
+                </a>
+                <a
+                  href="tel:+16723389890"
+                  className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors"
+                >
+                  <Phone size={13} />
+                  Call
+                </a>
+              </div>
             </div>
           </div>
 
