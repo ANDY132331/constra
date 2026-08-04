@@ -68,7 +68,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
-      <body className="h-full bg-[#0a0a0a] text-foreground overflow-hidden">
+      <body className="bg-[#0a0a0a] text-foreground">
         <StoreProvider>
           {children}
           <PwaInstall />
