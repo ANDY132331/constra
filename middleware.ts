@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/", "/demo", "/login", "/onboarding", "/auth", "/api/join", "/api/create-company", "/terms", "/privacy", "/reset-password", "/share/", "/api/share/"];
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Allow through if Supabase isn't configured (local dev without env vars).
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return NextResponse.next();
@@ -34,7 +34,7 @@ export async function proxy(request: NextRequest) {
   );
 
   // Refresh the session so tokens don't expire mid-session.
-  // IMPORTANT: must use getUser() not getSession() in proxy — getSession() is not safe here.
+  // IMPORTANT: must use getUser() not getSession() in middleware — getSession() is not safe here.
   const {
     data: { user },
   } = await supabase.auth.getUser();

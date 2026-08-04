@@ -25,9 +25,8 @@ function fmt(n: number) {
 }
 
 export async function GET(request: Request) {
-  // Protect the endpoint in production
   const secret = request.headers.get("authorization");
-  if (process.env.NODE_ENV === "production" && secret !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || secret !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

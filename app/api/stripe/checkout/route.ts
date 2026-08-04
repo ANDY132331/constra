@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
       customer_email: email ?? user.email,
       line_items: [{ price: resolvedPrice, quantity: 1 }],
       metadata: { companyId: companyId ?? "", userId: user.id },
-      success_url: `${origin}/settings?tab=billing&success=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/settings?tab=billing`,
+      success_url: `${origin}/settings?success=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/settings`,
       allow_promotion_codes: true,
     });
 
