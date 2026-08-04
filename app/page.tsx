@@ -126,11 +126,11 @@ export default function LandingPage() {
       {/* ── Nav ─────────────────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#080808]/80 backdrop-blur-xl border-b border-white/[0.05]">
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-              <HardHat size={16} className="text-black" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-amber-500 rounded-md flex items-center justify-center shadow-sm shadow-amber-500/30">
+              <HardHat size={13} className="text-black" strokeWidth={2.5} />
             </div>
-            <span className="text-[17px] font-black tracking-tight">Constra</span>
+            <span className="text-[16px] font-black tracking-tight">Constra</span>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -387,6 +387,31 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Photo strip ─────────────────────────────────────────────────────── */}
+      <section className="py-14 px-5 border-t border-white/[0.04] overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-center text-[11px] font-bold text-white/20 uppercase tracking-widest mb-8">Built for the field</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { src: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=75", alt: "Workers on scaffolding" },
+              { src: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=75", alt: "Construction worker with hardhat" },
+              { src: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=800&q=75", alt: "Job site overview" },
+              { src: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&q=75", alt: "Building under construction" },
+            ].map((photo, i) => (
+              <div key={i} className="aspect-[4/3] rounded-xl overflow-hidden relative group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  className="w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity duration-500 scale-105 group-hover:scale-100 transition-transform"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Trades ──────────────────────────────────────────────────────────── */}
       <section className="py-12 px-5 border-t border-white/[0.04]">
         <div className="max-w-5xl mx-auto">
@@ -629,7 +654,7 @@ export default function LandingPage() {
               <HardHat size={12} className="text-black" />
             </div>
             <span className="text-[14px] font-bold">Constra</span>
-            <span className="text-white/20 text-[12px]">· Workforce OS</span>
+            <span className="text-white/20 text-[12px]">· Field Workforce Management</span>
           </div>
           <div className="flex items-center gap-5 text-[12px] text-white/30">
             <Link href="/login" className="hover:text-white/60 transition-colors">Sign In</Link>

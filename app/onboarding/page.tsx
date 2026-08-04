@@ -688,7 +688,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               </div>
               <div>
                 <h1 className="text-2xl font-black text-white tracking-tight">Constra</h1>
-                <p className="text-[10px] text-white/30 tracking-widest uppercase">Workforce OS</p>
+                <p className="text-[10px] text-white/30 tracking-widest uppercase">Field Workforce Management</p>
               </div>
             </div>
 
