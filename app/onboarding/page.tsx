@@ -176,7 +176,7 @@ export default function OnboardingPage() {
     setLoading(false);
     if (signInErr) { setError(signInErr.message); return; }
 
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   }
 
   async function handleJoin() {
@@ -220,7 +220,7 @@ export default function OnboardingPage() {
     setLoading(false);
     if (signInErr) { setError(signInErr.message); return; }
 
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   }
 
   // ── Step indicator ──

@@ -65,7 +65,7 @@ function LoginForm() {
     const supabase = getClient();
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) { setLoading(false); setError(err.message); return; }
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   }
 
   async function handleForgotPassword() {
@@ -118,7 +118,7 @@ function LoginForm() {
     });
     setLoading(false);
     if (signInErr) { setError(signInErr.message); return; }
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   }
 
   return (
