@@ -28,6 +28,7 @@ function fmt(date: Date) {
 // Edit entry modal
 type EditEntryState = {
   id: string;
+  workerId?: string;
   workerName: string;
   clockIn: Date;
   clockOut: Date | undefined;
