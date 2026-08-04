@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     if (!rateLimit(key, 30, 60_000)) return rateLimitResponse();
 
     webPush.setVapidDetails(
-      process.env.VAPID_SUBJECT ?? "mailto:admin@getconstra.com",
+      (() => { const s = process.env.VAPID_SUBJECT; return (!s || s.includes("gmail")) ? "mailto:admin@getconstra.com" : s; })(),
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "",
       process.env.VAPID_PRIVATE_KEY ?? ""
     );

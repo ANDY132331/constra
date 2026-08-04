@@ -6,8 +6,10 @@ function getResend() {
   return _resend;
 }
 
-export const FROM = process.env.EMAIL_FROM ?? "Constra <notifications@getconstra.com>";
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://getconstra.com";
+const _from = process.env.EMAIL_FROM;
+export const FROM = (!_from || _from.includes("constra.app")) ? "Constra <notifications@getconstra.com>" : _from;
+const _appUrl = process.env.NEXT_PUBLIC_APP_URL;
+export const APP_URL = (!_appUrl || _appUrl.includes("localhost")) ? "https://getconstra.com" : _appUrl;
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
