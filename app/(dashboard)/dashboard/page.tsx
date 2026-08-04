@@ -264,8 +264,11 @@ export default function DashboardPage() {
   const openPunchItems = punchItems.filter((p) => p.status !== "resolved");
   const highPriority = openPunchItems.filter((p) => p.priority === "high");
 
+  const weekStart = new Date(now);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(now.getDate() - now.getDay());
   const weeklyHours = clockEntries
-    .filter((e) => e.clockOut)
+    .filter((e) => e.clockOut && e.clockIn >= weekStart)
     .reduce((sum, e) => sum + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
   const todayActiveHours = clockedInWorkers.reduce((sum, w) => {
     if (!w.clockInTime) return sum;

@@ -137,7 +137,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
           </div>
           <div className="flex flex-col leading-tight">
             <span className="font-bold text-white text-[15px] tracking-tight">Constra</span>
-            <span className="text-[10px] text-white/30 font-medium tracking-wide">WORKFORCE OS</span>
+            <span className="text-[10px] text-white/30 font-medium tracking-wide">Field Management</span>
           </div>
         </div>
         <button
