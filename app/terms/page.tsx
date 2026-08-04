@@ -63,7 +63,7 @@ export default function TermsPage() {
     },
     {
       title: "15. Contact",
-      body: `If you have questions about these Terms, please contact us at hello@constra.app or through the in-app support channel.`,
+      body: `If you have questions about these Terms, please contact us at hello@getconstra.com or through the in-app support channel.`,
     },
   ];
 

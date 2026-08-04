@@ -235,7 +235,7 @@ export default function OGImage() {
               fontFamily: "system-ui, sans-serif",
             }}
           >
-            constra.app
+            getconstra.com
           </span>
           <div
             style={{

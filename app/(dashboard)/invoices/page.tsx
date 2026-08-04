@@ -442,6 +442,7 @@ export default function InvoicesPage() {
   const [editId, setEditId]           = useState<string | null>(null);
   const [form, setForm]               = useState<InvForm>(blank);
   const [selectedId, setSelectedId]   = useState<string | null>(invoices[0]?.id ?? null);
+  const [mobilePreviewId, setMobilePreviewId] = useState<string | null>(null);
 
   const openEdit = (invoice: Invoice) => {
     setEditId(invoice.id);
@@ -618,7 +619,7 @@ export default function InvoicesPage() {
               return (
                 <button
                   key={inv.id}
-                  onClick={() => { openEdit(inv); setShowModal(true); }}
+                  onClick={() => setMobilePreviewId(inv.id)}
                   className="px-4 py-3.5 w-full text-left active:bg-white/[0.03] transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -890,6 +891,27 @@ export default function InvoicesPage() {
           </div>
         </div>
       )}
+
+      {/* MOBILE PREVIEW MODAL */}
+      {mobilePreviewId && (() => {
+        const inv = invoices.find((i) => i.id === mobilePreviewId);
+        if (!inv) return null;
+        return (
+          <div className="lg:hidden fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col">
+            <InvoiceDetail
+              invoice={inv}
+              currency={currency}
+              companyName={companyName}
+              companyAddress={companyAddress ?? ""}
+              companyLogo={companyLogo ?? ""}
+              onUpdate={(id, u) => updateInvoice(id, u)}
+              onDelete={(id) => { deleteInvoice(id); setMobilePreviewId(null); }}
+              onEdit={(invoice) => { setMobilePreviewId(null); openEdit(invoice); setShowModal(true); }}
+              onClose={() => setMobilePreviewId(null)}
+            />
+          </div>
+        );
+      })()}
     </>
   );
 }

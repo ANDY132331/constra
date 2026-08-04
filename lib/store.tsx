@@ -172,6 +172,7 @@ type StoreCtx = StoreState & {
   addDocumentVersion: (id: string, dataUrl: string, sizeBytes: number, uploadedById: string, note?: string) => void;
 
   addMessage: (m: Omit<Message, "id">) => void;
+  deleteMessage: (id: string) => void;
 
   addDailyReport: (r: Omit<DailyReport, "id" | "createdAt">) => void;
   updateDailyReport: (id: string, u: Partial<DailyReport>) => void;
@@ -1093,6 +1094,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [up]);
 
+  const deleteMessage = useCallback((id: string) => {
+    up((s) => ({ ...s, messages: s.messages.filter((m) => m.id !== id) }));
+    bg(() => getClient().from("crew_messages").delete().eq("id", id), "deleteMessage");
+  }, [up]);
+
   // ── Daily Reports ─────────────────────────────────────────────────────────────
 
   const addDailyReport = useCallback((r: Omit<DailyReport, "id" | "createdAt">) => {
@@ -1263,7 +1269,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addMaterialEntry, deleteMaterialEntry,
       addBlueprintPin, updateBlueprintPin, deleteBlueprintPin,
       addDocument, deleteDocument, addDocumentVersion,
-      addMessage,
+      addMessage, deleteMessage,
       addDailyReport, updateDailyReport, deleteDailyReport,
       addChangeOrder, updateChangeOrder, deleteChangeOrder,
       addCustomRole, deleteCustomRole,

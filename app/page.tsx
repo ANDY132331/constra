@@ -309,7 +309,7 @@ export default function LandingPage() {
                       <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
                     </div>
                     <div className="flex-1 bg-white/[0.04] rounded h-5 mx-2 flex items-center px-2">
-                      <span className="text-[9px] text-white/20">constra.app/dashboard</span>
+                      <span className="text-[9px] text-white/20">getconstra.com/dashboard</span>
                     </div>
                   </div>
                   {/* Dashboard content */}

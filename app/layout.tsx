@@ -24,12 +24,12 @@ export const metadata: Metadata = {
     title: "Constra — Field Workforce Management",
     description: "Run your entire job site from one app. Built for construction, civil, HVAC, electrical and every trade.",
     type: "website",
-    url: "https://constra.app",
+    url: "https://getconstra.com",
     locale: "en_CA",
     siteName: "Constra",
     images: [
       {
-        url: "https://constra.app/opengraph-image",
+        url: "https://getconstra.com/opengraph-image",
         width: 1200,
         height: 630,
         alt: "Constra — Field Workforce Management for Construction & Trades",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Constra — Field Workforce Management",
     description: "Time tracking, invoicing, punch lists, crew scheduling — all in one construction app.",
-    images: ["https://constra.app/opengraph-image"],
+    images: ["https://getconstra.com/opengraph-image"],
   },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Constra" },
   icons: {

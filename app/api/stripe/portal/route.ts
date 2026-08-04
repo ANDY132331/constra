@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-06-24.dahlia" });
-    const origin = req.headers.get("origin") ?? "https://constra.app";
+    const origin = req.headers.get("origin") ?? "https://getconstra.com";
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/settings?tab=billing`,

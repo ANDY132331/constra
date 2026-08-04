@@ -24,7 +24,7 @@ export default function GlobalError({
         <h1 className="text-[22px] font-black text-white mb-2">Something went wrong</h1>
         <p className="text-[13px] text-white/40 mb-8">
           An unexpected error occurred. Try refreshing the page — if it keeps happening, contact{" "}
-          <a href="mailto:hello@constra.app" className="text-amber-400 hover:text-amber-300">hello@constra.app</a>.
+          <a href="mailto:hello@getconstra.com" className="text-amber-400 hover:text-amber-300">hello@getconstra.com</a>.
         </p>
         <div className="flex items-center justify-center gap-3">
           <button

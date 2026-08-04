@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid price" }, { status: 400 });
     }
 
-    const origin = req.headers.get("origin") ?? "https://constra.app";
+    const origin = req.headers.get("origin") ?? "https://getconstra.com";
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],

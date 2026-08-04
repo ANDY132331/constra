@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
-import { Plus, Search, Send, CheckCircle2, XCircle, Clock, Lock, Trash2, X, FileText, FileDown, Pencil } from "lucide-react";
+import { Plus, Search, Send, CheckCircle2, XCircle, Clock, Lock, Trash2, X, FileText, FileDown, Pencil, ChevronLeft } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
@@ -173,6 +173,7 @@ export default function EstimatesPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<EstForm>(blank);
   const [convertedNotice, setConvertedNotice] = useState<string | null>(null);
+  const [mobilePreviewId, setMobilePreviewId] = useState<string | null>(null);
 
   const openEdit = (estimate: Estimate) => {
     setEditId(estimate.id);
@@ -324,7 +325,7 @@ export default function EstimatesPage() {
             const cfg = STATUS_CONFIG[e.status];
             const StatusIcon = cfg.icon;
             return (
-              <div key={e.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+              <button key={e.id} onClick={() => setMobilePreviewId(e.id)} className="w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:bg-white/[0.03] transition-colors">
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-mono text-white/30">{e.number}</p>
@@ -338,14 +339,9 @@ export default function EstimatesPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-[16px] font-bold text-white/85">{formatCurrency(Math.round(total), currency as never)}</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => openEdit(e)} className="p-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.09] text-white/50 transition-colors">
-                      <Pencil size={13} />
-                    </button>
-                    <button onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }} className="hidden" />
-                  </div>
+                  <ChevronLeft size={14} className="text-white/20 rotate-180" />
                 </div>
-              </div>
+              </button>
             );
           })}
           <button
@@ -555,6 +551,36 @@ export default function EstimatesPage() {
           </div>
         </div>
       )}
+
+      {/* MOBILE ESTIMATE PREVIEW */}
+      {mobilePreviewId && (() => {
+        const est = estimates.find((e) => e.id === mobilePreviewId);
+        if (!est) return null;
+        return (
+          <div className="lg:hidden fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] bg-[#0d0d0d] flex-shrink-0">
+              <button onClick={() => setMobilePreviewId(null)} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 transition-colors">
+                <ChevronLeft size={18} />
+              </button>
+              <span className="font-mono text-[12px] text-white/35">{est.number}</span>
+              <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS_CONFIG[est.status].className}`}>
+                {est.status}
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <EstimateCard
+                estimate={est}
+                onUpdate={(id, u) => updateEstimate(id, u)}
+                onDelete={(id) => { deleteEstimate(id); setMobilePreviewId(null); }}
+                onConvert={(e) => { handleConvertToInvoice(e); setMobilePreviewId(null); }}
+                onEdit={(e) => { setMobilePreviewId(null); openEdit(e); setShowModal(true); }}
+                currency={currency}
+                companyName={companyName}
+              />
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }

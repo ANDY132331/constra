@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
-  Send, Paperclip, MessagesSquare, X, Download,
+  Send, Paperclip, MessagesSquare, X, Download, Trash2,
 } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { useStore } from "@/lib/store";
@@ -15,7 +15,7 @@ function formatTime(date: Date) {
 }
 
 export default function MessagesPage() {
-  const { projects, messages, addMessage, currentUser } = useStore();
+  const { projects, messages, addMessage, deleteMessage, currentUser } = useStore();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
@@ -176,7 +176,7 @@ export default function MessagesPage() {
             const isMe = msg.senderId === currentUser.id;
             const showAvatar = i === 0 || projectMessages[i - 1].senderId !== msg.senderId;
             return (
-              <div key={msg.id} className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}>
+              <div key={msg.id} className={`flex gap-3 group/msg ${isMe ? "flex-row-reverse" : ""}`}>
                 {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 transition-opacity ${showAvatar ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                   style={{ backgroundColor: msg.senderColor + "33", color: msg.senderColor }}>
@@ -221,6 +221,15 @@ export default function MessagesPage() {
                         </button>
                       )}
                     </div>
+                  )}
+                  {isMe && (
+                    <button
+                      onClick={() => deleteMessage(msg.id)}
+                      className="opacity-0 group-hover/msg:opacity-100 self-end p-1 rounded text-white/20 hover:text-red-400 transition-all"
+                      aria-label="Delete message"
+                    >
+                      <Trash2 size={11} />
+                    </button>
                   )}
                 </div>
               </div>

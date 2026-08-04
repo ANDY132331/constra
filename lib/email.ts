@@ -6,8 +6,8 @@ function getResend() {
   return _resend;
 }
 
-export const FROM = process.env.EMAIL_FROM ?? "Constra <notifications@constra.app>";
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://constra.app";
+export const FROM = process.env.EMAIL_FROM ?? "Constra <notifications@getconstra.com>";
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://getconstra.com";
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -210,7 +210,7 @@ export function welcomeEmail({
 
       <h3 style="font-size:14px;color:#111;margin:20px 0 8px">Your company invite code</h3>
       <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px 18px;font-family:monospace;font-size:20px;font-weight:800;color:#92400e;letter-spacing:3px;text-align:center;margin-bottom:16px">${ic}</div>
-      <p style="font-size:13px;color:#666">Share this code with your crew so they can join your workspace at <strong>constra.app/login</strong> → "Join Company".</p>
+      <p style="font-size:13px;color:#666">Share this code with your crew so they can join your workspace at <strong>getconstra.com/login</strong> → "Join Company".</p>
 
       <h3 style="font-size:14px;color:#111;margin:20px 0 8px">What to do first</h3>
       <table style="width:100%;border-collapse:collapse">
