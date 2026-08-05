@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, ChevronRight, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy,
+  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy, DollarSign,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -45,6 +45,11 @@ const NAV_ITEMS: NavDef[] = [
 const FINANCE_ITEMS: NavDef[] = [
   { href: "/estimates", labelKey: "estimates", icon: Calculator, minLevel: "admin" },
   { href: "/invoices",  labelKey: "invoices",  icon: Receipt,    minLevel: "admin" },
+];
+
+// Budget tracking (no i18n key needed — hardcoded label like OPS_ITEMS)
+const BUDGET_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; minLevel?: "foreman" | "admin" }[] = [
+  { href: "/budget", label: "Budget", icon: DollarSign, minLevel: "admin" },
 ];
 
 // Hardcoded field ops items (avoids updating all 15 i18n locales)
@@ -196,6 +201,19 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
             <div className="mt-4 pt-3 border-t border-white/[0.06]">
               <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Field Ops</p>
               {visibleOps.map((item) => (
+                <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
+              ))}
+            </div>
+          );
+        })()}
+
+        {(() => {
+          const visibleBudget = BUDGET_ITEMS.filter(canSee);
+          if (visibleBudget.length === 0) return null;
+          return (
+            <div className="mt-4 pt-3 border-t border-white/[0.06]">
+              <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Cost Control</p>
+              {visibleBudget.map((item) => (
                 <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
               ))}
             </div>

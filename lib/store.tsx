@@ -7,7 +7,7 @@ import type {
   Worker, Project, Task, ClockEntry, PunchItem, SafetyIncident,
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   MaterialType, MaterialEntry, ProjectDocument, Message,
-  DailyReport, ChangeOrder, BlueprintPin,
+  DailyReport, ChangeOrder, BlueprintPin, BudgetLine,
 } from "./mock-data";
 import type { Locale } from "./i18n/locales";
 import type { CurrencyCode } from "./currency";
@@ -39,8 +39,9 @@ import {
   dbToDailyReport, dailyReportToDb,
   dbToChangeOrder, changeOrderToDb,
   dbToBlueprintPin, blueprintPinToDb,
+  dbToBudgetLine, budgetLineToDb,
   type DbTask, type DbMessage, type DbMaterialType, type DbMaterialEntry, type DbDocument,
-  type DbDailyReport, type DbChangeOrder, type DbBlueprintPin,
+  type DbDailyReport, type DbChangeOrder, type DbBlueprintPin, type DbBudgetLine,
 } from "@/lib/supabase/db";
 
 function reviveDates(_key: string, value: unknown): unknown {
@@ -92,6 +93,7 @@ type StoreState = {
   dailyReports: DailyReport[];
   changeOrders: ChangeOrder[];
   blueprintPins: BlueprintPin[];
+  budgetLines: BudgetLine[];
   customRoles: string[];
   companyAddress: string;
   businessNumber: string;
@@ -167,6 +169,10 @@ type StoreCtx = StoreState & {
   updateBlueprintPin: (id: string, u: Partial<BlueprintPin>) => void;
   deleteBlueprintPin: (id: string) => void;
 
+  addBudgetLine: (b: Omit<BudgetLine, "id" | "createdAt">) => void;
+  updateBudgetLine: (id: string, u: Partial<BudgetLine>) => void;
+  deleteBudgetLine: (id: string) => void;
+
   addDocument: (d: Omit<ProjectDocument, "id">) => void;
   deleteDocument: (id: string) => void;
   addDocumentVersion: (id: string, dataUrl: string, sizeBytes: number, uploadedById: string, note?: string) => void;
@@ -238,6 +244,7 @@ function defaultState(): StoreState {
     dailyReports: [],
     changeOrders: [],
     blueprintPins: [],
+    budgetLines: [],
     customRoles: [],
     companyAddress: "",
     businessNumber: "",
@@ -269,6 +276,7 @@ function loadState(): StoreState {
       dailyReports: parsed.dailyReports ?? [],
       changeOrders: parsed.changeOrders ?? [],
       blueprintPins: parsed.blueprintPins ?? [],
+      budgetLines: parsed.budgetLines ?? [],
       customRoles: parsed.customRoles ?? [],
       companyAddress: parsed.companyAddress ?? "",
       businessNumber: parsed.businessNumber ?? "",
@@ -349,6 +357,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { data: dailyReportsData },
         { data: changeOrdersData },
         { data: blueprintPinsData },
+        { data: budgetLinesData },
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("company_id", companyId),
         supabase.from("companies").select("*").eq("id", companyId).single(),
@@ -378,6 +387,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         supabase.from("change_orders").select("*").eq("company_id", companyId)
           .order("submitted_at", { ascending: false }),
         supabase.from("blueprint_pins").select("*").eq("company_id", companyId),
+        supabase.from("budget_lines").select("*").eq("company_id", companyId).order("created_at", { ascending: true }),
       ]);
 
       // Group tasks by project_id for efficient lookup
@@ -421,6 +431,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         dailyReports: (dailyReportsData ?? []).map((r) => dbToDailyReport(r as DbDailyReport)),
         changeOrders: (changeOrdersData ?? []).map((c) => dbToChangeOrder(c as DbChangeOrder)),
         blueprintPins: (blueprintPinsData ?? []).map((p) => dbToBlueprintPin(p as DbBlueprintPin)),
+        budgetLines: (budgetLinesData ?? []).map((b) => dbToBudgetLine(b as DbBudgetLine)),
         inviteCode: co?.invite_code ?? "",
         companyAddress: co?.address ?? "",
         businessNumber: co?.business_number ?? "",
@@ -1164,6 +1175,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     bg(() => getClient().from("blueprint_pins").delete().eq("id", id), "deleteBlueprintPin");
   }, [up]);
 
+  // ── Budget Lines ──────────────────────────────────────────────────────────────
+
+  const addBudgetLine = useCallback((b: Omit<BudgetLine, "id" | "createdAt">) => {
+    const line: BudgetLine = { ...b, id: genId(), createdAt: new Date() };
+    up((s) => ({ ...s, budgetLines: [...s.budgetLines, line] }));
+    bg(() => getClient().from("budget_lines").insert(budgetLineToDb(line, companyIdRef.current!)), "addBudgetLine");
+  }, [up]);
+
+  const updateBudgetLine = useCallback((id: string, u: Partial<BudgetLine>) => {
+    up((s) => ({ ...s, budgetLines: s.budgetLines.map((b) => b.id === id ? { ...b, ...u } : b) }));
+    bg(() => {
+      const merged = stateRef.current.budgetLines.find((b) => b.id === id);
+      if (!merged) return Promise.resolve({ error: null });
+      return getClient().from("budget_lines").update(budgetLineToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
+    }, "updateBudgetLine");
+  }, [up]);
+
+  const deleteBudgetLine = useCallback((id: string) => {
+    up((s) => ({ ...s, budgetLines: s.budgetLines.filter((b) => b.id !== id) }));
+    bg(() => getClient().from("budget_lines").delete().eq("id", id), "deleteBudgetLine");
+  }, [up]);
+
   // ── Custom roles ──────────────────────────────────────────────────────────────
 
   const addCustomRole = useCallback((role: string) => {
@@ -1268,6 +1301,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addMaterialType, updateMaterialType, deleteMaterialType, incrementMaterialUse,
       addMaterialEntry, deleteMaterialEntry,
       addBlueprintPin, updateBlueprintPin, deleteBlueprintPin,
+      addBudgetLine, updateBudgetLine, deleteBudgetLine,
       addDocument, deleteDocument, addDocumentVersion,
       addMessage, deleteMessage,
       addDailyReport, updateDailyReport, deleteDailyReport,

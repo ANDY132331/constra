@@ -4,7 +4,7 @@ import type {
   Worker, Project, Task, ClockEntry, PunchItem, SafetyIncident,
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   GpsLocation, VerificationFlag, Message, MaterialType, MaterialEntry, ProjectDocument,
-  DailyReport, ChangeOrder, BlueprintPin,
+  DailyReport, ChangeOrder, BlueprintPin, BudgetLine, BudgetLineCategory,
 } from "@/lib/mock-data";
 
 // ── Geo helper ─────────────────────────────────────────────────────────────────
@@ -1025,5 +1025,45 @@ export function blueprintPinToDb(
     note: p.note,
     resolved: p.resolved,
     created_by: p.createdBy ?? null,
+  };
+}
+
+// ── BudgetLine ─────────────────────────────────────────────────────────────────
+
+export type DbBudgetLine = {
+  id: string;
+  company_id: string;
+  project_id: string;
+  code: string;
+  description: string;
+  category: string;
+  budgeted: number;
+  actual: number;
+  created_at: string;
+};
+
+export function dbToBudgetLine(row: DbBudgetLine): BudgetLine {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    code: row.code,
+    description: row.description,
+    category: row.category as BudgetLineCategory,
+    budgeted: Number(row.budgeted),
+    actual: Number(row.actual),
+    createdAt: new Date(row.created_at),
+  };
+}
+
+export function budgetLineToDb(b: BudgetLine, companyId: string): Omit<DbBudgetLine, "created_at"> {
+  return {
+    id: b.id,
+    company_id: companyId,
+    project_id: b.projectId,
+    code: b.code,
+    description: b.description,
+    category: b.category,
+    budgeted: b.budgeted,
+    actual: b.actual,
   };
 }

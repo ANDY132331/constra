@@ -65,6 +65,19 @@ export type BlueprintPin = {
   createdBy?: string;
 };
 
+export type BudgetLineCategory = "labour" | "materials" | "subcontractor" | "equipment" | "general" | "other";
+
+export type BudgetLine = {
+  id: string;
+  projectId: string;
+  code: string;
+  description: string;
+  category: BudgetLineCategory;
+  budgeted: number;
+  actual: number;
+  createdAt: Date;
+};
+
 export type Project = {
   id: string;
   name: string;
