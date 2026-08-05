@@ -61,7 +61,7 @@ const FEATURES = [
     icon: MessageSquare,
     color: "#6366f1",
     title: "Crew Messaging",
-    body: "Per-project group chats with file and photo sharing. Real-time delivery powered by Supabase — no app install required for crew.",
+    body: "Per-project group chats with file and photo sharing. Real-time, reliable delivery — crew can message straight from their phone browser, no app install needed.",
   },
   {
     icon: MapPin,
@@ -104,7 +104,7 @@ const STEPS = [
   {
     n: "02",
     title: "Add projects & crew",
-    body: "Set up your job sites, assign workers, and configure roles in minutes. Import nothing — start from scratch in under 10 minutes.",
+    body: "Set up your job sites, assign workers, and configure roles in minutes. Most teams are fully up and running in under 10 minutes.",
   },
   {
     n: "03",
