@@ -8,23 +8,23 @@ import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
 import { MicButton } from "@/components/mic-button";
 
-// ── Colours (WhatsApp dark-mode palette) ──────────────────────────────────────
+// ── Colours (Light mix palette — airy, modern, Constra amber) ─────────────────
 const C = {
-  sidebarBg:    "#111b21",
-  sidebarActive:"#2a3942",
-  chatBg:       "#0b141a",
-  headerBg:     "#202c33",
-  inputBg:      "#202c33",
-  inputField:   "#2a3942",
-  sentBubble:   "#005c4b",     // WhatsApp dark-teal (amber users expect?)
-  // Constra-brand amber alternate — comment out the line above and uncomment below:
-  // sentBubble: "#1a4a35",
-  receivedBubble: "#1f2c34",
-  sentText:     "#e9edef",
-  receivedText: "#e9edef",
-  secondaryText:"#8696a0",
-  border:       "rgba(255,255,255,0.05)",
-  datePill:     "#182229",
+  sidebarBg:      "#ffffff",
+  sidebarActive:  "#fff8ed",          // warm amber tint on active row
+  chatBg:         "#f0f2f5",          // soft neutral grey — like Messenger light
+  headerBg:       "#ffffff",
+  inputBg:        "#f0f2f5",
+  inputField:     "#ffffff",
+  sentBubble:     "#f59e0b",          // Constra amber-500
+  sentBubbleGrad: "linear-gradient(135deg,#fbbf24,#d97706)", // amber gradient
+  receivedBubble: "#ffffff",
+  sentText:       "#1a0a00",          // near-black on amber (readable)
+  receivedText:   "#111827",          // dark gray on white
+  secondaryText:  "#6b7280",          // medium gray
+  border:         "rgba(0,0,0,0.07)",
+  datePill:       "rgba(0,0,0,0.10)",
+  divider:        "rgba(0,0,0,0.06)",
 };
 
 function fmtTime(d: Date) { return format(d, "h:mm a"); }
@@ -335,7 +335,7 @@ export default function MessagesPage() {
                           isMe ? (
                             <span className="absolute top-0 -right-[7px]" style={{
                               width: 0, height: 0,
-                              borderLeft: `7px solid ${C.sentBubble}`,
+                              borderLeft: `7px solid #fbbf24`,
                               borderBottom: "7px solid transparent",
                             }} />
                           ) : (
@@ -350,8 +350,9 @@ export default function MessagesPage() {
                         <div
                           className="px-3 pt-2 pb-1.5 rounded-[10px] text-[13.5px] leading-relaxed break-words"
                           style={{
-                            background: isMe ? C.sentBubble : C.receivedBubble,
+                            background: isMe ? C.sentBubbleGrad : C.receivedBubble,
                             color: isMe ? C.sentText : C.receivedText,
+                            boxShadow: isMe ? "0 1px 3px rgba(0,0,0,0.10)" : "0 1px 2px rgba(0,0,0,0.08)",
                             borderTopRightRadius: (showTail && isMe) ? "2px" : undefined,
                             borderTopLeftRadius:  (showTail && !isMe) ? "2px" : undefined,
                           }}
@@ -375,7 +376,7 @@ export default function MessagesPage() {
                           isMe ? (
                             <span className="absolute top-0 -right-[7px]" style={{
                               width: 0, height: 0,
-                              borderLeft: `7px solid ${C.sentBubble}`,
+                              borderLeft: `7px solid #fbbf24`,
                               borderBottom: "7px solid transparent",
                             }} />
                           ) : (
@@ -389,14 +390,15 @@ export default function MessagesPage() {
                         <div
                           className="px-3 py-2.5 rounded-[10px] flex items-center gap-2.5 min-w-[200px]"
                           style={{
-                            background: isMe ? C.sentBubble : C.receivedBubble,
+                            background: isMe ? C.sentBubbleGrad : C.receivedBubble,
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                             borderTopRightRadius: (showTail && isMe) ? "2px" : undefined,
                             borderTopLeftRadius:  (showTail && !isMe) ? "2px" : undefined,
                           }}
                         >
                           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ background: "rgba(255,255,255,0.12)" }}>
-                            <Mic size={14} style={{ color: C.sentText }} />
+                            style={{ background: isMe ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.06)" }}>
+                            <Mic size={14} style={{ color: isMe ? C.sentText : C.secondaryText }} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <audio
@@ -428,7 +430,7 @@ export default function MessagesPage() {
                           isMe ? (
                             <span className="absolute top-0 -right-[7px] z-10" style={{
                               width: 0, height: 0,
-                              borderLeft: `7px solid ${C.sentBubble}`,
+                              borderLeft: `7px solid #fbbf24`,
                               borderBottom: "7px solid transparent",
                             }} />
                           ) : (
@@ -457,7 +459,7 @@ export default function MessagesPage() {
                           <button
                             onClick={() => downloadAttachment(msg.attachmentName!, msg.attachmentData!)}
                             className="flex items-center gap-2.5 px-3 py-2.5 w-full text-left"
-                            style={{ background: isMe ? C.sentBubble : C.receivedBubble, borderRadius: 10 }}
+                            style={{ background: isMe ? C.sentBubbleGrad : C.receivedBubble, borderRadius: 10, boxShadow: "0 1px 2px rgba(0,0,0,0.08)" }}
                           >
                             <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                               style={{ background: "rgba(255,255,255,0.15)" }}>
@@ -552,9 +554,9 @@ export default function MessagesPage() {
             <button
               onClick={sendMessage}
               className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors"
-              style={{ background: "#25d366" }}
+              style={{ background: C.sentBubbleGrad }}
             >
-              <Send size={17} className="text-white" style={{ marginLeft: 2 }} />
+              <Send size={17} style={{ color: C.sentText, marginLeft: 2 }} />
             </button>
           ) : (
             <MicButton
