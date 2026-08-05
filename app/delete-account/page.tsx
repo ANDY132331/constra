@@ -87,7 +87,7 @@ export default function DeleteAccountPage() {
             <div className="border-t border-white/[0.06] pt-4">
               <p className="text-[13px] font-bold text-white/80 mb-1">Option 2 — Email request</p>
               <p className="text-[13px] text-white/50 leading-relaxed mb-3">
-                Send an email to the address below from the email associated with your Constra account. Include your full name and company name. We will process your request within 30 days.
+                Send an email to the address below from the email associated with your Constra account. Include your full name and company name. We will process your request within a few business days.
               </p>
               <a
                 href="mailto:privacy@getconstra.com?subject=Account Deletion Request&body=Please delete my Constra account.%0A%0AName: %0AEmail: %0ACompany: "
