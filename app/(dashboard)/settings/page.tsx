@@ -286,13 +286,30 @@ function SettingsInner() {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
+                          e.target.value = "";
+                          // Compress to max 400×400 / JPEG 75% so it fits in Supabase's body limit
                           const reader = new FileReader();
                           reader.onload = (ev) => {
-                            const result = ev.target?.result as string;
-                            if (result) setCompanyLogo(result);
+                            const dataUrl = ev.target?.result as string;
+                            if (!dataUrl) return;
+                            const img = new Image();
+                            img.onload = () => {
+                              const MAX = 400;
+                              const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+                              const w = Math.round(img.width * scale);
+                              const h = Math.round(img.height * scale);
+                              const canvas = document.createElement("canvas");
+                              canvas.width = w;
+                              canvas.height = h;
+                              const ctx = canvas.getContext("2d");
+                              if (!ctx) return;
+                              ctx.drawImage(img, 0, 0, w, h);
+                              const compressed = canvas.toDataURL("image/jpeg", 0.75);
+                              setCompanyLogo(compressed);
+                            };
+                            img.src = dataUrl;
                           };
                           reader.readAsDataURL(file);
-                          e.target.value = "";
                         }}
                       />
                     </label>
