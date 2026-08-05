@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Bell, Search, Plus, ChevronDown, FolderKanban, Users, ClipboardList,
   FileText, ShieldAlert, Truck, X, CheckCheck, Menu, Settings, LogOut,
-  User,
+  User, Moon, Sun,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
@@ -56,7 +56,7 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => voi
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, activityFeed, isRealtimeConnected, companyName, companyLogo, signOut } = useStore();
+  const { currentUser, activityFeed, isRealtimeConnected, companyName, companyLogo, signOut, theme, setTheme } = useStore();
   const isAdmin = isAdminOrAbove(currentUser.role);
   const isForeman = isForemanOrAbove(currentUser.role);
   const QUICK_ADD = ALL_QUICK_ADD.filter(({ minLevel }) =>
@@ -145,6 +145,15 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-lg transition-all"
         >
           <Search size={15} />
+        </button>
+
+        {/* Theme toggle */}
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-lg transition-all"
+        >
+          {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
         </button>
 
         {/* Notifications */}

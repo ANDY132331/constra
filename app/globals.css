@@ -44,7 +44,63 @@
   --radius-xl: calc(var(--radius) * 1.4);
 }
 
-/* Always dark — no light mode */
+/* ── App design tokens (overridden per theme) ─────────────────────────────── */
+:root {
+  /* Dark defaults */
+  --app-bg-0:     #080808;
+  --app-bg-1:     #0a0a0a;
+  --app-bg-2:     #0d0d0d;
+  --app-bg-3:     #111111;
+  --app-bg-4:     #161616;
+  --app-bg-5:     #1a1a1a;
+  --app-text:     rgba(255,255,255,0.90);
+  --app-text-2:   rgba(255,255,255,0.55);
+  --app-text-3:   rgba(255,255,255,0.30);
+  --app-border:   rgba(255,255,255,0.06);
+  --app-surface:  rgba(255,255,255,0.03);
+  --app-surface2: rgba(255,255,255,0.06);
+}
+
+[data-theme="light"] {
+  --app-bg-0:     #f0f0f0;
+  --app-bg-1:     #f4f4f4;
+  --app-bg-2:     #ffffff;
+  --app-bg-3:     #ffffff;
+  --app-bg-4:     #f8f8f8;
+  --app-bg-5:     #efefef;
+  --app-text:     rgba(10,10,10,0.92);
+  --app-text-2:   rgba(10,10,10,0.55);
+  --app-text-3:   rgba(10,10,10,0.35);
+  --app-border:   rgba(0,0,0,0.08);
+  --app-surface:  rgba(0,0,0,0.03);
+  --app-surface2: rgba(0,0,0,0.06);
+  /* Shadcn vars */
+  --background:       oklch(0.97 0 0);
+  --foreground:       oklch(0.07 0 0);
+  --card:             oklch(1 0 0);
+  --card-foreground:  oklch(0.07 0 0);
+  --popover:          oklch(0.98 0 0);
+  --popover-foreground: oklch(0.07 0 0);
+  --secondary:        oklch(0.92 0 0);
+  --secondary-foreground: oklch(0.07 0 0);
+  --muted:            oklch(0.92 0 0);
+  --muted-foreground: oklch(0.45 0.02 264);
+  --accent:           oklch(0.92 0 0);
+  --accent-foreground: oklch(0.07 0 0);
+  --border:           oklch(0 0 0 / 8%);
+  --input:            oklch(0 0 0 / 9%);
+  --sidebar:          oklch(0.95 0 0);
+  --sidebar-foreground: oklch(0.07 0 0);
+  --sidebar-border:   oklch(0 0 0 / 8%);
+}
+
+/* Light-mode overrides: the shell uses var(--app-bg-*) to theme structural colours.
+   Page content that uses hardcoded Tailwind dark-class values gets inverted here. */
+[data-theme="light"] body {
+  background: var(--app-bg-1);
+  color: var(--app-text);
+}
+
 :root {
   --background: oklch(0.07 0 0);
   --foreground: oklch(0.97 0.004 247);

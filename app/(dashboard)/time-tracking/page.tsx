@@ -13,6 +13,7 @@ import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
 import { runVerification } from "@/lib/verification";
 import { sendPushEvent } from "@/lib/push-client";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { isForemanOrAbove } from "@/lib/permissions";
 
 function elapsed(start: Date, end?: Date): string {
   const ms = (end ?? new Date()).getTime() - start.getTime();
@@ -354,10 +355,15 @@ export default function TimeTrackingPage() {
   // Suppress unused tick warning
   void tick;
 
+  // Workers (employees) only see their own data
+  const isEmployee = !isForemanOrAbove(currentUser.role);
+
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const clockedIn = workers.filter((w) => w.clockedIn);
+  const clockedIn = isEmployee
+    ? workers.filter((w) => w.clockedIn && w.id === currentUser.id)
+    : workers.filter((w) => w.clockedIn);
 
   const todayHours = clockEntries
     .filter((e) => e.clockOut && e.clockIn >= todayStart)
@@ -525,6 +531,8 @@ export default function TimeTrackingPage() {
   ].filter((e) => {
     const worker = getWorkerById(e.workerId);
     if (!worker) return false;
+    // Employees only see their own entries
+    if (isEmployee && e.workerId !== currentUser.id) return false;
     if (search && !worker.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (selectedProject !== "all" && e.projectId !== selectedProject) return false;
     return true;
@@ -565,23 +573,25 @@ export default function TimeTrackingPage() {
         </div>
       </div>
 
-      {/* Search + project filter */}
-      <div className="flex gap-2 px-4 pb-3">
-        <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 flex-1">
-          <Search size={13} className="text-white/30 flex-shrink-0" />
-          <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
-            placeholder="Search workers…" value={search} onChange={(e) => setSearch(e.target.value)} />
+      {/* Search + project filter — foreman/admin only */}
+      {!isEmployee && (
+        <div className="flex gap-2 px-4 pb-3">
+          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 flex-1">
+            <Search size={13} className="text-white/30 flex-shrink-0" />
+            <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
+              placeholder="Search workers…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <CustomSelect
+            className="bg-[#131110] border border-white/[0.07] text-white/60 text-[12px] rounded-xl px-3 py-2 outline-none cursor-pointer"
+            value={selectedProject}
+            onChange={(v) => setSelectedProject(v)}
+            options={[{ value: "all", label: "All" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]}
+          />
         </div>
-        <CustomSelect
-          className="bg-[#131110] border border-white/[0.07] text-white/60 text-[12px] rounded-xl px-3 py-2 outline-none cursor-pointer"
-          value={selectedProject}
-          onChange={(v) => setSelectedProject(v)}
-          options={[{ value: "all", label: "All" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]}
-        />
-      </div>
+      )}
 
-      {/* Overtime alert */}
-      {(() => {
+      {/* Overtime alert — foreman/admin only */}
+      {!isEmployee && (() => {
         const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
         const ot = workers.filter((w) => {
           const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);

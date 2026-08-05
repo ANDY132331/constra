@@ -100,6 +100,7 @@ type StoreState = {
   inviteCode: string;
   companyLogo: string;
   permissionsPin: string;
+  theme: "dark" | "light";
 };
 
 type StoreCtx = StoreState & {
@@ -205,6 +206,9 @@ type StoreCtx = StoreState & {
   getProjectById: (id: string) => Project | undefined;
   signOut: () => Promise<void>;
   currentUser: Worker;
+  /** "dark" (default) or "light" */
+  theme: "dark" | "light";
+  setTheme: (t: "dark" | "light") => void;
 };
 
 const STORAGE_KEY = "constra_v1";
@@ -251,6 +255,7 @@ function defaultState(): StoreState {
     inviteCode: "",
     companyLogo: "",
     permissionsPin: "",
+    theme: (typeof window !== "undefined" ? (localStorage.getItem("constra_theme") as "dark" | "light" | null) : null) ?? "dark",
   };
 }
 
@@ -1255,6 +1260,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     bg(() => getClient().from("companies").update({ industry: i }).eq("id", companyIdRef.current!), "setIndustry");
   }, [up]);
 
+  const setTheme = useCallback((t: "dark" | "light") => {
+    up((s) => ({ ...s, theme: t }));
+    if (typeof window !== "undefined") localStorage.setItem("constra_theme", t);
+  }, [up]);
+
   const setOnboarded = useCallback((v: boolean) =>
     up((s) => ({ ...s, onboarded: v })), [up]);
 
@@ -1313,6 +1323,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       getWorkerById, getProjectById,
       signOut,
       currentUser,
+      theme: state.theme,
+      setTheme,
     }}>
       {children}
     </Ctx.Provider>

@@ -30,7 +30,13 @@ const PAGE_MIN_LEVEL: Record<string, "foreman" | "admin"> = {
 };
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
-  const { language, onboarded, isLoading, currentUser } = useStore();
+  const { language, onboarded, isLoading, currentUser, theme } = useStore();
+
+  // Apply data-theme to <html> so CSS variables cascade everywhere
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    return () => { document.documentElement.removeAttribute("data-theme"); };
+  }, [theme]);
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);

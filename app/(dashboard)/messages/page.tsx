@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
-  Send, Paperclip, MessagesSquare, X, Download, Trash2,
+  Send, Paperclip, MessagesSquare, X, Download, Trash2, Mic,
 } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import { useStore } from "@/lib/store";
@@ -14,36 +14,57 @@ function formatTime(date: Date) {
   return format(date, "MMM d, h:mm a");
 }
 
+function fmtDur(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}:${String(sec).padStart(2, "0")}` : `0:${String(sec).padStart(2, "0")}`;
+}
+
 export default function MessagesPage() {
   const { projects, messages, addMessage, deleteMessage, currentUser } = useStore();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
 
-  // Auto-select first project if none is selected and projects are loaded
   useEffect(() => {
     if (!selectedProjectId && projects[0]?.id) {
       setSelectedProjectId(projects[0].id);
     }
   }, [projects, selectedProjectId]);
+
   const [text, setText] = useState("");
   const [pendingAttachment, setPendingAttachment] = useState<{ name: string; data: string } | null>(null);
   const [lightboxData, setLightboxData] = useState<{ name: string; data: string } | null>(null);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const bottomRef  = useRef<HTMLDivElement>(null);
+  const fileRef    = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const projectMessages = useMemo(
-    () => messages.filter((m) => m.projectId === selectedProjectId)
+    () => messages
+      .filter((m) => m.projectId === selectedProjectId)
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
-    [messages, selectedProjectId]
+    [messages, selectedProjectId],
   );
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [projectMessages.length, selectedProjectId]);
+
+  // ── Visual-viewport / keyboard avoidance (iOS PWA) ───────────────────────
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv || !containerRef.current) return;
+    const update = () => {
+      if (!containerRef.current) return;
+      // The layout header is 56 px; mobile-nav bottom offset is applied via padding-bottom on <main>
+      const available = vv.height;
+      containerRef.current.style.height = `${available}px`;
+    };
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
+  }, []);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -57,11 +78,10 @@ export default function MessagesPage() {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  function sendMessage() {
+  const sendMessage = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed && !pendingAttachment) return;
     if (!selectedProjectId) return;
-
     addMessage({
       projectId: selectedProjectId,
       senderId: currentUser.id,
@@ -73,10 +93,24 @@ export default function MessagesPage() {
       attachmentName: pendingAttachment?.name,
       attachmentData: pendingAttachment?.data,
     });
-
     setText("");
     setPendingAttachment(null);
-  }
+  }, [text, pendingAttachment, selectedProjectId, addMessage, currentUser]);
+
+  const handleAudio = useCallback((dataUrl: string, durationSeconds: number) => {
+    if (!selectedProjectId) return;
+    addMessage({
+      projectId: selectedProjectId,
+      senderId: currentUser.id,
+      senderName: currentUser.name,
+      senderInitials: currentUser.initials,
+      senderColor: currentUser.color,
+      text: "",
+      timestamp: new Date(),
+      attachmentName: `voice-${durationSeconds}s.webm`,
+      attachmentData: dataUrl,
+    });
+  }, [selectedProjectId, addMessage, currentUser]);
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -93,12 +127,18 @@ export default function MessagesPage() {
   }
 
   const isImage = (data: string) => data.startsWith("data:image");
+  const isAudio = (name: string, data: string) =>
+    data.startsWith("data:audio") || name.startsWith("voice-");
 
   const project = projects.find((p) => p.id === selectedProjectId);
 
   return (
-    <div className="flex h-[calc(100dvh-168px)] md:h-[calc(100dvh-176px)] lg:h-auto lg:max-h-[780px] overflow-hidden rounded-xl border border-white/[0.06] bg-[#111]">
-      {/* Sidebar — project list (full-screen on mobile when open, fixed-width on desktop) */}
+    <div
+      ref={containerRef}
+      className="flex overflow-hidden rounded-xl border border-white/[0.06] bg-[#111]"
+      style={{ height: "calc(100dvh - 168px)" }}
+    >
+      {/* ── Sidebar: project list ─────────────────────────────────────────── */}
       <div className={`flex-shrink-0 border-e border-white/[0.06] flex flex-col
         ${mobileSidebarOpen ? "flex" : "hidden"} sm:flex
         w-full sm:w-[220px]`}>
@@ -112,7 +152,9 @@ export default function MessagesPage() {
             <p className="text-[11px] text-white/25 px-4 py-3">No projects yet</p>
           ) : (
             projects.map((p) => {
-              const last = messages.filter((m) => m.projectId === p.id).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+              const last = messages
+                .filter((m) => m.projectId === p.id)
+                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
               const active = p.id === selectedProjectId;
               return (
                 <button
@@ -124,12 +166,11 @@ export default function MessagesPage() {
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
                     <span className={`text-[12px] font-semibold truncate ${active ? "text-amber-300" : "text-white/75"}`}>{p.name}</span>
                   </div>
-                  {last && (
+                  {last ? (
                     <p className="text-[10px] text-white/30 truncate ps-4">
-                      {last.senderName.split(" ")[0]}: {last.text || "📎 Attachment"}
+                      {last.senderName.split(" ")[0]}: {last.attachmentName?.startsWith("voice-") ? "🎙 Voice message" : last.text || "📎 Attachment"}
                     </p>
-                  )}
-                  {!last && (
+                  ) : (
                     <p className="text-[10px] text-white/20 italic ps-4">No messages yet</p>
                   )}
                 </button>
@@ -139,11 +180,10 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      {/* Chat area (full-screen on mobile when sidebar is closed) */}
+      {/* ── Chat area ─────────────────────────────────────────────────────── */}
       <div className={`flex-1 flex flex-col min-w-0 ${mobileSidebarOpen ? "hidden sm:flex" : "flex"}`}>
         {/* Chat header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] flex-shrink-0">
-          {/* Back button on mobile */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
             className="sm:hidden flex items-center justify-center w-7 h-7 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/[0.05] transition-all flex-shrink-0"
@@ -163,41 +203,73 @@ export default function MessagesPage() {
           )}
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+        {/* Messages list */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
           {projectMessages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
               <MessagesSquare size={32} className="text-white/15" />
               <p className="text-[13px] text-white/25">No messages yet</p>
-              <p className="text-[11px] text-white/15">Send a message to start the conversation</p>
+              <p className="text-[11px] text-white/15">Send a message or voice note to start</p>
             </div>
           )}
           {projectMessages.map((msg, i) => {
             const isMe = msg.senderId === currentUser.id;
             const showAvatar = i === 0 || projectMessages[i - 1].senderId !== msg.senderId;
+            const hasAudio = msg.attachmentName && msg.attachmentData && isAudio(msg.attachmentName, msg.attachmentData);
+            const durMatch = msg.attachmentName?.match(/voice-(\d+)s/);
+            const audioDur = durMatch ? parseInt(durMatch[1]) : 0;
             return (
-              <div key={msg.id} className={`flex gap-3 group/msg ${isMe ? "flex-row-reverse" : ""}`}>
+              <div key={msg.id} className={`flex gap-2.5 group/msg ${isMe ? "flex-row-reverse" : ""}`}>
                 {/* Avatar */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 transition-opacity ${showAvatar ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-                  style={{ backgroundColor: msg.senderColor + "33", color: msg.senderColor }}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 transition-opacity ${showAvatar ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                  style={{ backgroundColor: msg.senderColor + "33", color: msg.senderColor }}
+                >
                   {msg.senderInitials}
                 </div>
-                <div className={`flex flex-col gap-1 max-w-[70%] ${isMe ? "items-end" : "items-start"}`}>
+
+                <div className={`flex flex-col gap-1 max-w-[72%] ${isMe ? "items-end" : "items-start"}`}>
                   {showAvatar && (
                     <span className="text-[10px] text-white/30 px-1">
                       {isMe ? "You" : msg.senderName} · {formatTime(new Date(msg.timestamp))}
                     </span>
                   )}
+
                   {/* Text bubble */}
                   {msg.text && (
-                    <div className={`px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed ${isMe
+                    <div className={`px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed break-words ${isMe
                       ? "bg-amber-500 text-black rounded-tr-sm"
                       : "bg-white/[0.07] text-white/85 rounded-tl-sm"}`}>
                       {msg.text}
                     </div>
                   )}
-                  {/* Attachment */}
-                  {msg.attachmentName && msg.attachmentData && (
+
+                  {/* Audio voice message */}
+                  {hasAudio && (
+                    <div className={`rounded-2xl overflow-hidden border px-3 py-2.5 flex items-center gap-2.5 min-w-[180px]
+                      ${isMe ? "bg-amber-500/15 border-amber-500/30 rounded-tr-sm" : "bg-white/[0.06] border-white/[0.08] rounded-tl-sm"}`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isMe ? "bg-amber-500/30" : "bg-white/10"}`}>
+                        <Mic size={13} className={isMe ? "text-amber-300" : "text-white/60"} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <audio
+                          controls
+                          src={msg.attachmentData!}
+                          className="w-full h-7 max-w-[160px]"
+                          style={{ colorScheme: "dark" }}
+                          preload="metadata"
+                        />
+                      </div>
+                      {audioDur > 0 && (
+                        <span className={`text-[10px] flex-shrink-0 font-mono ${isMe ? "text-amber-300/70" : "text-white/35"}`}>
+                          {fmtDur(audioDur)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Image / file attachment */}
+                  {msg.attachmentName && msg.attachmentData && !hasAudio && (
                     <div className={`rounded-xl overflow-hidden border ${isMe ? "border-amber-500/30" : "border-white/[0.08]"} max-w-[240px]`}>
                       {isImage(msg.attachmentData) ? (
                         <img
@@ -222,6 +294,7 @@ export default function MessagesPage() {
                       )}
                     </div>
                   )}
+
                   {isMe && (
                     <button
                       onClick={() => deleteMessage(msg.id)}
@@ -240,7 +313,7 @@ export default function MessagesPage() {
 
         {/* Pending attachment preview */}
         {pendingAttachment && (
-          <div className="px-5 pb-2 flex-shrink-0">
+          <div className="px-4 pb-2 flex-shrink-0">
             <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
               {isImage(pendingAttachment.data) ? (
                 <img src={pendingAttachment.data} alt="" className="w-10 h-10 rounded object-cover" />
@@ -258,7 +331,7 @@ export default function MessagesPage() {
         )}
 
         {/* Input bar */}
-        <div className="flex-shrink-0 border-t border-white/[0.06] px-4 py-3 flex items-end gap-3">
+        <div className="flex-shrink-0 border-t border-white/[0.06] px-3 py-2.5 flex items-end gap-2">
           <button
             onClick={() => fileRef.current?.click()}
             className="p-2 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-colors flex-shrink-0 mb-0.5"
@@ -269,16 +342,18 @@ export default function MessagesPage() {
           <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
 
           <textarea
-            ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message…"
             rows={1}
-            className="flex-1 bg-[#1a1a1a] border border-white/[0.07] rounded-xl px-4 py-2.5 text-[13px] text-white placeholder-white/25 outline-none focus:border-amber-500/30 resize-none max-h-28 leading-relaxed"
+            inputMode="text"
+            enterKeyHint="send"
+            className="flex-1 bg-[#1a1a1a] border border-white/[0.07] rounded-xl px-3.5 py-2.5 text-[13px] text-white placeholder-white/25 outline-none focus:border-amber-500/30 resize-none max-h-24 leading-relaxed"
             style={{ overflowY: "auto" }}
           />
-          <MicButton onResult={(t) => setText((prev) => (prev ? prev + " " : "") + t.trim())} className="mb-0.5" />
+
+          <MicButton onAudio={handleAudio} className="mb-0.5" />
 
           <button
             onClick={sendMessage}
