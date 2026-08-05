@@ -20,13 +20,13 @@ import { isForemanOrAbove, isAdminOrAbove } from "@/lib/permissions";
 const ALWAYS_ALLOWED = ["/dashboard", "/time-tracking", "/safety", "/messages", "/photos", "/settings"];
 
 // Default role-based access for pages that require elevation
+// Workers can view: schedule, projects, punch-list (read-only enforced inside each page)
 const PAGE_MIN_LEVEL: Record<string, "foreman" | "admin"> = {
-  "/schedule": "foreman", "/projects": "foreman", "/tasks": "foreman",
-  "/punch-list": "foreman", "/rfis": "foreman", "/equipment": "foreman",
+  "/tasks": "foreman", "/rfis": "foreman", "/equipment": "foreman",
   "/materials": "foreman", "/documents": "foreman", "/blueprints": "foreman",
   "/daily-reports": "foreman",
   "/crew": "admin", "/reports": "admin", "/estimates": "admin",
-  "/invoices": "admin", "/change-orders": "admin",
+  "/invoices": "admin", "/change-orders": "admin", "/budget": "admin",
 };
 
 function LayoutInner({ children }: { children: React.ReactNode }) {

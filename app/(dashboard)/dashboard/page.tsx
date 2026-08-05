@@ -8,7 +8,7 @@ import {
   Activity, MessageSquare, FileText, Image as ImageIcon, Camera,
   RefreshCw, Mail, DollarSign, Cloud, Sun, CloudRain, Wind,
   Plus, GitPullRequest, Zap, BanknoteIcon, ReceiptText,
-  LogIn, LogOut,
+  LogIn, LogOut, ShieldAlert,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -307,21 +307,46 @@ export default function DashboardPage() {
     })),
   ].slice(0, 6);
 
-  // ── Worker simplified view ─────────────────────────────────────────────────
+  // ── Worker view ───────────────────────────────────────────────────────────────
   const isWorker = !isForemanOrAbove(currentUser.role);
   if (isWorker) {
     const myEntries = clockEntries.filter((e) => e.workerId === currentUser.id);
-    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0, 0, 0, 0);
+    const wkStart = new Date(); wkStart.setDate(wkStart.getDate() - wkStart.getDay()); wkStart.setHours(0, 0, 0, 0);
+    const todayStart = new Date(now.toDateString());
+
     const myWeekHours = myEntries
-      .filter((e) => e.clockOut && e.clockIn >= weekStart)
+      .filter((e) => e.clockOut && e.clockIn >= wkStart)
       .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
     const myTodayHours = myEntries
-      .filter((e) => e.clockOut && e.clockIn >= new Date(now.toDateString()))
+      .filter((e) => e.clockOut && e.clockIn >= todayStart)
       .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
     const liveElapsed = currentUser.clockedIn && currentUser.clockInTime
       ? (now.getTime() - currentUser.clockInTime.getTime()) / 3600000
       : 0;
-    const myProject = getProjectById(currentUser.projectIds?.[0] ?? "");
+
+    // Days worked this week (streak)
+    const workedDays = new Set(
+      myEntries
+        .filter((e) => e.clockOut && e.clockIn >= wkStart)
+        .map((e) => e.clockIn.toDateString())
+    ).size;
+
+    // My projects
+    const myProjects = (currentUser.projectIds ?? [])
+      .map((id) => getProjectById(id))
+      .filter(Boolean) as typeof projects;
+
+    // My tasks (assigned to me, not completed, due today or overdue)
+    const myTasks = projects
+      .flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.name })))
+      .filter((t) => t.workerId === currentUser.id && t.status !== "completed");
+    const urgentTasks = myTasks.filter((t) => t.endDate <= now);
+    const todayTasks = myTasks.filter((t) => t.endDate.toDateString() === now.toDateString() && t.endDate > now);
+
+    // My punch items (items on my projects)
+    const myPunchItems = punchItems.filter(
+      (p) => p.status !== "resolved" && myProjects.some((proj) => proj.id === p.projectId)
+    );
 
     const handleWorkerClockOut = () => {
       const entry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
@@ -329,123 +354,245 @@ export default function DashboardPage() {
       updateWorker(currentUser.id, { clockedIn: false, clockInTime: undefined });
     };
 
+    const totalToday = myTodayHours + liveElapsed;
+    const dayTarget = 8;
+    const weekTarget = 40;
+    const dayPct = Math.min((totalToday / dayTarget) * 100, 100);
+    const weekPct = Math.min(((myWeekHours + liveElapsed) / weekTarget) * 100, 100);
+
     return (
-      <div className="space-y-5 max-w-lg mx-auto">
-        {/* Greeting */}
-        <div>
-          <h2 className="text-xl font-bold text-white">{greeting}, {currentUser.name.split(" ")[0]}</h2>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            {weather && (() => {
-              const meta = weatherMeta(weather.code);
-              const WeatherIcon = meta.icon;
-              return (
-                <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1 text-[12px]" style={{ color: meta.color }}>
-                  <WeatherIcon size={13} />
-                  <span className="font-semibold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
-                </div>
-              );
-            })()}
-            {myProject && (
-              <div className="flex items-center gap-1.5 text-[12px] text-white/35">
-                <MapPin size={11} />
-                {myProject.name}
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="-mx-4 -mt-4 pb-2">
 
-        {/* Clock in/out hero */}
-        {currentUser.clockedIn ? (
-          <div className="bg-[#0a1a0a] border border-green-500/25 rounded-2xl p-6">
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-16 h-16 rounded-2xl bg-green-500/15 flex items-center justify-center flex-shrink-0">
-                <span className="w-4 h-4 bg-green-400 rounded-full animate-pulse" />
-              </div>
-              <div>
-                <p className="text-[18px] font-black text-green-400">On Site</p>
-                {currentUser.clockInTime && (
-                  <p className="text-[13px] text-white/50 mt-0.5">
-                    Since {currentUser.clockInTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} · {liveElapsed.toFixed(1)}h elapsed
-                  </p>
+        {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+        <div
+          className="relative overflow-hidden px-5 pt-6 pb-7"
+          style={{
+            background: currentUser.clockedIn
+              ? "linear-gradient(155deg, #003d1a 0%, #001a0a 50%, #080808 100%)"
+              : "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)",
+            borderBottom: `1px solid ${currentUser.clockedIn ? "rgba(34,197,94,0.2)" : "rgba(245,158,11,0.18)"}`,
+          }}
+        >
+          {/* Blueprint grid */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.08]"
+            style={{
+              backgroundImage: currentUser.clockedIn
+                ? "repeating-linear-gradient(90deg,rgba(34,197,94,1) 0,rgba(34,197,94,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(34,197,94,1) 0,rgba(34,197,94,1) 1px,transparent 1px,transparent 48px)"
+                : "repeating-linear-gradient(90deg,rgba(245,158,11,1) 0,rgba(245,158,11,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(245,158,11,1) 0,rgba(245,158,11,1) 1px,transparent 1px,transparent 48px)",
+            }}
+          />
+          {/* Glow */}
+          <div className="absolute -bottom-16 -left-10 w-80 h-80 pointer-events-none rounded-full blur-3xl"
+            style={{ background: currentUser.clockedIn ? "rgba(34,197,94,0.12)" : "rgba(245,158,11,0.12)" }} />
+
+          {/* Name + weather */}
+          <div className="relative flex items-start justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                {currentUser.clockedIn ? (
+                  <span className="flex items-center gap-1.5 bg-green-500/20 border border-green-500/30 rounded-full px-2.5 py-0.5 text-[11px] font-black text-green-400 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    On Site
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/25 rounded-full px-2.5 py-0.5 text-[11px] font-bold text-amber-400/80 uppercase tracking-wider">
+                    Off Site
+                  </span>
                 )}
+                {weather && (() => {
+                  const meta = weatherMeta(weather.code);
+                  const WeatherIcon = meta.icon;
+                  return (
+                    <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: meta.color }}>
+                      <WeatherIcon size={11} />
+                      {weather.temp}{useFahrenheit ? "°F" : "°C"}
+                    </span>
+                  );
+                })()}
               </div>
+              <h2 className="text-[26px] font-black text-white leading-none tracking-tight">
+                {greeting.split(" ")[0]},<br />
+                <span className={currentUser.clockedIn ? "text-green-400" : "text-amber-400"}>
+                  {currentUser.name.split(" ")[0]}
+                </span>
+              </h2>
+              {myProjects[0] && (
+                <p className="text-[12px] text-white/40 mt-1.5 flex items-center gap-1">
+                  <MapPin size={10} />
+                  {myProjects[0].name}
+                </p>
+              )}
             </div>
-            <button
-              onClick={handleWorkerClockOut}
-              className="w-full py-4 rounded-xl bg-red-500/15 hover:bg-red-500/25 active:bg-red-500/30 border border-red-500/30 text-red-400 font-black text-[16px] flex items-center justify-center gap-3 transition-all"
-            >
-              <LogOut size={20} />
-              Clock Out
-            </button>
-          </div>
-        ) : (
-          <Link href="/time-tracking" className="block bg-[#0a140a] border-2 border-green-500/30 rounded-2xl p-6 active:border-green-500/50 transition-all">
-            <div className="flex flex-col items-center gap-3 py-4">
-              <div className="w-20 h-20 rounded-full bg-green-500/15 flex items-center justify-center">
-                <LogIn size={34} className="text-green-400" />
-              </div>
-              <p className="text-[22px] font-black text-green-400">Clock In</p>
-              <p className="text-[13px] text-green-400/50">Tap to start your shift</p>
-            </div>
-          </Link>
-        )}
 
-        {/* Today's hours */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
-            <p className="text-2xl font-black text-white">{(myTodayHours + liveElapsed).toFixed(1)}h</p>
-            <p className="text-[12px] font-semibold text-blue-400 mt-0.5">Today</p>
-            <p className="text-[11px] text-white/30 mt-0.5">hours logged</p>
+            {/* Avatar */}
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-[18px] flex-shrink-0 border-2"
+              style={{
+                backgroundColor: (currentUser.color ?? "#f59e0b") + "22",
+                borderColor: (currentUser.color ?? "#f59e0b") + "44",
+                color: currentUser.color ?? "#f59e0b",
+              }}
+            >
+              {currentUser.photo
+                ? <img src={currentUser.photo} alt={currentUser.name} className="w-full h-full object-cover rounded-2xl" />
+                : currentUser.initials}
+            </div>
           </div>
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
-            <p className="text-2xl font-black text-white">{(myWeekHours + liveElapsed).toFixed(1)}h</p>
-            <p className="text-[12px] font-semibold text-amber-400 mt-0.5">This Week</p>
-            <p className="text-[11px] text-white/30 mt-0.5">hours logged</p>
-          </div>
+
+          {/* Clock in/out action */}
+          {currentUser.clockedIn ? (
+            <div className="relative space-y-3">
+              <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-2xl px-4 py-3">
+                <div>
+                  <p className="text-[13px] text-green-400/70 font-semibold">Clocked in</p>
+                  <p className="text-[22px] font-black text-white tabular-nums">
+                    {liveElapsed.toFixed(1)}<span className="text-[14px] text-white/50 font-bold ml-1">hrs</span>
+                  </p>
+                  {currentUser.clockInTime && (
+                    <p className="text-[11px] text-white/35">
+                      since {currentUser.clockInTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                </div>
+                <div className="w-12 h-12 rounded-full bg-green-500/15 flex items-center justify-center">
+                  <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+                </div>
+              </div>
+              <button
+                onClick={handleWorkerClockOut}
+                className="w-full py-4 rounded-2xl bg-red-500/15 active:bg-red-500/25 border border-red-500/30 text-red-400 font-black text-[15px] flex items-center justify-center gap-2.5 transition-all"
+              >
+                <LogOut size={18} strokeWidth={2.5} />
+                Clock Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/time-tracking"
+              className="relative flex items-center justify-between bg-amber-500 active:bg-amber-400 rounded-2xl px-5 py-4 shadow-xl shadow-amber-500/25 transition-all"
+            >
+              <div>
+                <p className="text-[11px] font-bold text-black/50 uppercase tracking-wider mb-0.5">Ready to work?</p>
+                <p className="text-[20px] font-black text-black">Clock In Now</p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-black/15 flex items-center justify-center">
+                <LogIn size={24} className="text-black" strokeWidth={2.5} />
+              </div>
+            </Link>
+          )}
         </div>
 
-        {/* Quick links */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* ── Stats row ────────────────────────────────────────────────────────── */}
+        <div className="px-4 pt-4 grid grid-cols-3 gap-3">
           {[
-            { href: "/messages", label: "Messages", icon: MessageSquare, color: "#3b82f6" },
-            { href: "/photos", label: "Photos", icon: ImageIcon, color: "#06b6d4" },
-            { href: "/safety", label: "Safety Log", icon: AlertTriangle, color: "#f59e0b" },
-            { href: "/time-tracking", label: "My Hours", icon: Clock, color: "#22c55e" },
-          ].map(({ href, label, icon: Icon, color }) => (
-            <Link key={href} href={href}
-              className="flex items-center gap-3 bg-[#111111] border border-white/[0.06] hover:border-white/10 active:bg-white/[0.04] rounded-xl p-4 transition-all">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: color + "18" }}>
-                <Icon size={17} style={{ color }} />
+            { label: "Today", value: totalToday.toFixed(1) + "h", pct: dayPct, color: "#3b82f6", sub: `${dayTarget}h target` },
+            { label: "This Week", value: (myWeekHours + liveElapsed).toFixed(1) + "h", pct: weekPct, color: "#f59e0b", sub: `${weekTarget}h target` },
+            { label: "Days In", value: String(workedDays), pct: (workedDays / 5) * 100, color: "#22c55e", sub: "this week" },
+          ].map(({ label, value, pct, color, sub }) => (
+            <div key={label} className="bg-[#111] border border-white/[0.06] rounded-2xl p-3">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1">{label}</p>
+              <p className="text-[20px] font-black text-white leading-none">{value}</p>
+              <p className="text-[10px] text-white/25 mt-0.5 mb-2">{sub}</p>
+              {/* Progress bar */}
+              <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
               </div>
-              <span className="text-[13px] font-semibold text-white/75">{label}</span>
-              <ArrowRight size={13} className="text-white/20 ml-auto" />
-            </Link>
+            </div>
           ))}
         </div>
 
-        {/* Recent activity */}
-        {activityFeed.length > 0 && (
-          <div>
-            <h3 className="text-[14px] font-bold text-white mb-3">Recent Activity</h3>
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl divide-y divide-white/[0.04]">
-              {activityFeed.slice(0, 5).map((event) => {
-                const iconDef = ACTIVITY_ICONS[event.type] ?? ACTIVITY_ICONS["task-updated"];
-                const Icon = iconDef.icon;
-                return (
-                  <div key={event.id} className="flex gap-3 p-3">
-                    <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: iconDef.color + "18" }}>
-                      <span style={{ color: iconDef.color }}><Icon size={13} /></span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] text-white/70 leading-snug">{event.description}</p>
-                      <p className="text-[10px] text-white/25 mt-1">{timeAgo(event.timestamp)}</p>
+        {/* ── My Projects ──────────────────────────────────────────────────────── */}
+        {myProjects.length > 0 && (
+          <div className="px-4 pt-4">
+            <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">My Projects</p>
+            <div className="space-y-2">
+              {myProjects.slice(0, 2).map((proj) => (
+                <Link key={proj.id} href="/projects"
+                  className="flex items-center gap-3 bg-[#111] border border-white/[0.06] active:bg-white/[0.04] rounded-2xl p-3.5 transition-all">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: (proj.color ?? "#f59e0b") + "18" }}>
+                    <FolderKanban size={18} style={{ color: proj.color ?? "#f59e0b" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold text-white/85 truncate">{proj.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500 rounded-full" style={{ width: `${proj.progress ?? 0}%` }} />
+                      </div>
+                      <span className="text-[10px] text-white/35 font-semibold flex-shrink-0">{proj.progress ?? 0}%</span>
                     </div>
                   </div>
-                );
-              })}
+                  <ArrowRight size={13} className="text-white/20 flex-shrink-0" />
+                </Link>
+              ))}
             </div>
           </div>
         )}
+
+        {/* ── My Tasks ─────────────────────────────────────────────────────────── */}
+        {(urgentTasks.length > 0 || todayTasks.length > 0) && (
+          <div className="px-4 pt-4">
+            <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">My Tasks</p>
+            <div className="bg-[#111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04] overflow-hidden">
+              {[...urgentTasks, ...todayTasks].slice(0, 4).map((task) => (
+                <div key={task.id} className="flex items-center gap-3 px-4 py-3">
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${urgentTasks.includes(task) ? "bg-red-400" : "bg-amber-400"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] text-white/80 font-semibold truncate">{task.name}</p>
+                    <p className="text-[11px] text-white/30">{task.projectName}</p>
+                  </div>
+                  {urgentTasks.includes(task) && (
+                    <span className="text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full flex-shrink-0">Overdue</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Punch list preview ───────────────────────────────────────────────── */}
+        {myPunchItems.length > 0 && (
+          <div className="px-4 pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider">Open Punch Items</p>
+              <Link href="/punch-list" className="text-[11px] text-amber-400/60 font-semibold">View all</Link>
+            </div>
+            <div className="bg-[#111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04] overflow-hidden">
+              {myPunchItems.slice(0, 3).map((item) => (
+                <div key={item.id} className="flex items-center gap-3 px-4 py-3">
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.priority === "high" ? "bg-red-400" : item.priority === "medium" ? "bg-amber-400" : "bg-white/30"}`} />
+                  <p className="text-[13px] text-white/70 truncate flex-1">{item.description}</p>
+                  <span className="text-[10px] text-white/25 capitalize flex-shrink-0">{item.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Quick actions ────────────────────────────────────────────────────── */}
+        <div className="px-4 pt-4 pb-2">
+          <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">Quick Actions</p>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { href: "/photos",        label: "Upload Photo",  icon: Camera,        color: "#06b6d4", sub: "Job site photos" },
+              { href: "/safety",        label: "Safety Log",    icon: ShieldAlert,   color: "#f59e0b", sub: "Report incident" },
+              { href: "/messages",      label: "Messages",      icon: MessageSquare, color: "#3b82f6", sub: "Crew chat" },
+              { href: "/schedule",      label: "Schedule",      icon: Calendar,      color: "#8b5cf6", sub: "Your calendar" },
+            ].map(({ href, label, icon: Icon, color, sub }) => (
+              <Link key={href} href={href}
+                className="flex flex-col gap-2 bg-[#111] border border-white/[0.06] active:bg-white/[0.04] rounded-2xl p-4 transition-all">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: color + "18" }}>
+                  <Icon size={19} style={{ color }} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-bold text-white/85">{label}</p>
+                  <p className="text-[11px] text-white/30">{sub}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
       </div>
     );
   }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Search, Circle, Timer, CheckCircle2, AlertCircle, MapPin, Calendar, X, Pencil } from "lucide-react";
+import { isForemanOrAbove } from "@/lib/permissions";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
@@ -34,7 +35,8 @@ const blank: ItemForm = {
 };
 
 export default function PunchListPage() {
-  const { punchItems, projects, workers, addPunchItem, updatePunchItem, deletePunchItem, getWorkerById, getProjectById } = useStore();
+  const { punchItems, projects, workers, addPunchItem, updatePunchItem, deletePunchItem, getWorkerById, getProjectById, currentUser } = useStore();
+  const canEdit = isForemanOrAbove(currentUser.role);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -112,11 +114,13 @@ export default function PunchListPage() {
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 pt-4 pb-3">
           <h2 className="text-xl font-bold text-white tracking-tight">Punch List</h2>
-          <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors">
-            <Plus size={14} />
-            Add Item
-          </button>
+          {canEdit && (
+            <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors">
+              <Plus size={14} />
+              Add Item
+            </button>
+          )}
         </div>
 
         {/* Stats */}
@@ -226,16 +230,18 @@ export default function PunchListPage() {
                       Reopen
                     </button>
                   )}
-                  <div className="flex items-center gap-1 ml-auto">
-                    <button onClick={() => openEdit(item)}
-                      className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
-                      <Pencil size={13} />
-                    </button>
-                    <button onClick={() => setDeleteConfirm(item.id)}
-                      className="p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
-                      <X size={13} />
-                    </button>
-                  </div>
+                  {canEdit && (
+                    <div className="flex items-center gap-1 ml-auto">
+                      <button onClick={() => openEdit(item)}
+                        className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                        <Pencil size={13} />
+                      </button>
+                      <button onClick={() => setDeleteConfirm(item.id)}
+                        className="p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        <X size={13} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -265,11 +271,11 @@ export default function PunchListPage() {
               <h2 className="text-2xl font-bold text-white tracking-tight">Punch List</h2>
               <p className="text-white/35 text-sm mt-0.5">Track and resolve defects, issues, and site observations</p>
             </div>
-            <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
+            {canEdit && <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
               className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
               <Plus size={15} />
               Add Item
-            </button>
+            </button>}
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -353,14 +359,16 @@ export default function PunchListPage() {
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
-                          <button onClick={() => openEdit(item)}
-                            className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-white/60 transition-all">
-                            <Pencil size={13} />
-                          </button>
-                          <button onClick={() => setDeleteConfirm(item.id)}
-                            className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all">
-                            <X size={13} />
-                          </button>
+                          {canEdit && <>
+                            <button onClick={() => openEdit(item)}
+                              className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-white/60 transition-all">
+                              <Pencil size={13} />
+                            </button>
+                            <button onClick={() => setDeleteConfirm(item.id)}
+                              className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all">
+                              <X size={13} />
+                            </button>
+                          </>}
                         </div>
                       </div>
                       {item.description && <p className="text-[12px] text-white/45 mb-3 leading-relaxed">{item.description}</p>}
@@ -390,26 +398,28 @@ export default function PunchListPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.05]">
-                    {item.status === "open" && (
-                      <button onClick={() => updatePunchItem(item.id, { status: "in-progress" })}
-                        className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1 rounded-lg transition-colors">
-                        Start Work
-                      </button>
-                    )}
-                    {item.status !== "resolved" && (
-                      <button onClick={() => updatePunchItem(item.id, { status: "resolved" })}
-                        className="text-[11px] font-semibold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/15 px-3 py-1 rounded-lg transition-colors">
-                        Mark Resolved
-                      </button>
-                    )}
-                    {item.status === "resolved" && (
-                      <button onClick={() => updatePunchItem(item.id, { status: "open" })}
-                        className="text-[11px] font-semibold text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/8 px-3 py-1 rounded-lg transition-colors">
-                        Reopen
-                      </button>
-                    )}
-                  </div>
+                  {canEdit && (
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.05]">
+                      {item.status === "open" && (
+                        <button onClick={() => updatePunchItem(item.id, { status: "in-progress" })}
+                          className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1 rounded-lg transition-colors">
+                          Start Work
+                        </button>
+                      )}
+                      {item.status !== "resolved" && (
+                        <button onClick={() => updatePunchItem(item.id, { status: "resolved" })}
+                          className="text-[11px] font-semibold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/15 px-3 py-1 rounded-lg transition-colors">
+                          Mark Resolved
+                        </button>
+                      )}
+                      {item.status === "resolved" && (
+                        <button onClick={() => updatePunchItem(item.id, { status: "open" })}
+                          className="text-[11px] font-semibold text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/8 px-3 py-1 rounded-lg transition-colors">
+                          Reopen
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

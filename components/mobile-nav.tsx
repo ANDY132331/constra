@@ -3,23 +3,53 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Clock, MessagesSquare, ShieldAlert, LifeBuoy,
+  LayoutDashboard, Clock, MessagesSquare, ShieldAlert,
+  CalendarDays, FolderKanban, ClipboardList, BarChart3,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { isForemanOrAbove, isAdminOrAbove } from "@/lib/permissions";
 
-const ITEMS = [
-  { href: "/dashboard",     icon: LayoutDashboard, label: "Home"    },
-  { href: "/time-tracking", icon: Clock,           label: "Clock"   },
-  { href: "/messages",      icon: MessagesSquare,  label: "Chat"    },
-  { href: "/safety",        icon: ShieldAlert,     label: "Safety"  },
-  { href: "/support",       icon: LifeBuoy,        label: "Support" },
-];
+type NavTab = { href: string; icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>; label: string; isClockBtn?: boolean };
 
 export function MobileNav() {
   const pathname = usePathname();
-  const { workers, currentUser } = useStore();
+  const { currentUser } = useStore();
 
-  const clockedIn = workers.find((w) => w.id === currentUser.id)?.clockedIn ?? false;
+  const isForeman = isForemanOrAbove(currentUser.role);
+  const isAdmin = isAdminOrAbove(currentUser.role);
+  const clockedIn = currentUser.clockedIn ?? false;
+
+  // Clock button — always centre tab
+  const clockTab: NavTab = { href: "/time-tracking", icon: Clock, label: clockedIn ? "On Site" : "Clock", isClockBtn: true };
+
+  let tabs: NavTab[];
+
+  if (isAdmin) {
+    tabs = [
+      { href: "/dashboard",     icon: LayoutDashboard, label: "Home" },
+      { href: "/projects",      icon: FolderKanban,    label: "Projects" },
+      clockTab,
+      { href: "/reports",       icon: BarChart3,       label: "Reports" },
+      { href: "/messages",      icon: MessagesSquare,  label: "Chat" },
+    ];
+  } else if (isForeman) {
+    tabs = [
+      { href: "/dashboard",     icon: LayoutDashboard, label: "Home" },
+      { href: "/projects",      icon: FolderKanban,    label: "Projects" },
+      clockTab,
+      { href: "/punch-list",    icon: ClipboardList,   label: "Punch" },
+      { href: "/messages",      icon: MessagesSquare,  label: "Chat" },
+    ];
+  } else {
+    // Worker — view-only access to schedule + projects
+    tabs = [
+      { href: "/dashboard",     icon: LayoutDashboard, label: "Home" },
+      { href: "/schedule",      icon: CalendarDays,    label: "Schedule" },
+      clockTab,
+      { href: "/projects",      icon: FolderKanban,    label: "Projects" },
+      { href: "/messages",      icon: MessagesSquare,  label: "Chat" },
+    ];
+  }
 
   return (
     <nav
@@ -32,40 +62,23 @@ export function MobileNav() {
         boxShadow: "0 -12px 48px rgba(0,0,0,0.75), 0 -1px 0 rgba(245,158,11,0.05)",
       }}
     >
-      {ITEMS.map(({ href, icon: Icon, label }, i) => {
+      {tabs.map(({ href, icon: Icon, label, isClockBtn }) => {
         const active = pathname === href || pathname.startsWith(href + "/");
-        const isClockBtn = i === 1;
 
         if (isClockBtn) {
           return (
             <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center py-2 -mt-4">
               <div className="relative">
-                {/* Outer glow ring */}
-                <div
-                  className={`absolute -inset-1.5 rounded-[18px] blur-sm transition-all ${
-                    clockedIn ? "bg-green-500/30" : "bg-amber-500/25"
-                  }`}
-                />
-                {/* Pulsing ring when clocked in */}
-                {clockedIn && (
-                  <div className="absolute -inset-1 rounded-2xl animate-ping bg-green-500/20" />
-                )}
-                <div
-                  className={`relative w-[54px] h-[54px] rounded-2xl flex items-center justify-center shadow-xl transition-all ${
-                    clockedIn
-                      ? "bg-green-500 shadow-green-500/40"
-                      : active
-                      ? "bg-amber-500 shadow-amber-500/50"
-                      : "bg-amber-500 shadow-amber-500/30"
-                  }`}
-                >
+                <div className={`absolute -inset-1.5 rounded-[18px] blur-sm transition-all ${clockedIn ? "bg-green-500/30" : "bg-amber-500/25"}`} />
+                {clockedIn && <div className="absolute -inset-1 rounded-2xl animate-ping bg-green-500/20" />}
+                <div className={`relative w-[54px] h-[54px] rounded-2xl flex items-center justify-center shadow-xl transition-all ${
+                  clockedIn ? "bg-green-500 shadow-green-500/40" : "bg-amber-500 shadow-amber-500/30"
+                }`}>
                   <Icon size={24} className="text-black" strokeWidth={2.5} />
                 </div>
               </div>
-              <span className={`text-[9px] font-black uppercase tracking-wider mt-1.5 ${
-                clockedIn ? "text-green-400" : "text-amber-400/70"
-              }`}>
-                {clockedIn ? "On Site" : "Clock"}
+              <span className={`text-[9px] font-black uppercase tracking-wider mt-1.5 ${clockedIn ? "text-green-400" : "text-amber-400/70"}`}>
+                {label}
               </span>
             </Link>
           );
@@ -75,11 +88,8 @@ export function MobileNav() {
           <Link
             key={href}
             href={href}
-            className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-all relative ${
-              active ? "text-amber-400" : "text-white/25"
-            }`}
+            className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-all relative ${active ? "text-amber-400" : "text-white/25"}`}
           >
-            {/* Pill background for active state */}
             {active && (
               <span className="absolute inset-x-2.5 top-2 bottom-2 rounded-xl bg-amber-500/10 border border-amber-500/15 -z-10" />
             )}
@@ -88,7 +98,6 @@ export function MobileNav() {
           </Link>
         );
       })}
-      {/* iOS safe area */}
       <div className="absolute inset-x-0 -bottom-0 bg-[#070707]" style={{ height: "env(safe-area-inset-bottom)" }} />
     </nav>
   );
