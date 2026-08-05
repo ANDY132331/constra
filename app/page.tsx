@@ -361,6 +361,62 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Video demo ──────────────────────────────────────────────────────── */}
+      {(() => {
+        // ✅ Drop your Loom or YouTube embed URL here when ready:
+        // Loom:    "https://www.loom.com/embed/YOUR_VIDEO_ID"
+        // YouTube: "https://www.youtube.com/embed/YOUR_VIDEO_ID"
+        const VIDEO_EMBED_URL = "";
+
+        return (
+          <section className="py-16 px-5 border-t border-white/[0.04]">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <p className="text-[11px] font-bold text-amber-400 uppercase tracking-[0.15em] mb-2">See It In Action</p>
+                <h2 className="text-[26px] sm:text-[32px] font-bold text-white/90 tracking-tight">
+                  From chaos to clarity in 2 minutes
+                </h2>
+                <p className="text-[14px] text-white/40 mt-2">Watch how a real crew uses Constra on a job site</p>
+              </div>
+
+              {VIDEO_EMBED_URL ? (
+                <div className="relative w-full rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl"
+                  style={{ paddingBottom: "56.25%" }}>
+                  <iframe
+                    src={VIDEO_EMBED_URL}
+                    className="absolute inset-0 w-full h-full"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                /* Placeholder — shown until VIDEO_EMBED_URL is filled in */
+                <div className="relative w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0d0d0d] shadow-2xl"
+                  style={{ paddingBottom: "56.25%" }}>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                    {/* Subtle grid background */}
+                    <div className="absolute inset-0 opacity-[0.03]"
+                      style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "40px 40px" }} />
+                    {/* Glow */}
+                    <div className="absolute w-64 h-64 bg-amber-500/10 rounded-full blur-3xl" />
+                    {/* Play button */}
+                    <div className="relative w-16 h-16 rounded-full bg-amber-500/90 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-black ml-1">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <div className="relative text-center">
+                      <p className="text-[15px] font-semibold text-white/60">Demo video coming soon</p>
+                      <p className="text-[12px] text-white/25 mt-1">See how Constra works on a real job site</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      })()}
+
       {/* ── Social proof strip ──────────────────────────────────────────────── */}
       <section className="py-8 px-5 border-t border-white/[0.04]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 text-center">
