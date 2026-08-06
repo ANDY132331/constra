@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
@@ -446,6 +446,7 @@ export default function EstimatesPage() {
   const [selectedId, setSelectedId]   = useState<string | null>(estimates[0]?.id ?? null);
   const [mobilePreviewId, setMobilePreviewId] = useState<string | null>(null);
   const [convertedNotice, setConvertedNotice] = useState<string | null>(null);
+  const convertedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!selectedId && estimates[0]?.id) setSelectedId(estimates[0].id);
@@ -487,7 +488,8 @@ export default function EstimatesPage() {
       notes: estimate.notes,
     });
     setConvertedNotice(nextInvNum);
-    setTimeout(() => setConvertedNotice(null), 5000);
+    if (convertedTimerRef.current) clearTimeout(convertedTimerRef.current);
+    convertedTimerRef.current = setTimeout(() => setConvertedNotice(null), 5000);
   };
 
   const filtered = estimates.filter((e) => {

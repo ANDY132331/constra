@@ -353,8 +353,8 @@ export default function MessagesPage() {
                             background: isMe ? C.sentGrad : C.recvBg,
                             color: isMe ? C.sentText : C.recvText,
                             borderRadius: isMe
-                              ? `18px 18px ${showSender ? "4px" : "18px"} 18px`
-                              : `18px 18px 18px ${showSender ? "4px" : "18px"}`,
+                              ? `18px 18px ${isGroupEnd ? "4px" : "18px"} 18px`
+                              : `18px 18px 18px ${isGroupEnd ? "4px" : "18px"}`,
                             boxShadow: isMe ? "0 2px 8px rgba(59,130,246,0.25)" : "0 1px 4px rgba(0,0,0,0.08)",
                           }}
                         >
@@ -380,8 +380,8 @@ export default function MessagesPage() {
                           style={{
                             background: isMe ? C.sentGrad : C.recvBg,
                             borderRadius: isMe
-                              ? `18px 18px ${showSender ? "4px" : "18px"} 18px`
-                              : `18px 18px 18px ${showSender ? "4px" : "18px"}`,
+                              ? `18px 18px ${isGroupEnd ? "4px" : "18px"} 18px`
+                              : `18px 18px 18px ${isGroupEnd ? "4px" : "18px"}`,
                             boxShadow: isMe ? "0 2px 8px rgba(59,130,246,0.25)" : "0 1px 4px rgba(0,0,0,0.08)",
                             minWidth: 200,
                           }}
@@ -513,7 +513,7 @@ export default function MessagesPage() {
             />
           </div>
 
-          {/* Send or mic */}
+          {/* Send or mic — MicButton must NOT be overflow-hidden so recording UI is visible */}
           {text.trim() || pendingAttachment ? (
             <button
               onClick={sendMessage}
@@ -523,10 +523,10 @@ export default function MessagesPage() {
               <Send size={17} className="text-white" style={{ marginLeft: 2 }} />
             </button>
           ) : (
-            <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full overflow-hidden shadow-sm" style={{ background: C.sentGrad }}>
+            <div className="flex-shrink-0">
               <MicButton
                 onAudio={handleAudio}
-                className="!w-full !h-full !bg-transparent !border-0 !rounded-full !text-white"
+                className="!bg-blue-500 !text-white !border-0 !rounded-full hover:!bg-blue-400 !shadow-sm"
                 size="md"
               />
             </div>
