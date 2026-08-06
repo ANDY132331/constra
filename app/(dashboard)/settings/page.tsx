@@ -292,12 +292,6 @@ function SettingsInner() {
 
   return (
     <div className="space-y-4">
-    {searchParams.get("success") === "1" && (
-      <div className="flex items-center gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 text-[13px] font-semibold text-green-400">
-        <CheckCircle2 size={15} />
-        Payment successful — Constra Pro is now active on your account.
-      </div>
-    )}
     <div className="flex flex-col sm:flex-row gap-6 max-w-[1100px]">
       {/* Sidebar tabs — horizontal scroll on mobile */}
       <div className="w-full sm:w-48 flex-shrink-0">

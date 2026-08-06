@@ -11,11 +11,10 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com",
+      "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://api.stripe.com https://vitals.vercel-insights.com",
-      "frame-src https://js.stripe.com https://checkout.stripe.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://vitals.vercel-insights.com",
       "font-src 'self'",
       "media-src 'self' blob:",
       "worker-src 'self' blob:",
@@ -36,6 +35,14 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        // assetlinks.json must be plain JSON with no CSP restrictions — required for TWA Play Store
+        source: "/.well-known/assetlinks.json",
+        headers: [
+          { key: "Content-Type", value: "application/json" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+        ],
+      },
       {
         source: "/:path*",
         headers: securityHeaders,
