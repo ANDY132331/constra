@@ -2,43 +2,50 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
-  Send, Paperclip, X, Download, Trash2, Mic, SmilePlus, Check, MessagesSquare,
+  Send, Paperclip, X, Download, Trash2, MessagesSquare,
+  Search, Phone, Info, ChevronLeft, Mic,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
 import { MicButton } from "@/components/mic-button";
 
-// ── Colours (Light mix palette — airy, modern, Constra amber) ─────────────────
+// ── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  sidebarBg:      "#ffffff",
-  sidebarActive:  "#fff8ed",          // warm amber tint on active row
-  chatBg:         "#f0f2f5",          // soft neutral grey — like Messenger light
-  headerBg:       "#ffffff",
-  inputBg:        "#f0f2f5",
-  inputField:     "#ffffff",
-  sentBubble:     "#f59e0b",          // Constra amber-500
-  sentBubbleGrad: "linear-gradient(135deg,#fbbf24,#d97706)", // amber gradient
-  receivedBubble: "#ffffff",
-  sentText:       "#1a0a00",          // near-black on amber (readable)
-  receivedText:   "#111827",          // dark gray on white
-  secondaryText:  "#6b7280",          // medium gray
-  border:         "rgba(0,0,0,0.07)",
-  datePill:       "rgba(0,0,0,0.10)",
-  divider:        "rgba(0,0,0,0.06)",
+  // Sidebar
+  sidebarBg:     "#ffffff",
+  sidebarBorder: "rgba(0,0,0,0.07)",
+  activeRow:     "#f0f5ff",
+  activeBorder:  "#3b82f6",
+
+  // Chat area
+  chatBg:        "#f2f5fb",
+
+  // Bubbles
+  sentGrad:      "linear-gradient(135deg,#4f8ef7,#1d4ed8)",
+  sentText:      "#ffffff",
+  recvBg:        "#ffffff",
+  recvText:      "#1a1a2e",
+
+  // UI
+  headerBg:      "#ffffff",
+  inputBg:       "#ffffff",
+  barBg:         "#f2f5fb",
+  secondaryText: "#8b9ab2",
+  border:        "rgba(0,0,0,0.07)",
+  datePill:      "rgba(100,116,139,0.15)",
 };
 
 function fmtTime(d: Date) { return format(d, "h:mm a"); }
-
 function fmtDur(s: number) {
   const m = Math.floor(s / 60);
   return m > 0 ? `${m}:${String(s % 60).padStart(2, "0")}` : `0:${String(s % 60).padStart(2, "0")}`;
 }
 
-function DateSeparator({ date }: { date: Date }) {
+function DateSep({ date }: { date: Date }) {
   const label = isToday(date) ? "Today" : isYesterday(date) ? "Yesterday" : format(date, "MMMM d, yyyy");
   return (
-    <div className="flex items-center justify-center my-2">
-      <span className="text-[11.5px] font-medium px-3 py-1 rounded-full" style={{ background: C.datePill, color: C.secondaryText }}>
+    <div className="flex items-center justify-center my-4">
+      <span className="text-[11px] font-semibold px-3 py-1 rounded-full" style={{ background: C.datePill, color: C.secondaryText }}>
         {label}
       </span>
     </div>
@@ -50,6 +57,7 @@ export default function MessagesPage() {
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
+  const [sidebarSearch, setSidebarSearch] = useState("");
 
   useEffect(() => {
     if (!selectedProjectId && projects[0]?.id) setSelectedProjectId(projects[0].id);
@@ -75,7 +83,7 @@ export default function MessagesPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [projectMessages.length, selectedProjectId]);
 
-  // ── Visual-viewport resize: keep chat visible when keyboard opens (iOS PWA) ─
+  // iOS PWA keyboard avoidance
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv || !containerRef.current) return;
@@ -148,80 +156,98 @@ export default function MessagesPage() {
 
   const project = projects.find((p) => p.id === selectedProjectId);
 
+  // Filtered sidebar projects
+  const filteredProjects = useMemo(() => {
+    const q = sidebarSearch.toLowerCase();
+    return projects.filter((p) => !q || p.name.toLowerCase().includes(q));
+  }, [projects, sidebarSearch]);
+
   return (
     <div
       ref={containerRef}
-      className="flex overflow-hidden rounded-2xl"
+      className="flex overflow-hidden rounded-2xl shadow-xl"
       style={{ height: "calc(100dvh - 168px)", border: `1px solid ${C.border}` }}
     >
-      {/* ═══════════════════════════════════════════════════════════════════════
-          SIDEBAR — project / conversation list (WhatsApp left panel)
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════ SIDEBAR ══════════════════════════════ */}
       <div
-        className={`flex-shrink-0 flex flex-col
-          ${mobileSidebarOpen ? "flex" : "hidden"} sm:flex
-          w-full sm:w-[260px]`}
+        className={`flex-shrink-0 flex flex-col ${mobileSidebarOpen ? "flex" : "hidden"} sm:flex w-full sm:w-[280px]`}
         style={{ background: C.sidebarBg, borderRight: `1px solid ${C.border}` }}
       >
         {/* Sidebar header */}
-        <div className="px-4 py-3.5 flex items-center gap-3" style={{ background: C.headerBg }}>
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold flex-shrink-0"
-            style={{ background: currentUser.color + "33", color: currentUser.color }}>
-            {currentUser.initials}
+        <div className="px-4 pt-4 pb-3 border-b" style={{ borderColor: C.border }}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[17px] font-black" style={{ color: "#1a1a2e" }}>Messages</h2>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold"
+              style={{ background: currentUser.color + "25", color: currentUser.color }}>
+              {currentUser.initials}
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold leading-none" style={{ color: C.sentText }}>Crew Chat</p>
-            <p className="text-[10px] mt-0.5" style={{ color: C.secondaryText }}>
-              {projects.length} project{projects.length !== 1 ? "s" : ""}
-            </p>
+          {/* Search bar */}
+          <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "#f2f5fb" }}>
+            <Search size={14} style={{ color: C.secondaryText }} />
+            <input
+              value={sidebarSearch}
+              onChange={(e) => setSidebarSearch(e.target.value)}
+              placeholder="Search projects…"
+              className="flex-1 bg-transparent text-[13px] outline-none"
+              style={{ color: "#1a1a2e" }}
+            />
           </div>
         </div>
 
         {/* Conversation list */}
         <div className="flex-1 overflow-y-auto">
-          {projects.length === 0 ? (
-            <p className="text-[12px] px-4 py-6 text-center" style={{ color: C.secondaryText }}>No projects yet</p>
+          {filteredProjects.length === 0 ? (
+            <p className="text-[12px] px-4 py-8 text-center" style={{ color: C.secondaryText }}>No projects yet</p>
           ) : (
-            projects.map((p, idx) => {
-              const last = messages
+            filteredProjects.map((p) => {
+              const projectMsgs = messages
                 .filter((m) => m.projectId === p.id)
-                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+              const last = projectMsgs[0];
+              const unreadCount = 0; // future: real unread tracking
               const active = p.id === selectedProjectId;
-              const unread = 0; // future: track unread count
               return (
                 <button
                   key={p.id}
                   onClick={() => { setSelectedProjectId(p.id); setMobileSidebarOpen(false); }}
-                  className="w-full text-start flex items-center gap-3 px-4 py-3 transition-colors relative"
-                  style={{ background: active ? C.sidebarActive : "transparent" }}
+                  className="w-full text-start flex items-center gap-3 px-4 py-3.5 transition-all relative"
+                  style={{
+                    background: active ? C.activeRow : "transparent",
+                    borderLeft: `3px solid ${active ? C.activeBorder : "transparent"}`,
+                  }}
                 >
-                  {/* Project colour avatar */}
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 text-[13px] font-bold"
-                    style={{ background: p.color + "33", color: p.color }}>
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 text-[13px] font-black shadow-sm"
+                    style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}88)`, color: "#fff" }}>
                     {p.name.slice(0, 2).toUpperCase()}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-0.5">
-                      <span className="text-[13.5px] font-semibold truncate" style={{ color: C.sentText }}>{p.name}</span>
+                    <div className="flex items-center justify-between gap-1 mb-0.5">
+                      <span className="text-[13.5px] font-bold truncate" style={{ color: active ? "#1d4ed8" : "#1a1a2e" }}>{p.name}</span>
                       {last && (
-                        <span className="text-[10.5px] flex-shrink-0" style={{ color: C.secondaryText }}>
+                        <span className="text-[10px] flex-shrink-0 font-medium" style={{ color: C.secondaryText }}>
                           {isToday(new Date(last.timestamp))
                             ? format(new Date(last.timestamp), "h:mm a")
-                            : format(new Date(last.timestamp), "MM/dd/yy")}
+                            : format(new Date(last.timestamp), "MM/dd")}
                         </span>
                       )}
                     </div>
                     <p className="text-[12px] truncate" style={{ color: C.secondaryText }}>
                       {last
-                        ? `${last.senderName.split(" ")[0]}: ${last.attachmentName?.startsWith("voice-") ? "🎙 Voice message" : last.text || "📎 Attachment"}`
+                        ? (last.attachmentName?.startsWith("voice-")
+                          ? "🎙 Voice message"
+                          : last.text || "📎 Attachment")
                         : "No messages yet"}
                     </p>
                   </div>
 
-                  {/* Bottom divider — skip last item */}
-                  {idx < projects.length - 1 && (
-                    <div className="absolute bottom-0 right-0 left-16" style={{ height: 1, background: C.border }} />
+                  {unreadCount > 0 && (
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white flex-shrink-0"
+                      style={{ background: C.activeBorder }}>
+                      {unreadCount}
+                    </span>
                   )}
                 </button>
               );
@@ -230,37 +256,36 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          CHAT PANEL
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════ CHAT PANEL ════════════════════════════ */}
       <div
         className={`flex-1 flex flex-col min-w-0 ${mobileSidebarOpen ? "hidden sm:flex" : "flex"}`}
         style={{ background: C.chatBg }}
       >
         {/* Chat header */}
-        <div className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0" style={{ background: C.headerBg }}>
-          {/* Mobile back */}
-          <button
-            onClick={() => setMobileSidebarOpen(true)}
-            className="sm:hidden w-7 h-7 flex items-center justify-center rounded-full transition-all"
-            style={{ color: C.secondaryText }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
+        <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0 border-b shadow-sm" style={{ background: C.headerBg, borderColor: C.border }}>
+          <button onClick={() => setMobileSidebarOpen(true)} className="sm:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-all hover:bg-black/5">
+            <ChevronLeft size={20} style={{ color: C.activeBorder }} />
           </button>
 
           {project ? (
             <>
-              <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[12px] font-bold"
-                style={{ background: project.color + "33", color: project.color }}>
+              <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-black shadow-sm"
+                style={{ background: `linear-gradient(135deg,${project.color}cc,${project.color}88)`, color: "#fff" }}>
                 {project.name.slice(0, 2).toUpperCase()}
               </div>
-              <div>
-                <p className="text-[14px] font-bold leading-none" style={{ color: C.sentText }}>{project.name}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: C.secondaryText }}>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14.5px] font-black leading-tight" style={{ color: "#1a1a2e" }}>{project.name}</p>
+                <p className="text-[11px]" style={{ color: C.secondaryText }}>
                   {projectMessages.length} message{projectMessages.length !== 1 ? "s" : ""}
                 </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors" title="Call (coming soon)">
+                  <Phone size={17} style={{ color: C.secondaryText }} />
+                </button>
+                <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors" title="Project info">
+                  <Info size={17} style={{ color: C.secondaryText }} />
+                </button>
               </div>
             </>
           ) : (
@@ -269,318 +294,259 @@ export default function MessagesPage() {
         </div>
 
         {/* ── Messages ─────────────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-0.5">
+        <div className="flex-1 overflow-y-auto px-4 py-3">
           {projectMessages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: C.sidebarActive }}>
-                <MessagesSquare size={28} style={{ color: C.secondaryText }} />
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.08)" }}>
+                <MessagesSquare size={32} style={{ color: "#3b82f6" }} />
               </div>
-              <p className="text-[13px]" style={{ color: C.secondaryText }}>No messages yet</p>
-              <p className="text-[11px]" style={{ color: C.secondaryText + "99" }}>Send a message or voice note to start the conversation</p>
+              <div>
+                <p className="text-[15px] font-bold" style={{ color: "#1a1a2e" }}>No messages yet</p>
+                <p className="text-[12px] mt-1" style={{ color: C.secondaryText }}>Send a message or voice note to kick things off</p>
+              </div>
             </div>
           )}
 
-          {projectMessages.map((msg, i) => {
-            const isMe = msg.senderId === currentUser.id;
-            const ts = new Date(msg.timestamp);
-            const prevMsg = i > 0 ? projectMessages[i - 1] : null;
-            const prevTs  = prevMsg ? new Date(prevMsg.timestamp) : null;
+          <div className="space-y-0.5">
+            {projectMessages.map((msg, i) => {
+              const isMe = msg.senderId === currentUser.id;
+              const ts = new Date(msg.timestamp);
+              const prevMsg = i > 0 ? projectMessages[i - 1] : null;
+              const prevTs  = prevMsg ? new Date(prevMsg.timestamp) : null;
+              const showDate   = !prevTs || !isSameDay(ts, prevTs);
+              const showSender = showDate || !prevMsg || prevMsg.senderId !== msg.senderId;
+              const isGroupEnd = !projectMessages[i + 1] || projectMessages[i + 1].senderId !== msg.senderId;
+              const hasAudio   = !!(msg.attachmentName && msg.attachmentData && isAudio(msg.attachmentName, msg.attachmentData));
+              const durMatch   = msg.attachmentName?.match(/voice-(\d+)s/);
+              const audioDur   = durMatch ? parseInt(durMatch[1]) : 0;
 
-            // Show date separator when day changes
-            const showDate = !prevTs || !isSameDay(ts, prevTs);
-            // Show avatar + sender name when sender changes or date changes
-            const showAvatar = showDate || !prevMsg || prevMsg.senderId !== msg.senderId;
-            // Tail only on first bubble from this sender in this group
-            const showTail = showAvatar;
+              return (
+                <div key={msg.id}>
+                  {showDate && <DateSep date={ts} />}
 
-            const hasAudio  = !!(msg.attachmentName && msg.attachmentData && isAudio(msg.attachmentName, msg.attachmentData));
-            const durMatch  = msg.attachmentName?.match(/voice-(\d+)s/);
-            const audioDur  = durMatch ? parseInt(durMatch[1]) : 0;
+                  <div className={`flex items-end gap-2.5 ${isMe ? "flex-row-reverse" : ""} ${showSender && !showDate ? "mt-4" : "mt-0.5"}`}>
+                    {/* Received avatar */}
+                    <div className={`w-8 flex-shrink-0 ${isMe ? "hidden" : "flex items-end"}`}>
+                      {isGroupEnd ? (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm"
+                          style={{ background: msg.senderColor + "30", color: msg.senderColor }}>
+                          {msg.senderInitials}
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8" />
+                      )}
+                    </div>
 
-            // Whether this is the last in a group (different next sender or last overall)
-            const nextMsg = projectMessages[i + 1];
-            const isGroupEnd = !nextMsg || nextMsg.senderId !== msg.senderId;
+                    {/* Bubble + name */}
+                    <div className={`group/bubble relative max-w-[72%] sm:max-w-[60%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                      {showSender && !isMe && (
+                        <p className="text-[11px] font-bold mb-1 px-1" style={{ color: msg.senderColor }}>
+                          {msg.senderName}
+                        </p>
+                      )}
 
-            return (
-              <div key={msg.id}>
-                {showDate && <DateSeparator date={ts} />}
-
-                <div className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""} ${showAvatar && !showDate ? "mt-3" : "mt-[2px]"}`}>
-                  {/* Avatar — show at group end (bottom of group), like WhatsApp */}
-                  <div className={`w-8 flex-shrink-0 flex items-end ${isMe ? "hidden" : ""}`}>
-                    {isGroupEnd && !isMe ? (
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold"
-                        style={{ background: msg.senderColor + "33", color: msg.senderColor }}>
-                        {msg.senderInitials}
-                      </div>
-                    ) : (
-                      <div className="w-8 h-8" /> /* spacer */
-                    )}
-                  </div>
-
-                  {/* Bubble wrapper */}
-                  <div className={`relative group/msg max-w-[70%] ${isMe ? "items-end" : "items-start"} flex flex-col`}>
-                    {/* Sender name (received only, first in group) */}
-                    {showAvatar && !isMe && (
-                      <p className="text-[11px] font-bold mb-1 px-1" style={{ color: msg.senderColor }}>
-                        {msg.senderName}
-                      </p>
-                    )}
-
-                    {/* TEXT bubble */}
-                    {msg.text && (
-                      <div className="relative">
-                        {/* Tail */}
-                        {showTail && (
-                          isMe ? (
-                            <span className="absolute top-0 -right-[7px]" style={{
-                              width: 0, height: 0,
-                              borderLeft: `7px solid #fbbf24`,
-                              borderBottom: "7px solid transparent",
-                            }} />
-                          ) : (
-                            <span className="absolute top-0 -left-[7px]" style={{
-                              width: 0, height: 0,
-                              borderRight: `7px solid ${C.receivedBubble}`,
-                              borderBottom: "7px solid transparent",
-                            }} />
-                          )
-                        )}
-
+                      {/* TEXT bubble */}
+                      {msg.text && (
                         <div
-                          className="px-3 pt-2 pb-1.5 rounded-[10px] text-[13.5px] leading-relaxed break-words"
+                          className="px-3.5 pt-2.5 pb-1.5 shadow-sm"
                           style={{
-                            background: isMe ? C.sentBubbleGrad : C.receivedBubble,
-                            color: isMe ? C.sentText : C.receivedText,
-                            boxShadow: isMe ? "0 1px 3px rgba(0,0,0,0.10)" : "0 1px 2px rgba(0,0,0,0.08)",
-                            borderTopRightRadius: (showTail && isMe) ? "2px" : undefined,
-                            borderTopLeftRadius:  (showTail && !isMe) ? "2px" : undefined,
+                            background: isMe ? C.sentGrad : C.recvBg,
+                            color: isMe ? C.sentText : C.recvText,
+                            borderRadius: isMe
+                              ? `18px 18px ${showSender ? "4px" : "18px"} 18px`
+                              : `18px 18px 18px ${showSender ? "4px" : "18px"}`,
+                            boxShadow: isMe ? "0 2px 8px rgba(59,130,246,0.25)" : "0 1px 4px rgba(0,0,0,0.08)",
                           }}
                         >
-                          {msg.text}
-                          {/* Time + check row */}
-                          <span className="flex items-center justify-end gap-1 mt-0.5 -mb-0.5">
-                            <span className="text-[10px]" style={{ color: isMe ? "rgba(233,237,239,0.55)" : C.secondaryText }}>
+                          <p className="text-[13.5px] leading-relaxed break-words">{msg.text}</p>
+                          <div className="flex items-center justify-end gap-1 mt-0.5 -mb-0.5">
+                            <span className="text-[10px]" style={{ color: isMe ? "rgba(255,255,255,0.65)" : C.secondaryText }}>
                               {fmtTime(ts)}
                             </span>
-                            {isMe && <Check size={11} style={{ color: "rgba(233,237,239,0.55)" }} />}
-                          </span>
+                            {isMe && (
+                              <svg width="13" height="8" viewBox="0 0 13 8" fill="none">
+                                <path d="M1 4L4 7L7 1" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M6 4L9 7L12 1" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* AUDIO voice message */}
-                    {hasAudio && (
-                      <div className="relative">
-                        {showTail && (
-                          isMe ? (
-                            <span className="absolute top-0 -right-[7px]" style={{
-                              width: 0, height: 0,
-                              borderLeft: `7px solid #fbbf24`,
-                              borderBottom: "7px solid transparent",
-                            }} />
-                          ) : (
-                            <span className="absolute top-0 -left-[7px]" style={{
-                              width: 0, height: 0,
-                              borderRight: `7px solid ${C.receivedBubble}`,
-                              borderBottom: "7px solid transparent",
-                            }} />
-                          )
-                        )}
+                      {/* AUDIO voice message */}
+                      {hasAudio && (
                         <div
-                          className="px-3 py-2.5 rounded-[10px] flex items-center gap-2.5 min-w-[200px]"
+                          className="px-3.5 py-2.5 flex items-center gap-3 shadow-sm"
                           style={{
-                            background: isMe ? C.sentBubbleGrad : C.receivedBubble,
-                            boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-                            borderTopRightRadius: (showTail && isMe) ? "2px" : undefined,
-                            borderTopLeftRadius:  (showTail && !isMe) ? "2px" : undefined,
+                            background: isMe ? C.sentGrad : C.recvBg,
+                            borderRadius: isMe
+                              ? `18px 18px ${showSender ? "4px" : "18px"} 18px`
+                              : `18px 18px 18px ${showSender ? "4px" : "18px"}`,
+                            boxShadow: isMe ? "0 2px 8px rgba(59,130,246,0.25)" : "0 1px 4px rgba(0,0,0,0.08)",
+                            minWidth: 200,
                           }}
                         >
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ background: isMe ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.06)" }}>
-                            <Mic size={14} style={{ color: isMe ? C.sentText : C.secondaryText }} />
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ background: isMe ? "rgba(255,255,255,0.18)" : "rgba(59,130,246,0.10)" }}>
+                            <Mic size={15} style={{ color: isMe ? "#fff" : "#3b82f6" }} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <audio
-                              controls
-                              src={msg.attachmentData!}
-                              className="w-full h-6"
-                              style={{ colorScheme: "dark" }}
-                              preload="metadata"
-                            />
+                            <audio controls src={msg.attachmentData!} className="w-full h-6" preload="metadata" />
                           </div>
                           <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
                             {audioDur > 0 && (
-                              <span className="text-[10px] font-mono" style={{ color: "rgba(233,237,239,0.55)" }}>
+                              <span className="text-[10px] font-mono font-semibold" style={{ color: isMe ? "rgba(255,255,255,0.7)" : C.secondaryText }}>
                                 {fmtDur(audioDur)}
                               </span>
                             )}
-                            <span className="text-[10px]" style={{ color: "rgba(233,237,239,0.55)" }}>
+                            <span className="text-[10px]" style={{ color: isMe ? "rgba(255,255,255,0.6)" : C.secondaryText }}>
                               {fmtTime(ts)}
                             </span>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* IMAGE / FILE attachment */}
-                    {msg.attachmentName && msg.attachmentData && !hasAudio && (
-                      <div className="relative overflow-hidden rounded-[10px]" style={{ maxWidth: 260 }}>
-                        {showTail && (
-                          isMe ? (
-                            <span className="absolute top-0 -right-[7px] z-10" style={{
-                              width: 0, height: 0,
-                              borderLeft: `7px solid #fbbf24`,
-                              borderBottom: "7px solid transparent",
-                            }} />
+                      {/* IMAGE / FILE attachment */}
+                      {msg.attachmentName && msg.attachmentData && !hasAudio && (
+                        <div style={{ maxWidth: 260 }}>
+                          {isImage(msg.attachmentData) ? (
+                            <div className="relative">
+                              <img
+                                src={msg.attachmentData}
+                                alt={msg.attachmentName}
+                                className="block max-w-full cursor-pointer"
+                                style={{ borderRadius: isMe ? "18px 18px 4px 18px" : "18px 18px 18px 4px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}
+                                onClick={() => setLightboxData({ name: msg.attachmentName!, data: msg.attachmentData! })}
+                              />
+                              <span className="absolute bottom-2 right-2.5 flex items-center gap-1">
+                                <span className="text-[10px] text-white drop-shadow-md font-medium">{fmtTime(ts)}</span>
+                              </span>
+                            </div>
                           ) : (
-                            <span className="absolute top-0 -left-[7px] z-10" style={{
-                              width: 0, height: 0,
-                              borderRight: `7px solid ${C.receivedBubble}`,
-                              borderBottom: "7px solid transparent",
-                            }} />
-                          )
-                        )}
-                        {isImage(msg.attachmentData) ? (
-                          <div className="relative">
-                            <img
-                              src={msg.attachmentData}
-                              alt={msg.attachmentName}
-                              className="block max-w-full cursor-pointer"
-                              style={{ borderRadius: 10 }}
-                              onClick={() => setLightboxData({ name: msg.attachmentName!, data: msg.attachmentData! })}
-                            />
-                            <span className="absolute bottom-1.5 right-2 flex items-center gap-0.5">
-                              <span className="text-[10px] text-white/80 drop-shadow">{fmtTime(ts)}</span>
-                              {isMe && <Check size={11} className="text-white/80 drop-shadow" />}
-                            </span>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => downloadAttachment(msg.attachmentName!, msg.attachmentData!)}
-                            className="flex items-center gap-2.5 px-3 py-2.5 w-full text-left"
-                            style={{ background: isMe ? C.sentBubbleGrad : C.receivedBubble, borderRadius: 10, boxShadow: "0 1px 2px rgba(0,0,0,0.08)" }}
-                          >
-                            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                              style={{ background: "rgba(255,255,255,0.15)" }}>
-                              <Download size={14} style={{ color: C.sentText }} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-[12px] font-semibold truncate" style={{ color: C.sentText }}>{msg.attachmentName}</p>
-                              <p className="text-[10px]" style={{ color: "rgba(233,237,239,0.55)" }}>Tap to download · {fmtTime(ts)}</p>
-                            </div>
-                          </button>
-                        )}
-                      </div>
-                    )}
+                            <button
+                              onClick={() => downloadAttachment(msg.attachmentName!, msg.attachmentData!)}
+                              className="flex items-center gap-3 px-3.5 py-3 w-full text-left shadow-sm"
+                              style={{
+                                background: isMe ? C.sentGrad : C.recvBg,
+                                borderRadius: isMe ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                                boxShadow: isMe ? "0 2px 8px rgba(59,130,246,0.25)" : "0 1px 4px rgba(0,0,0,0.08)",
+                              }}
+                            >
+                              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                                style={{ background: isMe ? "rgba(255,255,255,0.18)" : "rgba(59,130,246,0.10)" }}>
+                                <Download size={14} style={{ color: isMe ? "#fff" : "#3b82f6" }} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[12px] font-semibold truncate" style={{ color: isMe ? "#fff" : "#1a1a2e" }}>{msg.attachmentName}</p>
+                                <p className="text-[10px]" style={{ color: isMe ? "rgba(255,255,255,0.65)" : C.secondaryText }}>Tap to download · {fmtTime(ts)}</p>
+                              </div>
+                            </button>
+                          )}
+                        </div>
+                      )}
 
-                    {/* Delete button on hover */}
-                    {isMe && (
-                      <button
-                        onClick={() => deleteMessage(msg.id)}
-                        className="opacity-0 group-hover/msg:opacity-100 mt-0.5 self-end p-1 rounded-full transition-all"
-                        style={{ color: C.secondaryText }}
-                        aria-label="Delete"
-                      >
-                        <Trash2 size={11} />
-                      </button>
-                    )}
+                      {/* Delete on hover */}
+                      {isMe && (
+                        <button
+                          onClick={() => deleteMessage(msg.id)}
+                          className="opacity-0 group-hover/bubble:opacity-100 mt-0.5 self-end p-1 rounded-full transition-all hover:bg-black/5"
+                          style={{ color: C.secondaryText }}
+                          aria-label="Delete"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
           <div ref={bottomRef} />
         </div>
 
-        {/* ── Pending attachment preview ──────────────────────────────────── */}
+        {/* ── Pending attachment preview ────────────────────────────────────── */}
         {pendingAttachment && (
-          <div className="px-4 py-2 flex-shrink-0 border-t" style={{ borderColor: C.border, background: C.inputBg }}>
-            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: C.inputField }}>
+          <div className="px-4 py-2 flex-shrink-0 border-t" style={{ borderColor: C.border, background: C.barBg }}>
+            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm" style={{ background: C.inputBg }}>
               {isImage(pendingAttachment.data) ? (
-                <img src={pendingAttachment.data} alt="" className="w-10 h-10 rounded object-cover" />
+                <img src={pendingAttachment.data} alt="" className="w-10 h-10 rounded-lg object-cover" />
               ) : (
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.12)" }}>
-                  <Paperclip size={13} style={{ color: C.sentText }} />
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.10)" }}>
+                  <Paperclip size={13} style={{ color: "#3b82f6" }} />
                 </div>
               )}
-              <span className="text-[12px] max-w-[200px] truncate" style={{ color: C.sentText }}>{pendingAttachment.name}</span>
-              <button onClick={() => setPendingAttachment(null)} style={{ color: C.secondaryText }} className="hover:opacity-70 ms-1">
+              <span className="text-[12px] max-w-[200px] truncate" style={{ color: "#1a1a2e" }}>{pendingAttachment.name}</span>
+              <button onClick={() => setPendingAttachment(null)} style={{ color: C.secondaryText }} className="hover:opacity-70 ml-1 transition-opacity">
                 <X size={14} />
               </button>
             </div>
           </div>
         )}
 
-        {/* ── Input bar ─────────────────────────────────────────────────── */}
-        <div className="flex-shrink-0 flex items-end gap-2 px-3 py-2.5" style={{ background: C.inputBg }}>
-          {/* Emoji / sticker (cosmetic) */}
+        {/* ── Input bar ─────────────────────────────────────────────────────── */}
+        <div className="flex-shrink-0 flex items-end gap-2 px-3 py-3 border-t" style={{ background: C.barBg, borderColor: C.border }}>
+          {/* Attach button */}
           <button
-            className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-opacity opacity-60 hover:opacity-100"
-            style={{ color: C.secondaryText }}
-            title="Emoji"
+            onClick={() => fileRef.current?.click()}
+            className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 shadow-sm"
+            style={{ background: C.activeBorder }}
+            title="Attach file"
           >
-            <SmilePlus size={20} />
+            <Paperclip size={17} className="text-white" />
           </button>
+          <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
 
-          {/* Text input pill */}
-          <div className="flex-1 flex items-end rounded-2xl px-4 py-2" style={{ background: C.inputField }}>
+          {/* Text input */}
+          <div className="flex-1 flex items-end rounded-2xl px-4 py-2.5 shadow-sm" style={{ background: C.inputBg, border: `1px solid rgba(0,0,0,0.08)` }}>
             <textarea
               ref={textareaRef}
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message"
+              placeholder="Message…"
               rows={1}
               inputMode="text"
               enterKeyHint="send"
               className="flex-1 bg-transparent text-[13.5px] outline-none resize-none max-h-28 leading-relaxed"
-              style={{ color: C.sentText, caretColor: "#25d366", overflowY: "auto" }}
+              style={{ color: "#1a1a2e", caretColor: C.activeBorder }}
             />
-            {/* Attach button inside pill */}
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="flex-shrink-0 ml-2 mb-0.5 opacity-60 hover:opacity-100 transition-opacity"
-              style={{ color: C.secondaryText }}
-              title="Attach file"
-            >
-              <Paperclip size={18} />
-            </button>
           </div>
-          <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
 
-          {/* Mic / Send */}
+          {/* Send or mic */}
           {text.trim() || pendingAttachment ? (
             <button
               onClick={sendMessage}
-              className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors"
-              style={{ background: C.sentBubbleGrad }}
+              className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 shadow-sm"
+              style={{ background: C.sentGrad }}
             >
-              <Send size={17} style={{ color: C.sentText, marginLeft: 2 }} />
+              <Send size={17} className="text-white" style={{ marginLeft: 2 }} />
             </button>
           ) : (
-            <MicButton
-              onAudio={handleAudio}
-              className="!w-10 !h-10 !rounded-full"
-              size="md"
-            />
+            <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full overflow-hidden shadow-sm" style={{ background: C.sentGrad }}>
+              <MicButton
+                onAudio={handleAudio}
+                className="!w-full !h-full !bg-transparent !border-0 !rounded-full !text-white"
+                size="md"
+              />
+            </div>
           )}
         </div>
       </div>
 
-      {/* ── Image lightbox ─────────────────────────────────────────────────── */}
+      {/* ── Image lightbox ──────────────────────────────────────────────────── */}
       {lightboxData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90">
-          <div className="relative max-w-4xl max-h-[90vh]">
-            <img src={lightboxData.data} alt={lightboxData.name} className="max-w-full max-h-[85vh] object-contain rounded-xl" />
-            <div className="absolute top-2 right-2 flex gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90" onClick={() => setLightboxData(null)}>
+          <div className="relative max-w-4xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxData.data} alt={lightboxData.name} className="max-w-full max-h-[85vh] object-contain rounded-2xl" />
+            <div className="absolute top-3 right-3 flex gap-2">
               <button onClick={() => downloadAttachment(lightboxData.name, lightboxData.data)}
-                className="p-2 rounded-full bg-black/60 text-white/70 hover:text-white">
-                <Download size={15} />
+                className="p-2.5 rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/70 transition-all">
+                <Download size={16} />
               </button>
               <button onClick={() => setLightboxData(null)}
-                className="p-2 rounded-full bg-black/60 text-white/70 hover:text-white">
-                <X size={15} />
+                className="p-2.5 rounded-full bg-black/50 text-white/70 hover:text-white hover:bg-black/70 transition-all">
+                <X size={16} />
               </button>
             </div>
           </div>

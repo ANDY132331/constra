@@ -107,6 +107,65 @@ function SettingsInner() {
   const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pwError, setPwError] = useState("");
 
+  // â"€â"€ Logo upload â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  const [logoSaving, setLogoSaving] = useState(false);
+  const [logoStatus, setLogoStatus] = useState<"idle" | "saved" | "error">("idle");
+
+  const handleLogoUpload = async (file: File) => {
+    setLogoSaving(true);
+    setLogoStatus("idle");
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const raw = ev.target?.result as string;
+          if (!raw) { reject(new Error("FileReader returned empty")); return; }
+          const img = new Image();
+          img.onload = () => {
+            const MAX = 300;
+            const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+            const w = Math.round(img.width * scale);
+            const h = Math.round(img.height * scale);
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) { reject(new Error("Canvas context unavailable")); return; }
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", 0.70));
+          };
+          img.onerror = () => reject(new Error("Image failed to load"));
+          img.src = raw;
+        };
+        reader.onerror = () => reject(new Error("FileReader error"));
+        reader.readAsDataURL(file);
+      });
+
+      // Update local/cached state immediately
+      setCompanyLogo(dataUrl);
+
+      // Explicitly save to Supabase with feedback
+      if (SUPABASE_ENABLED && companyId) {
+        const { error } = await getClient()
+          .from("companies")
+          .update({ logo: dataUrl })
+          .eq("id", companyId);
+        if (error) {
+          console.error("[settings] logo save failed:", error);
+          setLogoStatus("error");
+          return;
+        }
+      }
+      setLogoStatus("saved");
+      setTimeout(() => setLogoStatus("idle"), 3000);
+    } catch (err) {
+      console.error("[settings] logo upload error:", err);
+      setLogoStatus("error");
+    } finally {
+      setLogoSaving(false);
+    }
+  };
+
   // â"€â"€ Invite code â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   const [displayCode, setDisplayCode] = useState(inviteCode || "CN-XXXX-XXXX");
   const [regenerating, setRegenerating] = useState(false);
@@ -277,48 +336,37 @@ function SettingsInner() {
                       : <Building2 size={24} className="text-white/20" />}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="cursor-pointer inline-flex items-center gap-2 bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] text-white/70 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                      Upload Logo
+                    <label className={`cursor-pointer inline-flex items-center gap-2 border text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${logoSaving ? "opacity-50 cursor-wait bg-white/[0.04] border-white/[0.06] text-white/40" : "bg-white/[0.06] hover:bg-white/[0.10] border-white/[0.08] text-white/70"}`}>
+                      {logoSaving ? "Saving…" : "Upload Logo"}
                       <input
                         type="file"
                         accept="image/*"
                         className="hidden"
+                        disabled={logoSaving}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           e.target.value = "";
-                          // Compress to max 400×400 / JPEG 75% so it fits in Supabase's body limit
-                          const reader = new FileReader();
-                          reader.onload = (ev) => {
-                            const dataUrl = ev.target?.result as string;
-                            if (!dataUrl) return;
-                            const img = new Image();
-                            img.onload = () => {
-                              const MAX = 400;
-                              const scale = Math.min(1, MAX / Math.max(img.width, img.height));
-                              const w = Math.round(img.width * scale);
-                              const h = Math.round(img.height * scale);
-                              const canvas = document.createElement("canvas");
-                              canvas.width = w;
-                              canvas.height = h;
-                              const ctx = canvas.getContext("2d");
-                              if (!ctx) return;
-                              ctx.drawImage(img, 0, 0, w, h);
-                              const compressed = canvas.toDataURL("image/jpeg", 0.75);
-                              setCompanyLogo(compressed);
-                            };
-                            img.src = dataUrl;
-                          };
-                          reader.readAsDataURL(file);
+                          handleLogoUpload(file);
                         }}
                       />
                     </label>
-                    {companyLogo && (
+                    {logoStatus === "saved" && (
+                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-green-400">
+                        <CheckCircle2 size={11} /> Logo saved!
+                      </span>
+                    )}
+                    {logoStatus === "error" && (
+                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400">
+                        <AlertCircle size={11} /> Save failed — run migration 005 in Supabase
+                      </span>
+                    )}
+                    {companyLogo && logoStatus === "idle" && (
                       <button onClick={() => setCompanyLogo("")} className="text-[11px] text-white/30 hover:text-red-400 transition-colors text-left">
                         Remove logo
                       </button>
                     )}
-                    <p className="text-[10px] text-white/25">PNG or SVG recommended · Used on invoices & PDFs</p>
+                    <p className="text-[10px] text-white/25">PNG or JPG · Used on invoices & PDFs</p>
                   </div>
                 </div>
               </div>
