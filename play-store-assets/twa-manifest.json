@@ -1,0 +1,39 @@
+{
+  "packageId": "com.constra.app",
+  "host": "www.getconstra.com",
+  "name": "Constra — Field Workforce Management",
+  "launcherName": "Constra",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#0a0a0a",
+  "navigationColor": "#0a0a0a",
+  "backgroundColor": "#0a0a0a",
+  "enableNotifications": true,
+  "startUrl": "/dashboard",
+  "iconUrl": "https://www.getconstra.com/icon-512.png",
+  "maskableIconUrl": "https://www.getconstra.com/icon-512.png",
+  "monochromeIconUrl": "https://www.getconstra.com/icon-192.png",
+  "appVersion": "1",
+  "appVersionName": "1.0.0",
+  "shortcutItems": [
+    {
+      "name": "Clock In / Out",
+      "shortName": "Clock In",
+      "url": "/time-tracking",
+      "iconUrl": "https://constra.vercel.app/icon-192.png"
+    },
+    {
+      "name": "Schedule",
+      "shortName": "Schedule",
+      "url": "/schedule",
+      "iconUrl": "https://constra.vercel.app/icon-192.png"
+    }
+  ],
+  "signing": {
+    "keyAlias": "constra-key",
+    "keyFullName": "Constra App Key",
+    "organization": "BuildRight Co.",
+    "organizationalUnit": "Mobile Apps",
+    "countryCode": "CA"
+  }
+}

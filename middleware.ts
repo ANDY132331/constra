@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/demo", "/login", "/onboarding", "/auth", "/api/join", "/api/create-company", "/terms", "/privacy", "/reset-password", "/share/", "/api/share/"];
+const PUBLIC_PATHS = ["/", "/demo", "/login", "/onboarding", "/auth", "/api/join", "/api/create-company", "/terms", "/privacy", "/reset-password", "/share/", "/api/share/", "/.well-known/"];
 
 export async function middleware(request: NextRequest) {
   // Allow through if Supabase isn't configured (local dev without env vars).
@@ -60,6 +60,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon\\.ico|sw\\.js|manifest\\.json|robots\\.txt|sitemap\\.xml|icon-192\\.png|icon-512\\.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|sw\\.js|manifest\\.json|robots\\.txt|sitemap\\.xml|icon-192\\.png|icon-512\\.png|\\.well-known|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

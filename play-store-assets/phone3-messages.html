@@ -1,0 +1,200 @@
+<title>Constra — Messages</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:390px;height:844px;overflow:hidden;background:#0a0a0a;font-family:-apple-system,system-ui,sans-serif;}
+.screen{width:390px;height:844px;display:flex;flex-direction:column;overflow:hidden;}
+/* Status bar */
+.sb{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 0;height:44px;flex-shrink:0;background:#fff;}
+.sb-time{font-size:15px;font-weight:700;color:#000;}
+.sb-icons{display:flex;align-items:center;gap:6px;}
+/* Chat header */
+.chat-header{background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.back-btn{width:32px;height:32px;border-radius:50%;background:#f0f5ff;display:flex;align-items:center;justify-content:center;}
+.ch-ava{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ea580c);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0;}
+.ch-info{flex:1;}
+.ch-name{font-size:15px;font-weight:700;color:#1a1a2e;}
+.ch-sub{font-size:11px;color:#8b9ab2;margin-top:1px;}
+.ch-actions{display:flex;gap:10px;}
+/* Chat area */
+.chat-area{flex:1;overflow-y:auto;background:#f2f5fb;padding:16px;scrollbar-width:none;}
+.chat-area::-webkit-scrollbar{display:none;}
+/* Date separator */
+.date-sep{display:flex;justify-content:center;margin:8px 0 12px;}
+.date-pill{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;background:rgba(100,116,139,0.15);color:#8b9ab2;}
+/* Message bubble */
+.msg{margin-bottom:8px;display:flex;}
+.msg.sent{justify-content:flex-end;}
+.msg.recv{justify-content:flex-start;gap:8px;}
+.recv-ava{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;align-self:flex-end;}
+.bubble{max-width:72%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.45;}
+.bubble.sent{background:linear-gradient(135deg,#4f8ef7,#1d4ed8);color:#fff;border-bottom-right-radius:4px;}
+.bubble.recv{background:#fff;color:#1a1a2e;border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+.msg-time{font-size:10px;margin-top:4px;text-align:right;}
+.msg-time.sent{color:rgba(255,255,255,0.7);}
+.msg-time.recv{color:#8b9ab2;}
+/* Group label */
+.msg-group{display:flex;flex-direction:column;max-width:72%;}
+.sender-name{font-size:11px;font-weight:600;color:#8b9ab2;margin-bottom:3px;margin-left:4px;}
+/* Input area */
+.input-area{background:#f2f5fb;border-top:1px solid rgba(0,0,0,0.07);padding:8px 12px 12px;display:flex;align-items:flex-end;gap:8px;flex-shrink:0;}
+.input-box{flex:1;background:#fff;border:1px solid rgba(0,0,0,0.09);border-radius:22px;padding:10px 16px;font-size:14px;color:#1a1a2e;outline:none;}
+.input-placeholder{color:#8b9ab2;}
+.input-actions{display:flex;align-items:center;gap:6px;}
+.input-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(0,0,0,0.09);}
+.send-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#1d4ed8);display:flex;align-items:center;justify-content:center;}
+/* Bottom Nav */
+.nav{background:rgba(7,7,7,0.97);border-top:1px solid rgba(245,158,11,0.14);display:flex;align-items:stretch;height:64px;flex-shrink:0;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:rgba(255,255,255,0.25);position:relative;}
+.nav-tab.active{color:#f59e0b;}
+.nav-tab.active::before{content:'';position:absolute;inset:6px 10px;border-radius:12px;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.15);z-index:-1;}
+.nav-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;}
+.nav-clock{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-20px;gap:6px;}
+.clock-btn{width:54px;height:54px;border-radius:16px;background:#f59e0b;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(245,158,11,0.35);}
+.nav-clock .nav-label{color:rgba(245,158,11,0.7);}
+</style>
+<div class="screen">
+  <!-- Status bar -->
+  <div class="sb">
+    <span class="sb-time">9:41</span>
+    <div class="sb-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="black"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1"/><rect x="9" y="2" width="3" height="10" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="16" height="12" viewBox="0 0 20 15" fill="black"><path d="M10 11.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/><path d="M6.3 8.3C7.3 7.3 8.6 6.8 10 6.8s2.7.5 3.7 1.5l1.8-1.8C14.2 5.1 12.2 4.3 10 4.3s-4.2.8-5.5 2.2l1.8 1.8z"/><path d="M2.5 4.5C4.3 2.7 7 1.5 10 1.5s5.7 1.2 7.5 3l1.8-1.8C17.1.7 13.8 0 10 0S2.9.7.7 2.7L2.5 4.5z"/></svg>
+      <svg width="25" height="12" viewBox="0 0 28 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="black" stroke-opacity=".3"/><rect x="2" y="2" width="18" height="9" rx="2" fill="black"/><path d="M25 4.5v4a2 2 0 000-4z" fill="black" opacity=".4"/></svg>
+    </div>
+  </div>
+
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="ch-ava">RF</div>
+    <div class="ch-info">
+      <div class="ch-name">Riverside Foundation</div>
+      <div class="ch-sub">4 members · 2 online</div>
+    </div>
+    <div class="ch-actions">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b9ab2" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b9ab2" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </div>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-area">
+    <div class="date-sep"><span class="date-pill">Today</span></div>
+
+    <!-- Received message -->
+    <div class="msg recv">
+      <div class="recv-ava" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">JM</div>
+      <div class="msg-group">
+        <div class="sender-name">James Miller</div>
+        <div class="bubble recv">Morning team! Concrete pour starts at 7am today. Make sure all formwork is set before we begin.</div>
+        <div class="msg-time recv">7:02 AM</div>
+      </div>
+    </div>
+
+    <!-- Received -->
+    <div class="msg recv">
+      <div class="recv-ava" style="background:linear-gradient(135deg,#0891b2,#0e7490);">SR</div>
+      <div class="msg-group">
+        <div class="sender-name">Sam Rodriguez</div>
+        <div class="bubble recv">Copy that. I'll be on site at 6:30 to double-check the forms.</div>
+        <div class="msg-time recv">7:18 AM</div>
+      </div>
+    </div>
+
+    <!-- Sent -->
+    <div class="msg sent">
+      <div class="msg-group" style="align-items:flex-end;">
+        <div class="bubble sent">On my way now. Traffic on Hwy 1 but should be there by 7.</div>
+        <div class="msg-time sent">7:31 AM</div>
+      </div>
+    </div>
+
+    <!-- Received -->
+    <div class="msg recv">
+      <div class="recv-ava" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">JM</div>
+      <div class="msg-group">
+        <div class="sender-name">James Miller</div>
+        <div class="bubble recv">Perfect. Also, the inspector is coming at 2pm. Let's make sure the rebar spacing docs are ready.</div>
+        <div class="msg-time recv">7:44 AM</div>
+      </div>
+    </div>
+
+    <!-- Sent -->
+    <div class="msg sent">
+      <div class="msg-group" style="align-items:flex-end;">
+        <div class="bubble sent">Got it — I have the inspection docs on Constra. Will print before 1:30.</div>
+        <div class="msg-time sent">7:52 AM</div>
+      </div>
+    </div>
+
+    <!-- Received -->
+    <div class="msg recv">
+      <div class="recv-ava" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">MP</div>
+      <div class="msg-group">
+        <div class="sender-name">Mike Patel</div>
+        <div class="bubble recv">Pump truck is confirmed for 8am. 👍</div>
+        <div class="msg-time recv">8:03 AM</div>
+      </div>
+    </div>
+
+    <!-- Sent last -->
+    <div class="msg sent">
+      <div class="msg-group" style="align-items:flex-end;">
+        <div class="bubble sent">Great. Everything's looking good for today. Let's crush it 💪</div>
+        <div class="msg-time sent">8:11 AM</div>
+      </div>
+    </div>
+
+    <!-- Received -->
+    <div class="msg recv">
+      <div class="recv-ava" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">JM</div>
+      <div class="msg-group">
+        <div class="sender-name">James Miller</div>
+        <div class="bubble recv">🏗️ Concrete pour complete. Excellent work everyone!</div>
+        <div class="msg-time recv">9:37 AM</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input area -->
+  <div class="input-area">
+    <div class="input-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b9ab2" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+    </div>
+    <div class="input-box"><span class="input-placeholder">Message Riverside Foundation…</span></div>
+    <div class="input-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b9ab2" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+    </div>
+    <div class="send-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="nav">
+    <div class="nav-tab">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity=".3"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity=".3"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity=".3"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity=".3"/></svg>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-tab">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+      <span class="nav-label">Projects</span>
+    </div>
+    <div class="nav-clock">
+      <div class="clock-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 15,15"/></svg>
+      </div>
+      <span class="nav-label">Clock</span>
+    </div>
+    <div class="nav-tab">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span class="nav-label">Reports</span>
+    </div>
+    <div class="nav-tab active">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="nav-label">Chat</span>
+    </div>
+  </div>
+</div>
