@@ -85,7 +85,10 @@ export function AIChatWidget() {
         signal: ctrl.signal,
       });
 
-      if (!res.ok || !res.body) throw new Error("Request failed");
+      if (!res.ok || !res.body) {
+        const msg = await res.text().catch(() => "");
+        throw new Error(`${res.status}: ${msg || "Request failed"}`);
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -106,12 +109,12 @@ export function AIChatWidget() {
       if (hasEscalation(accumulated)) setShowContact(true);
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
+      const errMsg = err instanceof Error ? err.message : String(err);
       setMessages((prev) => {
         const copy = [...prev];
         copy[copy.length - 1] = {
           role: "assistant",
-          content:
-            "Sorry, something went wrong. Please try again or contact support at 672-338-9890.",
+          content: `Error: ${errMsg}\n\nPlease try again or contact support at 672-338-9890.`,
         };
         return copy;
       });

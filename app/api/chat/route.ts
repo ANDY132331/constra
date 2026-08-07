@@ -1,9 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-// Allow up to 60 s for streaming responses on Vercel
 export const maxDuration = 60;
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Diagnostic: GET /api/chat returns whether the key is configured (never exposes the key itself)
+export async function GET() {
+  return Response.json({ configured: !!process.env.ANTHROPIC_API_KEY });
+}
 
 const SYSTEM_PROMPT = `You are the Constra AI assistant — a helpful, concise support agent built into the Constra construction workforce management app. You help field crews, foremen, project managers, and admins get answers fast.
 
@@ -135,29 +137,43 @@ If you can't resolve an issue, direct users to human support:
 - If asked about pricing, billing issues, or account-specific problems, recommend contacting support directly`;
 
 export async function POST(request: Request) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.error("[/api/chat] ANTHROPIC_API_KEY is not set");
+    return new Response("AI not configured — add ANTHROPIC_API_KEY in Vercel", { status: 503 });
+  }
+
+  let body: { messages?: { role: string; content: string }[] };
   try {
-    const body = await request.json();
-    const messages: Anthropic.MessageParam[] = (body.messages ?? []).filter(
-      (m: { role: string; content: string }) =>
-        m.role === "user" || m.role === "assistant"
-    );
+    body = await request.json();
+  } catch {
+    return new Response("Invalid JSON", { status: 400 });
+  }
 
-    if (!messages.length) {
-      return new Response("No messages provided", { status: 400 });
-    }
+  const messages: Anthropic.MessageParam[] = (body.messages ?? []).filter(
+    (m) => (m.role === "user" || m.role === "assistant") && m.content?.trim()
+  );
 
-    const messageStream = client.messages.stream({
+  if (!messages.length) {
+    return new Response("No messages provided", { status: 400 });
+  }
+
+  const client = new Anthropic({ apiKey });
+
+  try {
+    const sdkStream = await client.messages.create({
       model: "claude-opus-4-8",
       max_tokens: 512,
       system: SYSTEM_PROMPT,
       messages,
+      stream: true,
     });
 
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          for await (const event of messageStream) {
+          for await (const event of sdkStream) {
             if (
               event.type === "content_block_delta" &&
               event.delta.type === "text_delta"
@@ -166,25 +182,22 @@ export async function POST(request: Request) {
             }
           }
         } catch (err) {
+          console.error("[/api/chat] stream error:", err);
           controller.error(err);
           return;
         }
         controller.close();
-      },
-      cancel() {
-        messageStream.abort();
       },
     });
 
     return new Response(readable, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "X-Content-Type-Options": "nosniff",
         "Cache-Control": "no-store",
       },
     });
   } catch (err) {
-    console.error("[/api/chat] error:", err);
-    return new Response("Internal server error", { status: 500 });
+    console.error("[/api/chat] Anthropic error:", err);
+    return new Response("Upstream error", { status: 502 });
   }
 }
