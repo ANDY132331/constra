@@ -27,6 +27,17 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      // Redirect www → apex so there is never a cert mismatch on the www subdomain
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.getconstra.com" }],
+        destination: "https://getconstra.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
