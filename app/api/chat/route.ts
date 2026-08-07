@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// Uses Gemini REST API directly (no SDK) for maximum compatibility
 
 export const maxDuration = 60;
 
@@ -138,7 +138,6 @@ If you can't resolve an issue, direct users to human support:
 export async function POST(request: Request) {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
-    console.error("[/api/chat] GOOGLE_AI_API_KEY is not set");
     return new Response("AI not configured — add GOOGLE_AI_API_KEY in Vercel", { status: 503 });
   }
 
@@ -149,53 +148,80 @@ export async function POST(request: Request) {
     return new Response("Invalid JSON", { status: 400 });
   }
 
+  // Only keep user/assistant turns with content; skip leading assistant messages
+  // (Gemini requires the first turn in contents to be from "user")
   const rawMessages = (body.messages ?? []).filter(
     (m) => (m.role === "user" || m.role === "assistant") && m.content?.trim()
   );
+  const firstUserIdx = rawMessages.findIndex((m) => m.role === "user");
+  const trimmed = firstUserIdx >= 0 ? rawMessages.slice(firstUserIdx) : [];
 
-  if (!rawMessages.length) {
+  if (!trimmed.length) {
     return new Response("No messages provided", { status: 400 });
   }
 
-  // Gemini uses "model" instead of "assistant" for the AI role.
-  // History must start with a "user" turn — drop any leading assistant messages
-  // (e.g. the UI welcome message) before building the turn list.
-  const allTurns = rawMessages.map((m) => ({
-    role: m.role === "user" ? ("user" as const) : ("model" as const),
+  // Map to Gemini REST format ("model" instead of "assistant")
+  const contents = trimmed.map((m) => ({
+    role: m.role === "user" ? "user" : "model",
     parts: [{ text: m.content }],
   }));
-  const firstUserIdx = allTurns.findIndex((t) => t.role === "user");
-  const history = firstUserIdx > 0 ? allTurns.slice(firstUserIdx, -1) : allTurns.slice(0, -1);
-  const lastMessage = rawMessages[rawMessages.length - 1].content;
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents,
+          generationConfig: { maxOutputTokens: 512 },
+        }),
+      }
+    );
 
-    const chat = model.startChat({
-      history,
-      generationConfig: { maxOutputTokens: 512 },
-    });
+    if (!geminiRes.ok || !geminiRes.body) {
+      const errText = await geminiRes.text().catch(() => "");
+      console.error("[/api/chat] Gemini HTTP error:", geminiRes.status, errText);
+      return new Response(`Gemini error ${geminiRes.status}: ${errText}`, { status: 502 });
+    }
 
-    const result = await chat.sendMessageStream(lastMessage);
-
+    // Parse SSE stream from Gemini and forward text chunks
     const encoder = new TextEncoder();
+    const upstream = geminiRes.body.getReader();
+    const decoder = new TextDecoder();
+
     const readable = new ReadableStream({
       async start(controller) {
+        let buffer = "";
         try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            if (text) controller.enqueue(encoder.encode(text));
+          while (true) {
+            const { done, value } = await upstream.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const json = line.slice(6).trim();
+              if (!json || json === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(json);
+                const text: string | undefined =
+                  parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) controller.enqueue(encoder.encode(text));
+              } catch {
+                // skip malformed SSE line
+              }
+            }
           }
         } catch (err) {
-          console.error("[/api/chat] stream error:", err);
-          controller.error(err);
-          return;
+          console.error("[/api/chat] stream read error:", err);
         }
         controller.close();
+      },
+      cancel() {
+        upstream.cancel();
       },
     });
 
@@ -206,7 +232,8 @@ export async function POST(request: Request) {
       },
     });
   } catch (err) {
-    console.error("[/api/chat] Gemini error:", err);
-    return new Response("Upstream error", { status: 502 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[/api/chat] fetch error:", msg);
+    return new Response(`Server error: ${msg}`, { status: 502 });
   }
 }
