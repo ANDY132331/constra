@@ -82,7 +82,7 @@ export default function SupportPage() {
               <span className="text-amber-400">We pick up.</span>
             </h2>
             <p className="text-white/40 text-[14px] leading-relaxed mb-10">
-              Real support from the people who built the app — not a chatbot, not a ticket queue.
+              Real support from the people who built the app. Get instant answers from our AI assistant or talk to a human anytime.
             </p>
 
             <div className="space-y-4">
@@ -137,7 +137,7 @@ export default function SupportPage() {
               <span className="text-[11px] text-amber-300 font-semibold">Support</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2">How can we help?</h1>
-            <p className="text-white/40 text-[14px]">Call us or browse the FAQ below — most answers are there.</p>
+            <p className="text-white/40 text-[14px]">Try the AI assistant in the app for instant help, or call us for anything complex.</p>
           </div>
 
           {/* Contact cards */}

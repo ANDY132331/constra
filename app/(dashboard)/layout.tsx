@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineBanner } from "@/components/offline-banner";
 import { NotifPermissionPrompt } from "@/components/notif-permission-prompt";
 import { MobileNav } from "@/components/mobile-nav";
+import { AIChatWidget } from "@/components/ai-chat-widget";
 import { useStore } from "@/lib/store";
 import { usePullToRefresh } from "@/lib/use-pull-to-refresh";
 import { RefreshCw } from "lucide-react";
@@ -147,6 +148,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
           </main>
         </div>
         <MobileNav />
+        <AIChatWidget />
         <SearchModal />
         <OfflineBanner />
         <NotifPermissionPrompt />
