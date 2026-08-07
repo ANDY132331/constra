@@ -3,7 +3,15 @@
 export const maxDuration = 60;
 
 export async function GET() {
-  return Response.json({ configured: !!process.env.GOOGLE_AI_API_KEY });
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) return Response.json({ configured: false });
+  // List available models so we can pick the right one
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+  ).catch(() => null);
+  const data = res ? await res.json().catch(() => null) : null;
+  const models = data?.models?.map((m: { name: string }) => m.name) ?? "fetch failed";
+  return Response.json({ configured: true, models });
 }
 
 const SYSTEM_PROMPT = `You are the Constra AI assistant — a helpful, concise support agent built into the Constra construction workforce management app. You help field crews, foremen, project managers, and admins get answers fast.
