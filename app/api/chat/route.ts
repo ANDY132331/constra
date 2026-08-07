@@ -157,17 +157,21 @@ export async function POST(request: Request) {
     return new Response("No messages provided", { status: 400 });
   }
 
-  // Gemini uses "model" instead of "assistant" for the AI role
-  const history = rawMessages.slice(0, -1).map((m) => ({
-    role: m.role === "user" ? "user" : "model",
+  // Gemini uses "model" instead of "assistant" for the AI role.
+  // History must start with a "user" turn — drop any leading assistant messages
+  // (e.g. the UI welcome message) before building the turn list.
+  const allTurns = rawMessages.map((m) => ({
+    role: m.role === "user" ? ("user" as const) : ("model" as const),
     parts: [{ text: m.content }],
   }));
+  const firstUserIdx = allTurns.findIndex((t) => t.role === "user");
+  const history = firstUserIdx > 0 ? allTurns.slice(firstUserIdx, -1) : allTurns.slice(0, -1);
   const lastMessage = rawMessages[rawMessages.length - 1].content;
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
 
