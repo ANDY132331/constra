@@ -20,13 +20,13 @@
       "name": "Clock In / Out",
       "shortName": "Clock In",
       "url": "/time-tracking",
-      "iconUrl": "https://constra.vercel.app/icon-192.png"
+      "iconUrl": "https://www.getconstra.com/icon-192.png"
     },
     {
       "name": "Schedule",
       "shortName": "Schedule",
       "url": "/schedule",
-      "iconUrl": "https://constra.vercel.app/icon-192.png"
+      "iconUrl": "https://www.getconstra.com/icon-192.png"
     }
   ],
   "signing": {
