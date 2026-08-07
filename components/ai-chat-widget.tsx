@@ -283,7 +283,7 @@ export function AIChatWidget() {
                   <Mail size={12} className="text-amber-500 flex-shrink-0" />
                   {CONTACT_EMAIL}
                 </a>
-                <p className="text-white/25 text-[11px]">Mon – Fri, 8am – 6pm PT</p>
+                <p className="text-white/25 text-[11px]">Available anytime</p>
               </div>
             )}
 
