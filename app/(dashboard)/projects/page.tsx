@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { BarChart2, List, CalendarDays, Plus, Search, MapPin, ArrowUpRight, X, CheckCircle2, Clock, AlertCircle, Circle, Map, Trash2, Pencil, ShieldCheck, Share2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { GanttChart, type GanttProject } from "@/components/gantt-chart";
@@ -76,6 +77,7 @@ export default function ProjectsPage() {
     });
   };
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const geoInputRef = useRef<HTMLInputElement>(null);
 
   const openEdit = (project: typeof projects[0]) => {
     setEditId(project.id);
@@ -321,30 +323,15 @@ export default function ProjectsPage() {
             return (
               <div
                 key={p.id}
-                className="bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden"
+                onClick={() => isForeman && openEdit(p)}
+                className={`bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden ${isForeman ? "active:bg-white/[0.03] cursor-pointer" : ""}`}
                 style={{ borderLeft: `3px solid ${p.color}` }}
               >
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <p className="text-[14px] font-bold text-white flex-1 min-w-0 truncate">{p.name}</p>
-                    <div className="flex items-center gap-1 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
                       <StatusBadge status={p.status} pending={p.pendingApproval} />
-                      {isAdmin && (
-                        <>
-                          <button
-                            onClick={() => openEdit(p)}
-                            className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-white/70 transition-colors"
-                          >
-                            <Pencil size={12} />
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm(p.id)}
-                            className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-red-400 transition-colors"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </>
-                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between mb-2">
@@ -357,7 +344,7 @@ export default function ProjectsPage() {
                       {p.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
                     </p>
                   </div>
-                  <div>
+                  <div className="mb-3">
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-[11px] text-white/35">{completedTasks}/{totalTasks} tasks</p>
                       <p className="text-[11px] font-bold text-white/50">{p.progress}%</p>
@@ -366,6 +353,26 @@ export default function ProjectsPage() {
                       <div className="h-full rounded-full transition-all" style={{ width: `${p.progress}%`, backgroundColor: p.color }} />
                     </div>
                   </div>
+                  {/* Action strip — edit for foremen+, delete for admins only */}
+                  {isForeman && (
+                    <div className="flex gap-2 pt-2.5 border-t border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => openEdit(p)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/[0.05] text-white/50 active:bg-white/[0.1] transition-colors text-[12px] font-semibold"
+                      >
+                        <Pencil size={11} />
+                        Edit
+                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => setDeleteConfirm(p.id)}
+                          className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.05] text-white/35 active:bg-red-500/15 active:text-red-400 transition-colors"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -551,9 +558,11 @@ export default function ProjectsPage() {
                       </button>
                       <button
                         onClick={() => openEdit(project)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all"
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold text-white/40 hover:text-white hover:bg-amber-500/15 hover:text-amber-300 transition-all"
+                        title="Edit project"
                       >
-                        <Pencil size={12} />
+                        <Pencil size={11} />
+                        Edit
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(project.id)}
@@ -725,6 +734,7 @@ export default function ProjectsPage() {
                 <label className={lbl}>GPS Location <span className="text-white/20 normal-case font-normal">(optional)</span></label>
                 <div className="relative">
                   <input
+                    ref={geoInputRef}
                     className={inp}
                     placeholder="Search address for GPS pin…"
                     value={geoQuery}
@@ -735,20 +745,31 @@ export default function ProjectsPage() {
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/30">Searching…</span>
                   )}
                 </div>
-                {geoResults.length > 0 && (
-                  <div className="absolute z-50 left-0 right-0 mt-1 bg-[#1a1a1a] border border-white/[0.1] rounded-xl overflow-hidden shadow-2xl">
+                {/* Portal dropdown — rendered at document.body to escape modal overflow clipping */}
+                {geoResults.length > 0 && geoInputRef.current && typeof document !== "undefined" && createPortal(
+                  <div
+                    style={{
+                      position: "fixed",
+                      zIndex: 9999,
+                      left: geoInputRef.current.getBoundingClientRect().left,
+                      top: geoInputRef.current.getBoundingClientRect().bottom + 4,
+                      width: geoInputRef.current.getBoundingClientRect().width,
+                    }}
+                    className="bg-[#1a1a1a] border border-white/[0.1] rounded-xl overflow-hidden shadow-2xl"
+                  >
                     {geoResults.map((r, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => handleGeoSelect(r)}
-                        className="w-full text-left px-4 py-2.5 hover:bg-white/[0.06] transition-colors border-b border-white/[0.04] last:border-0"
+                        className="w-full text-left px-4 py-2.5 hover:bg-white/[0.06] active:bg-white/[0.1] transition-colors border-b border-white/[0.04] last:border-0"
                       >
                         <p className="text-[12px] text-white/80 truncate">{r.display_name}</p>
                         <p className="text-[10px] text-white/30 mt-0.5">{parseFloat(r.lat).toFixed(5)}, {parseFloat(r.lon).toFixed(5)}</p>
                       </button>
                     ))}
-                  </div>
+                  </div>,
+                  document.body
                 )}
                 {geoConfirmed && form.gpsLat && form.gpsLng ? (
                   <div className="mt-2">

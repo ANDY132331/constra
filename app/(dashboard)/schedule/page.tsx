@@ -101,7 +101,7 @@ const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
 
 export default function SchedulePage() {
-  const { projects } = useStore();
+  const { projects, currency } = useStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -110,7 +110,8 @@ export default function SchedulePage() {
   const [lon, setLon] = useState(DEFAULT_LON);
   const [locationName, setLocationName] = useState("Toronto, ON");
   const [weatherError, setWeatherError] = useState(false);
-  const [imperial, setImperial] = useState(false);
+  // Sync with global currency preference — USD → imperial (°F / mph)
+  const [imperial, setImperial] = useState(currency === "USD");
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [locationInput, setLocationInput] = useState("");
   const [geoResults, setGeoResults] = useState<{ name: string; country: string; admin1?: string; lat: number; lon: number }[]>([]);

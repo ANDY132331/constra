@@ -204,7 +204,7 @@ function fmtDist(m: number) {
 
 async function getGeofenceResult(projectGps: GpsLocation): Promise<{ ok: boolean; distanceM: number }> {
   return new Promise((resolve) => {
-    if (!("geolocation" in navigator)) return resolve({ ok: true, distanceM: 0 });
+    if (!("geolocation" in navigator)) return resolve({ ok: false, distanceM: -1 });
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const distanceM = haversineM(
