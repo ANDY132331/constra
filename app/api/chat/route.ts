@@ -1,10 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const maxDuration = 60;
 
-// Diagnostic: GET /api/chat returns whether the key is configured (never exposes the key itself)
 export async function GET() {
-  return Response.json({ configured: !!process.env.ANTHROPIC_API_KEY });
+  return Response.json({ configured: !!process.env.GOOGLE_AI_API_KEY });
 }
 
 const SYSTEM_PROMPT = `You are the Constra AI assistant — a helpful, concise support agent built into the Constra construction workforce management app. You help field crews, foremen, project managers, and admins get answers fast.
@@ -137,10 +136,10 @@ If you can't resolve an issue, direct users to human support:
 - If asked about pricing, billing issues, or account-specific problems, recommend contacting support directly`;
 
 export async function POST(request: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
-    console.error("[/api/chat] ANTHROPIC_API_KEY is not set");
-    return new Response("AI not configured — add ANTHROPIC_API_KEY in Vercel", { status: 503 });
+    console.error("[/api/chat] GOOGLE_AI_API_KEY is not set");
+    return new Response("AI not configured — add GOOGLE_AI_API_KEY in Vercel", { status: 503 });
   }
 
   let body: { messages?: { role: string; content: string }[] };
@@ -150,36 +149,42 @@ export async function POST(request: Request) {
     return new Response("Invalid JSON", { status: 400 });
   }
 
-  const messages: Anthropic.MessageParam[] = (body.messages ?? []).filter(
+  const rawMessages = (body.messages ?? []).filter(
     (m) => (m.role === "user" || m.role === "assistant") && m.content?.trim()
   );
 
-  if (!messages.length) {
+  if (!rawMessages.length) {
     return new Response("No messages provided", { status: 400 });
   }
 
-  const client = new Anthropic({ apiKey });
+  // Gemini uses "model" instead of "assistant" for the AI role
+  const history = rawMessages.slice(0, -1).map((m) => ({
+    role: m.role === "user" ? "user" : "model",
+    parts: [{ text: m.content }],
+  }));
+  const lastMessage = rawMessages[rawMessages.length - 1].content;
 
   try {
-    const sdkStream = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 512,
-      system: SYSTEM_PROMPT,
-      messages,
-      stream: true,
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction: SYSTEM_PROMPT,
     });
+
+    const chat = model.startChat({
+      history,
+      generationConfig: { maxOutputTokens: 512 },
+    });
+
+    const result = await chat.sendMessageStream(lastMessage);
 
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          for await (const event of sdkStream) {
-            if (
-              event.type === "content_block_delta" &&
-              event.delta.type === "text_delta"
-            ) {
-              controller.enqueue(encoder.encode(event.delta.text));
-            }
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            if (text) controller.enqueue(encoder.encode(text));
           }
         } catch (err) {
           console.error("[/api/chat] stream error:", err);
@@ -197,7 +202,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (err) {
-    console.error("[/api/chat] Anthropic error:", err);
+    console.error("[/api/chat] Gemini error:", err);
     return new Response("Upstream error", { status: 502 });
   }
 }
