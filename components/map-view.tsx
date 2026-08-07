@@ -14,6 +14,14 @@ const MapViewInner = dynamic(() => import("./map-view-inner"), {
   ),
 });
 
-export function MapView({ pins, className }: { pins: MapPin[]; className?: string }) {
-  return <MapViewInner pins={pins} className={className} />;
+export function MapView({
+  pins,
+  className,
+  zoom,
+}: {
+  pins: MapPin[];
+  className?: string;
+  zoom?: number;
+}) {
+  return <MapViewInner pins={pins} className={className} zoom={zoom} />;
 }

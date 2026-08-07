@@ -92,7 +92,10 @@ export default function ProjectsPage() {
       color: project.color,
       managerId: project.managerId,
     });
+    setGeoQuery("");
+    setGeoResults([]);
     if (project.gps) setGeoConfirmed(project.address || `${project.gps.lat.toFixed(5)}, ${project.gps.lng.toFixed(5)}`);
+    else setGeoConfirmed("");
     setShowModal(true);
   };
 
@@ -683,7 +686,7 @@ export default function ProjectsPage() {
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Project" : "New Project"}</h3>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); setGeoQuery(""); setGeoResults([]); setFormError(""); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -747,12 +750,42 @@ export default function ProjectsPage() {
                     ))}
                   </div>
                 )}
-                {geoConfirmed && (
-                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-green-400">
-                    <MapPin size={11} />
-                    <span className="truncate">{geoConfirmed}</span>
+                {geoConfirmed && form.gpsLat && form.gpsLng ? (
+                  <div className="mt-2">
+                    {/* Satellite map preview */}
+                    <div className="rounded-xl overflow-hidden border border-white/[0.08]" style={{ height: 168 }}>
+                      <MapView
+                        pins={[{
+                          lat: parseFloat(form.gpsLat),
+                          lng: parseFloat(form.gpsLng),
+                          label: form.name || "Project Site",
+                          sublabel: geoConfirmed,
+                          color: form.color || "#f59e0b",
+                        }]}
+                        className="w-full h-full"
+                        zoom={17}
+                      />
+                    </div>
+                    {/* Confirmed address row */}
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 text-[11px] text-green-400 min-w-0">
+                        <MapPin size={11} className="flex-shrink-0" />
+                        <span className="truncate">{geoConfirmed}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGeoConfirmed("");
+                          setGeoQuery("");
+                          setForm((f) => ({ ...f, gpsLat: "", gpsLng: "" }));
+                        }}
+                        className="text-[10px] text-white/25 hover:text-white/55 flex-shrink-0 transition-colors underline underline-offset-2"
+                      >
+                        Clear
+                      </button>
+                    </div>
                   </div>
-                )}
+                ) : null}
                 <p className="text-[10px] text-white/20 mt-1">Used for GPS off-site detection during clock-in verification.</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -804,7 +837,7 @@ export default function ProjectsPage() {
               </div>
             )}
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); setFormError(""); }}
+              <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); setGeoQuery(""); setGeoResults([]); setFormError(""); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}
               </button>
