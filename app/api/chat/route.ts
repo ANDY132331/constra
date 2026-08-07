@@ -3,15 +3,7 @@
 export const maxDuration = 60;
 
 export async function GET() {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) return Response.json({ configured: false });
-  // List available models so we can pick the right one
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
-  ).catch(() => null);
-  const data = res ? await res.json().catch(() => null) : null;
-  const models = data?.models?.map((m: { name: string }) => m.name) ?? "fetch failed";
-  return Response.json({ configured: true, models });
+  return Response.json({ configured: !!process.env.GROQ_API_KEY });
 }
 
 const SYSTEM_PROMPT = `You are the Constra AI assistant — a helpful, concise support agent built into the Constra construction workforce management app. You help field crews, foremen, project managers, and admins get answers fast.
@@ -144,9 +136,9 @@ If you can't resolve an issue, direct users to human support:
 - If asked about pricing, billing issues, or account-specific problems, recommend contacting support directly`;
 
 export async function POST(request: Request) {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return new Response("AI not configured — add GOOGLE_AI_API_KEY in Vercel", { status: 503 });
+    return new Response("AI not configured — add GROQ_API_KEY in Vercel", { status: 503 });
   }
 
   let body: { messages?: { role: string; content: string }[] };
@@ -156,47 +148,41 @@ export async function POST(request: Request) {
     return new Response("Invalid JSON", { status: 400 });
   }
 
-  // Only keep user/assistant turns with content; skip leading assistant messages
-  // (Gemini requires the first turn in contents to be from "user")
-  const rawMessages = (body.messages ?? []).filter(
+  const userMessages = (body.messages ?? []).filter(
     (m) => (m.role === "user" || m.role === "assistant") && m.content?.trim()
   );
-  const firstUserIdx = rawMessages.findIndex((m) => m.role === "user");
-  const trimmed = firstUserIdx >= 0 ? rawMessages.slice(firstUserIdx) : [];
 
-  if (!trimmed.length) {
+  if (!userMessages.length) {
     return new Response("No messages provided", { status: 400 });
   }
 
-  // Map to Gemini REST format ("model" instead of "assistant")
-  const contents = trimmed.map((m) => ({
-    role: m.role === "user" ? "user" : "model",
-    parts: [{ text: m.content }],
-  }));
-
   try {
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents,
-          generationConfig: { maxOutputTokens: 512 },
-        }),
-      }
-    );
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        stream: true,
+        max_tokens: 512,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...userMessages.map((m) => ({ role: m.role, content: m.content })),
+        ],
+      }),
+    });
 
-    if (!geminiRes.ok || !geminiRes.body) {
-      const errText = await geminiRes.text().catch(() => "");
-      console.error("[/api/chat] Gemini HTTP error:", geminiRes.status, errText);
-      return new Response(`Gemini error ${geminiRes.status}: ${errText}`, { status: 502 });
+    if (!groqRes.ok || !groqRes.body) {
+      const errText = await groqRes.text().catch(() => "");
+      console.error("[/api/chat] Groq error:", groqRes.status, errText);
+      return new Response(`Groq error ${groqRes.status}: ${errText}`, { status: 502 });
     }
 
-    // Parse SSE stream from Gemini and forward text chunks
+    // Groq returns OpenAI-compatible SSE — parse and forward text chunks
     const encoder = new TextEncoder();
-    const upstream = geminiRes.body.getReader();
+    const upstream = groqRes.body.getReader();
     const decoder = new TextDecoder();
 
     const readable = new ReadableStream({
@@ -216,15 +202,15 @@ export async function POST(request: Request) {
               try {
                 const parsed = JSON.parse(json);
                 const text: string | undefined =
-                  parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+                  parsed?.choices?.[0]?.delta?.content;
                 if (text) controller.enqueue(encoder.encode(text));
               } catch {
-                // skip malformed SSE line
+                // skip malformed line
               }
             }
           }
         } catch (err) {
-          console.error("[/api/chat] stream read error:", err);
+          console.error("[/api/chat] stream error:", err);
         }
         controller.close();
       },
