@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { BarChart2, List, CalendarDays, Plus, Search, MapPin, ArrowUpRight, X, CheckCircle2, Clock, AlertCircle, Circle, Map, Trash2, Pencil, ShieldCheck, Share2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { GanttChart, type GanttProject } from "@/components/gantt-chart";
@@ -77,7 +76,6 @@ export default function ProjectsPage() {
     });
   };
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const geoInputRef = useRef<HTMLInputElement>(null);
 
   const openEdit = (project: typeof projects[0]) => {
     setEditId(project.id);
@@ -734,7 +732,6 @@ export default function ProjectsPage() {
                 <label className={lbl}>GPS Location <span className="text-white/20 normal-case font-normal">(optional)</span></label>
                 <div className="relative">
                   <input
-                    ref={geoInputRef}
                     className={inp}
                     placeholder="Search address for GPS pin…"
                     value={geoQuery}
@@ -745,18 +742,8 @@ export default function ProjectsPage() {
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/30">Searching…</span>
                   )}
                 </div>
-                {/* Portal dropdown — rendered at document.body to escape modal overflow clipping */}
-                {geoResults.length > 0 && geoInputRef.current && typeof document !== "undefined" && createPortal(
-                  <div
-                    style={{
-                      position: "fixed",
-                      zIndex: 9999,
-                      left: geoInputRef.current.getBoundingClientRect().left,
-                      top: geoInputRef.current.getBoundingClientRect().bottom + 4,
-                      width: geoInputRef.current.getBoundingClientRect().width,
-                    }}
-                    className="bg-[#1a1a1a] border border-white/[0.1] rounded-xl overflow-hidden shadow-2xl"
-                  >
+                {geoResults.length > 0 && (
+                  <div className="mt-1 rounded-xl overflow-hidden shadow-2xl" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)" }}>
                     {geoResults.map((r, i) => (
                       <button
                         key={i}
@@ -768,8 +755,7 @@ export default function ProjectsPage() {
                         <p className="text-[10px] text-white/30 mt-0.5">{parseFloat(r.lat).toFixed(5)}, {parseFloat(r.lon).toFixed(5)}</p>
                       </button>
                     ))}
-                  </div>,
-                  document.body
+                  </div>
                 )}
                 {geoConfirmed && form.gpsLat && form.gpsLng ? (
                   <div className="mt-2">

@@ -94,12 +94,104 @@
   --sidebar-border:   oklch(0 0 0 / 8%);
 }
 
-/* Light-mode overrides: the shell uses var(--app-bg-*) to theme structural colours.
-   Page content that uses hardcoded Tailwind dark-class values gets inverted here. */
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT MODE — override hardcoded dark Tailwind utilities
+   The app was built dark-first; these rules flip every dark surface,
+   text, and border class when [data-theme="light"] is active.
+   ══════════════════════════════════════════════════════════════════ */
+
 [data-theme="light"] body {
   background: var(--app-bg-1);
   color: var(--app-text);
 }
+
+/* ── Background: hardcoded dark hex values ── */
+[data-theme="light"] .bg-\[\#080808\],
+[data-theme="light"] .bg-\[\#0a0a0a\],
+[data-theme="light"] .bg-\[\#0d0d0d\]  { background-color: #f8f8f8 !important; }
+
+[data-theme="light"] .bg-\[\#111\],
+[data-theme="light"] .bg-\[\#111111\]   { background-color: #f2f2f2 !important; }
+
+[data-theme="light"] .bg-\[\#131110\],
+[data-theme="light"] .bg-\[\#131313\]   { background-color: #eeeeee !important; }
+
+[data-theme="light"] .bg-\[\#141414\],
+[data-theme="light"] .bg-\[\#161616\]   { background-color: #e8e8e8 !important; }
+
+[data-theme="light"] .bg-\[\#1a1209\],
+[data-theme="light"] .bg-\[\#1a1a1a\],
+[data-theme="light"] .bg-\[\#1c1c1c\]   { background-color: #e2e2e2 !important; }
+
+/* ── Background: white/opacity surfaces → dark/opacity equivalents ── */
+[data-theme="light"] .bg-white\/\[0\.02\]  { background-color: rgba(0,0,0,0.02) !important; }
+[data-theme="light"] .bg-white\/\[0\.03\]  { background-color: rgba(0,0,0,0.03) !important; }
+[data-theme="light"] .bg-white\/\[0\.04\]  { background-color: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] .bg-white\/\[0\.05\]  { background-color: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .bg-white\/\[0\.06\]  { background-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .bg-white\/\[0\.07\]  { background-color: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] .bg-white\/\[0\.08\]  { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .bg-white\/\[0\.12\]  { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .bg-white\/5   { background-color: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .bg-white\/8   { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .bg-white\/10  { background-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .bg-white\/12  { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .bg-black\/70  { background-color: rgba(0,0,0,0.55) !important; }
+
+/* ── Text: white with opacity → dark equivalent ── */
+[data-theme="light"] .text-white     { color: rgba(0,0,0,0.92) !important; }
+[data-theme="light"] .text-white\/90 { color: rgba(0,0,0,0.90) !important; }
+[data-theme="light"] .text-white\/85 { color: rgba(0,0,0,0.85) !important; }
+[data-theme="light"] .text-white\/80 { color: rgba(0,0,0,0.80) !important; }
+[data-theme="light"] .text-white\/70 { color: rgba(0,0,0,0.70) !important; }
+[data-theme="light"] .text-white\/65 { color: rgba(0,0,0,0.65) !important; }
+[data-theme="light"] .text-white\/60 { color: rgba(0,0,0,0.60) !important; }
+[data-theme="light"] .text-white\/55 { color: rgba(0,0,0,0.55) !important; }
+[data-theme="light"] .text-white\/50 { color: rgba(0,0,0,0.50) !important; }
+[data-theme="light"] .text-white\/45 { color: rgba(0,0,0,0.45) !important; }
+[data-theme="light"] .text-white\/40 { color: rgba(0,0,0,0.40) !important; }
+[data-theme="light"] .text-white\/35 { color: rgba(0,0,0,0.35) !important; }
+[data-theme="light"] .text-white\/30 { color: rgba(0,0,0,0.30) !important; }
+[data-theme="light"] .text-white\/25 { color: rgba(0,0,0,0.25) !important; }
+[data-theme="light"] .text-white\/20 { color: rgba(0,0,0,0.20) !important; }
+[data-theme="light"] .text-white\/15 { color: rgba(0,0,0,0.15) !important; }
+[data-theme="light"] .text-white\/10 { color: rgba(0,0,0,0.10) !important; }
+
+/* ── Border: white/opacity → dark equivalent ── */
+[data-theme="light"] .border-white\/\[0\.04\] { border-color: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] .border-white\/\[0\.06\] { border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .border-white\/\[0\.07\] { border-color: rgba(0,0,0,0.11) !important; }
+[data-theme="light"] .border-white\/\[0\.08\] { border-color: rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .border-white\/\[0\.10\] { border-color: rgba(0,0,0,0.14) !important; }
+[data-theme="light"] .border-white\/\[0\.12\] { border-color: rgba(0,0,0,0.16) !important; }
+[data-theme="light"] .border-white\/\[0\.18\] { border-color: rgba(0,0,0,0.18) !important; }
+[data-theme="light"] .border-white\/\[0\.22\] { border-color: rgba(0,0,0,0.20) !important; }
+[data-theme="light"] .border-white\/5  { border-color: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] .border-white\/8  { border-color: rgba(0,0,0,0.11) !important; }
+[data-theme="light"] .border-white\/10 { border-color: rgba(0,0,0,0.14) !important; }
+
+/* ── Hover/active surfaces in light mode ── */
+[data-theme="light"] .hover\:bg-white\/\[0\.05\]:hover  { background-color: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .hover\:bg-white\/\[0\.06\]:hover  { background-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .hover\:bg-white\/\[0\.08\]:hover  { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .hover\:bg-white\/5:hover   { background-color: rgba(0,0,0,0.05) !important; }
+[data-theme="light"] .hover\:bg-white\/8:hover   { background-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .hover\:text-white:hover    { color: rgba(0,0,0,0.92) !important; }
+[data-theme="light"] .hover\:text-white\/70:hover { color: rgba(0,0,0,0.70) !important; }
+
+/* ── Ring/shadow in light mode ── */
+[data-theme="light"] .ring-\[\#0d0d0d\]   { --tw-ring-color: #f8f8f8 !important; }
+[data-theme="light"] .ring-\[\#111111\]   { --tw-ring-color: #f2f2f2 !important; }
+[data-theme="light"] .ring-\[\#161616\]   { --tw-ring-color: #e8e8e8 !important; }
+
+/* ── Scrollbar ── */
+[data-theme="light"] ::-webkit-scrollbar-thumb        { background: rgba(0,0,0,0.18); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover  { background: rgba(0,0,0,0.28); }
+
+/* ── Placeholder text ── */
+[data-theme="light"] .placeholder-white\/25::placeholder { color: rgba(0,0,0,0.30) !important; }
+[data-theme="light"] .placeholder\:text-white\/25::placeholder { color: rgba(0,0,0,0.30) !important; }
+[data-theme="light"] .placeholder\:text-white\/30::placeholder { color: rgba(0,0,0,0.35) !important; }
 
 :root {
   --background: oklch(0.07 0 0);
