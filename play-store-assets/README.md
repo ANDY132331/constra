@@ -13,12 +13,18 @@ Open each in Chrome, screenshot it, and upload to Google Play Console.
 | File | Type | Required size | Screen |
 |------|------|---------------|--------|
 | `constra-feature-graphic.html` | Feature Graphic | 1024 × 500 px | Landing banner |
-| `phone1-dashboard.html` | Phone screenshot | 1080 × 1920 px (9:16) | Dashboard |
-| `phone2-clockin.html` | Phone screenshot | 1080 × 1920 px (9:16) | Clock-In |
+| `phone1-dashboard.html` | Phone screenshot | 1080 × 1920 px (9:16) | Admin Dashboard |
+| `phone2-clockin.html` | Phone screenshot | 1080 × 1920 px (9:16) | Worker Clock-In |
 | `phone3-messages.html` | Phone screenshot | 1080 × 1920 px (9:16) | Crew Chat |
 | `phone4-invoices.html` | Phone screenshot | 1080 × 1920 px (9:16) | Invoices |
+| `phone5-projects.html` | Phone screenshot | 1080 × 1920 px (9:16) | Projects List |
+| `phone6-clockedin.html` | Phone screenshot | 1080 × 1920 px (9:16) | Worker Clocked In (live timer) |
+| `phone7-reports.html` | Phone screenshot | 1080 × 1920 px (9:16) | Reports & Analytics |
+| `phone8-crew.html` | Phone screenshot | 1080 × 1920 px (9:16) | Crew Management |
 | `tablet7-landscape.html` | 7" Tablet screenshot | 960 × 600 px (16:9) | Dashboard |
+| `tablet7-projects.html` | 7" Tablet screenshot | 960 × 600 px (16:9) | Projects split view |
 | `tablet10-landscape.html` | 10" Tablet screenshot | 1280 × 800 px (16:9) | Invoices split-panel |
+| `tablet10-reports.html` | 10" Tablet screenshot | 1280 × 800 px (16:9) | Reports & Analytics |
 | `twa-manifest.json` | TWA config | — | For PWABuilder / bubblewrap |
 
 ---
@@ -100,9 +106,9 @@ Wait ~1 minute for Vercel to deploy. Then verify the file is live:
    - Long description: (see below)
    - Package name: `com.constra.app`
 4. Upload **Feature Graphic** (from `constra-feature-graphic.html` screenshot)
-5. Upload **Phone screenshots** (all 4 from `phone1-` through `phone4-`)
-6. Upload **7" Tablet screenshots** (from `tablet7-landscape.html`)
-7. Upload **10" Tablet screenshots** (from `tablet10-landscape.html`)
+5. Upload **Phone screenshots** (all 8: `phone1-` through `phone8-`)
+6. Upload **7" Tablet screenshots** (`tablet7-landscape.html`, `tablet7-projects.html`)
+7. Upload **10" Tablet screenshots** (`tablet10-landscape.html`, `tablet10-reports.html`)
 8. Upload **App bundle**: `app-release-bundle.aab`
 9. Submit for review
 
@@ -122,8 +128,8 @@ Constra is the all-in-one field management app built for construction crews. Tra
 • Job scheduling and project management
 • Professional invoices with PDF export
 • Team chat for every project
-• Daily reports and punch-list tracking
-• Change order management
+• Daily reports and analytics
+• Crew management with role-based access
 • Works offline (PWA)
 
 Free to use. No subscription required.

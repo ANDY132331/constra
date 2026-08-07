@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Constra – Reports (10" Tablet)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1280px; height: 800px; overflow: hidden;
+    background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    color: #fff; display: flex;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px; height: 800px; background: #0d0d0d;
+    border-right: 1px solid rgba(255,255,255,0.07);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-brand {
+    display: flex; align-items: center; gap: 11px;
+    padding: 22px 18px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .brand-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: #f59e0b; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; color: #000;
+  }
+  .brand-name { font-size: 17px; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+  .brand-sub { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 600; margin-top: 1px; }
+
+  .nav-section { padding: 12px 10px 0; flex: 1; }
+  .nav-group-label {
+    font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.2);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 8px 10px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px; margin-bottom: 2px;
+    font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4);
+  }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-item.active {
+    background: rgba(245,158,11,0.1); color: #f59e0b;
+    border-left: 2px solid #f59e0b; padding-left: 10px;
+  }
+
+  .sidebar-footer {
+    padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(139,92,246,0.2); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 900; color: #a78bfa;
+  }
+  .user-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7); }
+  .user-role { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    height: 56px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: #0d0d0d; flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-title { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+  .period-tabs { display: flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); border-radius: 9px; padding: 3px; gap: 2px; }
+  .period-tab { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.3); }
+  .period-tab.active { background: #f59e0b; color: #000; }
+  .export-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 9px; padding: 8px 14px;
+    font-size: 12px; font-weight: 800; color: #f59e0b;
+  }
+  .export-btn svg { width: 14px; height: 14px; }
+
+  /* Content area */
+  .content { flex: 1; display: flex; gap: 0; overflow: hidden; }
+
+  /* Left column */
+  .col-left { width: 620px; padding: 20px 20px 20px 24px; flex-shrink: 0; overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.06); }
+
+  /* Big stat row */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+  .stat-card {
+    background: #111; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 14px 16px;
+  }
+  .stat-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+  }
+  .stat-val { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: -0.5px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+  .stat-delta { font-size: 11px; font-weight: 800; margin-top: 5px; }
+
+  /* Bar chart */
+  .chart-card {
+    background: #111; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+  }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .chart-title { font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.7); }
+  .chart-legend { display: flex; gap: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+  .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; }
+  .bar-track { flex: 1; width: 100%; display: flex; align-items: flex-end; background: rgba(255,255,255,0.04); border-radius: 5px; overflow: hidden; }
+  .bar-fill { width: 100%; border-radius: 5px; }
+  .bar-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.25); }
+  .bar-label.today { color: #f59e0b; }
+
+  /* Project hours breakdown */
+  .proj-break-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .section-title { font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.09em; }
+  .proj-rows { display: flex; flex-direction: column; gap: 6px; }
+  .proj-break-row {
+    display: flex; align-items: center; gap: 10px;
+    background: #111; border: 1px solid rgba(255,255,255,0.06); border-radius: 11px; padding: 10px 12px;
+  }
+  .proj-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .proj-name { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.7); flex: 1; }
+  .proj-hours-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .proj-hours-fill { height: 100%; border-radius: 3px; }
+  .proj-hours-val { font-size: 12px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; width: 44px; text-align: right; flex-shrink: 0; }
+
+  /* Right column */
+  .col-right { flex: 1; padding: 20px 24px; overflow-y: auto; }
+
+  .worker-section-title { font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 12px; }
+
+  .worker-cards { display: flex; flex-direction: column; gap: 8px; }
+  .worker-card {
+    background: #111; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 13px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .w-avatar {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900; flex-shrink: 0;
+  }
+  .w-body { flex: 1; min-width: 0; }
+  .w-name { font-size: 13px; font-weight: 800; color: #fff; }
+  .w-role { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .w-right { text-align: right; flex-shrink: 0; }
+  .w-hours { font-size: 15px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+  .w-label { font-size: 9px; color: rgba(255,255,255,0.25); font-weight: 700; margin-top: 2px; }
+  .w-bar-track { width: 80px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+  .w-bar-fill { height: 100%; border-radius: 2px; }
+
+  /* Payroll export card */
+  .payroll-card {
+    background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15);
+    border-radius: 13px; padding: 14px 16px; margin-top: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .payroll-left .pl-label { font-size: 10px; font-weight: 900; color: rgba(245,158,11,0.6); text-transform: uppercase; letter-spacing: 0.08em; }
+  .payroll-left .pl-val { font-size: 22px; font-weight: 900; color: #f59e0b; letter-spacing: -0.3px; font-variant-numeric: tabular-nums; }
+  .payroll-left .pl-sub { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+  .payroll-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: #f59e0b; border-radius: 9px; padding: 9px 16px;
+    font-size: 12px; font-weight: 900; color: #000;
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">C</div>
+    <div>
+      <div class="brand-name">Constra</div>
+      <div class="brand-sub">BuildRight Co.</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-group-label">Workspace</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Projects
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Schedule
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Time Tracking
+    </div>
+    <div class="nav-group-label">Finance</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Invoices
+    </div>
+    <div class="nav-group-label">Team</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Crew
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Messages
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Reports
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-avatar">SA</div>
+    <div>
+      <div class="user-name">Sarah Ahmed</div>
+      <div class="user-role">Admin · BuildRight Co.</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">Reports</span>
+      <div class="period-tabs">
+        <div class="period-tab active">This Week</div>
+        <div class="period-tab">Month</div>
+        <div class="period-tab">Quarter</div>
+      </div>
+      <span style="font-size:11px;color:rgba(255,255,255,0.25);font-weight:600;">Jul 30 – Aug 6, 2026</span>
+    </div>
+    <div class="export-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export PDF
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Left column -->
+    <div class="col-left">
+      <!-- KPI stat row -->
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(245,158,11,0.12);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          </div>
+          <div class="stat-val">284</div>
+          <div class="stat-label">Total Hours</div>
+          <div class="stat-delta" style="color:#4ade80;">↑ 12% vs prev</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(34,197,94,0.1);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="stat-val">$9.2K</div>
+          <div class="stat-label">Labor Cost</div>
+          <div class="stat-delta" style="color:rgba(255,255,255,0.3);">$32.4 avg/hr</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(59,130,246,0.1);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-val">8</div>
+          <div class="stat-label">Workers</div>
+          <div class="stat-delta" style="color:rgba(255,255,255,0.3);">5 on site today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(139,92,246,0.1);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="stat-val">3</div>
+          <div class="stat-label">Active Jobs</div>
+          <div class="stat-delta" style="color:rgba(255,255,255,0.3);">2 on schedule</div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title">Daily Hours — This Week</span>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div>Hours logged</div>
+            <div class="legend-item"><div class="legend-dot" style="background:rgba(245,158,11,0.25);"></div>Previous week</div>
+          </div>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:50%;background:rgba(245,158,11,0.3);"></div></div><div class="bar-label">Wed</div></div>
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:62%;background:rgba(245,158,11,0.45);"></div></div><div class="bar-label">Thu</div></div>
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:74%;background:rgba(245,158,11,0.45);"></div></div><div class="bar-label">Fri</div></div>
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:20%;background:rgba(245,158,11,0.3);"></div></div><div class="bar-label">Sat</div></div>
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:2%;background:rgba(245,158,11,0.2);"></div></div><div class="bar-label">Sun</div></div>
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:67%;background:rgba(245,158,11,0.45);"></div></div><div class="bar-label">Mon</div></div>
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:75%;background:rgba(245,158,11,0.45);"></div></div><div class="bar-label">Tue</div></div>
+          <div class="bar-group"><div class="bar-track"><div class="bar-fill" style="height:44%;background:#f59e0b;border-radius:5px;"></div></div><div class="bar-label today">Wed ●</div></div>
+        </div>
+      </div>
+
+      <!-- Hours by project -->
+      <div class="proj-break-header">
+        <span class="section-title">Hours by Project</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:700;">284h total</span>
+      </div>
+      <div class="proj-rows">
+        <div class="proj-break-row">
+          <div class="proj-dot" style="background:#f59e0b;"></div>
+          <div class="proj-name">Downtown Office Tower</div>
+          <div class="proj-hours-bar"><div class="proj-hours-fill" style="width:78%;background:#f59e0b;"></div></div>
+          <div class="proj-hours-val">142h</div>
+        </div>
+        <div class="proj-break-row">
+          <div class="proj-dot" style="background:#3b82f6;"></div>
+          <div class="proj-name">Harbourfront Condos Ph.2</div>
+          <div class="proj-hours-bar"><div class="proj-hours-fill" style="width:52%;background:#3b82f6;"></div></div>
+          <div class="proj-hours-val">96h</div>
+        </div>
+        <div class="proj-break-row">
+          <div class="proj-dot" style="background:#ef4444;"></div>
+          <div class="proj-name">Mississauga Retail Strip</div>
+          <div class="proj-hours-bar"><div class="proj-hours-fill" style="width:25%;background:#ef4444;"></div></div>
+          <div class="proj-hours-val">46h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="col-right">
+      <div class="worker-section-title">Worker Breakdown</div>
+      <div class="worker-cards">
+        <div class="worker-card">
+          <div class="w-avatar" style="background:rgba(245,158,11,0.15);color:#f59e0b;">JR</div>
+          <div class="w-body">
+            <div class="w-name">James Rodriguez</div>
+            <div class="w-role">Foreman · Downtown Tower</div>
+          </div>
+          <div class="w-right">
+            <div class="w-hours">48.5h</div>
+            <div class="w-label">this week</div>
+            <div class="w-bar-track"><div class="w-bar-fill" style="width:94%;background:#f59e0b;"></div></div>
+          </div>
+        </div>
+        <div class="worker-card">
+          <div class="w-avatar" style="background:rgba(59,130,246,0.15);color:#60a5fa;">MC</div>
+          <div class="w-body">
+            <div class="w-name">Marcus Chen</div>
+            <div class="w-role">Worker · Downtown Tower</div>
+          </div>
+          <div class="w-right">
+            <div class="w-hours">44.2h</div>
+            <div class="w-label">this week</div>
+            <div class="w-bar-track"><div class="w-bar-fill" style="width:86%;background:#3b82f6;"></div></div>
+          </div>
+        </div>
+        <div class="worker-card">
+          <div class="w-avatar" style="background:rgba(34,197,94,0.15);color:#4ade80;">SK</div>
+          <div class="w-body">
+            <div class="w-name">Sofia Kowalski</div>
+            <div class="w-role">Worker · Harbourfront</div>
+          </div>
+          <div class="w-right">
+            <div class="w-hours">41.0h</div>
+            <div class="w-label">this week</div>
+            <div class="w-bar-track"><div class="w-bar-fill" style="width:80%;background:#22c55e;"></div></div>
+          </div>
+        </div>
+        <div class="worker-card">
+          <div class="w-avatar" style="background:rgba(249,115,22,0.15);color:#fb923c;">DL</div>
+          <div class="w-body">
+            <div class="w-name">Derek Liu</div>
+            <div class="w-role">Project Manager</div>
+          </div>
+          <div class="w-right">
+            <div class="w-hours">38.5h</div>
+            <div class="w-label">this week</div>
+            <div class="w-bar-track"><div class="w-bar-fill" style="width:75%;background:#f97316;"></div></div>
+          </div>
+        </div>
+        <div class="worker-card">
+          <div class="w-avatar" style="background:rgba(139,92,246,0.15);color:#a78bfa;">TN</div>
+          <div class="w-body">
+            <div class="w-name">Tanya Novak</div>
+            <div class="w-role">Worker · Retail Strip</div>
+          </div>
+          <div class="w-right">
+            <div class="w-hours">36.8h</div>
+            <div class="w-label">this week</div>
+            <div class="w-bar-track"><div class="w-bar-fill" style="width:71%;background:#8b5cf6;"></div></div>
+          </div>
+        </div>
+        <div class="worker-card">
+          <div class="w-avatar" style="background:rgba(6,182,212,0.15);color:#22d3ee;">PK</div>
+          <div class="w-body">
+            <div class="w-name">Peter Kowalczyk</div>
+            <div class="w-role">Worker · Harbourfront</div>
+          </div>
+          <div class="w-right">
+            <div class="w-hours">34.5h</div>
+            <div class="w-label">this week</div>
+            <div class="w-bar-track"><div class="w-bar-fill" style="width:67%;background:#06b6d4;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payroll export card -->
+      <div class="payroll-card">
+        <div class="payroll-left">
+          <div class="pl-label">Total Payroll This Week</div>
+          <div class="pl-val">$9,196.80</div>
+          <div class="pl-sub">284h · 8 workers · avg $32.4/hr</div>
+        </div>
+        <div class="payroll-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export Payroll
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

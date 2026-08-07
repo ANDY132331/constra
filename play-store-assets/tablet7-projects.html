@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Constra – Projects (7" Tablet)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 960px; height: 600px; overflow: hidden;
+    background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    color: #fff; display: flex;
+  }
+
+  /* Left Sidebar */
+  .sidebar {
+    width: 220px; height: 600px; background: #0d0d0d;
+    border-right: 1px solid rgba(255,255,255,0.07);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 16px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .brand-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: #f59e0b; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 900; color: #000;
+  }
+  .brand-name { font-size: 16px; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+  .brand-sub { font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 600; }
+
+  .nav-section { padding: 10px 8px 0; }
+  .nav-label {
+    font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.2);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 6px 8px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 10px; margin-bottom: 2px;
+    font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.45); cursor: pointer;
+  }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-item.active {
+    background: rgba(245,158,11,0.1); color: #f59e0b;
+    border-left: 2px solid #f59e0b; margin-left: 0; padding-left: 8px;
+  }
+  .nav-item.active svg { color: #f59e0b; }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: rgba(139,92,246,0.2); display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: #a78bfa;
+  }
+  .user-name { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.7); }
+  .user-role { font-size: 10px; color: rgba(255,255,255,0.25); }
+
+  /* Main content — project list + detail panel */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Top bar */
+  .topbar {
+    height: 52px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: #0d0d0d;
+  }
+  .topbar-title { font-size: 17px; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .view-tabs { display: flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 3px; gap: 2px; }
+  .view-tab {
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;
+    color: rgba(255,255,255,0.3);
+  }
+  .view-tab.active { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .add-btn {
+    display: flex; align-items: center; gap: 5px;
+    background: #f59e0b; border-radius: 8px; padding: 6px 12px;
+    font-size: 11px; font-weight: 900; color: #000;
+  }
+
+  /* Split: list + map/detail */
+  .content-split { flex: 1; display: flex; overflow: hidden; }
+
+  /* Project list */
+  .proj-list {
+    width: 320px; flex-shrink: 0; overflow-y: auto; overflow-x: hidden;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .list-search {
+    padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; gap: 8px;
+    background: #0d0d0d;
+  }
+  .list-search svg { width: 14px; height: 14px; color: rgba(255,255,255,0.25); flex-shrink: 0; }
+  .list-search span { font-size: 12px; color: rgba(255,255,255,0.25); }
+
+  .proj-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer; position: relative;
+  }
+  .proj-row.selected {
+    background: rgba(255,255,255,0.05);
+    border-left: 2px solid #f59e0b;
+    padding-left: 12px;
+  }
+  .proj-color-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .proj-info { flex: 1; min-width: 0; }
+  .proj-name { font-size: 12px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proj-client { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+  .proj-right { text-align: right; flex-shrink: 0; }
+  .proj-pct { font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.6); font-variant-numeric: tabular-nums; }
+  .proj-status {
+    font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 20px; margin-top: 2px;
+    display: inline-block;
+  }
+  .s-active { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .s-upcoming { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .s-completed { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+
+  /* Detail panel */
+  .proj-detail { flex: 1; padding: 20px; overflow-y: auto; }
+  .detail-header { margin-bottom: 16px; }
+  .detail-color-bar { width: 36px; height: 4px; border-radius: 2px; background: #f59e0b; margin-bottom: 10px; }
+  .detail-title { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+  .detail-client { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 3px; }
+
+  .detail-stat-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .detail-stat {
+    flex: 1; background: #111; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 11px 12px;
+  }
+  .ds-val { font-size: 18px; font-weight: 900; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ds-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+
+  .detail-progress-section { margin-bottom: 16px; }
+  .dp-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .dp-label { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
+  .dp-pct { font-size: 11px; font-weight: 900; color: #f59e0b; }
+  .dp-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .dp-fill { height: 100%; border-radius: 3px; background: #f59e0b; }
+
+  .detail-section-label { font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+
+  .task-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .task-row {
+    display: flex; align-items: center; gap: 8px;
+    background: #111; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 8px 10px;
+  }
+  .task-icon { width: 16px; height: 16px; flex-shrink: 0; }
+  .task-name { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.7); flex: 1; }
+  .task-badge { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 20px; }
+  .tb-progress { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .tb-done { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .tb-blocked { background: rgba(239,68,68,0.15); color: #f87171; }
+  .tb-ns { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); }
+
+  .crew-avatars { display: flex; gap: 6px; flex-wrap: wrap; }
+  .crew-av {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900;
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">C</div>
+    <div>
+      <div class="brand-name">Constra</div>
+      <div class="brand-sub">BuildRight Co.</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Projects
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Schedule
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Time Tracking
+    </div>
+    <div class="nav-label" style="margin-top:6px;">Finance</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Invoices
+    </div>
+    <div class="nav-label" style="margin-top:6px;">Team</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Crew
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Messages
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Reports
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-avatar">SA</div>
+    <div>
+      <div class="user-name">Sarah Ahmed</div>
+      <div class="user-role">Admin</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-title">Projects</span>
+    <div class="topbar-actions">
+      <div class="view-tabs">
+        <div class="view-tab">Gantt</div>
+        <div class="view-tab active">Cards</div>
+        <div class="view-tab">Map</div>
+      </div>
+      <div class="add-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Project
+      </div>
+    </div>
+  </div>
+
+  <!-- Split view -->
+  <div class="content-split">
+    <!-- Project list -->
+    <div class="proj-list">
+      <div class="list-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Search projects…</span>
+      </div>
+
+      <div class="proj-row selected">
+        <div class="proj-color-dot" style="background:#f59e0b;"></div>
+        <div class="proj-info">
+          <div class="proj-name">Downtown Office Tower</div>
+          <div class="proj-client">Vertex Development Corp</div>
+        </div>
+        <div class="proj-right">
+          <div class="proj-pct">68%</div>
+          <span class="proj-status s-active">Active</span>
+        </div>
+      </div>
+
+      <div class="proj-row">
+        <div class="proj-color-dot" style="background:#3b82f6;"></div>
+        <div class="proj-info">
+          <div class="proj-name">Harbourfront Condos Ph.2</div>
+          <div class="proj-client">Lakeside Properties Inc.</div>
+        </div>
+        <div class="proj-right">
+          <div class="proj-pct">34%</div>
+          <span class="proj-status s-active">Active</span>
+        </div>
+      </div>
+
+      <div class="proj-row">
+        <div class="proj-color-dot" style="background:#8b5cf6;"></div>
+        <div class="proj-info">
+          <div class="proj-name">Scarborough Medical Centre</div>
+          <div class="proj-client">Ontario Health Authority</div>
+        </div>
+        <div class="proj-right">
+          <div class="proj-pct">0%</div>
+          <span class="proj-status s-upcoming">Upcoming</span>
+        </div>
+      </div>
+
+      <div class="proj-row">
+        <div class="proj-color-dot" style="background:#22c55e;"></div>
+        <div class="proj-info">
+          <div class="proj-name">Etobicoke Warehouse Reno</div>
+          <div class="proj-client">Metro Logistics Ltd.</div>
+        </div>
+        <div class="proj-right">
+          <div class="proj-pct">100%</div>
+          <span class="proj-status s-completed">Done</span>
+        </div>
+      </div>
+
+      <div class="proj-row">
+        <div class="proj-color-dot" style="background:#ef4444;"></div>
+        <div class="proj-info">
+          <div class="proj-name">Mississauga Retail Strip</div>
+          <div class="proj-client">Crown Realty Group</div>
+        </div>
+        <div class="proj-right">
+          <div class="proj-pct">12%</div>
+          <span class="proj-status s-active">Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="proj-detail">
+      <div class="detail-header">
+        <div class="detail-color-bar"></div>
+        <div class="detail-title">Downtown Office Tower</div>
+        <div class="detail-client">Vertex Development Corp · 456 King St W, Toronto</div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="detail-stat-row">
+        <div class="detail-stat">
+          <div class="ds-val" style="color:#f59e0b;">68%</div>
+          <div class="ds-label">Progress</div>
+        </div>
+        <div class="detail-stat">
+          <div class="ds-val">$1.2M</div>
+          <div class="ds-label">Budget</div>
+        </div>
+        <div class="detail-stat">
+          <div class="ds-val">5</div>
+          <div class="ds-label">Crew</div>
+        </div>
+        <div class="detail-stat">
+          <div class="ds-val">Aug 31</div>
+          <div class="ds-label">Deadline</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="detail-progress-section">
+        <div class="dp-header">
+          <span class="dp-label">Overall Completion</span>
+          <span class="dp-pct">68%</span>
+        </div>
+        <div class="dp-track"><div class="dp-fill" style="width:68%;"></div></div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="detail-section-label">Tasks</div>
+      <div class="task-rows">
+        <div class="task-row">
+          <svg class="task-icon" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="task-name">Foundation & Excavation</span>
+          <span class="task-badge tb-done">Done</span>
+        </div>
+        <div class="task-row">
+          <svg class="task-icon" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="task-name">Structural Steel</span>
+          <span class="task-badge tb-done">Done</span>
+        </div>
+        <div class="task-row">
+          <svg class="task-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          <span class="task-name">Exterior Cladding</span>
+          <span class="task-badge tb-progress">In Progress</span>
+        </div>
+        <div class="task-row">
+          <svg class="task-icon" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>
+          <span class="task-name">Interior Fitout</span>
+          <span class="task-badge tb-ns">Not Started</span>
+        </div>
+        <div class="task-row">
+          <svg class="task-icon" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>
+          <span class="task-name">Final Inspections</span>
+          <span class="task-badge tb-ns">Not Started</span>
+        </div>
+      </div>
+
+      <!-- Assigned crew -->
+      <div class="detail-section-label">Assigned Crew</div>
+      <div class="crew-avatars">
+        <div class="crew-av" style="background:rgba(245,158,11,0.15);color:#f59e0b;">JR</div>
+        <div class="crew-av" style="background:rgba(59,130,246,0.15);color:#60a5fa;">MC</div>
+        <div class="crew-av" style="background:rgba(34,197,94,0.15);color:#4ade80;">SK</div>
+        <div class="crew-av" style="background:rgba(249,115,22,0.15);color:#fb923c;">DL</div>
+        <div class="crew-av" style="background:rgba(239,68,68,0.15);color:#f87171;">TN</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
