@@ -1,12 +1,10 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.constra.app",
-      "sha256_cert_fingerprints": [
-        "PASTE_YOUR_SHA256_FINGERPRINT_HERE"
-      ]
-    }
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.getconstra.app",
+    "sha256_cert_fingerprints": [
+      "65:EF:7A:55:FE:C9:93:74:D1:3B:7E:C1:AD:BC:34:60:37:BC:7D:6A:78:42:9F:F9:3E:4C:54:23:1A:0B:14:D3"
+    ]
   }
-]
+}]
