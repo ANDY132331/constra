@@ -300,3 +300,62 @@
     background: oklch(1 0 0 / 20%);
   }
 }
+
+/* ── 3D Cinematic Hero (landing page) ─────────────────────────────────────── */
+#cl-hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:120px 52px 90px;background:#020202}
+#starCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.cl-glow{position:absolute;width:1100px;height:1100px;background:radial-gradient(circle,rgba(255,165,0,.1) 0%,rgba(255,69,0,.05) 45%,transparent 70%);right:-200px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1}
+.cl-inner{max-width:1340px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;position:relative;z-index:2}
+.cl-h{font-size:clamp(60px,8vw,108px);font-weight:900;letter-spacing:-.055em;line-height:.88;margin-bottom:28px;color:#fff}
+.hl{display:block;opacity:0}
+.hl-1{animation:clFU .65s .2s ease both}
+.hl-2{animation:clFU .65s .36s ease both;background:linear-gradient(135deg,#FFA500,#FF4500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hl-3{animation:clFU .65s .52s ease both;-webkit-text-stroke:2.5px rgba(255,255,255,.3);color:transparent}
+.hl.up{opacity:1}
+.hl-1.up{animation:clF1 6s ease-in-out infinite}
+.hl-2.up{animation:clF2 6s ease-in-out .8s infinite}
+.hl-3.up{animation:clF3 6s ease-in-out 1.6s infinite}
+@keyframes clF1{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes clF2{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+@keyframes clF3{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes clFU{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+.cl-eye{display:inline-flex;align-items:center;gap:10px;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:#FFA500;border:1px solid rgba(255,165,0,.3);padding:8px 16px;border-radius:100px;background:rgba(255,165,0,.06);margin-bottom:36px;opacity:0;animation:clFU .5s .1s ease both}
+.cl-eye-dot{width:6px;height:6px;border-radius:50%;background:#FFA500;animation:clPulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes clPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,165,0,.5)}50%{box-shadow:0 0 0 7px rgba(255,165,0,0)}}
+.cl-sub{font-size:17px;line-height:1.7;color:rgba(255,255,255,.6);max-width:430px;margin-bottom:44px;opacity:0;animation:clFU .6s .64s ease both}
+.cl-ctas{display:flex;gap:14px;flex-wrap:wrap;opacity:0;animation:clFU .6s .78s ease both}
+.cl-btn{background:linear-gradient(135deg,#FFA500,#FF4500);color:#000;font-weight:800;font-size:14px;letter-spacing:.04em;padding:16px 34px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);transition:transform .2s,box-shadow .3s;position:relative;overflow:hidden}
+.cl-btn::after{content:'';position:absolute;top:-50%;left:-65%;width:55%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);transform:skewX(-20deg);animation:clShim 3.5s ease-in-out 2s infinite}
+@keyframes clShim{0%{left:-65%}55%,100%{left:120%}}
+.cl-btn:hover{transform:translateY(-3px);box-shadow:0 22px 52px rgba(255,165,0,.45)}
+.cl-btn-ghost{background:transparent;color:rgba(255,255,255,.6);font-size:14px;font-weight:600;padding:16px 34px;border:1px solid rgba(255,255,255,.1);text-decoration:none;display:inline-block;transition:border-color .2s,color .2s}
+.cl-btn-ghost:hover{border-color:rgba(255,255,255,.35);color:#fff}
+.cl-trust{margin-top:40px;display:flex;align-items:center;gap:14px;opacity:0;animation:clFU .6s .9s ease both}
+.cl-avs{display:flex}
+.cl-av{width:36px;height:36px;border-radius:50%;border:2.5px solid #020202;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-left:-10px}
+.cl-av:first-child{margin-left:0}
+.cl-trust-txt{font-size:13px;color:rgba(255,255,255,.6)}
+.cl-trust-txt strong{color:#fff}
+.cl-vis{display:flex;align-items:center;justify-content:center;position:relative;opacity:0;animation:clFU .8s .4s ease both}
+.cl-scene{perspective:1100px;perspective-origin:center}
+.cl-wrap{transform-style:preserve-3d;position:relative;width:272px;height:560px;cursor:grab}
+.cl-wrap:active{cursor:grabbing}
+.cl-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:44px;overflow:hidden;background:#080808;border:1px solid rgba(255,255,255,.09);box-shadow:0 0 0 1px rgba(255,165,0,.12),0 44px 100px rgba(0,0,0,.85)}
+.cl-face-back{transform:rotateY(180deg);border-color:rgba(255,165,0,.22);box-shadow:0 0 0 1px rgba(255,165,0,.22),0 44px 100px rgba(0,0,0,.85),0 0 90px rgba(255,165,0,.14)}
+.cl-shadow{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);width:210px;height:28px;background:radial-gradient(ellipse,rgba(255,165,0,.28),transparent 70%);border-radius:50%;animation:clSh 4.5s ease-in-out infinite}
+@keyframes clSh{0%,100%{opacity:.55;transform:translateX(-50%) scaleX(.9)}50%{opacity:1;transform:translateX(-50%) scaleX(1.15)}}
+.cl-fb{position:absolute;background:rgba(10,10,10,.96);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:11px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 16px 48px rgba(0,0,0,.7);white-space:nowrap;backdrop-filter:blur(12px);pointer-events:none}
+.cl-fb-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.cl-fb-t{font-size:12px;font-weight:700;color:#fff}
+.cl-fb-s{font-size:9.5px;color:rgba(255,255,255,.4);margin-top:2px}
+.cl-fb1{top:-18px;right:-145px;animation:clFbA 4.3s ease-in-out infinite}
+.cl-fb2{bottom:105px;left:-154px;animation:clFbA 5s ease-in-out .9s infinite}
+.cl-fb3{bottom:20px;right:-132px;animation:clFbA 4.7s ease-in-out .5s infinite}
+@keyframes clFbA{0%,100%{transform:translateY(0) rotate(-.4deg)}50%{transform:translateY(-15px) rotate(.4deg)}}
+@media(max-width:1060px){
+  #cl-hero{padding:100px 24px 70px}
+  .cl-inner{grid-template-columns:1fr}
+  .cl-vis{display:none}
+  .cl-ctas{flex-direction:column}
+  .cl-sub{max-width:100%}
+}
