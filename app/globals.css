@@ -301,10 +301,19 @@
   }
 }
 
+/* ── Scroll reveal ─────────────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.revealed{opacity:1;transform:none}
+
+/* ── Feature card 3D ───────────────────────────────────────────────────────── */
+.feat-card{transform:perspective(700px) rotateX(0deg) rotateY(0deg) translateZ(0px);transition:transform .15s ease,border-color .2s,box-shadow .2s}
+.feat-card:hover{box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.feat-shine{pointer-events:none;position:absolute;inset:0;border-radius:inherit;transition:background .1s}
+
 /* ── 3D Cinematic Hero (landing page) ─────────────────────────────────────── */
-#cl-hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:120px 52px 90px;background:#020202}
+#cl-hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:120px 52px 90px;background:#05050d}
 #starCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.cl-glow{position:absolute;width:1100px;height:1100px;background:radial-gradient(circle,rgba(255,165,0,.1) 0%,rgba(255,69,0,.05) 45%,transparent 70%);right:-200px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1}
+.cl-glow{position:absolute;width:1000px;height:1000px;background:radial-gradient(circle,rgba(245,158,11,.08) 0%,rgba(249,115,22,.04) 45%,transparent 70%);right:-180px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1}
 .cl-inner{max-width:1340px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;position:relative;z-index:2}
 .cl-h{font-size:clamp(60px,8vw,108px);font-weight:900;letter-spacing:-.055em;line-height:.88;margin-bottom:28px;color:#fff}
 .hl{display:block;opacity:0}
