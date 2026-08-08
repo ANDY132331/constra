@@ -1,4 +1,4 @@
-const CACHE = "constra-v3";
+const CACHE = "constra-v5";
 
 const PRECACHE = ["/", "/dashboard", "/time-tracking", "/schedule", "/crew"];
 
