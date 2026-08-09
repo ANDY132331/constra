@@ -310,6 +310,7 @@
 /* ── Feature card 3D ───────────────────────────────────────────────────────── */
 .feat-card{transform:perspective(700px) rotateX(0deg) rotateY(0deg) translateZ(0px);transition:transform .15s ease,border-color .2s,box-shadow .2s}
 .feat-card:hover{box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.feat-card:hover .feat-top-bar{opacity:1!important}
 .feat-shine{pointer-events:none;position:absolute;inset:0;border-radius:inherit;transition:background .1s}
 
 /* ── 3D Cinematic Hero (landing page) ─────────────────────────────────────── */
