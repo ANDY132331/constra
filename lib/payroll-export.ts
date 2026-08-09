@@ -151,6 +151,10 @@ export function exportPayroll(
   const a = document.createElement("a");
   a.href = url;
   a.download = `constra-payroll-${periodLabel.replace(/\s/g, "-").toLowerCase()}.${adapter.fileExtension}`;
+  // Must append to DOM before clicking — required for Firefox and mobile browsers
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

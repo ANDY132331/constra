@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HardHat, Phone, Mail, Clock, ArrowRight, ChevronRight, ShieldCheck, Zap, Globe } from "lucide-react";
+import { HardHat, Phone, Mail, Clock, ArrowRight, ChevronRight, ChevronLeft, ShieldCheck, Zap, Globe } from "lucide-react";
 
 export const metadata = {
   title: "Support — Constra",
@@ -115,14 +115,20 @@ export default function SupportPage() {
 
         {/* Mobile nav */}
         <nav className="lg:hidden sticky top-0 z-50 bg-[#080808]/90 backdrop-blur-xl border-b border-white/[0.05]">
-          <div className="px-5 h-14 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
+          <div className="px-4 h-14 flex items-center justify-between gap-3">
+            {/* Back button */}
+            <Link href="/" className="flex items-center gap-1.5 text-white/55 hover:text-white transition-colors">
+              <ChevronLeft size={18} />
+              <span className="text-[13px] font-semibold">Back</span>
+            </Link>
+            {/* Logo centered */}
+            <Link href="/" className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
               <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
                 <HardHat size={14} className="text-black" />
               </div>
               <span className="text-[15px] font-black">Constra</span>
             </Link>
-            <Link href="/onboarding" className="bg-amber-500 text-black font-bold text-[12px] px-3 py-1.5 rounded-lg flex items-center gap-1">
+            <Link href="/onboarding" className="bg-amber-500 text-black font-bold text-[12px] px-3 py-1.5 rounded-lg flex items-center gap-1 flex-shrink-0">
               Get Started <ArrowRight size={11} />
             </Link>
           </div>

@@ -213,11 +213,15 @@ export default function LandingPage() {
     }
 
     // ── Headline float ───────────────────────────────────────────────────────
-    [".hl-1", ".hl-2", ".hl-3"].forEach((sel, i) => {
-      setTimeout(() => {
-        const el = document.querySelector(sel) as HTMLElement | null;
-        if (el && !cancelled) { el.style.opacity = "1"; el.classList.add("up"); }
-      }, 900 + i * 150);
+    // Wait for each line's fade-in animation to FINISH before starting the float.
+    // Using animationend avoids the mid-flight snap that setTimeout caused.
+    document.querySelectorAll<HTMLElement>(".hl").forEach(el => {
+      el.addEventListener("animationend", (e: AnimationEvent) => {
+        if (e.animationName === "clFU" && !cancelled) {
+          el.style.opacity = "1";
+          el.classList.add("up");
+        }
+      }, { once: true });
     });
 
     // ── 3D card tilt ─────────────────────────────────────────────────────────
