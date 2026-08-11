@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import { Clock, DollarSign, TrendingUp, Users, FileDown, AlertCircle, BarChart2, ChevronDown, FileText } from "lucide-react";
@@ -44,8 +44,16 @@ export default function ReportsPage() {
   const { workers, projects, clockEntries, currency, currentUser, companyName } = useStore();
   const router = useRouter();
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const t = useT();
   const exportMenuRef = useRef<HTMLDivElement>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback((msg: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast(msg);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
+  }, []);
 
   useEffect(() => {
     if (!isAdminOrAbove(currentUser.role)) router.replace("/dashboard");
@@ -152,8 +160,28 @@ export default function ReportsPage() {
 
   const activeWorkers = workers.filter((w) => w.clockedIn).length;
 
+  const handlePayrollExport = useCallback((adapterId: string) => {
+    if (periodEntries.length === 0) {
+      showToast("No entries in this period — add clock-ins first");
+      setExportMenuOpen(false);
+      return;
+    }
+    exportPayroll(adapterId, clockEntries, workers, projects, periodStart, periodEnd, periodLabel);
+    setExportMenuOpen(false);
+  }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, showToast]);
+
   return (
     <>
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <div className="bg-[#1e1e1e] border border-white/10 text-white text-[13px] font-semibold px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 whitespace-nowrap">
+            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full flex-shrink-0" />
+            {toast}
+          </div>
+        </div>
+      )}
+
       {/* MOBILE */}
       <div className="lg:hidden -mx-4 -mt-4 pb-6">
         {/* Header */}
@@ -190,10 +218,7 @@ export default function ReportsPage() {
                     {PAYROLL_ADAPTERS.map((adapter) => (
                       <button
                         key={adapter.id}
-                        onClick={() => {
-                          exportPayroll(adapter.id, clockEntries, workers, projects, periodStart, periodEnd, periodLabel);
-                          setExportMenuOpen(false);
-                        }}
+                        onClick={() => handlePayrollExport(adapter.id)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors text-left"
                       >
                         <FileDown size={12} className="text-amber-400/60" />
@@ -427,10 +452,7 @@ export default function ReportsPage() {
                     {PAYROLL_ADAPTERS.map((adapter) => (
                       <button
                         key={adapter.id}
-                        onClick={() => {
-                          exportPayroll(adapter.id, clockEntries, workers, projects, periodStart, periodEnd, periodLabel);
-                          setExportMenuOpen(false);
-                        }}
+                        onClick={() => handlePayrollExport(adapter.id)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors text-left"
                       >
                         <FileDown size={12} className="text-amber-400/60" />
