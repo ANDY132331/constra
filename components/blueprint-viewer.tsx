@@ -6,7 +6,7 @@ import type { BlueprintPin } from "@/lib/mock-data";
 
 const PIN_TYPES = [
   { value: "issue",  label: "Issue",  color: "#ef4444", icon: AlertTriangle },
-  { value: "safety", label: "Safety", color: "#f59e0b", icon: ShieldAlert },
+  { value: "safety", label: "Safety", color: "#F5C400", icon: ShieldAlert },
   { value: "rfi",    label: "RFI",    color: "#8b5cf6", icon: MessageSquare },
   { value: "info",   label: "Info",   color: "#60a5fa", icon: Info },
 ] as const;

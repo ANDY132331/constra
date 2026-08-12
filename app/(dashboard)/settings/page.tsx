@@ -42,7 +42,7 @@ const INDUSTRIES = [
 ];
 
 const ROLE_COLORS: Record<string, string> = {
-  Admin: "#f97316", "Project Manager": "#8b5cf6",
+  Admin: "#F5C400", "Project Manager": "#8b5cf6",
   Foreman: "#3b82f6", Worker: "#22c55e",
 };
 

@@ -25,7 +25,7 @@ type ForecastDay = { date: string; code: number; high: number; low: number; rain
 type WeatherData = { temp: number; code: number; windspeed: number; forecast: ForecastDay[] } | null;
 
 function weatherMeta(code: number): { label: string; icon: React.ComponentType<{ size?: number; className?: string }>; color: string } {
-  if (code === 0)                                                return { label: "Clear",        icon: Sun,       color: "#f59e0b" };
+  if (code === 0)                                                return { label: "Clear",        icon: Sun,       color: "#F5C400" };
   if (code <= 3)                                                 return { label: "Partly Cloudy",icon: Cloud,     color: "#94a3b8" };
   if (code <= 48)                                                return { label: "Foggy",        icon: Cloud,     color: "#6b7280" };
   if (code <= 67 || (code >= 80 && code <= 82))                 return { label: "Rain",         icon: CloudRain, color: "#60a5fa" };
@@ -116,7 +116,7 @@ const ACTIVITY_ICONS: Record<string, { icon: React.ComponentType<{ size?: number
   "clock-out":      { icon: Clock,         color: "#94a3b8", href: "/time-tracking" },
   "punch-added":    { icon: AlertTriangle, color: "#ef4444", href: "/punch-list"    },
   "rfi-submitted":  { icon: MessageSquare, color: "#3b82f6", href: "/rfis"          },
-  "invoice-sent":   { icon: FileText,      color: "#f59e0b", href: "/invoices"      },
+  "invoice-sent":   { icon: FileText,      color: "#F5C400", href: "/invoices"      },
   "task-updated":   { icon: CheckCircle2,  color: "#8b5cf6", href: "/tasks"         },
   "photo-uploaded": { icon: ImageIcon,     color: "#06b6d4", href: "/photos"        },
 };
@@ -187,7 +187,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
   const budget = project.budget;
   const overBudget = spent > budget;
   const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
-  const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#f59e0b" : "#22c55e";
+  const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
   return (
     <Link href="/projects" className="block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors">
       <div className="flex items-start gap-3 mb-3">
@@ -297,13 +297,13 @@ export default function DashboardPage() {
       id: co.id,
       label: `Change Order ${co.number}: ${co.title} pending approval`,
       href: "/change-orders",
-      color: "#f59e0b",
+      color: "#F5C400",
     })),
     ...overdueTasks.slice(0, 3).map((t) => ({
       id: t.id,
       label: `Task overdue: ${t.name}`,
       href: "/tasks",
-      color: "#f97316",
+      color: "#F5C400",
     })),
   ].slice(0, 6);
 
@@ -428,9 +428,9 @@ export default function DashboardPage() {
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-[18px] flex-shrink-0 border-2"
               style={{
-                backgroundColor: (currentUser.color ?? "#f59e0b") + "22",
-                borderColor: (currentUser.color ?? "#f59e0b") + "44",
-                color: currentUser.color ?? "#f59e0b",
+                backgroundColor: (currentUser.color ?? "#F5C400") + "22",
+                borderColor: (currentUser.color ?? "#F5C400") + "44",
+                color: currentUser.color ?? "#F5C400",
               }}
             >
               {currentUser.photo
@@ -486,7 +486,7 @@ export default function DashboardPage() {
         <div className="px-4 pt-4 grid grid-cols-3 gap-3">
           {[
             { label: "Today", value: totalToday.toFixed(1) + "h", pct: dayPct, color: "#3b82f6", sub: `${dayTarget}h target` },
-            { label: "This Week", value: (myWeekHours + liveElapsed).toFixed(1) + "h", pct: weekPct, color: "#f59e0b", sub: `${weekTarget}h target` },
+            { label: "This Week", value: (myWeekHours + liveElapsed).toFixed(1) + "h", pct: weekPct, color: "#F5C400", sub: `${weekTarget}h target` },
             { label: "Days In", value: String(workedDays), pct: (workedDays / 5) * 100, color: "#22c55e", sub: "this week" },
           ].map(({ label, value, pct, color, sub }) => (
             <div key={label} className="bg-[#111] border border-white/[0.06] rounded-2xl p-3">
@@ -510,8 +510,8 @@ export default function DashboardPage() {
                 <Link key={proj.id} href="/projects"
                   className="flex items-center gap-3 bg-[#111] border border-white/[0.06] active:bg-white/[0.04] rounded-2xl p-3.5 transition-all">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: (proj.color ?? "#f59e0b") + "18" }}>
-                    <FolderKanban size={18} style={{ color: proj.color ?? "#f59e0b" }} />
+                    style={{ backgroundColor: (proj.color ?? "#F5C400") + "18" }}>
+                    <FolderKanban size={18} style={{ color: proj.color ?? "#F5C400" }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-bold text-white/85 truncate">{proj.name}</p>
@@ -575,7 +575,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: "/photos",        label: "Upload Photo",  icon: Camera,        color: "#06b6d4", sub: "Job site photos" },
-              { href: "/safety",        label: "Safety Log",    icon: ShieldAlert,   color: "#f59e0b", sub: "Report incident" },
+              { href: "/safety",        label: "Safety Log",    icon: ShieldAlert,   color: "#F5C400", sub: "Report incident" },
               { href: "/messages",      label: "Messages",      icon: MessageSquare, color: "#3b82f6", sub: "Crew chat" },
               { href: "/schedule",      label: "Schedule",      icon: Calendar,      color: "#8b5cf6", sub: "Your calendar" },
             ].map(({ href, label, icon: Icon, color, sub }) => (
@@ -642,7 +642,7 @@ export default function DashboardPage() {
         <div
           className="absolute top-0 inset-x-0 h-[3px] pointer-events-none"
           style={{
-            background: "repeating-linear-gradient(90deg, #f59e0b 0px, #f59e0b 14px, rgba(0,0,0,0) 14px, rgba(0,0,0,0) 28px)",
+            background: "repeating-linear-gradient(90deg, #F5C400 0px, #F5C400 14px, rgba(0,0,0,0) 14px, rgba(0,0,0,0) 28px)",
           }}
         />
 
@@ -719,12 +719,12 @@ export default function DashboardPage() {
         <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
           {(([
             { label: "Hours/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9" },
-            { label: "Open Issues",   value: openPunchItems.length, color: "#f97316" },
+            { label: "Open Issues",   value: openPunchItems.length, color: "#F5C400" },
             { label: "High Priority", value: highPriority.length, color: "#ef4444" },
             ...(canSeeFinancials
               ? [
                   { label: "Collected",   value: formatCurrencyCompact(totalPaid, currency as never), color: "#22c55e" },
-                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: "#f59e0b" },
+                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: "#F5C400" },
                 ]
               : []),
           ]) as { label: string; value: string | number; color: string }[]).map((chip) => (
@@ -745,7 +745,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 gap-2.5">
           {[
             { label: "Daily Report",  icon: FileText,      href: "/daily-reports",  color: "#22c55e" },
-            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders", color: "#f59e0b" },
+            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders", color: "#F5C400" },
             { label: "Invoice",       icon: ReceiptText,   href: "/invoices",       color: "#0ea5e9" },
             { label: "Punch Item",    icon: AlertTriangle, href: "/punch-list",     color: "#ef4444" },
           ].map(({ label, icon: Icon, href, color }) => (
@@ -1162,7 +1162,7 @@ export default function DashboardPage() {
         <span className="text-[11px] text-white/25 font-semibold uppercase tracking-widest mr-1">Quick add</span>
         {[
           { label: "Daily Report", icon: FileText, href: "/daily-reports", color: "#22c55e" },
-          { label: "Change Order", icon: GitPullRequest, href: "/change-orders", color: "#f59e0b" },
+          { label: "Change Order", icon: GitPullRequest, href: "/change-orders", color: "#F5C400" },
           { label: "Invoice", icon: ReceiptText, href: "/invoices", color: "#3b82f6" },
           { label: "Punch Item", icon: AlertTriangle, href: "/punch-list", color: "#ef4444" },
         ].map(({ label, icon: Icon, href, color }) => (
@@ -1191,7 +1191,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard label={t.dashboard.workersOnSite} value={clockedInWorkers.length} sub={`of ${workers.length} total crew`} icon={Users} iconColor="#22c55e" href="/time-tracking" />
         <StatCard label={t.dashboard.hoursThisWeek} value={`${(weeklyHours + todayActiveHours).toFixed(0)}h`} sub={`${todayActiveHours.toFixed(1)}h active now`} icon={Clock} iconColor="#3b82f6" href="/time-tracking" />
-        <StatCard label={t.dashboard.activeProjects} value={activeProjects.length} sub={`${upcomingProjects.length} upcoming · ${completedProjects.length} done`} icon={FolderKanban} iconColor="#f59e0b" href="/projects" />
+        <StatCard label={t.dashboard.activeProjects} value={activeProjects.length} sub={`${upcomingProjects.length} upcoming · ${completedProjects.length} done`} icon={FolderKanban} iconColor="#F5C400" href="/projects" />
         <StatCard label={t.dashboard.openIssues} value={openPunchItems.length} sub={`${highPriority.length} high priority`} icon={ClipboardList} iconColor="#ef4444" href="/punch-list" />
         {canSeeFinancials && (
           <>

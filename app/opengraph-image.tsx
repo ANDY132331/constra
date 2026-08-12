@@ -64,7 +64,7 @@ export default function OGImage() {
             style={{
               width: "52px",
               height: "52px",
-              background: "#f59e0b",
+              background: "#F5C400",
               borderRadius: "14px",
               display: "flex",
               alignItems: "center",
@@ -146,7 +146,7 @@ export default function OGImage() {
               style={{
                 fontSize: "64px",
                 fontWeight: "900",
-                color: "#f59e0b",
+                color: "#F5C400",
                 lineHeight: "1.08",
                 letterSpacing: "-2px",
                 display: "flex",
@@ -253,14 +253,14 @@ export default function OGImage() {
                 width: "8px",
                 height: "8px",
                 borderRadius: "50%",
-                background: "#f59e0b",
+                background: "#F5C400",
                 display: "flex",
               }}
             />
             <span
               style={{
                 fontSize: "15px",
-                color: "#f59e0b",
+                color: "#F5C400",
                 fontWeight: "700",
                 display: "flex",
                 fontFamily: "system-ui, sans-serif",

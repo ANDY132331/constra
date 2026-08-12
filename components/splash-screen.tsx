@@ -93,11 +93,11 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
           85%  { opacity:0.35; }
           100% { opacity:0; transform:translateY(-140px) scale(0.3); }
         }
-        .ss-p { animation: ss-particle var(--pdur) var(--pdelay) ease-in infinite; position:absolute; border-radius:9999px; background:#f59e0b; }
+        .ss-p { animation: ss-particle var(--pdur) var(--pdelay) ease-in infinite; position:absolute; border-radius:9999px; background:#F5C400; }
 
         /* ── Amber glow on bar ── */
         .ss-bar-wrap { position:absolute; bottom:0; left:0; right:0; height:2px; background:rgba(255,255,255,0.04); }
-        .ss-bar { height:100%; background:#f59e0b; box-shadow: 0 0 10px 1px #f59e0b88; }
+        .ss-bar { height:100%; background:#F5C400; box-shadow: 0 0 10px 1px #F5C40088; }
 
         /* ── Icon entrance ── */
         @keyframes ss-icon { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
@@ -109,7 +109,7 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="ss-grid" width="52" height="52" patternUnits="userSpaceOnUse">
-              <path d="M52 0L0 0 0 52" fill="none" stroke="#f59e0b" strokeWidth="0.45" />
+              <path d="M52 0L0 0 0 52" fill="none" stroke="#F5C400" strokeWidth="0.45" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#ss-grid)" />
@@ -142,7 +142,7 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
             <path
               className="ss-glow"
               d="M9 92V23L38 5L67 23V92"
-              stroke="#f59e0b"
+              stroke="#F5C400"
               strokeWidth="16"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -151,7 +151,7 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
             <path
               className="ss-bframe"
               d="M9 92V23L38 5L67 23V92"
-              stroke="#f59e0b"
+              stroke="#F5C400"
               strokeWidth="2.8"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -160,7 +160,7 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
             <path
               className="ss-bfloors"
               d="M9 46H67 M9 67H67"
-              stroke="#f59e0b"
+              stroke="#F5C400"
               strokeWidth="1.3"
               strokeLinecap="round"
               opacity="0.38"
@@ -168,19 +168,19 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
             <path
               className="ss-center"
               d="M38 23V92"
-              stroke="#f59e0b"
+              stroke="#F5C400"
               strokeWidth="1.3"
               strokeLinecap="round"
               opacity="0.28"
             />
             {/* Windows — left */}
-            <rect className="ss-w1" x="14" y="28"  width="14" height="12" rx="2" fill="#f59e0b" opacity="0" />
-            <rect className="ss-w3" x="14" y="50"  width="14" height="11" rx="2" fill="#f59e0b" opacity="0" />
-            <rect className="ss-w5" x="14" y="71"  width="14" height="11" rx="2" fill="#f59e0b" opacity="0" />
+            <rect className="ss-w1" x="14" y="28"  width="14" height="12" rx="2" fill="#F5C400" opacity="0" />
+            <rect className="ss-w3" x="14" y="50"  width="14" height="11" rx="2" fill="#F5C400" opacity="0" />
+            <rect className="ss-w5" x="14" y="71"  width="14" height="11" rx="2" fill="#F5C400" opacity="0" />
             {/* Windows — right */}
-            <rect className="ss-w2" x="48" y="28"  width="14" height="12" rx="2" fill="#f59e0b" opacity="0" />
-            <rect className="ss-w4" x="48" y="50"  width="14" height="11" rx="2" fill="#f59e0b" opacity="0" />
-            <rect className="ss-w6" x="48" y="71"  width="14" height="11" rx="2" fill="#f59e0b" opacity="0" />
+            <rect className="ss-w2" x="48" y="28"  width="14" height="12" rx="2" fill="#F5C400" opacity="0" />
+            <rect className="ss-w4" x="48" y="50"  width="14" height="11" rx="2" fill="#F5C400" opacity="0" />
+            <rect className="ss-w6" x="48" y="71"  width="14" height="11" rx="2" fill="#F5C400" opacity="0" />
           </svg>
         </div>
 

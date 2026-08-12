@@ -18,7 +18,7 @@ type SharedProject = {
 
 const TASK_STATUS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   completed:    { label: "Completed",   icon: <CheckCircle2 size={13} />, color: "#22c55e" },
-  "in-progress":{ label: "In Progress", icon: <Clock size={13} />,        color: "#f59e0b" },
+  "in-progress":{ label: "In Progress", icon: <Clock size={13} />,        color: "#F5C400" },
   "not-started":{ label: "Not Started", icon: <Circle size={13} />,       color: "#6b7280" },
   delayed:      { label: "Delayed",     icon: <AlertCircle size={13} />,  color: "#ef4444" },
 };
@@ -63,7 +63,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
   const completed = project.tasks.filter((t) => t.status === "completed").length;
   const inProgress = project.tasks.filter((t) => t.status === "in-progress").length;
   const delayed = project.tasks.filter((t) => t.status === "delayed").length;
-  const burnColor = project.progress > 90 ? "#22c55e" : project.progress > 60 ? "#f59e0b" : "#3b82f6";
+  const burnColor = project.progress > 90 ? "#22c55e" : project.progress > 60 ? "#F5C400" : "#3b82f6";
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white">
@@ -126,7 +126,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: "Completed", value: completed, color: "#22c55e" },
-              { label: "In Progress", value: inProgress, color: "#f59e0b" },
+              { label: "In Progress", value: inProgress, color: "#F5C400" },
               { label: "Delayed", value: delayed, color: "#ef4444" },
             ].map(({ label, value, color }) => (
               <div key={label} className="text-center bg-gray-50 dark:bg-white/[0.03] rounded-xl py-3">

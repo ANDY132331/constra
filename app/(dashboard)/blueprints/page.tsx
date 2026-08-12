@@ -324,7 +324,7 @@ export default function BlueprintsPage() {
                 ) : (
                   <div className="p-2 space-y-1">
                     {docPins.map((pin) => {
-                      const COLOR = { issue: "#ef4444", safety: "#f59e0b", rfi: "#8b5cf6", info: "#60a5fa" }[pin.type];
+                      const COLOR = { issue: "#ef4444", safety: "#F5C400", rfi: "#8b5cf6", info: "#60a5fa" }[pin.type];
                       return (
                         <div
                           key={pin.id}

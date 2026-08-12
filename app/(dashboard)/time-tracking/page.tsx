@@ -968,7 +968,7 @@ export default function TimeTrackingPage() {
         {[
           { label: "On Site Now", value: clockedIn.length, sub: "workers live", color: "#22c55e" },
           { label: "Hours Today", value: `${todayTotal}h`, sub: "all workers combined", color: "#3b82f6" },
-          { label: "Total Sessions", value: clockEntries.filter((e) => e.clockOut && e.clockOut.getTime() !== 0).length, sub: "completed all time", color: "#f59e0b" },
+          { label: "Total Sessions", value: clockEntries.filter((e) => e.clockOut && e.clockOut.getTime() !== 0).length, sub: "completed all time", color: "#F5C400" },
           { label: "Active Projects", value: activeProjects.length, sub: "currently running", color: "#8b5cf6" },
         ].map(({ label, value, sub, color }) => (
           <div key={label} className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">

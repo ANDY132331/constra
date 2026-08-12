@@ -18,9 +18,9 @@ type Category = ProjectDocument["category"];
 const CATEGORIES: { value: Category; label: string; color: string }[] = [
   { value: "blueprint",   label: "Blueprints",          color: "#60a5fa" },
   { value: "permit",      label: "Permits",             color: "#34d399" },
-  { value: "contract",    label: "Contracts",           color: "#f59e0b" },
+  { value: "contract",    label: "Contracts",           color: "#F5C400" },
   { value: "inspection",  label: "Inspection Reports",  color: "#a78bfa" },
-  { value: "safety",      label: "Safety Docs",         color: "#f97316" },
+  { value: "safety",      label: "Safety Docs",         color: "#F5C400" },
   { value: "other",       label: "Other",               color: "#64748b" },
 ];
 

@@ -5,6 +5,13 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* ── Brand amber override → Constra construction yellow ──────────────────── */
+  --color-amber-300: #fada4a;
+  --color-amber-400: #f5cc00;
+  --color-amber-500: #F5C400;
+  --color-amber-600: #d4a900;
+  --color-amber-700: #a88400;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);

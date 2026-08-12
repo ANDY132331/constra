@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     custom_role: "Admin / Owner",
     email: email.trim(),
     phone: "",
-    color: "#f59e0b",
+    color: "#F5C400",
     clocked_in: false,
     hourly_rate: 0,
   });

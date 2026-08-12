@@ -303,7 +303,7 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.pct > 90 ? "#ef4444" : p.pct > 70 ? "#f59e0b" : p.color }} />
+                      <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.pct > 90 ? "#ef4444" : p.pct > 70 ? "#F5C400" : p.color }} />
                     </div>
                     <div className="flex justify-between mt-0.5">
                       <span className="text-[9px] text-white/25">{formatCurrencyCompact(p.spent, currency)} spent</span>
@@ -562,7 +562,7 @@ export default function ReportsPage() {
                     </div>
                     <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all"
-                        style={{ width: `${p.pct}%`, backgroundColor: p.pct > 90 ? "#ef4444" : p.pct > 70 ? "#f59e0b" : p.color }} />
+                        style={{ width: `${p.pct}%`, backgroundColor: p.pct > 90 ? "#ef4444" : p.pct > 70 ? "#F5C400" : p.color }} />
                     </div>
                     <div className="flex justify-between mt-1">
                       <span className="text-[10px] text-white/25">{formatCurrencyCompact(p.spent, currency)} spent</span>

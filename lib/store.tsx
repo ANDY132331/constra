@@ -1281,7 +1281,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     (state.authUserId ? state.workers.find((w) => w.id === state.authUserId) : undefined) ??
     state.workers[0] ?? {
       id: "admin", name: "Admin", initials: "AD", role: "Admin",
-      customRole: "Admin / Owner", email: "", phone: "", color: "#f59e0b",
+      customRole: "Admin / Owner", email: "", phone: "", color: "#F5C400",
       projectIds: [], clockedIn: false, hourlyRate: 0,
     };
 

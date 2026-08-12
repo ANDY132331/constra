@@ -281,7 +281,7 @@ export function GanttChart({
                 task.progress === 100
                   ? "#22c55e"
                   : task.progress > 0
-                  ? "#f59e0b"
+                  ? "#F5C400"
                   : "rgba(255,255,255,0.25)";
               const isDragging = dragState?.taskId === task.id;
 
@@ -421,7 +421,7 @@ export function GanttChart({
                 left: todayOffset * DAY_WIDTH + DAY_WIDTH / 2 - 1,
                 width: 2,
                 background:
-                  "linear-gradient(to bottom, #f59e0b, #f59e0b80, transparent)",
+                  "linear-gradient(to bottom, #F5C400, #F5C40080, transparent)",
               }}
             />
           )}

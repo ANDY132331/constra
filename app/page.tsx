@@ -148,7 +148,7 @@ const FEATURES = [
   { icon: ClipboardList, color: "#06b6d4", title: "Punch Lists & RFIs",               body: "Assign punch items with photos. Track RFIs end-to-end without email chains." },
   { icon: Package,       color: "#10b981", title: "Material Tracker",                  body: "Log deliveries and usage by trade. Auto low-stock alerts. Export per project." },
   { icon: MessageSquare, color: "#6366f1", title: "Crew Messaging",                    body: "Per-project group chats with file sharing. Real-time delivery." },
-  { icon: MapPin,        color: "#f97316", title: "GPS Site Map",                      body: "Every project on an interactive map. Clock-in locations pinned per worker." },
+  { icon: MapPin,        color: "#F5C400", title: "GPS Site Map",                      body: "Every project on an interactive map. Clock-in locations pinned per worker." },
   { icon: Truck,         color: "#84cc16", title: "Equipment Management",              body: "Track status, assignment, daily rate, and maintenance across all sites." },
   { icon: Globe,         color: "#a78bfa", title: "15-Language Support",               body: "Full localization in English, French, Spanish, Arabic, Punjabi, Hindi, and more." },
   { icon: WifiOff,       color: "#22d3ee", title: "Works Offline",                     body: "Clock in and log incidents with no signal. Syncs automatically when back online." },
@@ -341,7 +341,7 @@ export default function LandingPage() {
             ].map((s, i) => (
               <div key={i} style={{ padding: "40px 32px", borderRadius: 20, background: "rgba(255,255,255,.025)", border: "1px solid rgba(255,255,255,.05)", textAlign: "center" }}>
                 <div style={{ fontSize: 58, fontWeight: 900, lineHeight: 1, color: "#F5C400", marginBottom: 10, fontVariantNumeric: "tabular-nums" }}>
-                  <span className="counter" data-target={s.target} data-suffix={s.suffix} data-prefix={s.prefix || ""}>{s.prefix || ""}{0}{s.suffix}</span>
+                  <span className="counter" data-target={s.target} data-suffix={s.suffix} data-prefix={s.prefix || ""}>{s.prefix || ""}{s.target}{s.suffix}</span>
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,.8)", marginBottom: 4 }}>{s.label}</div>
                 <div style={{ fontSize: 12, color: "rgba(255,255,255,.28)" }}>{s.sub}</div>

@@ -144,8 +144,8 @@ function ResetPasswordForm() {
                   const score = [password.length >= 8, /[0-9]/.test(password), /[^a-zA-Z0-9]/.test(password), password.length >= 12].filter(Boolean).length;
                   const levels = [
                     { label: "Too short", color: "#ef4444", bars: 1 },
-                    { label: "Weak",      color: "#f97316", bars: 1 },
-                    { label: "Fair",      color: "#f59e0b", bars: 2 },
+                    { label: "Weak",      color: "#F5C400", bars: 1 },
+                    { label: "Fair",      color: "#F5C400", bars: 2 },
                     { label: "Good",      color: "#22c55e", bars: 3 },
                     { label: "Strong",    color: "#10b981", bars: 4 },
                   ];

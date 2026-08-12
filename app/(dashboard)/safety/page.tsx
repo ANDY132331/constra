@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const TYPE_CONFIG = {
-  "near-miss": { label: "Near Miss", icon: AlertTriangle, color: "#f59e0b" },
+  "near-miss": { label: "Near Miss", icon: AlertTriangle, color: "#F5C400" },
   injury: { label: "Injury", icon: Zap, color: "#ef4444" },
   "property-damage": { label: "Property Damage", icon: Building2, color: "#8b5cf6" },
   environmental: { label: "Environmental", icon: Info, color: "#06b6d4" },

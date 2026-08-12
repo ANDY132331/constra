@@ -96,7 +96,7 @@ export function SearchModal() {
         sub: p.client + " · " + p.status,
         href: "/projects",
         icon: FolderKanban,
-        color: "#f59e0b",
+        color: "#F5C400",
       })),
     ...projects
       .flatMap((p) => p.tasks.filter((t) => t.name.toLowerCase().includes(q)).map((t) => ({
@@ -135,7 +135,7 @@ export function SearchModal() {
         sub: "Invoice · " + i.status,
         href: "/invoices",
         icon: FileText,
-        color: "#f59e0b",
+        color: "#F5C400",
       })),
     ...safetyIncidents
       .filter((s) => s.description.toLowerCase().includes(q) || s.type.toLowerCase().includes(q))
@@ -151,7 +151,7 @@ export function SearchModal() {
 
   const SHORTCUTS = [
     { label: "Dashboard", href: "/dashboard", icon: Clock, color: "#3b82f6" },
-    { label: "Projects", href: "/projects", icon: FolderKanban, color: "#f59e0b" },
+    { label: "Projects", href: "/projects", icon: FolderKanban, color: "#F5C400" },
     { label: "Crew", href: "/crew", icon: Users, color: "#22c55e" },
     { label: "Punch List", href: "/punch-list", icon: ClipboardList, color: "#ef4444" },
     { label: "Invoices", href: "/invoices", icon: FileText, color: "#8b5cf6" },

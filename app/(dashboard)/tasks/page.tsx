@@ -206,7 +206,7 @@ export default function TasksPage() {
                     <div className="w-16 h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{
                         width: `${task.progress}%`,
-                        backgroundColor: task.status === "completed" ? "#22c55e" : task.status === "delayed" ? "#ef4444" : "#f59e0b"
+                        backgroundColor: task.status === "completed" ? "#22c55e" : task.status === "delayed" ? "#ef4444" : "#F5C400"
                       }} />
                     </div>
                     <span className="text-[10px] text-white/30">{task.progress}%</span>
@@ -315,7 +315,7 @@ export default function TasksPage() {
                 <div className="flex-1 h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{
                     width: `${task.progress}%`,
-                    backgroundColor: task.status === "completed" ? "#22c55e" : task.status === "delayed" ? "#ef4444" : "#f59e0b",
+                    backgroundColor: task.status === "completed" ? "#22c55e" : task.status === "delayed" ? "#ef4444" : "#F5C400",
                   }} />
                 </div>
                 <span className="text-[10px] text-white/30 w-8 text-right">{task.progress}%</span>

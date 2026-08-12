@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
             </tr>
             <tr>
               <td style="padding:8px 0;border-bottom:1px solid #e5e5e5;font-size:13px;color:#666">Amount Due</td>
-              <td style="padding:8px 0;border-bottom:1px solid #e5e5e5;font-size:14px;font-weight:800;color:#f59e0b;text-align:right">${amt}</td>
+              <td style="padding:8px 0;border-bottom:1px solid #e5e5e5;font-size:14px;font-weight:800;color:#F5C400;text-align:right">${amt}</td>
             </tr>
             <tr>
               <td style="padding:8px 0;font-size:13px;color:#666">Due Date</td>

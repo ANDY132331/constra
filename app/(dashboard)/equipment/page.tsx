@@ -12,7 +12,7 @@ import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 const STATUS_CONFIG = {
   available:   { label: "Available",   className: "bg-green-500/15 text-green-400",  dot: "#22c55e" },
   "in-use":    { label: "In Use",      className: "bg-blue-500/15 text-blue-400",    dot: "#3b82f6" },
-  maintenance: { label: "Maintenance", className: "bg-amber-500/15 text-amber-400",  dot: "#f59e0b" },
+  maintenance: { label: "Maintenance", className: "bg-amber-500/15 text-amber-400",  dot: "#F5C400" },
   "off-site":  { label: "Off Site",    className: "bg-white/8 text-white/40",        dot: "#666"    },
 };
 

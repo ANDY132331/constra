@@ -24,7 +24,7 @@ const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Worker: { label: "Worker", className: "bg-white/8 text-white/50" },
 };
 
-const COLORS = ["#f59e0b","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#f97316","#84cc16","#a78bfa"];
+const COLORS = ["#F5C400","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#F5C400","#84cc16","#a78bfa"];
 
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";

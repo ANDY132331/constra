@@ -13,7 +13,7 @@ import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 type View = "gantt" | "table" | "cards" | "map";
 
-const COLORS = ["#f59e0b","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#f97316"];
+const COLORS = ["#F5C400","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#F5C400"];
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
 
@@ -45,7 +45,7 @@ type FormState = {
 
 const blank: FormState = {
   name: "", client: "", address: "", gpsLat: "", gpsLng: "",
-  status: "active", startDate: "", endDate: "", budget: "", color: "#f59e0b", managerId: "",
+  status: "active", startDate: "", endDate: "", budget: "", color: "#F5C400", managerId: "",
 };
 
 export default function ProjectsPage() {
@@ -767,7 +767,7 @@ export default function ProjectsPage() {
                           lng: parseFloat(form.gpsLng),
                           label: form.name || "Project Site",
                           sublabel: geoConfirmed,
-                          color: form.color || "#f59e0b",
+                          color: form.color || "#F5C400",
                         }]}
                         className="w-full h-full"
                         zoom={17}

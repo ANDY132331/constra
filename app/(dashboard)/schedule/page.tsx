@@ -37,7 +37,7 @@ type WeatherData = {
 
 const EVENT_TYPE_CONFIG: Record<CustomEventType, { label: string; color: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
   meeting:    { label: "Meeting",    color: "#3b82f6", icon: Briefcase },
-  inspection: { label: "Inspection", color: "#f59e0b", icon: ClipboardCheck },
+  inspection: { label: "Inspection", color: "#F5C400", icon: ClipboardCheck },
   delivery:   { label: "Delivery",   color: "#22c55e", icon: Truck },
   permit:     { label: "Permit",     color: "#8b5cf6", icon: Calendar },
   other:      { label: "Other",      color: "#6b7280", icon: Calendar },

@@ -13,7 +13,7 @@ export type MapPin = {
 };
 
 function makeIcon(color: string) {
-  const c = color ?? "#f59e0b";
+  const c = color ?? "#F5C400";
   return L.divIcon({
     className: "",
     html: `
@@ -96,7 +96,7 @@ export default function MapViewInner({
 
     pins.forEach((pin) => {
       const marker = L.marker([pin.lat, pin.lng], {
-        icon: makeIcon(pin.color ?? "#f59e0b"),
+        icon: makeIcon(pin.color ?? "#F5C400"),
       });
 
       const popupHtml = `

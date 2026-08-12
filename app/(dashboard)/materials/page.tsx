@@ -16,10 +16,10 @@ import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 const TRADES = Object.keys(TRADE_MATERIALS);
 
 const TRADE_COLORS: Record<string, string> = {
-  "Framing":             "#f59e0b",
+  "Framing":             "#F5C400",
   "Drywall":             "#60a5fa",
   "Concrete":            "#94a3b8",
-  "Roofing":             "#f97316",
+  "Roofing":             "#F5C400",
   "Electrical":          "#facc15",
   "Plumbing":            "#38bdf8",
   "Insulation":          "#a78bfa",
@@ -161,7 +161,7 @@ export default function MaterialsPage() {
     setShowAddModal(false);
   }
 
-  const color = (trade: string) => TRADE_COLORS[trade] ?? "#f59e0b";
+  const color = (trade: string) => TRADE_COLORS[trade] ?? "#F5C400";
 
   return (
     <>

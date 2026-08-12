@@ -597,7 +597,7 @@ export async function generateInvoicePdfDataUrl(
   companyAddress?: string,
   companyLogo?: string,
 ): Promise<string> {
-  return exportInvoicePdf(invoice, currency, companyName, companyAddress, companyLogo, "#f59e0b", "dataurl") as Promise<string>;
+  return exportInvoicePdf(invoice, currency, companyName, companyAddress, companyLogo, "#F5C400", "dataurl") as Promise<string>;
 }
 
 export async function exportInvoicePdf(
@@ -606,7 +606,7 @@ export async function exportInvoicePdf(
   companyName?: string,
   companyAddress?: string,
   companyLogo?: string,
-  accentHex = "#f59e0b",
+  accentHex = "#F5C400",
   mode: "save" | "dataurl" = "save",
 ): Promise<string | void> {
   const { default: jsPDF } = await import("jspdf");

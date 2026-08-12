@@ -42,15 +42,15 @@ export function emailShell({
   body{margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
   .wrap{max-width:520px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
   .hd{background:#111;padding:20px 28px;display:flex;align-items:center;gap:10px}
-  .hd-logo{font-size:16px;font-weight:800;color:#f59e0b;letter-spacing:-0.3px}
+  .hd-logo{font-size:16px;font-weight:800;color:#F5C400;letter-spacing:-0.3px}
   .hd-co{font-size:12px;color:#ffffff60;margin-left:4px}
   .bd{padding:28px}
   .ft{padding:14px 28px;background:#f9f9f9;border-top:1px solid #e5e5e5;font-size:11px;color:#999;line-height:1.5}
-  .cta{display:inline-block;background:#f59e0b;color:#000!important;font-weight:700;font-size:13px;padding:11px 22px;border-radius:8px;text-decoration:none;margin-top:20px}
+  .cta{display:inline-block;background:#F5C400;color:#000!important;font-weight:700;font-size:13px;padding:11px 22px;border-radius:8px;text-decoration:none;margin-top:20px}
   h2{font-size:18px;font-weight:700;color:#111;margin:0 0 10px}
   p{font-size:14px;color:#444;line-height:1.6;margin:0 0 14px}
   .chip{display:inline-block;background:#f4f4f5;border-radius:6px;padding:4px 10px;font-size:12px;color:#555;margin-bottom:14px}
-  .quote{border-left:3px solid #f59e0b;padding:10px 14px;background:#fffbeb;border-radius:0 8px 8px 0;font-size:13px;color:#555;font-style:italic;margin:14px 0}
+  .quote{border-left:3px solid #F5C400;padding:10px 14px;background:#fffbeb;border-radius:0 8px 8px 0;font-size:13px;color:#555;font-style:italic;margin:14px 0}
 </style>
 </head>
 <body>
@@ -111,7 +111,7 @@ export function safetyIncidentEmail({
   description: string;
   severity?: string;
 }) {
-  const color = severity === "Critical" ? "#ef4444" : severity === "High" ? "#f97316" : "#f59e0b";
+  const color = severity === "Critical" ? "#ef4444" : severity === "High" ? "#F5C400" : "#F5C400";
   const r = esc(reporterName);
   const p = esc(projectName);
   const d = esc(description.length > 400 ? description.slice(0, 400) + "…" : description);
