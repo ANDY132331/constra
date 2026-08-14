@@ -88,13 +88,13 @@ export function MobileNav() {
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all relative ${active ? "text-amber-400" : "text-white/25"}`}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-200 relative ${active ? "text-amber-400 scale-[1.04]" : "text-white/25"}`}
             >
               {active && (
-                <span className="absolute inset-x-2.5 top-1.5 bottom-1.5 rounded-xl bg-amber-500/10 border border-amber-500/15 -z-10" />
+                <span className="absolute inset-x-2.5 top-1.5 bottom-1.5 rounded-xl bg-amber-500/10 border border-amber-500/15 -z-10 animate-[page-in_0.2s_ease_both]" />
               )}
               <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
-              <span className={`text-[9px] uppercase tracking-wider ${active ? "font-black" : "font-semibold"}`}>{label}</span>
+              <span className={`text-[9px] uppercase tracking-wider transition-all duration-200 ${active ? "font-black" : "font-semibold"}`}>{label}</span>
             </Link>
           );
         })}

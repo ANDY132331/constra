@@ -438,141 +438,479 @@ export async function exportMaterialsPdf(
   doc.save(`materials-${projectName.replace(/\s+/g, "-").toLowerCase()}.pdf`);
 }
 
+// ── Template Type ─────────────────────────────────────────────────────────────
+export type InvoiceTemplate = "classic" | "modern" | "minimal";
+
 // ── Estimate PDF ─────────────────────────────────────────────────────────────
-export async function exportEstimatePdf(estimate: Estimate, currency: string, companyName?: string) {
+export async function exportEstimatePdf(
+  estimate: Estimate,
+  currency: string,
+  companyName?: string,
+  companyAddress?: string,
+  companyLogo?: string,
+  template: InvoiceTemplate = "classic",
+) {
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
 
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
-  const AMBER = [245, 158, 11] as [number, number, number];
-  const DARK = [13, 13, 13] as [number, number, number];
-  const MID = [80, 80, 80] as [number, number, number];
-  const PAGE_W = doc.internal.pageSize.getWidth();
-  const MARGIN = 18;
+  const doc  = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
+  const PW   = doc.internal.pageSize.getWidth();
+  const PH   = doc.internal.pageSize.getHeight();
+  const ML   = 18;
+  const MR   = 18;
+
+  const ACCENT : [number,number,number] = [245, 196, 0];
+  const DARK   : [number,number,number] = [22,  22,  22];
+  const MID    : [number,number,number] = [90,  90,  90];
+  const LGRAY  : [number,number,number] = [210, 210, 210];
+  const WHITE  : [number,number,number] = [255, 255, 255];
 
   const currFmt = (n: number) =>
     new Intl.NumberFormat("en-CA", { style: "currency", currency: currency || "CAD" }).format(n);
 
-  // Header band
-  doc.setFillColor(...DARK);
-  doc.rect(0, 0, PAGE_W, 30, "F");
-  doc.setTextColor(...AMBER);
-  doc.setFontSize(20);
-  doc.setFont("helvetica", "bold");
-  doc.text(companyName ?? "Constra", MARGIN, 14);
-  doc.setTextColor(200, 200, 200);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text("ESTIMATE", PAGE_W - MARGIN, 11, { align: "right" });
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "bold");
-  doc.text(estimate.number, PAGE_W - MARGIN, 19, { align: "right" });
-
-  let y = 42;
-
-  // Issued / valid / project
-  doc.setTextColor(...MID);
-  doc.setFontSize(8.5);
-  doc.setFont("helvetica", "bold");
-  doc.text("PROJECT", MARGIN, y);
-  doc.text("CLIENT", MARGIN + 70, y);
-  doc.text("ISSUED", PAGE_W - MARGIN - 60, y);
-  doc.text("VALID UNTIL", PAGE_W - MARGIN, y, { align: "right" });
-
-  y += 5;
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(30, 30, 30);
-  doc.text(estimate.projectName, MARGIN, y);
-  doc.text(estimate.clientName, MARGIN + 70, y);
-  doc.text(estimate.issueDate.toLocaleDateString("en-CA", { dateStyle: "medium" }), PAGE_W - MARGIN - 60, y);
-  doc.text(estimate.validUntil.toLocaleDateString("en-CA", { dateStyle: "medium" }), PAGE_W - MARGIN, y, { align: "right" });
-
-  if (estimate.clientEmail) {
-    y += 4;
-    doc.setFontSize(7.5);
-    doc.setTextColor(120, 120, 120);
-    doc.text(estimate.clientEmail, MARGIN + 70, y);
-  }
-
-  y += 12;
-
-  // Divider
-  doc.setDrawColor(230, 230, 230);
-  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
-  y += 8;
-
-  // Line items table
   const subtotal = estimate.items.reduce((s, i) => s + i.qty * i.rate, 0);
-  const tax = subtotal * (estimate.taxRate / 100);
-  const total = subtotal + tax;
+  const tax      = subtotal * (estimate.taxRate / 100);
+  const total    = subtotal + tax;
 
-  autoTable(doc, {
-    startY: y,
-    margin: { left: MARGIN, right: MARGIN },
-    head: [["Description", "Category", "Qty", "Rate", "Amount"]],
-    body: estimate.items.map((item) => [
-      item.description,
-      item.category,
-      item.qty.toString(),
-      currFmt(item.rate),
-      currFmt(item.qty * item.rate),
-    ]),
-    headStyles: { fillColor: DARK, textColor: [255, 255, 255], fontSize: 8, fontStyle: "bold" },
-    bodyStyles: { fontSize: 8.5, textColor: MID },
-    alternateRowStyles: { fillColor: [248, 248, 248] },
-    columnStyles: { 0: { cellWidth: "auto" }, 2: { halign: "center" }, 3: { halign: "right" }, 4: { halign: "right" } },
-    theme: "grid",
-  });
+  const fmtDate = (d: Date) => d.toLocaleDateString("en-CA", { dateStyle: "medium" });
 
-  y = (doc as any).lastAutoTable.finalY + 6;
+  // ── SHARED: draw logo / initial mark ──────────────────────────────────────
+  const drawLogo = (x: number, y: number, size: number, light: boolean) => {
+    if (companyLogo?.startsWith("data:image")) {
+      doc.setFillColor(...(light ? WHITE : DARK));
+      doc.roundedRect(x, y, size, size, 3, 3, "F");
+      try {
+        const ext = companyLogo.startsWith("data:image/png") ? "PNG" : "JPEG";
+        doc.addImage(companyLogo, ext, x + 1, y + 1, size - 2, size - 2, undefined, "FAST");
+      } catch { /* fallback */ }
+    } else {
+      doc.setFillColor(...(light ? ACCENT : ACCENT));
+      doc.circle(x + size / 2, y + size / 2, size / 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(size * 0.45);
+      doc.setTextColor(...(light ? DARK : WHITE));
+      doc.text((companyName ?? "C").charAt(0).toUpperCase(), x + size / 2, y + size / 2 + size * 0.15, { align: "center" });
+    }
+  };
 
-  // Totals block (right-aligned)
-  const totalsX = PAGE_W - MARGIN - 80;
-  const amtX = PAGE_W - MARGIN;
-  doc.setFontSize(8.5);
-  doc.setTextColor(...MID);
-  doc.setFont("helvetica", "normal");
-  doc.text("Subtotal", totalsX, y);
-  doc.text(currFmt(subtotal), amtX, y, { align: "right" });
-  y += 5;
-  if (estimate.taxRate > 0) {
-    doc.text(`Tax (${estimate.taxRate}%)`, totalsX, y);
-    doc.text(currFmt(tax), amtX, y, { align: "right" });
-    y += 5;
-  }
-  doc.setDrawColor(220, 220, 220);
-  doc.line(totalsX, y, amtX, y);
-  y += 5;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(20, 20, 20);
-  doc.text("TOTAL", totalsX, y);
-  doc.setTextColor(...AMBER);
-  doc.text(currFmt(total), amtX, y, { align: "right" });
+  // ── SHARED: totals block ──────────────────────────────────────────────────
+  const drawTotals = (startY: number, accentFill: [number,number,number]) => {
+    const totW  = 88;
+    const totX  = PW - MR - totW;
+    const valX  = PW - MR;
+    let   ty    = startY;
 
-  if (estimate.notes) {
-    y += 14;
+    const row = (label: string, value: string, bold = false) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...MID);
+      doc.text(label, totX, ty);
+      doc.setTextColor(...(bold ? DARK : MID));
+      doc.text(value, valX, ty, { align: "right" });
+      ty += 6;
+    };
+
+    row("Subtotal", currFmt(subtotal));
+    if (estimate.taxRate > 0) row(`Tax (${estimate.taxRate}%)`, currFmt(tax));
+    doc.setDrawColor(...LGRAY);
+    doc.setLineWidth(0.2);
+    doc.line(totX, ty, valX, ty);
+    ty += 4;
+    row("Total", currFmt(total), true);
+
+    // Balance Due pill
+    const bdH = 9;
+    doc.setFillColor(...accentFill);
+    doc.roundedRect(totX - 4, ty, totW + 4, bdH, 1.5, 1.5, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...(accentFill[0] < 100 ? WHITE : DARK));
+    doc.text("Total Estimate", totX, ty + 5.8);
+    doc.text(currFmt(total), valX, ty + 5.8, { align: "right" });
+    return ty + bdH + 8;
+  };
+
+  // ── SHARED: notes + footer ────────────────────────────────────────────────
+  const drawNotes = (y: number) => {
+    if (!estimate.notes) return y;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
+    doc.setTextColor(...DARK);
+    doc.text("Notes", ML, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
     doc.setTextColor(...MID);
-    doc.text("NOTES", MARGIN, y);
-    y += 4;
+    const lines = doc.splitTextToSize(estimate.notes, (PW - ML - MR) * 0.6);
+    doc.text(lines, ML, y);
+    return y + lines.length * 4 + 6;
+  };
+
+  const drawLineItems = (startY: number, headFill: [number,number,number], headText: [number,number,number]) => {
+    autoTable(doc, {
+      startY,
+      margin: { left: ML, right: MR },
+      head: [["#", "Description", "Category", "Qty", "Rate", "Amount"]],
+      body: estimate.items.map((item, idx) => [
+        String(idx + 1),
+        item.description,
+        item.category || "—",
+        item.qty.toString(),
+        currFmt(item.rate),
+        currFmt(item.qty * item.rate),
+      ]),
+      headStyles: { fillColor: headFill, textColor: headText, fontSize: 8, fontStyle: "bold", cellPadding: { top: 4, bottom: 4, left: 3, right: 3 } },
+      bodyStyles: { fontSize: 8.5, textColor: DARK, cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 }, lineColor: [235, 235, 235], lineWidth: 0.1 },
+      alternateRowStyles: { fillColor: [251, 251, 251] },
+      columnStyles: {
+        0: { cellWidth: 8,  halign: "center", textColor: MID },
+        1: { cellWidth: "auto" },
+        2: { cellWidth: 28, halign: "center" },
+        3: { cellWidth: 12, halign: "center" },
+        4: { cellWidth: 28, halign: "right" },
+        5: { cellWidth: 32, halign: "right", fontStyle: "bold" },
+      },
+      theme: "grid",
+    });
+    return (doc as any).lastAutoTable.finalY;
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TEMPLATE: CLASSIC
+  // ═══════════════════════════════════════════════════════════════════════════
+  if (template === "classic") {
+    // Dark header band
+    doc.setFillColor(...DARK);
+    doc.rect(0, 0, PW, 32, "F");
+
+    // Company name in amber
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(...ACCENT);
+    doc.text(companyName ?? "Constra", ML, 15);
+
+    // Address
+    if (companyAddress) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(160, 160, 160);
+      doc.text(companyAddress.split(",")[0]?.trim() ?? "", ML, 22);
+    }
+
+    // ESTIMATE label + number on right
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    const lines = doc.splitTextToSize(estimate.notes, PAGE_W - MARGIN * 2);
-    doc.text(lines, MARGIN, y);
-  }
+    doc.setTextColor(160, 160, 160);
+    doc.text("ESTIMATE", PW - MR, 12, { align: "right" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...WHITE);
+    doc.text(estimate.number, PW - MR, 21, { align: "right" });
 
-  // Footer
-  const pH = doc.internal.pageSize.getHeight();
-  doc.setFillColor(...DARK);
-  doc.rect(0, pH - 10, PAGE_W, 10, "F");
-  doc.setTextColor(120, 120, 120);
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "normal");
-  doc.text(`${companyName ?? "Constra"} · ${estimate.number}`, MARGIN, pH - 4);
-  doc.text(`Generated ${new Date().toLocaleDateString("en-CA")}`, PAGE_W - MARGIN, pH - 4, { align: "right" });
+    // Total in header
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(130, 130, 130);
+    doc.text("TOTAL ESTIMATE", PW - MR, 28, { align: "right" });
+
+    let y = 42;
+
+    // Project / client / dates row
+    doc.setTextColor(...MID);
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "bold");
+    const col2 = ML + 72;
+    const col3 = PW - MR - 60;
+    doc.text("PROJECT", ML, y);
+    doc.text("CLIENT", col2, y);
+    doc.text("ISSUED", col3, y);
+    doc.text("VALID UNTIL", PW - MR, y, { align: "right" });
+
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...DARK);
+    doc.text(estimate.projectName, ML, y, { maxWidth: 65 });
+    doc.text(estimate.clientName, col2, y, { maxWidth: 65 });
+    doc.setFontSize(8.5);
+    doc.text(fmtDate(estimate.issueDate), col3, y);
+    doc.text(fmtDate(estimate.validUntil), PW - MR, y, { align: "right" });
+
+    if (estimate.clientEmail) {
+      y += 4.5;
+      doc.setFontSize(7.5);
+      doc.setTextColor(...MID);
+      doc.text(estimate.clientEmail, col2, y);
+    }
+    y += 10;
+
+    doc.setDrawColor(...LGRAY);
+    doc.setLineWidth(0.25);
+    doc.line(ML, y, PW - MR, y);
+    y += 8;
+
+    const tableEndY = drawLineItems(y, DARK, WHITE);
+    const afterTotals = drawTotals(tableEndY + 10, ACCENT);
+    const afterNotes = drawNotes(afterTotals);
+
+    // Footer
+    doc.setFillColor(...ACCENT);
+    doc.rect(0, PH - 8, PW, 8, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...DARK);
+    doc.text(`${companyName ?? "Constra"}  ·  ${estimate.number}  ·  Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, ML, PH - 3);
+    void afterNotes;
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TEMPLATE: MODERN
+  // ═══════════════════════════════════════════════════════════════════════════
+  } else if (template === "modern") {
+    const HDR = 48;
+
+    // Dark header
+    doc.setFillColor(28, 32, 38);
+    doc.rect(0, 0, PW, HDR, "F");
+
+    // Amber left accent strip
+    doc.setFillColor(...ACCENT);
+    doc.rect(0, 0, 4, HDR, "F");
+
+    // Logo
+    drawLogo(ML, 10, 26, false);
+
+    // Company name + address in header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...WHITE);
+    doc.text(companyName ?? "Constra", ML + 32, 20);
+    if (companyAddress) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(160, 170, 185);
+      const addrParts = companyAddress.split(",").map(s => s.trim()).filter(Boolean);
+      addrParts.slice(0, 2).forEach((p, i) => doc.text(p, ML + 32, 26 + i * 4.5));
+    }
+
+    // Right side of header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(...ACCENT);
+    doc.text("ESTIMATE", PW - MR, 18, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(160, 170, 185);
+    doc.text(estimate.number, PW - MR, 26, { align: "right" });
+    doc.setFontSize(7);
+    doc.text("Total Value", PW - MR, 34, { align: "right" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(...WHITE);
+    doc.text(currFmt(total), PW - MR, 43, { align: "right" });
+
+    let y = HDR + 10;
+
+    // Meta row
+    const metaLblX = ML;
+    const metaValX = ML + 38;
+    const meta2LblX = ML + 90;
+    const meta2ValX = ML + 130;
+
+    const metaRow = (lx: number, vx: number, label: string, value: string, ty: number) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...MID);
+      doc.text(label, lx, ty);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...DARK);
+      doc.text(value, vx, ty + 4.5);
+    };
+
+    metaRow(metaLblX, metaValX, "PROJECT", estimate.projectName, y);
+    metaRow(meta2LblX, meta2ValX, "CLIENT", estimate.clientName, y);
+    metaRow(PW - MR - 65, PW - MR, "ISSUED", fmtDate(estimate.issueDate), y);
+    y += 18;
+    metaRow(metaLblX, metaValX, "EMAIL", estimate.clientEmail || "—", y);
+    metaRow(PW - MR - 65, PW - MR, "VALID UNTIL", fmtDate(estimate.validUntil), y);
+    y += 14;
+
+    doc.setDrawColor(...LGRAY);
+    doc.setLineWidth(0.25);
+    doc.line(ML, y, PW - MR, y);
+    y += 8;
+
+    const tableEndY = drawLineItems(y, [28, 32, 38] as [number,number,number], WHITE);
+    const afterTotals = drawTotals(tableEndY + 10, ACCENT);
+    const afterNotes = drawNotes(afterTotals);
+
+    // Footer — thin accent line
+    doc.setFillColor(...ACCENT);
+    doc.rect(0, PH - 6, 4, 6, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...MID);
+    doc.text(`${companyName ?? "Constra"}  ·  ${estimate.number}  ·  Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, ML, PH - 2);
+    void afterNotes;
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TEMPLATE: MINIMAL
+  // ═══════════════════════════════════════════════════════════════════════════
+  } else {
+    // White canvas
+    doc.setFillColor(...WHITE);
+    doc.rect(0, 0, PW, PH, "F");
+
+    // Company name top-left
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...DARK);
+    doc.text(companyName ?? "Constra", ML, 20);
+
+    let leftY = 26;
+    if (companyAddress) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...MID);
+      const parts = companyAddress.split(",").map(s => s.trim()).filter(Boolean);
+      parts.slice(0, 3).forEach(p => { doc.text(p, ML, leftY); leftY += 4; });
+    }
+
+    // ESTIMATE top-right
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.setTextColor(...DARK);
+    doc.text("ESTIMATE", PW - MR, 22, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MID);
+    doc.text(estimate.number, PW - MR, 30, { align: "right" });
+
+    let y = Math.max(leftY + 6, 38);
+
+    // Hairline
+    doc.setDrawColor(...LGRAY);
+    doc.setLineWidth(0.3);
+    doc.line(ML, y, PW - MR, y);
+    y += 8;
+
+    // Bill to + meta
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(...MID);
+    doc.text("PROJECT / CLIENT", ML, y);
+    doc.text("DETAILS", PW - MR - 60, y);
+
+    y += 4.5;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...DARK);
+    doc.text(estimate.clientName, ML, y);
+
+    // Details column
+    const deets: [string, string][] = [
+      ["Project",    estimate.projectName],
+      ["Issued",     fmtDate(estimate.issueDate)],
+      ["Valid Until",fmtDate(estimate.validUntil)],
+    ];
+    let dy = y - 1;
+    deets.forEach(([lbl2, val]) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(...MID);
+      doc.text(lbl2, PW - MR - 60, dy);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...DARK);
+      doc.text(val, PW - MR, dy + 4, { align: "right" });
+      dy += 10;
+    });
+
+    y += 5;
+    if (estimate.clientEmail) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...MID);
+      doc.text(estimate.clientEmail, ML, y);
+      y += 5;
+    }
+
+    y = Math.max(y + 6, dy + 2);
+
+    doc.setDrawColor(...LGRAY);
+    doc.setLineWidth(0.2);
+    doc.line(ML, y, PW - MR, y);
+    y += 7;
+
+    // Minimal table — light gray header, no bold fill
+    autoTable(doc, {
+      startY: y,
+      margin: { left: ML, right: MR },
+      head: [["#", "Description", "Category", "Qty", "Rate", "Amount"]],
+      body: estimate.items.map((item, idx) => [
+        String(idx + 1),
+        item.description,
+        item.category || "—",
+        item.qty.toString(),
+        currFmt(item.rate),
+        currFmt(item.qty * item.rate),
+      ]),
+      headStyles: { fillColor: [245, 245, 245] as [number,number,number], textColor: MID, fontSize: 7.5, fontStyle: "bold", cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 } },
+      bodyStyles: { fontSize: 8.5, textColor: DARK, cellPadding: { top: 4, bottom: 4, left: 3, right: 3 }, lineColor: [235, 235, 235], lineWidth: 0.15 },
+      alternateRowStyles: { fillColor: [250, 250, 250] as [number,number,number] },
+      columnStyles: {
+        0: { cellWidth: 8,  halign: "center", textColor: MID },
+        1: { cellWidth: "auto" },
+        2: { cellWidth: 28, halign: "center" },
+        3: { cellWidth: 12, halign: "center" },
+        4: { cellWidth: 28, halign: "right" },
+        5: { cellWidth: 32, halign: "right", fontStyle: "bold" },
+      },
+      theme: "plain",
+    });
+
+    const tableEndY = (doc as any).lastAutoTable.finalY;
+    const totW  = 88;
+    const totX  = PW - MR - totW;
+    const valX  = PW - MR;
+    let ty = tableEndY + 10;
+
+    const minRow = (label: string, value: string, bold = false) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...MID);
+      doc.text(label, totX, ty);
+      doc.setTextColor(...DARK);
+      doc.text(value, valX, ty, { align: "right" });
+      ty += 6;
+    };
+
+    minRow("Subtotal", currFmt(subtotal));
+    if (estimate.taxRate > 0) minRow(`Tax (${estimate.taxRate}%)`, currFmt(tax));
+    doc.setDrawColor(...LGRAY);
+    doc.setLineWidth(0.2);
+    doc.line(totX, ty, valX, ty);
+    ty += 4;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...DARK);
+    doc.text("Total Estimate", totX, ty);
+    doc.text(currFmt(total), valX, ty, { align: "right" });
+    ty += 12;
+
+    const afterNotes2 = drawNotes(ty);
+    void afterNotes2;
+
+    // Minimal footer — thin line
+    doc.setDrawColor(...LGRAY);
+    doc.setLineWidth(0.3);
+    doc.line(ML, PH - 10, PW - MR, PH - 10);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(160, 160, 160);
+    doc.text(`${companyName ?? "Constra"}  ·  ${estimate.number}`, ML, PH - 5);
+    doc.text(`Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, PW - MR, PH - 5, { align: "right" });
+  }
 
   doc.save(`${estimate.number}.pdf`);
 }
@@ -596,8 +934,9 @@ export async function generateInvoicePdfDataUrl(
   companyName?: string,
   companyAddress?: string,
   companyLogo?: string,
+  template: InvoiceTemplate = "classic",
 ): Promise<string> {
-  return exportInvoicePdf(invoice, currency, companyName, companyAddress, companyLogo, "#F5C400", "dataurl") as Promise<string>;
+  return exportInvoicePdf(invoice, currency, companyName, companyAddress, companyLogo, "#F5C400", "dataurl", template) as Promise<string>;
 }
 
 export async function exportInvoicePdf(
@@ -608,6 +947,7 @@ export async function exportInvoicePdf(
   companyLogo?: string,
   accentHex = "#F5C400",
   mode: "save" | "dataurl" = "save",
+  template: InvoiceTemplate = "classic",
 ): Promise<string | void> {
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");

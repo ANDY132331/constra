@@ -104,7 +104,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
           <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#0a0a0a]">
             {sidebarOpen && (
               <div
-                className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+                className="mobile-overlay fixed inset-0 z-40 bg-black/55 lg:hidden"
                 onClick={() => setSidebarOpen(false)}
               />
             )}
@@ -134,7 +134,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
                 )}
-                <ErrorBoundary>{children}</ErrorBoundary>
+                {/* key=pathname re-mounts this div on every navigation → triggers page-enter animation */}
+                <div key={pathname} className="page-enter">
+                  <ErrorBoundary>{children}</ErrorBoundary>
+                </div>
               </main>
             </div>
             <MobileNav />

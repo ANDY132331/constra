@@ -114,7 +114,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <div ref={newRef} className="relative">
           <button
             onClick={() => { setShowNew((v) => !v); setShowNotif(false); setShowUser(false); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[12px] font-bold px-3 py-1.5 rounded-lg transition-all duration-100"
           >
             <Plus size={13} />
             <span className="hidden sm:inline">New</span>
@@ -122,7 +122,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
 
           {showNew && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
+            <div className="pop-in absolute right-0 top-full mt-2 w-48 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
               <p className="text-[9px] font-bold uppercase tracking-widest text-white/25 px-4 pt-3 pb-2">Quick Add</p>
               {QUICK_ADD.map(({ label, icon: Icon, href }) => (
                 <button
@@ -169,7 +169,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
 
           {showNotif && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
+            <div className="pop-in absolute right-0 top-full mt-2 w-80 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
               <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/[0.06]">
                 <p className="text-[13px] font-bold text-white">Notifications</p>
                 <button onClick={() => setShowNotif(false)} className="text-white/30 hover:text-white/60 transition-colors">
@@ -237,7 +237,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
 
           {showUser && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
+            <div className="pop-in absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
               {/* User identity */}
               <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
                 {companyLogo ? (

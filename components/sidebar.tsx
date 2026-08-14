@@ -101,15 +101,15 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
       <Link
         href={href}
         onClick={onClose}
-        className={`group flex items-center gap-3 py-2 rounded-lg text-[13px] transition-all mb-0.5 ${
+        className={`group flex items-center gap-3 py-2 rounded-lg text-[13px] transition-all duration-150 mb-0.5 ${
           active
             ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-400/70 pl-[10px] pr-3"
-            : "text-white/45 hover:text-white/80 hover:bg-white/5 px-3"
+            : "text-white/45 hover:text-white/80 hover:bg-white/[0.06] px-3"
         }`}
       >
         <Icon
           size={15}
-          className={active ? "text-amber-400" : "text-white/30 group-hover:text-white/60 transition-colors"}
+          className={`flex-shrink-0 transition-all duration-150 ${active ? "text-amber-400 scale-110" : "text-white/30 group-hover:text-white/60 group-hover:scale-110"}`}
         />
         <span className="flex-1 font-medium">{label}</span>
         {badge && (
@@ -128,9 +128,10 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
 
   return (
     <aside className={`
+      sidebar-slide
       fixed inset-y-0 left-0 z-50 flex flex-col w-[240px] min-w-[240px] h-full
       bg-[#0d0d0d] border-r border-white/[0.06] overflow-hidden
-      transition-transform duration-200
+      transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]
       lg:static lg:translate-x-0 lg:z-auto
       ${open ? "translate-x-0" : "-translate-x-full"}
     `}>

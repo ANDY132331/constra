@@ -84,8 +84,8 @@ function StatCard({
   href?: string;
 }) {
   const inner = (
-    <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors overflow-hidden relative">
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-xl opacity-40" style={{ backgroundColor: iconColor }} />
+    <div className="card-hover bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/20 overflow-hidden relative">
+      <div className="progress-bar absolute bottom-0 left-0 h-[2px] rounded-b-xl opacity-50" style={{ backgroundColor: iconColor, right: 0 }} />
       <div className="flex items-start justify-between mb-3">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: iconColor + "18" }}>
           <span style={{ color: iconColor }}><Icon size={17} /></span>
@@ -142,7 +142,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
   const mins = Math.floor((elapsed % 3600000) / 60000);
 
   return (
-    <Link href="/crew" className="block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/20 transition-colors group">
+    <Link href="/crew" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/25 group">
       <div className="w-full h-28 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden"
         style={{ background: `${worker.color}15` }}>
         {worker.photo ? (
@@ -189,7 +189,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
   const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
   const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
   return (
-    <Link href="/projects" className="block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-white/10 transition-colors">
+    <Link href="/projects" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/20">
       <div className="flex items-start gap-3 mb-3">
         <div className="w-1.5 h-12 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: project.color }} />
         <div className="flex-1 min-w-0">
@@ -207,7 +207,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
           <span className="text-[12px] font-bold text-white">{project.progress}%</span>
         </div>
         <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
-          <div className="h-full rounded-full transition-all" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
+          <div className="progress-bar h-full rounded-full" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
         </div>
       </div>
       {showFinancials && (
@@ -219,7 +219,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
             </span>
           </div>
           <div className="h-1.5 bg-white/8 rounded-full overflow-hidden mb-2">
-            <div className="h-full rounded-full transition-all" style={{ width: `${budgetPct}%`, backgroundColor: burnColor }} />
+            <div className="progress-bar h-full rounded-full" style={{ width: `${budgetPct}%`, backgroundColor: burnColor }} />
           </div>
           <div className="text-[10px] text-white/25">{formatCurrencyCompact(spent, currency as never)} of {formatCurrencyCompact(budget, currency as never)}</div>
         </>
@@ -752,7 +752,7 @@ export default function DashboardPage() {
             <Link
               key={label}
               href={href}
-              className="flex items-center gap-3 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3.5 active:bg-white/[0.04] transition-colors"
+              className="card-hover flex items-center gap-3 bg-[#131110] border border-white/[0.07] hover:border-white/[0.12] rounded-2xl px-4 py-3.5 active:scale-[0.97]"
             >
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -809,7 +809,7 @@ export default function DashboardPage() {
                 <Link
                   key={w.id}
                   href="/time-tracking"
-                  className="flex-shrink-0 flex flex-col items-center gap-1.5 bg-[#131110] border border-white/[0.07] rounded-2xl p-3 w-[84px] active:bg-white/[0.04]"
+                  className="flex-shrink-0 flex flex-col items-center gap-1.5 bg-[#131110] border border-white/[0.07] hover:border-green-500/20 rounded-2xl p-3 w-[84px] transition-colors duration-150 active:scale-95"
                 >
                   <div className="relative">
                     <div
