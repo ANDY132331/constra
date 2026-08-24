@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { format, isBefore } from "date-fns";
 import { ConfirmModal } from "@/components/confirm-modal";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
   completed: { label: "Completed", icon: CheckCircle2, className: "text-green-400" },

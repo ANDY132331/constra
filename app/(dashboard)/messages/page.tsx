@@ -526,7 +526,7 @@ export default function MessagesPage() {
             <div className="flex-shrink-0">
               <MicButton
                 onAudio={handleAudio}
-                className="!bg-blue-500 !text-white !border-0 !rounded-full hover:!bg-blue-400 !shadow-sm"
+                variant="light"
                 size="md"
               />
             </div>

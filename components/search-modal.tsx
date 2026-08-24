@@ -50,9 +50,6 @@ export function SearchModal() {
     if (open) setTimeout(() => inputRef.current?.focus(), 50);
   }, [open]);
 
-  // Reset active index when query changes
-  useEffect(() => { setActiveIndex(-1); }, [query]);
-
   // Scroll active item into view
   useEffect(() => {
     if (activeIndex < 0 || !listRef.current) return;
@@ -181,13 +178,13 @@ export function SearchModal() {
           <input
             ref={inputRef}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setActiveIndex(-1); }}
             onKeyDown={handleInputKeyDown}
             placeholder="Search workers, projects, tasks, equipment…"
             className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none"
           />
           {query && (
-            <button onClick={() => setQuery("")} className="text-white/25 hover:text-white/50 transition-colors">
+            <button onClick={() => { setQuery(""); setActiveIndex(-1); }} className="text-white/25 hover:text-white/50 transition-colors">
               <X size={14} />
             </button>
           )}

@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://getconstra.com"),
   title: "Constra — Field Workforce Management for Construction & Trades",
   description: "Run your entire job site from one app. Time tracking, crew scheduling, invoicing, punch lists, safety logs, and more — built for construction and trade contractors.",
   keywords: ["construction management", "workforce management", "time tracking", "crew scheduling", "invoicing", "punch list", "construction app", "trade contractor software"],

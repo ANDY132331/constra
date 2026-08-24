@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
 /* ─── Particle data (fixed so no hydration mismatch) ─────────────────────── */
 const PARTICLES: { size: number; left: string; bottom: string; dur: string; delay: string }[] = [
   { size: 2,   left: "7%",  bottom: "4%",  dur: "4.8s", delay: "0.0s" },

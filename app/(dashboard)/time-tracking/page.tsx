@@ -13,7 +13,7 @@ const CameraCapture = dynamic(
 import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
 import { runVerification } from "@/lib/verification";
 import { sendPushEvent } from "@/lib/push-client";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { isForemanOrAbove } from "@/lib/permissions";
 
 function elapsed(start: Date, end?: Date): string {
@@ -345,6 +345,8 @@ export default function TimeTrackingPage() {
   }, []);
 
   useEffect(() => {
+    // Reading navigator.onLine (external system) on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOnline(navigator.onLine);
     const up = () => setIsOnline(true);
     const down = () => setIsOnline(false);
@@ -370,8 +372,11 @@ export default function TimeTrackingPage() {
     .filter((e) => e.clockOut && e.clockIn >= todayStart)
     .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
 
+  // Intentionally impure: `tick` (bumped every 30s above) is what drives this
+  // recomputation on a timer so the live-elapsed-hours display keeps counting up.
   const liveHours = clockedIn.reduce((s, w) => {
     if (!w.clockInTime) return s;
+    // eslint-disable-next-line react-hooks/purity
     return s + (Date.now() - w.clockInTime.getTime()) / 3600000;
   }, 0);
 
@@ -444,7 +449,7 @@ export default function TimeTrackingPage() {
     if (flags.length > 0) {
       updateClockEntry(entryId, { verificationFlags: flags });
     }
-  }, [cameraTarget, clockEntries, addClockEntry, updateClockEntry, updateWorker, getProjectById]);
+  }, [cameraTarget, clockEntries, addClockEntry, updateClockEntry, updateWorker, getProjectById, companyId]);
 
   const handleClockOut = useCallback((workerId: string) => {
     const entry = [...clockEntries].reverse().find((e) => e.workerId === workerId && !e.clockOut);

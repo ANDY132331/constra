@@ -5,7 +5,7 @@ import { MessageSquare, Plus, Search, Clock, CheckCircle2, XCircle, ChevronDown,
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG = {
   open: { label: "Open", className: "bg-red-500/15 text-red-400", icon: Clock },

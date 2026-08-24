@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { BarChart2, List, CalendarDays, Plus, Search, MapPin, ArrowUpRight, X, CheckCircle2, Clock, AlertCircle, Circle, Map, Trash2, Pencil, ShieldCheck, Share2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { BarChart2, List, CalendarDays, Plus, Search, MapPin, X, AlertCircle, Map, Trash2, Pencil, ShieldCheck, Share2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { GanttChart, type GanttProject } from "@/components/gantt-chart";
 import { formatCurrencyCompact } from "@/lib/currency";
@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n";
 import { MapView } from "@/components/map-view";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type View = "gantt" | "table" | "cards" | "map";
 
@@ -27,13 +27,6 @@ function StatusBadge({ status, pending }: { status: string; pending?: boolean })
   const s = map[status] ?? map.active;
   return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.className}`}>{s.label}</span>;
 }
-
-const taskStatusIcon = {
-  completed: <CheckCircle2 size={13} className="text-green-400" />,
-  "in-progress": <Clock size={13} className="text-amber-400" />,
-  "not-started": <Circle size={13} className="text-white/20" />,
-  delayed: <AlertCircle size={13} className="text-red-400" />,
-};
 
 type FormState = {
   name: string; client: string; address: string;

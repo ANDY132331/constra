@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Circle, Timer, CheckCircle2, AlertCircle, MapPin, Calendar, X, Pencil } from "lucide-react";
+import { Plus, Search, Circle, Timer, CheckCircle2, MapPin, Calendar, X, Pencil } from "lucide-react";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const PRIORITY_CONFIG = {
   high: { label: "HIGH", className: "bg-red-500/15 text-red-400" },

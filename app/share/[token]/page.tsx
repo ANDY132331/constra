@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { use } from "react";
+import Link from "next/link";
 import { CheckCircle2, Clock, Circle, AlertCircle, MapPin, Calendar, Building2, Loader2, HardHat } from "lucide-react";
 
 type SharedTask = {
@@ -170,7 +171,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
 
         <div className="text-center text-[11px] text-gray-400 dark:text-white/20 pt-4 pb-8">
           Powered by{" "}
-          <a href="/" className="text-amber-500/80 hover:text-amber-500 transition-colors">Constra</a>
+          <Link href="/" className="text-amber-500/80 hover:text-amber-500 transition-colors">Constra</Link>
           {" "}· {project.companyName}
         </div>
       </div>

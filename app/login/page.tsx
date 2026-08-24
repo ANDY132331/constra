@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { HardHat, Eye, EyeOff, ArrowRight, Globe, Loader2, WifiOff, MapPin, Zap } from "lucide-react";
 import Link from "next/link";
@@ -23,7 +23,11 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { setOnboarded } = useStore();
 
-  const [mode, setMode] = useState<"login" | "join">("login");
+  // Auto-switch to join tab if ?join=CODE is in the URL (from QR code scan).
+  // Derived directly from searchParams (available synchronously on first render
+  // inside the Suspense boundary) as lazy initial state, rather than an effect —
+  // avoids an extra render and the flash of "login" mode before switching to "join".
+  const [mode, setMode] = useState<"login" | "join">(() => (searchParams.get("join") ? "join" : "login"));
 
   // Sign-in state
   const [email, setEmail] = useState("");
@@ -31,24 +35,18 @@ function LoginForm() {
   const [showPw, setShowPw] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
 
-  // Auto-switch to join tab if ?join=CODE is in the URL (from QR code scan)
-  // Also surface auth callback errors (e.g. expired magic links)
-  useEffect(() => {
-    const code = searchParams.get("join");
-    if (code) { setMode("join"); setJoinCode(code.toUpperCase()); }
-    const err = searchParams.get("error");
-    if (err === "auth_callback_failed") setError("The sign-in link has expired. Please try again.");
-  }, [searchParams]);
-
   // Join state
-  const [joinCode, setJoinCode] = useState("");
+  const [joinCode, setJoinCode] = useState(() => searchParams.get("join")?.toUpperCase() ?? "");
   const [joinEmail, setJoinEmail] = useState("");
   const [joinPassword, setJoinPassword] = useState("");
   const [joinFirstName, setJoinFirstName] = useState("");
   const [joinLastName, setJoinLastName] = useState("");
   const [showJoinPw, setShowJoinPw] = useState(false);
 
-  const [error, setError] = useState("");
+  // Surface auth callback errors (e.g. expired magic links) the same way
+  const [error, setError] = useState(() =>
+    searchParams.get("error") === "auth_callback_failed" ? "The sign-in link has expired. Please try again." : ""
+  );
   const [loading, setLoading] = useState(false);
 
   async function handleSignIn() {

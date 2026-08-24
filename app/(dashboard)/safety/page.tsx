@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const TYPE_CONFIG = {
   "near-miss": { label: "Near Miss", icon: AlertTriangle, color: "#F5C400" },
@@ -113,6 +113,9 @@ export default function SafetyPage() {
     const injuries = safetyIncidents.filter((i) => i.type === "injury").map((i) => i.date);
     if (injuries.length === 0) return null;
     const last = new Date(Math.max(...injuries.map((d) => d.getTime())));
+    // Day-granularity display — no live ticker needed, any later render (data
+    // change, navigation) naturally corrects it once the day actually rolls over.
+    // eslint-disable-next-line react-hooks/purity
     return Math.floor((Date.now() - last.getTime()) / 86400000);
   })();
 

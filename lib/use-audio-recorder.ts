@@ -2,7 +2,8 @@
 
 import { useState, useRef, useCallback } from "react";
 
-export type RecordingState = "idle" | "recording" | "processing";
+export type RecordingState = "idle" | "recording" | "processing" | "error";
+export type RecordingError = "permission-denied" | "not-supported" | "unknown";
 
 export interface AudioResult {
   dataUrl: string;   // base64 data URL
@@ -12,15 +13,18 @@ export interface AudioResult {
 
 export interface UseAudioRecorderReturn {
   state: RecordingState;
+  error: RecordingError | null;
   durationSeconds: number;
   supported: boolean;
   start: () => Promise<void>;
   stop: () => Promise<AudioResult | null>;
   cancel: () => void;
+  clearError: () => void;
 }
 
 export function useAudioRecorder(): UseAudioRecorderReturn {
   const [state, setState] = useState<RecordingState>("idle");
+  const [error, setError] = useState<RecordingError | null>(null);
   const [durationSeconds, setDurationSeconds] = useState(0);
 
   const recorderRef  = useRef<MediaRecorder | null>(null);
@@ -34,8 +38,11 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     "mediaDevices" in navigator &&
     typeof MediaRecorder !== "undefined";
 
+  const clearError = useCallback(() => setError(null), []);
+
   const start = useCallback(async () => {
     if (!supported) return;
+    setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 
@@ -80,9 +87,19 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       timerRef.current = setInterval(() => {
         setDurationSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000));
       }, 500);
-    } catch (err) {
-      console.error("[audio-recorder] failed to start:", err);
-      setState("idle");
+    } catch (err: unknown) {
+      const name = (err as { name?: string })?.name ?? "";
+      if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+        setError("permission-denied");
+      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+        setError("not-supported");
+      } else {
+        setError("unknown");
+        console.error("[audio-recorder] failed to start:", err);
+      }
+      setState("error");
+      // Auto-reset to idle after showing error briefly
+      setTimeout(() => setState("idle"), 3000);
     }
   }, [supported]);
 
@@ -112,5 +129,5 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     setDurationSeconds(0);
   }, []);
 
-  return { state, durationSeconds, supported, start, stop, cancel };
+  return { state, error, durationSeconds, supported, start, stop, cancel, clearError };
 }

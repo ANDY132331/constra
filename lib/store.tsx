@@ -592,20 +592,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     async function boot() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setState((s) => ({ ...s, isLoading: false }));
-          return;
-        }
-        const { data: profile } = await supabase
-          .from("profiles").select("company_id").eq("id", user.id).single();
-        if (!profile) {
-          setState((s) => ({ ...s, isLoading: false }));
-          return;
-        }
-        const companyId = profile.company_id as string;
-        await loadAllData(companyId, user.id);
-        setupRealtime(companyId);
+        // Guard against a network call that never resolves or rejects (slow/dead
+        // connection, cold-starting backend) — without this, a genuine hang here
+        // would leave the splash screen spinning forever with no way out. Cached
+        // local data (already hydrated via loadState() above) still renders once
+        // isLoading flips false, so this is a pure safety net, not a behavior change
+        // on the happy path.
+        const BOOT_TIMEOUT_MS = 15000;
+        const timeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("boot-timeout")), BOOT_TIMEOUT_MS)
+        );
+
+        await Promise.race([
+          (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+              setState((s) => ({ ...s, isLoading: false }));
+              return;
+            }
+            const { data: profile } = await supabase
+              .from("profiles").select("company_id").eq("id", user.id).single();
+            if (!profile) {
+              setState((s) => ({ ...s, isLoading: false }));
+              return;
+            }
+            const companyId = profile.company_id as string;
+            await loadAllData(companyId, user.id);
+            setupRealtime(companyId);
+          })(),
+          timeout,
+        ]);
       } catch {
         setState((s) => ({ ...s, isLoading: false }));
       }

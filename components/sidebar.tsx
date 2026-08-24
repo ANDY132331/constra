@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
-  BarChart3, Settings, Search, HardHat, ChevronRight, Users, X,
+  BarChart3, Settings, Search, HardHat, Users, X,
   Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy, DollarSign,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -59,6 +59,47 @@ const OPS_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size
   { href: "/change-orders", label: "Change Orders", icon: GitPullRequest, minLevel: "admin" },
 ];
 
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  badge,
+  active,
+  onClose,
+}: {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  badge?: string;
+  active: boolean;
+  onClose?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className={`group flex items-center gap-3 py-2 rounded-lg text-[13px] transition-all duration-150 mb-0.5 ${
+        active
+          ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-400/70 pl-[10px] pr-3"
+          : "text-white/45 hover:text-white/80 hover:bg-white/[0.06] px-3"
+      }`}
+    >
+      <Icon
+        size={15}
+        className={`flex-shrink-0 transition-all duration-150 ${active ? "text-amber-400 scale-110" : "text-white/30 group-hover:text-white/60 group-hover:scale-110"}`}
+      />
+      <span className="flex-1 font-medium">{label}</span>
+      {badge && (
+        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+          active ? "bg-amber-500/25 text-amber-300" : "bg-amber-500/20 text-amber-400"
+        }`}>
+          {badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const { currentUser, projects } = useStore();
@@ -84,44 +125,6 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
-
-  const NavItem = ({
-    href,
-    label,
-    icon: Icon,
-    badge,
-  }: {
-    href: string;
-    label: string;
-    icon: React.ComponentType<{ size?: number; className?: string }>;
-    badge?: string;
-  }) => {
-    const active = isActive(href);
-    return (
-      <Link
-        href={href}
-        onClick={onClose}
-        className={`group flex items-center gap-3 py-2 rounded-lg text-[13px] transition-all duration-150 mb-0.5 ${
-          active
-            ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-400/70 pl-[10px] pr-3"
-            : "text-white/45 hover:text-white/80 hover:bg-white/[0.06] px-3"
-        }`}
-      >
-        <Icon
-          size={15}
-          className={`flex-shrink-0 transition-all duration-150 ${active ? "text-amber-400 scale-110" : "text-white/30 group-hover:text-white/60 group-hover:scale-110"}`}
-        />
-        <span className="flex-1 font-medium">{label}</span>
-        {badge && (
-          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
-            active ? "bg-amber-500/25 text-amber-300" : "bg-amber-500/20 text-amber-400"
-          }`}>
-            {badge}
-          </span>
-        )}
-      </Link>
-    );
-  };
 
   const visibleNav = NAV_ITEMS.filter(canSee);
   const visibleFinance = FINANCE_ITEMS.filter(canSee);
@@ -181,6 +184,8 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
             label={t.nav[item.labelKey]}
             icon={item.icon}
             badge={item.badge?.(pendingCount)}
+            active={isActive(item.href)}
+            onClose={onClose}
           />
         ))}
 
@@ -190,7 +195,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
               {t.nav.finance}
             </p>
             {visibleFinance.map((item) => (
-              <NavItem key={item.href} href={item.href} label={t.nav[item.labelKey]} icon={item.icon} />
+              <NavItem key={item.href} href={item.href} label={t.nav[item.labelKey]} icon={item.icon} active={isActive(item.href)} onClose={onClose} />
             ))}
           </div>
         )}
@@ -202,7 +207,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
             <div className="mt-4 pt-3 border-t border-white/[0.06]">
               <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Field Ops</p>
               {visibleOps.map((item) => (
-                <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
+                <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} onClose={onClose} />
               ))}
             </div>
           );
@@ -215,15 +220,15 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
             <div className="mt-4 pt-3 border-t border-white/[0.06]">
               <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Cost Control</p>
               {visibleBudget.map((item) => (
-                <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
+                <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} onClose={onClose} />
               ))}
             </div>
           );
         })()}
 
         <div className="mt-4 pt-3 border-t border-white/[0.06]">
-          <NavItem href="/settings" label={t.nav.settings} icon={Settings} />
-          <NavItem href="/support" label="Support" icon={LifeBuoy} />
+          <NavItem href="/settings" label={t.nav.settings} icon={Settings} active={isActive("/settings")} onClose={onClose} />
+          <NavItem href="/support" label="Support" icon={LifeBuoy} active={isActive("/support")} onClose={onClose} />
         </div>
       </nav>
 

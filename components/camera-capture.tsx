@@ -85,6 +85,9 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
   }, [stopStream, facingMode]);
 
   useEffect(() => {
+    // Intentional: kicking off camera/GPS acquisition (external systems) on mount,
+    // not deriving state from props/state — the canonical use case for an effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     startCamera();
     requestGps();
     return () => stopStream();

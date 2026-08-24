@@ -40,7 +40,6 @@ export async function exportReportPdf(input: PdfReportInput) {
   const DARK   = [15,  15,  15]  as [number, number, number];
   const DARK2  = [28,  28,  28]  as [number, number, number];
   const MID    = [90,  90,  90]  as [number, number, number];
-  const LIGHT  = [246, 246, 246] as [number, number, number];
   const WHITE  = [255, 255, 255] as [number, number, number];
   const GREEN  = [34,  197, 94]  as [number, number, number];
   const RED    = [239, 68,  68]  as [number, number, number];
@@ -949,6 +948,9 @@ export async function exportInvoicePdf(
   mode: "save" | "dataurl" = "save",
   template: InvoiceTemplate = "classic",
 ): Promise<string | void> {
+  // TODO: only "classic" is implemented below — Modern/Minimal branches (matching
+  // the 3-template system already built for exportEstimatePdf) are not yet wired in.
+  void template;
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
 
@@ -1299,7 +1301,6 @@ export async function exportDailyReportPdf({
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 35 }, 2: { fontStyle: "bold", cellWidth: 35 } },
     theme: "striped",
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
 
   const textBlock = (heading: string, text: string) => {
@@ -1424,7 +1425,6 @@ export async function exportChangeOrderPdf({
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 38 }, 2: { fontStyle: "bold", cellWidth: 38 } },
     theme: "striped",
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
 
   const section = (heading: string, text: string) => {

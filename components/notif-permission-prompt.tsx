@@ -53,7 +53,7 @@ export function NotifPermissionPrompt() {
               Stay on top of your site
             </p>
             <p className="text-[11px] text-white/40 mt-1 leading-relaxed">
-              Get notified when workers clock in, safety incidents occur, and more — even when you're in another tab.
+              Get notified when workers clock in, safety incidents occur, and more — even when you&apos;re in another tab.
             </p>
           </div>
           <button

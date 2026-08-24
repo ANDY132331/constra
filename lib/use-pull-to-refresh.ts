@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const THRESHOLD = 72;
 
@@ -11,8 +11,6 @@ export function usePullToRefresh(
   const startYRef = useRef(0);
   const pullYRef = useRef(0);
   const activeRef = useRef(false);
-
-  const refresh = useCallback(onRefresh, [onRefresh]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -42,7 +40,7 @@ export function usePullToRefresh(
         setRefreshing(true);
         setPullY(THRESHOLD);
         pullYRef.current = 0;
-        try { await refresh(); } finally { setRefreshing(false); setPullY(0); }
+        try { await onRefresh(); } finally { setRefreshing(false); setPullY(0); }
       } else {
         pullYRef.current = 0;
         setPullY(0);
@@ -57,7 +55,7 @@ export function usePullToRefresh(
       el.removeEventListener("touchmove", onMove);
       el.removeEventListener("touchend", onEnd);
     };
-  }, [containerRef, refresh]);
+  }, [containerRef, onRefresh]);
 
   return { pullY, refreshing, threshold: THRESHOLD };
 }

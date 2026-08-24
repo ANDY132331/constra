@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, getDay, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type CustomEventType = "meeting" | "inspection" | "delivery" | "permit" | "other";
 
@@ -123,7 +123,9 @@ export default function SchedulePage() {
   const [deleteEventConfirm, setDeleteEventConfirm] = useState<string | null>(null);
   const [addForm, setAddForm] = useState({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting" as CustomEventType, description: "" });
 
+  // Reading from localStorage (external system) on mount.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCustomEvents(loadCustomEvents());
   }, []);
 
@@ -203,6 +205,10 @@ export default function SchedulePage() {
     } else {
       fallbackFn();
     }
+    // Intentional run-once-on-mount: fetchWeather's identity changes with
+    // locationName, which this effect itself sets — including it here would
+    // re-trigger a second geolocation prompt/fetch after the first one resolves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function getWeatherForDay(day: Date): WeatherDay | null {
@@ -711,7 +717,7 @@ export default function SchedulePage() {
 
           {calEvents.length === 0 && (
             <div className="text-center py-6 text-white/25 text-[13px]">
-              No events yet — add tasks to projects or click "Add Event" above
+              No events yet — add tasks to projects or click &quot;Add Event&quot; above
             </div>
           )}
 

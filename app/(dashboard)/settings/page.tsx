@@ -85,29 +85,34 @@ function SettingsInner() {
     address: companyAddress,
   });
 
-  // Sync form when store loads data
+  // Sync form when store loads data (companyName/etc. arrive asynchronously from
+  // Supabase after mount — this is re-hydrating local draft state from an external
+  // source, not deriving it from a prop already available at render time).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCompanyForm({ name: companyName, businessNumber, address: companyAddress });
   }, [companyName, businessNumber, companyAddress]);
 
-  // â"€â"€ Roles â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ── Roles ─────────────────────────────────────────────────────────────────────
   const [newRole, setNewRole] = useState("");
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const [editRoleValue, setEditRoleValue] = useState("");
 
-  // â"€â"€ Notifications â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ── Notifications ─────────────────────────────────────────────────────────────
   const [notifPerms, setNotifPerms] = useState<NotificationPermission | "unsupported">("default");
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(() => loadPrefs());
   const [notifRequesting, setNotifRequesting] = useState(false);
+  // Reading the browser's Notification.permission (external system) on mount.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setNotifPerms(getPermission()); }, []);
 
-  // â"€â"€ Security â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ── Security ──────────────────────────────────────────────────────────────────
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
   const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pwError, setPwError] = useState("");
 
-  // â"€â"€ Logo upload â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ── Logo upload ────────────────────────────────────────────────────────────────
   const [logoSaving, setLogoSaving] = useState(false);
   const [logoStatus, setLogoStatus] = useState<"idle" | "saved" | "error">("idle");
 
@@ -166,17 +171,21 @@ function SettingsInner() {
     }
   };
 
-  // â"€â"€ Invite code â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ── Invite code ───────────────────────────────────────────────────────────────
   const [displayCode, setDisplayCode] = useState(inviteCode || "CN-XXXX-XXXX");
   const [regenerating, setRegenerating] = useState(false);
   const [regenError, setRegenError] = useState("");
+  // inviteCode arrives asynchronously from the store; displayCode is also set
+  // independently after regenerating a code (see handleRegenerateCode below),
+  // so it can't be purely derived — this effect just re-syncs it once the store loads.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (inviteCode) setDisplayCode(inviteCode); }, [inviteCode]);
 
-  // â"€â"€ Confirmation dialogs â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ── Confirmation dialogs ──────────────────────────────────────────────────────
   const [kickConfirm, setKickConfirm] = useState<{ id: string; name: string } | null>(null);
   const [deleteRoleConfirm, setDeleteRoleConfirm] = useState<string | null>(null);
 
-  // â"€â"€ Handlers â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ── Handlers ──────────────────────────────────────────────────────────────────
 
   const saveCompany = () => {
     setCompanyName(companyForm.name);
@@ -268,7 +277,7 @@ function SettingsInner() {
       setPwStatus("success");
       setPwForm({ current: "", next: "", confirm: "" });
       setTimeout(() => setPwStatus("idle"), 3000);
-    } catch (err) {
+    } catch {
       setPwError("Something went wrong. Please try again.");
       setPwStatus("error");
     }
@@ -308,7 +317,7 @@ function SettingsInner() {
 
       <div className="flex-1 min-w-0">
 
-        {/* â"€â"€ COMPANY â"€â"€ */}
+        {/* ── COMPANY ── */}
         {tab === "company" && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
@@ -421,7 +430,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â"€â"€ PREFERENCES â"€â"€ */}
+        {/* ── PREFERENCES ── */}
         {tab === "preferences" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">App Preferences</h3>
@@ -488,13 +497,13 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â"€â"€ WORKERS â"€â"€ */}
+        {/* ── WORKERS ── */}
         {tab === "workers" && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
               <h3 className="text-[17px] font-bold text-white">Workers & Crew</h3>
               <Link href="/crew" className="text-[12px] text-amber-400 hover:text-amber-300 transition-colors">
-                + Add new worker â†'
+                + Add new worker →
               </Link>
             </div>
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden">
@@ -545,7 +554,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â"€â"€ ROLES â"€â"€ */}
+        {/* ── ROLES ── */}
         {tab === "roles" && (
           <div className="space-y-5">
             <div>
@@ -623,7 +632,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â"€â"€ NOTIFICATIONS â"€â"€ */}
+        {/* ── NOTIFICATIONS ── */}
         {tab === "notifications" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">Notification Preferences</h3>
@@ -685,7 +694,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â"€â"€ SECURITY â"€â"€ */}
+        {/* ── SECURITY ── */}
         {tab === "security" && (
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">Security</h3>
@@ -766,7 +775,7 @@ function SettingsInner() {
           </div>
         )}
 
-        {/* â"€â"€ BILLING â"€â"€ */}
+        {/* ── BILLING ── */}
         {tab === "access" && (
           <AccessControlTab
             workers={workers}
@@ -803,7 +812,7 @@ function SettingsInner() {
   );
 }
 
-// â"€â"€ Access Control Tab â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+// ── Access Control Tab ────────────────────────────────────────────────────────
 
 type ControllablePage = { href: string; label: string; group: "Core" | "Field Ops" | "Admin" | "Finance"; alwaysOn?: boolean };
 

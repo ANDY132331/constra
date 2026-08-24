@@ -204,7 +204,7 @@ export default function SupportPage() {
             <div className="mt-8 p-5 bg-[#0f0f0f] border border-white/[0.06] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <p className="text-[13px] font-bold text-white/70">Still have a question?</p>
-                <p className="text-[12px] text-white/35">Reach us by phone or email — we'll sort it out.</p>
+                <p className="text-[12px] text-white/35">Reach us by phone or email — we&apos;ll sort it out.</p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <a
