@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/demo", "/login", "/onboarding", "/auth", "/api/join", "/api/create-company", "/terms", "/privacy", "/reset-password", "/share/", "/api/share/", "/.well-known/"];
+const PUBLIC_PATHS = ["/", "/demo", "/login", "/onboarding", "/auth", "/api/join", "/api/create-company", "/terms", "/privacy", "/reset-password", "/share/", "/api/share/", "/.well-known/", "/delete-account", "/api/restore-account"];
 
 export async function proxy(request: NextRequest) {
   // Allow through if Supabase isn't configured (local dev without env vars).

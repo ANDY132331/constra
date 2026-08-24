@@ -81,7 +81,7 @@ export default function DeleteAccountPage() {
             <div>
               <p className="text-[13px] font-bold text-white/80 mb-1">Option 1 — In the app</p>
               <p className="text-[13px] text-white/50 leading-relaxed">
-                Sign in → Settings → scroll to the bottom → <span className="text-red-400 font-semibold">Delete Account</span>. Your data will be permanently deleted within 30 days.
+                Sign in → Settings → Security tab → <span className="text-red-400 font-semibold">Delete Account</span>. You&apos;ll get an email with a link to cancel — if you don&apos;t, your data is permanently deleted after 7 days.
               </p>
             </div>
             <div className="border-t border-white/[0.06] pt-4">

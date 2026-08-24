@@ -191,6 +191,39 @@ export function clockInEmail({
   });
 }
 
+export function accountDeletionEmail({
+  company,
+  name,
+  scope,
+  cancelUrl,
+}: {
+  company: string;
+  name: string;
+  /** "profile" = just this person's account. "company" = the entire company workspace. */
+  scope: "profile" | "company";
+  cancelUrl: string;
+}) {
+  const n = esc(name);
+  const co = esc(company);
+  const scopeWarning =
+    scope === "company"
+      ? `<p style="color:#ef4444;font-weight:700">This will permanently delete the entire <strong>${co}</strong> workspace — every worker, project, and record. All crew members will lose access.</p>`
+      : `<p>Your profile, photos, messages, and personal settings will be permanently deleted. Records your company needs to keep (like time entries tied to payroll) may be retained as described in our deletion policy.</p>`;
+  return emailShell({
+    company,
+    preheader: `Account deletion requested — you have 7 days to cancel`,
+    body: `
+      <h2 style="color:#ef4444">Account deletion requested</h2>
+      <p>Hi <strong>${n}</strong>,</p>
+      <p>We received a request to delete your Constra account. If this was you, no action is needed — deletion will proceed automatically in <strong>7 days</strong>.</p>
+      ${scopeWarning}
+      <p style="margin-top:18px">Didn't request this, or changed your mind?</p>
+      <a class="cta" href="${cancelUrl}">Cancel Deletion →</a>
+      <p style="color:#aaa;font-size:12px;margin-top:20px">This link works for the next 7 days. After that, deletion cannot be undone.</p>
+    `,
+  });
+}
+
 export function welcomeEmail({
   firstName,
   companyName,

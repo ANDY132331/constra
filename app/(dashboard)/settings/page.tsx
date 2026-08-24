@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Users, Building2, Bell, BellOff, Shield, HardHat, Lock,
@@ -62,13 +62,15 @@ function SettingsInner() {
     workers, currentUser, companyName, setCompanyName, deleteWorker, updateWorker,
     language, setLanguage, currency, setCurrency, industry, setIndustry,
     customRoles, addCustomRole, deleteCustomRole,
-    companyAddress, businessNumber, inviteCode,
-    setCompanyAddress, setBusinessNumber,
+    companyAddress, businessNumber, defaultTaxRate, inviteCode,
+    setCompanyAddress, setBusinessNumber, setDefaultTaxRate,
     companyLogo, setCompanyLogo,
     companyId, permissionsPin, setPermissionsPin,
+    signOut,
   } = useStore();
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const isAdmin = isAdminOrAbove(currentUser.role);
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab");
@@ -83,6 +85,7 @@ function SettingsInner() {
     name: companyName,
     businessNumber: businessNumber,
     address: companyAddress,
+    taxRate: String(defaultTaxRate),
   });
 
   // Sync form when store loads data (companyName/etc. arrive asynchronously from
@@ -90,8 +93,8 @@ function SettingsInner() {
   // source, not deriving it from a prop already available at render time).
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCompanyForm({ name: companyName, businessNumber, address: companyAddress });
-  }, [companyName, businessNumber, companyAddress]);
+    setCompanyForm({ name: companyName, businessNumber, address: companyAddress, taxRate: String(defaultTaxRate) });
+  }, [companyName, businessNumber, companyAddress, defaultTaxRate]);
 
   // ── Roles ─────────────────────────────────────────────────────────────────────
   const [newRole, setNewRole] = useState("");
@@ -111,6 +114,34 @@ function SettingsInner() {
   const [showPw, setShowPw] = useState(false);
   const [pwStatus, setPwStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pwError, setPwError] = useState("");
+
+  // ── Delete account ─────────────────────────────────────────────────────────────
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteStatus, setDeleteStatus] = useState<"idle" | "loading" | "requested" | "error">("idle");
+  const [deleteError, setDeleteError] = useState("");
+
+  const handleRequestDeletion = async () => {
+    setDeleteStatus("loading");
+    setDeleteError("");
+    try {
+      const res = await fetch("/api/delete-account", { method: "POST" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeleteError(json.error || "Something went wrong. Please try again or email support@getconstra.com.");
+        setDeleteStatus("error");
+        return;
+      }
+      setDeleteStatus("requested");
+      setTimeout(async () => {
+        await signOut();
+        router.push("/login");
+      }, 4000);
+    } catch {
+      setDeleteError("Network error. Please try again or email support@getconstra.com.");
+      setDeleteStatus("error");
+    }
+  };
 
   // ── Logo upload ────────────────────────────────────────────────────────────────
   const [logoSaving, setLogoSaving] = useState(false);
@@ -191,6 +222,8 @@ function SettingsInner() {
     setCompanyName(companyForm.name);
     setCompanyAddress(companyForm.address);
     setBusinessNumber(companyForm.businessNumber);
+    const parsedRate = parseFloat(companyForm.taxRate);
+    if (!isNaN(parsedRate)) setDefaultTaxRate(Math.min(100, Math.max(0, parsedRate)));
     setSavedBanner(true);
     setTimeout(() => setSavedBanner(false), 2500);
   };
@@ -383,6 +416,13 @@ function SettingsInner() {
                   <label className={lbl}>Business / Tax Number</label>
                   <input className={inp} value={companyForm.businessNumber} placeholder="e.g. 123456789"
                     onChange={(e) => setCompanyForm((f) => ({ ...f, businessNumber: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={lbl}>Default Tax Rate (%)</label>
+                  <input className={inp} type="number" min="0" max="100" step="0.01" value={companyForm.taxRate}
+                    placeholder="13"
+                    onChange={(e) => setCompanyForm((f) => ({ ...f, taxRate: e.target.value }))} />
+                  <p className="text-[10px] text-white/25 mt-1">Pre-fills new invoices &amp; estimates — still editable per document.</p>
                 </div>
                 <div className="col-span-2">
                   <label className={lbl}>Business Address</label>
@@ -765,12 +805,85 @@ function SettingsInner() {
             {/* Danger zone */}
             <div className="bg-[#111111] border border-red-500/15 rounded-xl p-5">
               <h4 className="text-[14px] font-bold text-red-400 mb-1">Danger Zone</h4>
-              <p className="text-[12px] text-white/40 mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
-              <a
-                href="mailto:hello@getconstra.com?subject=Account Deletion Request"
-                className="inline-flex items-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors">
-                Request Account Deletion
-              </a>
+              {isAdminOrAbove(currentUser.role) ? (
+                <p className="text-[12px] text-white/40 mb-4">
+                  Deleting your account permanently deletes your entire <strong className="text-white/60">{companyName || "company"}</strong> workspace — every worker, project, and record. All crew members will lose access. You&apos;ll get an email with 7 days to cancel before it&apos;s permanent.
+                </p>
+              ) : (
+                <p className="text-[12px] text-white/40 mb-4">
+                  Permanently delete your account, profile, and personal data. You&apos;ll get an email with 7 days to cancel before it&apos;s permanent.
+                </p>
+              )}
+              <button
+                onClick={() => { setShowDeleteModal(true); setDeleteConfirmText(""); setDeleteStatus("idle"); setDeleteError(""); }}
+                className="inline-flex items-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Delete account confirmation modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70">
+            <div className="bg-[#1a1a1a] border border-red-500/20 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+              {deleteStatus === "requested" ? (
+                <>
+                  <div className="w-11 h-11 rounded-full bg-green-500/15 flex items-center justify-center mb-3">
+                    <CheckCircle2 size={20} className="text-green-400" />
+                  </div>
+                  <h3 className="text-[15px] font-bold text-white mb-2">Check your email</h3>
+                  <p className="text-[13px] text-white/50 leading-relaxed">
+                    We&apos;ve sent a confirmation to your email with a link to cancel if you change your mind. Deletion happens automatically in 7 days if you don&apos;t. You&apos;ll be signed out shortly.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <h3 className="text-[15px] font-bold text-white leading-snug">Delete your account?</h3>
+                    <button onClick={() => setShowDeleteModal(false)} className="p-0.5 text-white/25 hover:text-white/60 transition-colors flex-shrink-0 mt-0.5">
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <p className="text-[13px] text-white/50 mb-4 leading-relaxed">
+                    {isAdminOrAbove(currentUser.role)
+                      ? <>This deletes the entire <strong className="text-red-400">{companyName || "company"}</strong> workspace — every worker, project, and record — after a 7-day grace period. All crew members lose access. This cannot be undone after 7 days.</>
+                      : <>Your account and personal data will be deleted after a 7-day grace period. This cannot be undone after that.</>}
+                  </p>
+                  <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5">
+                    Type DELETE to confirm
+                  </label>
+                  <input
+                    autoFocus
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="DELETE"
+                    className="w-full bg-white/[0.04] border border-red-500/20 rounded-lg px-3 py-2.5 text-[13px] text-white outline-none focus:border-red-500/50 mb-3"
+                  />
+                  {deleteStatus === "error" && (
+                    <div className="flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-lg mb-3">
+                      <AlertCircle size={13} className="text-red-400 flex-shrink-0" />
+                      <p className="text-[12px] text-red-300">{deleteError}</p>
+                    </div>
+                  )}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleRequestDeletion}
+                      disabled={deleteConfirmText !== "DELETE" || deleteStatus === "loading"}
+                      className="flex-1 bg-red-500 hover:bg-red-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-[13px] py-2.5 rounded-xl transition-colors"
+                    >
+                      {deleteStatus === "loading" ? "Requesting…" : "Delete Account"}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -430,7 +430,7 @@ function EstimateRow({ estimate, currency, selected, onClick }: {
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export default function EstimatesPage() {
-  const { estimates, addEstimate, updateEstimate, deleteEstimate, invoices, addInvoice, currency, companyName, companyLogo, currentUser } = useStore();
+  const { estimates, addEstimate, updateEstimate, deleteEstimate, invoices, addInvoice, currency, companyName, companyLogo, currentUser, defaultTaxRate } = useStore();
   const router = useRouter();
   const t = useT();
 
@@ -448,7 +448,10 @@ export default function EstimatesPage() {
   const [convertedNotice, setConvertedNotice] = useState<string | null>(null);
   const convertedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // estimates arrives asynchronously from the store (Supabase load after mount) —
+  // auto-selecting the first one once it's actually available.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!selectedId && estimates[0]?.id) setSelectedId(estimates[0].id);
   }, [estimates, selectedId]);
 
@@ -552,7 +555,7 @@ export default function EstimatesPage() {
         notes: form.notes.trim() || undefined,
       });
     }
-    setForm(blank);
+    setForm({ ...blank, taxRate: String(defaultTaxRate) });
     setEditId(null);
     setShowModal(false);
   };
@@ -582,7 +585,7 @@ export default function EstimatesPage() {
         <div className="flex items-center justify-between px-4 pt-4 pb-3">
           <h1 className="text-[22px] font-black text-white">Estimates</h1>
           <button
-            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
           >
             <Plus size={13} /> New Estimate
@@ -711,7 +714,7 @@ export default function EstimatesPage() {
                 <Lock size={9} /> Private
               </div>
               <button
-                onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+                onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
                 className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-lg transition-colors"
               >
                 <Plus size={14} /> New Estimate

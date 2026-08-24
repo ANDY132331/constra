@@ -4,17 +4,16 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
-  Plus, Search, Send, CheckCircle2, Clock, AlertTriangle, Lock,
-  Trash2, X, FileText, Building2, ChevronRight, Download, Eye,
-  Calendar, Mail, MapPin, Hash, Pencil,
+  Plus, Search, Send, CheckCircle2, AlertTriangle, Lock,
+  Trash2, X, FileText, ChevronRight, Download, Eye,
+  Mail, Pencil,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
-import { useT } from "@/lib/i18n";
 import type { Invoice } from "@/lib/mock-data";
 import { exportInvoicePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const STATUS_CONFIG = {
   draft:   { label: "Draft",   bg: "bg-zinc-700/60",       text: "text-zinc-300",   dot: "bg-zinc-400",   bar: "bg-zinc-600" },
@@ -79,7 +78,6 @@ function InvoiceDetail({
   const cfg       = STATUS_CONFIG[invoice.status];
   const isOverdue = invoice.status === "overdue";
   const isPaid    = invoice.status === "paid";
-  const isDraft   = invoice.status === "draft";
 
   return (
     <div className="flex flex-col h-full">
@@ -429,9 +427,8 @@ function InvoiceRow({ invoice, currency, selected, onClick }: {
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export default function InvoicesPage() {
-  const { invoices, addInvoice, updateInvoice, deleteInvoice, currency, companyName, companyAddress, companyLogo, currentUser } = useStore();
+  const { invoices, addInvoice, updateInvoice, deleteInvoice, currency, companyName, companyAddress, companyLogo, currentUser, defaultTaxRate } = useStore();
   const router = useRouter();
-  const t = useT();
 
   useEffect(() => {
     if (!isAdminOrAbove(currentUser.role)) router.replace("/dashboard");
@@ -527,7 +524,7 @@ export default function InvoicesPage() {
         notes: form.notes.trim() || undefined,
       });
     }
-    setForm(blank);
+    setForm({ ...blank, taxRate: String(defaultTaxRate) });
     setEditId(null);
     setShowModal(false);
   };
@@ -550,7 +547,7 @@ export default function InvoicesPage() {
         <div className="flex items-center justify-between px-4 pt-4 pb-3">
           <h1 className="text-[22px] font-black text-white">Invoices</h1>
           <button
-            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
           >
             <Plus size={13} /> New Invoice
@@ -676,7 +673,7 @@ export default function InvoicesPage() {
             <Lock size={9} /> Private
           </div>
           <button
-            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-lg transition-colors"
           >
             <Plus size={14} /> New Invoice

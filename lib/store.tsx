@@ -97,6 +97,7 @@ type StoreState = {
   customRoles: string[];
   companyAddress: string;
   businessNumber: string;
+  defaultTaxRate: number;
   inviteCode: string;
   companyLogo: string;
   permissionsPin: string;
@@ -193,6 +194,7 @@ type StoreCtx = StoreState & {
   deleteCustomRole: (role: string) => void;
   setCompanyAddress: (a: string) => void;
   setBusinessNumber: (b: string) => void;
+  setDefaultTaxRate: (r: number) => void;
   setPermissionsPin: (hashedPin: string) => void;
 
   setCompanyName: (name: string) => void;
@@ -252,6 +254,7 @@ function defaultState(): StoreState {
     customRoles: [],
     companyAddress: "",
     businessNumber: "",
+    defaultTaxRate: 13,
     inviteCode: "",
     companyLogo: "",
     permissionsPin: "",
@@ -285,6 +288,7 @@ function loadState(): StoreState {
       customRoles: parsed.customRoles ?? [],
       companyAddress: parsed.companyAddress ?? "",
       businessNumber: parsed.businessNumber ?? "",
+      defaultTaxRate: parsed.defaultTaxRate ?? 13,
       inviteCode: parsed.inviteCode ?? "",
       permissionsPin: parsed.permissionsPin ?? "",
     };
@@ -402,7 +406,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         tasksByProject[t.project_id].push(t as DbTask);
       });
 
-      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string } | null;
+      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number } | null;
 
       const isPro = true; // free during launch period
 
@@ -440,6 +444,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         inviteCode: co?.invite_code ?? "",
         companyAddress: co?.address ?? "",
         businessNumber: co?.business_number ?? "",
+        defaultTaxRate: co?.default_tax_rate ?? 13,
         companyLogo: co?.logo ?? s.companyLogo,
       }));
     }
@@ -1240,6 +1245,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     bg(() => getClient().from("companies").update({ business_number: b }).eq("id", companyIdRef.current!), "setBusinessNumber");
   }, [up]);
 
+  const setDefaultTaxRate = useCallback((r: number) => {
+    up((s) => ({ ...s, defaultTaxRate: r }));
+    bg(() => getClient().from("companies").update({ default_tax_rate: r }).eq("id", companyIdRef.current!), "setDefaultTaxRate");
+  }, [up]);
+
   const setPermissionsPin = useCallback((hashedPin: string) => {
     up((s) => ({ ...s, permissionsPin: hashedPin }));
   }, [up]);
@@ -1333,7 +1343,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addDailyReport, updateDailyReport, deleteDailyReport,
       addChangeOrder, updateChangeOrder, deleteChangeOrder,
       addCustomRole, deleteCustomRole,
-      setCompanyAddress, setBusinessNumber, setPermissionsPin,
+      setCompanyAddress, setBusinessNumber, setDefaultTaxRate, setPermissionsPin,
       setCompanyName, setCompanyLogo, setIsPro,
       setLanguage, setCurrency, setIndustry, setOnboarded,
       getWorkerById, getProjectById,
