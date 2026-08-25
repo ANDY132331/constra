@@ -9,6 +9,7 @@ import { formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { PAYROLL_ADAPTERS, exportPayroll } from "@/lib/payroll-export";
 import { exportReportPdf } from "@/lib/pdf-export";
+import { computeWorkerOvertime } from "@/lib/overtime";
 
 function periodBounds(period: "week" | "month" | "quarter"): { start: Date; end: Date; label: string } {
   const now = new Date();
@@ -41,7 +42,10 @@ function periodBounds(period: "week" | "month" | "quarter"): { start: Date; end:
 }
 
 export default function ReportsPage() {
-  const { workers, projects, clockEntries, currency, currentUser, companyName } = useStore();
+  const {
+    workers, projects, clockEntries, currency, currentUser, companyName,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
+  } = useStore();
   const router = useRouter();
   const [pdfLoading, setPdfLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -143,22 +147,45 @@ export default function ReportsPage() {
   const totalBudget = projectBudgets.reduce((s, p) => s + p.budget, 0);
   const totalSpent = projectBudgets.reduce((s, p) => s + p.spent, 0);
 
-  // Top workers by actual hours in period
+  // Top workers by actual hours in period, including OT breakdown when enabled
   const topWorkers = useMemo(() => {
     return workers
       .map((w) => {
-        const h = periodEntries
-          .filter((e) => e.workerId === w.id)
-          .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
-        const projectCount = new Set(periodEntries.filter((e) => e.workerId === w.id).map((e) => e.projectId)).size;
-        return { ...w, hoursThisPeriod: Math.round(h * 10) / 10, projectCount };
+        const workerEntries = periodEntries.filter((e) => e.workerId === w.id);
+        const h = workerEntries.reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+        const projectCount = new Set(workerEntries.map((e) => e.projectId)).size;
+        const ot = overtimeEnabled
+          ? computeWorkerOvertime(workerEntries, w.hourlyRate ?? 0, {
+              enabled: overtimeEnabled,
+              dailyThreshold: overtimeDailyThreshold,
+              weeklyThreshold: overtimeWeeklyThreshold,
+              multiplier: overtimeMultiplier,
+            })
+          : null;
+        return {
+          ...w,
+          hoursThisPeriod: Math.round(h * 10) / 10,
+          projectCount,
+          regularHours: ot?.regularHours ?? null,
+          overtimeHours: ot?.overtimeHours ?? null,
+          regularPay: ot?.regularPay ?? null,
+          overtimePay: ot?.overtimePay ?? null,
+          totalPay: ot?.totalPay ?? null,
+        };
       })
       .filter((w) => w.hoursThisPeriod > 0)
       .sort((a, b) => b.hoursThisPeriod - a.hoursThisPeriod)
       .slice(0, 5);
-  }, [workers, periodEntries]);
+  }, [workers, periodEntries, overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
 
   const activeWorkers = workers.filter((w) => w.clockedIn).length;
+
+  const overtimeSettings = useMemo(() => ({
+    enabled: overtimeEnabled,
+    dailyThreshold: overtimeDailyThreshold,
+    weeklyThreshold: overtimeWeeklyThreshold,
+    multiplier: overtimeMultiplier,
+  }), [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
 
   const handlePayrollExport = useCallback((adapterId: string) => {
     if (periodEntries.length === 0) {
@@ -166,9 +193,9 @@ export default function ReportsPage() {
       setExportMenuOpen(false);
       return;
     }
-    exportPayroll(adapterId, clockEntries, workers, projects, periodStart, periodEnd, periodLabel);
+    exportPayroll(adapterId, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings);
     setExportMenuOpen(false);
-  }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, showToast]);
+  }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings, showToast]);
 
   return (
     <>
@@ -342,6 +369,12 @@ export default function ReportsPage() {
                           {worker.projectCount} project{worker.projectCount !== 1 ? "s" : ""}
                         </span>
                       </div>
+                      {overtimeEnabled && worker.overtimeHours != null && worker.overtimeHours > 0 && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[9px] text-white/35">Reg {worker.regularHours?.toFixed(1)}h</span>
+                          <span className="text-[9px] text-amber-400 font-semibold">OT {worker.overtimeHours.toFixed(1)}h</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );

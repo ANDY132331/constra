@@ -14,6 +14,7 @@ import type { Invoice } from "@/lib/mock-data";
 import { exportInvoicePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 
 const STATUS_CONFIG = {
   draft:   { label: "Draft",   bg: "bg-zinc-700/60",       text: "text-zinc-300",   dot: "bg-zinc-400",   bar: "bg-zinc-600" },
@@ -66,6 +67,7 @@ function InvoiceDetail({
   const [sendLoading, setSendLoading] = useState(false);
   const [sendStatus, setSendStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [template, setTemplate] = useTemplateChoice("constra_invoice_template");
 
   useEffect(() => {
     if (!sendStatus) return;
@@ -111,7 +113,7 @@ function InvoiceDetail({
                 let pdfDataUrl: string | undefined;
                 try {
                   const { generateInvoicePdfDataUrl } = await import("@/lib/pdf-export");
-                  pdfDataUrl = await generateInvoicePdfDataUrl(invoice, currency, companyName, companyAddress, companyLogo);
+                  pdfDataUrl = await generateInvoicePdfDataUrl(invoice, currency, companyName, companyAddress, companyLogo, template);
                 } catch {}
                 const res = await fetch("/api/invoice/email", {
                   method: "POST",
@@ -147,10 +149,11 @@ function InvoiceDetail({
             <Mail size={13} />
             {sendLoading ? "Sending…" : invoice.status === "overdue" ? "Send Reminder" : "Send"}
           </button>
+          <TemplatePicker value={template} onChange={setTemplate} />
           <button
             onClick={async () => {
               setPdfLoading(true);
-              try { await exportInvoicePdf(invoice, currency, companyName, companyAddress, companyLogo); }
+              try { await exportInvoicePdf(invoice, currency, companyName, companyAddress, companyLogo, "#F5C400", "save", template); }
               finally { setPdfLoading(false); }
             }}
             disabled={pdfLoading}

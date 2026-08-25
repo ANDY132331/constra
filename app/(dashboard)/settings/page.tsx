@@ -7,7 +7,7 @@ import {
   Users, Building2, Bell, BellOff, Shield, HardHat, Lock,
   Plus, Edit2, Trash2, Copy, CheckCircle2, Key, X, Check,
   Globe, Briefcase, DollarSign, Eye, EyeOff, AlertCircle,
-  ShieldCheck, ChevronDown,
+  ShieldCheck, ChevronDown, Clock,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { LOCALE_LABELS, type Locale } from "@/lib/i18n/locales";
@@ -64,6 +64,8 @@ function SettingsInner() {
     customRoles, addCustomRole, deleteCustomRole,
     companyAddress, businessNumber, defaultTaxRate, inviteCode,
     setCompanyAddress, setBusinessNumber, setDefaultTaxRate,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
+    setOvertimeSettings,
     companyLogo, setCompanyLogo,
     companyId, permissionsPin, setPermissionsPin,
     signOut,
@@ -95,6 +97,25 @@ function SettingsInner() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCompanyForm({ name: companyName, businessNumber, address: companyAddress, taxRate: String(defaultTaxRate) });
   }, [companyName, businessNumber, companyAddress, defaultTaxRate]);
+
+  // ── Overtime form ─────────────────────────────────────────────────────────────
+  const [overtimeForm, setOvertimeForm] = useState({
+    enabled: overtimeEnabled,
+    dailyThreshold: overtimeDailyThreshold != null ? String(overtimeDailyThreshold) : "",
+    weeklyThreshold: overtimeWeeklyThreshold != null ? String(overtimeWeeklyThreshold) : "40",
+    multiplier: String(overtimeMultiplier),
+  });
+  const [overtimeSaved, setOvertimeSaved] = useState(false);
+  // Sync from store once Supabase data loads
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOvertimeForm({
+      enabled: overtimeEnabled,
+      dailyThreshold: overtimeDailyThreshold != null ? String(overtimeDailyThreshold) : "",
+      weeklyThreshold: overtimeWeeklyThreshold != null ? String(overtimeWeeklyThreshold) : "40",
+      multiplier: String(overtimeMultiplier),
+    });
+  }, [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
 
   // ── Roles ─────────────────────────────────────────────────────────────────────
   const [newRole, setNewRole] = useState("");
@@ -226,6 +247,20 @@ function SettingsInner() {
     if (!isNaN(parsedRate)) setDefaultTaxRate(Math.min(100, Math.max(0, parsedRate)));
     setSavedBanner(true);
     setTimeout(() => setSavedBanner(false), 2500);
+  };
+
+  const saveOvertime = () => {
+    const daily = overtimeForm.dailyThreshold === "" ? null : parseFloat(overtimeForm.dailyThreshold);
+    const weekly = overtimeForm.weeklyThreshold === "" ? null : parseFloat(overtimeForm.weeklyThreshold);
+    const mult = parseFloat(overtimeForm.multiplier);
+    setOvertimeSettings({
+      enabled: overtimeForm.enabled,
+      dailyThreshold: daily != null && !isNaN(daily) ? daily : null,
+      weeklyThreshold: weekly != null && !isNaN(weekly) ? weekly : null,
+      multiplier: !isNaN(mult) && mult > 0 ? mult : 1.5,
+    });
+    setOvertimeSaved(true);
+    setTimeout(() => setOvertimeSaved(false), 2500);
   };
 
   const [linkCopied, setLinkCopied] = useState(false);
@@ -432,6 +467,86 @@ function SettingsInner() {
               </div>
               <button onClick={saveCompany} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
                 Save Changes
+              </button>
+            </div>
+
+            {/* ── Overtime Rules ── */}
+            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Clock size={16} className="text-amber-400" />
+                  <div>
+                    <h4 className="text-[14px] font-bold text-white">Overtime Rules</h4>
+                    <p className="text-[11px] text-white/35">Applied to payroll exports and reports.</p>
+                  </div>
+                </div>
+                {overtimeSaved && (
+                  <span className="flex items-center gap-1.5 text-[12px] text-green-400 font-semibold bg-green-500/10 px-3 py-1.5 rounded-lg">
+                    <CheckCircle2 size={13} /> Saved!
+                  </span>
+                )}
+              </div>
+
+              {/* Enable toggle */}
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.05]">
+                <div>
+                  <p className="text-[13px] font-semibold text-white">Enable Overtime Tracking</p>
+                  <p className="text-[11px] text-white/35 mt-0.5">When off, all hours are treated as regular pay.</p>
+                </div>
+                <button
+                  onClick={() => setOvertimeForm((f) => ({ ...f, enabled: !f.enabled }))}
+                  className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${overtimeForm.enabled ? "bg-amber-500" : "bg-white/10"}`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${overtimeForm.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
+                </button>
+              </div>
+
+              {overtimeForm.enabled && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={lbl}>Daily Threshold (hrs)</label>
+                    <input
+                      className={inp}
+                      type="number"
+                      min="1"
+                      step="0.5"
+                      value={overtimeForm.dailyThreshold}
+                      placeholder="e.g. 8 (leave blank to skip)"
+                      onChange={(e) => setOvertimeForm((f) => ({ ...f, dailyThreshold: e.target.value }))}
+                    />
+                    <p className="text-[10px] text-white/25 mt-1">Hours/day before daily OT kicks in. Leave blank to disable.</p>
+                  </div>
+                  <div>
+                    <label className={lbl}>Weekly Threshold (hrs)</label>
+                    <input
+                      className={inp}
+                      type="number"
+                      min="1"
+                      step="0.5"
+                      value={overtimeForm.weeklyThreshold}
+                      placeholder="e.g. 40 (leave blank to skip)"
+                      onChange={(e) => setOvertimeForm((f) => ({ ...f, weeklyThreshold: e.target.value }))}
+                    />
+                    <p className="text-[10px] text-white/25 mt-1">Regular hours/week after daily OT removed. Leave blank to disable.</p>
+                  </div>
+                  <div>
+                    <label className={lbl}>Overtime Multiplier</label>
+                    <input
+                      className={inp}
+                      type="number"
+                      min="1"
+                      step="0.25"
+                      value={overtimeForm.multiplier}
+                      placeholder="1.5"
+                      onChange={(e) => setOvertimeForm((f) => ({ ...f, multiplier: e.target.value }))}
+                    />
+                    <p className="text-[10px] text-white/25 mt-1">e.g. 1.5 = time-and-a-half, 2.0 = double time.</p>
+                  </div>
+                </div>
+              )}
+
+              <button onClick={saveOvertime} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+                Save Overtime Rules
               </button>
             </div>
 

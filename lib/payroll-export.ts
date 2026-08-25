@@ -3,6 +3,8 @@
 // Phase 2: ADP, Paychex (add new adapters here without changing callers)
 
 import type { ClockEntry, Worker, Project } from "./mock-data";
+import type { OvertimeSettings } from "./overtime";
+import { computeWorkerOvertime } from "./overtime";
 
 export type PayrollRow = {
   workerName: string;
@@ -17,12 +19,28 @@ export type PayrollRow = {
   grossPay: number;
 };
 
+// Per-worker overtime breakdown for the whole export period
+export type WorkerOvertimeSummary = {
+  workerName: string;
+  workerEmail: string;
+  regularHours: number;
+  overtimeHours: number;
+  regularPay: number;
+  overtimePay: number;
+  totalPay: number;
+};
+
 export type PayrollAdapter = {
   id: string;
   label: string;
   fileExtension: string;
   mimeType: string;
-  serialize: (rows: PayrollRow[], periodLabel: string) => string;
+  serialize: (
+    rows: PayrollRow[],
+    periodLabel: string,
+    overtimeSummaries?: WorkerOvertimeSummary[],
+    multiplier?: number,
+  ) => string;
 };
 
 function buildRows(
@@ -58,6 +76,41 @@ function buildRows(
     .sort((a, b) => a.workerName.localeCompare(b.workerName) || a.date.localeCompare(b.date));
 }
 
+function buildOvertimeSummaries(
+  entries: ClockEntry[],
+  workers: Worker[],
+  periodStart: Date,
+  periodEnd: Date,
+  settings: OvertimeSettings,
+): WorkerOvertimeSummary[] {
+  const workerMap = new Map(workers.map((w) => [w.id, w]));
+  // Group entries by worker within the period
+  const byWorker = new Map<string, ClockEntry[]>();
+  for (const e of entries) {
+    if (!e.clockOut || e.clockIn < periodStart || e.clockIn > periodEnd || e.clockOut.getTime() === 0) continue;
+    const list = byWorker.get(e.workerId) ?? [];
+    list.push(e);
+    byWorker.set(e.workerId, list);
+  }
+
+  const summaries: WorkerOvertimeSummary[] = [];
+  for (const [workerId, workerEntries] of byWorker) {
+    const worker = workerMap.get(workerId);
+    const breakdown = computeWorkerOvertime(workerEntries, worker?.hourlyRate ?? 0, settings);
+    summaries.push({
+      workerName: worker?.name ?? "Unknown",
+      workerEmail: worker?.email ?? "",
+      regularHours: breakdown.regularHours,
+      overtimeHours: breakdown.overtimeHours,
+      regularPay: breakdown.regularPay,
+      overtimePay: breakdown.overtimePay,
+      totalPay: breakdown.totalPay,
+    });
+  }
+
+  return summaries.sort((a, b) => a.workerName.localeCompare(b.workerName));
+}
+
 function escapeCsv(val: string | number): string {
   const s = String(val);
   return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
@@ -70,7 +123,7 @@ const csvAdapter: PayrollAdapter = {
   label: "CSV (Universal)",
   fileExtension: "csv",
   mimeType: "text/csv",
-  serialize(rows, periodLabel) {
+  serialize(rows, periodLabel, overtimeSummaries, multiplier) {
     const header = ["Worker", "Email", "Role", "Project", "Date", "Clock In", "Clock Out", "Hours", "Rate ($/hr)", "Gross Pay ($)"];
     const lines = [
       `# Constra Payroll Export — ${periodLabel}`,
@@ -83,10 +136,28 @@ const csvAdapter: PayrollAdapter = {
       ),
     ];
 
-    // Summary totals
+    // Summary totals (straight hours, for reference)
     const totalHours = rows.reduce((s, r) => s + r.hoursWorked, 0);
     const totalPay = rows.reduce((s, r) => s + r.grossPay, 0);
     lines.push("", `# Totals,,,,,,,${totalHours.toFixed(2)},,$${totalPay.toFixed(2)}`);
+
+    // Overtime breakdown section — appended when OT is enabled
+    if (overtimeSummaries && overtimeSummaries.length > 0) {
+      lines.push(
+        "",
+        `# ── Overtime Breakdown (${multiplier ?? 1.5}× multiplier) ──`,
+        ["Worker", "Email", "Regular Hrs", "OT Hrs", "Regular Pay ($)", "OT Pay ($)", "Total Pay ($)"]
+          .map(escapeCsv).join(","),
+        ...overtimeSummaries.map((s) =>
+          [s.workerName, s.workerEmail, s.regularHours, s.overtimeHours, s.regularPay, s.overtimePay, s.totalPay]
+            .map(escapeCsv).join(",")
+        ),
+      );
+      const totReg = overtimeSummaries.reduce((s, r) => s + r.regularPay, 0);
+      const totOT = overtimeSummaries.reduce((s, r) => s + r.overtimePay, 0);
+      const totAll = overtimeSummaries.reduce((s, r) => s + r.totalPay, 0);
+      lines.push(`# OT Totals,,,,${totReg.toFixed(2)},${totOT.toFixed(2)},${totAll.toFixed(2)}`);
+    }
 
     return lines.join("\n");
   },
@@ -97,17 +168,32 @@ const gustoAdapter: PayrollAdapter = {
   label: "Gusto",
   fileExtension: "csv",
   mimeType: "text/csv",
-  serialize(rows, periodLabel) {
-    // Gusto time import format: Employee Name, Hours, Earnings Type, Date
+  serialize(rows, periodLabel, overtimeSummaries) {
+    // Gusto time import format: Employee Name, Hours, Earnings Type, Job/Department, Date, Note
     const header = ["Employee Name", "Hours", "Earnings Type", "Job/Department", "Date", "Note"];
     const lines = [
       `# Constra → Gusto Export — ${periodLabel}`,
       "",
       header.map(escapeCsv).join(","),
-      ...rows.map((r) =>
-        [r.workerName, r.hoursWorked.toFixed(2), "Regular", r.projectName, r.date, ""].map(escapeCsv).join(",")
-      ),
     ];
+
+    if (overtimeSummaries && overtimeSummaries.length > 0) {
+      // When overtime is enabled: aggregated Regular + OT rows per worker (Gusto preferred format)
+      for (const s of overtimeSummaries) {
+        if (s.regularHours > 0) {
+          lines.push([s.workerName, s.regularHours.toFixed(2), "Regular", "", "", ""].map(escapeCsv).join(","));
+        }
+        if (s.overtimeHours > 0) {
+          lines.push([s.workerName, s.overtimeHours.toFixed(2), "Overtime", "", "", ""].map(escapeCsv).join(","));
+        }
+      }
+    } else {
+      // No overtime — per-shift detail rows
+      for (const r of rows) {
+        lines.push([r.workerName, r.hoursWorked.toFixed(2), "Regular", r.projectName, r.date, ""].map(escapeCsv).join(","));
+      }
+    }
+
     return lines.join("\n");
   },
 };
@@ -140,12 +226,20 @@ export function exportPayroll(
   periodStart: Date,
   periodEnd: Date,
   periodLabel: string,
+  overtimeSettings?: OvertimeSettings | null,
 ): void {
   const adapter = PAYROLL_ADAPTERS.find((a) => a.id === adapterId);
   if (!adapter) return;
 
   const rows = buildRows(entries, workers, projects, periodStart, periodEnd);
-  const content = adapter.serialize(rows, periodLabel);
+
+  // Build overtime summaries only when the feature is enabled
+  const overtimeSummaries =
+    overtimeSettings?.enabled
+      ? buildOvertimeSummaries(entries, workers, periodStart, periodEnd, overtimeSettings)
+      : undefined;
+
+  const content = adapter.serialize(rows, periodLabel, overtimeSummaries, overtimeSettings?.multiplier);
   const blob = new Blob([content], { type: adapter.mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

@@ -14,6 +14,7 @@ import type { Estimate } from "@/lib/mock-data";
 import { exportEstimatePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -50,12 +51,13 @@ function estimateTotal(est: Estimate) {
 // ── Estimate detail panel ────────────────────────────────────────────────────
 
 function EstimateDetail({
-  estimate, currency, companyName, companyLogo,
+  estimate, currency, companyName, companyAddress, companyLogo,
   onUpdate, onDelete, onEdit, onConvert, onClose,
 }: {
   estimate: Estimate;
   currency: string;
   companyName: string;
+  companyAddress: string;
   companyLogo: string;
   onUpdate: (id: string, u: Partial<Estimate>) => void;
   onDelete: (id: string) => void;
@@ -67,6 +69,7 @@ function EstimateDetail({
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [sendLoading, setSendLoading]   = useState(false);
   const [sendStatus, setSendStatus]     = useState<{ ok: boolean; msg: string } | null>(null);
+  const [template, setTemplate] = useTemplateChoice("constra_estimate_template");
 
   useEffect(() => {
     if (!sendStatus) return;
@@ -147,11 +150,12 @@ function EstimateDetail({
             <Mail size={13} />
             {sendLoading ? "Sending…" : "Send"}
           </button>
-          {/* PDF button */}
+          {/* PDF template + button */}
+          <TemplatePicker value={template} onChange={setTemplate} />
           <button
             onClick={async () => {
               setPdfLoading(true);
-              try { await exportEstimatePdf(estimate, currency, companyName); }
+              try { await exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template); }
               finally { setPdfLoading(false); }
             }}
             disabled={pdfLoading}
@@ -430,7 +434,7 @@ function EstimateRow({ estimate, currency, selected, onClick }: {
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export default function EstimatesPage() {
-  const { estimates, addEstimate, updateEstimate, deleteEstimate, invoices, addInvoice, currency, companyName, companyLogo, currentUser, defaultTaxRate } = useStore();
+  const { estimates, addEstimate, updateEstimate, deleteEstimate, invoices, addInvoice, currency, companyName, companyAddress, companyLogo, currentUser, defaultTaxRate } = useStore();
   const router = useRouter();
   const t = useT();
 
@@ -791,6 +795,7 @@ export default function EstimatesPage() {
                   estimate={selectedEstimate}
                   currency={currency}
                   companyName={companyName}
+                  companyAddress={companyAddress ?? ""}
                   companyLogo={companyLogo ?? ""}
                   onUpdate={updateEstimate}
                   onDelete={(id) => { deleteEstimate(id); setSelectedId(null); }}
@@ -955,6 +960,7 @@ export default function EstimatesPage() {
               estimate={est}
               currency={currency}
               companyName={companyName}
+              companyAddress={companyAddress ?? ""}
               companyLogo={companyLogo ?? ""}
               onUpdate={(id, u) => updateEstimate(id, u)}
               onDelete={(id) => { deleteEstimate(id); setMobilePreviewId(null); }}

@@ -98,6 +98,10 @@ type StoreState = {
   companyAddress: string;
   businessNumber: string;
   defaultTaxRate: number;
+  overtimeEnabled: boolean;
+  overtimeDailyThreshold: number | null;
+  overtimeWeeklyThreshold: number | null;
+  overtimeMultiplier: number;
   inviteCode: string;
   companyLogo: string;
   permissionsPin: string;
@@ -195,6 +199,7 @@ type StoreCtx = StoreState & {
   setCompanyAddress: (a: string) => void;
   setBusinessNumber: (b: string) => void;
   setDefaultTaxRate: (r: number) => void;
+  setOvertimeSettings: (s: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number }) => void;
   setPermissionsPin: (hashedPin: string) => void;
 
   setCompanyName: (name: string) => void;
@@ -255,6 +260,10 @@ function defaultState(): StoreState {
     companyAddress: "",
     businessNumber: "",
     defaultTaxRate: 13,
+    overtimeEnabled: false,
+    overtimeDailyThreshold: null,
+    overtimeWeeklyThreshold: 40,
+    overtimeMultiplier: 1.5,
     inviteCode: "",
     companyLogo: "",
     permissionsPin: "",
@@ -289,6 +298,10 @@ function loadState(): StoreState {
       companyAddress: parsed.companyAddress ?? "",
       businessNumber: parsed.businessNumber ?? "",
       defaultTaxRate: parsed.defaultTaxRate ?? 13,
+      overtimeEnabled: parsed.overtimeEnabled ?? false,
+      overtimeDailyThreshold: parsed.overtimeDailyThreshold ?? null,
+      overtimeWeeklyThreshold: parsed.overtimeWeeklyThreshold ?? 40,
+      overtimeMultiplier: parsed.overtimeMultiplier ?? 1.5,
       inviteCode: parsed.inviteCode ?? "",
       permissionsPin: parsed.permissionsPin ?? "",
     };
@@ -406,7 +419,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         tasksByProject[t.project_id].push(t as DbTask);
       });
 
-      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number } | null;
+      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number; overtime_enabled?: boolean; overtime_daily_threshold?: number | null; overtime_weekly_threshold?: number | null; overtime_multiplier?: number } | null;
 
       const isPro = true; // free during launch period
 
@@ -445,6 +458,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         companyAddress: co?.address ?? "",
         businessNumber: co?.business_number ?? "",
         defaultTaxRate: co?.default_tax_rate ?? 13,
+        overtimeEnabled: co?.overtime_enabled ?? false,
+        overtimeDailyThreshold: co?.overtime_daily_threshold ?? null,
+        overtimeWeeklyThreshold: co?.overtime_weekly_threshold ?? 40,
+        overtimeMultiplier: co?.overtime_multiplier ?? 1.5,
         companyLogo: co?.logo ?? s.companyLogo,
       }));
     }
@@ -1250,6 +1267,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     bg(() => getClient().from("companies").update({ default_tax_rate: r }).eq("id", companyIdRef.current!), "setDefaultTaxRate");
   }, [up]);
 
+  const setOvertimeSettings = useCallback((
+    s2: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number },
+  ) => {
+    up((s) => ({
+      ...s,
+      overtimeEnabled: s2.enabled,
+      overtimeDailyThreshold: s2.dailyThreshold,
+      overtimeWeeklyThreshold: s2.weeklyThreshold,
+      overtimeMultiplier: s2.multiplier,
+    }));
+    bg(() => getClient().from("companies").update({
+      overtime_enabled: s2.enabled,
+      overtime_daily_threshold: s2.dailyThreshold,
+      overtime_weekly_threshold: s2.weeklyThreshold,
+      overtime_multiplier: s2.multiplier,
+    }).eq("id", companyIdRef.current!), "setOvertimeSettings");
+  }, [up]);
+
   const setPermissionsPin = useCallback((hashedPin: string) => {
     up((s) => ({ ...s, permissionsPin: hashedPin }));
   }, [up]);
@@ -1343,7 +1378,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addDailyReport, updateDailyReport, deleteDailyReport,
       addChangeOrder, updateChangeOrder, deleteChangeOrder,
       addCustomRole, deleteCustomRole,
-      setCompanyAddress, setBusinessNumber, setDefaultTaxRate, setPermissionsPin,
+      setCompanyAddress, setBusinessNumber, setDefaultTaxRate, setOvertimeSettings, setPermissionsPin,
       setCompanyName, setCompanyLogo, setIsPro,
       setLanguage, setCurrency, setIndustry, setOnboarded,
       getWorkerById, getProjectById,
