@@ -704,6 +704,15 @@ export default function ReportsPage() {
                         {worker.projectCount} project{worker.projectCount !== 1 ? "s" : ""}
                       </span>
                     </div>
+                    {overtimeEnabled && worker.overtimeHours != null && worker.overtimeHours > 0 && (
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[10px] text-white/35">Reg {worker.regularHours?.toFixed(1)}h</span>
+                        <span className="text-[10px] text-amber-400 font-semibold">OT {worker.overtimeHours.toFixed(1)}h</span>
+                        {worker.overtimePay != null && (
+                          <span className="text-[10px] text-amber-400/60">+{formatCurrencyCompact(worker.overtimePay, currency)} OT pay</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
