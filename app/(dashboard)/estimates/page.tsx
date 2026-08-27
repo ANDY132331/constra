@@ -106,7 +106,7 @@ function EstimateDetail({
         </div>
         <div className="flex items-center gap-1">
           {sendStatus && (
-            <span className={`text-[11px] font-semibold mr-2 ${sendStatus.ok ? "text-emerald-400" : "text-red-400"}`}>
+            <span className={`hidden sm:inline text-[11px] font-semibold mr-1 ${sendStatus.ok ? "text-emerald-400" : "text-red-400"}`}>
               {sendStatus.msg}
             </span>
           )}
@@ -145,13 +145,13 @@ function EstimateDetail({
                 setSendLoading(false);
               }
             }}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
           >
             <Mail size={13} />
-            {sendLoading ? "Sending…" : "Send"}
+            <span className="hidden sm:inline">{sendLoading ? "Sending…" : "Send"}</span>
           </button>
           {/* PDF template + button */}
-          <TemplatePicker value={template} onChange={setTemplate} />
+          <div className="hidden sm:flex"><TemplatePicker value={template} onChange={setTemplate} /></div>
           <button
             onClick={async () => {
               setPdfLoading(true);
@@ -159,9 +159,9 @@ function EstimateDetail({
               finally { setPdfLoading(false); }
             }}
             disabled={pdfLoading}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
           >
-            <FileDown size={13} /> {pdfLoading ? "…" : "PDF"}
+            <FileDown size={13} /> <span className="hidden sm:inline">{pdfLoading ? "…" : "PDF"}</span>
           </button>
           <button onClick={() => onEdit(estimate)} aria-label="Edit estimate"
             className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
@@ -180,7 +180,7 @@ function EstimateDetail({
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60 text-[#161616]">
 
             {/* ── Header ── */}
-            <div className="px-8 pt-8 pb-6 border-b border-gray-100">
+            <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b border-gray-100">
               <div className="flex items-start justify-between gap-4">
                 {/* Logo + company */}
                 <div className="flex items-center gap-4 min-w-0">
@@ -199,11 +199,11 @@ function EstimateDetail({
                 </div>
                 {/* Estimate type + number + total */}
                 <div className="text-right flex-shrink-0">
-                  <p className="text-[30px] font-black text-gray-800 leading-none tracking-tight">ESTIMATE</p>
-                  <p className="text-[12px] text-gray-400 mt-0.5 font-mono">#{estimate.number}</p>
-                  <div className="mt-3">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Total Amount</p>
-                    <p className="text-[24px] font-black text-gray-900 leading-tight">
+                  <p className="text-[20px] sm:text-[30px] font-black text-gray-800 leading-none tracking-tight">ESTIMATE</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5 font-mono">#{estimate.number}</p>
+                  <div className="mt-2 sm:mt-3">
+                    <p className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">Total Amount</p>
+                    <p className="text-[18px] sm:text-[24px] font-black text-gray-900 leading-tight">
                       {formatCurrency(Math.round(total), currency as never)}
                     </p>
                   </div>
@@ -213,26 +213,26 @@ function EstimateDetail({
 
             {/* ── Status banners ── */}
             {isAccepted && (
-              <div className="mx-8 mt-5 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 sm:mt-5 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
                 <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-emerald-700">Estimate Accepted</p>
               </div>
             )}
             {isDeclined && (
-              <div className="mx-8 mt-5 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 sm:mt-5 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
                 <XCircle size={15} className="text-red-600 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-red-700">Estimate Declined</p>
               </div>
             )}
             {isExpired && (
-              <div className="mx-8 mt-5 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 sm:mt-5 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3">
                 <Clock size={15} className="text-orange-500 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-orange-700">Estimate expired — was valid until {estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
               </div>
             )}
 
             {/* ── Bill To / Dates ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 px-8 pt-6 pb-5 border-b border-gray-100">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 px-4 sm:px-8 pt-5 sm:pt-6 pb-4 sm:pb-5 border-b border-gray-100">
               <div className="sm:col-span-2 pr-6 sm:border-r border-gray-100 mb-4 sm:mb-0">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Prepared For</p>
                 <p className="text-[14px] font-bold text-amber-600">{estimate.clientName}</p>
@@ -270,8 +270,9 @@ function EstimateDetail({
             </div>
 
             {/* ── Line items ── */}
-            <div className="px-8 pt-5 pb-2">
-              <table className="w-full text-[12px]">
+            <div className="px-4 sm:px-8 pt-4 sm:pt-5 pb-2">
+              <div className="overflow-x-auto -mx-1 px-1">
+              <table className="w-full text-[12px] min-w-[460px]">
                 <thead>
                   <tr className="bg-amber-500 text-white">
                     <th className="text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-3 rounded-tl-lg w-8">#</th>
@@ -295,11 +296,12 @@ function EstimateDetail({
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* ── Totals ── */}
-            <div className="px-8 pt-4 pb-6 flex justify-end">
-              <div className="w-72">
+            <div className="px-4 sm:px-8 pt-4 pb-6 flex justify-end">
+              <div className="w-full sm:w-72">
                 <div className="flex justify-between py-2 text-[12px]">
                   <span className="text-gray-500">Sub Total</span>
                   <span className="text-gray-800 font-semibold">{formatCurrency(sub, currency as never)}</span>
@@ -325,20 +327,20 @@ function EstimateDetail({
 
             {/* ── Notes ── */}
             {estimate.notes && (
-              <div className="mx-8 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Notes &amp; Scope</p>
                 <p className="text-[12px] text-gray-600 leading-relaxed">{estimate.notes}</p>
               </div>
             )}
 
             {/* ── Terms ── */}
-            <div className="mx-8 mb-8">
+            <div className="mx-4 sm:mx-8 mb-6 sm:mb-8">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Terms &amp; Conditions</p>
               <p className="text-[11px] text-gray-400 leading-relaxed">This estimate is valid until the date stated above. Prices are subject to change after expiry. Acceptance of this estimate constitutes agreement to the stated scope and pricing.</p>
             </div>
 
             {/* ── Footer band ── */}
-            <div className="bg-amber-500 px-8 py-3 flex items-center justify-between">
+            <div className="bg-amber-500 px-4 sm:px-8 py-3 flex items-center justify-between">
               <p className="text-[10px] text-white/80 font-medium">{companyName} · {estimate.number}</p>
               <p className="text-[10px] text-white/60">Page 1</p>
             </div>
