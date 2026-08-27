@@ -230,6 +230,65 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
+// ── Share nudge ───────────────────────────────────────────────────────────────
+function ShareNudge() {
+  const [visible, setVisible] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    try {
+      const dismissed = localStorage.getItem("constra_share_nudge_v1");
+      if (!dismissed) setVisible(true);
+    } catch { /* ignore private browsing */ }
+  }, []);
+
+  const dismiss = () => {
+    setVisible(false);
+    try { localStorage.setItem("constra_share_nudge_v1", "1"); } catch { /* ignore */ }
+  };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText("https://getconstra.com");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch { /* ignore */ }
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div
+      className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl border"
+      style={{ background: "rgba(245,196,0,.07)", borderColor: "rgba(245,196,0,.2)" }}
+    >
+      <span className="text-amber-400 flex-shrink-0 text-[18px]">🏗️</span>
+      <p className="text-[12px] text-amber-200/70 flex-1 leading-snug">
+        <strong className="text-amber-300 font-semibold">Know another contractor?</strong>{" "}
+        Constra is 100% free — share it with them.
+      </p>
+      <button
+        onClick={copy}
+        className="flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors"
+        style={{
+          background: copied ? "rgba(34,197,94,.15)" : "rgba(245,196,0,.12)",
+          color: copied ? "#22c55e" : "#F5C400",
+          border: `1px solid ${copied ? "rgba(34,197,94,.25)" : "rgba(245,196,0,.25)"}`,
+        }}
+      >
+        {copied ? "✓ Copied!" : "Copy Link"}
+      </button>
+      <button
+        onClick={dismiss}
+        className="flex-shrink-0 text-white/20 hover:text-white/50 transition-colors text-[16px] leading-none"
+        aria-label="Dismiss"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const {
     workers, projects, punchItems, clockEntries, activityFeed,
@@ -599,6 +658,9 @@ export default function DashboardPage() {
 
   return (
     <>
+    {/* ── Share nudge — dismissible, fires once via localStorage ─────────── */}
+    <ShareNudge />
+
     {/* ── MOBILE DASHBOARD ──────────────────────────────────────────────── */}
     <div className="lg:hidden -mx-4 -mt-4 pb-2">
 

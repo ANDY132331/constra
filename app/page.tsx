@@ -328,6 +328,56 @@ export default function LandingPage() {
         </div>
       </div>
 
+      {/* ── Download strip ───────────────────────────────────────────────── */}
+      <div style={{ background: "#0f0f0f", borderBottom: "1px solid rgba(255,255,255,.05)", padding: "28px 24px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,.4)", fontWeight: 500 }}>Available on</p>
+          {/* Android / Play Store */}
+          <a
+            href="https://play.google.com/store/apps/details?id=com.getconstra.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 10,
+              background: "#161616", border: "1px solid rgba(255,255,255,.1)",
+              borderRadius: 10, padding: "10px 18px", textDecoration: "none",
+              transition: "border-color .2s",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3.18 23.76a2 2 0 0 1-1.18-1.84V2.08C2 1.4 2.46.82 3.18.24L13.5 12 3.18 23.76z" fill="#4FC3F7"/>
+              <path d="M17.5 8.24 5.5.74l10 9.5-8-2z" fill="#43A047"/>
+              <path d="M20.86 10.4c.7.4 1.14 1.1 1.14 1.6s-.44 1.2-1.14 1.6L17.5 15.7l-4-3.7 4-3.7 3.36 2.1z" fill="#FDD835"/>
+              <path d="M5.5 23.26 17.5 15.7l-2-1.9-10 9.46z" fill="#F4511E"/>
+            </svg>
+            <div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,.3)", letterSpacing: ".06em", textTransform: "uppercase", lineHeight: 1 }}>Get it on</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,.85)", lineHeight: 1.3 }}>Google Play</div>
+            </div>
+          </a>
+          {/* iPhone / PWA */}
+          <a
+            href="/onboarding"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 10,
+              background: "#161616", border: "1px solid rgba(255,255,255,.1)",
+              borderRadius: 10, padding: "10px 18px", textDecoration: "none",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+              <line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+            <div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,.3)", letterSpacing: ".06em", textTransform: "uppercase", lineHeight: 1 }}>Works on</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,.85)", lineHeight: 1.3 }}>iPhone & Web</div>
+            </div>
+          </a>
+          <div style={{ width: 1, height: 32, background: "rgba(255,255,255,.08)" }} />
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,.25)", fontWeight: 500 }}>Free · No credit card · All features included</p>
+        </div>
+      </div>
+
       {/* ── Stats ────────────────────────────────────────────────────────── */}
       <section className="reveal" style={{ padding: "100px 24px", background: "#111" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
