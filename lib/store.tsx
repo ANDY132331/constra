@@ -697,10 +697,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // ── Workers ──────────────────────────────────────────────────────────────────
 
-  const addWorker = useCallback((w: Omit<Worker, "id">) => {
-    const worker = { ...w, id: genId() };
-    up((s) => ({ ...s, workers: [...s.workers, worker] }));
-    bg(() => getClient().from("profiles").insert(workerToDb(worker, companyIdRef.current!)), "addWorker");
+  const addWorker = useCallback((w: Omit<Worker, "id"> & { id?: string }) => {
+    // If an id is provided (e.g. from /api/create-worker which returns the real
+    // auth user UUID), use it directly so the optimistic row matches the DB row.
+    // bg() is skipped when an id is provided because the API already wrote the DB.
+    const worker = { ...w, id: w.id ?? genId() };
+    up((s) => ({ ...s, workers: [...s.workers.filter(x => x.id !== worker.id), worker] }));
+    if (!w.id) {
+      // No real id supplied → legacy path (will fail FK constraint; kept for safety)
+      bg(() => getClient().from("profiles").insert(workerToDb(worker, companyIdRef.current!)), "addWorker");
+    }
   }, [up]);
 
   const updateWorker = useCallback((id: string, u: Partial<Worker>) => {

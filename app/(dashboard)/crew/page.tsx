@@ -214,6 +214,8 @@ export default function CrewPage() {
   const [showQR, setShowQR] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (prefill) setSearch(prefill); }, [prefill]);
@@ -240,7 +242,7 @@ export default function CrewPage() {
   const canSeeFinancials = currentUser.role === "Admin" || currentUser.role === "Project Manager";
   const canEdit = currentUser.role === "Admin" || currentUser.role === "Project Manager";
 
-  const openAdd = () => { setForm(blank); setEditId(null); setCertifications([]); setShowModal(true); };
+  const openAdd = () => { setForm(blank); setEditId(null); setCertifications([]); setSaveError(""); setShowModal(true); };
   const openEdit = (w: Worker) => {
     setForm({
       name: w.name, customRole: w.customRole, role: w.role,
@@ -249,6 +251,7 @@ export default function CrewPage() {
     });
     setCertifications(w.certifications ? [...w.certifications] : []);
     setEditId(w.id);
+    setSaveError("");
     setShowModal(true);
   };
 
@@ -260,27 +263,74 @@ export default function CrewPage() {
     reader.readAsDataURL(file);
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) return;
-    const initials = form.name.trim().split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
-    const profileFields = {
-      name: form.name.trim(),
-      initials,
-      customRole: form.customRole.trim() || form.role,
-      role: form.role,
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      color: form.color,
-      photo: form.photo || undefined,
-      hourlyRate: parseFloat(form.hourlyRate) || 0,
-      certifications: certifications.length > 0 ? certifications : undefined,
-    };
+    setSaveError("");
+
     if (editId) {
-      updateWorker(editId, profileFields);
+      // Edit existing worker — update profile in DB via store (works fine, no FK issue)
+      const initials = form.name.trim().split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+      updateWorker(editId, {
+        name: form.name.trim(),
+        initials,
+        customRole: form.customRole.trim() || form.role,
+        role: form.role,
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        color: form.color,
+        photo: form.photo || undefined,
+        hourlyRate: parseFloat(form.hourlyRate) || 0,
+        certifications: certifications.length > 0 ? certifications : undefined,
+      });
+      setShowModal(false);
     } else {
-      addWorker({ ...profileFields, projectIds: [], clockedIn: false });
+      // New worker — use server API to create a real auth user + profile
+      setSaving(true);
+      try {
+        const res = await fetch("/api/create-worker", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name.trim(),
+            role: form.role,
+            customRole: form.customRole.trim() || form.role,
+            email: form.email.trim() || null,
+            phone: form.phone.trim(),
+            color: form.color,
+            photo: form.photo || null,
+            hourlyRate: form.hourlyRate,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setSaveError(data.error ?? "Failed to create worker");
+          return;
+        }
+        // Realtime subscription will add the worker to state automatically.
+        // As a fallback, optimistically add with the real ID returned.
+        const initials = data.initials ?? form.name.trim().split(" ").map((p: string) => p[0]).join("").slice(0, 2).toUpperCase();
+        addWorker({
+          id: data.id,
+          name: form.name.trim(),
+          initials,
+          customRole: form.customRole.trim() || form.role,
+          role: form.role,
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          color: form.color,
+          photo: form.photo || undefined,
+          hourlyRate: parseFloat(form.hourlyRate) || 0,
+          certifications: certifications.length > 0 ? certifications : undefined,
+          projectIds: [],
+          clockedIn: false,
+        } as Worker);
+        setShowModal(false);
+      } catch {
+        setSaveError("Network error — please try again");
+      } finally {
+        setSaving(false);
+      }
     }
-    setShowModal(false);
   };
 
   const handleDelete = (id: string) => {
@@ -839,14 +889,19 @@ export default function CrewPage() {
               </div>
             </div>
 
+            {saveError && (
+              <p className="mx-6 mb-2 text-[12px] text-red-400 flex items-center gap-1.5">
+                <AlertTriangle size={12} /> {saveError}
+              </p>
+            )}
             <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => setShowModal(false)}
+              <button onClick={() => { setShowModal(false); setSaveError(""); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSave} disabled={!form.name.trim()}
+              <button onClick={handleSave} disabled={!form.name.trim() || saving}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                {editId ? "Save Changes" : "Add Worker"}
+                {saving ? "Adding…" : editId ? "Save Changes" : "Add Worker"}
               </button>
             </div>
           </div>
