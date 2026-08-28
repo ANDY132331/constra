@@ -47,6 +47,65 @@ function invoiceTotal(inv: Invoice) {
   return sub * (1 + inv.taxRate / 100);
 }
 
+// ── Paper style helper ───────────────────────────────────────────────────────
+import type { InvoiceTemplate } from "@/lib/pdf-export";
+function invoicePaperStyles(t: InvoiceTemplate, isPaid: boolean) {
+  if (t === "modern") return {
+    headerBg:          "bg-[#1c2026]",
+    headerBorder:      "border-[#2a2e38]",
+    accentStrip:       true,
+    companyNameColor:  "text-white",
+    companyAddrColor:  "text-white/40",
+    invoiceTitleColor: "text-amber-400",
+    invoiceNumColor:   "text-white/35",
+    balanceLabelColor: "text-white/40",
+    balanceAmtColor:   "text-white",
+    tableHeadBg:       "bg-[#1c2026]",
+    tableHeadText:     "text-white/80",
+    altRowBg:          "bg-gray-50",
+    balanceBg:         isPaid ? "bg-emerald-500" : "bg-amber-500",
+    footerBg:          "bg-[#1c2026]",
+    footerText:        "text-white/60",
+    clientNameColor:   "text-amber-400",
+  } as const;
+  if (t === "minimal") return {
+    headerBg:          "bg-white",
+    headerBorder:      "border-gray-200",
+    accentStrip:       false,
+    companyNameColor:  "text-gray-700",
+    companyAddrColor:  "text-gray-400",
+    invoiceTitleColor: "text-gray-300",
+    invoiceNumColor:   "text-gray-400",
+    balanceLabelColor: "text-gray-400",
+    balanceAmtColor:   "text-gray-800",
+    tableHeadBg:       "bg-gray-50",
+    tableHeadText:     "text-gray-500",
+    altRowBg:          "",
+    balanceBg:         isPaid ? "bg-emerald-500" : "bg-gray-800",
+    footerBg:          "bg-gray-100",
+    footerText:        "text-gray-400",
+    clientNameColor:   "text-gray-700",
+  } as const;
+  return {
+    headerBg:          "bg-white",
+    headerBorder:      "border-gray-100",
+    accentStrip:       false,
+    companyNameColor:  "text-amber-600",
+    companyAddrColor:  "text-gray-400",
+    invoiceTitleColor: "text-gray-800",
+    invoiceNumColor:   "text-gray-400",
+    balanceLabelColor: "text-gray-400",
+    balanceAmtColor:   "text-gray-900",
+    tableHeadBg:       "bg-amber-500",
+    tableHeadText:     "text-white",
+    altRowBg:          "bg-gray-50",
+    balanceBg:         isPaid ? "bg-emerald-500" : "bg-amber-500",
+    footerBg:          "bg-amber-500",
+    footerText:        "text-white/80",
+    clientNameColor:   "text-amber-600",
+  } as const;
+}
+
 // ── Invoice detail panel ────────────────────────────────────────────────────
 
 function InvoiceDetail({
@@ -80,6 +139,7 @@ function InvoiceDetail({
   const cfg       = STATUS_CONFIG[invoice.status];
   const isOverdue = invoice.status === "overdue";
   const isPaid    = invoice.status === "paid";
+  const ps        = invoicePaperStyles(template, isPaid);
 
   return (
     <div className="flex flex-col h-full">
@@ -149,7 +209,7 @@ function InvoiceDetail({
             <Mail size={13} />
             <span className="hidden sm:inline">{sendLoading ? "Sending…" : invoice.status === "overdue" ? "Send Reminder" : "Send"}</span>
           </button>
-          <div className="hidden sm:flex"><TemplatePicker value={template} onChange={setTemplate} /></div>
+          <TemplatePicker value={template} onChange={setTemplate} />
           <button
             onClick={async () => {
               setPdfLoading(true);
@@ -173,39 +233,40 @@ function InvoiceDetail({
 
       {/* ── Invoice document (white-paper preview) ── */}
       <div className="flex-1 overflow-y-auto bg-[#1a1a1a]">
-        <div className="max-w-[640px] mx-auto my-6 px-4 sm:px-0">
-          <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60 text-[#161616]">
+        <div className="max-w-[640px] mx-auto my-4 sm:my-6 px-3 sm:px-4">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
 
             {/* ── Header ── */}
-            <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b border-gray-100">
-              <div className="flex items-start justify-between gap-4">
+            <div className={`relative px-5 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b ${ps.headerBg} ${ps.headerBorder}`}>
+              {ps.accentStrip && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />}
+              <div className="flex items-start justify-between gap-3">
                 {/* Logo + company */}
-                <div className="flex items-center gap-4 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   {companyLogo ? (
-                    <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-amber-50">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex-shrink-0">
                       <img src={companyLogo} alt={companyName} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30">
-                      <span className="text-white text-[22px] font-black">{(companyName ?? "C").charAt(0)}</span>
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-[18px] sm:text-[22px] font-black">{(companyName ?? "C").charAt(0)}</span>
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="text-[17px] font-black text-amber-600 leading-tight truncate">{companyName}</p>
+                    <p className={`text-[15px] sm:text-[17px] font-black leading-tight truncate ${ps.companyNameColor}`}>{companyName}</p>
                     {companyAddress && (
-                      <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
-                        {companyAddress.split(",").map((s) => s.trim()).filter(Boolean).join("\n")}
+                      <p className={`text-[10px] sm:text-[11px] mt-0.5 leading-snug ${ps.companyAddrColor}`}>
+                        {companyAddress.split(",").slice(0, 2).map((s) => s.trim()).join(", ")}
                       </p>
                     )}
                   </div>
                 </div>
                 {/* Invoice type + number + balance */}
                 <div className="text-right flex-shrink-0">
-                  <p className="text-[20px] sm:text-[30px] font-black text-gray-800 leading-none tracking-tight">INVOICE</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5 font-mono">#{invoice.number}</p>
-                  <div className="mt-2 sm:mt-3">
-                    <p className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">Balance Due</p>
-                    <p className="text-[18px] sm:text-[24px] font-black text-gray-900 leading-tight">
+                  <p className={`text-[18px] sm:text-[28px] font-black leading-none tracking-tight ${ps.invoiceTitleColor}`}>INVOICE</p>
+                  <p className={`text-[10px] mt-0.5 font-mono ${ps.invoiceNumColor}`}>#{invoice.number}</p>
+                  <div className="mt-2">
+                    <p className={`text-[9px] uppercase tracking-wider font-bold ${ps.balanceLabelColor}`}>Balance Due</p>
+                    <p className={`text-[16px] sm:text-[22px] font-black leading-tight ${ps.balanceAmtColor}`}>
                       {formatCurrency(isPaid ? 0 : Math.round(total), currency as never)}
                     </p>
                   </div>
@@ -213,10 +274,10 @@ function InvoiceDetail({
               </div>
             </div>
 
-            {/* ── Status banner ── */}
+            {/* ── Status banners ── */}
             {isOverdue && (
-              <div className="mx-4 sm:mx-8 mt-4 sm:mt-5 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                <AlertTriangle size={15} className="text-red-500 flex-shrink-0" />
+              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />
                 <div>
                   <p className="text-[12px] font-bold text-red-600">Payment Overdue</p>
                   <p className="text-[11px] text-red-400">Was due {invoice.dueDate.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
@@ -224,95 +285,92 @@ function InvoiceDetail({
               </div>
             )}
             {isPaid && (
-              <div className="mx-4 sm:mx-8 mt-4 sm:mt-5 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
-                <CheckCircle2 size={15} className="text-emerald-600 flex-shrink-0" />
+              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-emerald-700">Paid in Full — Thank you!</p>
               </div>
             )}
 
             {/* ── Bill To / Dates ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 px-4 sm:px-8 pt-5 sm:pt-6 pb-4 sm:pb-5 border-b border-gray-100">
-              <div className="sm:col-span-2 pr-6 sm:border-r border-gray-100 mb-4 sm:mb-0">
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Bill To</p>
-                <p className="text-[14px] font-bold text-amber-600">{invoice.clientName}</p>
-                {invoice.clientAddress && (
-                  <p className="text-[11px] text-gray-500 mt-1.5 leading-relaxed">{invoice.clientAddress}</p>
-                )}
-                {invoice.clientEmail && (
-                  <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
-                    <Mail size={10} className="text-gray-300" />
-                    {invoice.clientEmail}
-                  </p>
-                )}
-              </div>
-              <div className="px-0 sm:px-6 space-y-3">
-                <div>
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Invoice Date</p>
-                  <p className="text-[12px] text-gray-700 font-semibold">
-                    {invoice.issueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
+            <div className="px-5 sm:px-8 pt-5 pb-4 border-b border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:gap-8">
+                <div className="flex-1 mb-4 sm:mb-0">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Bill To</p>
+                  <p className={`text-[14px] font-bold ${ps.clientNameColor}`}>{invoice.clientName}</p>
+                  {invoice.clientAddress && (
+                    <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">{invoice.clientAddress}</p>
+                  )}
+                  {invoice.clientEmail && (
+                    <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
+                      <Mail size={10} className="text-gray-300" />{invoice.clientEmail}
+                    </p>
+                  )}
                 </div>
-                <div>
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Due Date</p>
-                  <p className={`text-[12px] font-semibold ${isOverdue ? "text-red-600" : "text-gray-700"}`}>
-                    {invoice.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Terms</p>
-                  <p className="text-[12px] text-gray-700 font-semibold">Due on Receipt</p>
+                <div className="flex flex-row sm:flex-col gap-6 sm:gap-3 flex-shrink-0">
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Invoice Date</p>
+                    <p className="text-[12px] text-gray-700 font-semibold">
+                      {invoice.issueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Due Date</p>
+                    <p className={`text-[12px] font-semibold ${isOverdue ? "text-red-600" : "text-gray-700"}`}>
+                      {invoice.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* ── Line items ── */}
-            <div className="px-4 sm:px-8 pt-4 sm:pt-5 pb-2">
-              <div className="overflow-x-auto -mx-1 px-1">
-              <table className="w-full text-[12px] min-w-[420px]">
-                <thead>
-                  <tr className="bg-amber-500 text-white">
-                    <th className="text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-3 rounded-tl-lg w-8">#</th>
-                    <th className="text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-3">Item &amp; Description</th>
-                    <th className="text-center text-[9px] font-black uppercase tracking-[0.12em] px-3 py-3 w-12">Qty</th>
-                    <th className="text-right text-[9px] font-black uppercase tracking-[0.12em] px-3 py-3 w-24">Rate</th>
-                    <th className="text-right text-[9px] font-black uppercase tracking-[0.12em] px-3 py-3 rounded-tr-lg w-28">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoice.items.map((item, i) => (
-                    <tr key={i} className={`border-b border-gray-100 ${i % 2 === 1 ? "bg-gray-50" : ""}`}>
-                      <td className="py-3.5 px-3 text-gray-400 text-center">{i + 1}</td>
-                      <td className="py-3.5 px-3 text-gray-800 font-medium">{item.description}</td>
-                      <td className="py-3.5 px-3 text-center text-gray-500">{item.qty}</td>
-                      <td className="py-3.5 px-3 text-right text-gray-500">{formatCurrency(item.rate, currency as never)}</td>
-                      <td className="py-3.5 px-3 text-right text-gray-800 font-bold">{formatCurrency(item.qty * item.rate, currency as never)}</td>
+            <div className="px-5 sm:px-8 pt-4 pb-2">
+              <div className="overflow-x-auto">
+                <table className="w-full text-[12px] min-w-[380px]">
+                  <thead>
+                    <tr className={ps.tableHeadBg}>
+                      <th className={`text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 rounded-tl-lg w-7 ${ps.tableHeadText}`}>#</th>
+                      <th className={`text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 ${ps.tableHeadText}`}>Item</th>
+                      <th className={`text-center text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 w-10 ${ps.tableHeadText}`}>Qty</th>
+                      <th className={`text-right text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 w-20 ${ps.tableHeadText}`}>Rate</th>
+                      <th className={`text-right text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 rounded-tr-lg w-24 ${ps.tableHeadText}`}>Amount</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {invoice.items.map((item, i) => (
+                      <tr key={i} className={`border-b border-gray-100 ${i % 2 === 1 ? ps.altRowBg : ""}`}>
+                        <td className="py-3 px-3 text-gray-400 text-center">{i + 1}</td>
+                        <td className="py-3 px-3 text-gray-800 font-medium">{item.description}</td>
+                        <td className="py-3 px-3 text-center text-gray-500">{item.qty}</td>
+                        <td className="py-3 px-3 text-right text-gray-500">{formatCurrency(item.rate, currency as never)}</td>
+                        <td className="py-3 px-3 text-right text-gray-800 font-bold">{formatCurrency(item.qty * item.rate, currency as never)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 
             {/* ── Totals ── */}
-            <div className="px-4 sm:px-8 pt-4 pb-6 flex justify-end">
-              <div className="w-full sm:w-72">
-                <div className="flex justify-between py-2 text-[12px]">
+            <div className="px-5 sm:px-8 pt-3 pb-6 flex justify-end">
+              <div className="w-full sm:w-64">
+                <div className="flex justify-between py-1.5 text-[12px]">
                   <span className="text-gray-500">Sub Total</span>
                   <span className="text-gray-800 font-semibold">{formatCurrency(sub, currency as never)}</span>
                 </div>
                 {invoice.taxRate > 0 && (
-                  <div className="flex justify-between py-2 text-[12px] border-b border-gray-100">
-                    <span className="text-gray-500">Tax Rate &nbsp; {invoice.taxRate}%</span>
+                  <div className="flex justify-between py-1.5 text-[12px] border-b border-gray-100">
+                    <span className="text-gray-500">Tax {invoice.taxRate}%</span>
                     <span className="text-gray-800 font-semibold">{formatCurrency(tax, currency as never)}</span>
                   </div>
                 )}
-                <div className="flex justify-between py-2 text-[13px] border-b border-gray-200">
+                <div className="flex justify-between py-1.5 text-[12px] border-b border-gray-200">
                   <span className="text-gray-700 font-bold">Total</span>
                   <span className="text-gray-900 font-bold">{formatCurrency(Math.round(total), currency as never)}</span>
                 </div>
-                <div className={`flex justify-between items-center px-4 py-3 mt-1 rounded-xl ${isPaid ? "bg-emerald-500" : "bg-amber-500"}`}>
-                  <span className="text-[13px] font-black text-white">Balance Due</span>
-                  <span className="text-[18px] font-black text-white">
+                <div className={`flex justify-between items-center px-4 py-3 mt-2 rounded-xl ${ps.balanceBg}`}>
+                  <span className="text-[12px] font-black text-white">Balance Due</span>
+                  <span className="text-[16px] sm:text-[18px] font-black text-white">
                     {formatCurrency(isPaid ? 0 : Math.round(total), currency as never)}
                   </span>
                 </div>
@@ -328,15 +386,15 @@ function InvoiceDetail({
             )}
 
             {/* ── Terms ── */}
-            <div className="mx-4 sm:mx-8 mb-6 sm:mb-8">
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Terms &amp; Conditions</p>
+            <div className="mx-4 sm:mx-8 mb-5 sm:mb-7">
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Terms &amp; Conditions</p>
               <p className="text-[11px] text-gray-400 leading-relaxed">All payments are due as specified. Overdue accounts may be subject to late fees. Thank you for your business.</p>
             </div>
 
             {/* ── Footer band ── */}
-            <div className="bg-amber-500 px-4 sm:px-8 py-3 flex items-center justify-between">
-              <p className="text-[10px] text-white/80 font-medium">{companyName} · {invoice.number}</p>
-              <p className="text-[10px] text-white/60">Page 1</p>
+            <div className={`${ps.footerBg} px-5 sm:px-8 py-3 flex items-center justify-between`}>
+              <p className={`text-[10px] font-medium ${ps.footerText}`}>{companyName} · {invoice.number}</p>
+              <p className={`text-[10px] ${ps.footerText} opacity-70`}>Page 1</p>
             </div>
           </div>
         </div>

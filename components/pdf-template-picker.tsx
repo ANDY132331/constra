@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Check } from "lucide-react";
 import type { InvoiceTemplate } from "@/lib/pdf-export";
 
@@ -71,7 +71,7 @@ function MinimalThumb() {
   );
 }
 
-const TEMPLATES: { id: InvoiceTemplate; label: string; desc: string; Thumb: () => JSX.Element }[] = [
+const TEMPLATES: { id: InvoiceTemplate; label: string; desc: string; Thumb: () => React.ReactElement }[] = [
   { id: "classic", label: "Classic", desc: "Amber header row · bold INVOICE · colored footer", Thumb: ClassicThumb },
   { id: "modern",  label: "Modern",  desc: "Dark charcoal header · amber accent strip",        Thumb: ModernThumb },
   { id: "minimal", label: "Minimal", desc: "Clean & text-only · hairline separators",           Thumb: MinimalThumb },
