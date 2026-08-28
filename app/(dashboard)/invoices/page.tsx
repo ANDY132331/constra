@@ -834,7 +834,7 @@ export default function InvoicesPage() {
 
       {/* ── New Invoice Modal ── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm sheet">
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <div>

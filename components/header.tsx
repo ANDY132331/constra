@@ -99,9 +99,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
       {/* Mobile hamburger */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-lg transition-all flex-shrink-0"
+        className="lg:hidden w-11 h-11 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-xl transition-all flex-shrink-0 -ml-1"
       >
-        <Menu size={18} />
+        <Menu size={20} />
       </button>
 
       <div className="flex-1 min-w-0">
@@ -114,9 +114,10 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <div ref={newRef} className="relative">
           <button
             onClick={() => { setShowNew((v) => !v); setShowNotif(false); setShowUser(false); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[12px] font-bold px-3 py-1.5 rounded-lg transition-all duration-100"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[13px] font-bold px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-lg transition-all duration-100"
           >
-            <Plus size={13} />
+            <Plus size={15} className="sm:hidden" />
+            <Plus size={13} className="hidden sm:block" />
             <span className="hidden sm:inline">New</span>
             <ChevronDown size={11} className={`transition-transform ${showNew ? "rotate-180" : ""}`} />
           </button>
@@ -142,16 +143,17 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <button
           onClick={openSearch}
           title="Search (⌘K)"
-          className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-lg transition-all"
+          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-xl sm:rounded-lg transition-all"
         >
-          <Search size={15} />
+          <Search size={16} className="sm:hidden" />
+          <Search size={15} className="hidden sm:block" />
         </button>
 
-        {/* Theme toggle */}
+        {/* Theme toggle — desktop only; on mobile it lives in the user dropdown */}
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-lg transition-all"
+          className="hidden sm:flex w-8 h-8 items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-lg transition-all"
         >
           {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
         </button>
@@ -160,7 +162,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <div ref={notifRef} className="relative">
           <button
             onClick={() => { setShowNotif((v) => !v); setShowNew(false); setShowUser(false); if (!readNotifs) setReadNotifs(true); }}
-            className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-lg transition-all relative"
+            className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-xl sm:rounded-lg transition-all relative"
           >
             <Bell size={15} />
             {hasUnread && (
@@ -271,6 +273,14 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                 >
                   <Settings size={14} className="text-white/30" />
                   Settings
+                </button>
+                {/* Theme toggle — visible on mobile where header button is hidden */}
+                <button
+                  onClick={() => { setTheme(theme === "dark" ? "light" : "dark"); setShowUser(false); }}
+                  className="sm:hidden w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors text-left"
+                >
+                  {theme === "dark" ? <Sun size={14} className="text-white/30" /> : <Moon size={14} className="text-white/30" />}
+                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </button>
               </div>
 

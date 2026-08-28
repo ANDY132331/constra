@@ -79,7 +79,7 @@ function HoursModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
       <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
           <div>
@@ -672,7 +672,7 @@ export default function CrewPage() {
 
       {/* QR Code Modal */}
       {showQR && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl p-8 flex flex-col items-center gap-5 w-72">
             <div className="flex items-center justify-between w-full">
               <h3 className="text-[15px] font-bold text-white">Invite Workers</h3>
@@ -695,7 +695,7 @@ export default function CrewPage() {
 
       {/* Add/Edit Worker Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Worker" : "Add Worker"}</h3>

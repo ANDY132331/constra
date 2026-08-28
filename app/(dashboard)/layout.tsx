@@ -43,6 +43,14 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+
+  // Allow MobileNav "More" tab to open sidebar via custom event
+  useEffect(() => {
+    const handler = () => setSidebarOpen(true);
+    window.addEventListener("open-sidebar", handler);
+    return () => window.removeEventListener("open-sidebar", handler);
+  }, []);
+
   const handleRefresh = useCallback(async () => {
     await new Promise<void>((r) => setTimeout(r, 500));
     window.location.reload();

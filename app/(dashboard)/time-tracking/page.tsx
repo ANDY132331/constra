@@ -67,7 +67,7 @@ function EditEntryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
       <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-sm">
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06]">
           <div>
@@ -138,7 +138,7 @@ function ProjectPickerModal({
   const [selected, setSelected] = useState(projects[0]?.id ?? "");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
       <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-sm">
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06]">
           <div>
@@ -237,7 +237,7 @@ function GeofenceWarningModal({
   onCancel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 sheet">
       <div className="bg-[#161616] border border-amber-500/25 rounded-2xl w-full max-w-sm shadow-2xl">
         {/* Top amber bar */}
         <div className="h-1 bg-amber-500 rounded-t-2xl" />
@@ -556,10 +556,10 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <h2 className="text-[18px] font-bold text-white tracking-tight">Time Tracking</h2>
         <div className="flex items-center gap-2">
-          {clockEntries.filter((e) => e.clockOut).length > 0 && (
+          {clockEntries.filter((e) => e.clockOut).length > 0 && !isEmployee && (
             <button onClick={exportCsv} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-lg">
               <Download size={12} /> CSV
             </button>
@@ -569,13 +569,73 @@ export default function TimeTrackingPage() {
               <LogOut size={12} /> All Out
             </button>
           )}
-          <button
-            onClick={() => requestClockIn(currentUser)}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
-          >
-            <LogIn size={14} />
-            Clock In
-          </button>
+          {/* Small clock-in button shown only for admin/foreman in top bar */}
+          {!isEmployee && !isCurrentUserClockedIn && (
+            <button
+              onClick={() => requestClockIn(currentUser)}
+              className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
+            >
+              <LogIn size={14} />
+              Clock In
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── Big hero clock-in / clock-out card — employees & foremen ── */}
+      <div className="px-4 pb-4">
+        <div className={`rounded-2xl p-5 border transition-all ${
+          isCurrentUserClockedIn
+            ? "bg-green-500/[0.07] border-green-500/20"
+            : "bg-amber-500/[0.07] border-amber-500/20"
+        }`}>
+          {isCurrentUserClockedIn ? (
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative flex-shrink-0">
+                <div className="absolute -inset-1 rounded-full bg-green-500/20 animate-ping" />
+                <div className="relative w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <span className="w-3.5 h-3.5 bg-green-400 rounded-full" />
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-bold text-white">On Site</p>
+                <p className="text-[22px] font-black text-green-400 leading-tight tracking-tight">
+                  {elapsed(currentUser.clockInTime ?? new Date())}
+                </p>
+                {(() => {
+                  const myEntry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
+                  const proj = myEntry ? getProjectById(myEntry.projectId) : null;
+                  return proj ? <p className="text-[12px] text-white/40 truncate">{proj.name}</p> : null;
+                })()}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center mb-4 py-2">
+              <p className="text-[16px] font-bold text-white/80">Ready to start your shift?</p>
+              <p className="text-[12px] text-white/35 mt-1">Tap below to clock in with GPS verification</p>
+            </div>
+          )}
+          {isCurrentUserClockedIn ? (
+            <button
+              onClick={() => handleClockOut(currentUser.id)}
+              className="w-full py-4 rounded-2xl text-[17px] font-black text-white bg-red-500 active:bg-red-600 transition-colors flex items-center justify-center gap-2.5 shadow-lg shadow-red-500/25"
+            >
+              <LogOut size={20} strokeWidth={2.5} />
+              Clock Out
+            </button>
+          ) : (
+            <button
+              onClick={() => requestClockIn(currentUser)}
+              disabled={geofenceChecking}
+              className="w-full py-4 rounded-2xl text-[17px] font-black text-black bg-amber-500 active:bg-amber-600 disabled:opacity-60 transition-colors flex items-center justify-center gap-2.5 shadow-lg shadow-amber-500/25"
+            >
+              {geofenceChecking ? (
+                <><Loader2 size={20} className="animate-spin" /> Checking location…</>
+              ) : (
+                <><LogIn size={20} strokeWidth={2.5} /> Clock In</>
+              )}
+            </button>
+          )}
         </div>
       </div>
 

@@ -475,3 +475,52 @@ button, a, [role="button"], input, select, textarea {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
+
+/* ── Mobile bottom sheets ──────────────────────────────────────── */
+/* Add class "sheet" to the modal wrapper div for this behaviour */
+@media (max-width: 640px) {
+  .sheet {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .sheet > div {
+    border-radius: 20px 20px 0 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh;
+    animation: slide-up-sheet 0.32s cubic-bezier(0.16,1,0.3,1) both;
+    /* safe-area so content isn't hidden behind home bar */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+@keyframes slide-up-sheet {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Minimum touch target size for all interactive elements ─────── */
+/* Ensures tappable controls are at least 44×44 CSS px on touch devices */
+@media (pointer: coarse) {
+  button:not(.no-min-touch),
+  [role="button"]:not(.no-min-touch) {
+    min-height: 36px;
+  }
+}
+
+/* ── Form inputs — comfortable touch height ────────────────────── */
+@media (pointer: coarse) {
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    min-height: 44px;
+  }
+}
