@@ -22,7 +22,7 @@ interface MicButtonProps {
 function AudioMicButton({
   onAudio, size, className, variant = "dark",
 }: Required<Pick<MicButtonProps, "onAudio">> & Pick<MicButtonProps, "size" | "className" | "variant">) {
-  const { state, error, durationSeconds, supported, start, stop, cancel } = useAudioRecorder();
+  const { state, error, durationSeconds, supported, start, stop, cancel, clearError } = useAudioRecorder();
 
   if (!supported) return null;
 
@@ -37,27 +37,45 @@ function AudioMicButton({
   // ── Error state ─────────────────────────────────────────────────────────────
   if (isError) {
     const msg = error === "permission-denied"
-      ? "Mic blocked — allow in browser settings"
+      ? "Mic blocked"
       : error === "not-supported"
-      ? "No microphone found"
-      : "Mic failed — try again";
+      ? "No mic found"
+      : "Mic failed";
 
     if (variant === "light") {
       return (
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <span className="text-[11px] text-red-500 font-semibold bg-red-50 border border-red-200 rounded-lg px-2 py-1 flex items-center gap-1">
             <AlertCircle size={11} />
             {msg}
           </span>
+          {error !== "not-supported" && (
+            <button
+              type="button"
+              onClick={() => { clearError(); start(); }}
+              className="text-[11px] font-semibold text-blue-500 underline underline-offset-2"
+            >
+              Retry
+            </button>
+          )}
         </div>
       );
     }
     return (
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-1.5 flex-shrink-0">
         <span className="text-[11px] text-red-400 font-semibold bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1 flex items-center gap-1">
           <AlertCircle size={11} />
           {msg}
         </span>
+        {error !== "not-supported" && (
+          <button
+            type="button"
+            onClick={() => { clearError(); start(); }}
+            className="text-[11px] font-semibold text-blue-400 underline underline-offset-2"
+          >
+            Retry
+          </button>
+        )}
       </div>
     );
   }

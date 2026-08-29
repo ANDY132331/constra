@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Send, Paperclip, X, Download, Trash2, MessagesSquare,
-  Search, Phone, Info, ChevronLeft, Mic,
+  Search, Phone, Info, ChevronLeft, Mic, Video, PhoneCall, PhoneOff,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
@@ -59,11 +59,12 @@ function DateSep({ date, datePill, secondaryText }: { date: Date; datePill: stri
 
 export default function MessagesPage() {
   const C = useThemeTokens();
-  const { projects, messages, addMessage, deleteMessage, currentUser } = useStore();
+  const { projects, messages, addMessage, deleteMessage, currentUser, workers } = useStore();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState("");
+  const [showCallSheet, setShowCallSheet] = useState(false);
 
   useEffect(() => {
     if (!selectedProjectId && projects[0]?.id) setSelectedProjectId(projects[0].id);
@@ -161,6 +162,15 @@ export default function MessagesPage() {
   const isAudio = (name: string, data: string) => data.startsWith("data:audio") || name.startsWith("voice-");
 
   const project = projects.find((p) => p.id === selectedProjectId);
+
+  // Call sheet helpers
+  const jitsiRoom = project ? `constra-${project.id.replace(/-/g, "").slice(0, 12)}` : "";
+  const projectWorkers = useMemo(
+    () => workers.filter((w) => project?.workerIds.includes(w.id)),
+    [workers, project],
+  );
+  // Detect Apple device (for FaceTime links)
+  const isApple = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
 
   // Filtered sidebar projects
   const filteredProjects = useMemo(() => {
@@ -286,8 +296,21 @@ export default function MessagesPage() {
                 </p>
               </div>
               <div className="flex items-center gap-1">
-                <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 dark:hover:bg-white/5 transition-colors" title="Call (coming soon)">
-                  <Phone size={17} style={{ color: C.secondaryText }} />
+                <button
+                  onClick={() => setShowCallSheet(true)}
+                  className="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+                  style={{ background: "rgba(34,197,94,0.10)" }}
+                  title="Call"
+                >
+                  <Phone size={17} style={{ color: "#22c55e" }} />
+                </button>
+                <button
+                  onClick={() => setShowCallSheet(true)}
+                  className="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+                  style={{ background: "rgba(59,130,246,0.10)" }}
+                  title="Video call"
+                >
+                  <Video size={17} style={{ color: "#3b82f6" }} />
                 </button>
                 <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 dark:hover:bg-white/5 transition-colors" title="Project info">
                   <Info size={17} style={{ color: C.secondaryText }} />
@@ -539,6 +562,116 @@ export default function MessagesPage() {
           )}
         </div>
       </div>
+
+      {/* ── Call sheet ──────────────────────────────────────────────────────── */}
+      {showCallSheet && project && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowCallSheet(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative w-full sm:w-[400px] rounded-t-3xl sm:rounded-2xl p-5 pb-10 sm:pb-5 shadow-2xl"
+            style={{ background: C.headerBg, border: `1px solid ${C.border}` }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full mx-auto mb-4 sm:hidden" style={{ background: C.border }} />
+            {/* Title */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[16px] font-black" style={{ color: C.titleColor }}>{project.name}</p>
+                <p className="text-[12px]" style={{ color: C.secondaryText }}>Start a call with your team</p>
+              </div>
+              <button onClick={() => setShowCallSheet(false)} className="w-8 h-8 flex items-center justify-center rounded-full" style={{ background: C.barBg }}>
+                <X size={15} style={{ color: C.secondaryText }} />
+              </button>
+            </div>
+
+            {/* Main call actions */}
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <a
+                href={`https://meet.jit.si/${jitsiRoom}#config.startWithVideoMuted=true`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setShowCallSheet(false)}
+                className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all active:scale-95"
+                style={{ background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.2)" }}
+              >
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.15)" }}>
+                  <PhoneCall size={22} style={{ color: "#22c55e" }} />
+                </div>
+                <span className="text-[13px] font-bold" style={{ color: "#22c55e" }}>Voice Call</span>
+                <span className="text-[10px]" style={{ color: C.secondaryText }}>Opens in browser</span>
+              </a>
+
+              <a
+                href={`https://meet.jit.si/${jitsiRoom}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setShowCallSheet(false)}
+                className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all active:scale-95"
+                style={{ background: "rgba(59,130,246,0.10)", border: "1px solid rgba(59,130,246,0.2)" }}
+              >
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.15)" }}>
+                  <Video size={22} style={{ color: "#3b82f6" }} />
+                </div>
+                <span className="text-[13px] font-bold" style={{ color: "#3b82f6" }}>Video Call</span>
+                <span className="text-[10px]" style={{ color: C.secondaryText }}>Opens in browser</span>
+              </a>
+            </div>
+
+            {/* Per-worker direct contact */}
+            {projectWorkers.length > 0 && (
+              <>
+                <p className="text-[11px] font-black uppercase tracking-widest mb-3" style={{ color: C.secondaryText }}>Direct Contact</p>
+                <div className="flex flex-col gap-2 max-h-52 overflow-y-auto">
+                  {projectWorkers.map((w) => (
+                    <div key={w.id} className="flex items-center gap-3 py-2.5 px-3 rounded-xl" style={{ background: C.barBg }}>
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-black"
+                        style={{ background: w.color + "25", color: w.color }}>
+                        {w.initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-semibold truncate" style={{ color: C.titleColor }}>{w.name}</p>
+                        <p className="text-[11px] truncate" style={{ color: C.secondaryText }}>{w.customRole || w.role}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {w.phone && (
+                          <a href={`tel:${w.phone}`} onClick={() => setShowCallSheet(false)}
+                            className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+                            style={{ background: "rgba(34,197,94,0.12)" }} title={`Call ${w.name}`}>
+                            <Phone size={13} style={{ color: "#22c55e" }} />
+                          </a>
+                        )}
+                        {isApple && (w.phone || w.email) && (
+                          <a
+                            href={`facetime://${w.phone || w.email}`}
+                            onClick={() => setShowCallSheet(false)}
+                            className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+                            style={{ background: "rgba(0,200,83,0.12)" }}
+                            title={`FaceTime ${w.name}`}
+                          >
+                            <Video size={13} style={{ color: "#00c853" }} />
+                          </a>
+                        )}
+                        {w.email && (
+                          <a href={`mailto:${w.email}`} onClick={() => setShowCallSheet(false)}
+                            className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+                            style={{ background: "rgba(59,130,246,0.12)" }} title={`Email ${w.name}`}>
+                            <PhoneOff size={11} style={{ color: "#3b82f6" }} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <p className="text-[10px] text-center mt-4" style={{ color: C.secondaryText }}>
+              Calls use Jitsi Meet — free, secure, no account needed
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Image lightbox ──────────────────────────────────────────────────── */}
       {lightboxData && (
