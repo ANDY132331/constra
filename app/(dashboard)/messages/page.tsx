@@ -72,6 +72,61 @@ export default function MessagesPage() {
   const bottomRef    = useRef<HTMLDivElement>(null);
   const fileRef      = useRef<HTMLInputElement>(null);
   const textareaRef  = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Mobile: pin the container between the header (56 px) and mobile nav (4.5 rem)
+  // using JS so we avoid SSR/hydration issues with <style> hoisting in React 19.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const apply = () => {
+      const mobile = window.innerWidth < 1024;
+      if (mobile) {
+        const navH = 4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const sai  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sat") || "0") || 0;
+        el.style.position     = "fixed";
+        el.style.top          = "56px";
+        el.style.left         = "0";
+        el.style.right        = "0";
+        el.style.bottom       = `${navH}px`;
+        el.style.height       = "auto";
+        el.style.marginTop    = "0";
+        el.style.marginLeft   = "0";
+        el.style.marginRight  = "0";
+        el.style.borderRadius = "0";
+        el.style.borderLeft   = "none";
+        el.style.borderRight  = "none";
+        void sai; // suppress unused warning
+      } else {
+        el.style.position     = "";
+        el.style.top          = "";
+        el.style.left         = "";
+        el.style.right        = "";
+        el.style.bottom       = "";
+        el.style.height       = "calc(100dvh - 168px)";
+        el.style.marginTop    = "";
+        el.style.marginLeft   = "";
+        el.style.marginRight  = "";
+        el.style.borderRadius = "";
+        el.style.borderLeft   = "";
+        el.style.borderRight  = "";
+      }
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    // Also adjust when the virtual keyboard pushes the viewport
+    const vv = window.visualViewport;
+    if (vv) {
+      const onVV = () => {
+        if (window.innerWidth < 1024 && containerRef.current) {
+          containerRef.current.style.bottom = `${window.innerHeight - vv.height + 4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`;
+        }
+      };
+      vv.addEventListener("resize", onVV);
+      return () => { window.removeEventListener("resize", apply); vv.removeEventListener("resize", onVV); };
+    }
+    return () => window.removeEventListener("resize", apply);
+  }, []);
 
   const projectMessages = useMemo(
     () => messages
@@ -169,26 +224,9 @@ export default function MessagesPage() {
 
   return (
     <>
-      {/* ── Mobile full-screen CSS ────────────────────────────────────────── */}
-      <style>{`
-        @media (max-width: 1023px) {
-          .msg-shell {
-            position: fixed !important;
-            top: 56px !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
-            height: auto !important;
-            margin: 0 !important;
-            border-radius: 0 !important;
-            border-left: none !important;
-            border-right: none !important;
-          }
-        }
-      `}</style>
-
       <div
-        className="msg-shell flex overflow-hidden rounded-2xl shadow-xl"
+        ref={containerRef}
+        className="flex overflow-hidden rounded-2xl shadow-xl"
         style={{ height: "calc(100dvh - 168px)", border: `1px solid ${C.border}` }}
       >
         {/* ══════════════════════════════ SIDEBAR ════════════════════════════ */}
