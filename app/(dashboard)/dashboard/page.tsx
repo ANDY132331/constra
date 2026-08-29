@@ -136,8 +136,13 @@ function timeAgo(date: Date): string {
 function WorkerCard({ worker }: { worker: Worker }) {
   const { getProjectById } = useStore();
   const project = getProjectById(worker.projectIds[0]);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((n) => n + 1), 60000);
+    return () => clearInterval(id);
+  }, []);
   const clockIn = worker.clockInTime ?? new Date();
-  const elapsed = new Date().getTime() - clockIn.getTime();
+  const elapsed = Date.now() - clockIn.getTime();
   const hours = Math.floor(elapsed / 3600000);
   const mins = Math.floor((elapsed % 3600000) / 60000);
 
@@ -775,6 +780,24 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* ── Getting started nudge (only when no projects exist) ───────────── */}
+      {activeProjects.length === 0 && projects.length === 0 && (
+        <div className="px-4 pt-4">
+          <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-4">
+            <p className="text-[13px] font-black text-amber-400 mb-1">🏗️ Let's get you set up</p>
+            <p className="text-[12px] text-white/50 mb-3 leading-snug">Create your first project, add your crew, and start tracking work.</p>
+            <div className="flex gap-2 flex-wrap">
+              <Link href="/projects" className="flex items-center gap-1.5 bg-amber-500 text-black text-[12px] font-black px-3 py-2 rounded-xl">
+                <FolderKanban size={13} /> New Project
+              </Link>
+              <Link href="/crew" className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.08] text-white/70 text-[12px] font-bold px-3 py-2 rounded-xl">
+                <Users size={13} /> Add Crew
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stat chips — horizontal scroll */}
       <div className="px-4 pt-4">

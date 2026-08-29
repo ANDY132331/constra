@@ -16,6 +16,7 @@ import { useSearchPrefill } from "@/lib/use-search-prefill";
 import type { Worker, HoursAdjustment, WorkerCertification } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { toast } from "sonner";
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Admin: { label: "Admin", className: "bg-purple-500/15 text-purple-400" },
@@ -282,6 +283,7 @@ export default function CrewPage() {
         hourlyRate: parseFloat(form.hourlyRate) || 0,
         certifications: certifications.length > 0 ? certifications : undefined,
       });
+      toast.success(`${form.name.trim()} updated`);
       setShowModal(false);
     } else {
       // New worker — use server API to create a real auth user + profile
@@ -324,6 +326,11 @@ export default function CrewPage() {
           projectIds: [],
           clockedIn: false,
         } as Worker);
+        const hasEmail = !!form.email.trim();
+        toast.success(
+          `${form.name.trim()} added${hasEmail ? " — password reset email sent" : " — share the invite code so they can sign up"}`,
+          { duration: 5000 }
+        );
         setShowModal(false);
       } catch {
         setSaveError("Network error — please try again");
@@ -930,7 +937,14 @@ export default function CrewPage() {
             : "Remove this worker from your workspace? They will lose access immediately.";
         })()}
         confirmLabel="Remove"
-        onConfirm={() => { if (deleteConfirm) deleteWorker(deleteConfirm); setDeleteConfirm(null); }}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            const name = workers.find((w) => w.id === deleteConfirm)?.name;
+            deleteWorker(deleteConfirm);
+            if (name) toast.success(`${name} removed from workspace`);
+          }
+          setDeleteConfirm(null);
+        }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

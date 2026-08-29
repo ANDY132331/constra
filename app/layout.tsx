@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { StoreProvider } from "@/lib/store";
 import PwaInstall from "@/components/pwa-install";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -74,6 +75,7 @@ export default function RootLayout({
           {children}
           <PwaInstall />
           <Analytics />
+          <Toaster richColors position="top-center" />
         </StoreProvider>
       </body>
     </html>

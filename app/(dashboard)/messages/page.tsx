@@ -10,30 +10,35 @@ import { useStore } from "@/lib/store";
 import { MicButton } from "@/components/mic-button";
 
 // ── Design tokens ────────────────────────────────────────────────────────────
-const C = {
-  // Sidebar
-  sidebarBg:     "#ffffff",
-  sidebarBorder: "rgba(0,0,0,0.07)",
-  activeRow:     "#f0f5ff",
-  activeBorder:  "#3b82f6",
+function useThemeTokens() {
+  const isDark = useStore().theme === "dark";
+  return {
+    // Sidebar
+    sidebarBg:     isDark ? "#111111"              : "#ffffff",
+    sidebarBorder: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
+    activeRow:     isDark ? "rgba(59,130,246,0.08)" : "#f0f5ff",
+    activeBorder:  "#3b82f6",
 
-  // Chat area
-  chatBg:        "#f2f5fb",
+    // Chat area
+    chatBg:        isDark ? "#0d0d0d"              : "#f2f5fb",
 
-  // Bubbles
-  sentGrad:      "linear-gradient(135deg,#4f8ef7,#1d4ed8)",
-  sentText:      "#ffffff",
-  recvBg:        "#ffffff",
-  recvText:      "#1a1a2e",
+    // Bubbles
+    sentGrad:      "linear-gradient(135deg,#4f8ef7,#1d4ed8)",
+    sentText:      "#ffffff",
+    recvBg:        isDark ? "#1c1c1c"              : "#ffffff",
+    recvText:      isDark ? "#e5e7eb"              : "#1a1a2e",
 
-  // UI
-  headerBg:      "#ffffff",
-  inputBg:       "#ffffff",
-  barBg:         "#f2f5fb",
-  secondaryText: "#8b9ab2",
-  border:        "rgba(0,0,0,0.07)",
-  datePill:      "rgba(100,116,139,0.15)",
-};
+    // UI
+    headerBg:      isDark ? "#111111"              : "#ffffff",
+    inputBg:       isDark ? "#1a1a1a"              : "#ffffff",
+    barBg:         isDark ? "#111111"              : "#f2f5fb",
+    secondaryText: isDark ? "#6b7280"              : "#8b9ab2",
+    border:        isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.07)",
+    datePill:      isDark ? "rgba(255,255,255,0.07)" : "rgba(100,116,139,0.15)",
+    titleColor:    isDark ? "#f3f4f6"              : "#1a1a2e",
+    activeTitle:   isDark ? "#60a5fa"              : "#1d4ed8",
+  };
+}
 
 function fmtTime(d: Date) { return format(d, "h:mm a"); }
 function fmtDur(s: number) {
@@ -41,11 +46,11 @@ function fmtDur(s: number) {
   return m > 0 ? `${m}:${String(s % 60).padStart(2, "0")}` : `0:${String(s % 60).padStart(2, "0")}`;
 }
 
-function DateSep({ date }: { date: Date }) {
+function DateSep({ date, datePill, secondaryText }: { date: Date; datePill: string; secondaryText: string }) {
   const label = isToday(date) ? "Today" : isYesterday(date) ? "Yesterday" : format(date, "MMMM d, yyyy");
   return (
     <div className="flex items-center justify-center my-4">
-      <span className="text-[11px] font-semibold px-3 py-1 rounded-full" style={{ background: C.datePill, color: C.secondaryText }}>
+      <span className="text-[11px] font-semibold px-3 py-1 rounded-full" style={{ background: datePill, color: secondaryText }}>
         {label}
       </span>
     </div>
@@ -53,6 +58,7 @@ function DateSep({ date }: { date: Date }) {
 }
 
 export default function MessagesPage() {
+  const C = useThemeTokens();
   const { projects, messages, addMessage, deleteMessage, currentUser } = useStore();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
@@ -176,21 +182,21 @@ export default function MessagesPage() {
         {/* Sidebar header */}
         <div className="px-4 pt-4 pb-3 border-b" style={{ borderColor: C.border }}>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[17px] font-black" style={{ color: "#1a1a2e" }}>Messages</h2>
+            <h2 className="text-[17px] font-black" style={{ color: C.titleColor }}>Messages</h2>
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold"
               style={{ background: currentUser.color + "25", color: currentUser.color }}>
               {currentUser.initials}
             </div>
           </div>
           {/* Search bar */}
-          <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "#f2f5fb" }}>
+          <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: C.barBg }}>
             <Search size={14} style={{ color: C.secondaryText }} />
             <input
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
               placeholder="Search projects…"
               className="flex-1 bg-transparent text-[13px] outline-none"
-              style={{ color: "#1a1a2e" }}
+              style={{ color: C.titleColor }}
             />
           </div>
         </div>
@@ -225,7 +231,7 @@ export default function MessagesPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1 mb-0.5">
-                      <span className="text-[13.5px] font-bold truncate" style={{ color: active ? "#1d4ed8" : "#1a1a2e" }}>{p.name}</span>
+                      <span className="text-[13.5px] font-bold truncate" style={{ color: active ? C.activeTitle : C.titleColor }}>{p.name}</span>
                       {last && (
                         <span className="text-[10px] flex-shrink-0 font-medium" style={{ color: C.secondaryText }}>
                           {isToday(new Date(last.timestamp))
@@ -263,7 +269,7 @@ export default function MessagesPage() {
       >
         {/* Chat header */}
         <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0 border-b shadow-sm" style={{ background: C.headerBg, borderColor: C.border }}>
-          <button onClick={() => setMobileSidebarOpen(true)} className="sm:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-all hover:bg-black/5">
+          <button onClick={() => setMobileSidebarOpen(true)} className="sm:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-all hover:bg-white/5 dark:hover:bg-white/5">
             <ChevronLeft size={20} style={{ color: C.activeBorder }} />
           </button>
 
@@ -274,16 +280,16 @@ export default function MessagesPage() {
                 {project.name.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[14.5px] font-black leading-tight" style={{ color: "#1a1a2e" }}>{project.name}</p>
+                <p className="text-[14.5px] font-black leading-tight" style={{ color: C.titleColor }}>{project.name}</p>
                 <p className="text-[11px]" style={{ color: C.secondaryText }}>
                   {projectMessages.length} message{projectMessages.length !== 1 ? "s" : ""}
                 </p>
               </div>
               <div className="flex items-center gap-1">
-                <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors" title="Call (coming soon)">
+                <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 dark:hover:bg-white/5 transition-colors" title="Call (coming soon)">
                   <Phone size={17} style={{ color: C.secondaryText }} />
                 </button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors" title="Project info">
+                <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 dark:hover:bg-white/5 transition-colors" title="Project info">
                   <Info size={17} style={{ color: C.secondaryText }} />
                 </button>
               </div>
@@ -301,7 +307,7 @@ export default function MessagesPage() {
                 <MessagesSquare size={32} style={{ color: "#3b82f6" }} />
               </div>
               <div>
-                <p className="text-[15px] font-bold" style={{ color: "#1a1a2e" }}>No messages yet</p>
+                <p className="text-[15px] font-bold" style={{ color: C.titleColor }}>No messages yet</p>
                 <p className="text-[12px] mt-1" style={{ color: C.secondaryText }}>Send a message or voice note to kick things off</p>
               </div>
             </div>
@@ -322,7 +328,7 @@ export default function MessagesPage() {
 
               return (
                 <div key={msg.id}>
-                  {showDate && <DateSep date={ts} />}
+                  {showDate && <DateSep date={ts} datePill={C.datePill} secondaryText={C.secondaryText} />}
 
                   <div className={`flex items-end gap-2.5 ${isMe ? "flex-row-reverse" : ""} ${showSender && !showDate ? "mt-4" : "mt-0.5"}`}>
                     {/* Received avatar */}
@@ -437,7 +443,7 @@ export default function MessagesPage() {
                                 <Download size={14} style={{ color: isMe ? "#fff" : "#3b82f6" }} />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-[12px] font-semibold truncate" style={{ color: isMe ? "#fff" : "#1a1a2e" }}>{msg.attachmentName}</p>
+                                <p className="text-[12px] font-semibold truncate" style={{ color: isMe ? "#fff" : C.titleColor }}>{msg.attachmentName}</p>
                                 <p className="text-[10px]" style={{ color: isMe ? "rgba(255,255,255,0.65)" : C.secondaryText }}>Tap to download · {fmtTime(ts)}</p>
                               </div>
                             </button>
@@ -449,7 +455,7 @@ export default function MessagesPage() {
                       {isMe && (
                         <button
                           onClick={() => deleteMessage(msg.id)}
-                          className="opacity-0 group-hover/bubble:opacity-100 mt-0.5 self-end p-1 rounded-full transition-all hover:bg-black/5"
+                          className="opacity-0 group-hover/bubble:opacity-100 mt-0.5 self-end p-1 rounded-full transition-all hover:bg-white/5 dark:hover:bg-white/5"
                           style={{ color: C.secondaryText }}
                           aria-label="Delete"
                         >
@@ -476,7 +482,7 @@ export default function MessagesPage() {
                   <Paperclip size={13} style={{ color: "#3b82f6" }} />
                 </div>
               )}
-              <span className="text-[12px] max-w-[200px] truncate" style={{ color: "#1a1a2e" }}>{pendingAttachment.name}</span>
+              <span className="text-[12px] max-w-[200px] truncate" style={{ color: C.titleColor }}>{pendingAttachment.name}</span>
               <button onClick={() => setPendingAttachment(null)} style={{ color: C.secondaryText }} className="hover:opacity-70 ml-1 transition-opacity">
                 <X size={14} />
               </button>
@@ -509,7 +515,7 @@ export default function MessagesPage() {
               inputMode="text"
               enterKeyHint="send"
               className="flex-1 bg-transparent text-[13.5px] outline-none resize-none max-h-28 leading-relaxed"
-              style={{ color: "#1a1a2e", caretColor: C.activeBorder }}
+              style={{ color: C.titleColor, caretColor: C.activeBorder }}
             />
           </div>
 
