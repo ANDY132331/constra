@@ -39,12 +39,15 @@ function hasEscalation(text: string) {
   return ESCALATION_RE.some((r) => r.test(text));
 }
 
+// Outer wrapper: only hook is usePathname, early return is safe here
 export function AIChatWidget() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-
-  // Don't render on messages page — it covers the mic button
   if (pathname === "/messages") return null;
+  return <AIChatWidgetInner />;
+}
+
+function AIChatWidgetInner() {
+  const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
