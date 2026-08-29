@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import {
   MessageCircle,
   X,
@@ -39,7 +40,11 @@ function hasEscalation(text: string) {
 }
 
 export function AIChatWidget() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  // Don't render on messages page — it covers the mic button
+  if (pathname === "/messages") return null;
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
