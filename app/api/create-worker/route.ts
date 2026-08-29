@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   const workerEmail = email?.trim() || null;
 
   // If no email provided, use a placeholder so auth.admin.createUser doesn't fail.
-  const authEmail = workerEmail ?? `worker-${crypto.randomUUID()}@placeholder.constra.app`;
+  const authEmail = workerEmail ?? `worker-${crypto.randomUUID()}@placeholder.getconstra.com`;
 
   // 1. Create the auth user
   const { data: authData, error: authErr } = await service.auth.admin.createUser({

@@ -7,7 +7,7 @@ function getResend() {
 }
 
 const _from = process.env.EMAIL_FROM;
-export const FROM = (!_from || _from.includes("constra.app")) ? "Constra <notifications@getconstra.com>" : _from;
+export const FROM = (!_from || _from.includes("getconstra.com")) ? "Constra <notifications@getconstra.com>" : _from;
 const _appUrl = process.env.NEXT_PUBLIC_APP_URL;
 export const APP_URL = (!_appUrl || _appUrl.includes("localhost")) ? "https://getconstra.com" : _appUrl;
 
