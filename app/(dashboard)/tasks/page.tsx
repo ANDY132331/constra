@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Circle, Clock, AlertTriangle, Plus, Search, X, Pencil, Trash2 } from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertTriangle, Plus, Search, X, Pencil, Trash2, ClipboardList } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { format, isBefore } from "date-fns";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { EmptyState } from "@/components/empty-state";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
   completed: { label: "Completed", icon: CheckCircle2, className: "text-green-400" },
@@ -157,9 +158,15 @@ export default function TasksPage() {
         </div>
         <div className="px-4 space-y-2">
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-white/25 text-[13px]">
-              {allTasks.length === 0 ? "No tasks yet" : "No tasks match filters"}
-            </div>
+            <EmptyState
+              icon={ClipboardList}
+              title={allTasks.length === 0 ? "No tasks yet" : "No tasks found"}
+              body={allTasks.length === 0
+                ? "Create tasks to assign work to your crew, set deadlines, and track progress."
+                : "Try changing your search or filters."}
+              action={allTasks.length === 0 ? { label: "Add Task", onClick: () => setShowModal(true) } : undefined}
+              isFiltered={allTasks.length > 0 && filtered.length === 0}
+            />
           )}
           {filtered.map((task) => {
             const mProject = getProjectById(task.projectId);
@@ -272,11 +279,15 @@ export default function TasksPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="px-5 py-12 text-center text-white/25 text-[13px]">
-            {allTasks.length === 0
-              ? <span>No tasks yet — <button onClick={() => setShowModal(true)} className="text-amber-400 hover:text-amber-300">add one</button></span>
-              : "No tasks match your filters"}
-          </div>
+          <EmptyState
+            icon={ClipboardList}
+            title={allTasks.length === 0 ? "No tasks yet" : "No tasks found"}
+            body={allTasks.length === 0
+              ? "Create tasks to assign work to your crew, set deadlines, and track progress."
+              : "Try changing your search or filters."}
+            action={allTasks.length === 0 ? { label: "Add Task", onClick: () => setShowModal(true) } : undefined}
+            isFiltered={allTasks.length > 0 && filtered.length === 0}
+          />
         )}
 
         {filtered.map((task) => {

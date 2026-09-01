@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, AlertTriangle, X, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, AlertTriangle, X, Pencil, Trash2, Truck } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
@@ -159,17 +160,16 @@ export default function EquipmentPage() {
 
         {/* Equipment cards */}
         <div className="px-4 space-y-2">
-          {filtered.length === 0 && equipment.length === 0 ? (
-            <div className="text-center py-16 text-white/25 space-y-2">
-              <p className="text-[14px]">No equipment added yet</p>
-              <button onClick={openAdd} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                + Add your first piece of equipment
-              </button>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-10 text-white/25">
-              <p className="text-[13px]">No equipment matches your filters</p>
-            </div>
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={Truck}
+              title={equipment.length === 0 ? "No equipment yet" : "No equipment found"}
+              body={equipment.length === 0
+                ? "Track vehicles, machinery, and tools — assign them to projects and log service dates."
+                : "Try changing your search or status filter."}
+              action={equipment.length === 0 && isAdmin ? { label: "Add Equipment", onClick: openAdd } : undefined}
+              isFiltered={equipment.length > 0 && filtered.length === 0}
+            />
           ) : (
             filtered.map((eq) => {
               const project = eq.projectId ? getProjectById(eq.projectId) : null;
@@ -278,12 +278,12 @@ export default function EquipmentPage() {
           </div>
 
           {equipment.length === 0 ? (
-            <div className="text-center py-16 text-white/25 space-y-2">
-              <p className="text-[14px]">No equipment added yet</p>
-              <button onClick={openAdd} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                + Add your first piece of equipment
-              </button>
-            </div>
+            <EmptyState
+              icon={Truck}
+              title="No equipment yet"
+              body="Track vehicles, machinery, and tools — assign them to projects and log service dates."
+              action={isAdmin ? { label: "Add Equipment", onClick: openAdd } : undefined}
+            />
           ) : (
             <div className="overflow-x-auto rounded-xl">
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[860px]">

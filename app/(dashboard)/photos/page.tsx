@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, ChevronRight, Layers, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
@@ -168,9 +169,16 @@ export default function PhotosPage() {
         </div>
         {/* Photo grid */}
         {filtered.length === 0 ? (
-          <div className="px-4 text-center py-16 text-white/25 space-y-2">
-            <FolderOpen size={36} className="mx-auto opacity-30" />
-            <p className="text-[14px] font-semibold">{photos.length === 0 ? "No photos yet" : "No photos found"}</p>
+          <div className="px-4">
+            <EmptyState
+              icon={FolderOpen}
+              title={photos.length === 0 ? "No photos yet" : "No photos found"}
+              body={photos.length === 0
+                ? "Upload site photos to document progress, flag issues, and keep your crew aligned."
+                : "Try changing your search or filters."}
+              action={photos.length === 0 ? { label: "Upload Photo", onClick: () => setShowModal(true) } : undefined}
+              isFiltered={photos.length > 0 && filtered.length === 0}
+            />
           </div>
         ) : (
           <div className="px-3 grid grid-cols-2 gap-2">
@@ -323,12 +331,13 @@ export default function PhotosPage() {
           </div>
 
           {photos.length === 0 ? (
-            <div className="text-center py-20 text-white/25 space-y-2">
-              <FolderOpen size={40} className="mx-auto opacity-30" />
-              <p className="text-[14px] font-semibold">No photos yet</p>
-              <button onClick={openModal} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                + Upload your first photo
-              </button>
+            <div className="py-4">
+              <EmptyState
+                icon={FolderOpen}
+                title="No photos yet"
+                body="Upload site photos to document progress, flag issues, and keep your crew aligned."
+                action={{ label: "Upload Photo", onClick: openModal }}
+              />
             </div>
           ) : view === "grid" && filtered.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

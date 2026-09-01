@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -241,12 +242,18 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         {/* Incidents list */}
         <div className="px-4 space-y-2">
           {filtered.length === 0 && (
-            <div className="text-center py-16 space-y-2">
-              <ShieldAlert size={32} className="mx-auto text-white/20" />
-              <p className="text-white/25 text-[14px]">
-                {safetyIncidents.length === 0 ? "No incidents logged" : "No incidents match your filters"}
-              </p>
-            </div>
+            <EmptyState
+              icon={ShieldAlert}
+              title={safetyIncidents.length === 0 ? "No incidents logged" : "No incidents found"}
+              body={safetyIncidents.length === 0
+                ? "Log safety incidents, near-misses, and hazards to keep your crew protected."
+                : "Try changing your search or filters."}
+              action={safetyIncidents.length === 0 ? {
+                label: "Log Incident",
+                onClick: () => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); },
+              } : undefined}
+              isFiltered={safetyIncidents.length > 0 && filtered.length === 0}
+            />
           )}
           {filtered.map((incident) => {
             const project = getProjectById(incident.projectId);
@@ -386,17 +393,18 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
 
           <div className="space-y-3">
             {filtered.length === 0 && (
-              <div className="text-center py-16 text-white/25 space-y-2">
-                <ShieldAlert size={36} className="mx-auto opacity-30" />
-                <p className="text-[14px]">
-                  {safetyIncidents.length === 0 ? "No incidents logged" : "No incidents match your filters"}
-                </p>
-                {safetyIncidents.length === 0 && (
-                  <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                    + Log an incident
-                  </button>
-                )}
-              </div>
+              <EmptyState
+                icon={ShieldAlert}
+                title={safetyIncidents.length === 0 ? "No incidents logged" : "No incidents found"}
+                body={safetyIncidents.length === 0
+                  ? "Log safety incidents, near-misses, and hazards to keep your crew protected."
+                  : "Try changing your search or filters."}
+                action={safetyIncidents.length === 0 ? {
+                  label: "Log Incident",
+                  onClick: () => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); },
+                } : undefined}
+                isFiltered={safetyIncidents.length > 0 && filtered.length === 0}
+              />
             )}
             {filtered.map((incident) => {
               const project = getProjectById(incident.projectId);

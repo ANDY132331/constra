@@ -7,7 +7,7 @@ import QRCode from "qrcode";
 import {
   UserPlus, Search, Mail, Clock, CheckCircle2,
   Copy, Check, X, Pencil, Trash2, Upload, Camera,
-  Plus, Minus, History, AlertTriangle, QrCode,
+  Plus, Minus, History, AlertTriangle, QrCode, Users,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -15,6 +15,7 @@ import { getCurrencySymbol } from "@/lib/currency";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import type { Worker, HoursAdjustment, WorkerCertification } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 import { toast } from "sonner";
 
@@ -515,9 +516,15 @@ export default function CrewPage() {
           );
         })}
         {filtered.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-white/20 text-[13px]">No crew members found</p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title={workers.length === 0 ? "No crew members yet" : "No crew members found"}
+            body={workers.length === 0
+              ? "Add your crew to track hours, assign tasks, and manage roles across your projects."
+              : "Try changing your search or role filter."}
+            action={workers.length === 0 && isAdmin ? { label: "Add Crew Member", onClick: openAdd } : undefined}
+            isFiltered={workers.length > 0 && filtered.length === 0}
+          />
         )}
       </div>
     </div>
@@ -712,14 +719,15 @@ export default function CrewPage() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 space-y-3">
-          <p className="text-white/20 text-[13px]">No crew members found</p>
-          {workers.length === 0 && (
-            <button onClick={openAdd} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-              + Add your first crew member
-            </button>
-          )}
-        </div>
+        <EmptyState
+          icon={Users}
+          title={workers.length === 0 ? "No crew members yet" : "No crew members found"}
+          body={workers.length === 0
+            ? "Add your crew to track hours, assign tasks, and manage roles across your projects."
+            : "Try changing your search or role filter."}
+          action={workers.length === 0 && isAdmin ? { label: "Add Crew Member", onClick: openAdd } : undefined}
+          isFiltered={workers.length > 0 && filtered.length === 0}
+        />
       )}
 
     </div>

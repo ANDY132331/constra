@@ -8,6 +8,7 @@ import {
   ChevronRight, ChevronLeft, Download, CheckCircle2, Clock, XCircle, Ban, Pencil,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/currency";
 import type { ChangeOrder } from "@/lib/mock-data";
@@ -209,7 +210,15 @@ export default function ChangeOrdersPage() {
             </div>
             <div className="px-4 space-y-2">
               {filtered.length === 0 ? (
-                <div className="text-center py-12 text-white/30 text-[13px]">No change orders found</div>
+                <EmptyState
+                  icon={GitPullRequest}
+                  title={changeOrders?.length === 0 ? "No change orders yet" : "No change orders found"}
+                  body={changeOrders?.length === 0
+                    ? "Log scope changes, cost adjustments, and client approvals as change orders."
+                    : "Try adjusting your search or status filter."}
+                  action={changeOrders?.length === 0 && isAdmin ? { label: "New Change Order", onClick: () => { openNew(); } } : undefined}
+                  isFiltered={!!changeOrders?.length && filtered.length === 0}
+                />
               ) : filtered.map((co) => {
                 const proj = projectMap.get(co.projectId);
                 const cfg = STATUS_CONFIG[co.status];
@@ -350,9 +359,16 @@ export default function ChangeOrdersPage() {
         {/* List */}
         <div className="flex-1 overflow-y-auto">
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-              <GitPullRequest size={32} className="text-white/10" />
-              <p className="text-[13px] text-white/30">No change orders found</p>
+            <div className="flex items-center justify-center h-full">
+              <EmptyState
+                icon={GitPullRequest}
+                title={changeOrders?.length === 0 ? "No change orders yet" : "No change orders found"}
+                body={changeOrders?.length === 0
+                  ? "Log scope changes, cost adjustments, and client approvals as change orders."
+                  : "Try adjusting your search or status filter."}
+                action={changeOrders?.length === 0 && isAdmin ? { label: "New Change Order", onClick: () => { openNew(); } } : undefined}
+                isFiltered={!!changeOrders?.length && filtered.length === 0}
+              />
             </div>
           ) : (
             filtered.map((co) => {

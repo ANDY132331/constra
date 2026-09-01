@@ -8,6 +8,7 @@ import {
   ChevronRight, Download, Calendar, ClipboardList, Zap,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { useStore } from "@/lib/store";
 import type { DailyReport } from "@/lib/mock-data";
@@ -250,10 +251,18 @@ export default function DailyReportsPage() {
             {/* List */}
             <div className="divide-y divide-white/[0.05]">
               {filtered.length === 0 ? (
-                <div className="text-center py-16 text-white/25 space-y-2 px-4">
-                  <FileText size={32} className="mx-auto opacity-30" />
-                  <p className="text-[13px]">No daily reports yet</p>
-                </div>
+                <EmptyState
+                  icon={ClipboardList}
+                  title={dailyReports?.length === 0 ? "No reports yet" : "No reports found"}
+                  body={dailyReports?.length === 0
+                    ? "Submit your first daily report to log crew, weather, and site progress."
+                    : "Try changing your search or filters."}
+                  action={dailyReports?.length === 0 && isForemanOrAbove(currentUser.role) ? {
+                    label: "Submit Report",
+                    onClick: () => { setForm(emptyForm()); setShowForm(true); },
+                  } : undefined}
+                  isFiltered={!!dailyReports?.length && filtered.length === 0}
+                />
               ) : (
                 filtered.map((report) => {
                   const proj = projectMap.get(report.projectId);
@@ -341,10 +350,19 @@ export default function DailyReportsPage() {
         {/* List */}
         <div className="flex-1 overflow-y-auto">
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-              <FileText size={32} className="text-white/10" />
-              <p className="text-[13px] text-white/30">No daily reports yet</p>
-              <p className="text-[11px] text-white/20">Create your first report to get started</p>
+            <div className="flex items-center justify-center h-full">
+              <EmptyState
+                icon={ClipboardList}
+                title={dailyReports?.length === 0 ? "No reports yet" : "No reports found"}
+                body={dailyReports?.length === 0
+                  ? "Submit your first daily report to log crew, weather, and site progress."
+                  : "Try changing your search or filters."}
+                action={dailyReports?.length === 0 && isForemanOrAbove(currentUser.role) ? {
+                  label: "Submit Report",
+                  onClick: () => { setForm(emptyForm()); setShowForm(true); },
+                } : undefined}
+                isFiltered={!!dailyReports?.length && filtered.length === 0}
+              />
             </div>
           ) : (
             filtered.map((report) => {

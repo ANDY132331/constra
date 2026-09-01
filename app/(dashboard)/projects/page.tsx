@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { BarChart2, List, CalendarDays, Plus, Search, MapPin, X, AlertCircle, Map, Trash2, Pencil, ShieldCheck, Share2 } from "lucide-react";
+import { BarChart2, List, CalendarDays, Plus, Search, MapPin, X, AlertCircle, Map, Trash2, Pencil, ShieldCheck, Share2, FolderKanban } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { GanttChart, type GanttProject } from "@/components/gantt-chart";
 import { formatCurrencyCompact } from "@/lib/currency";
@@ -10,6 +10,7 @@ import { MapView } from "@/components/map-view";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { EmptyState } from "@/components/empty-state";
 
 type View = "gantt" | "table" | "cards" | "map";
 
@@ -308,7 +309,18 @@ export default function ProjectsPage() {
         {/* Project cards */}
         <div className="px-4 space-y-2">
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-white/25 text-[14px]">No projects found</div>
+            <EmptyState
+              icon={FolderKanban}
+              title={projects.length === 0 ? "No projects yet" : "No projects found"}
+              body={projects.length === 0
+                ? "Create your first project to track progress, assign crew, and monitor budget."
+                : "Try adjusting your search or filters."}
+              action={projects.length === 0 && isForeman ? {
+                label: "Create Project",
+                onClick: () => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); },
+              } : undefined}
+              isFiltered={projects.length > 0 && filtered.length === 0}
+            />
           )}
           {filtered.map((p) => {
             const manager = getWorkerById(p.managerId);
@@ -464,13 +476,19 @@ export default function ProjectsPage() {
             </div>
           </div>
 
-          {projects.length === 0 && (
-            <div className="text-center py-20 space-y-3">
-              <p className="text-white/20 text-[14px]">No projects yet</p>
-              <button onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }} className="text-amber-400 text-[13px] hover:text-amber-300 transition-colors">
-                + Create your first project
-              </button>
-            </div>
+          {filtered.length === 0 && (
+            <EmptyState
+              icon={FolderKanban}
+              title={projects.length === 0 ? "No projects yet" : "No projects found"}
+              body={projects.length === 0
+                ? "Create your first project to start tracking progress, assigning crew, and monitoring budget."
+                : "Try adjusting your search or filters."}
+              action={projects.length === 0 && isForeman ? {
+                label: "Create Project",
+                onClick: () => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); },
+              } : undefined}
+              isFiltered={projects.length > 0 && filtered.length === 0}
+            />
           )}
 
           {view === "gantt" && (
