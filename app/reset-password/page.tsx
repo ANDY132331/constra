@@ -162,15 +162,25 @@ function ResetPasswordForm() {
                 })()}
               </div>
 
-              <input
-                type={showPw ? "text" : "password"}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Confirm new password"
-                required
-                disabled={!sessionReady}
-                className={inp}
-              />
+              <div>
+                <div className="relative">
+                  <input
+                    type={showPw ? "text" : "password"}
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    placeholder="Confirm new password"
+                    required
+                    disabled={!sessionReady}
+                    className={inp}
+                  />
+                  {confirm.length > 0 && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold"
+                      style={{ color: confirm === password ? "#10b981" : "#ef4444" }}>
+                      {confirm === password ? "✓ Match" : "✗"}
+                    </span>
+                  )}
+                </div>
+              </div>
 
               {status === "error" && (
                 <div className="flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl">
