@@ -383,6 +383,11 @@ function LoginForm() {
                       <label className={lbl}>Email</label>
                       <input
                         type="email"
+                        name="email"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
                         className={inp}
                         placeholder="you@company.com"
                         value={email}
@@ -395,6 +400,8 @@ function LoginForm() {
                       <div className="relative">
                         <input
                           type={showPw ? "text" : "password"}
+                          name="password"
+                          autoComplete="current-password"
                           className={`${inp} pr-10`}
                           placeholder="••••••••"
                           value={password}
@@ -442,26 +449,57 @@ function LoginForm() {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className={lbl}>First Name</label>
-                        <input className={inp} placeholder="Jane" value={joinFirstName} onChange={(e) => setJoinFirstName(e.target.value)} />
+                        <input
+                          name="given-name"
+                          autoComplete="given-name"
+                          className={inp}
+                          placeholder="Jane"
+                          value={joinFirstName}
+                          onChange={(e) => setJoinFirstName(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                        />
                       </div>
                       <div>
                         <label className={lbl}>Last Name</label>
-                        <input className={inp} placeholder="Smith" value={joinLastName} onChange={(e) => setJoinLastName(e.target.value)} />
+                        <input
+                          name="family-name"
+                          autoComplete="family-name"
+                          className={inp}
+                          placeholder="Smith"
+                          value={joinLastName}
+                          onChange={(e) => setJoinLastName(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                        />
                       </div>
                     </div>
                     <div>
                       <label className={lbl}>Work Email</label>
-                      <input type="email" className={inp} placeholder="you@company.com" value={joinEmail} onChange={(e) => setJoinEmail(e.target.value)} />
+                      <input
+                        type="email"
+                        name="email"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        className={inp}
+                        placeholder="you@company.com"
+                        value={joinEmail}
+                        onChange={(e) => setJoinEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                      />
                     </div>
                     <div>
                       <label className={lbl}>Password</label>
                       <div className="relative">
                         <input
                           type={showJoinPw ? "text" : "password"}
+                          name="new-password"
+                          autoComplete="new-password"
                           className={`${inp} pr-10`}
                           placeholder="At least 8 characters"
                           value={joinPassword}
                           onChange={(e) => setJoinPassword(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleJoin()}
                         />
                         <button
                           type="button"

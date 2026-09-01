@@ -127,6 +127,8 @@ function ResetPasswordForm() {
                 <div className="relative">
                   <input
                     type={showPw ? "text" : "password"}
+                    name="new-password"
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="New password (min 8 characters)"
@@ -166,6 +168,8 @@ function ResetPasswordForm() {
                 <div className="relative">
                   <input
                     type={showPw ? "text" : "password"}
+                    name="confirm-password"
+                    autoComplete="new-password"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Confirm new password"

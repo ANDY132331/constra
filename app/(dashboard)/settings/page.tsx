@@ -49,6 +49,49 @@ const ROLE_COLORS: Record<string, string> = {
 const inp = "w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/40 transition-colors placeholder:text-white/20";
 const lbl = "text-[11px] font-semibold text-white/40 uppercase tracking-wide block mb-1.5";
 
+// ── Sign out all other devices ────────────────────────────────────────────────
+function SignOutOtherDevices() {
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+
+  async function handleSignOutOthers() {
+    setStatus("loading");
+    try {
+      const supabase = getClient();
+      await supabase.auth.signOut({ scope: "others" });
+      setStatus("done");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+      <h4 className="text-[14px] font-bold text-white mb-1">Active Sessions</h4>
+      <p className="text-[12px] text-white/40 mb-4">
+        Sign out of all other devices where you&apos;re currently logged in. Your current session stays active.
+      </p>
+      {status === "done" ? (
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-green-500/10 border border-green-500/20 rounded-lg w-fit">
+          <CheckCircle2 size={13} className="text-green-400" />
+          <span className="text-[12px] text-green-300 font-semibold">All other sessions signed out.</span>
+        </div>
+      ) : (
+        <button
+          onClick={handleSignOutOthers}
+          disabled={status === "loading"}
+          className="inline-flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] disabled:opacity-50 text-white/70 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors"
+        >
+          <Lock size={13} />
+          {status === "loading" ? "Signing out…" : "Sign Out All Other Devices"}
+        </button>
+      )}
+      {status === "error" && (
+        <p className="text-[11px] text-red-400 mt-2">Something went wrong. Please try again.</p>
+      )}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   return (
     <Suspense>
@@ -866,29 +909,84 @@ function SettingsInner() {
                 </div>
               ) : (
                 <form onSubmit={handlePasswordChange} className="space-y-3 max-w-sm">
-                  {[
-                    { key: "current" as const, label: "Current Password" },
-                    { key: "next" as const, label: "New Password" },
-                    { key: "confirm" as const, label: "Confirm New Password" },
-                  ].map(({ key, label }) => (
-                    <div key={key}>
-                      <label className={lbl}>{label}</label>
-                      <div className="relative">
-                        <input
-                          type={showPw ? "text" : "password"}
-                          value={pwForm[key]}
-                          onChange={(e) => setPwForm((f) => ({ ...f, [key]: e.target.value }))}
-                          className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 pr-9 text-[13px] text-white outline-none focus:border-amber-500/40"
-                        />
-                        {key === "confirm" && (
-                          <button type="button" onClick={() => setShowPw(!showPw)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                            {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
-                          </button>
+                  {/* Current password */}
+                  <div>
+                    <label className={lbl}>Current Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPw ? "text" : "password"}
+                        name="current-password"
+                        autoComplete="current-password"
+                        value={pwForm.current}
+                        onChange={(e) => setPwForm((f) => ({ ...f, current: e.target.value }))}
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 pr-9 text-[13px] text-white outline-none focus:border-amber-500/40"
+                      />
+                    </div>
+                  </div>
+
+                  {/* New password + strength meter */}
+                  <div>
+                    <label className={lbl}>New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPw ? "text" : "password"}
+                        name="new-password"
+                        autoComplete="new-password"
+                        value={pwForm.next}
+                        onChange={(e) => setPwForm((f) => ({ ...f, next: e.target.value }))}
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 pr-9 text-[13px] text-white outline-none focus:border-amber-500/40"
+                      />
+                    </div>
+                    {pwForm.next.length > 0 && (() => {
+                      const score = [pwForm.next.length >= 8, /[0-9]/.test(pwForm.next), /[^a-zA-Z0-9]/.test(pwForm.next), pwForm.next.length >= 12].filter(Boolean).length;
+                      const levels = [
+                        { label: "Too short", color: "#ef4444", bars: 1 },
+                        { label: "Weak",      color: "#f59e0b", bars: 1 },
+                        { label: "Fair",      color: "#f59e0b", bars: 2 },
+                        { label: "Good",      color: "#22c55e", bars: 3 },
+                        { label: "Strong",    color: "#10b981", bars: 4 },
+                      ];
+                      const lvl = levels[Math.min(score, 4)];
+                      return (
+                        <div className="mt-1.5">
+                          <div className="flex gap-1 mb-1">
+                            {[1,2,3,4].map(i => (
+                              <div key={i} className="h-0.5 flex-1 rounded-full transition-all duration-300"
+                                style={{ backgroundColor: i <= lvl.bars ? lvl.color : "rgba(255,255,255,0.08)" }} />
+                            ))}
+                          </div>
+                          <p className="text-[10px] font-semibold" style={{ color: lvl.color }}>{lvl.label}</p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Confirm password + match indicator */}
+                  <div>
+                    <label className={lbl}>Confirm New Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPw ? "text" : "password"}
+                        name="confirm-password"
+                        autoComplete="new-password"
+                        value={pwForm.confirm}
+                        onChange={(e) => setPwForm((f) => ({ ...f, confirm: e.target.value }))}
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 pr-16 text-[13px] text-white outline-none focus:border-amber-500/40"
+                      />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                        {pwForm.confirm.length > 0 && (
+                          <span className="text-[10px] font-bold"
+                            style={{ color: pwForm.confirm === pwForm.next ? "#10b981" : "#ef4444" }}>
+                            {pwForm.confirm === pwForm.next ? "✓" : "✗"}
+                          </span>
                         )}
+                        <button type="button" onClick={() => setShowPw(!showPw)}
+                          className="text-white/30 hover:text-white/60">
+                          {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
                       </div>
                     </div>
-                  ))}
+                  </div>
 
                   {pwStatus === "error" && (
                     <div className="flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -904,6 +1002,9 @@ function SettingsInner() {
                 </form>
               )}
             </div>
+
+            {/* Sign out other devices */}
+            <SignOutOtherDevices />
 
             {/* 2FA — informational only for now */}
             <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
