@@ -585,12 +585,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .on("postgres_changes", { event: "*", schema: "public", table: "hours_adjustments", filter: `company_id=eq.${companyId}` }, (p) => {
           if (p.eventType === "INSERT") setState((s) => ({ ...s, hoursAdjustments: [...s.hoursAdjustments, dbToHoursAdjustment(p.new as Parameters<typeof dbToHoursAdjustment>[0])] }));
         })
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "crew_messages", filter: `company_id=eq.${companyId}` }, (p) => {
-          const msg = dbToMessage(p.new as DbMessage);
-          setState((s) => {
-            if (s.messages.some((m) => m.id === msg.id)) return s;
-            return { ...s, messages: [...s.messages, msg] };
-          });
+        .on("postgres_changes", { event: "*", schema: "public", table: "crew_messages", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") {
+            const msg = dbToMessage(p.new as DbMessage);
+            setState((s) => {
+              if (s.messages.some((m) => m.id === msg.id)) return s;
+              return { ...s, messages: [...s.messages, msg] };
+            });
+          } else if (p.eventType === "DELETE") {
+            setState((s) => ({ ...s, messages: s.messages.filter((m) => m.id !== (p.old as {id:string}).id) }));
+          }
         })
         .on("postgres_changes", { event: "*", schema: "public", table: "daily_reports", filter: `company_id=eq.${companyId}` }, (p) => {
           if (p.eventType === "INSERT") setState((s) => ({ ...s, dailyReports: [dbToDailyReport(p.new as DbDailyReport), ...s.dailyReports.filter(x => x.id !== (p.new as {id:string}).id)] }));

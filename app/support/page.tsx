@@ -117,9 +117,9 @@ export default function SupportPage() {
         <nav className="lg:hidden sticky top-0 z-50 bg-[#080808]/90 backdrop-blur-xl border-b border-white/[0.05]">
           <div className="px-4 h-14 flex items-center justify-between gap-3">
             {/* Back button */}
-            <Link href="/" className="flex items-center gap-1.5 text-white/55 hover:text-white transition-colors">
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-white/55 hover:text-white transition-colors">
               <ChevronLeft size={18} />
-              <span className="text-[13px] font-semibold">Back</span>
+              <span className="text-[13px] font-semibold">Dashboard</span>
             </Link>
             {/* Logo centered */}
             <Link href="/" className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">

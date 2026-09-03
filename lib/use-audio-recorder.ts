@@ -98,8 +98,6 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         console.error("[audio-recorder] failed to start:", err);
       }
       setState("error");
-      // Auto-reset to idle after showing error briefly
-      setTimeout(() => setState("idle"), 3000);
     }
   }, [supported]);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus } from "lucide-react";
+import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus, Download, ExternalLink } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getClient } from "@/lib/supabase/client";
 import { BlueprintViewer } from "@/components/blueprint-viewer";
@@ -158,7 +158,28 @@ export default function BlueprintsPage() {
         {selectedDoc && (
           <div className="px-4 mt-4">
             <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-2">Selected: {selectedDoc.name}</p>
-            <p className="text-[12px] text-amber-400/70">Open on desktop to view and annotate the blueprint.</p>
+            <div className="flex gap-2 mt-2">
+              {(selectedDoc.publicUrl ?? selectedDoc.dataUrl) && (
+                <a
+                  href={selectedDoc.publicUrl ?? selectedDoc.dataUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 text-[13px] font-bold active:scale-95 transition-transform"
+                >
+                  <ExternalLink size={14} /> Open
+                </a>
+              )}
+              {(selectedDoc.publicUrl ?? selectedDoc.dataUrl) && (
+                <a
+                  href={selectedDoc.publicUrl ?? selectedDoc.dataUrl}
+                  download={selectedDoc.name}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/[0.05] border border-white/[0.07] rounded-xl text-white/60 text-[13px] font-bold active:scale-95 transition-transform"
+                >
+                  <Download size={14} /> Download
+                </a>
+              )}
+            </div>
+            <p className="text-[10px] text-white/20 mt-2 text-center">Pin annotations available on desktop</p>
           </div>
         )}
       </div>

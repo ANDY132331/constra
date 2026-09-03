@@ -3,36 +3,33 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Send, Paperclip, X, Download, Trash2, MessagesSquare,
-  Search, Phone, Info, ChevronLeft, Mic, Video, PhoneCall, PhoneOff,
+  Search, Info, ChevronLeft, Mic, ArrowLeft,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
-import { MicButton } from "@/components/mic-button";
+import { useRouter } from "next/navigation";
 
-// ── Design tokens ────────────────────────────────────────────────────────────
-function useThemeTokens() {
-  const isDark = useStore().theme === "dark";
-  return {
-    sidebarBg:     isDark ? "#111111"                    : "#ffffff",
-    sidebarBorder: isDark ? "rgba(255,255,255,0.06)"    : "rgba(0,0,0,0.07)",
-    activeRow:     isDark ? "rgba(59,130,246,0.08)"     : "#f0f5ff",
-    activeBorder:  "#3b82f6",
-    chatBg:        isDark ? "#0d0d0d"                   : "#f0f4fb",
-    sentGrad:      "linear-gradient(135deg,#4f8ef7,#1d4ed8)",
-    sentText:      "#ffffff",
-    recvBg:        isDark ? "#1e1e1e"                   : "#ffffff",
-    recvText:      isDark ? "#e5e7eb"                   : "#1a1a2e",
-    headerBg:      isDark ? "#111111"                   : "#ffffff",
-    inputBg:       isDark ? "#1c1c1c"                   : "#ffffff",
-    barBg:         isDark ? "#111111"                   : "#f0f4fb",
-    secondaryText: isDark ? "#6b7280"                   : "#8b9ab2",
-    border:        isDark ? "rgba(255,255,255,0.06)"    : "rgba(0,0,0,0.07)",
-    datePill:      isDark ? "rgba(255,255,255,0.07)"    : "rgba(100,116,139,0.15)",
-    titleColor:    isDark ? "#f3f4f6"                   : "#1a1a2e",
-    activeTitle:   isDark ? "#60a5fa"                   : "#1d4ed8",
-    inputBorder:   isDark ? "rgba(255,255,255,0.08)"    : "rgba(0,0,0,0.09)",
-  };
-}
+// ── Design tokens — rich blue messaging palette ───────────────────────────────
+const C = {
+  sidebarBg:     "#0d1117",
+  sidebarBorder: "rgba(96,165,250,0.08)",
+  activeRow:     "rgba(59,130,246,0.12)",
+  activeBorder:  "#3b82f6",
+  chatBg:        "#070c18",
+  sentGrad:      "linear-gradient(135deg,#2563eb,#1e40af)",
+  sentText:      "#ffffff",
+  recvBg:        "#131c2e",
+  recvText:      "#e2e8f0",
+  headerBg:      "#0d1117",
+  inputBg:       "#131c2e",
+  barBg:         "#0d1117",
+  secondaryText: "#4b6a9b",
+  border:        "rgba(96,165,250,0.07)",
+  datePill:      "rgba(96,165,250,0.10)",
+  titleColor:    "#e2e8f0",
+  activeTitle:   "#60a5fa",
+  inputBorder:   "rgba(96,165,250,0.14)",
+};
 
 function fmtTime(d: Date) { return format(d, "h:mm a"); }
 function fmtDur(s: number) {
@@ -52,14 +49,12 @@ function DateSep({ date, datePill, secondaryText }: { date: Date; datePill: stri
 }
 
 export default function MessagesPage() {
-  const C = useThemeTokens();
-  const { projects, messages, addMessage, deleteMessage, currentUser, workers } = useStore();
+  const router = useRouter();
+  const { projects, messages, addMessage, deleteMessage, currentUser } = useStore();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState("");
-  const [showCallSheet, setShowCallSheet] = useState(false);
-  const [activeCallUrl, setActiveCallUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedProjectId && projects[0]?.id) setSelectedProjectId(projects[0].id);
@@ -74,58 +69,22 @@ export default function MessagesPage() {
   const textareaRef  = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Mobile: pin the container between the header (56 px) and mobile nav (4.5 rem)
-  // using JS so we avoid SSR/hydration issues with <style> hoisting in React 19.
+  // When the virtual keyboard opens on mobile, shrink the container so the input
+  // bar stays visible. We use visualViewport (not position:fixed) to avoid the
+  // iOS "fixed inside overflow:auto" bug.
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
-    const apply = () => {
-      const mobile = window.innerWidth < 1024;
-      if (mobile) {
-        const navH = 4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize);
-        const sai  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sat") || "0") || 0;
-        el.style.position     = "fixed";
-        el.style.top          = "56px";
-        el.style.left         = "0";
-        el.style.right        = "0";
-        el.style.bottom       = `${navH}px`;
-        el.style.height       = "auto";
-        el.style.marginTop    = "0";
-        el.style.marginLeft   = "0";
-        el.style.marginRight  = "0";
-        el.style.borderRadius = "0";
-        el.style.borderLeft   = "none";
-        el.style.borderRight  = "none";
-        void sai; // suppress unused warning
-      } else {
-        el.style.position     = "";
-        el.style.top          = "";
-        el.style.left         = "";
-        el.style.right        = "";
-        el.style.bottom       = "";
-        el.style.height       = "calc(100dvh - 168px)";
-        el.style.marginTop    = "";
-        el.style.marginLeft   = "";
-        el.style.marginRight  = "";
-        el.style.borderRadius = "";
-        el.style.borderLeft   = "";
-        el.style.borderRight  = "";
-      }
-    };
-    apply();
-    window.addEventListener("resize", apply);
-    // Also adjust when the virtual keyboard pushes the viewport
     const vv = window.visualViewport;
-    if (vv) {
-      const onVV = () => {
-        if (window.innerWidth < 1024 && containerRef.current) {
-          containerRef.current.style.bottom = `${window.innerHeight - vv.height + 4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)}px`;
-        }
-      };
-      vv.addEventListener("resize", onVV);
-      return () => { window.removeEventListener("resize", apply); vv.removeEventListener("resize", onVV); };
-    }
-    return () => window.removeEventListener("resize", apply);
+    if (!el || !vv) return;
+    const update = () => {
+      if (window.innerWidth >= 1024) { el.style.height = ""; return; }
+      const headerH = 56;
+      const navH = 4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+      el.style.height = `${Math.max(vv.height - headerH - navH, 200)}px`;
+    };
+    vv.addEventListener("resize", update);
+    window.addEventListener("resize", update);
+    return () => { vv.removeEventListener("resize", update); window.removeEventListener("resize", update); };
   }, []);
 
   const projectMessages = useMemo(
@@ -171,21 +130,6 @@ export default function MessagesPage() {
     textareaRef.current?.focus();
   }, [text, pendingAttachment, selectedProjectId, addMessage, currentUser]);
 
-  const handleAudio = useCallback((dataUrl: string, durationSeconds: number) => {
-    if (!selectedProjectId) return;
-    addMessage({
-      projectId: selectedProjectId,
-      senderId: currentUser.id,
-      senderName: currentUser.name,
-      senderInitials: currentUser.initials,
-      senderColor: currentUser.color,
-      text: "",
-      timestamp: new Date(),
-      attachmentName: `voice-${durationSeconds}s.webm`,
-      attachmentData: dataUrl,
-    });
-  }, [selectedProjectId, addMessage, currentUser]);
-
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
@@ -200,46 +144,39 @@ export default function MessagesPage() {
 
   const project = projects.find((p) => p.id === selectedProjectId);
 
-  // Call helpers
-  const jitsiRoom = project ? `constra-${project.id.replace(/-/g, "").slice(0, 12)}` : "";
-  const projectWorkers = useMemo(
-    () => workers.filter((w) => project?.workerIds.includes(w.id)),
-    [workers, project],
-  );
-  const isApple = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
-
   // Filtered sidebar projects
   const filteredProjects = useMemo(() => {
     const q = sidebarSearch.toLowerCase();
     return projects.filter((p) => !q || p.name.toLowerCase().includes(q));
   }, [projects, sidebarSearch]);
 
-  function startCall(type: "audio" | "video") {
-    const url = type === "audio"
-      ? `https://meet.jit.si/${jitsiRoom}?config.startWithVideoMuted=true&config.startAudioOnly=true&config.prejoinPageEnabled=false`
-      : `https://meet.jit.si/${jitsiRoom}?config.startWithVideoMuted=false&config.prejoinPageEnabled=false`;
-    setShowCallSheet(false);
-    setActiveCallUrl(url);
-  }
-
   return (
     <>
       <div
         ref={containerRef}
-        className="flex overflow-hidden rounded-2xl shadow-xl"
-        style={{ height: "calc(100dvh - 168px)", border: `1px solid ${C.border}` }}
+        className="flex overflow-hidden"
+        style={{ height: "100dvh", background: C.chatBg }}
       >
         {/* ══════════════════════════════ SIDEBAR ════════════════════════════ */}
         <div
-          className={`flex-shrink-0 flex flex-col ${mobileSidebarOpen ? "flex" : "hidden"} sm:flex w-full sm:w-[280px]`}
+          className={`flex-shrink-0 flex flex-col ${mobileSidebarOpen ? "flex" : "hidden"} sm:flex w-full sm:w-[300px]`}
           style={{ background: C.sidebarBg, borderRight: `1px solid ${C.border}` }}
         >
           {/* Sidebar header */}
-          <div className="px-4 pt-4 pb-3 border-b" style={{ borderColor: C.border }}>
+          <div className="px-4 pb-3 border-b" style={{ borderColor: C.border, paddingTop: "max(16px, env(safe-area-inset-top))" }}>
+            {/* Back to dashboard */}
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="flex items-center gap-1.5 mb-3 -ml-1 px-2 py-1 rounded-lg transition-colors active:scale-95"
+              style={{ color: C.activeTitle }}
+            >
+              <ArrowLeft size={16} />
+              <span className="text-[13px] font-semibold">Dashboard</span>
+            </button>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[17px] font-black" style={{ color: C.titleColor }}>Messages</h2>
+              <h2 className="text-[20px] font-black" style={{ color: C.titleColor }}>Messages</h2>
               <div className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold"
-                style={{ background: currentUser.color + "25", color: currentUser.color }}>
+                style={{ background: currentUser.color + "30", color: currentUser.color }}>
                 {currentUser.initials}
               </div>
             </div>
@@ -337,22 +274,6 @@ export default function MessagesPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setShowCallSheet(true)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full transition-all active:scale-90"
-                    style={{ background: "rgba(34,197,94,0.12)" }}
-                    title="Voice call"
-                  >
-                    <Phone size={16} style={{ color: "#22c55e" }} />
-                  </button>
-                  <button
-                    onClick={() => setShowCallSheet(true)}
-                    className="w-9 h-9 flex items-center justify-center rounded-full transition-all active:scale-90"
-                    style={{ background: "rgba(59,130,246,0.12)" }}
-                    title="Video call"
-                  >
-                    <Video size={16} style={{ color: "#3b82f6" }} />
-                  </button>
                   <button
                     className="w-9 h-9 flex items-center justify-center rounded-full transition-all hover:bg-white/5"
                     title="Project info"
@@ -591,152 +512,18 @@ export default function MessagesPage() {
               />
             </div>
 
-            {/* Send / mic */}
-            {text.trim() || pendingAttachment ? (
-              <button
-                onClick={sendMessage}
-                className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90"
-                style={{ background: C.sentGrad }}
-              >
-                <Send size={18} className="text-white" style={{ marginLeft: 2 }} />
-              </button>
-            ) : (
-              <div className="flex-shrink-0">
-                <MicButton onAudio={handleAudio} variant="light" size="md" />
-              </div>
-            )}
+            {/* Send */}
+            <button
+              onClick={sendMessage}
+              disabled={!text.trim() && !pendingAttachment}
+              className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90 disabled:opacity-40"
+              style={{ background: C.sentGrad }}
+            >
+              <Send size={18} className="text-white" style={{ marginLeft: 2 }} />
+            </button>
           </div>
         </div>
       </div>
-
-      {/* ── In-app call overlay ─────────────────────────────────────────────── */}
-      {activeCallUrl && (
-        <div className="fixed inset-0 z-[200] flex flex-col bg-black">
-          {/* Call header */}
-          <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
-            <div>
-              <p className="text-white font-black text-[15px]">{project?.name}</p>
-              <p className="text-white/50 text-[12px]">Live call · Jitsi Meet</p>
-            </div>
-            <button
-              onClick={() => setActiveCallUrl(null)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-[13px] text-white transition-all active:scale-95"
-              style={{ background: "#ef4444" }}
-            >
-              <PhoneOff size={15} />
-              End
-            </button>
-          </div>
-          {/* Jitsi iframe */}
-          <iframe
-            src={activeCallUrl}
-            allow="camera; microphone; display-capture; fullscreen; autoplay; clipboard-write"
-            className="flex-1 w-full"
-            style={{ border: "none" }}
-          />
-        </div>
-      )}
-
-      {/* ── Call sheet ──────────────────────────────────────────────────────── */}
-      {showCallSheet && project && (
-        <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center" onClick={() => setShowCallSheet(false)}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div
-            className="relative w-full sm:w-[400px] rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl"
-            style={{ background: C.headerBg, border: `1px solid ${C.border}`, paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 rounded-full mx-auto mb-4 sm:hidden" style={{ background: C.border }} />
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-[16px] font-black" style={{ color: C.titleColor }}>{project.name}</p>
-                <p className="text-[12px]" style={{ color: C.secondaryText }}>Start a call with your team</p>
-              </div>
-              <button onClick={() => setShowCallSheet(false)} className="w-8 h-8 flex items-center justify-center rounded-full" style={{ background: C.barBg }}>
-                <X size={15} style={{ color: C.secondaryText }} />
-              </button>
-            </div>
-
-            {/* Main call buttons */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <button
-                onClick={() => startCall("audio")}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all active:scale-95"
-                style={{ background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.2)" }}
-              >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(34,197,94,0.15)" }}>
-                  <PhoneCall size={22} style={{ color: "#22c55e" }} />
-                </div>
-                <span className="text-[13px] font-bold" style={{ color: "#22c55e" }}>Voice Call</span>
-                <span className="text-[10px]" style={{ color: C.secondaryText }}>In-app</span>
-              </button>
-
-              <button
-                onClick={() => startCall("video")}
-                className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all active:scale-95"
-                style={{ background: "rgba(59,130,246,0.10)", border: "1px solid rgba(59,130,246,0.2)" }}
-              >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.15)" }}>
-                  <Video size={22} style={{ color: "#3b82f6" }} />
-                </div>
-                <span className="text-[13px] font-bold" style={{ color: "#3b82f6" }}>Video Call</span>
-                <span className="text-[10px]" style={{ color: C.secondaryText }}>In-app</span>
-              </button>
-            </div>
-
-            {/* Per-worker direct contact */}
-            {projectWorkers.length > 0 && (
-              <>
-                <p className="text-[11px] font-black uppercase tracking-widest mb-3" style={{ color: C.secondaryText }}>Direct Contact</p>
-                <div className="flex flex-col gap-2 max-h-52 overflow-y-auto">
-                  {projectWorkers.map((w) => (
-                    <div key={w.id} className="flex items-center gap-3 py-2.5 px-3 rounded-xl" style={{ background: C.barBg }}>
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-black"
-                        style={{ background: w.color + "25", color: w.color }}>
-                        {w.initials}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold truncate" style={{ color: C.titleColor }}>{w.name}</p>
-                        <p className="text-[11px] truncate" style={{ color: C.secondaryText }}>{w.customRole || w.role}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        {w.phone && (
-                          <a href={`tel:${w.phone}`} onClick={() => setShowCallSheet(false)}
-                            className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            style={{ background: "rgba(34,197,94,0.12)" }}>
-                            <Phone size={13} style={{ color: "#22c55e" }} />
-                          </a>
-                        )}
-                        {isApple && (w.phone || w.email) && (
-                          <a
-                            href={`facetime://${w.phone || w.email}`}
-                            onClick={() => setShowCallSheet(false)}
-                            className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            style={{ background: "rgba(0,200,83,0.12)" }}
-                          >
-                            <Video size={13} style={{ color: "#00c853" }} />
-                          </a>
-                        )}
-                        {w.email && (
-                          <a href={`mailto:${w.email}`} onClick={() => setShowCallSheet(false)}
-                            className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            style={{ background: "rgba(59,130,246,0.12)" }}>
-                            <PhoneOff size={11} style={{ color: "#3b82f6" }} />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <p className="text-[10px] text-center mt-4" style={{ color: C.secondaryText }}>
-              Calls use Jitsi Meet — free, secure, no account needed
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* ── Image lightbox ──────────────────────────────────────────────────── */}
       {lightboxData && (

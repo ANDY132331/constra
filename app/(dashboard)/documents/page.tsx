@@ -60,6 +60,23 @@ export default function DocumentsPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const versionInputRef = useRef<HTMLInputElement>(null);
+  const pdfBlobRef = useRef<string | null>(null);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+  const isIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+  // Convert data:application/pdf → blob URL (Chrome blocks data: URIs in iframes)
+  useEffect(() => {
+    if (pdfBlobRef.current) { URL.revokeObjectURL(pdfBlobRef.current); pdfBlobRef.current = null; }
+    setPdfBlobUrl(null);
+    const dataUrl = previewDoc?.dataUrl;
+    if (!dataUrl?.startsWith("data:application/pdf")) return;
+    fetch(dataUrl).then(r => r.blob()).then(blob => {
+      const url = URL.createObjectURL(blob);
+      pdfBlobRef.current = url;
+      setPdfBlobUrl(url);
+    }).catch(() => {});
+    return () => { if (pdfBlobRef.current) { URL.revokeObjectURL(pdfBlobRef.current); pdfBlobRef.current = null; } };
+  }, [previewDoc?.dataUrl]);
 
   const filteredDocs = useMemo(() => {
     return documents.filter((d) => {
@@ -439,10 +456,34 @@ export default function DocumentsPage() {
               </div>
             </div>
             <div className="flex-1 overflow-auto p-5 flex items-center justify-center bg-[#0d0d0d]">
-              {previewDoc.dataUrl?.startsWith("data:image") ? (
+              {previewDoc.dataUrl?.startsWith("data:image") || (previewDoc.dataUrl?.startsWith("https://") && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(previewDoc.dataUrl)) ? (
                 <img src={previewDoc.dataUrl} alt={previewDoc.name} className="max-w-full max-h-full object-contain rounded-lg" />
               ) : previewDoc.dataUrl?.startsWith("data:application/pdf") ? (
-                <iframe src={previewDoc.dataUrl} className="w-full h-[60vh] rounded-lg" title={previewDoc.name} />
+                isIOS ? (
+                  <div className="text-center">
+                    <File size={48} className="text-white/20 mx-auto mb-3" />
+                    <p className="text-[13px] text-white/50 mb-4">PDF preview not supported on iOS Safari</p>
+                    {pdfBlobUrl && (
+                      <a href={pdfBlobUrl} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-xl transition-colors">
+                        <Download size={14} /> Open PDF
+                      </a>
+                    )}
+                  </div>
+                ) : pdfBlobUrl ? (
+                  <iframe src={pdfBlobUrl} className="w-full h-[60vh] rounded-lg border-0" title={previewDoc.name} />
+                ) : (
+                  <div className="text-white/30 text-[13px]">Loading PDF…</div>
+                )
+              ) : previewDoc.dataUrl?.startsWith("https://") && /\.pdf(\?|$)/i.test(previewDoc.dataUrl) ? (
+                isIOS ? (
+                  <a href={previewDoc.dataUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-xl transition-colors">
+                    <Download size={14} /> Open PDF
+                  </a>
+                ) : (
+                  <iframe src={previewDoc.dataUrl} className="w-full h-[60vh] rounded-lg border-0" title={previewDoc.name} />
+                )
               ) : (
                 <div className="text-center">
                   <File size={48} className="text-white/20 mx-auto mb-3" />

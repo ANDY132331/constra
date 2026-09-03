@@ -109,51 +109,60 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       {/* ── App shell — only mount after auth resolves ── */}
       {!isLoading && onboarded && (
         <I18nProvider locale={language}>
-          <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#0a0a0a]">
-            {sidebarOpen && (
-              <div
-                className="mobile-overlay fixed inset-0 z-40 bg-black/55 lg:hidden"
-                onClick={() => setSidebarOpen(false)}
-              />
-            )}
-            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-              <Header onMenuClick={() => setSidebarOpen((v) => !v)} />
-              <main ref={mainRef} className="flex-1 overflow-y-auto p-4 md:p-6 lg:pb-6 bg-[#0a0a0a]" style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}>
-                {(pullY > 8 || refreshing) && (
-                  <div
-                    className="fixed left-0 right-0 z-30 flex items-center justify-center pointer-events-none lg:hidden"
-                    style={{
-                      top: 56,
-                      transform: `translateY(${Math.min(pullY, 72) - 72}px)`,
-                      opacity: Math.min(pullY / 36, 1),
-                      transition: refreshing ? "none" : "transform 0.08s, opacity 0.08s",
-                    }}
-                  >
-                    <div className="bg-[#1a1a1a] border border-white/10 rounded-full px-3 py-1.5 flex items-center gap-2 shadow-xl">
-                      <RefreshCw
-                        size={13}
-                        className={`text-amber-400 flex-shrink-0 ${refreshing ? "animate-spin" : ""}`}
-                        style={{ transform: refreshing ? undefined : `rotate(${(pullY / 72) * 180}deg)` }}
-                      />
-                      <span className="text-[11px] text-white/50 font-medium">
-                        {refreshing ? "Refreshing…" : pullY >= 72 ? "Release to refresh" : "Pull to refresh"}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {/* key=pathname re-mounts this div on every navigation → triggers page-enter animation */}
-                <div key={pathname} className="page-enter">
-                  <ErrorBoundary>{children}</ErrorBoundary>
-                </div>
-              </main>
+          {pathname === "/messages" ? (
+            /* ── Full-screen standalone messaging shell ── */
+            <div className="h-[100dvh] w-screen overflow-hidden" style={{ background: "#070c18" }}>
+              <ErrorBoundary>{children}</ErrorBoundary>
+              <OfflineBanner />
+              <NotifPermissionPrompt />
             </div>
-            <MobileNav />
-            <AIChatWidget />
-            <SearchModal />
-            <OfflineBanner />
-            <NotifPermissionPrompt />
-          </div>
+          ) : (
+            /* ── Standard dashboard shell ── */
+            <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#0a0a0a]">
+              {sidebarOpen && (
+                <div
+                  className="mobile-overlay fixed inset-0 z-40 bg-black/55 lg:hidden"
+                  onClick={() => setSidebarOpen(false)}
+                />
+              )}
+              <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+              <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+                <Header onMenuClick={() => setSidebarOpen((v) => !v)} />
+                <main ref={mainRef} className="flex-1 overflow-y-auto p-4 md:p-6 lg:pb-6 bg-[#0a0a0a]" style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}>
+                  {(pullY > 8 || refreshing) && (
+                    <div
+                      className="fixed left-0 right-0 z-30 flex items-center justify-center pointer-events-none lg:hidden"
+                      style={{
+                        top: 56,
+                        transform: `translateY(${Math.min(pullY, 72) - 72}px)`,
+                        opacity: Math.min(pullY / 36, 1),
+                        transition: refreshing ? "none" : "transform 0.08s, opacity 0.08s",
+                      }}
+                    >
+                      <div className="bg-[#1a1a1a] border border-white/10 rounded-full px-3 py-1.5 flex items-center gap-2 shadow-xl">
+                        <RefreshCw
+                          size={13}
+                          className={`text-amber-400 flex-shrink-0 ${refreshing ? "animate-spin" : ""}`}
+                          style={{ transform: refreshing ? undefined : `rotate(${(pullY / 72) * 180}deg)` }}
+                        />
+                        <span className="text-[11px] text-white/50 font-medium">
+                          {refreshing ? "Refreshing…" : pullY >= 72 ? "Release to refresh" : "Pull to refresh"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <div key={pathname} className="page-enter">
+                    <ErrorBoundary>{children}</ErrorBoundary>
+                  </div>
+                </main>
+              </div>
+              <MobileNav />
+              <AIChatWidget />
+              <SearchModal />
+              <OfflineBanner />
+              <NotifPermissionPrompt />
+            </div>
+          )}
         </I18nProvider>
       )}
 

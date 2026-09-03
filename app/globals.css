@@ -524,3 +524,31 @@ button, a, [role="button"], input, select, textarea {
     min-height: 44px;
   }
 }
+
+/* ── Messages page: full-screen chat layout ──────────────────────────────
+   On mobile the main element gets .messages-main which strips its padding
+   and overflow so the chat container can fill from header to mobile-nav.
+   On desktop (≥1024 px) we restore normal scroll + padding for the
+   rounded-card look.                                                       */
+@media (max-width: 1023px) {
+  .messages-main {
+    overflow: hidden !important;
+    padding: 0 !important;
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
+  }
+  /* The page-enter wrapper must stretch to fill the whole main on mobile */
+  .messages-main > div {
+    height: 100%;
+  }
+}
+
+/* ── Global scroll smoothness ──────────────────────────────────────────────── */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+/* Prevent scroll chaining / bounce on nested scroll containers */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto {
+  overscroll-behavior: contain;
+}

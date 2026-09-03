@@ -36,34 +36,54 @@ function AudioMicButton({
 
   // ── Error state ─────────────────────────────────────────────────────────────
   if (isError) {
-    const msg = error === "permission-denied"
-      ? "Mic blocked"
-      : error === "not-supported"
-      ? "No mic found"
-      : "Mic failed";
-
-    if (variant === "light") {
+    // Permission denied: user must enable mic in browser/OS settings.
+    if (error === "permission-denied") {
       return (
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-[11px] text-red-500 font-semibold bg-red-50 border border-red-200 rounded-lg px-2 py-1 flex items-center gap-1">
+          <span className={`text-[11px] font-semibold rounded-lg px-2 py-1 flex items-center gap-1 ${
+            variant === "light"
+              ? "text-red-500 bg-red-50 border border-red-200"
+              : "text-red-400 bg-red-500/10 border border-red-500/20"
+          }`}>
             <AlertCircle size={11} />
-            {msg}
+            Mic blocked
           </span>
-          {error !== "not-supported" && (
-            <button
-              type="button"
-              onClick={() => { clearError(); start(); }}
-              className="text-[11px] font-semibold text-blue-500 underline underline-offset-2"
-            >
-              Retry
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              // On iOS/Android open app settings; on desktop just retry
+              if (navigator.permissions) {
+                navigator.permissions.query({ name: "microphone" as PermissionName }).then((s) => {
+                  if (s.state === "denied") {
+                    alert("Microphone is blocked. Go to your browser Settings → Site Permissions → Microphone and allow access, then retry.");
+                  } else {
+                    clearError();
+                    start();
+                  }
+                }).catch(() => { clearError(); start(); });
+              } else {
+                clearError();
+                start();
+              }
+            }}
+            className={`text-[11px] font-semibold underline underline-offset-2 ${
+              variant === "light" ? "text-blue-500" : "text-blue-400"
+            }`}
+          >
+            Fix
+          </button>
         </div>
       );
     }
+
+    const msg = error === "not-supported" ? "No mic found" : "Mic failed";
     return (
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        <span className="text-[11px] text-red-400 font-semibold bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1 flex items-center gap-1">
+        <span className={`text-[11px] font-semibold rounded-lg px-2 py-1 flex items-center gap-1 ${
+          variant === "light"
+            ? "text-red-500 bg-red-50 border border-red-200"
+            : "text-red-400 bg-red-500/10 border border-red-500/20"
+        }`}>
           <AlertCircle size={11} />
           {msg}
         </span>
@@ -71,7 +91,9 @@ function AudioMicButton({
           <button
             type="button"
             onClick={() => { clearError(); start(); }}
-            className="text-[11px] font-semibold text-blue-400 underline underline-offset-2"
+            className={`text-[11px] font-semibold underline underline-offset-2 ${
+              variant === "light" ? "text-blue-500" : "text-blue-400"
+            }`}
           >
             Retry
           </button>
