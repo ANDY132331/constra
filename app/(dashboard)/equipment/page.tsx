@@ -9,6 +9,7 @@ import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { isAdminOrAbove } from "@/lib/permissions";
 
 const STATUS_CONFIG = {
   available:   { label: "Available",   className: "bg-green-500/15 text-green-400",  dot: "#22c55e" },
@@ -34,7 +35,8 @@ const blank: EqForm = {
 };
 
 export default function EquipmentPage() {
-  const { equipment, projects, addEquipment, updateEquipment, deleteEquipment, getProjectById, currency } = useStore();
+  const { equipment, projects, addEquipment, updateEquipment, deleteEquipment, getProjectById, currency, currentUser } = useStore();
+  const isAdmin = isAdminOrAbove(currentUser.role);
   const t = useT();
   const prefill = useSearchPrefill("/equipment");
   const [search, setSearch] = useState("");

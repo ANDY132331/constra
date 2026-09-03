@@ -241,6 +241,7 @@ export default function CrewPage() {
   });
 
   const clockedIn = workers.filter((w) => w.clockedIn).length;
+  const isAdmin = isAdminOrAbove(currentUser.role);
   const canSeeFinancials = currentUser.role === "Admin" || currentUser.role === "Project Manager";
   const canEdit = currentUser.role === "Admin" || currentUser.role === "Project Manager";
 
