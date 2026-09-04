@@ -58,19 +58,21 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   const { pullY, refreshing } = usePullToRefresh(mainRef, handleRefresh);
 
   // ── Splash screen state ─────────────────────────────────────────────────────
-  // Keep the SplashScreen mounted throughout loading so its CSS animation runs
-  // continuously — no restart flash when auth resolves. When isLoading goes
-  // false we wait ~900 ms (enough for the animation to finish its main beats)
-  // then trigger the exit transition, and unmount 700 ms after that.
-  const [splashExiting, setSplashExiting] = useState(false);
-  const [splashGone,    setSplashGone]    = useState(false);
+  // If the app is already booted when this layout mounts (e.g. client-side
+  // navigation back into the dashboard), skip the splash entirely so it never
+  // flickers. On a fresh load isLoading starts true, so splashGone = false and
+  // the animation plays normally. Once isLoading flips false we wait briefly
+  // (animation beats) then trigger the exit, and unmount 500 ms after that.
+  const [splashExiting, setSplashExiting] = useState(() => !isLoading);
+  const [splashGone,    setSplashGone]    = useState(() => !isLoading);
 
   useEffect(() => {
-    if (!isLoading) {
-      const t1 = setTimeout(() => setSplashExiting(true), 900);
-      const t2 = setTimeout(() => setSplashGone(true),    900 + 700);
+    if (!isLoading && !splashGone) {
+      const t1 = setTimeout(() => setSplashExiting(true), 300);
+      const t2 = setTimeout(() => setSplashGone(true),    300 + 500);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
   // ───────────────────────────────────────────────────────────────────────────
 

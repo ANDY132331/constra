@@ -134,9 +134,9 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
       sidebar-slide
       fixed inset-y-0 left-0 z-50 flex flex-col w-[240px] min-w-[240px] h-full
       bg-[#0d0d0d] border-r border-white/[0.06] overflow-hidden
-      transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]
+      transition-transform duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]
       lg:static lg:translate-x-0 lg:z-auto
-      ${open ? "translate-x-0" : "-translate-x-full"}
+      ${open ? "translate-x-0 shadow-[8px_0_40px_rgba(0,0,0,0.6)]" : "-translate-x-full"}
     `}>
       {/* Logo */}
       <div className="flex items-center justify-between px-5 h-14 border-b border-white/[0.06] flex-shrink-0">

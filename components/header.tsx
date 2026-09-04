@@ -45,11 +45,15 @@ const ALL_QUICK_ADD = [
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => void) {
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const handler = (e: Event) => {
       if (ref.current && !ref.current.contains(e.target as Node)) cb();
     };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
   }, [ref, cb]);
 }
 

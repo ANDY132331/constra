@@ -30,7 +30,7 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden select-none"
       style={{
         background: "#080808",
-        transition: "opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)",
+        transition: "opacity 0.5s cubic-bezier(0.4,0,0.2,1), transform 0.5s cubic-bezier(0.4,0,0.2,1)",
         opacity: exiting ? 0 : 1,
         transform: exiting ? "scale(1.06)" : "scale(1)",
         pointerEvents: exiting ? "none" : "auto",

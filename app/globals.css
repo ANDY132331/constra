@@ -542,13 +542,46 @@ button, a, [role="button"], input, select, textarea {
   }
 }
 
-/* ── Global scroll smoothness ──────────────────────────────────────────────── */
-* {
+/* ── Global mobile polish ───────────────────────────────────────────────────── */
+
+/* Momentum scrolling on iOS for all scroll containers */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto,
+.overflow-y-scroll,
+.overflow-x-scroll {
   -webkit-overflow-scrolling: touch;
 }
-/* Prevent scroll chaining / bounce on nested scroll containers */
+
+/* Prevent scroll chaining / bounce on nested containers */
 .overflow-y-auto,
 .overflow-x-auto,
 .overflow-auto {
   overscroll-behavior: contain;
+}
+
+/* Kill the blue tap highlight on mobile (iOS/Android) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent font size inflation on iOS landscape */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Hardware-accelerate the main scroll area */
+main {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Smoother page entrance — reduce Y travel on mobile (less jumpy) */
+@media (pointer: coarse) {
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .page-enter { animation-duration: 0.18s; }
 }
