@@ -34,10 +34,10 @@ const PAGE_MIN_LEVEL: Record<string, "foreman" | "admin"> = {
 function LayoutInner({ children }: { children: React.ReactNode }) {
   const { language, onboarded, isLoading, currentUser, theme } = useStore();
 
-  // Apply data-theme to <html> so CSS variables cascade everywhere
+  // Sync theme reactively when user switches in the header toggle
+  // (Global ThemeApplier in root layout handles the initial value)
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    return () => { document.documentElement.removeAttribute("data-theme"); };
   }, [theme]);
   const router = useRouter();
   const pathname = usePathname();

@@ -585,3 +585,106 @@ main {
   }
   .page-enter { animation-duration: 0.18s; }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   THEME TRANSITION — smooth color shift when toggling dark ↔ light
+   Only applies to background and color, not layout props, so there
+   is no jank on page-load (the inline script sets data-theme first).
+   ══════════════════════════════════════════════════════════════════ */
+html[data-theme] body,
+html[data-theme] header,
+html[data-theme] aside,
+html[data-theme] nav,
+html[data-theme] main,
+html[data-theme] footer {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LIGHT MODE — deeper refinements (supplements the override block above)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Sidebar: raised card look in light */
+[data-theme="light"] aside {
+  background: #ffffff !important;
+  border-right-color: rgba(0,0,0,0.09) !important;
+  box-shadow: 2px 0 16px rgba(0,0,0,0.06) !important;
+}
+
+/* Header: crisp top bar in light */
+[data-theme="light"] header {
+  background: rgba(255,255,255,0.95) !important;
+  border-bottom-color: rgba(0,0,0,0.09) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Main content area */
+[data-theme="light"] main {
+  background: #f5f5f5 !important;
+}
+
+/* Cards and surfaces in light mode */
+[data-theme="light"] .bg-\[\#0a0a0a\],
+[data-theme="light"] .bg-\[\#080808\],
+[data-theme="light"] .bg-\[\#0d0d0d\] {
+  background-color: #f5f5f5 !important;
+}
+[data-theme="light"] .bg-\[\#111\],
+[data-theme="light"] .bg-\[\#111111\] {
+  background-color: #efefef !important;
+}
+[data-theme="light"] .bg-\[\#161616\],
+[data-theme="light"] .bg-\[\#141414\] {
+  background-color: #e8e8e8 !important;
+}
+[data-theme="light"] .bg-\[\#1a1a1a\] {
+  background-color: #e0e0e0 !important;
+}
+
+/* Shadows in light mode (cards, dropdowns) */
+[data-theme="light"] .shadow-2xl {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08) !important;
+}
+[data-theme="light"] .shadow-xl {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+
+/* Active nav item in light mode */
+[data-theme="light"] .bg-amber-500\/10 {
+  background-color: rgba(245,196,0,0.12) !important;
+}
+
+/* Popover / dropdown backgrounds */
+[data-theme="light"] .bg-\[\#1a1a1a\].border {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.10) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14) !important;
+}
+
+/* Skeleton shimmer in light mode */
+[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.07) 50%, rgba(0,0,0,0.04) 75%);
+  background-size: 600px 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DARK MODE — subtle depth improvements
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Sidebar: slightly lighter than the black body for depth */
+:root:not([data-theme="light"]) aside {
+  background: #0d0d0d;
+  box-shadow: 2px 0 0 rgba(255,255,255,0.04);
+}
+
+/* Header: floating feel in dark */
+:root:not([data-theme="light"]) header {
+  background: rgba(13,13,13,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}

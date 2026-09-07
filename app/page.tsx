@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   HardHat, Clock, ShieldCheck, FileText, BarChart3,
@@ -157,7 +158,40 @@ const FEATURES = [
 const TRADES = ["General Contracting","Civil / Utilities","Electrical","Plumbing","HVAC","Roofing","Concrete & Masonry","Steel / Structural","Framing","Drywall","Flooring","Painting","Excavation","Landscaping","Insulation"];
 
 // ─── Component ────────────────────────────────────────────────────────────────
+// Auth check: synchronous localStorage read so we don't flash the landing page
+// for users who are already signed in — they get sent straight to dashboard.
+function isAlreadyOnboarded(): boolean {
+  try {
+    const raw = localStorage.getItem("constra_v1");
+    if (!raw) return false;
+    const data = JSON.parse(raw) as { onboarded?: boolean };
+    return data?.onboarded === true;
+  } catch {
+    return false;
+  }
+}
+
 export default function LandingPage() {
+  const router = useRouter();
+  // Read once on mount — if already onboarded, redirect immediately
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (isAlreadyOnboarded()) {
+      router.replace("/dashboard");
+      // keep checking=true so we render a blank page, not the full landing page
+    } else {
+      setChecking(false);
+    }
+  }, [router]);
+
+  // Render nothing while we check auth state — prevents landing page flash
+  if (checking) {
+    return (
+      <div style={{ background: "#080808", width: "100vw", height: "100vh" }} aria-hidden="true" />
+    );
+  }
+
   useEffect(() => {
     let cancelled = false;
 

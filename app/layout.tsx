@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { StoreProvider } from "@/lib/store";
 import PwaInstall from "@/components/pwa-install";
+import { ThemeApplier } from "@/components/theme-applier";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -69,9 +70,20 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Inline script: apply saved theme before React hydrates to prevent flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('constra_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="bg-[#0a0a0a] text-foreground">
         <StoreProvider>
+          {/* Keeps data-theme in sync with the store everywhere in the app */}
+          <ThemeApplier />
           {children}
           <PwaInstall />
           <Analytics />
