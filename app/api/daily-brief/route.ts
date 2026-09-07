@@ -7,13 +7,17 @@ import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 type BriefPayload = {
   workerCount: number;
   clockedInWorkers: Array<{ name: string; role: string; project: string; hoursIn: number }>;
-  activeProjects: Array<{ name: string; progress: number; tasksTotal: number; tasksDue: number; tasksOverdue: number }>;
+  activeProjects: Array<{ name: string; progress: number; tasksTotal: number; tasksDue: number; tasksOverdue: number; budgetPct?: number | null }>;
   tasksDueToday: Array<{ name: string; project: string; worker: string; overdue: boolean }>;
   openPunchItems: number;
   highPriorityPunchItems: number;
   safetyIncidentsThisWeek: number;
   companyName: string;
   currentTime: string;
+  // Financial
+  totalOutstanding?: number;
+  overdueInvoices?: Array<{ number: string; amount: number; client: string; daysOverdue: number }>;
+  overBudgetProjects?: Array<{ name: string; budgetPct: number | null }>;
 };
 
 function generateBrief(data: BriefPayload): string {
@@ -85,9 +89,38 @@ function generateBrief(data: BriefPayload): string {
     lines.push("");
   }
 
+  // Financial alerts
+  const hasFinancial =
+    (data.overdueInvoices && data.overdueInvoices.length > 0) ||
+    (data.overBudgetProjects && data.overBudgetProjects.length > 0) ||
+    (data.totalOutstanding && data.totalOutstanding > 0);
+
+  if (hasFinancial) {
+    lines.push("**Money**");
+    if (data.overdueInvoices && data.overdueInvoices.length > 0) {
+      data.overdueInvoices.slice(0, 3).forEach((inv) => {
+        lines.push(`🚨 Invoice ${inv.number} — $${inv.amount.toLocaleString()} from ${inv.client} is ${inv.daysOverdue} days overdue.`);
+      });
+      if (data.overdueInvoices.length > 3) {
+        lines.push(`• …and ${data.overdueInvoices.length - 3} more overdue invoices.`);
+      }
+    }
+    if (data.totalOutstanding && data.totalOutstanding > 0 && (!data.overdueInvoices || data.overdueInvoices.length === 0)) {
+      lines.push(`$${data.totalOutstanding.toLocaleString()} outstanding in unpaid invoices.`);
+    }
+    if (data.overBudgetProjects && data.overBudgetProjects.length > 0) {
+      data.overBudgetProjects.forEach((p) => {
+        lines.push(`⚠ ${p.name} has used ${p.budgetPct}% of its budget.`);
+      });
+    }
+    lines.push("");
+  }
+
   // Action items
   const actions: string[] = [];
   if (data.safetyIncidentsThisWeek > 0) actions.push("Review this week's safety incidents before crew mobilises");
+  if (data.overdueInvoices && data.overdueInvoices.length > 0) actions.push(`Chase ${data.overdueInvoices.length} overdue invoice${data.overdueInvoices.length > 1 ? "s" : ""} — cash flow at risk`);
+  if (data.overBudgetProjects && data.overBudgetProjects.length > 0) actions.push(`Review budget on ${data.overBudgetProjects.map((p) => p.name).join(", ")}`);
   if (data.highPriorityPunchItems > 0) actions.push(`Clear ${data.highPriorityPunchItems} high-priority punch item${data.highPriorityPunchItems > 1 ? "s" : ""}`);
   if (overdue.length > 0) actions.push(`Follow up on ${overdue.length} overdue task${overdue.length > 1 ? "s" : ""} — delays compound`);
   if (due.length > 0) actions.push(`${due.length} task${due.length > 1 ? "s" : ""} due today — confirm assignments are clear`);

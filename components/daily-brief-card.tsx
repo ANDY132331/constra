@@ -41,8 +41,13 @@ function BriefLine({ line }: { line: string }) {
   );
 }
 
+function invTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
+  const sub = inv.items.reduce((s, it) => s + it.qty * it.rate, 0);
+  return sub * (1 + inv.taxRate / 100);
+}
+
 export function DailyBriefCard() {
-  const { workers, projects, punchItems, safetyIncidents, companyName } = useStore();
+  const { workers, projects, punchItems, safetyIncidents, companyName, invoices } = useStore();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +77,8 @@ export function DailyBriefCard() {
         const tasksOverdue = p.tasks.filter(
           (t) => t.status !== "completed" && t.endDate < now
         ).length;
-        return { name: p.name, progress: p.progress, tasksTotal: p.tasks.length, tasksDue, tasksOverdue };
+        const budgetPct = p.budget > 0 ? Math.round((p.spent / p.budget) * 100) : null;
+        return { name: p.name, progress: p.progress, tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
       });
 
     const tasksDueToday = projects.flatMap((p) =>
@@ -93,6 +99,20 @@ export function DailyBriefCard() {
     const weekAgo = new Date(now.getTime() - 7 * 86400000);
     const safetyThisWeek = safetyIncidents.filter((s) => new Date(s.date) >= weekAgo).length;
 
+    // ── Financial ────────────────────────────────────────────────────────────
+    const totalOutstanding = invoices
+      .filter((i) => i.status === "sent")
+      .reduce((s, i) => s + invTotal(i), 0);
+    const overdueInvoices = invoices
+      .filter((i) => i.status === "overdue")
+      .map((i) => ({
+        number: i.number,
+        amount: Math.round(invTotal(i)),
+        client: i.clientName,
+        daysOverdue: Math.floor((now.getTime() - new Date(i.dueDate).getTime()) / 86400000),
+      }));
+    const overBudgetProjects = activeProjects.filter((p) => p.budgetPct !== null && p.budgetPct > 90);
+
     return {
       workerCount: workers.length,
       clockedInWorkers,
@@ -103,8 +123,12 @@ export function DailyBriefCard() {
       safetyIncidentsThisWeek: safetyThisWeek,
       companyName: companyName || "Your Company",
       currentTime: now.toLocaleString("en-US", { weekday: "long", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+      // Financial additions
+      totalOutstanding: Math.round(totalOutstanding),
+      overdueInvoices,
+      overBudgetProjects: overBudgetProjects.map((p) => ({ name: p.name, budgetPct: p.budgetPct })),
     };
-  }, [workers, projects, punchItems, safetyIncidents, companyName]);
+  }, [workers, projects, punchItems, safetyIncidents, companyName, invoices]);
 
   const generate = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();

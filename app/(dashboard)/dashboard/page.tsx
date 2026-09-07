@@ -16,6 +16,7 @@ import { formatCurrencyCompact } from "@/lib/currency";
 import type { Worker, Project, Invoice } from "@/lib/mock-data";
 import Link from "next/link";
 import { DailyBriefCard } from "@/components/daily-brief-card";
+import { AskConstra } from "@/components/ask-constra";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { isForemanOrAbove } from "@/lib/permissions";
 
@@ -881,6 +882,13 @@ export default function DashboardPage() {
         </ErrorBoundary>
       </div>
 
+      {/* Ask Constra — data-aware AI */}
+      <div className="px-4 pt-3">
+        <ErrorBoundary fallback={null}>
+          <AskConstra />
+        </ErrorBoundary>
+      </div>
+
       {/* Crew on site — horizontal avatar scroll */}
       <div className="px-4 pt-5">
         <div className="flex items-center justify-between mb-3">
@@ -1279,14 +1287,19 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* AI Daily Brief */}
-      <ErrorBoundary fallback={
-        <div className="bg-[#111111] border border-white/[0.06] rounded-2xl px-5 py-4 text-[12px] text-white/30">
-          AI Daily Brief unavailable — <button onClick={() => window.location.reload()} className="text-amber-400 hover:text-amber-300 underline">reload to retry</button>
-        </div>
-      }>
-        <DailyBriefCard />
-      </ErrorBoundary>
+      {/* AI Daily Brief + Ask Constra */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <ErrorBoundary fallback={
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl px-5 py-4 text-[12px] text-white/30">
+            AI Daily Brief unavailable — <button onClick={() => window.location.reload()} className="text-amber-400 hover:text-amber-300 underline">reload to retry</button>
+          </div>
+        }>
+          <DailyBriefCard />
+        </ErrorBoundary>
+        <ErrorBoundary fallback={null}>
+          <AskConstra />
+        </ErrorBoundary>
+      </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
