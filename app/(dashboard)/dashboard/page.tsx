@@ -298,8 +298,9 @@ export default function DashboardPage() {
   const {
     workers, projects, punchItems, clockEntries, activityFeed,
     currentUser, getWorkerById, getProjectById, currency,
-    invoices, changeOrders, updateWorker, updateClockEntry,
+    invoices, changeOrders, updateWorker, updateClockEntry, theme,
   } = useStore();
+  const dk = theme !== "light"; // dark mode flag for hero section
   const t = useT();
   const useFahrenheit = currency === "USD";
   const weather = useWeather(useFahrenheit);
@@ -432,22 +433,26 @@ export default function DashboardPage() {
           className="relative overflow-hidden px-5 pt-6 pb-7"
           style={{
             background: currentUser.clockedIn
-              ? "linear-gradient(155deg, #003d1a 0%, #001a0a 50%, #080808 100%)"
-              : "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)",
-            borderBottom: `1px solid ${currentUser.clockedIn ? "rgba(34,197,94,0.2)" : "rgba(245,158,11,0.18)"}`,
+              ? dk ? "linear-gradient(155deg, #003d1a 0%, #001a0a 50%, #080808 100%)" : "linear-gradient(155deg, #ecfdf5 0%, #d1fae5 55%, #f0fdf4 100%)"
+              : dk ? "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)" : "linear-gradient(155deg, #fffbeb 0%, #fef3c7 60%, #fff7ed 100%)",
+            borderBottom: `1px solid ${currentUser.clockedIn ? (dk ? "rgba(34,197,94,0.2)" : "rgba(34,197,94,0.35)") : (dk ? "rgba(245,158,11,0.18)" : "rgba(245,158,11,0.35)")}`,
           }}
         >
           {/* Blueprint grid */}
           <div className="absolute inset-0 pointer-events-none opacity-[0.08]"
             style={{
               backgroundImage: currentUser.clockedIn
-                ? "repeating-linear-gradient(90deg,rgba(34,197,94,1) 0,rgba(34,197,94,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(34,197,94,1) 0,rgba(34,197,94,1) 1px,transparent 1px,transparent 48px)"
-                : "repeating-linear-gradient(90deg,rgba(245,158,11,1) 0,rgba(245,158,11,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(245,158,11,1) 0,rgba(245,158,11,1) 1px,transparent 1px,transparent 48px)",
+                ? dk
+                  ? "repeating-linear-gradient(90deg,rgba(34,197,94,1) 0,rgba(34,197,94,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(34,197,94,1) 0,rgba(34,197,94,1) 1px,transparent 1px,transparent 48px)"
+                  : "repeating-linear-gradient(90deg,rgba(21,128,61,1) 0,rgba(21,128,61,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(21,128,61,1) 0,rgba(21,128,61,1) 1px,transparent 1px,transparent 48px)"
+                : dk
+                  ? "repeating-linear-gradient(90deg,rgba(245,158,11,1) 0,rgba(245,158,11,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(245,158,11,1) 0,rgba(245,158,11,1) 1px,transparent 1px,transparent 48px)"
+                  : "repeating-linear-gradient(90deg,rgba(161,98,7,1) 0,rgba(161,98,7,1) 1px,transparent 1px,transparent 48px),repeating-linear-gradient(0deg,rgba(161,98,7,1) 0,rgba(161,98,7,1) 1px,transparent 1px,transparent 48px)",
             }}
           />
           {/* Glow */}
           <div className="absolute -bottom-16 -left-10 w-80 h-80 pointer-events-none rounded-full blur-3xl"
-            style={{ background: currentUser.clockedIn ? "rgba(34,197,94,0.12)" : "rgba(245,158,11,0.12)" }} />
+            style={{ background: currentUser.clockedIn ? (dk ? "rgba(34,197,94,0.12)" : "rgba(34,197,94,0.06)") : (dk ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.06)") }} />
 
           {/* Name + weather */}
           <div className="relative flex items-start justify-between mb-4">
@@ -474,14 +479,14 @@ export default function DashboardPage() {
                   );
                 })()}
               </div>
-              <h2 className="text-[26px] font-black text-white leading-none tracking-tight">
+              <h2 className={`text-[26px] font-black leading-none tracking-tight ${dk ? "text-white" : "text-gray-900"}`}>
                 {greeting.split(" ")[0]},<br />
-                <span className={currentUser.clockedIn ? "text-green-400" : "text-amber-400"}>
+                <span className={currentUser.clockedIn ? "text-green-600" : "text-amber-600"}>
                   {currentUser.name.split(" ")[0]}
                 </span>
               </h2>
               {myProjects[0] && (
-                <p className="text-[12px] text-white/40 mt-1.5 flex items-center gap-1">
+                <p className={`text-[12px] mt-1.5 flex items-center gap-1 ${dk ? "text-white/40" : "text-gray-500"}`}>
                   <MapPin size={10} />
                   {myProjects[0].name}
                 </p>
@@ -508,12 +513,12 @@ export default function DashboardPage() {
             <div className="relative space-y-3">
               <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-2xl px-4 py-3">
                 <div>
-                  <p className="text-[13px] text-green-400/70 font-semibold">Clocked in</p>
-                  <p className="text-[22px] font-black text-white tabular-nums">
-                    {liveElapsed.toFixed(1)}<span className="text-[14px] text-white/50 font-bold ml-1">hrs</span>
+                  <p className="text-[13px] text-green-600 font-semibold">Clocked in</p>
+                  <p className={`text-[22px] font-black tabular-nums ${dk ? "text-white" : "text-gray-900"}`}>
+                    {liveElapsed.toFixed(1)}<span className={`text-[14px] font-bold ml-1 ${dk ? "text-white/50" : "text-gray-500"}`}>hrs</span>
                   </p>
                   {currentUser.clockInTime && (
-                    <p className="text-[11px] text-white/35">
+                    <p className={`text-[11px] ${dk ? "text-white/35" : "text-gray-500"}`}>
                       since {currentUser.clockInTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   )}
@@ -550,15 +555,15 @@ export default function DashboardPage() {
         <div className="px-4 pt-4 grid grid-cols-3 gap-3">
           {[
             { label: "Today", value: totalToday.toFixed(1) + "h", pct: dayPct, color: "#3b82f6", sub: `${dayTarget}h target` },
-            { label: "This Week", value: (myWeekHours + liveElapsed).toFixed(1) + "h", pct: weekPct, color: "#F5C400", sub: `${weekTarget}h target` },
-            { label: "Days In", value: String(workedDays), pct: (workedDays / 5) * 100, color: "#22c55e", sub: "this week" },
+            { label: "This Week", value: (myWeekHours + liveElapsed).toFixed(1) + "h", pct: weekPct, color: "#d97706", sub: `${weekTarget}h target` },
+            { label: "Days In", value: String(workedDays), pct: (workedDays / 5) * 100, color: "#16a34a", sub: "this week" },
           ].map(({ label, value, pct, color, sub }) => (
-            <div key={label} className="bg-[#111] border border-white/[0.06] rounded-2xl p-3">
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1">{label}</p>
-              <p className="text-[20px] font-black text-white leading-none">{value}</p>
-              <p className="text-[10px] text-white/25 mt-0.5 mb-2">{sub}</p>
+            <div key={label} className={`rounded-2xl p-3 ${dk ? "bg-[#111] border border-white/[0.06]" : "bg-white border border-gray-200 shadow-sm"}`}>
+              <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${dk ? "text-white/30" : "text-gray-400"}`}>{label}</p>
+              <p className={`text-[20px] font-black leading-none ${dk ? "text-white" : "text-gray-900"}`}>{value}</p>
+              <p className={`text-[10px] mt-0.5 mb-2 ${dk ? "text-white/25" : "text-gray-400"}`}>{sub}</p>
               {/* Progress bar */}
-              <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+              <div className={`h-1 rounded-full overflow-hidden ${dk ? "bg-white/[0.06]" : "bg-gray-100"}`}>
                 <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
               </div>
             </div>
@@ -673,16 +678,19 @@ export default function DashboardPage() {
       <div
         className="relative overflow-hidden px-5 pt-6 pb-7"
         style={{
-          background: "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)",
-          borderBottom: "1px solid rgba(245,158,11,0.18)",
+          background: dk
+            ? "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)"
+            : "linear-gradient(155deg, #fffbeb 0%, #fef3c7 60%, #fff7ed 100%)",
+          borderBottom: dk ? "1px solid rgba(245,158,11,0.18)" : "1px solid rgba(245,158,11,0.35)",
         }}
       >
         {/* Blueprint grid — clearly visible */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage:
-              "repeating-linear-gradient(90deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(0deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px)",
+            backgroundImage: dk
+              ? "repeating-linear-gradient(90deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(0deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px)"
+              : "repeating-linear-gradient(90deg, rgba(161,98,7,0.10) 0px, rgba(161,98,7,0.10) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(0deg, rgba(161,98,7,0.10) 0px, rgba(161,98,7,0.10) 1px, transparent 1px, transparent 48px)",
           }}
         />
         {/* Diagonal accent cut — bottom-right triangle */}
@@ -691,43 +699,51 @@ export default function DashboardPage() {
           style={{
             width: 0,
             height: 0,
-            borderBottom: "72px solid rgba(245,158,11,0.07)",
+            borderBottom: `72px solid ${dk ? "rgba(245,158,11,0.07)" : "rgba(161,98,7,0.08)"}`,
             borderLeft: "220px solid transparent",
           }}
         />
         {/* Amber radial glow — strong, bottom-left */}
         <div
           className="absolute -bottom-16 -left-10 w-80 h-80 pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(245,158,11,0.22) 0%, rgba(217,119,6,0.06) 50%, transparent 70%)" }}
+          style={{ background: dk
+            ? "radial-gradient(circle, rgba(245,158,11,0.22) 0%, rgba(217,119,6,0.06) 50%, transparent 70%)"
+            : "radial-gradient(circle, rgba(245,158,11,0.12) 0%, rgba(217,119,6,0.03) 50%, transparent 70%)"
+          }}
         />
         {/* Secondary glow — top-right accent */}
         <div
           className="absolute -top-12 -right-12 w-56 h-56 pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(234,88,12,0.10) 0%, transparent 65%)" }}
+          style={{ background: dk
+            ? "radial-gradient(circle, rgba(234,88,12,0.10) 0%, transparent 65%)"
+            : "radial-gradient(circle, rgba(234,88,12,0.05) 0%, transparent 65%)"
+          }}
         />
         {/* Top hazard stripe */}
         <div
           className="absolute top-0 inset-x-0 h-[3px] pointer-events-none"
           style={{
-            background: "repeating-linear-gradient(90deg, #F5C400 0px, #F5C400 14px, rgba(0,0,0,0) 14px, rgba(0,0,0,0) 28px)",
+            background: dk
+              ? "repeating-linear-gradient(90deg, #F5C400 0px, #F5C400 14px, rgba(0,0,0,0) 14px, rgba(0,0,0,0) 28px)"
+              : "repeating-linear-gradient(90deg, #d97706 0px, #d97706 14px, rgba(255,255,255,0) 14px, rgba(255,255,255,0) 28px)",
           }}
         />
 
         {/* Greeting + live clock */}
         <div className="relative flex items-start justify-between mb-5">
           <div>
-            <p className="text-[11px] font-black text-amber-500/60 uppercase tracking-[0.14em] mb-0.5">
+            <p className={`text-[11px] font-black uppercase tracking-[0.14em] mb-0.5 ${dk ? "text-amber-500/60" : "text-amber-700"}`}>
               {greeting.split(",")[0]}
             </p>
-            <h2 className="text-[24px] font-black text-white tracking-tight leading-tight">
+            <h2 className={`text-[24px] font-black tracking-tight leading-tight ${dk ? "text-white" : "text-gray-900"}`}>
               {currentUser.name.split(" ")[0]}
             </h2>
           </div>
           <div className="text-right mt-0.5">
-            <p className="text-[22px] font-black text-white tabular-nums leading-none">
+            <p className={`text-[22px] font-black tabular-nums leading-none ${dk ? "text-white" : "text-gray-900"}`}>
               {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
             </p>
-            <p className="text-[11px] text-white/35 mt-1">
+            <p className={`text-[11px] mt-1 ${dk ? "text-white/35" : "text-gray-500"}`}>
               {now.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
             </p>
           </div>
@@ -735,21 +751,21 @@ export default function DashboardPage() {
 
         {/* Big stat tiles */}
         <div className="relative flex gap-3 mb-5">
-          <div className="flex-1 bg-white/[0.05] border border-amber-500/15 rounded-2xl p-4">
+          <div className={`flex-1 rounded-2xl p-4 border ${dk ? "bg-white/[0.05] border-amber-500/15" : "bg-white/70 border-amber-400/30 backdrop-blur-sm"}`}>
             <div className="flex items-end gap-1 mb-1">
-              <span className="text-[44px] font-black text-white leading-none tabular-nums">{clockedInWorkers.length}</span>
-              <span className="text-[14px] font-bold text-amber-400/50 mb-2">/{workers.length}</span>
+              <span className={`text-[44px] font-black leading-none tabular-nums ${dk ? "text-white" : "text-gray-900"}`}>{clockedInWorkers.length}</span>
+              <span className={`text-[14px] font-bold mb-2 ${dk ? "text-amber-400/50" : "text-amber-600/60"}`}>/{workers.length}</span>
             </div>
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-amber-500/70">Crew on Site</p>
+            <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${dk ? "text-amber-500/70" : "text-amber-700"}`}>Crew on Site</p>
             <div className="flex items-center gap-1.5 mt-2">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-[10px] text-green-400 font-bold">Live</span>
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[10px] text-green-600 font-bold">Live</span>
             </div>
           </div>
-          <div className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4">
-            <span className="text-[44px] font-black text-white leading-none tabular-nums block mb-1">{activeProjects.length}</span>
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-white/40">Active Jobs</p>
-            <p className="text-[10px] text-white/30 mt-2">{upcomingProjects.length} upcoming</p>
+          <div className={`flex-1 rounded-2xl p-4 border ${dk ? "bg-white/[0.04] border-white/[0.08]" : "bg-white/70 border-gray-200/80 backdrop-blur-sm"}`}>
+            <span className={`text-[44px] font-black leading-none tabular-nums block mb-1 ${dk ? "text-white" : "text-gray-900"}`}>{activeProjects.length}</span>
+            <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${dk ? "text-white/40" : "text-gray-500"}`}>Active Jobs</p>
+            <p className={`text-[10px] mt-2 ${dk ? "text-white/30" : "text-gray-400"}`}>{upcomingProjects.length} upcoming</p>
           </div>
         </div>
 
@@ -760,12 +776,12 @@ export default function DashboardPage() {
             const WIcon = wMeta.icon;
             return (
               <div
-                className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.07] rounded-lg px-3 py-1.5"
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 border ${dk ? "bg-white/[0.05] border-white/[0.07]" : "bg-white/60 border-gray-200"}`}
                 style={{ color: wMeta.color }}
               >
                 <WIcon size={12} />
                 <span className="text-[12px] font-bold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
-                <span className="text-[11px] text-white/30 ml-0.5">{wMeta.label}</span>
+                <span className={`text-[11px] ml-0.5 ${dk ? "text-white/30" : "text-gray-500"}`}>{wMeta.label}</span>
               </div>
             );
           })()}
@@ -804,21 +820,21 @@ export default function DashboardPage() {
         <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
           {(([
             { label: "Hours/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9" },
-            { label: "Open Issues",   value: openPunchItems.length, color: "#F5C400" },
+            { label: "Open Issues",   value: openPunchItems.length, color: dk ? "#F5C400" : "#d97706" },
             { label: "High Priority", value: highPriority.length, color: "#ef4444" },
             ...(canSeeFinancials
               ? [
                   { label: "Collected",   value: formatCurrencyCompact(totalPaid, currency as never), color: "#22c55e" },
-                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: "#F5C400" },
+                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: dk ? "#F5C400" : "#d97706" },
                 ]
               : []),
           ]) as { label: string; value: string | number; color: string }[]).map((chip) => (
             <div
               key={chip.label}
-              className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3"
+              className={`flex-shrink-0 rounded-2xl px-4 py-3 border ${dk ? "bg-[#131110] border-white/[0.07]" : "bg-white border-gray-200 shadow-sm"}`}
             >
               <p className="text-[20px] font-black tabular-nums" style={{ color: chip.color }}>{chip.value}</p>
-              <p className="text-[10px] text-white/35 font-semibold mt-0.5 whitespace-nowrap">{chip.label}</p>
+              <p className={`text-[10px] font-semibold mt-0.5 whitespace-nowrap ${dk ? "text-white/35" : "text-gray-500"}`}>{chip.label}</p>
             </div>
           ))}
         </div>
@@ -826,18 +842,18 @@ export default function DashboardPage() {
 
       {/* Quick actions — 2×2 grid */}
       <div className="px-4 pt-4">
-        <p className="text-[10px] font-black text-white/25 uppercase tracking-[0.14em] mb-3">Quick Add</p>
+        <p className={`text-[10px] font-black uppercase tracking-[0.14em] mb-3 ${dk ? "text-white/25" : "text-gray-400"}`}>Quick Add</p>
         <div className="grid grid-cols-2 gap-2.5">
           {[
             { label: "Daily Report",  icon: FileText,      href: "/daily-reports",  color: "#22c55e" },
-            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders", color: "#F5C400" },
+            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders", color: dk ? "#F5C400" : "#d97706" },
             { label: "Invoice",       icon: ReceiptText,   href: "/invoices",       color: "#0ea5e9" },
             { label: "Punch Item",    icon: AlertTriangle, href: "/punch-list",     color: "#ef4444" },
           ].map(({ label, icon: Icon, href, color }) => (
             <Link
               key={label}
               href={href}
-              className="card-hover flex items-center gap-3 bg-[#131110] border border-white/[0.07] hover:border-white/[0.12] rounded-2xl px-4 py-3.5 active:scale-[0.97]"
+              className={`card-hover flex items-center gap-3 rounded-2xl px-4 py-3.5 active:scale-[0.97] border ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 hover:border-gray-300 shadow-sm"}`}
             >
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -846,8 +862,8 @@ export default function DashboardPage() {
                 <Icon size={15} style={{ color }} />
               </div>
               <div>
-                <p className="text-[12px] font-bold text-white/80 leading-tight">{label}</p>
-                <p className="text-[10px] text-white/30 mt-0.5">Add new</p>
+                <p className={`text-[12px] font-bold leading-tight ${dk ? "text-white/80" : "text-gray-800"}`}>{label}</p>
+                <p className={`text-[10px] mt-0.5 ${dk ? "text-white/30" : "text-gray-400"}`}>Add new</p>
               </div>
             </Link>
           ))}
