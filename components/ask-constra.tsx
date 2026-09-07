@@ -222,7 +222,10 @@ export function AskConstra() {
         signal: ctrl.signal,
       });
 
-      if (!res.ok || !res.body) throw new Error(`Error ${res.status}`);
+      if (!res.ok || !res.body) {
+        const errBody = await res.text().catch(() => "");
+        throw new Error(errBody || `Error ${res.status}`);
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

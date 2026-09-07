@@ -1,5 +1,6 @@
 // Data-aware AI endpoint — answers financial & operational questions
 // using the actual company data sent from the client (store).
+export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export type ProjectSnap = {
@@ -114,10 +115,14 @@ function buildContext(d: CompanySnap): string {
   return lines.join("\n");
 }
 
+export async function GET() {
+  return Response.json({ configured: !!process.env.GROQ_API_KEY });
+}
+
 export async function POST(request: Request) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return new Response("AI not configured — add GROQ_API_KEY in Vercel", { status: 503 });
+    return new Response("GROQ_API_KEY not set in Vercel environment", { status: 503 });
   }
 
   let body: { messages: Array<{ role: string; content: string }>; companyData: CompanySnap };
@@ -150,14 +155,19 @@ export async function POST(request: Request) {
         stream: true,
         max_tokens: 700,
         messages: groqMessages,
-        temperature: 0.3, // more precise for financial answers
       }),
     });
 
     if (!groqRes.ok || !groqRes.body) {
-      const txt = await groqRes.text().catch(() => "");
+      const txt = await groqRes.text().catch(() => "(no body)");
       console.error("[/api/ask-constra] Groq error:", groqRes.status, txt);
-      return new Response(`Groq error ${groqRes.status}`, { status: 502 });
+      // Parse Groq error for a user-friendly message
+      let reason = `Groq ${groqRes.status}`;
+      try {
+        const parsed = JSON.parse(txt);
+        reason = parsed?.error?.message ?? parsed?.message ?? reason;
+      } catch { /* use raw text if not JSON */ if (txt.length < 200) reason = txt; }
+      return new Response(reason, { status: 502 });
     }
 
     const encoder = new TextEncoder();
