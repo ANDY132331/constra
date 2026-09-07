@@ -3,40 +3,7 @@
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-export type ProjectSnap = {
-  name: string;
-  status: string;
-  budget: number;
-  spent: number;
-  laborCost: number;  // clock hours × hourly rate
-  revenue: number;    // invoices for this project
-  progress: number;
-  overdueTasks: number;
-};
-
-export type CompanySnap = {
-  companyName: string;
-  currency: string;
-  currentDate: string;
-  // Revenue
-  totalBilled: number;
-  totalCollected: number;
-  totalOutstanding: number;
-  overdueInvoices: Array<{ number: string; amount: number; client: string; daysOverdue: number }>;
-  // Labor (this month)
-  totalLaborCostThisMonth: number;
-  totalHoursThisMonth: number;
-  // Projects
-  projects: ProjectSnap[];
-  // Budget lines
-  budgetByCategory: Array<{ category: string; budgeted: number; actual: number }>;
-  // Crew
-  workerCount: number;
-  clockedInCount: number;
-  // Equipment
-  equipmentTotal: number;
-  equipmentInUse: number;
-};
+import type { CompanySnap } from "@/lib/ask-constra-types";
 
 const SYSTEM_PROMPT = `You are the Constra AI — the financial and operations brain for a construction company. You have access to real company data.
 

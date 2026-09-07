@@ -9,7 +9,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Sparkles, Send, Loader2, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { useStore } from "@/lib/store";
-import type { CompanySnap, ProjectSnap } from "@/app/api/ask-constra/route";
+import type { CompanySnap, ProjectSnap } from "@/lib/ask-constra-types";
 
 // ── Helper: compute an invoice's subtotal ──────────────────────────────────────
 function invoiceTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
