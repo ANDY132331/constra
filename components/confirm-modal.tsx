@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useScrollLock } from "@/lib/use-scroll-lock";
 
 export function ConfirmModal({
   open,
@@ -19,9 +20,13 @@ export function ConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  useScrollLock(open);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60"
+      onTouchMove={(e) => e.preventDefault()}
+    >
       <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
         <div className="flex items-start justify-between gap-2 mb-3">
           <h3 className="text-[15px] font-bold text-white leading-snug">{title}</h3>

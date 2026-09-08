@@ -501,15 +501,6 @@ button, a, [role="button"], input, select, textarea {
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* ── Minimum touch target size for all interactive elements ─────── */
-/* Ensures tappable controls are at least 44×44 CSS px on touch devices */
-@media (pointer: coarse) {
-  button:not(.no-min-touch),
-  [role="button"]:not(.no-min-touch) {
-    min-height: 36px;
-  }
-}
-
 /* ── Form inputs — comfortable touch height ────────────────────── */
 @media (pointer: coarse) {
   input[type="text"],
@@ -553,10 +544,10 @@ button, a, [role="button"], input, select, textarea {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent scroll chaining / bounce on nested containers */
-.overflow-y-auto,
+/* Contain scroll on nested inner containers (not the main scroll area itself) */
+.overflow-y-auto:not(.main-scroll),
 .overflow-x-auto,
-.overflow-auto {
+.overflow-auto:not(.main-scroll) {
   overscroll-behavior: contain;
 }
 
@@ -687,4 +678,134 @@ html[data-theme] footer {
   background: rgba(13,13,13,0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MAIN SCROLL AREA
+   Controls padding, overscroll, and feel for the primary content
+   container. Replaces the old inline paddingBottom style.
+   ══════════════════════════════════════════════════════════════════ */
+
+.main-scroll {
+  /* Mobile: clear MobileNav (h-16 = 64px) + device safe area */
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  /* Natural elastic bounce at edges on iOS — feels native */
+  overscroll-behavior-y: auto;
+}
+
+@media (min-width: 1024px) {
+  /* Desktop / laptop: no MobileNav, so no need for extra clearance */
+  .main-scroll {
+    padding-bottom: 2rem;
+    /* Contain scroll on desktop to prevent propagation to body */
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SCROLLBAR — device-aware sizing
+   Mouse users get a thin, subtle 4px bar.
+   Touch-only devices hide it entirely (they get native momentum).
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Fine pointer (mouse/trackpad) — slim bar */
+@media (pointer: fine) {
+  ::-webkit-scrollbar            { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track      { background: transparent; }
+  ::-webkit-scrollbar-thumb      { background: oklch(1 0 0 / 9%); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover{ background: oklch(1 0 0 / 17%); }
+
+  [data-theme="light"] ::-webkit-scrollbar-thumb      { background: rgba(0,0,0,0.11); }
+  [data-theme="light"] ::-webkit-scrollbar-thumb:hover{ background: rgba(0,0,0,0.20); }
+
+  /* Firefox */
+  * { scrollbar-width: thin; scrollbar-color: oklch(1 0 0 / 9%) transparent; }
+  [data-theme="light"] * { scrollbar-color: rgba(0,0,0,0.11) transparent; }
+}
+
+/* Coarse pointer (touch) — hide scrollbar chrome, keep scroll */
+@media (pointer: coarse) {
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SHEET / MODAL SCROLL
+   Inner content in bottom-sheets and modals scrolls smoothly with
+   containment so the background never moves.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .sheet > div {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Standalone modal inner scrollers (any overflow-y-auto inside a fixed overlay) */
+[class*="fixed"][class*="inset-0"] .overflow-y-auto {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ACTIVE-STATE FEEDBACK — instant on mobile
+   Press states fire in <100 ms instead of waiting for native delay.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+  /* Card-like buttons get a subtle push-down on tap */
+  button:active:not(:disabled),
+  [role="button"]:active,
+  a:active {
+    opacity: 0.78;
+    transform: scale(0.975);
+    transition: opacity 0.05s, transform 0.05s;
+  }
+  /* But amber primary buttons go a bit lighter instead of darker */
+  .bg-amber-500:active,
+  .bg-amber-400:active {
+    opacity: 0.85;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   HORIZONTAL OVERFLOW — tables and wide content
+   Any direct child table inside a card gets a scroll wrapper so the
+   page body never scrolls sideways on mobile.
+   ══════════════════════════════════════════════════════════════════ */
+
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAPTOP / DESKTOP — sidebar scroll refinement
+   The sidebar can be taller than the viewport on small laptops;
+   make its nav scrollable without showing a visible scrollbar.
+   ══════════════════════════════════════════════════════════════════ */
+
+aside nav,
+aside > div {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+aside nav::-webkit-scrollbar,
+aside > div::-webkit-scrollbar {
+  display: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TOUCH TARGET MINIMUM — comfort on thumb
+   Bumped from 36px → 44px to match Apple HIG; exclude icon-only
+   chips that intentionally stay compact.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+  button:not(.no-min-touch),
+  [role="button"]:not(.no-min-touch) {
+    min-height: 42px;
+  }
 }

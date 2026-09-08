@@ -99,6 +99,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
     if (minLevel === "admin" && !isAdmin) router.replace("/dashboard");
   }, [pathname, isLoading, onboarded, currentUser, router]);
 
+  // Reset scroll position to top on every route change
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]);
+
   // Set RTL direction on <html> element
   useEffect(() => {
     const dir = RTL_LOCALES.includes(language as never) ? "rtl" : "ltr";
@@ -130,7 +135,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
               <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
               <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                 <Header onMenuClick={() => setSidebarOpen((v) => !v)} />
-                <main ref={mainRef} className="flex-1 overflow-y-auto p-4 md:p-6 lg:pb-6 bg-[#0a0a0a]" style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}>
+                <main ref={mainRef} className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#0a0a0a] main-scroll">
                   {(pullY > 8 || refreshing) && (
                     <div
                       className="fixed left-0 right-0 z-30 flex items-center justify-center pointer-events-none lg:hidden"
