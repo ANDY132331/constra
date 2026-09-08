@@ -25,9 +25,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing invoiceId or amount" }, { status: 400 });
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2026-06-24.dahlia" as Parameters<typeof Stripe>[1]["apiVersion"],
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-06-24.dahlia" as any });
 
   const stripeCurrency = currency.toLowerCase();
   const unitAmount = ZERO_DECIMAL.has(currency.toUpperCase())

@@ -454,9 +454,9 @@ export default function InsurancePage() {
       <ConfirmModal
         open={!!deleteId}
         title="Delete policy?"
-        message="This will permanently remove this insurance record."
+        body="This will permanently remove this insurance record."
         confirmLabel="Delete"
-        variant="danger"
+        danger
         onConfirm={() => {
           if (deleteId) { deleteInsurancePolicy(deleteId); toast.success("Policy deleted"); }
           setDeleteId(null);

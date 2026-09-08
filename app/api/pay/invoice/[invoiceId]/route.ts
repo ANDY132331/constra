@@ -40,7 +40,8 @@ export async function GET(
   const items = (invoice.items as DbItem[]) ?? [];
   const sub = items.reduce((s: number, i: DbItem) => s + i.qty * i.rate, 0);
   const total = sub * (1 + Number(invoice.tax_rate) / 100);
-  const company = invoice.companies as { name: string; currency: string } | null;
+  const companiesRaw = invoice.companies as unknown;
+  const company = (Array.isArray(companiesRaw) ? companiesRaw[0] : companiesRaw) as { name: string; currency: string } | null;
 
   // Return only client-safe fields — no internal IDs, no other invoices
   return NextResponse.json({
