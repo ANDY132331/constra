@@ -7,7 +7,7 @@ import type {
   Worker, Project, Task, ClockEntry, PunchItem, SafetyIncident,
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   MaterialType, MaterialEntry, ProjectDocument, Message,
-  DailyReport, ChangeOrder, BlueprintPin, BudgetLine,
+  DailyReport, ChangeOrder, BlueprintPin, BudgetLine, InsurancePolicy,
 } from "./mock-data";
 import type { Locale } from "./i18n/locales";
 import type { CurrencyCode } from "./currency";
@@ -94,6 +94,7 @@ type StoreState = {
   changeOrders: ChangeOrder[];
   blueprintPins: BlueprintPin[];
   budgetLines: BudgetLine[];
+  insurancePolicies: InsurancePolicy[];
   customRoles: string[];
   companyAddress: string;
   businessNumber: string;
@@ -179,6 +180,10 @@ type StoreCtx = StoreState & {
   updateBudgetLine: (id: string, u: Partial<BudgetLine>) => void;
   deleteBudgetLine: (id: string) => void;
 
+  addInsurancePolicy: (p: Omit<InsurancePolicy, "id">) => void;
+  updateInsurancePolicy: (id: string, u: Partial<InsurancePolicy>) => void;
+  deleteInsurancePolicy: (id: string) => void;
+
   addDocument: (d: Omit<ProjectDocument, "id">) => void;
   deleteDocument: (id: string) => void;
   addDocumentVersion: (id: string, dataUrl: string, sizeBytes: number, uploadedById: string, note?: string) => void;
@@ -256,6 +261,7 @@ function defaultState(): StoreState {
     changeOrders: [],
     blueprintPins: [],
     budgetLines: [],
+    insurancePolicies: [],
     customRoles: [],
     companyAddress: "",
     businessNumber: "",
@@ -294,6 +300,7 @@ function loadState(): StoreState {
       changeOrders: parsed.changeOrders ?? [],
       blueprintPins: parsed.blueprintPins ?? [],
       budgetLines: parsed.budgetLines ?? [],
+      insurancePolicies: parsed.insurancePolicies ?? [],
       customRoles: parsed.customRoles ?? [],
       companyAddress: parsed.companyAddress ?? "",
       businessNumber: parsed.businessNumber ?? "",
@@ -1250,6 +1257,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     bg(() => getClient().from("budget_lines").delete().eq("id", id), "deleteBudgetLine");
   }, [up]);
 
+  // ── Insurance policies ────────────────────────────────────────────────────────
+
+  const addInsurancePolicy = useCallback((p: Omit<InsurancePolicy, "id">) => {
+    const id = genId();
+    up((s) => ({ ...s, insurancePolicies: [...s.insurancePolicies, { ...p, id }] }));
+  }, [up]);
+
+  const updateInsurancePolicy = useCallback((id: string, u: Partial<InsurancePolicy>) => {
+    up((s) => ({ ...s, insurancePolicies: s.insurancePolicies.map((p) => p.id === id ? { ...p, ...u } : p) }));
+  }, [up]);
+
+  const deleteInsurancePolicy = useCallback((id: string) => {
+    up((s) => ({ ...s, insurancePolicies: s.insurancePolicies.filter((p) => p.id !== id) }));
+  }, [up]);
+
   // ── Custom roles ──────────────────────────────────────────────────────────────
 
   const addCustomRole = useCallback((role: string) => {
@@ -1383,6 +1405,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addMaterialEntry, deleteMaterialEntry,
       addBlueprintPin, updateBlueprintPin, deleteBlueprintPin,
       addBudgetLine, updateBudgetLine, deleteBudgetLine,
+      addInsurancePolicy, updateInsurancePolicy, deleteInsurancePolicy,
       addDocument, deleteDocument, addDocumentVersion,
       addMessage, deleteMessage,
       addDailyReport, updateDailyReport, deleteDailyReport,

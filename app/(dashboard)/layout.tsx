@@ -28,7 +28,7 @@ const PAGE_MIN_LEVEL: Record<string, "foreman" | "admin"> = {
   "/materials": "foreman", "/documents": "foreman", "/blueprints": "foreman",
   "/daily-reports": "foreman",
   "/crew": "admin", "/reports": "admin", "/estimates": "admin",
-  "/invoices": "admin", "/change-orders": "admin", "/budget": "admin",
+  "/invoices": "admin", "/change-orders": "admin", "/budget": "admin", "/insurance": "admin",
 };
 
 function LayoutInner({ children }: { children: React.ReactNode }) {

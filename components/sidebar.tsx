@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy, DollarSign,
+  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -49,7 +49,8 @@ const FINANCE_ITEMS: NavDef[] = [
 
 // Budget tracking (no i18n key needed — hardcoded label like OPS_ITEMS)
 const BUDGET_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; minLevel?: "foreman" | "admin" }[] = [
-  { href: "/budget", label: "Budget", icon: DollarSign, minLevel: "admin" },
+  { href: "/budget",    label: "Budget",    icon: DollarSign,  minLevel: "admin" },
+  { href: "/insurance", label: "Insurance", icon: ShieldCheck, minLevel: "admin" },
 ];
 
 // Hardcoded field ops items (avoids updating all 15 i18n locales)

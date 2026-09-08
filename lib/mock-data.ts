@@ -19,6 +19,7 @@ export type WorkerCertification = {
   expiryDate?: Date;
 };
 
+
 export type Worker = {
   id: string;
   name: string;
@@ -303,6 +304,42 @@ export type Message = {
   attachmentData?: string;
 };
 
+
+// ── Insurance / COI tracking ──────────────────────────────────────────────────
+
+export type InsuranceCoverageType =
+  | "general-liability"
+  | "workers-comp"
+  | "auto"
+  | "umbrella"
+  | "professional-liability"
+  | "builders-risk"
+  | "other";
+
+export type InsurancePolicy = {
+  id: string;
+  /** Who the policy covers — company, subcontractor, or individual worker */
+  holderName: string;
+  holderType: "company" | "subcontractor" | "worker";
+  workerId?: string;          // set when holderType === "worker"
+  coverageType: InsuranceCoverageType;
+  insurer: string;            // name of the insurance carrier
+  policyNumber: string;
+  coverageAmount: number;     // in company currency
+  issueDate: Date;
+  expiryDate: Date;
+  notes?: string;
+};
+
+export const COVERAGE_TYPE_LABELS: Record<InsuranceCoverageType, string> = {
+  "general-liability":     "General Liability",
+  "workers-comp":          "Workers' Compensation",
+  "auto":                  "Commercial Auto",
+  "umbrella":              "Umbrella / Excess",
+  "professional-liability":"Professional Liability",
+  "builders-risk":         "Builder's Risk",
+  "other":                 "Other",
+};
 
 export const TRADE_MATERIALS: Record<string, Array<{ name: string; unit: string }>> = {
   "Framing": [
