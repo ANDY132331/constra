@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
+import { Shield } from "lucide-react";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -31,6 +32,8 @@ const PAGE_TITLES: Record<string, string> = {
   "/daily-reports": "Daily Reports",
   "/change-orders": "Change Orders",
   "/blueprints": "Blueprints",
+  "/insurance": "Insurance & COI",
+  "/budget": "Budget",
   "/settings": "Settings",
 };
 
@@ -60,9 +63,15 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => voi
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, activityFeed, isRealtimeConnected, companyName, companyLogo, signOut, theme, setTheme } = useStore();
+  const { currentUser, activityFeed, insurancePolicies, isRealtimeConnected, companyName, companyLogo, signOut, theme, setTheme } = useStore();
   const isAdmin = isAdminOrAbove(currentUser.role);
   const isForeman = isForemanOrAbove(currentUser.role);
+
+  // Insurance expiry alerts (expired or expiring within 30 days)
+  const expiryAlerts = isAdmin ? insurancePolicies.filter((p) => {
+    const ms = new Date(p.expiryDate).getTime() - Date.now();
+    return ms < 30 * 24 * 60 * 60 * 1000;
+  }) : [];
   const QUICK_ADD = ALL_QUICK_ADD.filter(({ minLevel }) =>
     minLevel === "all" || (minLevel === "foreman" && isForeman) || (minLevel === "admin" && isAdmin)
   );
@@ -90,7 +99,8 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
   const openSearch = () => window.dispatchEvent(new Event("open-search"));
 
-  const hasUnread = !readNotifs && activityFeed.length > 0;
+  const hasUnread = !readNotifs && (activityFeed.length > 0 || expiryAlerts.length > 0);
+  const unreadCount = expiryAlerts.length + (activityFeed.length > 0 ? 1 : 0);
 
   const handleSignOut = async () => {
     setShowUser(false);
@@ -170,7 +180,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           >
             <Bell size={15} />
             {hasUnread && (
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-amber-500 rounded-full ring-1 ring-[#0d0d0d]" />
+              <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-red-500 rounded-full ring-1 ring-[#0d0d0d] flex items-center justify-center">
+                <span className="text-[9px] font-black text-white leading-none">{unreadCount > 9 ? "9+" : unreadCount}</span>
+              </span>
             )}
           </button>
 
@@ -182,15 +194,40 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                   <X size={14} />
                 </button>
               </div>
-              {activityFeed.length === 0 ? (
+              {expiryAlerts.length === 0 && activityFeed.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-10 text-white/25">
                   <CheckCheck size={28} className="opacity-40" />
                   <p className="text-[13px]">All caught up</p>
                   <p className="text-[11px] text-white/20">Activity from your projects will show here</p>
                 </div>
               ) : (
-                <div className="max-h-72 overflow-y-auto">
-                  {activityFeed.slice(0, 15).map((event) => (
+                <div className="max-h-80 overflow-y-auto">
+                  {/* Insurance expiry alerts — shown first */}
+                  {expiryAlerts.map((p) => {
+                    const ms = new Date(p.expiryDate).getTime() - Date.now();
+                    const expired = ms <= 0;
+                    const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+                    return (
+                      <div key={p.id} className={`flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors cursor-pointer`}
+                        onClick={() => { router.push("/insurance"); setShowNotif(false); }}>
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${expired ? "bg-red-500/15" : "bg-amber-500/15"}`}>
+                          <Shield size={12} className={expired ? "text-red-400" : "text-amber-400"} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] text-white/80 font-semibold leading-snug">
+                            {expired ? "Insurance expired" : "Insurance expiring soon"}
+                          </p>
+                          <p className="text-[11px] text-white/50 mt-0.5 truncate">
+                            {p.holderName} · {expired ? `${Math.abs(days)}d ago` : `${days}d left`}
+                          </p>
+                        </div>
+                        <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full flex-shrink-0 mt-1 ${expired ? "bg-red-500/15 text-red-400" : "bg-amber-500/12 text-amber-400"}`}>
+                          {expired ? "EXPIRED" : "SOON"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {activityFeed.slice(0, 12).map((event) => (
                     <div key={event.id} className="flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">

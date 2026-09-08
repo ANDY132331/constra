@@ -219,7 +219,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
           if (visibleBudget.length === 0) return null;
           return (
             <div className="mt-4 pt-3 border-t border-white/[0.06]">
-              <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Cost Control</p>
+              <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Finance & Compliance</p>
               {visibleBudget.map((item) => (
                 <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} onClose={onClose} />
               ))}
