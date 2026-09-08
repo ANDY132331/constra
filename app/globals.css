@@ -115,7 +115,8 @@
 /* ── Background: hardcoded dark hex values ── */
 [data-theme="light"] .bg-\[\#080808\],
 [data-theme="light"] .bg-\[\#0a0a0a\],
-[data-theme="light"] .bg-\[\#0d0d0d\]  { background-color: #f8f8f8 !important; }
+[data-theme="light"] .bg-\[\#0d0d0d\],
+[data-theme="light"] .bg-\[\#0f0d0a\]  { background-color: #f8f8f8 !important; }
 
 [data-theme="light"] .bg-\[\#111\],
 [data-theme="light"] .bg-\[\#111111\]   { background-color: #f2f2f2 !important; }
@@ -128,7 +129,10 @@
 
 [data-theme="light"] .bg-\[\#1a1209\],
 [data-theme="light"] .bg-\[\#1a1a1a\],
-[data-theme="light"] .bg-\[\#1c1c1c\]   { background-color: #e2e2e2 !important; }
+[data-theme="light"] .bg-\[\#1c1c1c\]   { background-color: #e4e4e4 !important; }
+
+/* Ask Constra textarea in light mode */
+[data-theme="light"] .bg-\[\#1a1209\]   { background-color: #f0f0f0 !important; }
 
 /* ── Background: white/opacity surfaces → dark/opacity equivalents ── */
 [data-theme="light"] .bg-white\/\[0\.02\]  { background-color: rgba(0,0,0,0.02) !important; }

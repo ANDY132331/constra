@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
   const {
     to,
     invoiceNumber,
+    invoiceId,
     clientName,
     amount,
     dueDate,
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
   } = body as {
     to: string;
     invoiceNumber: string;
+    invoiceId?: string;
     clientName: string;
     amount: string;
     dueDate: string;
@@ -46,6 +48,9 @@ export async function POST(request: NextRequest) {
     pdfDataUrl?: string;
     isReminder?: boolean;
   };
+
+  // Build the payment link — direct to client pay page if invoiceId is available
+  const payLink = invoiceId ? `${APP_URL}/pay/${invoiceId}` : `${APP_URL}/invoices`;
 
   if (!to || !invoiceNumber) {
     return NextResponse.json({ error: "Missing to or invoiceNumber" }, { status: 400 });
@@ -81,7 +86,7 @@ export async function POST(request: NextRequest) {
           </table>
           ${nt ? `<div class="quote">${nt}</div>` : ""}
           <p style="color:#888;font-size:12px">If you believe this is in error or have already sent payment, please disregard this notice or contact us directly.</p>
-          <a class="cta" style="background:#ef4444" href="${APP_URL}/invoices">View & Pay Invoice →</a>
+          <a class="cta" style="background:#ef4444" href="${payLink}">View &amp; Pay Invoice →</a>
         `,
       })
     : emailShell({
@@ -107,7 +112,7 @@ export async function POST(request: NextRequest) {
           </table>
           ${nt ? `<div class="quote">${nt}</div>` : ""}
           <p style="color:#888;font-size:12px">If you have any questions about this invoice, please reply to this email.</p>
-          <a class="cta" href="${APP_URL}/invoices">View Invoice Portal →</a>
+          <a class="cta" href="${payLink}">View &amp; Pay Invoice →</a>
         `,
       });
 

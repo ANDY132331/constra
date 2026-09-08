@@ -181,6 +181,7 @@ function InvoiceDetail({
                   body: JSON.stringify({
                     to: invoice.clientEmail,
                     invoiceNumber: invoice.number,
+                    invoiceId: invoice.id,
                     clientName: invoice.clientName,
                     amount: amountStr,
                     dueDate: dueDateStr,
