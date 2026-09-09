@@ -7,6 +7,7 @@ import { GanttChart, type GanttProject } from "@/components/gantt-chart";
 import { formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { MapView } from "@/components/map-view";
+import { GeofenceMapEditor } from "@/components/geofence-map-editor";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -38,13 +39,6 @@ type FormState = {
   budget: string; color: string; managerId: string;
 };
 
-const GEOFENCE_PRESETS = [
-  { label: "200 m", sublabel: "Small site", value: "200" },
-  { label: "500 m", sublabel: "Standard", value: "500" },
-  { label: "1 km",  sublabel: "Large site", value: "1000" },
-  { label: "5 km",  sublabel: "Highway",    value: "5000" },
-];
-
 const blank: FormState = {
   name: "", client: "", address: "", gpsLat: "", gpsLng: "",
   geofenceRadius: "500",
@@ -73,6 +67,9 @@ export default function ProjectsPage() {
   const [formError, setFormError] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState<string | null>(null);
+  // Incrementing key that forces the GeofenceMapEditor to remount when the user
+  // picks a new geocoder result or opens an existing project for editing.
+  const [mapSeed, setMapSeed] = useState(0);
 
   const copyShare = (projectId: string) => {
     const url = `${window.location.origin}/share/${projectId}`;
@@ -103,6 +100,7 @@ export default function ProjectsPage() {
     setGeoResults([]);
     if (project.gps) setGeoConfirmed(project.address || `${project.gps.lat.toFixed(5)}, ${project.gps.lng.toFixed(5)}`);
     else setGeoConfirmed("");
+    setMapSeed((s) => s + 1); // remount editor at this project's existing pin
     setShowModal(true);
   };
 
@@ -130,6 +128,7 @@ export default function ProjectsPage() {
     setGeoConfirmed(r.display_name);
     setGeoQuery("");
     setGeoResults([]);
+    setMapSeed((s) => s + 1); // remount the interactive geofence editor at the new pin
   };
 
   // Pending projects go to an approval section for admins; foremen see their own in normal list
@@ -783,23 +782,40 @@ export default function ProjectsPage() {
                   </div>
                 )}
                 {geoConfirmed && form.gpsLat && form.gpsLng ? (
-                  <div className="mt-2">
-                    {/* Satellite map preview */}
-                    <div className="rounded-xl overflow-hidden border border-white/[0.08]" style={{ height: 168 }}>
-                      <MapView
-                        pins={[{
-                          lat: parseFloat(form.gpsLat),
-                          lng: parseFloat(form.gpsLng),
-                          label: form.name || "Project Site",
-                          sublabel: geoConfirmed,
-                          color: form.color || "#F5C400",
-                        }]}
+                  <div className="mt-2 space-y-2">
+                    {/* ── Interactive geofence editor ── */}
+                    <div className="rounded-xl overflow-hidden border border-white/[0.08]" style={{ height: 260 }}>
+                      <GeofenceMapEditor
+                        key={mapSeed}
+                        lat={parseFloat(form.gpsLat)}
+                        lng={parseFloat(form.gpsLng)}
+                        radiusM={parseInt(form.geofenceRadius) || 500}
+                        color={form.color || "#F5C400"}
                         className="w-full h-full"
-                        zoom={17}
+                        onChange={(newLat, newLng, newRadius) => {
+                          setForm((f) => ({
+                            ...f,
+                            gpsLat: newLat.toString(),
+                            gpsLng: newLng.toString(),
+                            geofenceRadius: Math.round(newRadius).toString(),
+                          }));
+                        }}
                       />
                     </div>
+                    {/* Drag hint + live radius readout */}
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[10px] text-white/25 leading-snug">
+                        <span className="text-amber-400/70">Drag</span> the white ring to resize · <span className="text-amber-400/70">Drag</span> center dot to repin
+                      </p>
+                      <span className="text-[11px] font-bold text-amber-400 flex-shrink-0 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                        {(() => {
+                          const r = parseInt(form.geofenceRadius) || 500;
+                          return r >= 1000 ? `${(r / 1000).toFixed(2).replace(/\.?0+$/, "")} km` : `${r} m`;
+                        })()}
+                      </span>
+                    </div>
                     {/* Confirmed address row */}
-                    <div className="mt-1.5 flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 text-[11px] text-green-400 min-w-0">
                         <MapPin size={11} className="flex-shrink-0" />
                         <span className="truncate">{geoConfirmed}</span>
@@ -813,57 +829,13 @@ export default function ProjectsPage() {
                         }}
                         className="text-[10px] text-white/25 hover:text-white/55 flex-shrink-0 transition-colors underline underline-offset-2"
                       >
-                        Clear
+                        Clear pin
                       </button>
                     </div>
                   </div>
-                ) : null}
-                <p className="text-[10px] text-white/20 mt-1">Used for GPS off-site detection during clock-in verification.</p>
-              </div>
-
-              {/* Geofence radius — only relevant when a GPS pin is set */}
-              <div>
-                <label className={lbl}>Clock-in Radius</label>
-                <p className="text-[10px] text-white/20 mb-2">Workers must be within this distance of the site pin to clock in.</p>
-                <div className="grid grid-cols-4 gap-1.5 mb-2">
-                  {GEOFENCE_PRESETS.map((p) => (
-                    <button
-                      key={p.value}
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, geofenceRadius: p.value }))}
-                      className={`flex flex-col items-center py-2 px-1 rounded-xl border text-center transition-all ${
-                        form.geofenceRadius === p.value
-                          ? "border-amber-500/60 bg-amber-500/[0.08] text-amber-400"
-                          : "border-white/[0.07] bg-white/[0.02] text-white/45 hover:border-white/[0.14] hover:text-white/70"
-                      }`}
-                    >
-                      <span className="text-[12px] font-bold leading-tight">{p.label}</span>
-                      <span className="text-[9px] mt-0.5 opacity-70">{p.sublabel}</span>
-                    </button>
-                  ))}
-                </div>
-                {/* Custom input — shown when value doesn't match any preset */}
-                {!GEOFENCE_PRESETS.some((p) => p.value === form.geofenceRadius) && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      className={inp + " flex-1"}
-                      type="number"
-                      min={50}
-                      max={50000}
-                      placeholder="Custom metres"
-                      value={form.geofenceRadius}
-                      onChange={(e) => setForm((f) => ({ ...f, geofenceRadius: e.target.value }))}
-                    />
-                    <span className="text-[11px] text-white/30">m</span>
-                  </div>
+                ) : (
+                  <p className="text-[10px] text-white/20 mt-1">Search an address above — then drag the circle to set the clock-in boundary.</p>
                 )}
-                <button
-                  type="button"
-                  className="text-[10px] text-white/25 hover:text-amber-400 transition-colors mt-1.5 underline underline-offset-2"
-                  onClick={() => setForm((f) => ({ ...f, geofenceRadius: "" }))}
-                >
-                  Custom radius
-                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
