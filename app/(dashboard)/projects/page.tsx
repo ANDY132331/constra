@@ -32,13 +32,22 @@ function StatusBadge({ status, pending }: { status: string; pending?: boolean })
 type FormState = {
   name: string; client: string; address: string;
   gpsLat: string; gpsLng: string;
+  geofenceRadius: string; // metres
   status: "active" | "upcoming" | "completed";
   startDate: string; endDate: string;
   budget: string; color: string; managerId: string;
 };
 
+const GEOFENCE_PRESETS = [
+  { label: "200 m", sublabel: "Small site", value: "200" },
+  { label: "500 m", sublabel: "Standard", value: "500" },
+  { label: "1 km",  sublabel: "Large site", value: "1000" },
+  { label: "5 km",  sublabel: "Highway",    value: "5000" },
+];
+
 const blank: FormState = {
   name: "", client: "", address: "", gpsLat: "", gpsLng: "",
+  geofenceRadius: "500",
   status: "active", startDate: "", endDate: "", budget: "", color: "#F5C400", managerId: "",
 };
 
@@ -82,6 +91,7 @@ export default function ProjectsPage() {
       address: project.address,
       gpsLat: project.gps?.lat.toString() ?? "",
       gpsLng: project.gps?.lng.toString() ?? "",
+      geofenceRadius: project.geofenceRadius?.toString() ?? "500",
       status: project.status,
       startDate: project.startDate.toISOString().split("T")[0],
       endDate: project.endDate.toISOString().split("T")[0],
@@ -182,6 +192,7 @@ export default function ProjectsPage() {
       client: form.client.trim(),
       address: form.address.trim(),
       gps,
+      geofenceRadius: parseInt(form.geofenceRadius) || 500,
       status: form.status,
       startDate: form.startDate ? new Date(form.startDate) : new Date(),
       endDate: form.endDate ? new Date(form.endDate) : new Date(Date.now() + 90 * 86400000),
@@ -809,6 +820,52 @@ export default function ProjectsPage() {
                 ) : null}
                 <p className="text-[10px] text-white/20 mt-1">Used for GPS off-site detection during clock-in verification.</p>
               </div>
+
+              {/* Geofence radius — only relevant when a GPS pin is set */}
+              <div>
+                <label className={lbl}>Clock-in Radius</label>
+                <p className="text-[10px] text-white/20 mb-2">Workers must be within this distance of the site pin to clock in.</p>
+                <div className="grid grid-cols-4 gap-1.5 mb-2">
+                  {GEOFENCE_PRESETS.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, geofenceRadius: p.value }))}
+                      className={`flex flex-col items-center py-2 px-1 rounded-xl border text-center transition-all ${
+                        form.geofenceRadius === p.value
+                          ? "border-amber-500/60 bg-amber-500/[0.08] text-amber-400"
+                          : "border-white/[0.07] bg-white/[0.02] text-white/45 hover:border-white/[0.14] hover:text-white/70"
+                      }`}
+                    >
+                      <span className="text-[12px] font-bold leading-tight">{p.label}</span>
+                      <span className="text-[9px] mt-0.5 opacity-70">{p.sublabel}</span>
+                    </button>
+                  ))}
+                </div>
+                {/* Custom input — shown when value doesn't match any preset */}
+                {!GEOFENCE_PRESETS.some((p) => p.value === form.geofenceRadius) && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      className={inp + " flex-1"}
+                      type="number"
+                      min={50}
+                      max={50000}
+                      placeholder="Custom metres"
+                      value={form.geofenceRadius}
+                      onChange={(e) => setForm((f) => ({ ...f, geofenceRadius: e.target.value }))}
+                    />
+                    <span className="text-[11px] text-white/30">m</span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="text-[10px] text-white/25 hover:text-amber-400 transition-colors mt-1.5 underline underline-offset-2"
+                  onClick={() => setForm((f) => ({ ...f, geofenceRadius: "" }))}
+                >
+                  Custom radius
+                </button>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Start Date</label>

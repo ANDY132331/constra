@@ -93,6 +93,7 @@ export type Project = {
   forecast?: number;   // projected final cost at completion
   address: string;
   gps?: GpsLocation;
+  geofenceRadius?: number; // metres — clock-in allowed radius (default 500; highways can be 5000+)
   color: string;
   managerId: string;
   workerIds: string[];

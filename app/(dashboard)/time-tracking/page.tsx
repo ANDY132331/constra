@@ -188,8 +188,6 @@ function ProjectPickerModal({
   );
 }
 
-const GEOFENCE_RADIUS_M = 200;
-
 function haversineM(a: GpsLocation, b: GpsLocation): number {
   const R = 6_371_000;
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -200,24 +198,49 @@ function haversineM(a: GpsLocation, b: GpsLocation): number {
 }
 
 function fmtDist(m: number) {
+  if (m < 0) return "Unknown";
   return m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`;
 }
 
-async function getGeofenceResult(projectGps: GpsLocation): Promise<{ ok: boolean; distanceM: number }> {
-  return new Promise((resolve) => {
-    if (!("geolocation" in navigator)) return resolve({ ok: false, distanceM: -1 });
+/** Try to get the device's current position once, with the given timeout. */
+function tryGetPosition(timeoutMs: number): Promise<GeolocationPosition | null> {
+  return new Promise((res) => {
+    if (!("geolocation" in navigator)) return res(null);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const distanceM = haversineM(
-          { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy ?? 0 },
-          projectGps,
-        );
-        resolve({ ok: distanceM <= GEOFENCE_RADIUS_M, distanceM });
-      },
-      () => resolve({ ok: false, distanceM: -1 }), // denied / unavailable → show warning
-      { timeout: 6000, maximumAge: 30_000 },
+      (pos) => res(pos),
+      () => res(null),
+      { timeout: timeoutMs, maximumAge: 15_000, enableHighAccuracy: true },
     );
   });
+}
+
+/**
+ * Check whether the device is within `radiusM` metres of `projectGps`.
+ * Makes up to two attempts so transient failures don't block clock-in:
+ *   • First pass: 10 s timeout, high-accuracy mode
+ *   • Retry if failed or accuracy is worse than 3× the radius (for small sites)
+ */
+async function getGeofenceResult(
+  projectGps: GpsLocation,
+  radiusM: number,
+): Promise<{ ok: boolean; distanceM: number; accuracyM: number }> {
+  let pos = await tryGetPosition(10_000);
+
+  // Retry when: no fix yet, or accuracy is so bad it's meaningless for small sites
+  const accuracyTooCoarse = pos && pos.coords.accuracy > radiusM * 3 && radiusM < 2_000;
+  if (!pos || accuracyTooCoarse) {
+    pos = await tryGetPosition(15_000);
+  }
+
+  if (!pos) return { ok: false, distanceM: -1, accuracyM: -1 };
+
+  const accuracyM = pos.coords.accuracy ?? 0;
+  const distanceM = haversineM(
+    { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: accuracyM },
+    projectGps,
+  );
+  // Worker is "ok" if they're within radius; accuracy blur is acceptable on large sites
+  return { ok: distanceM <= radiusM, distanceM, accuracyM };
 }
 
 type GeofenceWarning = {
@@ -225,6 +248,8 @@ type GeofenceWarning = {
   projectId: string;
   projectName: string;
   distanceM: number;
+  accuracyM: number;
+  radiusM: number;
 };
 
 function GeofenceWarningModal({
@@ -263,22 +288,30 @@ function GeofenceWarningModal({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-white/40">Your distance</span>
-              <span className="text-[13px] font-black text-amber-400">{warning.distanceM === -1 ? "Unknown" : fmtDist(warning.distanceM)}</span>
+              <span className="text-[13px] font-black text-amber-400">{fmtDist(warning.distanceM)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-white/40">Allowed radius</span>
-              <span className="text-[12px] text-white/60">{fmtDist(GEOFENCE_RADIUS_M)}</span>
+              <span className="text-[12px] text-white/60">{fmtDist(warning.radiusM)}</span>
             </div>
+            {warning.accuracyM > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-white/40">GPS accuracy</span>
+                <span className={`text-[12px] font-semibold ${warning.accuracyM > warning.radiusM ? "text-red-400" : "text-white/60"}`}>
+                  ±{fmtDist(warning.accuracyM)}
+                </span>
+              </div>
+            )}
             {warning.distanceM > 0 && (
               <div className="mt-2">
                 <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full bg-amber-500 transition-all"
-                    style={{ width: `${Math.min(100, (GEOFENCE_RADIUS_M / warning.distanceM) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (warning.radiusM / warning.distanceM) * 100)}%` }}
                   />
                 </div>
                 <div className="flex justify-between mt-1">
-                  <span className="text-[9px] text-white/25">Site</span>
+                  <span className="text-[9px] text-white/25">Site boundary</span>
                   <span className="text-[9px] text-white/25">You are here</span>
                 </div>
               </div>
@@ -388,10 +421,11 @@ export default function TimeTrackingPage() {
     const project = getProjectById(projectId);
     if (project?.gps) {
       setGeofenceChecking(true);
-      const { ok, distanceM } = await getGeofenceResult(project.gps);
+      const radiusM = project.geofenceRadius ?? 500;
+      const { ok, distanceM, accuracyM } = await getGeofenceResult(project.gps, radiusM);
       setGeofenceChecking(false);
       if (!ok) {
-        setGeofenceWarning({ worker, projectId, projectName: project.name, distanceM });
+        setGeofenceWarning({ worker, projectId, projectName: project.name, distanceM, accuracyM, radiusM });
         return;
       }
     }
