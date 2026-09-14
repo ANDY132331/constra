@@ -438,13 +438,13 @@ export default function ProjectsPage() {
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => setDeleteConfirm(p.id)}
-                        className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                        className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => approveProject(p.id)}
-                        className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+                        className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
                       >
                         Approve
                       </button>
@@ -935,7 +935,7 @@ export default function ProjectsPage() {
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Project" : "New Project"}</h3>
-              <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -1136,5 +1136,7 @@ export default function ProjectsPage() {
     </>
   );
 }
+
+
 
 

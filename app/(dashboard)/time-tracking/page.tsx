@@ -75,7 +75,7 @@ function EditEntryModal({
             <h3 className="text-[15px] font-bold text-white">Edit Time Entry</h3>
             <p className="text-[11px] text-white/35 mt-0.5">{entry.workerName}</p>
           </div>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -146,7 +146,7 @@ function ProjectPickerModal({
             <h3 className="text-[15px] font-bold text-white">Select Project</h3>
             <p className="text-[11px] text-white/35 mt-0.5">Clocking in {worker.name}</p>
           </div>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -595,12 +595,12 @@ export default function TimeTrackingPage() {
         <h2 className="text-[22px] font-bold text-white">Time</h2>
         <div className="flex items-center gap-2">
           {clockEntries.filter((e) => e.clockOut).length > 0 && !isEmployee && (
-            <button onClick={exportCsv} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-lg">
+            <button onClick={exportCsv} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-full">
               <Download size={12} /> CSV
             </button>
           )}
           {clockedIn.length > 1 && (currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
-            <button onClick={() => setClockOutAllConfirm(true)} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-lg">
+            <button onClick={() => setClockOutAllConfirm(true)} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-full">
               <LogOut size={12} /> All Out
             </button>
           )}
@@ -1027,7 +1027,7 @@ export default function TimeTrackingPage() {
           {clockEntries.filter((e) => e.clockOut).length > 0 && (
             <button
               onClick={exportCsv}
-              className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-white/50 hover:text-white font-bold text-[13px] px-4 py-2 rounded-lg transition-all"
+              className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-white/50 hover:text-white font-bold text-[13px] px-4 py-2 rounded-full transition-all"
             >
               <Download size={14} />
               Export CSV
@@ -1037,7 +1037,7 @@ export default function TimeTrackingPage() {
           {clockedIn.length > 1 && (currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
             <button
               onClick={() => setClockOutAllConfirm(true)}
-              className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-white/50 hover:text-white font-bold text-[13px] px-4 py-2 rounded-lg transition-all"
+              className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-white/50 hover:text-white font-bold text-[13px] px-4 py-2 rounded-full transition-all"
             >
               <LogOut size={14} />
               Clock Out All ({clockedIn.length})
@@ -1045,13 +1045,13 @@ export default function TimeTrackingPage() {
           )}
           {isCurrentUserClockedIn ? (
             <button onClick={() => handleClockOut(currentUser.id)}
-              className="flex items-center gap-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 font-bold text-[13px] px-4 py-2 rounded-lg transition-all">
+              className="flex items-center gap-2 bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 font-bold text-[13px] px-4 py-2 rounded-full transition-all">
               <LogOut size={14} />
               Clock Out
             </button>
           ) : (
             <button onClick={() => requestClockIn(currentUser)}
-              className="flex items-center gap-2 bg-green-500/15 hover:bg-green-500/25 border border-green-500/30 text-green-400 font-bold text-[13px] px-4 py-2 rounded-lg transition-all">
+              className="flex items-center gap-2 bg-green-500/15 hover:bg-green-500/25 border border-green-500/30 text-green-400 font-bold text-[13px] px-4 py-2 rounded-full transition-all">
               <LogIn size={14} />
               Clock In
             </button>
@@ -1162,7 +1162,7 @@ export default function TimeTrackingPage() {
                   </div>
                   {worker.id !== currentUser.id && (
                     <button onClick={() => handleClockOut(worker.id)}
-                      className="mt-3 w-full text-[11px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/15 py-1.5 rounded-lg transition-colors">
+                      className="mt-3 w-full text-[11px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/15 py-1.5 rounded-full transition-colors">
                       Clock Out
                     </button>
                   )}
@@ -1180,7 +1180,7 @@ export default function TimeTrackingPage() {
           <div className="flex gap-2 flex-wrap">
             {workers.filter((w) => !w.clockedIn).map((worker) => (
               <button key={worker.id} onClick={() => requestClockIn(worker)}
-                className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] hover:border-green-500/30 hover:bg-green-500/[0.04] rounded-lg px-3 py-2 transition-all group">
+                className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] hover:border-green-500/30 hover:bg-green-500/[0.04] rounded-full px-3 py-2 transition-all group">
                 <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[9px] font-bold flex-shrink-0"
                   style={{ backgroundColor: worker.color + "25", color: worker.color }}>
                   {worker.photo
@@ -1463,5 +1463,8 @@ export default function TimeTrackingPage() {
     </>
   );
 }
+
+
+
 
 

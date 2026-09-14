@@ -88,7 +88,7 @@ function HoursModal({
             <h3 className="text-[15px] font-bold text-white">Manage Hours</h3>
             <p className="text-[11px] text-white/40 mt-0.5">{worker.name}</p>
           </div>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -415,10 +415,10 @@ export default function CrewPage() {
           <div className="flex items-center justify-between gap-3">
             <code className="text-[20px] font-black font-mono tracking-[0.15em] text-amber-400">{inviteCode}</code>
             <div className="flex items-center gap-2">
-              <button onClick={() => handleShowQR()} className="p-2 rounded-lg bg-white/[0.05] text-white/40 active:text-white/70">
+              <button onClick={() => handleShowQR()} className="p-2 rounded-full bg-white/[0.05] text-white/40 active:text-white/70">
                 <QrCode size={14} />
               </button>
-              <button onClick={() => handleCopy()} className="flex items-center gap-1.5 bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-lg px-3 py-1.5 text-[12px] font-bold">
+              <button onClick={() => handleCopy()} className="flex items-center gap-1.5 bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-full px-3 py-1.5 text-[12px] font-bold">
                 {copied ? <Check size={12} /> : <Copy size={12} />}
                 {copied ? "Copied" : "Copy"}
               </button>
@@ -498,17 +498,17 @@ export default function CrewPage() {
                 </div>
                 <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
                   {canEdit && isAdminOrAbove(currentUser.role) && (
-                    <button onClick={() => setHoursWorker(worker)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
+                    <button onClick={() => setHoursWorker(worker)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
                       <Clock size={13} />
                     </button>
                   )}
                   {canEdit && (
                     <>
-                      <button onClick={() => openEdit(worker)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 active:bg-white/5 transition-all">
+                      <button onClick={() => openEdit(worker)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/30 active:bg-white/5 transition-all">
                         <Pencil size={13} />
                       </button>
                       {worker.id !== currentUser.id && (
-                        <button onClick={() => handleDelete(worker.id)} className="p-1.5 rounded-lg text-white/30 active:bg-red-500/10 transition-all">
+                        <button onClick={() => handleDelete(worker.id)} className="p-1.5 rounded-full text-white/30 active:bg-red-500/10 transition-all">
                           <Trash2 size={13} />
                         </button>
                       )}
@@ -579,11 +579,11 @@ export default function CrewPage() {
         <div className="flex items-center gap-3 flex-wrap">
           <code className="text-lg font-black font-mono tracking-[0.15em] text-amber-400">{inviteCode}</code>
           <button onClick={handleShowQR}
-            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 active:bg-amber-500/35 text-amber-400 px-3 py-2 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 active:bg-amber-500/35 text-amber-400 px-3 py-2 rounded-full transition-colors">
             <QrCode size={13} /> QR Code
           </button>
           <button onClick={() => handleCopy(false)}
-            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 active:bg-amber-500/35 text-amber-400 px-3 py-2 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 text-[12px] font-bold bg-amber-500/15 hover:bg-amber-500/25 active:bg-amber-500/35 text-amber-400 px-3 py-2 rounded-full transition-colors">
             {copied ? <Check size={13} /> : <Copy size={13} />}
             {copied ? "Copied!" : "Copy Code"}
           </button>
@@ -682,7 +682,7 @@ export default function CrewPage() {
                   </div>
                   {currentUser.role === "Admin" && (
                     <button onClick={() => setHoursWorker(worker)}
-                      className="text-[10px] font-bold text-amber-400/60 hover:text-amber-400 bg-amber-500/[0.06] hover:bg-amber-500/10 px-2 py-0.5 rounded-lg transition-colors">
+                      className="text-[10px] font-bold text-amber-400/60 hover:text-amber-400 bg-amber-500/[0.06] hover:bg-amber-500/10 px-2 py-0.5 rounded-full transition-colors">
                       Manage Hours
                     </button>
                   )}
@@ -745,7 +745,7 @@ export default function CrewPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-8 flex flex-col items-center gap-5 w-full sm:w-72">
             <div className="flex items-center justify-between w-full">
               <h3 className="text-[15px] font-bold text-white">Invite Workers</h3>
-              <button onClick={() => setShowQR(false)} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+              <button onClick={() => setShowQR(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>
@@ -754,7 +754,7 @@ export default function CrewPage() {
               <p className="text-[13px] font-bold text-white/70">Scan to join workspace</p>
               <p className="text-[11px] text-white/30">Or share code: <span className="font-mono font-bold text-amber-400">{inviteCode}</span></p>
             </div>
-            <button onClick={() => handleCopy(true)} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 transition-colors flex items-center justify-center gap-2">
+            <button onClick={() => handleCopy(true)} className="w-full py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 transition-colors flex items-center justify-center gap-2">
               {copied ? <Check size={14} /> : <Copy size={14} />}
               {copied ? "Link Copied!" : "Copy Invite Link"}
             </button>
@@ -769,7 +769,7 @@ export default function CrewPage() {
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Worker" : "Add Worker"}</h3>
               <button onClick={() => setShowModal(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+                className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -962,5 +962,9 @@ export default function CrewPage() {
     </>
   );
 }
+
+
+
+
 
 

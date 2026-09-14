@@ -156,7 +156,7 @@ function InvoiceDetail({
       {/* â”€â”€ Toolbar â”€â”€ */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         <div className="flex items-center gap-2.5">
-          <button onClick={onClose} aria-label="Back to invoices" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
+          <button onClick={onClose} aria-label="Back to invoices" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
             <ChevronRight size={16} className="rotate-180" />
           </button>
           <span className="font-mono text-[12px] text-white/35 tracking-wider">{invoice.number}</span>
@@ -211,7 +211,7 @@ function InvoiceDetail({
                 setSendLoading(false);
               }
             }}
-            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40 ${
+            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40 ${
               invoice.status === "overdue"
                 ? "text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/15"
                 : "text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09]"
@@ -222,7 +222,7 @@ function InvoiceDetail({
           </button>
           <button
             onClick={copyPaymentLink}
-            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors ${linkCopied ? "text-emerald-400 bg-emerald-500/10" : "text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09]"}`}
+            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-full transition-colors ${linkCopied ? "text-emerald-400 bg-emerald-500/10" : "text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09]"}`}
             title="Copy payment link"
           >
             {linkCopied ? <Check size={13} /> : <Link2 size={13} />}
@@ -236,15 +236,15 @@ function InvoiceDetail({
               finally { setPdfLoading(false); }
             }}
             disabled={pdfLoading}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40"
           >
             <Download size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
           </button>
-          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
+          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
             <Pencil size={14} />
           </button>
           <button onClick={() => setDeleteConfirm(true)} aria-label="Delete invoice"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
+            className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
             <Trash2 size={14} />
           </button>
         </div>
@@ -423,25 +423,25 @@ function InvoiceDetail({
       <div className="flex items-center gap-2 px-5 py-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         {invoice.status === "draft" && (
           <button onClick={() => onUpdate(invoice.id, { status: "sent" })}
-            className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-full transition-colors">
             <Send size={13} /> Mark as Sent
           </button>
         )}
         {invoice.status === "sent" && (
           <>
             <button onClick={() => onUpdate(invoice.id, { status: "paid" })}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-colors">
+              className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-full transition-colors">
               <CheckCircle2 size={13} /> Mark Paid
             </button>
             <button onClick={() => onUpdate(invoice.id, { status: "overdue" })}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-lg transition-colors">
+              className="flex items-center gap-1.5 text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-full transition-colors">
               <AlertTriangle size={12} /> Mark Overdue
             </button>
           </>
         )}
         {invoice.status === "overdue" && (
           <button onClick={() => onUpdate(invoice.id, { status: "paid" })}
-            className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-full transition-colors">
             <CheckCircle2 size={13} /> Mark Paid
           </button>
         )}
@@ -871,7 +871,7 @@ export default function InvoicesPage() {
                 <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Invoice" : "New Invoice"}</h3>
                 {!editId && <p className="text-[11px] text-white/30 mt-0.5 font-mono">{nextNumber}</p>}
               </div>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} aria-label="Close" className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} aria-label="Close" className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1">
                 <X size={16} />
               </button>
             </div>
@@ -945,7 +945,7 @@ export default function InvoicesPage() {
                           <input className={inp} type="number" placeholder="0.00" value={item.rate}
                             onChange={(e) => updateItem(idx, "rate", e.target.value)} />
                         </div>
-                        <button onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10">
+                        <button onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10">
                           <X size={14} />
                         </button>
                       </div>
@@ -1013,5 +1013,8 @@ export default function InvoicesPage() {
     </>
   );
 }
+
+
+
 
 

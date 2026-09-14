@@ -288,7 +288,7 @@ export default function DocumentsPage() {
               <h2 className="text-2xl font-bold text-white tracking-tight">Document Vault</h2>
               <p className="text-[12px] text-white/35 mt-0.5">Blueprints, permits, contracts, and job-site files</p>
             </div>
-            <label className={`flex items-center gap-2 ${uploading ? "bg-amber-500/40" : "bg-amber-500 hover:bg-amber-400"} text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors cursor-pointer`}>
+            <label className={`flex items-center gap-2 ${uploading ? "bg-amber-500/40" : "bg-amber-500 hover:bg-amber-400"} text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors cursor-pointer`}>
               <Upload size={15} />
               {uploading ? "Uploading…" : "Upload File"}
               <input
@@ -440,21 +440,21 @@ export default function DocumentsPage() {
               <div className="flex items-center gap-2">
                 {(previewDoc.versions?.length ?? 0) > 0 && (
                   <button onClick={() => setShowVersions((v) => !v)} title="Version history"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors ${showVersions ? "bg-white/10 text-white" : "bg-white/[0.05] text-white/50 hover:text-white/80"}`}>
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold transition-colors ${showVersions ? "bg-white/10 text-white" : "bg-white/[0.05] text-white/50 hover:text-white/80"}`}>
                     <History size={12} /> {previewDoc.versions!.length}
                   </button>
                 )}
-                <label className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors cursor-pointer ${uploadingVersion ? "bg-white/5 text-white/30" : "bg-white/[0.05] text-white/50 hover:text-white/80"}`}
+                <label className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold transition-colors cursor-pointer ${uploadingVersion ? "bg-white/5 text-white/30" : "bg-white/[0.05] text-white/50 hover:text-white/80"}`}
                   title="Upload new version">
                   <RefreshCw size={12} /> {uploadingVersion ? "…" : "New Version"}
                   <input ref={versionInputRef} type="file" className="hidden" onChange={handleVersionUpload} disabled={uploadingVersion} />
                 </label>
                 <button onClick={() => downloadDoc(previewDoc)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold transition-colors">
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold transition-colors">
                   <Download size={12} /> Download
                 </button>
                 <button onClick={() => { setPreviewDoc(null); setShowVersions(false); }}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+                  className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                   ✕
                 </button>
               </div>
@@ -503,7 +503,7 @@ export default function DocumentsPage() {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-3">Version History</p>
                 <div className="space-y-2">
                   {previewDoc.versions.map((v, i) => (
-                    <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.05] transition-colors group">
+                    <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-full bg-white/[0.03] hover:bg-white/[0.05] transition-colors group">
                       <History size={12} className="text-white/25 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-[11px] text-white/55">
@@ -537,4 +537,6 @@ export default function DocumentsPage() {
     </>
   );
 }
+
+
 

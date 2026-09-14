@@ -353,7 +353,7 @@ export default function InsurancePage() {
               <h2 className="text-[15px] font-bold text-white/90">
                 {editId ? "Edit Policy" : "Add Insurance Policy"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
+              <button onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
                 <X size={16} />
               </button>
             </div>
@@ -460,5 +460,6 @@ export default function InsurancePage() {
     </div>
   );
 }
+
 
 

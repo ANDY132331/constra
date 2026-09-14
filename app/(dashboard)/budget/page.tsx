@@ -490,7 +490,7 @@ export default function BudgetPage() {
 
               <div className="flex gap-2 pt-1">
                 <button type="button" onClick={closeForm}
-                  className="flex-1 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 text-[13px] font-medium py-2.5 rounded-lg transition-colors">
+                  className="flex-1 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 text-[13px] font-medium py-2.5 rounded-full transition-colors">
                   Cancel
                 </button>
                 <button type="submit"

@@ -246,7 +246,7 @@ export default function BlueprintsPage() {
           <button
             onClick={() => { setUploadError(null); fileInputRef.current?.click(); }}
             disabled={uploading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-bold transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-bold transition-colors disabled:opacity-50"
           >
             <Upload size={12} /> {uploading ? "Uploading…" : "Upload Blueprint"}
           </button>
@@ -400,4 +400,5 @@ export default function BlueprintsPage() {
     </>
   );
 }
+
 

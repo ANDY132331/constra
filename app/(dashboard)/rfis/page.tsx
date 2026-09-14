@@ -357,11 +357,11 @@ export default function RFIsPage() {
                                 value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
                               <div className="flex gap-2">
                                 <button onClick={() => handleAnswer(rfi.id)}
-                                  className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                                  className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
                                   Submit Answer
                                 </button>
                                 <button onClick={() => setAnswerRfiId(null)}
-                                  className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
+                                  className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
                                   Cancel
                                 </button>
                               </div>
@@ -369,14 +369,14 @@ export default function RFIsPage() {
                           ) : (
                             <div className="flex gap-2 pt-1">
                               <button onClick={() => { setAnswerRfiId(rfi.id); setAnswerText(""); }}
-                                className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                                className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
                                 Submit Answer
                               </button>
                               <button onClick={() => {
                                 if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
                                 updateRFI(rfi.id, { status: "closed" });
                               }}
-                                className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
+                                className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
                                 Close RFI
                               </button>
                             </div>
@@ -385,11 +385,11 @@ export default function RFIsPage() {
                         {rfi.status === "answered" && (
                           <div className="flex gap-2 pt-1">
                             <button onClick={() => updateRFI(rfi.id, { status: "closed" })}
-                              className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-lg transition-colors">
+                              className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
                               Close RFI
                             </button>
                             <button onClick={() => updateRFI(rfi.id, { status: "open", answer: undefined })}
-                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
                               Reopen
                             </button>
                           </div>
@@ -397,7 +397,7 @@ export default function RFIsPage() {
                         {rfi.status === "closed" && (
                           <div className="flex gap-2 pt-1">
                             <button onClick={() => updateRFI(rfi.id, { status: "open" })}
-                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors">
+                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
                               Reopen RFI
                             </button>
                           </div>
@@ -420,7 +420,7 @@ export default function RFIsPage() {
               <h3 className="text-[15px] font-bold text-white">
                 {editId ? "Edit RFI" : <>New RFI <span className="text-white/30 font-normal text-[13px]">{nextNumber}</span></>}
               </h3>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -533,5 +533,7 @@ export default function RFIsPage() {
     </>
   );
 }
+
+
 
 

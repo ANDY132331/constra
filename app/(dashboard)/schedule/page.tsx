@@ -340,7 +340,7 @@ export default function SchedulePage() {
                     <div className="mt-2 space-y-0.5">
                       {geoResults.map((r, i) => (
                         <button key={i} onClick={() => applyGeoResult(r)}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-white/[0.05] transition-colors">
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-full text-left hover:bg-white/[0.05] transition-colors">
                           <MapPin size={11} className="text-amber-400 flex-shrink-0" />
                           <div>
                             <p className="text-[12px] font-semibold text-white/80">{r.name}</p>
@@ -500,11 +500,11 @@ export default function SchedulePage() {
                       {customEvt && (
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <button onClick={() => openEditEvent(customEvt)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                            className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
                             <Pencil size={12} />
                           </button>
                           <button onClick={() => setDeleteEventConfirm(e.id)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
                             <X size={12} />
                           </button>
                         </div>
@@ -532,7 +532,7 @@ export default function SchedulePage() {
               <div className="relative">
                 <button
                   onClick={() => setShowLocationPicker(!showLocationPicker)}
-                  className="flex items-center gap-1.5 bg-[#111] hover:bg-white/5 border border-white/[0.07] text-white/50 hover:text-white/80 text-[12px] px-3 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 bg-[#111] hover:bg-white/5 border border-white/[0.07] text-white/50 hover:text-white/80 text-[12px] px-3 py-2 rounded-full transition-colors"
                 >
                   <MapPin size={12} />
                   {locationName}
@@ -554,7 +554,7 @@ export default function SchedulePage() {
                       <div className="mt-2 space-y-0.5">
                         {geoResults.map((r, i) => (
                           <button key={i} onClick={() => applyGeoResult(r)}
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-white/[0.05] transition-colors">
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-full text-left hover:bg-white/[0.05] transition-colors">
                             <MapPin size={11} className="text-amber-400 flex-shrink-0" />
                             <div>
                               <p className="text-[12px] font-semibold text-white/80">{r.name}</p>
@@ -576,7 +576,7 @@ export default function SchedulePage() {
                 <>
                   <button
                     onClick={() => setImperial((v) => !v)}
-                    className="text-[11px] font-bold text-white/40 hover:text-white/70 bg-white/[0.04] hover:bg-white/[0.07] px-2.5 py-1.5 rounded-lg transition-colors"
+                    className="text-[11px] font-bold text-white/40 hover:text-white/70 bg-white/[0.04] hover:bg-white/[0.07] px-2.5 py-1.5 rounded-full transition-colors"
                     title="Toggle temperature units"
                   >
                     {imperial ? "°F" : "°C"}
@@ -659,12 +659,12 @@ export default function SchedulePage() {
           <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-x-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors">
+                className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-full transition-colors">
                 <ChevronLeft size={16} />
               </button>
               <h3 className="text-[15px] font-bold text-white">{format(currentMonth, "MMMM yyyy")}</h3>
               <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-lg transition-colors">
+                className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-full transition-colors">
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -731,7 +731,7 @@ export default function SchedulePage() {
                 <h4 className="text-[14px] font-bold text-white">{format(selectedDay, "EEEE, MMMM d, yyyy")}</h4>
                 <button
                   onClick={() => { setEditEventId(null); setAddForm({ title: "", date: format(selectedDay, "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); }}
-                  className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors"
                 >
                   <Plus size={13} /> Add Event
                 </button>
@@ -805,7 +805,7 @@ export default function SchedulePage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06] flex-shrink-0">
               <h3 className="text-[15px] font-bold text-white">{editEventId ? "Edit Event" : "Add Event"}</h3>
-              <button onClick={() => { setShowAddModal(false); setEditEventId(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+              <button onClick={() => { setShowAddModal(false); setEditEventId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>
@@ -867,5 +867,7 @@ export default function SchedulePage() {
     </>
   );
 }
+
+
 
 

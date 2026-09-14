@@ -141,7 +141,7 @@ function EstimateDetail({
       {/* â”€â”€ Toolbar â”€â”€ */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         <div className="flex items-center gap-2.5">
-          <button onClick={onClose} aria-label="Back" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
+          <button onClick={onClose} aria-label="Back" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
             <ChevronRight size={16} className="rotate-180" />
           </button>
           <span className="font-mono text-[12px] text-white/35 tracking-wider">{estimate.number}</span>
@@ -194,7 +194,7 @@ function EstimateDetail({
                 setSendLoading(false);
               }
             }}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40"
           >
             <Mail size={13} />
             <span className="hidden sm:inline">{sendLoading ? "Sendingâ€¦" : "Send"}</span>
@@ -202,7 +202,7 @@ function EstimateDetail({
           {/* Copy share link */}
           <button
             onClick={copyEstimateLink}
-            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors ${linkCopied ? "text-emerald-400 bg-emerald-500/10" : "text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09]"}`}
+            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-full transition-colors ${linkCopied ? "text-emerald-400 bg-emerald-500/10" : "text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09]"}`}
             title="Copy share link"
           >
             {linkCopied ? <Check size={13} /> : <Link2 size={13} />}
@@ -217,16 +217,16 @@ function EstimateDetail({
               finally { setPdfLoading(false); }
             }}
             disabled={pdfLoading}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40"
           >
             <FileDown size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
           </button>
           <button onClick={() => onEdit(estimate)} aria-label="Edit estimate"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
+            className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
             <Pencil size={14} />
           </button>
           <button onClick={() => setDeleteConfirm(true)} aria-label="Delete estimate"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
+            className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
             <Trash2 size={14} />
           </button>
         </div>
@@ -413,25 +413,25 @@ function EstimateDetail({
       <div className="flex items-center gap-2 px-5 py-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         {isDraft && (
           <button onClick={() => onUpdate(estimate.id, { status: "sent" })}
-            className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-full transition-colors">
             <Send size={13} /> Mark as Sent
           </button>
         )}
         {isSent && (
           <>
             <button onClick={() => onUpdate(estimate.id, { status: "accepted" })}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-lg transition-colors">
+              className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-full transition-colors">
               <CheckCircle2 size={13} /> Mark Accepted
             </button>
             <button onClick={() => onUpdate(estimate.id, { status: "declined" })}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-lg transition-colors">
+              className="flex items-center gap-1.5 text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-full transition-colors">
               <XCircle size={12} /> Mark Declined
             </button>
           </>
         )}
         {isAccepted && (
           <button onClick={() => onConvert(estimate)}
-            className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-4 py-2 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-4 py-2 rounded-full transition-colors">
             <FileDown size={13} /> Convert to Invoice
           </button>
         )}
@@ -886,7 +886,7 @@ export default function EstimatesPage() {
                 <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Estimate" : "New Estimate"}</h3>
                 {!editId && <p className="text-[11px] text-white/30 mt-0.5 font-mono">{nextNumber}</p>}
               </div>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-1.5 rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -975,7 +975,7 @@ export default function EstimatesPage() {
                           <input className={inp} type="number" placeholder="0.00" value={item.rate}
                             onChange={(e) => updateItem(idx, "rate", e.target.value)} />
                         </div>
-                        <button onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10">
+                        <button onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10">
                           <X size={14} />
                         </button>
                       </div>
@@ -1045,5 +1045,8 @@ export default function EstimatesPage() {
     </>
   );
 }
+
+
+
 
 

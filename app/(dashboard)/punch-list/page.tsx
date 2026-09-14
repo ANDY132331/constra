@@ -227,30 +227,30 @@ export default function PunchListPage() {
                 <div className="flex items-center gap-2 pt-2 border-t border-white/[0.05]">
                   {item.status === "open" && (
                     <button onClick={() => updatePunchItem(item.id, { status: "in-progress" })}
-                      className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-lg transition-colors">
+                      className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full transition-colors">
                       Start
                     </button>
                   )}
                   {item.status !== "resolved" && (
                     <button onClick={() => updatePunchItem(item.id, { status: "resolved" })}
-                      className="text-[11px] font-semibold text-green-400 bg-green-500/10 px-3 py-1 rounded-lg transition-colors">
+                      className="text-[11px] font-semibold text-green-400 bg-green-500/10 px-3 py-1 rounded-full transition-colors">
                       Resolve
                     </button>
                   )}
                   {item.status === "resolved" && (
                     <button onClick={() => updatePunchItem(item.id, { status: "open" })}
-                      className="text-[11px] font-semibold text-white/30 bg-white/5 px-3 py-1 rounded-lg transition-colors">
+                      className="text-[11px] font-semibold text-white/30 bg-white/5 px-3 py-1 rounded-full transition-colors">
                       Reopen
                     </button>
                   )}
                   {canEdit && (
                     <div className="flex items-center gap-1 ml-auto">
                       <button onClick={() => openEdit(item)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
                         <Pencil size={13} />
                       </button>
                       <button onClick={() => setDeleteConfirm(item.id)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
                         <X size={13} />
                       </button>
                     </div>
@@ -413,19 +413,19 @@ export default function PunchListPage() {
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.05]">
                       {item.status === "open" && (
                         <button onClick={() => updatePunchItem(item.id, { status: "in-progress" })}
-                          className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1 rounded-lg transition-colors">
+                          className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1 rounded-full transition-colors">
                           Start Work
                         </button>
                       )}
                       {item.status !== "resolved" && (
                         <button onClick={() => updatePunchItem(item.id, { status: "resolved" })}
-                          className="text-[11px] font-semibold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/15 px-3 py-1 rounded-lg transition-colors">
+                          className="text-[11px] font-semibold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/15 px-3 py-1 rounded-full transition-colors">
                           Mark Resolved
                         </button>
                       )}
                       {item.status === "resolved" && (
                         <button onClick={() => updatePunchItem(item.id, { status: "open" })}
-                          className="text-[11px] font-semibold text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/8 px-3 py-1 rounded-lg transition-colors">
+                          className="text-[11px] font-semibold text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/8 px-3 py-1 rounded-full transition-colors">
                           Reopen
                         </button>
                       )}
@@ -456,7 +456,7 @@ export default function PunchListPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Item" : "Add Punch Item"}</h3>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -553,5 +553,7 @@ export default function PunchListPage() {
     </>
   );
 }
+
+
 
 

@@ -266,12 +266,12 @@ export default function ChangeOrdersPage() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); }}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors">
                     <CheckCircle2 size={12} /> Approve
                   </button>
                   <button
                     onClick={() => { updateChangeOrder(selected.id, { status: "rejected" }); setSelected((p) => p ? { ...p, status: "rejected" } : null); }}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-full transition-colors">
                     <XCircle size={12} /> Reject
                   </button>
                 </div>
@@ -420,20 +420,20 @@ export default function ChangeOrdersPage() {
               <button
                 onClick={() => handleExportPdf(selected)}
                 disabled={pdfLoading}
-                className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+                className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-3 py-1.5 rounded-full transition-colors disabled:opacity-40"
               >
                 <Download size={13} /> {pdfLoading ? "…" : "PDF"}
               </button>
-              <button onClick={() => openEdit(selected)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors" title="Edit">
+              <button onClick={() => openEdit(selected)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors" title="Edit">
                 <Pencil size={14} />
               </button>
               <button
                 onClick={() => setDeleteConfirm(selected.id)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
               >
                 <Trash2 size={14} />
               </button>
-              <button onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
+              <button onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
                 <X size={14} />
               </button>
             </div>
@@ -455,13 +455,13 @@ export default function ChangeOrdersPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); }}
-                    className="flex items-center gap-1.5 text-[12px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 text-[12px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors"
                   >
                     <CheckCircle2 size={13} /> Approve
                   </button>
                   <button
                     onClick={() => { updateChangeOrder(selected.id, { status: "rejected" }); setSelected((p) => p ? { ...p, status: "rejected" } : null); }}
-                    className="flex items-center gap-1.5 text-[12px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 text-[12px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-full transition-colors"
                   >
                     <XCircle size={13} /> Reject
                   </button>
@@ -498,7 +498,7 @@ export default function ChangeOrdersPage() {
           <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-xl w-full max-w-lg max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-[14px] font-bold text-white/90">{editing ? "Edit Change Order" : "New Change Order"}</h3>
-              <button onClick={() => { setShowForm(false); setEditing(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
+              <button onClick={() => { setShowForm(false); setEditing(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
             </div>
             <div className="overflow-y-scroll flex-1 px-5 py-4 space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -551,7 +551,7 @@ export default function ChangeOrdersPage() {
               </div>
             </div>
             <div className="px-5 py-4 border-t border-white/[0.06] flex justify-end gap-2">
-              <button onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2 text-[13px] text-white/50 hover:text-white/80 rounded-lg hover:bg-white/[0.05] transition-colors">Cancel</button>
+              <button onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2 text-[13px] text-white/50 hover:text-white/80 rounded-full hover:bg-white/[0.05] transition-colors">Cancel</button>
               <button
                 onClick={handleSubmit}
                 disabled={!form.projectId || !form.title.trim() || !form.number.trim()}
@@ -604,5 +604,7 @@ function DetailSection({ title, content }: { title: string; content: string }) {
     </div>
   );
 }
+
+
 
 

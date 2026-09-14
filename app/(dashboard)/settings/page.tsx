@@ -79,7 +79,7 @@ function SignOutOtherDevices() {
         <button
           onClick={handleSignOutOthers}
           disabled={status === "loading"}
-          className="inline-flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] disabled:opacity-50 text-white/70 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] disabled:opacity-50 text-white/70 font-semibold text-[12px] px-4 py-2 rounded-full transition-colors"
         >
           <Lock size={13} />
           {status === "loading" ? "Signing out…" : "Sign Out All Other Devices"}
@@ -433,7 +433,7 @@ function SettingsInner() {
         <div className="hidden sm:flex flex-col gap-1">
           {TABS.filter((t) => !t.adminOnly || isAdmin).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors text-left whitespace-nowrap relative overflow-hidden ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full text-[13px] font-medium transition-colors text-left whitespace-nowrap relative overflow-hidden ${
                 tab === id ? "bg-amber-500/12 text-amber-400" : "text-white/45 hover:text-white/70 hover:bg-white/5"
               }`}
               style={tab === id ? { boxShadow: "inset 2px 0 0 rgba(245,196,0,0.7)" } : {}}>
@@ -468,7 +468,7 @@ function SettingsInner() {
                       : <Building2 size={24} className="text-white/20" />}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className={`cursor-pointer inline-flex items-center gap-2 border text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${logoSaving ? "opacity-50 cursor-wait bg-white/[0.04] border-white/[0.06] text-white/40" : "bg-white/[0.06] hover:bg-white/[0.10] border-white/[0.08] text-white/70"}`}>
+                    <label className={`cursor-pointer inline-flex items-center gap-2 border text-[12px] font-semibold px-3 py-1.5 rounded-full transition-colors ${logoSaving ? "opacity-50 cursor-wait bg-white/[0.04] border-white/[0.06] text-white/40" : "bg-white/[0.06] hover:bg-white/[0.10] border-white/[0.08] text-white/70"}`}>
                       {logoSaving ? "Saving…" : "Upload Logo"}
                       <input
                         type="file"
@@ -619,17 +619,17 @@ function SettingsInner() {
                   {displayCode}
                 </div>
                 <button onClick={copyCode}
-                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-lg transition-colors">
+                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors">
                   {codeCopied ? <CheckCircle2 size={15} className="text-green-400" /> : <Copy size={15} />}
                   {codeCopied ? "Copied!" : "Copy Code"}
                 </button>
                 <button onClick={copyLink}
-                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-lg transition-colors">
+                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors">
                   {linkCopied ? <CheckCircle2 size={15} className="text-green-400" /> : <Copy size={15} />}
                   {linkCopied ? "Copied!" : "Copy Link"}
                 </button>
                 <button onClick={regenerateCode} disabled={regenerating}
-                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 disabled:opacity-50 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-lg transition-colors">
+                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 disabled:opacity-50 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors">
                   <Key size={15} className={regenerating ? "animate-spin" : ""} />
                   {regenerating ? "…" : "Regenerate"}
                 </button>
@@ -751,7 +751,7 @@ function SettingsInner() {
                     <div className="flex items-center gap-1 justify-end">
                       {!isMe ? (
                         <button onClick={() => handleKick(worker.id, worker.name)}
-                          className="flex items-center gap-1 text-[11px] font-bold text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-all">
+                          className="flex items-center gap-1 text-[11px] font-bold text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2 py-1 rounded-full transition-all">
                           <Trash2 size={11} /> Kick
                         </button>
                       ) : (
@@ -799,7 +799,7 @@ function SettingsInner() {
                   <p className="col-span-2 text-[12px] text-white/25 italic py-1">No custom roles yet.</p>
                 )}
                 {customRoles.map((role) => (
-                  <div key={role} className="flex items-center gap-2 bg-amber-500/[0.05] border border-amber-500/15 rounded-lg px-3 py-2.5 group hover:border-amber-500/25 transition-colors">
+                  <div key={role} className="flex items-center gap-2 bg-amber-500/[0.05] border border-amber-500/15 rounded-full px-3 py-2.5 group hover:border-amber-500/25 transition-colors">
                     <HardHat size={12} className="text-amber-400/50 flex-shrink-0" />
                     {editingRole === role ? (
                       <>
@@ -1050,7 +1050,7 @@ function SettingsInner() {
               )}
               <button
                 onClick={() => { setShowDeleteModal(true); setDeleteConfirmText(""); setDeleteStatus("idle"); setDeleteError(""); }}
-                className="inline-flex items-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-[12px] px-4 py-2 rounded-lg transition-colors"
+                className="inline-flex items-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-[12px] px-4 py-2 rounded-full transition-colors"
               >
                 Delete Account
               </button>
@@ -1323,7 +1323,7 @@ function AccessControlTab({
             }
             <button
               onClick={() => setShowPinSetup((v) => !v)}
-              className="flex items-center gap-1.5 text-[12px] font-bold bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.14] border border-white/[0.08] text-white/60 hover:text-white px-3 py-2 rounded-lg transition-all"
+              className="flex items-center gap-1.5 text-[12px] font-bold bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.14] border border-white/[0.08] text-white/60 hover:text-white px-3 py-2 rounded-full transition-all"
             >
               <Key size={13} />
               {permissionsPin ? "Change PIN" : "Set PIN"}
@@ -1412,7 +1412,7 @@ function AccessControlTab({
                                   key={page.href}
                                   onClick={() => togglePage(worker.id, page.href, draft)}
                                   disabled={locked}
-                                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-[12px] font-semibold transition-all text-left ${
+                                  className={`flex items-center gap-2 px-3 py-2.5 rounded-full border text-[12px] font-semibold transition-all text-left ${
                                     on
                                       ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
                                       : "bg-white/[0.03] border-white/[0.06] text-white/35"
@@ -1508,7 +1508,7 @@ function AccessControlTab({
               )}
 
               {!permissionsPin && (
-                <button onClick={() => setPinModal(null)} className="w-full py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+                <button onClick={() => setPinModal(null)} className="w-full py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                   Close
                 </button>
               )}
@@ -1519,5 +1519,7 @@ function AccessControlTab({
     </div>
   );
 }
+
+
 
 
