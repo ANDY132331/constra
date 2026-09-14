@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, getDay, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 
 type CustomEventType = "meeting" | "inspection" | "delivery" | "permit" | "other";
@@ -716,9 +717,12 @@ export default function SchedulePage() {
           </div>
 
           {calEvents.length === 0 && (
-            <div className="text-center py-6 text-white/25 text-[13px]">
-              No events yet — add tasks to projects or click &quot;Add Event&quot; above
-            </div>
+            <EmptyState
+              icon={Calendar}
+              title="No events yet"
+              body="Add events manually or assign tasks to projects — they'll appear on the calendar."
+              action={{ label: "Add Event", onClick: () => { setEditEventId(null); setAddForm({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); } }}
+            />
           )}
 
           {selectedDay && (

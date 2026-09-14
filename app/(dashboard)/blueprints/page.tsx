@@ -264,14 +264,20 @@ export default function BlueprintsPage() {
         {/* Left sidebar — blueprint list */}
         <div className="w-56 flex-shrink-0 border-r border-white/[0.06] bg-[#0d0d0d] overflow-y-auto">
           {projectBlueprints.length === 0 ? (
-            <div className="p-4 text-center">
-              <FileImage size={28} className="text-white/15 mx-auto mb-2" />
-              <p className="text-[11px] text-white/25">No blueprints yet</p>
+            <div className="flex flex-col items-center text-center px-4 py-10 gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                <FileImage size={20} className="text-white/20" />
+              </div>
+              <div>
+                <p className="text-[12px] font-semibold text-white/30">No blueprints yet</p>
+                <p className="text-[10px] text-white/15 mt-0.5 leading-relaxed">Upload a PDF or image to get started</p>
+              </div>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-3 flex items-center gap-1 mx-auto text-[10px] text-amber-400 hover:text-amber-300"
+                className="text-[11px] font-bold text-black px-3 py-1.5 rounded-full transition-all active:scale-[0.97]"
+                style={{ background: "linear-gradient(145deg, #F5C400, #d4a900)", boxShadow: "0 2px 10px rgba(245,196,0,0.2)" }}
               >
-                <FilePlus size={11} /> Upload one
+                Upload
               </button>
             </div>
           ) : (

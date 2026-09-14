@@ -811,7 +811,7 @@ export default function EstimatesPage() {
                     <button
                       key={tab.key}
                       onClick={() => setStatusFilter(tab.key)}
-                      className={`flex-shrink-0 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-colors ${
+                      className={`flex-shrink-0 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-colors ${
                         statusFilter === tab.key
                           ? "bg-amber-500/15 text-amber-400"
                           : "text-white/35 hover:text-white/60 hover:bg-white/[0.04]"

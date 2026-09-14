@@ -430,10 +430,7 @@ export default function PhotosPage() {
                 .filter((g) => g.photos.length > 0);
 
               if (byProject.length === 0) return (
-                <div className="text-center py-16 text-white/25">
-                  <FolderOpen size={40} className="mx-auto mb-3 opacity-30" />
-                  <p className="text-[14px] font-semibold">No photos found</p>
-                </div>
+                <EmptyState icon={FolderOpen} title="No photos match" body="Try clearing your filters or selecting a different project." isFiltered />
               );
 
               return (
@@ -546,10 +543,7 @@ export default function PhotosPage() {
           ) : null}
 
           {photos.length > 0 && filtered.length === 0 && (
-            <div className="text-center py-16 text-white/25">
-              <FolderOpen size={40} className="mx-auto mb-3 opacity-30" />
-              <p className="text-[14px] font-semibold">No photos found</p>
-            </div>
+            <EmptyState icon={FolderOpen} title="No photos match" body="Try clearing your search or project filter." isFiltered />
           )}
         </div>
       </div>

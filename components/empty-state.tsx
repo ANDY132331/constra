@@ -47,7 +47,7 @@ export function EmptyState({ icon: Icon, title, body, action, isFiltered }: Empt
       {action && (
         <button
           onClick={action.onClick}
-          className="mt-1 inline-flex items-center gap-1.5 font-bold text-[13px] px-5 py-2.5 rounded-xl transition-all active:scale-[0.97]"
+          className="mt-1 inline-flex items-center gap-1.5 font-bold text-[13px] px-5 py-2.5 rounded-full transition-all active:scale-[0.97]"
           style={{
             background: "linear-gradient(145deg, #F5C400, #d4a900)",
             color: "#000",
