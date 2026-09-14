@@ -132,16 +132,16 @@ export default function PhotosPage() {
           </button>
         </div>
         {/* Project filter */}
-        <div className="px-5 mb-3 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-5 mb-3 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           <button onClick={() => setProjectFilter("all")}
-            className={`flex-shrink-0 text-[12px] font-semibold px-3.5 py-2 rounded-xl border transition-colors ${projectFilter === "all" ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
+            className={`flex-shrink-0 snap-start text-[12px] font-semibold px-3.5 py-2 rounded-full border transition-colors ${projectFilter === "all" ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
             All <span className="opacity-50">{photos.length}</span>
           </button>
           {projects.filter((p) => p.status !== "upcoming").map((project) => {
             const count = photos.filter((ph) => ph.projectId === project.id).length;
             return (
               <button key={project.id} onClick={() => setProjectFilter(project.id)}
-                className={`flex-shrink-0 flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-xl border transition-colors ${projectFilter === project.id ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
+                className={`flex-shrink-0 snap-start flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full border transition-colors ${projectFilter === project.id ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} />
                 {project.name} <span className="opacity-50">{count}</span>
               </button>

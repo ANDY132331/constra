@@ -246,10 +246,10 @@ export default function TasksPage() {
         </button>
       </div>
 
-      <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-xl p-1 w-fit flex-wrap">
+      <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1 w-fit flex-wrap">
         {FILTER_TABS.map((tab) => (
           <button key={tab.key} onClick={() => setFilterStatus(tab.key)}
-            className={`text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors ${
+            className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-colors ${
               filterStatus === tab.key ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/60"}`}>
             {tab.label} <span className="opacity-60">{counts[tab.key] ?? 0}</span>
           </button>

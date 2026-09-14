@@ -103,10 +103,10 @@ function HoursModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mx-6 mt-5 bg-[#0d0d0d] border border-white/[0.06] rounded-xl p-1">
+        <div className="flex gap-1 mx-6 mt-5 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
           {(["adjust", "history"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[12px] font-bold transition-colors ${tab === t ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-[12px] font-bold transition-colors ${tab === t ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
               {t === "adjust" ? <><Plus size={12} />Adjust</> : <><History size={12} />History</>}
             </button>
           ))}
@@ -432,7 +432,7 @@ export default function CrewPage() {
       <div className="px-5 mb-4 flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden pb-0.5">
         {(["all", "Admin", "Project Manager", "Foreman", "Worker"] as const).map((role) => (
           <button key={role} onClick={() => setFilterRole(role)}
-            className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
+            className={`px-3.5 py-2 rounded-full text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
               filterRole === role ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/50"
             }`}>
             {role === "all" ? "All" : role}
@@ -597,10 +597,10 @@ export default function CrewPage() {
           <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none w-48"
             placeholder={`${t.common.search} crew…`} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-xl p-1">
+        <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
           {["all", "Admin", "Project Manager", "Foreman", "Worker"].map((r) => (
             <button key={r} onClick={() => setFilterRole(r)}
-              className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors ${filterRole === r ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
+              className={`text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors ${filterRole === r ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
               {r === "all" ? "All" : r}
             </button>
           ))}

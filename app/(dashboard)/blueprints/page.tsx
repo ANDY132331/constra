@@ -208,7 +208,7 @@ export default function BlueprintsPage() {
                 <button
                   key={t}
                   onClick={() => setFilterType(t)}
-                  className={`text-[10px] px-2 py-1 rounded-lg font-semibold capitalize transition-colors ${filterType === t ? "bg-amber-500/20 text-amber-400" : "text-white/30 hover:text-white/60"}`}
+                  className={`text-[10px] px-2 py-1 rounded-full font-semibold capitalize transition-colors ${filterType === t ? "bg-amber-500/20 text-amber-400" : "text-white/30 hover:text-white/60"}`}
                 >
                   {t === "all" ? "All types" : PIN_TYPE_LABELS[t]}
                 </button>
@@ -221,7 +221,7 @@ export default function BlueprintsPage() {
                 <button
                   key={v}
                   onClick={() => setFilterResolved(v)}
-                  className={`text-[10px] px-2 py-1 rounded-lg font-semibold capitalize transition-colors ${filterResolved === v ? "bg-amber-500/20 text-amber-400" : "text-white/30 hover:text-white/60"}`}
+                  className={`text-[10px] px-2 py-1 rounded-full font-semibold capitalize transition-colors ${filterResolved === v ? "bg-amber-500/20 text-amber-400" : "text-white/30 hover:text-white/60"}`}
                 >
                   {v}
                 </button>

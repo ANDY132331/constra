@@ -321,7 +321,7 @@ export default function ProjectsPage() {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold capitalize whitespace-nowrap transition-all ${
+                className={`px-3.5 py-2 rounded-full text-[12px] font-semibold capitalize whitespace-nowrap transition-all ${
                   statusFilter === s
                     ? "bg-amber-500 text-black"
                     : "bg-[#131110] border border-white/[0.07] text-white/50"
@@ -478,10 +478,10 @@ export default function ProjectsPage() {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-lg p-0.5 gap-0.5">
+            <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-full p-0.5 gap-0.5">
               {VIEWS.map(({ id, label, icon: Icon }) => (
                 <button key={id} onClick={() => setView(id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${
                     view === id ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70 hover:bg-white/5"}`}>
                   <Icon size={13} />{label}
                 </button>
@@ -495,7 +495,7 @@ export default function ProjectsPage() {
             <div className="flex items-center gap-1">
               {["all", "active", "upcoming", "completed"].map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
-                  className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold capitalize transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold capitalize transition-all ${
                     statusFilter === s ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60 hover:bg-white/5"}`}>
                   {s}
                 </button>

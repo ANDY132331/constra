@@ -351,12 +351,12 @@ export default function MaterialsPage() {
               className="bg-[#111] border border-white/[0.07] rounded-lg px-3 py-2 text-[13px] text-white/70 outline-none"
             />
 
-            <div className="flex items-center gap-1 bg-[#111] border border-white/[0.07] rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-[#111] border border-white/[0.07] rounded-full p-1">
               {(["delivery", "usage"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setEntryType(t)}
-                  className={`px-3 py-1 rounded-md text-[12px] font-semibold capitalize transition-colors ${entryType === t ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70"}`}
+                  className={`px-3 py-1 rounded-full text-[12px] font-semibold capitalize transition-colors ${entryType === t ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70"}`}
                 >
                   {t === "delivery" ? "Deliveries" : "Usage"}
                 </button>

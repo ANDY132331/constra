@@ -260,10 +260,10 @@ export default function ReportsPage() {
         </div>
         {/* Period selector */}
         <div className="px-5 mb-4">
-          <div className="flex gap-1 bg-[#131110] border border-white/[0.07] rounded-xl p-1">
+          <div className="flex gap-1 bg-[#131110] border border-white/[0.07] rounded-full p-1">
             {(["week", "month", "quarter"] as const).map((p) => (
               <button key={p} onClick={() => setPeriod(p)}
-                className={`flex-1 text-[13px] font-bold py-2 rounded-lg transition-colors ${period === p ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
+                className={`flex-1 text-[13px] font-bold py-2 rounded-full transition-colors ${period === p ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
                 {p === "week" ? "Week" : p === "month" ? "Month" : "Quarter"}
               </button>
             ))}
@@ -446,10 +446,10 @@ export default function ReportsPage() {
           <p className="text-white/35 text-sm mt-0.5">{periodLabel}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-xl p-1">
+          <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
             {(["week", "month", "quarter"] as const).map((p) => (
               <button key={p} onClick={() => setPeriod(p)}
-                className={`text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors ${period === p ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
+                className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-colors ${period === p ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
                 {p === "week" ? "Week" : p === "month" ? "Month" : "Quarter"}
               </button>
             ))}

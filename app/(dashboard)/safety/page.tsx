@@ -216,7 +216,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               <button
                 key={type}
                 onClick={() => setTypeFilter(type)}
-                className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all ${
+                className={`px-3.5 py-2 rounded-full text-[12px] font-semibold whitespace-nowrap transition-all ${
                   typeFilter === type
                     ? "bg-amber-500 text-black"
                     : "bg-[#131110] border border-white/[0.07] text-white/50"
@@ -232,7 +232,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         <div className="px-5 mb-4 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
           {(["all", "critical", "high", "medium", "low"] as const).map((sev) => (
             <button key={sev} onClick={() => setSeverityFilter(sev)}
-              className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
+              className={`px-3.5 py-2 rounded-full text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
                 severityFilter === sev ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/50"
               }`}>
               {sev === "all" ? "All Severity" : sev.charAt(0).toUpperCase() + sev.slice(1)}
