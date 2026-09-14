@@ -171,7 +171,7 @@ export default function ChangeOrdersPage() {
             <h1 className="text-[22px] font-bold text-white">Change Orders</h1>
           )}
           {!selected && (
-            <button onClick={openNew} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-xl transition-colors">
+            <button onClick={openNew} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-full transition-colors">
               <Plus size={14} /> New
             </button>
           )}
@@ -290,10 +290,10 @@ export default function ChangeOrdersPage() {
               </div>
             )}
             <div className="flex gap-2 pt-1">
-              <button onClick={() => openEdit(selected)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.09] text-white/60 text-[12px] font-semibold transition-colors">
+              <button onClick={() => openEdit(selected)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.09] text-white/60 text-[12px] font-semibold transition-colors">
                 <Pencil size={13} /> Edit
               </button>
-              <button onClick={() => setDeleteConfirm(selected.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[12px] font-semibold transition-colors">
+              <button onClick={() => setDeleteConfirm(selected.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[12px] font-semibold transition-colors">
                 <Trash2 size={13} /> Delete
               </button>
             </div>
@@ -318,7 +318,7 @@ export default function ChangeOrdersPage() {
           </div>
           <button
             onClick={openNew}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-2 rounded-lg transition-colors flex-shrink-0"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-2 rounded-full transition-colors flex-shrink-0"
           >
             <Plus size={13} /> New
           </button>
@@ -555,7 +555,7 @@ export default function ChangeOrdersPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!form.projectId || !form.title.trim() || !form.number.trim()}
-                className="px-4 py-2 text-[13px] font-bold bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black rounded-lg transition-colors"
+                className="px-4 py-2 text-[13px] font-bold bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black rounded-full transition-colors"
               >
                 {editing ? "Save Changes" : "Create CO"}
               </button>
@@ -604,3 +604,5 @@ function DetailSection({ title, content }: { title: string; content: string }) {
     </div>
   );
 }
+
+

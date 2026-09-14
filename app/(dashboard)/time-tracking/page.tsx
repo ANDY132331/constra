@@ -102,11 +102,11 @@ function EditEntryModal({
               Delete
             </button>
             <button onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+              className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
               Cancel
             </button>
             <button onClick={handleSave}
-              className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 transition-colors">
+              className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 transition-colors">
               Save
             </button>
           </div>
@@ -173,13 +173,13 @@ function ProjectPickerModal({
         </div>
         <div className="flex gap-3 px-5 pb-5">
           <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+            className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
             Cancel
           </button>
           <button
             onClick={() => selected && onSelect(selected)}
             disabled={!selected || projects.length === 0}
-            className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Continue to Photo
           </button>
@@ -328,13 +328,13 @@ function GeofenceWarningModal({
           <div className="flex gap-3">
             <button
               onClick={onCancel}
-              className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors"
+              className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={onOverride}
-              className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 transition-colors flex items-center justify-center gap-2"
             >
               <ShieldAlert size={13} className="text-amber-400" />
               Override & Clock In
@@ -608,7 +608,7 @@ export default function TimeTrackingPage() {
           {!isEmployee && !isCurrentUserClockedIn && (
             <button
               onClick={() => requestClockIn(currentUser)}
-              className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-full transition-colors"
             >
               <LogIn size={14} />
               Clock In
@@ -1463,3 +1463,5 @@ export default function TimeTrackingPage() {
     </>
   );
 }
+
+

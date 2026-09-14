@@ -181,7 +181,7 @@ export default function InsurancePage() {
         {isAdmin && (
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-500/15"
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-all active:scale-95 shadow-lg shadow-amber-500/15"
           >
             <Plus size={15} />
             Add Policy
@@ -433,10 +433,10 @@ export default function InsurancePage() {
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-xl border border-white/[0.08] text-[13px] text-white/50 hover:bg-white/[0.04] transition-colors">
+                <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-full border border-white/[0.08] text-[13px] text-white/50 hover:bg-white/[0.04] transition-colors">
                   Cancel
                 </button>
-                <button onClick={handleSave} className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] transition-all active:scale-95">
+                <button onClick={handleSave} className="flex-1 py-2.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] transition-all active:scale-95">
                   {editId ? "Save Changes" : "Add Policy"}
                 </button>
               </div>
@@ -460,3 +460,5 @@ export default function InsurancePage() {
     </div>
   );
 }
+
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -48,7 +48,7 @@ function invoiceTotal(inv: Invoice) {
   return sub * (1 + inv.taxRate / 100);
 }
 
-// ── Paper style helper ───────────────────────────────────────────────────────
+// â”€â”€ Paper style helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 import type { InvoiceTemplate } from "@/lib/pdf-export";
 function invoicePaperStyles(t: InvoiceTemplate, isPaid: boolean) {
   if (t === "modern") return {
@@ -107,7 +107,7 @@ function invoicePaperStyles(t: InvoiceTemplate, isPaid: boolean) {
   } as const;
 }
 
-// ── Invoice detail panel ────────────────────────────────────────────────────
+// â”€â”€ Invoice detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function InvoiceDetail({
   invoice, currency, companyName, companyAddress, companyLogo,
@@ -153,7 +153,7 @@ function InvoiceDetail({
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── Toolbar ── */}
+      {/* â”€â”€ Toolbar â”€â”€ */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         <div className="flex items-center gap-2.5">
           <button onClick={onClose} aria-label="Back to invoices" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
@@ -218,7 +218,7 @@ function InvoiceDetail({
             }`}
           >
             <Mail size={13} />
-            <span className="hidden sm:inline">{sendLoading ? "Sending…" : invoice.status === "overdue" ? "Send Reminder" : "Send"}</span>
+            <span className="hidden sm:inline">{sendLoading ? "Sendingâ€¦" : invoice.status === "overdue" ? "Send Reminder" : "Send"}</span>
           </button>
           <button
             onClick={copyPaymentLink}
@@ -238,7 +238,7 @@ function InvoiceDetail({
             disabled={pdfLoading}
             className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
           >
-            <Download size={13} /> <span className="hidden sm:inline">{pdfLoading ? "…" : "PDF"}</span>
+            <Download size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
           </button>
           <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
             <Pencil size={14} />
@@ -250,12 +250,12 @@ function InvoiceDetail({
         </div>
       </div>
 
-      {/* ── Invoice document (white-paper preview) ── */}
+      {/* â”€â”€ Invoice document (white-paper preview) â”€â”€ */}
       <div className="flex-1 overflow-y-auto bg-[#1a1a1a]">
         <div className="max-w-[640px] mx-auto my-4 sm:my-6 px-3 sm:px-4">
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
 
-            {/* ── Header ── */}
+            {/* â”€â”€ Header â”€â”€ */}
             <div className={`relative px-5 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b ${ps.headerBg} ${ps.headerBorder}`}>
               {ps.accentStrip && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />}
               <div className="flex items-start justify-between gap-3">
@@ -293,7 +293,7 @@ function InvoiceDetail({
               </div>
             </div>
 
-            {/* ── Status banners ── */}
+            {/* â”€â”€ Status banners â”€â”€ */}
             {isOverdue && (
               <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
                 <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />
@@ -306,11 +306,11 @@ function InvoiceDetail({
             {isPaid && (
               <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
                 <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
-                <p className="text-[12px] font-bold text-emerald-700">Paid in Full — Thank you!</p>
+                <p className="text-[12px] font-bold text-emerald-700">Paid in Full â€” Thank you!</p>
               </div>
             )}
 
-            {/* ── Bill To / Dates ── */}
+            {/* â”€â”€ Bill To / Dates â”€â”€ */}
             <div className="px-5 sm:px-8 pt-5 pb-4 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:gap-8">
                 <div className="flex-1 mb-4 sm:mb-0">
@@ -342,7 +342,7 @@ function InvoiceDetail({
               </div>
             </div>
 
-            {/* ── Line items ── */}
+            {/* â”€â”€ Line items â”€â”€ */}
             <div className="px-5 sm:px-8 pt-4 pb-2">
               <div className="overflow-x-auto">
                 <table className="w-full text-[12px] min-w-[380px]">
@@ -370,7 +370,7 @@ function InvoiceDetail({
               </div>
             </div>
 
-            {/* ── Totals ── */}
+            {/* â”€â”€ Totals â”€â”€ */}
             <div className="px-5 sm:px-8 pt-3 pb-6 flex justify-end">
               <div className="w-full sm:w-64">
                 <div className="flex justify-between py-1.5 text-[12px]">
@@ -396,7 +396,7 @@ function InvoiceDetail({
               </div>
             </div>
 
-            {/* ── Notes ── */}
+            {/* â”€â”€ Notes â”€â”€ */}
             {invoice.notes && (
               <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Notes</p>
@@ -404,22 +404,22 @@ function InvoiceDetail({
               </div>
             )}
 
-            {/* ── Terms ── */}
+            {/* â”€â”€ Terms â”€â”€ */}
             <div className="mx-4 sm:mx-8 mb-5 sm:mb-7">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Terms &amp; Conditions</p>
               <p className="text-[11px] text-gray-400 leading-relaxed">All payments are due as specified. Overdue accounts may be subject to late fees. Thank you for your business.</p>
             </div>
 
-            {/* ── Footer band ── */}
+            {/* â”€â”€ Footer band â”€â”€ */}
             <div className={`${ps.footerBg} px-5 sm:px-8 py-3 flex items-center justify-between`}>
-              <p className={`text-[10px] font-medium ${ps.footerText}`}>{companyName} · {invoice.number}</p>
+              <p className={`text-[10px] font-medium ${ps.footerText}`}>{companyName} Â· {invoice.number}</p>
               <p className={`text-[10px] ${ps.footerText} opacity-70`}>Page 1</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Action bar ── */}
+      {/* â”€â”€ Action bar â”€â”€ */}
       <div className="flex items-center gap-2 px-5 py-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         {invoice.status === "draft" && (
           <button onClick={() => onUpdate(invoice.id, { status: "sent" })}
@@ -466,7 +466,7 @@ function InvoiceDetail({
   );
 }
 
-// ── Invoice list row ─────────────────────────────────────────────────────────
+// â”€â”€ Invoice list row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function InvoiceRow({ invoice, currency, selected, onClick }: {
   invoice: Invoice; currency: string; selected: boolean; onClick: () => void;
@@ -491,7 +491,7 @@ function InvoiceRow({ invoice, currency, selected, onClick }: {
           </div>
           <p className="text-[13px] font-semibold text-white/90 truncate">{invoice.clientName}</p>
           <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/35"}`}>
-            {isOverdue ? "Overdue · " : "Due "}
+            {isOverdue ? "Overdue Â· " : "Due "}
             {invoice.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
           </p>
         </div>
@@ -506,7 +506,7 @@ function InvoiceRow({ invoice, currency, selected, onClick }: {
   );
 }
 
-// ── Main page ────────────────────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function InvoicesPage() {
   const { invoices, addInvoice, updateInvoice, deleteInvoice, currency, companyName, companyAddress, companyLogo, currentUser, defaultTaxRate } = useStore();
@@ -633,7 +633,7 @@ export default function InvoicesPage() {
           </div>
           <button
             onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-amber-500/20"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-full transition-colors shadow-lg shadow-amber-500/20"
           >
             <Plus size={15} /> New
           </button>
@@ -662,7 +662,7 @@ export default function InvoicesPage() {
           <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
             className="bg-transparent text-[13px] text-white/80 placeholder:text-white/30 outline-none flex-1"
-            placeholder="Search client or invoice #…"
+            placeholder="Search client or invoice #â€¦"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -721,7 +721,7 @@ export default function InvoicesPage() {
                       </div>
                       <p className="text-[14px] font-semibold text-white/90 truncate">{inv.clientName}</p>
                       <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
-                        {isOverdue ? "⚠ Overdue · " : "Due "}
+                        {isOverdue ? "âš  Overdue Â· " : "Due "}
                         {inv.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                       </p>
                     </div>
@@ -740,7 +740,7 @@ export default function InvoicesPage() {
       <div className="hidden lg:block h-full">
         <div className="h-full flex flex-col -m-4 md:-m-6">
 
-          {/* ── Top stats bar ── */}
+          {/* â”€â”€ Top stats bar â”€â”€ */}
           <div className="flex items-stretch gap-0 border-b border-white/[0.06] flex-shrink-0 overflow-x-auto">
         <div className="flex items-center gap-3 px-5 py-3.5 border-r border-white/[0.05] min-w-[160px]">
           <div className="flex-1">
@@ -768,14 +768,14 @@ export default function InvoicesPage() {
           </div>
           <button
             onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New Invoice
           </button>
         </div>
       </div>
 
-      {/* ── Master / Detail layout ── */}
+      {/* â”€â”€ Master / Detail layout â”€â”€ */}
       <div className="flex flex-1 overflow-hidden">
 
         {/* Left: list panel */}
@@ -786,7 +786,7 @@ export default function InvoicesPage() {
               <Search size={13} className="text-white/30 flex-shrink-0" />
               <input
                 className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
-                placeholder="Search client or number…"
+                placeholder="Search client or numberâ€¦"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -862,7 +862,7 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {/* ── New Invoice Modal ── */}
+      {/* â”€â”€ New Invoice Modal â”€â”€ */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col shadow-2xl">
@@ -971,18 +971,18 @@ export default function InvoicesPage() {
               </div>
               <div>
                 <label className={lbl}>Notes</label>
-                <textarea className={inp + " resize-none"} rows={2} placeholder="Payment terms, bank details…"
+                <textarea className={inp + " resize-none"} rows={2} placeholder="Payment terms, bank detailsâ€¦"
                   value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
               </div>
             </div>
 
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 Cancel
               </button>
               <button onClick={handleSave} disabled={!form.clientName.trim()}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editId ? "Save Changes" : "Create Invoice"}
               </button>
             </div>
@@ -1013,3 +1013,5 @@ export default function InvoicesPage() {
     </>
   );
 }
+
+

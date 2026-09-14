@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 
-// ── Status config ─────────────────────────────────────────────────────────────
+// â”€â”€ Status config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STATUS_CONFIG = {
   draft:    { label: "Draft",    bg: "bg-zinc-700/60",    text: "text-zinc-300",    dot: "bg-zinc-400"    },
   sent:     { label: "Sent",     bg: "bg-blue-500/15",    text: "text-blue-400",    dot: "bg-blue-400"    },
@@ -50,7 +50,7 @@ function estimateTotal(est: Estimate) {
   return sub * (1 + est.taxRate / 100);
 }
 
-// ── Template-aware paper styles ───────────────────────────────────────────────
+// â”€â”€ Template-aware paper styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function estimatePaperStyles(t: InvoiceTemplate, isAccepted: boolean) {
   if (t === "modern") return {
     headerBg: "bg-[#1c2026]", headerBorder: "border-[#2a2e38]",
@@ -87,7 +87,7 @@ function estimatePaperStyles(t: InvoiceTemplate, isAccepted: boolean) {
   } as const;
 }
 
-// ── Estimate detail panel ────────────────────────────────────────────────────
+// â”€â”€ Estimate detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function EstimateDetail({
   estimate, currency, companyName, companyAddress, companyLogo,
@@ -138,7 +138,7 @@ function EstimateDetail({
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── Toolbar ── */}
+      {/* â”€â”€ Toolbar â”€â”€ */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         <div className="flex items-center gap-2.5">
           <button onClick={onClose} aria-label="Back" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
@@ -186,7 +186,7 @@ function EstimateDetail({
                   if (isDraft) onUpdate(estimate.id, { status: "sent" });
                   setSendStatus({ ok: true, msg: `Sent to ${estimate.clientEmail}` });
                 } else {
-                  setSendStatus({ ok: false, msg: "Failed — check RESEND_API_KEY in Vercel." });
+                  setSendStatus({ ok: false, msg: "Failed â€” check RESEND_API_KEY in Vercel." });
                 }
               } catch {
                 setSendStatus({ ok: false, msg: "Network error." });
@@ -197,7 +197,7 @@ function EstimateDetail({
             className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
           >
             <Mail size={13} />
-            <span className="hidden sm:inline">{sendLoading ? "Sending…" : "Send"}</span>
+            <span className="hidden sm:inline">{sendLoading ? "Sendingâ€¦" : "Send"}</span>
           </button>
           {/* Copy share link */}
           <button
@@ -219,7 +219,7 @@ function EstimateDetail({
             disabled={pdfLoading}
             className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
           >
-            <FileDown size={13} /> <span className="hidden sm:inline">{pdfLoading ? "…" : "PDF"}</span>
+            <FileDown size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
           </button>
           <button onClick={() => onEdit(estimate)} aria-label="Edit estimate"
             className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
@@ -232,12 +232,12 @@ function EstimateDetail({
         </div>
       </div>
 
-      {/* ── Estimate document (white-paper preview) ── */}
+      {/* â”€â”€ Estimate document (white-paper preview) â”€â”€ */}
       <div className="flex-1 overflow-y-auto bg-[#1a1a1a]">
         <div className="max-w-[640px] mx-auto my-4 sm:my-6 px-3 sm:px-4">
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
 
-            {/* ── Header ── */}
+            {/* â”€â”€ Header â”€â”€ */}
             <div className={`relative px-5 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b ${ps.headerBg} ${ps.headerBorder}`}>
               {ps.accentStrip && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />}
               <div className="flex items-start justify-between gap-3">
@@ -275,7 +275,7 @@ function EstimateDetail({
               </div>
             </div>
 
-            {/* ── Status banners ── */}
+            {/* â”€â”€ Status banners â”€â”€ */}
             {isAccepted && (
               <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
                 <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
@@ -291,11 +291,11 @@ function EstimateDetail({
             {isExpired && (
               <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3">
                 <Clock size={14} className="text-orange-500 flex-shrink-0" />
-                <p className="text-[12px] font-bold text-orange-700">Expired — was valid until {estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
+                <p className="text-[12px] font-bold text-orange-700">Expired â€” was valid until {estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
               </div>
             )}
 
-            {/* ── Prepared For / Dates ── */}
+            {/* â”€â”€ Prepared For / Dates â”€â”€ */}
             <div className="px-5 sm:px-8 pt-5 pb-4 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:gap-8">
                 <div className="flex-1 mb-4 sm:mb-0">
@@ -330,7 +330,7 @@ function EstimateDetail({
               </div>
             </div>
 
-            {/* ── Line items ── */}
+            {/* â”€â”€ Line items â”€â”€ */}
             <div className="px-5 sm:px-8 pt-4 pb-2">
               <div className="overflow-x-auto">
                 <table className="w-full text-[12px] min-w-[380px]">
@@ -360,7 +360,7 @@ function EstimateDetail({
               </div>
             </div>
 
-            {/* ── Totals ── */}
+            {/* â”€â”€ Totals â”€â”€ */}
             <div className="px-5 sm:px-8 pt-3 pb-6 flex justify-end">
               <div className="w-full sm:w-64">
                 <div className="flex justify-between py-1.5 text-[12px]">
@@ -386,7 +386,7 @@ function EstimateDetail({
               </div>
             </div>
 
-            {/* ── Notes ── */}
+            {/* â”€â”€ Notes â”€â”€ */}
             {estimate.notes && (
               <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Notes &amp; Scope</p>
@@ -394,22 +394,22 @@ function EstimateDetail({
               </div>
             )}
 
-            {/* ── Terms ── */}
+            {/* â”€â”€ Terms â”€â”€ */}
             <div className="mx-4 sm:mx-8 mb-5 sm:mb-7">
               <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Terms &amp; Conditions</p>
               <p className="text-[11px] text-gray-400 leading-relaxed">This estimate is valid until the date stated above. Prices are subject to change after expiry. Acceptance constitutes agreement to the stated scope and pricing.</p>
             </div>
 
-            {/* ── Footer band ── */}
+            {/* â”€â”€ Footer band â”€â”€ */}
             <div className={`${ps.footerBg} px-5 sm:px-8 py-3 flex items-center justify-between`}>
-              <p className={`text-[10px] font-medium ${ps.footerText}`}>{companyName} · {estimate.number}</p>
+              <p className={`text-[10px] font-medium ${ps.footerText}`}>{companyName} Â· {estimate.number}</p>
               <p className={`text-[10px] ${ps.footerText} opacity-70`}>Page 1</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Action bar ── */}
+      {/* â”€â”€ Action bar â”€â”€ */}
       <div className="flex items-center gap-2 px-5 py-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         {isDraft && (
           <button onClick={() => onUpdate(estimate.id, { status: "sent" })}
@@ -457,7 +457,7 @@ function EstimateDetail({
   );
 }
 
-// ── Estimate list row ────────────────────────────────────────────────────────
+// â”€â”€ Estimate list row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function EstimateRow({ estimate, currency, selected, onClick }: {
   estimate: Estimate; currency: string; selected: boolean; onClick: () => void;
@@ -494,7 +494,7 @@ function EstimateRow({ estimate, currency, selected, onClick }: {
   );
 }
 
-// ── Main page ────────────────────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function EstimatesPage() {
   const { estimates, addEstimate, updateEstimate, deleteEstimate, invoices, addInvoice, currency, companyName, companyAddress, companyLogo, currentUser, defaultTaxRate } = useStore();
@@ -515,7 +515,7 @@ export default function EstimatesPage() {
   const [convertedNotice, setConvertedNotice] = useState<string | null>(null);
   const convertedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // estimates arrives asynchronously from the store (Supabase load after mount) —
+  // estimates arrives asynchronously from the store (Supabase load after mount) â€”
   // auto-selecting the first one once it's actually available.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -639,12 +639,12 @@ export default function EstimatesPage() {
 
   return (
     <>
-      {/* ══════════════ MOBILE ══════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â• MOBILE â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {convertedNotice && (
           <div className="flex items-center justify-between gap-3 mx-4 mt-4 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-            <p className="text-[13px] text-emerald-400 font-semibold">Invoice {convertedNotice} created — find it in Invoices.</p>
-            <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400">✕</button>
+            <p className="text-[13px] text-emerald-400 font-semibold">Invoice {convertedNotice} created â€” find it in Invoices.</p>
+            <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400">âœ•</button>
           </div>
         )}
 
@@ -653,7 +653,7 @@ export default function EstimatesPage() {
           <h1 className="text-[22px] font-bold text-white">Estimates</h1>
           <button
             onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New
           </button>
@@ -680,7 +680,7 @@ export default function EstimatesPage() {
           <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
             className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
-            placeholder="Search project or client…"
+            placeholder="Search project or clientâ€¦"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -745,11 +745,11 @@ export default function EstimatesPage() {
         )}
       </div>
 
-      {/* ══════════════ DESKTOP ══════════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â• DESKTOP â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <div className="hidden lg:block h-full">
         <div className="h-full flex flex-col -m-4 md:-m-6">
 
-          {/* ── Top stats bar ── */}
+          {/* â”€â”€ Top stats bar â”€â”€ */}
           <div className="flex items-stretch gap-0 border-b border-white/[0.06] flex-shrink-0 overflow-x-auto">
             <div className="flex items-center gap-3 px-5 py-3.5 border-r border-white/[0.05] min-w-[160px]">
               <div className="flex-1">
@@ -774,7 +774,7 @@ export default function EstimatesPage() {
             {convertedNotice && (
               <div className="flex items-center gap-3 px-4 py-3 border-r border-white/[0.05] bg-emerald-500/5">
                 <p className="text-[12px] text-emerald-400 font-semibold">Invoice {convertedNotice} created!</p>
-                <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400">✕</button>
+                <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400">âœ•</button>
               </div>
             )}
             <div className="flex items-center gap-2 px-5 py-3.5 ml-auto flex-shrink-0">
@@ -783,14 +783,14 @@ export default function EstimatesPage() {
               </div>
               <button
                 onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
-                className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-full transition-colors"
               >
                 <Plus size={14} /> New Estimate
               </button>
             </div>
           </div>
 
-          {/* ── Master / Detail layout ── */}
+          {/* â”€â”€ Master / Detail layout â”€â”€ */}
           <div className="flex flex-1 overflow-hidden">
 
             {/* Left: list panel */}
@@ -801,7 +801,7 @@ export default function EstimatesPage() {
                   <Search size={13} className="text-white/30 flex-shrink-0" />
                   <input
                     className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
-                    placeholder="Search project or client…"
+                    placeholder="Search project or clientâ€¦"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -877,7 +877,7 @@ export default function EstimatesPage() {
         </div>
       </div>
 
-      {/* ── New / Edit Estimate Modal ── */}
+      {/* â”€â”€ New / Edit Estimate Modal â”€â”€ */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col shadow-2xl">
@@ -962,7 +962,7 @@ export default function EstimatesPage() {
                           { value: "Other", label: "Other" },
                         ]}
                       />
-                      <input className={inp} placeholder="Description…" value={item.description}
+                      <input className={inp} placeholder="Descriptionâ€¦" value={item.description}
                         onChange={(e) => updateItem(idx, "description", e.target.value)} />
                       <div className="flex gap-2 sm:contents">
                         <div className="flex-1">
@@ -1002,18 +1002,18 @@ export default function EstimatesPage() {
 
               <div>
                 <label className={lbl}>Notes &amp; Scope</label>
-                <textarea className={inp + " resize-none"} rows={2} placeholder="Scope, assumptions, exclusions…"
+                <textarea className={inp + " resize-none"} rows={2} placeholder="Scope, assumptions, exclusionsâ€¦"
                   value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
               </div>
             </div>
 
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}
               </button>
               <button onClick={handleSave} disabled={!form.projectName.trim() || !form.clientName.trim()}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editId ? "Save Changes" : "Create Estimate"}
               </button>
             </div>
@@ -1021,7 +1021,7 @@ export default function EstimatesPage() {
         </div>
       )}
 
-      {/* ── Mobile preview modal ── */}
+      {/* â”€â”€ Mobile preview modal â”€â”€ */}
       {mobilePreviewId && (() => {
         const est = estimates.find((e) => e.id === mobilePreviewId);
         if (!est) return null;
@@ -1045,3 +1045,5 @@ export default function EstimatesPage() {
     </>
   );
 }
+
+

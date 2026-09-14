@@ -469,7 +469,7 @@ export default function DocumentsPage() {
                     <p className="text-[13px] text-white/50 mb-4">PDF preview not supported on iOS Safari</p>
                     {pdfBlobUrl && (
                       <a href={pdfBlobUrl} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-xl transition-colors">
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-full transition-colors">
                         <Download size={14} /> Open PDF
                       </a>
                     )}
@@ -482,7 +482,7 @@ export default function DocumentsPage() {
               ) : previewDoc.dataUrl?.startsWith("https://") && /\.pdf(\?|$)/i.test(previewDoc.dataUrl) ? (
                 isIOS ? (
                   <a href={previewDoc.dataUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-xl transition-colors">
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-full transition-colors">
                     <Download size={14} /> Open PDF
                   </a>
                 ) : (
@@ -537,3 +537,4 @@ export default function DocumentsPage() {
     </>
   );
 }
+

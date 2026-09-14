@@ -306,7 +306,7 @@ export default function SchedulePage() {
               });
               setShowAddModal(true);
             }}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} />
             Add
@@ -591,7 +591,7 @@ export default function SchedulePage() {
               <span className="text-[12px] text-white/35">{calEvents.length} events</span>
               <button
                 onClick={() => { setEditEventId(null); setAddForm({ title: "", date: selectedDay ? format(selectedDay, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); }}
-                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
               >
                 <Plus size={15} />
                 Add Event
@@ -846,9 +846,9 @@ export default function SchedulePage() {
             </div>
             <div className="flex gap-3 px-6 pb-6 flex-shrink-0">
               <button onClick={() => { setShowAddModal(false); setEditEventId(null); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
               <button onClick={handleAddEvent} disabled={!addForm.title.trim() || !addForm.date}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editEventId ? "Save Changes" : "Add to Calendar"}
               </button>
             </div>
@@ -867,3 +867,5 @@ export default function SchedulePage() {
     </>
   );
 }
+
+

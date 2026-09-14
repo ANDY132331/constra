@@ -136,7 +136,7 @@ export default function TasksPage() {
           <h2 className="text-[22px] font-bold text-white">Tasks</h2>
           <button
             onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl"
+            className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-full"
           >
             <Plus size={15} /> New
           </button>
@@ -239,7 +239,7 @@ export default function TasksPage() {
         </div>
         <button
           onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask); setShowModal(true); }}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
         >
           <Plus size={15} />
           New Task
@@ -451,11 +451,11 @@ export default function TasksPage() {
             </div>
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditTaskId(null); setEditProjectId(null); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}
               </button>
               <button onClick={handleSave} disabled={!editTaskId && (!form.projectId || !form.name.trim())}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editTaskId ? "Save Changes" : "Add Task"}
               </button>
             </div>
@@ -474,3 +474,5 @@ export default function TasksPage() {
     </>
   );
 }
+
+

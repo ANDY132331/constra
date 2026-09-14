@@ -209,7 +209,7 @@ export default function DailyReportsPage() {
               <h1 className="text-[22px] font-bold text-white">Daily Reports</h1>
               <button
                 onClick={() => { setForm(emptyForm()); setShowForm(true); }}
-                className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
+                className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
               >
                 <Plus size={14} /> New
               </button>
@@ -327,7 +327,7 @@ export default function DailyReportsPage() {
           </div>
           <button
             onClick={() => { setForm(emptyForm()); setShowForm(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-2 rounded-lg transition-colors flex-shrink-0"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-2 rounded-full transition-colors flex-shrink-0"
           >
             <Plus size={13} /> New
           </button>
@@ -591,7 +591,7 @@ export default function DailyReportsPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!form.projectId || !form.date || !form.workCompleted.trim()}
-                className="px-4 py-2 text-[13px] font-bold bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black rounded-lg transition-colors"
+                className="px-4 py-2 text-[13px] font-bold bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black rounded-full transition-colors"
               >
                 Submit Report
               </button>
@@ -620,3 +620,4 @@ function Section({ title, content, color }: { title: string; content: string; co
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus, Download, ExternalLink } from "lucide-react";
@@ -92,7 +92,7 @@ export default function BlueprintsPage() {
           <button
             onClick={() => { setUploadError(null); fileInputRef.current?.click(); }}
             disabled={uploading}
-            className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl disabled:opacity-50"
+            className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-full disabled:opacity-50"
           >
             <Upload size={14} /> {uploading ? "…" : "Upload"}
           </button>
@@ -400,3 +400,4 @@ export default function BlueprintsPage() {
     </>
   );
 }
+

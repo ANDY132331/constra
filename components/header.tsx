@@ -138,7 +138,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             aria-label="Quick add"
             aria-expanded={showNew}
             aria-haspopup="true"
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[13px] font-bold px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-lg transition-all duration-100"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[13px] font-bold px-3 py-2 sm:py-1.5 rounded-full transition-all duration-100"
           >
             <Plus size={15} className="sm:hidden" />
             <Plus size={13} className="hidden sm:block" />

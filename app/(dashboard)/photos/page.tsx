@@ -127,7 +127,7 @@ export default function PhotosPage() {
             <p className="text-white/35 text-[12px] mt-0.5">{photos.length} photo{photos.length !== 1 ? "s" : ""}</p>
           </div>
           <button onClick={openModal}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors">
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
             <Upload size={15} /> Upload
           </button>
         </div>
@@ -232,7 +232,7 @@ export default function PhotosPage() {
           </p>
         </div>
         <button onClick={openModal}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
           <Upload size={15} />
           Upload Photos
         </button>
@@ -635,9 +635,9 @@ export default function PhotosPage() {
             </div>
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={closeModal}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={!form.caption.trim() || !photoUrl || uploading}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
                 {uploading ? <><Loader2 size={14} className="animate-spin" /> Uploading…</> : "Upload"}
               </button>
             </div>
@@ -710,3 +710,5 @@ export default function PhotosPage() {
     </>
   );
 }
+
+

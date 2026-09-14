@@ -113,7 +113,7 @@ export default function EquipmentPage() {
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h2 className="text-[22px] font-bold text-white">Equipment</h2>
           <button onClick={openAdd}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors">
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
             <Plus size={14} />
             Add
           </button>
@@ -238,7 +238,7 @@ export default function EquipmentPage() {
               </p>
             </div>
             <button onClick={openAdd}
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
               <Plus size={15} />
               Add Equipment
             </button>
@@ -430,9 +430,9 @@ export default function EquipmentPage() {
             </div>
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => setShowModal(false)}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">{t.common.cancel}</button>
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">{t.common.cancel}</button>
               <button onClick={handleSave} disabled={!form.name.trim()}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editId ? "Save Changes" : "Add Equipment"}
               </button>
             </div>
@@ -451,3 +451,5 @@ export default function EquipmentPage() {
     </>
   );
 }
+
+

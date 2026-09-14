@@ -117,11 +117,11 @@ function HoursModal({
             {/* Add / Subtract toggle */}
             <div className="flex gap-2">
               <button onClick={() => setMode("add")}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-bold border transition-colors ${mode === "add" ? "bg-green-500/15 border-green-500/30 text-green-400" : "bg-white/[0.03] border-white/[0.07] text-white/35 hover:text-white/55"}`}>
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full text-[13px] font-bold border transition-colors ${mode === "add" ? "bg-green-500/15 border-green-500/30 text-green-400" : "bg-white/[0.03] border-white/[0.07] text-white/35 hover:text-white/55"}`}>
                 <Plus size={13} /> Add Hours
               </button>
               <button onClick={() => setMode("subtract")}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-bold border transition-colors ${mode === "subtract" ? "bg-red-500/15 border-red-500/30 text-red-400" : "bg-white/[0.03] border-white/[0.07] text-white/35 hover:text-white/55"}`}>
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full text-[13px] font-bold border transition-colors ${mode === "subtract" ? "bg-red-500/15 border-red-500/30 text-red-400" : "bg-white/[0.03] border-white/[0.07] text-white/35 hover:text-white/55"}`}>
                 <Minus size={13} /> Remove Hours
               </button>
             </div>
@@ -377,7 +377,7 @@ export default function CrewPage() {
         {canEdit && (
           <button
             onClick={openAdd}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-full transition-colors"
           >
             <UserPlus size={14} />
             Add Member
@@ -548,7 +548,7 @@ export default function CrewPage() {
         </div>
         {canEdit && (
           <button onClick={openAdd}
-            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
             <UserPlus size={15} />
             Add Worker
           </button>
@@ -915,11 +915,11 @@ export default function CrewPage() {
             )}
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setSaveError(""); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 Cancel
               </button>
               <button onClick={handleSave} disabled={!form.name.trim() || saving}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {saving ? "Adding…" : editId ? "Save Changes" : "Add Worker"}
               </button>
             </div>
@@ -962,3 +962,5 @@ export default function CrewPage() {
     </>
   );
 }
+
+

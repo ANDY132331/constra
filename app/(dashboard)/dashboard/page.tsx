@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -801,7 +801,7 @@ export default function DashboardPage() {
             <p className="text-[13px] font-black text-amber-400 mb-1">🏗️ Let's get you set up</p>
             <p className="text-[12px] text-white/50 mb-3 leading-snug">Create your first project, add your crew, and start tracking work.</p>
             <div className="flex gap-2 flex-wrap">
-              <Link href="/projects" className="flex items-center gap-1.5 bg-amber-500 text-black text-[12px] font-black px-3 py-2 rounded-xl">
+              <Link href="/projects" className="flex items-center gap-1.5 bg-amber-500 text-black text-[12px] font-black px-3 py-2 rounded-full">
                 <FolderKanban size={13} /> New Project
               </Link>
               <Link href="/crew" className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.08] text-white/70 text-[12px] font-bold px-3 py-2 rounded-xl">
@@ -1655,3 +1655,4 @@ export default function DashboardPage() {
     </>
   );
 }
+

@@ -323,7 +323,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               </p>
             </div>
             <button onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors flex-shrink-0">
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-full transition-colors flex-shrink-0">
               <Plus size={15} />
               Log Incident
             </button>
@@ -588,9 +588,9 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
             </div>
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">{t.common.cancel}</button>
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">{t.common.cancel}</button>
               <button onClick={handleSave} disabled={!form.description.trim()}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editId ? "Save Changes" : "Log Incident"}
               </button>
             </div>
@@ -609,3 +609,5 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
     </>
   );
 }
+
+

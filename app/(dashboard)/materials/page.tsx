@@ -173,7 +173,7 @@ export default function MaterialsPage() {
           <h2 className="text-[22px] font-bold text-white">Materials</h2>
           <button
             onClick={() => { setShowAddModal(true); setEntryProjectId(projects[0]?.id ?? ""); }}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} />
             Log
@@ -311,7 +311,7 @@ export default function MaterialsPage() {
               )}
               <button
                 onClick={() => { setShowAddModal(true); setEntryProjectId(projects[0]?.id ?? ""); }}
-                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
               >
                 <Plus size={15} />
                 Log Material
@@ -603,7 +603,7 @@ export default function MaterialsPage() {
               <button
                 onClick={handleAddEntry}
                 disabled={!selectedMaterial || !quantity || !entryProjectId}
-                className="w-full py-3 bg-amber-500 hover:bg-amber-400 disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold text-[14px] rounded-lg transition-colors"
+                className="w-full py-3 bg-amber-500 hover:bg-amber-400 disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold text-[14px] rounded-full transition-colors"
               >
                 Log {entryType === "delivery" ? "Delivery" : "Usage"}
               </button>
@@ -623,3 +623,4 @@ export default function MaterialsPage() {
     </>
   );
 }
+

@@ -242,7 +242,7 @@ export default function ProjectsPage() {
           {isForeman && (
             <button
               onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setMobileStep(1); setShowModal(true); }}
-              className="bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
+              className="bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-full flex items-center gap-1.5"
             >
               <Plus size={14} />
               {isAdmin ? "New Project" : "Submit Project"}
@@ -469,7 +469,7 @@ export default function ProjectsPage() {
             {isForeman && (
               <button
                 onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
-                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
               >
                 <Plus size={15} />
                 {isAdmin ? "New Project" : "Submit Project"}
@@ -1106,11 +1106,11 @@ export default function ProjectsPage() {
             )}
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); setGeoQuery(""); setGeoResults([]); setFormError(""); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}
               </button>
               <button onClick={handleSave} disabled={!form.name.trim()}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editId ? "Save Changes" : "Create Project"}
               </button>
             </div>
@@ -1136,3 +1136,5 @@ export default function ProjectsPage() {
     </>
   );
 }
+
+

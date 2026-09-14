@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import { isAdminOrAbove } from "@/lib/permissions";
@@ -187,7 +187,7 @@ export default function BudgetPage() {
           {isAdmin && (
             <button
               onClick={openAdd}
-              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-full transition-colors"
             >
               <Plus size={14} strokeWidth={2.5} />
               Add Line
@@ -494,7 +494,7 @@ export default function BudgetPage() {
                   Cancel
                 </button>
                 <button type="submit"
-                  className="flex-1 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+                  className="flex-1 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-semibold py-2.5 rounded-full transition-colors">
                   {editId ? "Save Changes" : "Add Line"}
                 </button>
               </div>
@@ -515,3 +515,4 @@ export default function BudgetPage() {
     </div>
   );
 }
+

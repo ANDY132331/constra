@@ -119,7 +119,7 @@ export default function RFIsPage() {
           <h1 className="text-[22px] font-bold text-white">RFIs</h1>
           <button
             onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New RFI
           </button>
@@ -230,7 +230,7 @@ export default function RFIsPage() {
               <p className="text-white/35 text-sm mt-0.5">Request For Information — formal clarification and design queries</p>
             </div>
             <button onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
               <Plus size={15} />
               New RFI
             </button>
@@ -503,9 +503,9 @@ export default function RFIsPage() {
             </div>
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={!form.subject.trim()}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editId ? "Save Changes" : "Submit RFI"}
               </button>
             </div>
@@ -533,3 +533,5 @@ export default function RFIsPage() {
     </>
   );
 }
+
+

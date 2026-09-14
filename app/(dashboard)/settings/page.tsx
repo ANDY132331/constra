@@ -526,7 +526,7 @@ function SettingsInner() {
                     onChange={(e) => setCompanyForm((f) => ({ ...f, address: e.target.value }))} />
                 </div>
               </div>
-              <button onClick={saveCompany} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+              <button onClick={saveCompany} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
                 Save Changes
               </button>
             </div>
@@ -606,7 +606,7 @@ function SettingsInner() {
                 </div>
               )}
 
-              <button onClick={saveOvertime} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+              <button onClick={saveOvertime} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
                 Save Overtime Rules
               </button>
             </div>
@@ -840,7 +840,7 @@ function SettingsInner() {
                   className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-[13px] text-white outline-none focus:border-amber-500/40 placeholder:text-white/20"
                 />
                 <button type="submit" disabled={!newRole.trim()}
-                  className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-bold text-[12px] px-3 py-2.5 rounded-lg transition-colors">
+                  className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black font-bold text-[12px] px-3 py-2.5 rounded-full transition-colors">
                   <Plus size={13} /> Add
                 </button>
               </form>
@@ -877,7 +877,7 @@ function SettingsInner() {
                   <p className="text-[11px] text-white/40 mt-0.5">Get real-time alerts for clock-ins, safety incidents, new tasks, and more.</p>
                 </div>
                 <button onClick={enableNotifs} disabled={notifRequesting}
-                  className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-black text-[12px] font-bold px-4 py-2 rounded-lg transition-colors">
+                  className="flex-shrink-0 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-black text-[12px] font-bold px-4 py-2 rounded-full transition-colors">
                   {notifRequesting ? "Requesting…" : "Enable"}
                 </button>
               </div>
@@ -1014,7 +1014,7 @@ function SettingsInner() {
                   )}
 
                   <button type="submit" disabled={pwStatus === "loading"}
-                    className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+                    className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
                     {pwStatus === "loading" ? "Updating…" : "Update Password"}
                   </button>
                 </form>
@@ -1348,7 +1348,7 @@ function AccessControlTab({
             </div>
             {pinSetupError && <p className="text-[12px] text-red-400">{pinSetupError}</p>}
             {pinSetupSuccess && <p className="text-[12px] text-green-400 font-semibold flex items-center gap-1.5"><Check size={12} /> PIN saved!</p>}
-            <button onClick={savePin} className="bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-lg transition-colors">
+            <button onClick={savePin} className="bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
               Save PIN
             </button>
           </div>
@@ -1434,7 +1434,7 @@ function AccessControlTab({
                     <div className="flex items-center gap-3 pt-2 border-t border-white/[0.06]">
                       <button
                         onClick={() => handleSaveClick(worker.id)}
-                        className="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-5 py-2.5 rounded-lg transition-colors"
+                        className="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-5 py-2.5 rounded-full transition-colors"
                       >
                         Save Access
                       </button>
@@ -1496,11 +1496,11 @@ function AccessControlTab({
                   </div>
                   <div className="flex gap-3">
                     <button onClick={() => { setPinModal(null); setPinInput(""); setPinError(""); }}
-                      className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 active:bg-white/10 transition-colors">
+                      className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 active:bg-white/10 transition-colors">
                       Cancel
                     </button>
                     <button onClick={verifyAndApply} disabled={pinVerifying || !pinInput}
-                      className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 disabled:opacity-40 transition-colors">
+                      className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 active:bg-amber-600 disabled:opacity-40 transition-colors">
                       {pinVerifying ? "Verifying…" : "Verify & Save"}
                     </button>
                   </div>
@@ -1519,3 +1519,5 @@ function AccessControlTab({
     </div>
   );
 }
+
+
