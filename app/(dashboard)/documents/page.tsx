@@ -133,6 +133,7 @@ export default function DocumentsPage() {
     }
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    toast.success("Document uploaded");
   }
 
   function downloadDoc(doc: ProjectDocument) {

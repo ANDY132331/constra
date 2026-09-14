@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { toast } from "sonner";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -290,6 +291,7 @@ function SettingsInner() {
     if (!isNaN(parsedRate)) setDefaultTaxRate(Math.min(100, Math.max(0, parsedRate)));
     setSavedBanner(true);
     setTimeout(() => setSavedBanner(false), 2500);
+    toast.success("Company settings saved");
   };
 
   const saveOvertime = () => {
@@ -304,6 +306,7 @@ function SettingsInner() {
     });
     setOvertimeSaved(true);
     setTimeout(() => setOvertimeSaved(false), 2500);
+    toast.success("Overtime settings saved");
   };
 
   const [linkCopied, setLinkCopied] = useState(false);

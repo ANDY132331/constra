@@ -154,6 +154,7 @@ export default function MaterialsPage() {
       note: note.trim() || undefined,
     };
     addMaterialEntry(entry);
+    toast.success(entryType === "delivery" ? "Delivery logged" : "Usage recorded");
 
     // Reset form
     setSelectedMaterial(null);

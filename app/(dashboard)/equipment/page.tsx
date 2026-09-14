@@ -95,9 +95,11 @@ export default function EquipmentPage() {
     } else {
       addEquipment(payload);
     }
+    const wasEditing = !!editId;
     setForm(blank);
     setEditId(null);
     setShowModal(false);
+    toast.success(wasEditing ? "Equipment updated" : "Equipment added");
   };
 
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);

@@ -1,6 +1,6 @@
 ﻿"use client";
-import { toast } from "sonner";
 
+import { toast } from "sonner";
 import { useState } from "react";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -107,8 +107,10 @@ export default function SafetyPage() {
       });
     }
     setForm(blank);
+    const wasEditing = !!editId;
     setEditId(null);
     setShowModal(false);
+    toast.success(wasEditing ? "Incident updated" : "Incident logged");
   };
 
   const daysWithoutInjury = (() => {

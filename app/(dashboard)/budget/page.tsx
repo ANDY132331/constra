@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { toast } from "sonner";
 import { useState, useMemo } from "react";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
@@ -159,8 +160,10 @@ export default function BudgetPage() {
     if (!data.projectId || !data.code || !data.description) return;
     if (editId) {
       updateBudgetLine(editId, data);
+      toast.success("Budget line updated");
     } else {
       addBudgetLine(data);
+      toast.success("Budget line added");
     }
     closeForm();
   }

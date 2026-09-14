@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { toast } from "sonner";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind, AlertTriangle, MapPin, RefreshCw, X, Briefcase, Truck, ClipboardCheck, Calendar, Pencil } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, getDay, isSameDay } from "date-fns";
@@ -275,8 +276,10 @@ export default function SchedulePage() {
       saveCustomEvents(updated);
     }
     setAddForm({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" });
+    const wasEditing = !!editEventId;
     setEditEventId(null);
     setShowAddModal(false);
+    toast.success(wasEditing ? "Event updated" : "Event added");
   }
 
   function deleteCustomEvent(id: string) {

@@ -121,7 +121,7 @@ export default function PunchListPage() {
             {canEdit && counts.open > 0 && (
               <button
                 onClick={() => { punchItems.filter(i => i.status === "open").forEach(i => updatePunchItem(i.id, { status: "resolved" })); }}
-                className="text-[12px] font-bold text-white/40 px-3 py-2 rounded-xl border border-white/[0.07] active:bg-white/[0.05] transition-colors"
+                className="text-[12px] font-bold text-white/40 px-3 py-2 rounded-full border border-white/[0.07] active:bg-white/[0.05] transition-colors"
               >
                 Resolve All
               </button>
@@ -555,6 +555,7 @@ export default function PunchListPage() {
     </>
   );
 }
+
 
 
 
