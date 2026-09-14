@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState, useMemo, useRef } from "react";
 import {
@@ -270,7 +271,7 @@ export default function MaterialsPage() {
                       <span>{format(new Date(entry.date), "MMM d, yyyy")}</span>
                     </div>
                     <button onClick={() => setDeleteConfirm(entry.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                      className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
                       <Trash2 size={12} />
                     </button>
                   </div>
@@ -303,7 +304,7 @@ export default function MaterialsPage() {
                       setPdfLoading(false); }
                   }}
                   disabled={pdfLoading}
-                  className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.07] text-white/60 font-bold text-[13px] px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.07] text-white/60 font-bold text-[13px] px-4 py-2 rounded-full transition-colors disabled:opacity-50"
                 >
                   <FileText size={14} />
                   {pdfLoading ? "Generating…" : "Export PDF"}
@@ -623,5 +624,9 @@ export default function MaterialsPage() {
     </>
   );
 }
+
+
+
+
 
 

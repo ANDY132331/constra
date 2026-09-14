@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState } from "react";
 import { Plus, Search, Circle, Timer, CheckCircle2, MapPin, Calendar, X, Pencil } from "lucide-react";
@@ -106,6 +107,7 @@ export default function PunchListPage() {
     setForm(blank);
     setEditId(null);
     setShowModal(false);
+    toast.success(editId ? "Item updated" : "Item added to punch list");
   };
 
   return (
@@ -553,6 +555,8 @@ export default function PunchListPage() {
     </>
   );
 }
+
+
 
 
 

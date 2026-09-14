@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { Download, X, Smartphone } from "lucide-react";
@@ -50,7 +50,7 @@ function CustomTabBanner() {
       <div className="bg-[#1c1a18] border border-amber-500/25 rounded-2xl px-4 py-4 shadow-2xl shadow-black/60">
         <div className="flex items-start gap-3">
           {/* Icon */}
-          <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <div className="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
             <Smartphone size={16} className="text-black" />
           </div>
 
@@ -88,7 +88,7 @@ function CustomTabBanner() {
 
           <button
             onClick={dismiss}
-            className="w-9 h-9 flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.05] rounded-xl transition-colors flex-shrink-0 -mt-1 -mr-1.5"
+            className="w-9 h-9 flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.05] rounded-full transition-colors flex-shrink-0 -mt-1 -mr-1.5"
             aria-label="Dismiss"
           >
             <X size={15} />
@@ -138,7 +138,7 @@ export default function PwaInstall() {
       {/* Native Chrome install prompt (shown when app not yet installed) */}
       {!dismissed && installPrompt && (
         <div className="fixed bottom-24 lg:bottom-4 right-4 z-50 flex items-center gap-3 bg-[#1a1a1a] border border-white/[0.1] rounded-xl px-4 py-3 shadow-xl max-w-xs">
-          <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
             <Download size={14} className="text-black" />
           </div>
           <div className="flex-1 min-w-0">
@@ -150,7 +150,7 @@ export default function PwaInstall() {
               className="text-[11px] font-bold text-black bg-amber-500 hover:bg-amber-400 px-2.5 py-1.5 rounded-lg transition-colors">
               Install
             </button>
-            <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.05] rounded-lg transition-colors">
+            <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.05] rounded-full transition-colors">
               <X size={13} />
             </button>
           </div>
@@ -159,3 +159,4 @@ export default function PwaInstall() {
     </>
   );
 }
+

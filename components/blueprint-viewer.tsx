@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { ZoomIn, ZoomOut, Maximize2, Plus, X, Check, AlertTriangle, Info, ShieldAlert, MessageSquare } from "lucide-react";
@@ -171,19 +171,19 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.06] bg-[#0d0d0d] flex-shrink-0">
         {/* Zoom controls */}
-        <button onClick={zoomOut} className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomOut size={13} /></button>
+        <button onClick={zoomOut} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomOut size={13} /></button>
         <span className="text-[11px] text-white/40 w-10 text-center">{Math.round(zoom * 100)}%</span>
-        <button onClick={zoomIn} className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomIn size={13} /></button>
-        <button onClick={resetView} className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><Maximize2 size={12} /></button>
+        <button onClick={zoomIn} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomIn size={13} /></button>
+        <button onClick={resetView} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><Maximize2 size={12} /></button>
 
         <div className="w-px h-4 bg-white/10 mx-1" />
 
         {/* Page controls (PDF only) */}
         {fileType === "pdf" && pdfPages > 1 && (
           <>
-            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="text-[11px] px-2 h-7 rounded-lg bg-white/[0.05] hover:bg-white/10 disabled:opacity-30 transition-colors">←</button>
+            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="text-[11px] px-2 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 disabled:opacity-30 transition-colors">←</button>
             <span className="text-[11px] text-white/40">{currentPage} / {pdfPages}</span>
-            <button onClick={() => setCurrentPage((p) => Math.min(pdfPages, p + 1))} disabled={currentPage === pdfPages} className="text-[11px] px-2 h-7 rounded-lg bg-white/[0.05] hover:bg-white/10 disabled:opacity-30 transition-colors">→</button>
+            <button onClick={() => setCurrentPage((p) => Math.min(pdfPages, p + 1))} disabled={currentPage === pdfPages} className="text-[11px] px-2 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 disabled:opacity-30 transition-colors">→</button>
             <div className="w-px h-4 bg-white/10 mx-1" />
           </>
         )}
@@ -346,8 +346,8 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); confirmPin(); } if (e.key === "Escape") cancelPending(); }}
                 />
                 <div className="flex gap-2">
-                  <button onClick={confirmPin} className="flex-1 bg-amber-500 text-black text-[10px] font-bold py-1.5 rounded-lg hover:bg-amber-400 transition-colors">Place</button>
-                  <button onClick={cancelPending} className="flex-1 bg-white/[0.05] text-white/40 text-[10px] font-bold py-1.5 rounded-lg hover:bg-white/10 transition-colors">Cancel</button>
+                  <button onClick={confirmPin} className="flex-1 bg-amber-500 text-black text-[10px] font-bold py-1.5 rounded-full hover:bg-amber-400 transition-colors">Place</button>
+                  <button onClick={cancelPending} className="flex-1 bg-white/[0.05] text-white/40 text-[10px] font-bold py-1.5 rounded-full hover:bg-white/10 transition-colors">Cancel</button>
                 </div>
               </div>
             </div>
@@ -364,3 +364,4 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
     </div>
   );
 }
+

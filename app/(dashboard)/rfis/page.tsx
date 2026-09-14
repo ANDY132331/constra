@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState } from "react";
 import { MessageSquare, Plus, Search, Clock, CheckCircle2, XCircle, ChevronDown, ChevronRight, X, Trash2, Pencil } from "lucide-react";
@@ -101,6 +102,7 @@ export default function RFIsPage() {
     setForm(blank);
     setEditId(null);
     setShowModal(false);
+    toast.success(editId ? "RFI updated" : "RFI submitted");
   };
 
   const handleAnswer = (rfiId: string) => {
@@ -533,6 +535,8 @@ export default function RFIsPage() {
     </>
   );
 }
+
+
 
 
 

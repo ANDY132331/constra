@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState } from "react";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
@@ -609,6 +610,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
     </>
   );
 }
+
 
 
 

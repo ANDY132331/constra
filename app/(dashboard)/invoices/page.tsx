@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -609,6 +610,7 @@ export default function InvoicesPage() {
     setForm({ ...blank, taxRate: String(defaultTaxRate) });
     setEditId(null);
     setShowModal(false);
+    toast.success(editId ? "Invoice updated" : "Invoice created");
   };
 
   const previewTotal = calcTotal(form.items, form.taxRate);
@@ -1013,6 +1015,8 @@ export default function InvoicesPage() {
     </>
   );
 }
+
+
 
 
 

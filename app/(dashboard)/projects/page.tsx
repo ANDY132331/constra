@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState, useRef } from "react";
 import { BarChart2, List, CalendarDays, Plus, Search, MapPin, X, AlertCircle, Map, Trash2, Pencil, ShieldCheck, Share2, FolderKanban, ChevronLeft } from "lucide-react";
@@ -230,6 +231,7 @@ export default function ProjectsPage() {
     setGeoResults([]);
     setGeoConfirmed("");
     setShowModal(false);
+    toast.success(editId ? "Project updated" : (!isAdmin ? "Project submitted for approval" : "Project created"));
   };
 
   return (
@@ -269,13 +271,13 @@ export default function ProjectsPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setDeleteConfirm(p.id)}
-                        className="flex-1 text-[12px] font-bold py-1.5 rounded-lg bg-red-500/10 text-red-400 active:bg-red-500/20"
+                        className="flex-1 text-[12px] font-bold py-1.5 rounded-full bg-red-500/10 text-red-400 active:bg-red-500/20"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => approveProject(p.id)}
-                        className="flex-1 text-[12px] font-bold py-1.5 rounded-lg bg-green-500/15 text-green-400 active:bg-green-500/25"
+                        className="flex-1 text-[12px] font-bold py-1.5 rounded-full bg-green-500/15 text-green-400 active:bg-green-500/25"
                       >
                         Approve
                       </button>
@@ -1136,6 +1138,8 @@ export default function ProjectsPage() {
     </>
   );
 }
+
+
 
 
 

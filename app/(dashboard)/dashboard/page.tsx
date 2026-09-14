@@ -275,7 +275,7 @@ function ShareNudge() {
       </p>
       <button
         onClick={copy}
-        className="flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-colors"
+        className="flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors"
         style={{
           background: copied ? "rgba(34,197,94,.15)" : "rgba(245,196,0,.12)",
           color: copied ? "#22c55e" : "#F5C400",
@@ -1141,7 +1141,7 @@ export default function DashboardPage() {
               return (
                 <button
                   onClick={() => setWeatherExpanded(e => !e)}
-                  className="flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/10 rounded-lg px-2.5 py-1 text-[12px] transition-all"
+                  className="flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/10 rounded-full px-2.5 py-1 text-[12px] transition-all"
                   style={{ color: meta.color }}
                 >
                   <WeatherIcon size={13} />
@@ -1158,7 +1158,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handleRefresh}
-            className="flex items-center gap-1.5 bg-[#111111] border border-white/[0.06] hover:border-white/10 rounded-xl px-3 py-2.5 text-[12px] text-white/40 hover:text-white/60 transition-all"
+            className="flex items-center gap-1.5 bg-[#111111] border border-white/[0.06] hover:border-white/10 rounded-full px-3 py-2.5 text-[12px] text-white/40 hover:text-white/60 transition-all"
           >
             <RefreshCw size={13} className={refreshing ? "animate-spin text-amber-400" : ""} />
             <span className="hidden sm:inline">{refreshing ? `${t.common.refresh}…` : t.common.refresh}</span>
@@ -1248,7 +1248,7 @@ export default function DashboardPage() {
           <Link
             key={label}
             href={href}
-            className="flex items-center gap-1.5 bg-[#111111] border border-white/[0.06] hover:border-white/10 rounded-lg px-3 py-2 text-[12px] text-white/60 hover:text-white transition-all group"
+            className="flex items-center gap-1.5 bg-[#111111] border border-white/[0.06] hover:border-white/10 rounded-full px-3 py-2 text-[12px] text-white/60 hover:text-white transition-all group"
           >
             <span style={{ color }} className="group-hover:scale-110 transition-transform"><Icon size={13} /></span>
             <Plus size={10} className="text-white/25" />
@@ -1312,7 +1312,7 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-1.5">
             {urgentItems.map((item) => (
               <Link key={item.id} href={item.href}
-                className="flex items-center gap-2.5 bg-white/[0.03] hover:bg-white/[0.05] rounded-lg px-3 py-2 transition-colors group">
+                className="flex items-center gap-2.5 bg-white/[0.03] hover:bg-white/[0.05] rounded-full px-3 py-2 transition-colors group">
                 <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
                 <span className="text-[12px] text-white/70 group-hover:text-white/90 transition-colors flex-1">{item.label}</span>
                 <ArrowRight size={11} className="text-white/20 group-hover:text-white/40 transition-colors flex-shrink-0" />
@@ -1629,7 +1629,7 @@ export default function DashboardPage() {
                 ].filter(Boolean).join("\n"));
                 window.open(`mailto:${currentUser.email ?? ""}?subject=${subject}&body=${body}`, "_self");
               }}
-              className="flex items-center gap-2 text-[12px] font-bold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.08] px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-2 text-[12px] font-bold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.08] px-3 py-2 rounded-full transition-colors"
             >
               <Mail size={13} />
               Email Digest
@@ -1655,4 +1655,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
 

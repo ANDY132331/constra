@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -120,7 +120,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
       <button
         onClick={onMenuClick}
         aria-label="Open menu"
-        className="lg:hidden w-10 h-10 flex items-center justify-center text-white/35 hover:text-white/70 active:text-white/80 rounded-xl transition-colors flex-shrink-0 -ml-1"
+        className="lg:hidden w-10 h-10 flex items-center justify-center text-white/35 hover:text-white/70 active:text-white/80 rounded-full transition-colors flex-shrink-0 -ml-1"
       >
         <Menu size={20} strokeWidth={1.8} />
       </button>
@@ -168,7 +168,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           onClick={openSearch}
           title="Search (⌘K)"
           aria-label="Search"
-          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-xl sm:rounded-lg transition-all"
+          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-full sm:rounded-lg transition-all"
         >
           <Search size={16} className="sm:hidden" />
           <Search size={15} className="hidden sm:block" />
@@ -179,7 +179,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="hidden sm:flex w-8 h-8 items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-lg transition-all"
+          className="hidden sm:flex w-8 h-8 items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-full transition-all"
         >
           {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
         </button>
@@ -191,7 +191,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             aria-label={hasUnread ? `Notifications — ${unreadCount} unread` : "Notifications"}
             aria-expanded={showNotif}
             aria-haspopup="true"
-            className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-xl sm:rounded-lg transition-all relative"
+            className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-full sm:rounded-lg transition-all relative"
           >
             <Bell size={15} />
             {hasUnread && (
@@ -205,7 +205,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             <div className="pop-in absolute right-0 top-full mt-2 w-80 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
               <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/[0.06]">
                 <p className="text-[13px] font-bold text-white">Notifications</p>
-                <button onClick={() => setShowNotif(false)} aria-label="Close notifications" className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.05] rounded-lg transition-colors -mr-1">
+                <button onClick={() => setShowNotif(false)} aria-label="Close notifications" className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.05] rounded-full transition-colors -mr-1">
                   <X size={14} />
                 </button>
               </div>
@@ -302,7 +302,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
               {/* User identity */}
               <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
                 {companyLogo ? (
-                  <img src={companyLogo} alt={companyName} className="w-8 h-8 rounded-lg object-contain bg-white/5" />
+                  <img src={companyLogo} alt={companyName} className="w-8 h-8 rounded-full object-contain bg-white/5" />
                 ) : (
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
@@ -359,3 +359,4 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
     </header>
   );
 }
+

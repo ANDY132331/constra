@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -184,7 +184,7 @@ export function SearchModal() {
             className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none"
           />
           {query && (
-            <button onClick={() => { setQuery(""); setActiveIndex(-1); }} aria-label="Clear search" className="w-8 h-8 flex items-center justify-center text-white/25 hover:text-white/50 hover:bg-white/[0.05] rounded-lg transition-colors flex-shrink-0">
+            <button onClick={() => { setQuery(""); setActiveIndex(-1); }} aria-label="Clear search" className="w-8 h-8 flex items-center justify-center text-white/25 hover:text-white/50 hover:bg-white/[0.05] rounded-full transition-colors flex-shrink-0">
               <X size={14} />
             </button>
           )}
@@ -205,7 +205,7 @@ export function SearchModal() {
                       onClick={() => go(r.href, r.label)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left ${activeIndex === i ? "bg-white/[0.08]" : "hover:bg-white/[0.05]"}`}
                     >
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: r.color + "18" }}>
                         <span style={{ color: r.color }}><Icon size={14} /></span>
                       </div>
@@ -234,7 +234,7 @@ export function SearchModal() {
                     onClick={() => go(s.href)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left ${activeIndex === i ? "bg-white/[0.08]" : "hover:bg-white/[0.05]"}`}
                   >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: s.color + "18" }}>
                       <span style={{ color: s.color }}><Icon size={14} /></span>
                     </div>
@@ -255,3 +255,4 @@ export function SearchModal() {
     </div>
   );
 }
+

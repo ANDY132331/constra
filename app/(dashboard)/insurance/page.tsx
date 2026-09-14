@@ -303,13 +303,13 @@ export default function InsurancePage() {
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => openEdit(policy)}
-                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-colors"
+                              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-colors"
                             >
                               <Pencil size={13} />
                             </button>
                             <button
                               onClick={() => setDeleteId(policy.id)}
-                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors"
+                              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors"
                             >
                               <Trash2 size={13} />
                             </button>
@@ -460,6 +460,7 @@ export default function InsurancePage() {
     </div>
   );
 }
+
 
 
 

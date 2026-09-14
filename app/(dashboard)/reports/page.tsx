@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -466,7 +466,7 @@ export default function ReportsPage() {
                   }
                 }}
                 disabled={pdfLoading}
-                className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold text-[13px] px-4 py-2 rounded-lg transition-colors border border-amber-500/20 disabled:opacity-50"
+                className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold text-[13px] px-4 py-2 rounded-full transition-colors border border-amber-500/20 disabled:opacity-50"
               >
                 <FileText size={14} />
                 {pdfLoading ? "Generating…" : "Download PDF"}
@@ -474,7 +474,7 @@ export default function ReportsPage() {
               <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setExportMenuOpen((o) => !o)}
-                  className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 font-bold text-[13px] px-4 py-2 rounded-lg transition-colors border border-white/[0.07]"
+                  className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 font-bold text-[13px] px-4 py-2 rounded-full transition-colors border border-white/[0.07]"
                 >
                   <FileDown size={14} />
                   {t.common.export} Payroll
@@ -724,3 +724,4 @@ export default function ReportsPage() {
     </>
   );
 }
+

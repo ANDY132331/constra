@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
@@ -167,7 +167,7 @@ export default function MessagesPage() {
             {/* Back to dashboard */}
             <button
               onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-1.5 mb-3 -ml-1 px-2 py-1 rounded-lg transition-colors active:scale-95"
+              className="flex items-center gap-1.5 mb-3 -ml-1 px-2 py-1 rounded-full transition-colors active:scale-95"
               style={{ color: C.activeTitle }}
             >
               <ArrowLeft size={16} />
@@ -552,4 +552,5 @@ export default function MessagesPage() {
     </>
   );
 }
+
 

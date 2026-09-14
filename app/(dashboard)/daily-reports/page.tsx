@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -129,6 +130,7 @@ export default function DailyReportsPage() {
     });
     setForm(emptyForm());
     setShowForm(false);
+    toast.success("Daily report created");
   }, [form, addDailyReport, currentUser.id]);
 
   const handleExportPdf = useCallback(async (report: DailyReport) => {
@@ -620,6 +622,9 @@ function Section({ title, content, color }: { title: string; content: string; co
     </div>
   );
 }
+
+
+
 
 
 

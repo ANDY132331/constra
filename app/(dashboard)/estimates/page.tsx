@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -625,6 +626,7 @@ export default function EstimatesPage() {
     setForm({ ...blank, taxRate: String(defaultTaxRate) });
     setEditId(null);
     setShowModal(false);
+    toast.success(editId ? "Estimate updated" : "Estimate created");
   };
 
   const previewTotal = form.items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0) * (1 + (parseFloat(form.taxRate) || 0) / 100);
@@ -1045,6 +1047,8 @@ export default function EstimatesPage() {
     </>
   );
 }
+
+
 
 
 

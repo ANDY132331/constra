@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { X } from "lucide-react";
 import { useScrollLock } from "@/lib/use-scroll-lock";
@@ -30,7 +30,7 @@ export function ConfirmModal({
       <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
         <div className="flex items-start justify-between gap-2 mb-3">
           <h3 className="text-[15px] font-bold text-white leading-snug">{title}</h3>
-          <button onClick={onCancel} aria-label="Close" className="w-8 h-8 flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.05] rounded-lg transition-colors flex-shrink-0 -mt-1 -mr-1">
+          <button onClick={onCancel} aria-label="Close" className="w-8 h-8 flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.05] rounded-full transition-colors flex-shrink-0 -mt-1 -mr-1">
             <X size={14} />
           </button>
         </div>
@@ -57,3 +57,4 @@ export function ConfirmModal({
     </div>
   );
 }
+

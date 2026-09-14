@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState, useEffect } from "react";
 import { Plus, Search, AlertTriangle, X, Pencil, Trash2, Truck } from "lucide-react";
@@ -451,6 +452,9 @@ export default function EquipmentPage() {
     </>
   );
 }
+
+
+
 
 
 

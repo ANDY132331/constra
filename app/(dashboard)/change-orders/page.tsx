@@ -1,4 +1,5 @@
 ﻿"use client";
+import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -136,6 +137,7 @@ export default function ChangeOrdersPage() {
         submittedById: currentUser.id,
       });
     }
+    toast.success(editing ? "Change order updated" : "Change order created");
     setForm(emptyForm());
     setShowForm(false);
     setEditing(null);
@@ -604,6 +606,9 @@ function DetailSection({ title, content }: { title: string; content: string }) {
     </div>
   );
 }
+
+
+
 
 
 
