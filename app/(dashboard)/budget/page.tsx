@@ -391,9 +391,8 @@ export default function BudgetPage() {
 
       {/* Add / Edit drawer */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeForm} />
-          <div className="relative w-full sm:max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) closeForm(); }}>
+          <div className="sheet relative w-full sm:max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl max-h-[90dvh] overflow-y-scroll overscroll-y-contain" style={{touchAction:"pan-y"}}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[15px] font-semibold text-white/90">{editId ? "Edit Line Item" : "Add Budget Line"}</h2>
               <button onClick={closeForm} className="text-white/40 hover:text-white/70 transition-colors">

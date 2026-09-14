@@ -796,7 +796,7 @@ export default function InvoicesPage() {
                 <button
                   key={tab.key}
                   onClick={() => setStatusFilter(tab.key)}
-                  className={`flex-shrink-0 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-colors ${
+                  className={`flex-shrink-0 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-colors ${
                     statusFilter === tab.key
                       ? "bg-amber-500/15 text-amber-400"
                       : "text-white/35 hover:text-white/60 hover:bg-white/[0.04]"
@@ -816,13 +816,12 @@ export default function InvoicesPage() {
           {/* List */}
           <div className="flex-1 overflow-y-scroll">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 py-16 text-white/25">
-                <FileText size={28} className="opacity-40" />
-                <p className="text-[13px]">No invoices</p>
-                <button onClick={() => setShowModal(true)} className="text-[12px] text-amber-400 hover:text-amber-300 transition-colors">
-                  + Create one
-                </button>
-              </div>
+              <EmptyState
+                icon={FileText}
+                title="No invoices"
+                body="Create your first invoice to get paid."
+                action={{ label: "Create Invoice", onClick: () => setShowModal(true) }}
+              />
             ) : (
               filtered.map((inv) => (
                 <InvoiceRow
