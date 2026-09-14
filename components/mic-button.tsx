@@ -112,8 +112,8 @@ function AudioMicButton({
             <button
               type="button"
               onClick={cancel}
-              className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 border border-gray-300 text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
-              title="Cancel recording"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 border border-gray-300 text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
+              aria-label="Cancel recording"
             >
               <X size={13} />
             </button>
@@ -146,8 +146,8 @@ function AudioMicButton({
       <div className={`flex items-center gap-2 flex-shrink-0 ${className ?? ""}`}>
         {recording && (
           <button type="button" onClick={cancel}
-            className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/40 hover:text-red-400 transition-colors"
-            title="Cancel recording">
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/40 hover:text-red-400 transition-colors"
+            aria-label="Cancel recording">
             <X size={13} />
           </button>
         )}

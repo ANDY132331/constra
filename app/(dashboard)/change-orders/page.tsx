@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -161,54 +161,54 @@ export default function ChangeOrdersPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
-        <div className="flex items-center justify-between px-4 py-3 bg-[#0d0c0b] border-b border-white/[0.06]">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
           {selected ? (
             <button onClick={() => setSelected(null)} className="flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white/80 transition-colors">
               <ChevronLeft size={16} /> Back
             </button>
           ) : (
-            <h1 className="text-[15px] font-bold text-white">Change Orders</h1>
+            <h1 className="text-[22px] font-bold text-white">Change Orders</h1>
           )}
           {!selected && (
-            <button onClick={openNew} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-1.5 rounded-lg transition-colors">
-              <Plus size={13} /> New
+            <button onClick={openNew} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-xl transition-colors">
+              <Plus size={14} /> New
             </button>
           )}
         </div>
 
         {!selected ? (
           <>
-            <div className="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar">
-              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 text-center">
-                <p className="text-[10px] text-white/30 mb-0.5">Pending</p>
-                <p className="text-[12px] font-bold font-mono text-amber-400">{formatCurrency(totals.pending, currency as never)}</p>
+            <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
+              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+                <p className="text-[20px] font-bold font-mono text-amber-400 leading-none">{formatCurrency(totals.pending, currency as never)}</p>
+                <p className="text-[11px] text-white/40 font-medium mt-0.5">Pending</p>
               </div>
-              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 text-center">
-                <p className="text-[10px] text-white/30 mb-0.5">Approved</p>
-                <p className="text-[12px] font-bold font-mono text-emerald-400">{formatCurrency(totals.approved, currency as never)}</p>
+              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+                <p className="text-[20px] font-bold font-mono text-emerald-400 leading-none">{formatCurrency(totals.approved, currency as never)}</p>
+                <p className="text-[11px] text-white/40 font-medium mt-0.5">Approved</p>
               </div>
-              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 text-center">
-                <p className="text-[10px] text-white/30 mb-0.5">Total</p>
-                <p className="text-[12px] font-bold font-mono text-white/70">{formatCurrency(totals.all, currency as never)}</p>
-              </div>
-            </div>
-            <div className="px-4 mb-3">
-              <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
-                <Search size={13} className="text-white/30 flex-shrink-0" />
-                <input className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/25 outline-none"
-                  placeholder="Search change orders..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
+                <p className="text-[20px] font-bold font-mono text-white/70 leading-none">{formatCurrency(totals.all, currency as never)}</p>
+                <p className="text-[11px] text-white/40 font-medium mt-0.5">Total</p>
               </div>
             </div>
-            <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
+            <div className="px-5 mb-4">
+              <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+                <Search size={14} className="text-white/30 flex-shrink-0" />
+                <input className="flex-1 bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none"
+                  placeholder="Search change orders…" value={search} onChange={(e) => setSearch(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex gap-2 px-5 mb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
               {(["all", "pending", "approved", "rejected", "void"] as const).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold capitalize transition-colors ${statusFilter === s ? "bg-amber-500 text-black" : "bg-white/[0.06] text-white/45 hover:bg-white/[0.09]"}`}>
+                  className={`flex-shrink-0 snap-start px-3.5 py-2 rounded-full text-[13px] font-semibold capitalize transition-colors ${statusFilter === s ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/45"}`}>
                   {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
             </div>
-            <div className="px-4 space-y-2">
+            <div className="px-5 space-y-3">
               {filtered.length === 0 ? (
                 <EmptyState
                   icon={GitPullRequest}
@@ -223,7 +223,7 @@ export default function ChangeOrdersPage() {
                 const proj = projectMap.get(co.projectId);
                 const cfg = STATUS_CONFIG[co.status];
                 return (
-                  <button key={co.id} onClick={() => setSelected(co)} className="w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                  <button key={co.id} onClick={() => setSelected(co)} className="w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 transition-transform">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-mono text-white/30">{co.number}</p>
@@ -357,7 +357,7 @@ export default function ChangeOrdersPage() {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-scroll">
           {filtered.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <EmptyState
@@ -424,22 +424,22 @@ export default function ChangeOrdersPage() {
               >
                 <Download size={13} /> {pdfLoading ? "…" : "PDF"}
               </button>
-              <button onClick={() => openEdit(selected)} className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors" title="Edit">
+              <button onClick={() => openEdit(selected)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors" title="Edit">
                 <Pencil size={14} />
               </button>
               <button
                 onClick={() => setDeleteConfirm(selected.id)}
-                className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
               >
                 <Trash2 size={14} />
               </button>
-              <button onClick={() => setSelected(null)} className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
+              <button onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
                 <X size={14} />
               </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          <div className="flex-1 overflow-y-scroll px-6 py-5 space-y-5">
             {/* Amount */}
             <div className="bg-white/[0.03] rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -494,13 +494,13 @@ export default function ChangeOrdersPage() {
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#111] border border-white/[0.08] rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
+          <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-xl w-full max-w-lg max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-[14px] font-bold text-white/90">{editing ? "Edit Change Order" : "New Change Order"}</h3>
-              <button onClick={() => { setShowForm(false); setEditing(null); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-colors"><X size={14} /></button>
+              <button onClick={() => { setShowForm(false); setEditing(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
             </div>
-            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+            <div className="overflow-y-scroll flex-1 px-5 py-4 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>CO Number *</label>

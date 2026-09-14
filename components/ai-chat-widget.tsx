@@ -227,7 +227,7 @@ function AIChatWidgetInner() {
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/[0.06] active:bg-white/[0.10] transition-colors"
               aria-label="Close chat"
             >
               <X size={15} />

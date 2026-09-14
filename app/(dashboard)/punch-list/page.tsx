@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Plus, Search, Circle, Timer, CheckCircle2, MapPin, Calendar, X, Pencil } from "lucide-react";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { CustomSelect } from "@/components/ui/custom-select";
 
@@ -110,45 +111,55 @@ export default function PunchListPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3">
-          <h2 className="text-xl font-bold text-white tracking-tight">Punch List</h2>
-          {canEdit && (
-            <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
-              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors">
-              <Plus size={14} />
-              Add Item
-            </button>
-          )}
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
+          <h2 className="text-[22px] font-bold text-white">Punch List</h2>
+          <div className="flex items-center gap-2">
+            {canEdit && counts.open > 0 && (
+              <button
+                onClick={() => { punchItems.filter(i => i.status === "open").forEach(i => updatePunchItem(i.id, { status: "resolved" })); }}
+                className="text-[12px] font-bold text-white/40 px-3 py-2 rounded-xl border border-white/[0.07] active:bg-white/[0.05] transition-colors"
+              >
+                Resolve All
+              </button>
+            )}
+            {canEdit && (
+              <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
+                className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors">
+                <Plus size={14} />
+                Add
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-2 px-4 mb-3">
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-white">{punchItems.length}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Total</p>
+        {/* Stats chips */}
+        <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-white leading-none">{punchItems.length}</p>
+            <p className="text-[11px] text-white/40 font-medium mt-0.5">Total</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-red-400">{counts.open}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Open</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-red-400 leading-none">{counts.open}</p>
+            <p className="text-[11px] text-red-400/60 font-medium mt-0.5">Open</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-amber-400">{counts["in-progress"]}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">In Prog</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-amber-400 leading-none">{counts["in-progress"]}</p>
+            <p className="text-[11px] text-amber-400/60 font-medium mt-0.5">In Progress</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-green-400">{counts.resolved}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Done</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-green-400 leading-none">{counts.resolved}</p>
+            <p className="text-[11px] text-green-400/60 font-medium mt-0.5">Done</p>
           </div>
         </div>
 
         {/* Priority filter tabs */}
-        <div className="flex gap-2 px-4 mb-3 overflow-x-auto scrollbar-none pb-0.5">
+        <div className="flex gap-2 px-5 mb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x pb-0.5">
           {(["all", "low", "medium", "high"] as const).map((p) => (
             <button key={p} onClick={() => setPriorityFilter(p)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-bold transition-colors capitalize ${
-                priorityFilter === p ? "bg-amber-500 text-black" : "bg-white/[0.06] text-white/40"
+              className={`flex-shrink-0 snap-start px-3.5 py-2 rounded-full text-[12px] font-semibold transition-all capitalize ${
+                priorityFilter === p ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/50"
               }`}>
               {p === "all" ? "All" : p}
             </button>
@@ -156,7 +167,7 @@ export default function PunchListPage() {
         </div>
 
         {/* Item cards */}
-        <div className="px-4 space-y-2">
+        <div className="px-5 space-y-3">
           {filtered.map((item) => {
             const project = getProjectById(item.projectId);
             const assignee = item.assignedToId ? getWorkerById(item.assignedToId) : null;
@@ -165,8 +176,10 @@ export default function PunchListPage() {
             const StatusIcon = statCfg.icon;
             const overdue = isOverdue(item);
 
+            const priorityBorder = item.priority === "high" ? "#ef4444" : item.priority === "medium" ? "#F5C400" : "#374151";
             return (
-              <div key={item.id} className={`bg-[#131110] border rounded-2xl p-4 ${overdue ? "border-red-500/25" : "border-white/[0.07]"}`}>
+              <div key={item.id} className={`bg-[#131110] border rounded-2xl p-4 active:scale-[0.985] active:opacity-90 transition-transform ${overdue ? "border-red-500/25" : "border-white/[0.07]"}`}
+                style={{ borderLeftColor: priorityBorder, borderLeftWidth: 3 }}>
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2 min-w-0">
                     <StatusIcon size={14} className={`flex-shrink-0 ${statCfg.iconClass}`} />
@@ -233,11 +246,11 @@ export default function PunchListPage() {
                   {canEdit && (
                     <div className="flex items-center gap-1 ml-auto">
                       <button onClick={() => openEdit(item)}
-                        className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
                         <Pencil size={13} />
                       </button>
                       <button onClick={() => setDeleteConfirm(item.id)}
-                        className="p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
                         <X size={13} />
                       </button>
                     </div>
@@ -248,17 +261,15 @@ export default function PunchListPage() {
           })}
 
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-white/25 space-y-2">
-              <CheckCircle2 size={36} className="mx-auto opacity-30" />
-              <p className="text-[13px] font-semibold">
-                {punchItems.length === 0 ? "No punch items yet" : "No items match your filters"}
-              </p>
-              {punchItems.length === 0 && (
-                <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                  + Add your first item
-                </button>
-              )}
-            </div>
+            <EmptyState
+              icon={CheckCircle2}
+              title={punchItems.length === 0 ? "No punch items yet" : "No items match"}
+              body={punchItems.length === 0
+                ? "Track defects, issues, and site observations until they're resolved."
+                : "Try clearing your filters or searching with different terms."}
+              action={punchItems.length === 0 && canEdit ? { label: "Add Item", onClick: () => setShowModal(true) } : undefined}
+              isFiltered={punchItems.length > 0 && filtered.length === 0}
+            />
           )}
         </div>
       </div>
@@ -425,17 +436,15 @@ export default function PunchListPage() {
             })}
 
             {filtered.length === 0 && (
-              <div className="text-center py-16 text-white/25 space-y-2">
-                <CheckCircle2 size={40} className="mx-auto opacity-30" />
-                <p className="text-[14px] font-semibold">
-                  {punchItems.length === 0 ? "No punch items yet" : "No items match your filters"}
-                </p>
-                {punchItems.length === 0 && (
-                  <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                    + Add your first item
-                  </button>
-                )}
-              </div>
+              <EmptyState
+                icon={CheckCircle2}
+                title={punchItems.length === 0 ? "No punch items yet" : "No items match"}
+                body={punchItems.length === 0
+                  ? "Track defects, issues, and site observations until they're resolved."
+                  : "Try clearing your filters or searching with different terms."}
+                action={punchItems.length === 0 && canEdit ? { label: "Add Item", onClick: () => setShowModal(true) } : undefined}
+                isFiltered={punchItems.length > 0 && filtered.length === 0}
+              />
             )}
           </div>
         </div>
@@ -443,15 +452,15 @@ export default function PunchListPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Item" : "Add Punch Item"}</h3>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Title *</label>
                 <input className={inp} placeholder="e.g. Crack in south wall"
@@ -519,7 +528,7 @@ export default function PunchListPage() {
                   value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} />
               </div>
             </div>
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 Cancel

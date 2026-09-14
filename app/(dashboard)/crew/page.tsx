@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -81,14 +81,14 @@ function HoursModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-      <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+      <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
           <div>
             <h3 className="text-[15px] font-bold text-white">Manage Hours</h3>
             <p className="text-[11px] text-white/40 mt-0.5">{worker.name}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -113,7 +113,7 @@ function HoursModal({
         </div>
 
         {tab === "adjust" && (
-          <div className="p-6 space-y-4">
+          <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
             {/* Add / Subtract toggle */}
             <div className="flex gap-2">
               <button onClick={() => setMode("add")}
@@ -370,10 +370,10 @@ export default function CrewPage() {
   return (
     <>
     {/* ── MOBILE ── */}
-    <div className="lg:hidden -mx-4 -mt-4 pb-6">
+    <div className="lg:hidden -mx-5 -mt-5 pb-6">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-3">
-        <h2 className="text-[18px] font-bold text-white tracking-tight">Crew</h2>
+      <div className="flex items-center justify-between px-5 pt-5 pb-4">
+        <h2 className="text-[22px] font-bold text-white">Crew</h2>
         {canEdit && (
           <button
             onClick={openAdd}
@@ -386,7 +386,7 @@ export default function CrewPage() {
       </div>
 
       {/* Stats row */}
-      <div className="flex gap-3 px-4 pb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-3 px-5 pb-5 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
           <p className="text-[20px] font-bold text-white leading-none">{workers.length}</p>
           <p className="text-[11px] text-white/50 font-semibold mt-0.5">Total</p>
@@ -410,7 +410,7 @@ export default function CrewPage() {
 
       {/* Invite code */}
       {canEdit && inviteCode && (
-        <div className="mx-4 mb-4 bg-[#131110] border border-amber-500/20 rounded-xl p-4">
+        <div className="mx-5 mb-5 bg-[#131110] border border-amber-500/20 rounded-2xl p-4.5">
           <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Invite Code</p>
           <div className="flex items-center justify-between gap-3">
             <code className="text-[20px] font-black font-mono tracking-[0.15em] text-amber-400">{inviteCode}</code>
@@ -429,10 +429,10 @@ export default function CrewPage() {
       )}
 
       {/* Role filter */}
-      <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden pb-0.5">
+      <div className="px-5 mb-4 flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden pb-0.5">
         {(["all", "Admin", "Project Manager", "Foreman", "Worker"] as const).map((role) => (
           <button key={role} onClick={() => setFilterRole(role)}
-            className={`px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all flex-shrink-0 ${
+            className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
               filterRole === role ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/50"
             }`}>
             {role === "all" ? "All" : role}
@@ -441,23 +441,26 @@ export default function CrewPage() {
       </div>
 
       {/* Search */}
-      <div className="px-4 mb-4">
-        <input
-          placeholder="Search crew..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 text-[14px] text-white/80 placeholder:text-white/30 outline-none focus:border-amber-500/30 transition-colors"
-        />
+      <div className="px-5 mb-4">
+        <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3 focus-within:border-amber-500/30 transition-colors">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30 flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input
+            placeholder="Search crew..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
+          />
+        </div>
       </div>
 
       {/* Worker list */}
-      <div className="px-4">
+      <div className="px-5 space-y-3">
         {filtered.map((worker) => {
           const roleCfg = ROLE_CONFIG[worker.role] ?? ROLE_CONFIG.Worker;
           return (
-            <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 mb-2">
+            <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4.5">
               {/* Row 1: Avatar + Name + Role badge */}
-              <div className="flex items-center gap-3 mb-1.5">
+              <div className="flex items-center gap-3 mb-2">
                 <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[14px] font-black"
                   style={{ backgroundColor: worker.color + "20", color: worker.color }}>
                   {worker.photo
@@ -495,13 +498,13 @@ export default function CrewPage() {
                 </div>
                 <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
                   {canEdit && isAdminOrAbove(currentUser.role) && (
-                    <button onClick={() => setHoursWorker(worker)} className="p-1.5 rounded-lg text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
+                    <button onClick={() => setHoursWorker(worker)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
                       <Clock size={13} />
                     </button>
                   )}
                   {canEdit && (
                     <>
-                      <button onClick={() => openEdit(worker)} className="p-1.5 rounded-lg text-white/30 active:bg-white/5 transition-all">
+                      <button onClick={() => openEdit(worker)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 active:bg-white/5 transition-all">
                         <Pencil size={13} />
                       </button>
                       {worker.id !== currentUser.id && (
@@ -738,11 +741,11 @@ export default function CrewPage() {
 
       {/* QR Code Modal */}
       {showQR && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl p-8 flex flex-col items-center gap-5 w-72">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-8 flex flex-col items-center gap-5 w-full sm:w-72">
             <div className="flex items-center justify-between w-full">
               <h3 className="text-[15px] font-bold text-white">Invite Workers</h3>
-              <button onClick={() => setShowQR(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5">
+              <button onClick={() => setShowQR(false)} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>
@@ -761,17 +764,17 @@ export default function CrewPage() {
 
       {/* Add/Edit Worker Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Worker" : "Add Worker"}</h3>
               <button onClick={() => setShowModal(false)}
-                className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-5" style={{touchAction:"pan-y"}}>
               {/* Photo */}
               <div className="flex flex-col items-center gap-3">
                 <div className="w-20 h-20 rounded-2xl overflow-hidden cursor-pointer relative group"
@@ -910,7 +913,7 @@ export default function CrewPage() {
                 <AlertTriangle size={12} /> {saveError}
               </p>
             )}
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setSaveError(""); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 Cancel

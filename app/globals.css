@@ -289,6 +289,12 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* Prevent the html/body from scrolling — all scroll happens inside .main-scroll */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   body {
     @apply bg-background text-foreground;
   }
@@ -407,10 +413,10 @@
 
 /* ── Page entrance — re-fires on every route change via key prop ── */
 @keyframes page-in {
-  from { opacity:0; transform:translateY(10px); }
-  to   { opacity:1; transform:translateY(0);    }
+  from { opacity:0; transform:translateY(18px) scale(0.993); }
+  to   { opacity:1; transform:translateY(0)    scale(1);     }
 }
-.page-enter { animation: page-in 0.22s cubic-bezier(0.16,1,0.3,1) both; }
+.page-enter { animation: page-in 0.28s cubic-bezier(0.16,1,0.3,1) both; }
 
 /* ── Dropdown / popover pop-in ─────────────────────────────────── */
 @keyframes pop-in {
@@ -449,6 +455,30 @@
 
 /* ── Button press feel ──────────────────────────────────────────── */
 .btn-press:active { transform: scale(0.96); transition: transform 0.08s; }
+
+/* ── Mobile tap row — instant, satisfying press ─────────────────── */
+@media (pointer: coarse) {
+  /* List rows and cards: crisp scale-down + dimming on press */
+  .tap-feedback:active,
+  .card-hover:active {
+    transform: scale(0.985) !important;
+    opacity: 0.82 !important;
+    transition: transform 0.06s cubic-bezier(0.4,0,0.2,1),
+                opacity   0.06s !important;
+  }
+  /* Nav links and buttons: quicker, tighter press */
+  button:active,
+  a[href]:active {
+    opacity: 0.75;
+    transition: opacity 0.07s !important;
+  }
+  /* Accent buttons (amber, green, red) keep opacity but scale down */
+  .active\:scale-\[0\.97\]:active { transform: scale(0.97) !important; }
+  .active\:bg-amber-600:active,
+  .active\:bg-amber-400:active {
+    transition: background-color 0.06s, transform 0.06s !important;
+  }
+}
 
 /* ── Touch delay elimination (mobile) ─────────────────────────── */
 button, a, [role="button"], input, select, textarea {
@@ -499,10 +529,28 @@ button, a, [role="button"], input, select, textarea {
     /* safe-area so content isn't hidden behind home bar */
     padding-bottom: env(safe-area-inset-bottom);
   }
+  /* Ensure the scrollable content area inside a sheet scrolls on iOS */
+  .sheet > div [class*="overflow-y"] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
 }
 @keyframes slide-up-sheet {
-  from { transform: translateY(30px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0);    opacity: 1;   }
+}
+/* Full-screen wizard slide-up (used for create/edit full-screen flows) */
+@keyframes slideUpFull {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0);    }
+}
+
+/* ── Mobile: clear content behind the fixed bottom nav ───────────────────── */
+/* Nav is 62px + safe-area-inset-bottom. Add generous breathing room.        */
+@media (max-width: 1023px) {
+  .mobile-main-padding {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+  }
 }
 
 /* ── Form inputs — comfortable touch height ────────────────────── */
@@ -566,19 +614,45 @@ html {
   text-size-adjust: 100%;
 }
 
+/* ── Prevent iOS auto-zoom on input focus ─────────────────────────────────
+   iOS Safari zooms into the page when a focused input has font-size < 16px.
+   Override any smaller Tailwind font-size on touch devices.                 */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([class*="hidden"]),
+  textarea,
+  select {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
+/* ── Remove number input spinners (cleaner on mobile) ─────────────────── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ── Improve date input appearance on dark backgrounds ────────────────── */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
 /* Hardware-accelerate the main scroll area */
 main {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
 
-/* Smoother page entrance — reduce Y travel on mobile (less jumpy) */
+/* Mobile page entrance — stronger spring, slide from below */
 @media (pointer: coarse) {
   @keyframes page-in {
-    from { opacity: 0; transform: translateY(5px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(24px) scale(0.99); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
   }
-  .page-enter { animation-duration: 0.18s; }
+  .page-enter { animation-duration: 0.3s; }
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -691,17 +765,24 @@ html[data-theme] footer {
    ══════════════════════════════════════════════════════════════════ */
 
 .main-scroll {
-  /* Mobile: clear MobileNav (h-16 = 64px) + device safe area */
-  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
-  /* Natural elastic bounce at edges on iOS — feels native */
-  overscroll-behavior-y: auto;
+  /* Force scroll mode — Android WebView scrolls reliably on `scroll`, not `auto` */
+  overflow-y: scroll !important;
+  /* Tell Android/iOS to handle vertical touches as scroll, not pass them up */
+  touch-action: pan-y pinch-zoom;
+  /* Momentum scrolling on iOS and some Android */
+  -webkit-overflow-scrolling: touch;
+  /* Extra clearance: MobileNav (64 px) + breathing room + device safe area */
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  /* Contain overscroll so the background never bounces instead of the content */
+  overscroll-behavior-y: contain;
 }
 
 @media (min-width: 1024px) {
-  /* Desktop / laptop: no MobileNav, so no need for extra clearance */
+  /* Desktop / laptop: no MobileNav — restore normal behaviour */
   .main-scroll {
+    overflow-y: auto !important;
+    touch-action: auto;
     padding-bottom: 2rem;
-    /* Contain scroll on desktop to prevent propagation to body */
     overscroll-behavior-y: contain;
   }
 }
@@ -735,19 +816,27 @@ html[data-theme] footer {
 
 /* ══════════════════════════════════════════════════════════════════
    SHEET / MODAL SCROLL
-   Inner content in bottom-sheets and modals scrolls smoothly with
-   containment so the background never moves.
+   Modals now use flex-col layout: header stays, content scrolls,
+   footer stays. The card itself clips (overflow: hidden) so the
+   inner flex-1 overflow-y-scroll div is the only scroll surface.
    ══════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 640px) {
+  /* Sheet card: clip at boundary, let flex children handle scroll */
   .sheet > div {
-    overflow-y: auto;
+    overflow: hidden !important;
     overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
   }
 }
 
-/* Standalone modal inner scrollers (any overflow-y-auto inside a fixed overlay) */
+/* The scrollable body inside any modal (flex-1 overflow-y-scroll) */
+[class*="fixed"][class*="inset-0"] .overflow-y-scroll {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Standalone modal inner scrollers */
 [class*="fixed"][class*="inset-0"] .overflow-y-auto {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
@@ -810,6 +899,446 @@ aside > div::-webkit-scrollbar {
 @media (pointer: coarse) {
   button:not(.no-min-touch),
   [role="button"]:not(.no-min-touch) {
-    min-height: 42px;
+    min-height: 44px;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE BREATHING ROOM
+   Pages use -mx-5 -mt-5 to bleed to edges on mobile.
+   Cards get a consistent comfortable internal rhythm.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Card style used across all pages — consistent shadow + rounding */
+.mob-card {
+  background: #111111;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 16px;
+}
+[data-theme="light"] .mob-card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+/* Section label above a group of cards */
+.mob-section-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  padding: 0 0 10px 0;
+}
+[data-theme="light"] .mob-section-label {
+  color: rgba(0,0,0,0.32);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANDROID / CHROME WEBVIEW — prevent address-bar height changes
+   from causing layout jank. Use the viewport-fit=cover viewport.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Ensure no element inside the app can inadvertently grow the document */
+body > * {
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+/* The main scroll container is the ONLY thing allowed to scroll */
+.main-scroll {
+  max-height: none !important;
+  overflow-y: scroll !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MICRO-INTERACTION POLISH — Procore-level feel
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Instant tap feedback — no 300ms delay. Applied to interactive elements ONLY.
+   Maps and scroll areas need their own touch-action (pinch-zoom etc), so we
+   avoid setting it on * which would override Leaflet's touch handling. */
+button, a, [role="button"],
+input[type="submit"], input[type="button"], input[type="reset"],
+label[for] {
+  touch-action: manipulation;
+}
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth elevation on interactive cards */
+.card-interactive {
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+  cursor: pointer;
+}
+.card-interactive:active {
+  transform: scale(0.975);
+  transition-duration: 0.06s;
+}
+
+/* Input focus glow */
+input:focus, textarea:focus, select:focus {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Better button transitions */
+button {
+  transition: opacity 0.12s ease, transform 0.12s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Icon buttons — no min-height restriction */
+.icon-btn {
+  min-height: unset !important;
+  touch-action: manipulation;
+}
+
+/* Fade-in for newly added content */
+@keyframes fade-slide-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.fade-in-up {
+  animation: fade-slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Status badge pulse */
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.status-pulse { animation: status-pulse 2.4s ease-in-out infinite; }
+
+/* Smooth number transitions for stats */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Better scrollbar for chat/inner containers */
+@media (pointer: fine) {
+  .chat-scroll::-webkit-scrollbar { width: 3px; }
+  .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 9999px; }
+}
+
+/* Pull-to-refresh spinner */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.spin-slow { animation: spin-slow 1s linear infinite; }
+
+/* Ambient glow on active nav items */
+.nav-active-glow {
+  box-shadow: 0 0 0 1px rgba(245,196,0,0.2), 0 2px 12px rgba(245,196,0,0.12);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MODAL / BOTTOM-SHEET SCROLL — Android WebView reliable scrolling
+   Fixed overlays that have a scrollable inner container need
+   overflow-y: scroll (not auto) + touch-action on Android.
+   Targeting fixed+inset-0 overlay children that scroll.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* All scrollable children inside a fixed overlay */
+.fixed.inset-0 > div > [class*="overflow-y"],
+.fixed.inset-0 > div [class*="overflow-y-auto"],
+.fixed.inset-0 > div [class*="overflow-y-scroll"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Force scroll mode on modal inner containers on touch devices */
+@media (pointer: coarse) {
+  .fixed.inset-0 [class*="overflow-y-auto"] {
+    overflow-y: scroll !important;
+    touch-action: pan-y;
+  }
+  /* Bottom-sheet inner scroll */
+  .sheet > div {
+    overflow-y: scroll !important;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  /* When keyboard opens on Android, dvh adjusts — ensure modal fits */
+  .sheet > div,
+  .fixed.inset-0 [class*="max-h-"] {
+    max-height: 85dvh !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PREMIUM MOBILE POLISH — WhatsApp / TikTok level feel
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Better card defaults — rounder, softer, more depth ── */
+.bg-\[\#111111\],
+.bg-\[\#111\] {
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.03) inset;
+}
+
+/* ── Premium input focus ring ── */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(245,196,0,0.25), 0 0 0 1px rgba(245,196,0,0.4);
+  border-color: rgba(245,196,0,0.45) !important;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+/* ── Better active press state ── */
+@media (pointer: coarse) {
+  button:active:not(:disabled),
+  [role="button"]:active,
+  a:active {
+    opacity: 0.75;
+    transform: scale(0.972);
+    transition: opacity 0.06s, transform 0.06s !important;
+  }
+  /* Amber buttons: stay bright on press */
+  .bg-amber-500:active,
+  .bg-amber-400:active {
+    opacity: 0.9 !important;
+    transform: scale(0.972);
+  }
+}
+
+/* ── List item tap highlight — subtle amber instead of browser default ── */
+.tap-row {
+  transition: background 0.12s ease;
+  -webkit-tap-highlight-color: rgba(245,196,0,0.06);
+}
+.tap-row:active {
+  background: rgba(245,196,0,0.05) !important;
+}
+
+/* ── Divider lines — thinner and more refined ── */
+.divide-y > * + * {
+  border-top-width: 1px;
+  border-color: rgba(255,255,255,0.045);
+}
+
+/* ── Better bottom-sheet safe area for nav height change (62px) ── */
+.main-scroll {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom)) !important;
+}
+
+/* ── Status badges — rounder pill style ── */
+.rounded-full { border-radius: 9999px; }
+
+/* ── Smoother page entrance on mobile ── */
+@media (pointer: coarse) {
+  .page-enter {
+    animation: page-in-mobile 0.20s cubic-bezier(0.25,1,0.5,1) both;
+  }
+  @keyframes page-in-mobile {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+/* ── Card hover lift — more pronounced on desktop ── */
+@media (pointer: fine) {
+  .card-hover:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.55) !important;
+  }
+}
+
+/* ── Better skeleton shimmer ── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.025) 25%,
+    rgba(255,255,255,0.055) 50%,
+    rgba(255,255,255,0.025) 75%
+  ) !important;
+  background-size: 400px 100% !important;
+  animation: shimmer 1.4s ease-in-out infinite !important;
+}
+
+/* ── Amber primary button — more polished ── */
+.btn-primary {
+  background: linear-gradient(145deg, #F5C400, #d4a900);
+  color: #000;
+  font-weight: 800;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(245,196,0,0.30), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 0.12s, box-shadow 0.18s, opacity 0.12s;
+}
+.btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(245,196,0,0.20);
+}
+
+/* ── Modal backdrop — higher blur ── */
+.bg-black\/70 {
+  background: rgba(0,0,0,0.72) !important;
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+}
+
+/* ── Section headings on mobile pages ── */
+.section-heading {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.30);
+  padding-bottom: 8px;
+}
+
+/* ── No selection highlight flicker on tappable items ── */
+button, a, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── Consistent amber scrollbar on mobile for inner lists ── */
+@media (pointer: coarse) {
+  .overflow-x-auto {
+    scrollbar-width: none;
+  }
+  .overflow-x-auto::-webkit-scrollbar { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE HORIZONTAL TABS — smooth snap scroll + fade edges
+   Used by filter tabs, role pills, schedule day-strip, settings tabs
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Snap-scroll for filter pill rows */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-start {
+  scroll-snap-align: start;
+}
+
+/* Fade left/right edge hint when tabs overflow */
+.tab-scroll-container {
+  position: relative;
+}
+.tab-scroll-container::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 32px;
+  background: linear-gradient(to left, rgba(10,10,10,0.7), transparent);
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SHEET DRAG HANDLE — visual cue that modal can be scrolled
+   Add a small pill handle at the top of sheet modals on mobile.
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .sheet > div::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 9999px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   IMPROVED CARD BORDERS — subtle inner highlight
+   ══════════════════════════════════════════════════════════════════ */
+.mob-card,
+.bg-\[\#131110\] {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   STATUS CHIP CONSISTENCY — standard pill size across all pages
+   ══════════════════════════════════════════════════════════════════ */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BETTER AMBER BUTTON — gradient + inner glow
+   Apply class .btn-amber for the most polished version.
+   ══════════════════════════════════════════════════════════════════ */
+.btn-amber {
+  background: linear-gradient(145deg, #F5C400, #d4a900);
+  color: #000;
+  font-weight: 800;
+  box-shadow: 0 4px 20px rgba(245,196,0,0.28), inset 0 1px 0 rgba(255,255,255,0.22);
+  transition: transform 0.1s, box-shadow 0.15s, opacity 0.1s;
+  touch-action: manipulation;
+}
+.btn-amber:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(245,196,0,0.18);
+  opacity: 0.9;
+}
+.btn-amber:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LIST ROW SWIPE HINT — right-to-left subtle trail on mobile
+   ══════════════════════════════════════════════════════════════════ */
+@media (pointer: coarse) {
+  .swipe-row {
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   IMPROVED LINE-CLAMP TYPOGRAPHY
+   ══════════════════════════════════════════════════════════════════ */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   NETWORK STATUS BADGE
+   ══════════════════════════════════════════════════════════════════ */
+.online-dot {
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.25);
+  animation: status-pulse 2.4s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FORM FIELD LABELS — consistent style across all pages
+   ══════════════════════════════════════════════════════════════════ */
+.field-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.32);
+  margin-bottom: 6px;
+}
+[data-theme="light"] .field-label {
+  color: rgba(0,0,0,0.40);
 }

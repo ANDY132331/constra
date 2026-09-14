@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Plus, Search, AlertTriangle, X, Pencil, Trash2, Truck } from "lucide-react";
@@ -108,29 +108,31 @@ export default function EquipmentPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3">
-          <h2 className="text-xl font-bold text-white tracking-tight">Equipment</h2>
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
+          <h2 className="text-[22px] font-bold text-white">Equipment</h2>
           <button onClick={openAdd}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors">
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors">
             <Plus size={14} />
             Add
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-2 px-4 mb-3">
+        {/* Stats chips */}
+        <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
           {(["available", "in-use", "maintenance", "off-site"] as const).map((status) => {
             const cfg = STATUS_CONFIG[status];
             const count = equipment.filter((e) => e.status === status).length;
             return (
               <button key={status}
                 onClick={() => setStatusFilter(statusFilter === status ? "all" : status)}
-                className={`bg-[#131110] border rounded-xl p-3 text-center transition-all ${statusFilter === status ? "border-amber-500/40" : "border-white/[0.07]"}`}>
-                <div className="w-2 h-2 rounded-full mx-auto mb-1" style={{ backgroundColor: cfg.dot }} />
-                <p className="text-xl font-bold text-white">{count}</p>
-                <p className="text-[9px] text-white/40 mt-0.5 leading-tight">{cfg.label}</p>
+                className={`flex-shrink-0 bg-[#131110] border rounded-2xl px-4 py-3 text-left transition-all ${statusFilter === status ? "border-amber-500/40" : "border-white/[0.07]"}`}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cfg.dot }} />
+                  <p className="text-[11px] text-white/40 font-medium">{cfg.label}</p>
+                </div>
+                <p className="text-[22px] font-bold text-white leading-none">{count}</p>
               </button>
             );
           })}
@@ -138,7 +140,7 @@ export default function EquipmentPage() {
 
         {/* Service alert */}
         {needsService.length > 0 && (
-          <div className="mx-4 mb-3 bg-amber-500/[0.07] border border-amber-500/20 rounded-xl p-3 flex items-center gap-3">
+          <div className="mx-5 mb-4 bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-4 flex items-center gap-3">
             <AlertTriangle size={16} className="text-amber-400 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-bold text-amber-300">{needsService.length} unit{needsService.length > 1 ? "s" : ""} due for service</p>
@@ -148,11 +150,11 @@ export default function EquipmentPage() {
         )}
 
         {/* Search */}
-        <div className="px-4 mb-3">
-          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2.5">
-            <Search size={13} className="text-white/30 flex-shrink-0" />
+        <div className="px-5 mb-4">
+          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+            <Search size={14} className="text-white/30 flex-shrink-0" />
             <input
-              className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+              className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
               placeholder="Search equipment…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -161,7 +163,7 @@ export default function EquipmentPage() {
         </div>
 
         {/* Equipment cards */}
-        <div className="px-4 space-y-2">
+        <div className="px-5 space-y-3">
           {filtered.length === 0 ? (
             <EmptyState
               icon={Truck}
@@ -209,11 +211,11 @@ export default function EquipmentPage() {
                     <span className="text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/day</span>
                     <div className="flex items-center gap-1">
                       <button onClick={() => openEdit(eq)}
-                        className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
                         <Pencil size={13} />
                       </button>
                       <button onClick={() => handleDelete(eq.id, eq.name)}
-                        className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -348,15 +350,15 @@ export default function EquipmentPage() {
 
       {/* Add / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Equipment" : "Add Equipment"}</h3>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Equipment Name *</label>
                 <input className={inp} placeholder="e.g. CAT 320 Excavator"
@@ -426,7 +428,7 @@ export default function EquipmentPage() {
                   onChange={(e) => setForm((f) => ({ ...f, certExpiry: e.target.value }))} />
               </div>
             </div>
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => setShowModal(false)}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">{t.common.cancel}</button>
               <button onClick={handleSave} disabled={!form.name.trim()}

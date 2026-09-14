@@ -7,6 +7,7 @@ import {
   AlertTriangle, CheckCircle2, ChevronDown,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/currency";
 import type { BudgetLine, BudgetLineCategory } from "@/lib/mock-data";
@@ -180,13 +181,13 @@ export default function BudgetPage() {
       <div className="flex-shrink-0 px-4 md:px-6 pt-5 pb-4 border-b border-white/[0.06]">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-[17px] font-semibold text-white/90 tracking-tight">Budget</h1>
+            <h1 className="text-[22px] font-bold text-white">Budget</h1>
             <p className="text-[12px] text-white/35 mt-0.5">Cost code line items per project</p>
           </div>
           {isAdmin && (
             <button
               onClick={openAdd}
-              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-semibold px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-xl transition-colors"
             >
               <Plus size={14} strokeWidth={2.5} />
               Add Line
@@ -195,26 +196,19 @@ export default function BudgetPage() {
         </div>
 
         {/* Summary cards */}
-        <div className="grid grid-cols-3 gap-3 mt-4">
+        <div className="flex gap-2.5 mt-4 overflow-x-auto no-scrollbar -mx-4 md:mx-0 px-4 md:px-0 md:grid md:grid-cols-3 md:gap-3">
           {[
-            { label: "Total Budgeted", value: fmt(totals.budgeted), icon: DollarSign, color: "text-white/60" },
-            { label: "Total Actual",   value: fmt(totals.actual),   icon: TrendingUp, color: "text-blue-400" },
+            { label: "Budgeted", value: fmt(totals.budgeted), color: "text-white/70" },
+            { label: "Actual",   value: fmt(totals.actual),   color: "text-blue-400" },
             {
-              label: "Variance",
+              label: (totals.variance >= 0 ? "Under Budget" : "Over Budget"),
               value: fmt(Math.abs(totals.variance)),
-              icon: totals.variance >= 0 ? TrendingDown : AlertTriangle,
               color: totals.variance > 0 ? "text-emerald-400" : totals.variance < 0 ? "text-red-400" : "text-white/40",
-              prefix: totals.variance >= 0 ? "Under " : "Over ",
             },
-          ].map(({ label, value, icon: Icon, color, prefix }) => (
-            <div key={label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Icon size={13} className={color} />
-                <span className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">{label}</span>
-              </div>
-              <p className={`text-[15px] font-bold ${color}`}>
-                {prefix}{value}
-              </p>
+          ].map(({ label, value, color }) => (
+            <div key={label} className="flex-shrink-0 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3">
+              <p className={`text-[18px] font-bold leading-none ${color}`}>{value}</p>
+              <p className="text-[11px] text-white/35 font-medium mt-1">{label}</p>
             </div>
           ))}
         </div>
@@ -252,19 +246,12 @@ export default function BudgetPage() {
       {/* Table */}
       <div className="flex-1 overflow-auto px-4 md:px-6 py-4 space-y-4">
         {grouped.size === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <DollarSign size={36} className="text-white/10 mb-3" />
-            <p className="text-[14px] text-white/30 font-medium">No budget lines yet</p>
-            <p className="text-[12px] text-white/20 mt-1">Add cost code line items to track your project spend</p>
-            {isAdmin && (
-              <button
-                onClick={openAdd}
-                className="mt-4 flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[12px] font-semibold px-4 py-2 rounded-lg transition-colors border border-amber-500/20"
-              >
-                <Plus size={13} /> Add First Line
-              </button>
-            )}
-          </div>
+          <EmptyState
+            icon={DollarSign}
+            title="No budget lines yet"
+            body="Add cost code line items to track project spend against budget."
+            action={isAdmin ? { label: "Add Budget Line", onClick: openAdd } : undefined}
+          />
         ) : (
           Array.from(grouped.entries()).map(([projectId, lines]) => {
             const proj = projects.find((p) => p.id === projectId);
@@ -280,22 +267,40 @@ export default function BudgetPage() {
                 {/* Project header */}
                 <button
                   onClick={() => setExpandedProject(isExpanded && grouped.size > 1 ? (expandedProject === projectId ? null : projectId) : null)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-colors"
+                  className="w-full flex flex-col px-4 py-3 hover:bg-white/[0.02] transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-[13px] font-semibold text-white/85">{proj?.name ?? "Unknown Project"}</span>
-                    <span className="text-[11px] text-white/30 bg-white/[0.05] px-2 py-0.5 rounded-full">{lines.length} lines</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="hidden sm:flex items-center gap-4 text-[12px]">
-                      <span className="text-white/40">Budget: <span className="text-white/70 font-medium">{fmt(projTotals.budgeted)}</span></span>
-                      <span className="text-white/40">Actual: <span className="text-blue-400 font-medium">{fmt(projTotals.actual)}</span></span>
-                      <span className={`font-semibold ${projVariance >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {projVariance >= 0 ? "▼" : "▲"} {fmt(Math.abs(projVariance))}
-                      </span>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[13px] font-semibold text-white/85">{proj?.name ?? "Unknown Project"}</span>
+                      <span className="text-[11px] text-white/30 bg-white/[0.05] px-2 py-0.5 rounded-full">{lines.length} lines</span>
                     </div>
-                    <ChevronDown size={14} className={`text-white/30 transition-transform ${!isExpanded ? "-rotate-90" : ""}`} />
+                    <div className="flex items-center gap-4">
+                      <div className="hidden sm:flex items-center gap-4 text-[12px]">
+                        <span className="text-white/40">Budget: <span className="text-white/70 font-medium">{fmt(projTotals.budgeted)}</span></span>
+                        <span className="text-white/40">Actual: <span className="text-blue-400 font-medium">{fmt(projTotals.actual)}</span></span>
+                        <span className={`font-semibold ${projVariance >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {projVariance >= 0 ? "▼" : "▲"} {fmt(Math.abs(projVariance))}
+                        </span>
+                      </div>
+                      <ChevronDown size={14} className={`text-white/30 transition-transform ${!isExpanded ? "-rotate-90" : ""}`} />
+                    </div>
                   </div>
+                  {/* Spend progress bar */}
+                  {projTotals.budgeted > 0 && (() => {
+                    const pct = Math.min((projTotals.actual / projTotals.budgeted) * 100, 100);
+                    const over = projTotals.actual > projTotals.budgeted;
+                    return (
+                      <div className="w-full mt-2.5">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] text-white/30">{pct.toFixed(0)}% of budget used</span>
+                          <span className={`text-[10px] font-bold ${over ? "text-red-400" : "text-white/40"}`}>{fmt(projTotals.actual)} / {fmt(projTotals.budgeted)}</span>
+                        </div>
+                        <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: over ? "#ef4444" : pct > 80 ? "#F5C400" : "#22c55e" }} />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </button>
 
                 {isExpanded && (
@@ -341,15 +346,15 @@ export default function BudgetPage() {
                                   <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                       onClick={() => openEdit(b)}
-                                      className="p-1 rounded hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors"
+                                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors"
                                     >
-                                      <Pencil size={12} />
+                                      <Pencil size={13} />
                                     </button>
                                     <button
                                       onClick={() => setDeleteId(b.id)}
-                                      className="p-1 rounded hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-colors"
+                                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-colors"
                                     >
-                                      <Trash2 size={12} />
+                                      <Trash2 size={13} />
                                     </button>
                                   </div>
                                 </td>

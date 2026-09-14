@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { MessageSquare, Plus, Search, Clock, CheckCircle2, XCircle, ChevronDown, ChevronRight, X, Trash2, Pencil } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { CustomSelect } from "@/components/ui/custom-select";
 
@@ -112,23 +113,23 @@ export default function RFIsPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3">
-          <h1 className="text-[22px] font-black text-white">RFIs</h1>
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
+          <h1 className="text-[22px] font-bold text-white">RFIs</h1>
           <button
             onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
           >
-            <Plus size={13} /> New RFI
+            <Plus size={14} /> New RFI
           </button>
         </div>
 
         {/* Status filter pills */}
-        <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 px-5 pb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           <button
             onClick={() => setStatusFilter("all")}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${statusFilter === "all" ? "bg-white/15 text-white" : "bg-white/[0.05] text-white/40"}`}
+            className={`flex-shrink-0 snap-start px-3.5 py-2 rounded-full text-[12px] font-semibold transition-all ${statusFilter === "all" ? "bg-white/15 text-white border border-white/20" : "bg-[#131110] border border-white/[0.07] text-white/40"}`}
           >
             All ({rfis.length})
           </button>
@@ -138,7 +139,7 @@ export default function RFIsPage() {
             return (
               <button key={status}
                 onClick={() => setStatusFilter(statusFilter === status ? "all" : status)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${statusFilter === status ? cfg.className : "bg-white/[0.05] text-white/40"}`}
+                className={`flex-shrink-0 snap-start px-3.5 py-2 rounded-full text-[12px] font-semibold transition-all border ${statusFilter === status ? cfg.className + " border-current/20" : "bg-[#131110] border-white/[0.07] text-white/40"}`}
               >
                 {cfg.label} ({count})
               </button>
@@ -147,7 +148,7 @@ export default function RFIsPage() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-white/[0.05] mx-4 mb-3 px-3 py-2.5 rounded-xl">
+        <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-xl">
           <Search size={13} className="text-white/30" />
           <input
             className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
@@ -158,49 +159,65 @@ export default function RFIsPage() {
         </div>
 
         {/* List */}
-        <div className="divide-y divide-white/[0.05]">
-          {rfis.length === 0 && (
-            <div className="text-center py-16 text-white/25 space-y-2 px-4">
-              <MessageSquare size={32} className="mx-auto opacity-30" />
-              <p className="text-[13px]">No RFIs yet</p>
-              <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px]">
-                + Submit your first RFI
-              </button>
-            </div>
-          )}
-          {rfis.length > 0 && filtered.length === 0 && (
-            <div className="text-center py-12 text-white/25 px-4">
-              <p className="text-[13px]">No RFIs match the filter</p>
-            </div>
-          )}
-          {filtered.map((rfi) => {
-            const project = getProjectById(rfi.projectId);
-            const statusCfg = STATUS_CONFIG[rfi.status];
-            const prioCfg = PRIORITY_CONFIG[rfi.priority];
-            const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
-            return (
-              <div key={rfi.id} className={`px-4 py-3.5 active:bg-white/[0.03] transition-colors ${isOverdue ? "bg-red-500/[0.03]" : ""}`}>
-                <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] text-white/30 font-mono">{rfi.number}</span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
-                    {isOverdue && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full">OVERDUE</span>}
+        <div className="divide-y divide-white/[0.04]">
+          {rfis.length === 0 ? (
+            <EmptyState
+              icon={MessageSquare}
+              title="No RFIs yet"
+              body="Submit a Request For Information to get formal answers on design or site questions."
+              action={{ label: "Submit RFI", onClick: () => setShowModal(true) }}
+            />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={MessageSquare}
+              title="No RFIs found"
+              body="Try a different status filter or clear your search."
+              isFiltered
+            />
+          ) : (
+            filtered.map((rfi) => {
+              const project = getProjectById(rfi.projectId);
+              const statusCfg = STATUS_CONFIG[rfi.status];
+              const prioCfg = PRIORITY_CONFIG[rfi.priority];
+              const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
+              return (
+                <button
+                  key={rfi.id}
+                  onClick={() => { setExpanded(expanded === rfi.id ? null : rfi.id); }}
+                  className={`w-full text-left px-5 py-4 active:bg-white/[0.04] transition-colors ${isOverdue ? "bg-red-500/[0.03]" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] text-white/30 font-mono">{rfi.number}</span>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
+                      {isOverdue && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full">OVERDUE</span>}
+                    </div>
+                    <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
                   </div>
-                  <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
-                </div>
-                <p className="text-[14px] font-bold text-white/85 mb-1.5">{rfi.subject}</p>
-                <div className="flex items-center justify-between text-[11px] text-white/30">
-                  {project ? (
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: project.color }} />
-                      {project.name}
-                    </span>
-                  ) : <span />}
-                  <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
-                </div>
-              </div>
-            );
-          })}
+                  <p className="text-[14px] font-bold text-white/85 mb-1.5 text-left">{rfi.subject}</p>
+                  {rfi.question && (
+                    <p className="text-[12px] text-white/40 mb-2 line-clamp-2 text-left">{rfi.question}</p>
+                  )}
+                  <div className="flex items-center justify-between text-[11px] text-white/30">
+                    {project ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: project.color }} />
+                        {project.name}
+                      </span>
+                    ) : <span />}
+                    <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                  </div>
+                  {/* Expanded answer view on mobile */}
+                  {expanded === rfi.id && rfi.answer && (
+                    <div className="mt-3 bg-green-500/[0.06] border border-green-500/15 rounded-xl px-3 py-2.5 text-left">
+                      <p className="text-[9px] font-bold text-green-400/60 uppercase tracking-wider mb-1">Answer</p>
+                      <p className="text-[12px] text-white/65 leading-relaxed">{rfi.answer}</p>
+                    </div>
+                  )}
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -248,21 +265,21 @@ export default function RFIsPage() {
           </div>
 
           <div className="space-y-2">
-            {rfis.length === 0 && (
-              <div className="text-center py-16 text-white/25 space-y-2">
-                <MessageSquare size={36} className="mx-auto opacity-30" />
-                <p className="text-[14px]">No RFIs yet</p>
-                <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px] hover:text-amber-300 transition-colors">
-                  + Submit your first RFI
-                </button>
-              </div>
-            )}
-            {rfis.length > 0 && filtered.length === 0 && (
-              <div className="text-center py-12 text-white/25 space-y-1">
-                <MessageSquare size={28} className="mx-auto opacity-20" />
-                <p className="text-[13px]">No RFIs match the current filter</p>
-              </div>
-            )}
+            {rfis.length === 0 ? (
+              <EmptyState
+                icon={MessageSquare}
+                title="No RFIs yet"
+                body="Submit a Request For Information to get formal answers on design or site questions."
+                action={{ label: "Submit RFI", onClick: () => setShowModal(true) }}
+              />
+            ) : filtered.length === 0 ? (
+              <EmptyState
+                icon={MessageSquare}
+                title="No RFIs match"
+                body="Try a different status filter or clear your search."
+                isFiltered
+              />
+            ) : null}
             {filtered.map((rfi) => {
               const project = getProjectById(rfi.projectId);
               const submitter = getWorkerById(rfi.submittedById);
@@ -397,17 +414,17 @@ export default function RFIsPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">
                 {editId ? "Edit RFI" : <>New RFI <span className="text-white/30 font-normal text-[13px]">{nextNumber}</span></>}
               </h3>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Subject *</label>
                 <input className={inp} placeholder="e.g. Footing depth variance at grid C-4"
@@ -484,7 +501,7 @@ export default function RFIsPage() {
                   onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))} />
               </div>
             </div>
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={!form.subject.trim()}

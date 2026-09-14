@@ -58,7 +58,8 @@ export function NotifPermissionPrompt() {
           </div>
           <button
             onClick={dismiss}
-            className="text-white/25 hover:text-white/50 transition-colors flex-shrink-0 -mt-0.5"
+            aria-label="Dismiss notification prompt"
+            className="w-8 h-8 flex items-center justify-center text-white/25 hover:text-white/50 hover:bg-white/[0.05] rounded-lg transition-colors flex-shrink-0 -mr-1"
           >
             <X size={14} />
           </button>

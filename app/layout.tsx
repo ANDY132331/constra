@@ -61,6 +61,9 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   themeColor: "#0a0a0a",
+  // Tells Android Chrome to resize the visual viewport when the keyboard opens
+  // so form inputs scroll into view automatically.
+  interactiveWidget: "resizes-visual",
 };
 
 export default function RootLayout({
@@ -69,7 +72,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}
+      style={{ height: "100dvh", overflow: "hidden" }}
       suppressHydrationWarning
     >
       <head>

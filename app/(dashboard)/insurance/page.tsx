@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import { isAdminOrAbove } from "@/lib/permissions";
@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/currency";
 import type { InsurancePolicy, InsuranceCoverageType } from "@/lib/mock-data";
 import { COVERAGE_TYPE_LABELS } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toast } from "sonner";
 
@@ -171,9 +172,9 @@ export default function InsurancePage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-[20px] font-black text-white/90 flex items-center gap-2">
+          <h1 className="text-[22px] font-bold text-white flex items-center gap-2">
             <Shield size={20} className="text-amber-400" />
-            Insurance & COI
+            Insurance
           </h1>
           <p className="text-[12px] text-white/35 mt-0.5">Track certificates of insurance for your company, workers, and subcontractors</p>
         </div>
@@ -189,15 +190,15 @@ export default function InsurancePage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="flex gap-2.5 -mx-5 px-5 overflow-x-auto no-scrollbar lg:mx-0 lg:px-0 lg:grid lg:grid-cols-3 lg:gap-3">
         {[
           { label: "Expired",       count: expired, color: "text-red-400",     bg: "bg-red-500/8 border-red-500/15" },
           { label: "Expiring Soon", count: soon,    color: "text-amber-400",   bg: "bg-amber-500/8 border-amber-500/15" },
           { label: "Valid",         count: valid,   color: "text-emerald-400", bg: "bg-emerald-500/8 border-emerald-500/15" },
         ].map(({ label, count, color, bg }) => (
-          <div key={label} className={`rounded-xl px-4 py-3 border ${bg}`}>
-            <p className={`text-[22px] font-black ${color}`}>{count}</p>
-            <p className="text-[11px] text-white/40 font-medium mt-0.5">{label}</p>
+          <div key={label} className={`flex-shrink-0 rounded-2xl px-4 py-3 border ${bg}`}>
+            <p className={`text-[28px] font-bold leading-none ${color}`}>{count}</p>
+            <p className="text-[11px] text-white/40 font-medium mt-1">{label}</p>
           </div>
         ))}
       </div>
@@ -234,19 +235,13 @@ export default function InsurancePage() {
 
       {/* Table / Cards */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center">
-            <Shield size={20} className="text-white/20" />
-          </div>
-          <div>
-            <p className="text-[14px] font-semibold text-white/40">
-              {search || typeFilter !== "all" || statusFilter !== "all" ? "No policies match your filters" : "No insurance policies yet"}
-            </p>
-            {!search && typeFilter === "all" && statusFilter === "all" && isAdmin && (
-              <p className="text-[12px] text-white/25 mt-1">Click &ldquo;Add Policy&rdquo; to track your first COI</p>
-            )}
-          </div>
-        </div>
+        <EmptyState
+          icon={Shield}
+          title={search || typeFilter !== "all" || statusFilter !== "all" ? "No policies match your filters" : "No insurance policies yet"}
+          body={!search && typeFilter === "all" && statusFilter === "all" && isAdmin ? "Click \"Add Policy\" to track your first COI." : "Try adjusting your search or filters."}
+          isFiltered={!!(search || typeFilter !== "all" || statusFilter !== "all")}
+          action={!search && typeFilter === "all" && statusFilter === "all" && isAdmin ? { label: "Add Policy", onClick: () => setShowModal(true) } : undefined}
+        />
       ) : (
         <div className="space-y-2">
           {filtered.map((policy) => {
@@ -260,7 +255,7 @@ export default function InsurancePage() {
             return (
               <div
                 key={policy.id}
-                className="group bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3.5 hover:border-white/[0.10] transition-all"
+                className="group bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-4 hover:border-white/[0.10] active:scale-[0.985] active:opacity-90 transition-all"
               >
                 <div className="flex items-start gap-3">
                   {/* Status dot */}
@@ -308,13 +303,13 @@ export default function InsurancePage() {
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => openEdit(policy)}
-                              className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-colors"
+                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-colors"
                             >
                               <Pencil size={13} />
                             </button>
                             <button
                               onClick={() => setDeleteId(policy.id)}
-                              className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors"
+                              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors"
                             >
                               <Trash2 size={13} />
                             </button>
@@ -352,19 +347,18 @@ export default function InsurancePage() {
 
       {/* Add / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-0">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative w-full max-w-lg bg-[#111] border border-white/[0.08] rounded-2xl shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
+          <div className="sheet relative w-full max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl z-10 max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h2 className="text-[15px] font-bold text-white/90">
                 {editId ? "Edit Policy" : "Add Insurance Policy"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
+              <button onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
                 <X size={16} />
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-5 space-y-4" style={{touchAction:"pan-y"}}>
               {/* Holder */}
               <div className="grid grid-cols-2 gap-3">
                 <div>

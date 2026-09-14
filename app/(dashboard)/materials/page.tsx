@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useRef } from "react";
 import {
@@ -9,6 +9,7 @@ import { exportMaterialsPdf } from "@/lib/pdf-export";
 import { format } from "date-fns";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import type { MaterialEntry, MaterialType } from "@/lib/mock-data";
 import { TRADE_MATERIALS } from "@/lib/mock-data";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
@@ -166,40 +167,40 @@ export default function MaterialsPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3">
-          <h2 className="text-xl font-bold text-white tracking-tight">Materials</h2>
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
+          <h2 className="text-[22px] font-bold text-white">Materials</h2>
           <button
             onClick={() => { setShowAddModal(true); setEntryProjectId(projects[0]?.id ?? ""); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
           >
             <Plus size={14} />
-            Log Material
+            Log
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 px-4 mb-3">
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-white">{materialEntries.length}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Total</p>
+        {/* Stats chips */}
+        <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-white leading-none">{materialEntries.length}</p>
+            <p className="text-[11px] text-white/40 font-medium mt-0.5">Total</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-emerald-400">{materialEntries.filter((e) => e.type === "delivery").length}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Deliveries</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-emerald-400 leading-none">{materialEntries.filter((e) => e.type === "delivery").length}</p>
+            <p className="text-[11px] text-emerald-400/60 font-medium mt-0.5">Deliveries</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-amber-400">{materialEntries.filter((e) => e.type === "usage").length}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">Usage</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-amber-400 leading-none">{materialEntries.filter((e) => e.type === "usage").length}</p>
+            <p className="text-[11px] text-amber-400/60 font-medium mt-0.5">Usage</p>
           </div>
         </div>
 
         {/* Delivery / Usage tabs */}
-        <div className="flex gap-2 px-4 mb-3">
+        <div className="flex gap-2 px-5 mb-4">
           {(["delivery", "usage"] as const).map((t) => (
             <button key={t} onClick={() => setEntryType(t)}
-              className={`flex-1 py-2 rounded-xl text-[13px] font-bold capitalize transition-colors ${
+              className={`flex-1 py-2 rounded-full text-[13px] font-bold capitalize transition-colors ${
                 entryType === t ? "bg-amber-500 text-black" : "bg-white/[0.06] text-white/40"
               }`}>
               {t === "delivery" ? "Deliveries" : "Usage"}
@@ -208,7 +209,7 @@ export default function MaterialsPage() {
         </div>
 
         {/* Project filter */}
-        <div className="px-4 mb-3">
+        <div className="px-5 mb-4">
           <CustomSelect
             value={selectedProject}
             onChange={(v) => setSelectedProject(v)}
@@ -221,13 +222,14 @@ export default function MaterialsPage() {
         </div>
 
         {/* Entry cards */}
-        <div className="px-4 space-y-2">
+        <div className="px-5 space-y-3">
           {filteredEntries.filter((e) => e.type === entryType).length === 0 ? (
-            <div className="text-center py-16">
-              <Package size={28} className="text-white/15 mx-auto mb-3" />
-              <p className="text-[13px] text-white/25">No {entryType} logs yet</p>
-              <p className="text-[11px] text-white/15 mt-1">Tap "Log Material" to get started</p>
-            </div>
+            <EmptyState
+              icon={Package}
+              title={`No ${entryType} logs yet`}
+              body={`Tap "Log Material" to track your first ${entryType === "delivery" ? "material delivery" : "usage entry"}.`}
+              action={{ label: "Log Material", onClick: () => setShowAddModal(true) }}
+            />
           ) : (
             filteredEntries.filter((e) => e.type === entryType).map((entry) => {
               const project = projects.find((p) => p.id === entry.projectId);
@@ -268,7 +270,7 @@ export default function MaterialsPage() {
                       <span>{format(new Date(entry.date), "MMM d, yyyy")}</span>
                     </div>
                     <button onClick={() => setDeleteConfirm(entry.id)}
-                      className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
                       <Trash2 size={12} />
                     </button>
                   </div>
@@ -416,11 +418,12 @@ export default function MaterialsPage() {
               </span>
             </div>
             {filteredEntries.filter((e) => e.type === entryType).length === 0 ? (
-              <div className="py-16 text-center">
-                <Package size={28} className="text-white/15 mx-auto mb-3" />
-                <p className="text-[13px] text-white/25">No {entryType} logs yet</p>
-                <p className="text-[11px] text-white/15 mt-1">Click "Log Material" to get started</p>
-              </div>
+              <EmptyState
+                icon={Package}
+                title={`No ${entryType} logs yet`}
+                body={`Click "Log Material" to track your first ${entryType === "delivery" ? "material delivery" : "usage entry"}.`}
+                action={{ label: "Log Material", onClick: () => setShowAddModal(true) }}
+              />
             ) : (
               <div className="divide-y divide-white/[0.04]">
                 {filteredEntries.filter((e) => e.type === entryType).map((entry) => {
@@ -468,13 +471,12 @@ export default function MaterialsPage() {
 
       {/* Add Material Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
-          <div className="relative bg-[#141414] border border-white/[0.1] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}>
+          <div className="sheet relative bg-[#141414] border border-white/[0.1] rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
               <h3 className="text-[15px] font-bold text-white">Log Material</h3>
-              <button onClick={() => setShowAddModal(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5">
+              <button onClick={() => setShowAddModal(false)} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>

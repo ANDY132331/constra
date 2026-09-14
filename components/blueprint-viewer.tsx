@@ -276,7 +276,7 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: meta.color }}>{meta.label}</span>
-                      <button onClick={() => setSelectedPin(null)} className="text-white/30 hover:text-white/70"><X size={12} /></button>
+                      <button onClick={() => setSelectedPin(null)} aria-label="Close" className="w-7 h-7 flex items-center justify-center text-white/30 hover:text-white/70 rounded-md transition-colors -mr-1"><X size={13} /></button>
                     </div>
                     <p className="text-[12px] text-white/70 mb-3">{pin.note || <span className="italic text-white/30">No note</span>}</p>
                     <div className="flex gap-2">
@@ -288,9 +288,10 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
                       </button>
                       <button
                         onClick={() => { onDeletePin(pin.id); setSelectedPin(null); }}
-                        className="flex items-center justify-center w-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                        aria-label="Delete pin"
+                        className="flex items-center justify-center w-8 h-[30px] rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                       >
-                        <X size={10} />
+                        <X size={12} />
                       </button>
                     </div>
                   </div>

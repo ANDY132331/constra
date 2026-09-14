@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Clock, MessagesSquare,
-  CalendarDays, FolderKanban, ClipboardList, BarChart3,
-  Receipt, MoreHorizontal, CheckSquare,
+  CalendarDays, FolderKanban, CheckSquare,
+  Receipt, MoreHorizontal,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isForemanOrAbove, isAdminOrAbove } from "@/lib/permissions";
@@ -26,99 +26,162 @@ export function MobileNav() {
   const isAdmin = isAdminOrAbove(currentUser.role);
   const clockedIn = currentUser.clockedIn ?? false;
 
-  const clockTab: NavTab = { href: "/time-tracking", icon: Clock, label: clockedIn ? "On Site" : "Clock", isClockBtn: true };
+  const clockTab: NavTab = {
+    href: "/time-tracking",
+    icon: Clock,
+    label: clockedIn ? "On Site" : "Clock In",
+    isClockBtn: true,
+  };
   const moreTab: NavTab = { icon: MoreHorizontal, label: "More", isMore: true };
 
   let tabs: NavTab[];
   if (isAdmin) {
     tabs = [
-      { href: "/dashboard",  icon: LayoutDashboard, label: "Home" },
-      { href: "/invoices",   icon: Receipt,         label: "Invoices" },
+      { href: "/dashboard", icon: LayoutDashboard, label: "Home" },
+      { href: "/invoices",  icon: Receipt,         label: "Invoices" },
       clockTab,
-      { href: "/projects",   icon: FolderKanban,    label: "Projects" },
+      { href: "/projects",  icon: FolderKanban,    label: "Projects" },
       moreTab,
     ];
   } else if (isForeman) {
     tabs = [
-      { href: "/dashboard",  icon: LayoutDashboard, label: "Home" },
-      { href: "/tasks",      icon: CheckSquare,     label: "Tasks" },
+      { href: "/dashboard", icon: LayoutDashboard, label: "Home" },
+      { href: "/tasks",     icon: CheckSquare,     label: "Tasks" },
       clockTab,
-      { href: "/projects",   icon: FolderKanban,    label: "Projects" },
+      { href: "/projects",  icon: FolderKanban,    label: "Projects" },
       moreTab,
     ];
   } else {
     tabs = [
-      { href: "/dashboard",  icon: LayoutDashboard, label: "Home" },
-      { href: "/schedule",   icon: CalendarDays,    label: "Schedule" },
+      { href: "/dashboard", icon: LayoutDashboard, label: "Home" },
+      { href: "/schedule",  icon: CalendarDays,    label: "Schedule" },
       clockTab,
-      { href: "/projects",   icon: FolderKanban,    label: "Projects" },
-      { href: "/messages",   icon: MessagesSquare,  label: "Chat" },
+      { href: "/projects",  icon: FolderKanban,    label: "Projects" },
+      { href: "/messages",  icon: MessagesSquare,  label: "Chat" },
     ];
   }
 
-  const openSidebar = () => {
-    window.dispatchEvent(new CustomEvent("open-sidebar"));
-  };
+  const openSidebar = () => window.dispatchEvent(new CustomEvent("open-sidebar"));
 
   return (
     <nav
       className="lg:hidden fixed bottom-0 inset-x-0 z-40"
       style={{
-        background: "rgba(7,7,7,0.97)",
-        backdropFilter: "blur(28px)",
-        WebkitBackdropFilter: "blur(28px)",
-        borderTop: "1px solid rgba(245,158,11,0.14)",
-        boxShadow: "0 -12px 48px rgba(0,0,0,0.75)",
+        background: "rgba(8,8,8,0.98)",
+        backdropFilter: "blur(32px) saturate(180%)",
+        WebkitBackdropFilter: "blur(32px) saturate(180%)",
+        borderTop: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 -1px 0 rgba(255,255,255,0.04), 0 -20px 60px rgba(0,0,0,0.9)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div className="flex items-stretch h-16">
-        {tabs.map(({ href, icon: Icon, label, isClockBtn, isMore }, idx) => {
-          const active = href ? (pathname === href || pathname.startsWith(href + "/")) : false;
+      <div className="flex items-stretch" style={{ height: 62 }}>
+        {tabs.map(({ href, icon: Icon, label, isClockBtn, isMore }) => {
+          const active = href
+            ? pathname === href || pathname.startsWith(href + "/")
+            : false;
 
+          /* ── Centre clock/clock-out button ── */
           if (isClockBtn && href) {
             return (
-              <Link key={label} href={href} className="flex-1 flex flex-col items-center justify-center -mt-5">
-                <div className="relative">
-                  <div className={`absolute -inset-1.5 rounded-[18px] blur-sm transition-all ${clockedIn ? "bg-green-500/30" : "bg-amber-500/25"}`} />
-                  {clockedIn && <div className="absolute -inset-1 rounded-2xl animate-ping bg-green-500/20" />}
-                  <div className={`relative w-[54px] h-[54px] rounded-2xl flex items-center justify-center shadow-xl transition-all ${
-                    clockedIn ? "bg-green-500 shadow-green-500/40" : "bg-amber-500 shadow-amber-500/30"
-                  }`}>
-                    <Icon size={24} className="text-black" strokeWidth={2.5} />
-                  </div>
+              <Link
+                key={label}
+                href={href}
+                className="flex-1 flex flex-col items-center justify-center"
+                style={{ marginTop: -18 }}
+              >
+                {/* Glow halo */}
+                <div
+                  className="absolute rounded-full blur-xl pointer-events-none"
+                  style={{
+                    width: 64, height: 64,
+                    background: clockedIn
+                      ? "rgba(34,197,94,0.35)"
+                      : "rgba(245,196,0,0.28)",
+                    marginTop: -9,
+                  }}
+                />
+                {/* Pulse ring when clocked in */}
+                {clockedIn && (
+                  <div
+                    className="absolute rounded-full animate-ping pointer-events-none"
+                    style={{ width: 58, height: 58, background: "rgba(34,197,94,0.18)", marginTop: -9 }}
+                  />
+                )}
+                {/* Button disc */}
+                <div
+                  className="relative flex items-center justify-center rounded-[22px] shadow-2xl"
+                  style={{
+                    width: 54, height: 54,
+                    background: clockedIn
+                      ? "linear-gradient(145deg, #22c55e, #16a34a)"
+                      : "linear-gradient(145deg, #F5C400, #d4a900)",
+                    boxShadow: clockedIn
+                      ? "0 8px 28px rgba(34,197,94,0.5), 0 2px 6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2)"
+                      : "0 8px 28px rgba(245,196,0,0.45), 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3)",
+                  }}
+                >
+                  <Icon size={22} className="text-black" strokeWidth={2.5} />
                 </div>
-                <span className={`text-[9px] font-black uppercase tracking-wider mt-1.5 ${clockedIn ? "text-green-400" : "text-amber-400/70"}`}>
+                <span
+                  className="text-[9px] font-black uppercase tracking-wider mt-2"
+                  style={{ color: clockedIn ? "#4ade80" : "#F5C400" }}
+                >
                   {label}
                 </span>
               </Link>
             );
           }
 
+          /* ── More / sidebar button ── */
           if (isMore) {
             return (
               <button
                 key={label}
                 onClick={openSidebar}
-                className="flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-200 relative text-white/25 active:text-white/60"
+                className="flex-1 flex flex-col items-center justify-center gap-[5px] transition-opacity duration-100"
+                style={{ color: "rgba(255,255,255,0.28)" }}
               >
-                <Icon size={20} strokeWidth={1.8} />
+                <Icon size={22} strokeWidth={1.6} />
                 <span className="text-[9px] font-semibold uppercase tracking-wider">{label}</span>
               </button>
             );
           }
 
+          /* ── Regular tab ── */
           return (
             <Link
               key={label}
               href={href!}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-200 relative ${active ? "text-amber-400 scale-[1.04]" : "text-white/25"}`}
+              className="flex-1 flex flex-col items-center justify-center gap-[5px] relative transition-all duration-150"
+              style={{ color: active ? "#F5C400" : "rgba(255,255,255,0.28)" }}
             >
+              {/* Active indicator — thin line at top */}
               {active && (
-                <span className="absolute inset-x-2.5 top-1.5 bottom-1.5 rounded-xl bg-amber-500/10 border border-amber-500/15 -z-10 animate-[page-in_0.2s_ease_both]" />
+                <span
+                  className="absolute top-0 rounded-b-full"
+                  style={{
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 28,
+                    height: 3,
+                    background: "linear-gradient(90deg, #F5C400, #fada4a)",
+                    boxShadow: "0 1px 8px rgba(245,196,0,0.7)",
+                  }}
+                />
               )}
-              <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
-              <span className={`text-[9px] uppercase tracking-wider transition-all duration-200 ${active ? "font-black" : "font-semibold"}`}>{label}</span>
+              <span
+                className="transition-transform duration-150 flex"
+                style={{ transform: active ? "scale(1.08)" : "scale(1)" }}
+              >
+                <Icon size={22} strokeWidth={active ? 2.2 : 1.6} />
+              </span>
+              <span
+                className="text-[9px] uppercase tracking-wider transition-all duration-150"
+                style={{ fontWeight: active ? 800 : 500 }}
+              >
+                {label}
+              </span>
             </Link>
           );
         })}

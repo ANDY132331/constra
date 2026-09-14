@@ -163,7 +163,7 @@ export default function MessagesPage() {
           style={{ background: C.sidebarBg, borderRight: `1px solid ${C.border}` }}
         >
           {/* Sidebar header */}
-          <div className="px-4 pb-3 border-b" style={{ borderColor: C.border, paddingTop: "max(16px, env(safe-area-inset-top))" }}>
+          <div className="px-5 pb-3 border-b" style={{ borderColor: C.border, paddingTop: "max(20px, env(safe-area-inset-top))" }}>
             {/* Back to dashboard */}
             <button
               onClick={() => router.push("/dashboard")}
@@ -174,7 +174,7 @@ export default function MessagesPage() {
               <span className="text-[13px] font-semibold">Dashboard</span>
             </button>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[20px] font-black" style={{ color: C.titleColor }}>Messages</h2>
+              <h2 className="text-[22px] font-bold" style={{ color: C.titleColor }}>Messages</h2>
               <div className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold"
                 style={{ background: currentUser.color + "30", color: currentUser.color }}>
                 {currentUser.initials}
@@ -193,7 +193,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Conversation list */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-scroll" style={{ overscrollBehaviorY: "contain" } as React.CSSProperties}>
             {filteredProjects.length === 0 ? (
               <p className="text-[12px] px-4 py-8 text-center" style={{ color: C.secondaryText }}>No projects yet</p>
             ) : (
@@ -288,7 +288,7 @@ export default function MessagesPage() {
           </div>
 
           {/* ── Messages ──────────────────────────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto px-3 py-3">
+          <div className="flex-1 overflow-y-scroll px-3 py-3" style={{ overscrollBehaviorY: "contain", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
             {projectMessages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-6">
                 <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.08)" }}>
@@ -439,15 +439,15 @@ export default function MessagesPage() {
                           </div>
                         )}
 
-                        {/* Delete on hover */}
+                        {/* Delete — visible on hover (desktop) and always visible as small button on touch */}
                         {isMe && (
                           <button
                             onClick={() => deleteMessage(msg.id)}
-                            className="opacity-0 group-hover/bubble:opacity-100 mt-0.5 self-end p-1 rounded-full transition-all"
-                            style={{ color: C.secondaryText }}
-                            aria-label="Delete"
+                            className="opacity-0 group-hover/bubble:opacity-100 sm:group-hover/bubble:opacity-100 mt-0.5 self-end p-1.5 rounded-full transition-all active:scale-90"
+                            style={{ color: C.secondaryText, WebkitTapHighlightColor: "transparent" }}
+                            aria-label="Delete message"
                           >
-                            <Trash2 size={11} />
+                            <Trash2 size={12} />
                           </button>
                         )}
                       </div>
@@ -480,8 +480,8 @@ export default function MessagesPage() {
 
           {/* ── Input bar ───────────────────────────────────────────────────── */}
           <div
-            className="flex-shrink-0 flex items-end gap-2 px-3 pt-2 pb-3 border-t"
-            style={{ background: C.barBg, borderColor: C.border }}
+            className="flex-shrink-0 flex items-end gap-2 px-3 pt-2 border-t"
+            style={{ background: C.barBg, borderColor: C.border, paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
           >
             {/* Attach */}
             <button
@@ -501,14 +501,20 @@ export default function MessagesPage() {
               <textarea
                 ref={textareaRef}
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  setText(e.target.value);
+                  // Auto-resize
+                  const el = e.target;
+                  el.style.height = "auto";
+                  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+                }}
                 onKeyDown={handleKeyDown}
                 placeholder="Message…"
                 rows={1}
                 inputMode="text"
                 enterKeyHint="send"
-                className="flex-1 bg-transparent text-[14px] outline-none resize-none max-h-32 leading-relaxed"
-                style={{ color: C.titleColor, caretColor: C.activeBorder }}
+                className="flex-1 bg-transparent text-[14px] outline-none resize-none leading-relaxed"
+                style={{ color: C.titleColor, caretColor: C.activeBorder, maxHeight: 120, minHeight: 22 }}
               />
             </div>
 
@@ -528,7 +534,7 @@ export default function MessagesPage() {
       {/* ── Image lightbox ──────────────────────────────────────────────────── */}
       {lightboxData && (
         <div className="fixed inset-0 z-[180] flex items-center justify-center p-4 bg-black/90" onClick={() => setLightboxData(null)}>
-          <div className="relative max-w-4xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-4xl max-h-[85dvh]" onClick={(e) => e.stopPropagation()}>
             <img src={lightboxData.data} alt={lightboxData.name} className="max-w-full max-h-[85vh] object-contain rounded-2xl" />
             <div className="absolute top-3 right-3 flex gap-2">
               <button onClick={() => downloadAttachment(lightboxData.name, lightboxData.data)}

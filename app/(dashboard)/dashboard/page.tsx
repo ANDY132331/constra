@@ -427,7 +427,7 @@ export default function DashboardPage() {
     const weekPct = Math.min(((myWeekHours + liveElapsed) / weekTarget) * 100, 100);
 
     return (
-      <div className="-mx-4 -mt-4 pb-2">
+      <div className="-mx-5 -mt-5 pb-2">
 
         {/* ── Hero ─────────────────────────────────────────────────────────────── */}
         <div
@@ -553,13 +553,13 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Stats row ────────────────────────────────────────────────────────── */}
-        <div className="px-4 pt-4 grid grid-cols-3 gap-3">
+        <div className="flex gap-2.5 pt-6 px-5 overflow-x-auto no-scrollbar">
           {[
             { label: "Today", value: totalToday.toFixed(1) + "h", pct: dayPct, color: "#3b82f6", sub: `${dayTarget}h target` },
             { label: "This Week", value: (myWeekHours + liveElapsed).toFixed(1) + "h", pct: weekPct, color: "#d97706", sub: `${weekTarget}h target` },
             { label: "Days In", value: String(workedDays), pct: (workedDays / 5) * 100, color: "#16a34a", sub: "this week" },
           ].map(({ label, value, pct, color, sub }) => (
-            <div key={label} className={`rounded-2xl p-3 ${dk ? "bg-[#111] border border-white/[0.06]" : "bg-white border border-gray-200 shadow-sm"}`}>
+            <div key={label} className={`flex-shrink-0 min-w-[120px] rounded-2xl p-3.5 ${dk ? "bg-[#111] border border-white/[0.06]" : "bg-white border border-gray-200 shadow-sm"}`}>
               <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${dk ? "text-white/30" : "text-gray-400"}`}>{label}</p>
               <p className={`text-[20px] font-black leading-none ${dk ? "text-white" : "text-gray-900"}`}>{value}</p>
               <p className={`text-[10px] mt-0.5 mb-2 ${dk ? "text-white/25" : "text-gray-400"}`}>{sub}</p>
@@ -573,8 +573,8 @@ export default function DashboardPage() {
 
         {/* ── My Projects ──────────────────────────────────────────────────────── */}
         {myProjects.length > 0 && (
-          <div className="px-4 pt-4">
-            <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">My Projects</p>
+          <div className="px-5 pt-6">
+            <p className="text-[12px] font-medium text-white/35 mb-3">My Projects</p>
             <div className="space-y-2">
               {myProjects.slice(0, 2).map((proj) => (
                 <Link key={proj.id} href="/projects"
@@ -601,8 +601,8 @@ export default function DashboardPage() {
 
         {/* ── My Tasks ─────────────────────────────────────────────────────────── */}
         {(urgentTasks.length > 0 || todayTasks.length > 0) && (
-          <div className="px-4 pt-4">
-            <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">My Tasks</p>
+          <div className="px-5 pt-6">
+            <p className="text-[12px] font-medium text-white/35 mb-3">My Tasks</p>
             <div className="bg-[#111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04] overflow-hidden">
               {[...urgentTasks, ...todayTasks].slice(0, 4).map((task) => (
                 <div key={task.id} className="flex items-center gap-3 px-4 py-3">
@@ -622,10 +622,10 @@ export default function DashboardPage() {
 
         {/* ── Punch list preview ───────────────────────────────────────────────── */}
         {myPunchItems.length > 0 && (
-          <div className="px-4 pt-4">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider">Open Punch Items</p>
-              <Link href="/punch-list" className="text-[11px] text-amber-400/60 font-semibold">View all</Link>
+          <div className="px-5 pt-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[12px] font-medium text-white/35">Open Issues</p>
+              <Link href="/punch-list" className="text-[11px] text-amber-400/60">View all</Link>
             </div>
             <div className="bg-[#111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04] overflow-hidden">
               {myPunchItems.slice(0, 3).map((item) => (
@@ -640,24 +640,20 @@ export default function DashboardPage() {
         )}
 
         {/* ── Quick actions ────────────────────────────────────────────────────── */}
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-[11px] font-bold text-white/30 uppercase tracking-wider mb-2">Quick Actions</p>
+        <div className="px-5 pt-6 pb-4">
           <div className="grid grid-cols-2 gap-3">
             {[
-              { href: "/photos",        label: "Upload Photo",  icon: Camera,        color: "#06b6d4", sub: "Job site photos" },
-              { href: "/safety",        label: "Safety Log",    icon: ShieldAlert,   color: "#F5C400", sub: "Report incident" },
-              { href: "/messages",      label: "Messages",      icon: MessageSquare, color: "#3b82f6", sub: "Crew chat" },
-              { href: "/schedule",      label: "Schedule",      icon: Calendar,      color: "#8b5cf6", sub: "Your calendar" },
-            ].map(({ href, label, icon: Icon, color, sub }) => (
+              { href: "/photos",        label: "Upload Photo",  icon: Camera,        color: "#06b6d4" },
+              { href: "/safety",        label: "Safety Log",    icon: ShieldAlert,   color: "#F5C400" },
+              { href: "/messages",      label: "Messages",      icon: MessageSquare, color: "#3b82f6" },
+              { href: "/schedule",      label: "Schedule",      icon: Calendar,      color: "#8b5cf6" },
+            ].map(({ href, label, icon: Icon, color }) => (
               <Link key={href} href={href}
-                className="flex flex-col gap-2 bg-[#111] border border-white/[0.06] active:bg-white/[0.04] rounded-2xl p-4 transition-all">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: color + "18" }}>
-                  <Icon size={19} style={{ color }} />
+                className="flex items-center gap-3.5 bg-[#111] border border-white/[0.06] active:bg-white/[0.04] rounded-2xl px-4 py-4 transition-all">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: color + "18" }}>
+                  <Icon size={17} style={{ color }} />
                 </div>
-                <div>
-                  <p className="text-[13px] font-bold text-white/85">{label}</p>
-                  <p className="text-[11px] text-white/30">{sub}</p>
-                </div>
+                <p className="text-[13px] font-semibold text-white/85">{label}</p>
               </Link>
             ))}
           </div>
@@ -673,7 +669,7 @@ export default function DashboardPage() {
     <ShareNudge />
 
     {/* ── MOBILE DASHBOARD ──────────────────────────────────────────────── */}
-    <div className="lg:hidden -mx-4 -mt-4 pb-2">
+    <div className="lg:hidden -mx-5 -mt-5 pb-2">
 
       {/* Hero panel — edge-to-edge, amber glow, blueprint grid */}
       <div
@@ -800,7 +796,7 @@ export default function DashboardPage() {
 
       {/* ── Getting started nudge (only when no projects exist) ───────────── */}
       {activeProjects.length === 0 && projects.length === 0 && (
-        <div className="px-4 pt-4">
+        <div className="px-5 pt-4">
           <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-4">
             <p className="text-[13px] font-black text-amber-400 mb-1">🏗️ Let's get you set up</p>
             <p className="text-[12px] text-white/50 mb-3 leading-snug">Create your first project, add your crew, and start tracking work.</p>
@@ -817,7 +813,7 @@ export default function DashboardPage() {
       )}
 
       {/* Stat chips — horizontal scroll */}
-      <div className="px-4 pt-4">
+      <div className="px-5 pt-6">
         <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
           {(([
             { label: "Hours/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9" },
@@ -842,8 +838,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick actions — 2×2 grid */}
-      <div className="px-4 pt-4">
-        <p className={`text-[10px] font-black uppercase tracking-[0.14em] mb-3 ${dk ? "text-white/25" : "text-gray-400"}`}>Quick Add</p>
+      <div className="px-5 pt-6">
         <div className="grid grid-cols-2 gap-2.5">
           {[
             { label: "Daily Report",  icon: FileText,      href: "/daily-reports",  color: "#22c55e" },
@@ -854,25 +849,22 @@ export default function DashboardPage() {
             <Link
               key={label}
               href={href}
-              className={`card-hover flex items-center gap-3 rounded-2xl px-4 py-3.5 active:scale-[0.97] border ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 hover:border-gray-300 shadow-sm"}`}
+              className={`card-hover flex items-center gap-3.5 rounded-2xl px-4 py-4 active:scale-[0.97] border ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 hover:border-gray-300 shadow-sm"}`}
             >
               <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: color + "18" }}
               >
-                <Icon size={15} style={{ color }} />
+                <Icon size={17} style={{ color }} />
               </div>
-              <div>
-                <p className={`text-[12px] font-bold leading-tight ${dk ? "text-white/80" : "text-gray-800"}`}>{label}</p>
-                <p className={`text-[10px] mt-0.5 ${dk ? "text-white/30" : "text-gray-400"}`}>Add new</p>
-              </div>
+              <p className={`text-[13px] font-semibold leading-tight ${dk ? "text-white/80" : "text-gray-800"}`}>{label}</p>
             </Link>
           ))}
         </div>
       </div>
 
       {/* AI Daily Brief */}
-      <div className="px-4 pt-4">
+      <div className="px-5 pt-6">
         <ErrorBoundary fallback={
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 text-[12px] text-white/30">
             AI Brief unavailable
@@ -883,26 +875,26 @@ export default function DashboardPage() {
       </div>
 
       {/* Ask Constra — data-aware AI */}
-      <div className="px-4 pt-3">
+      <div className="px-5 pt-4">
         <ErrorBoundary fallback={null}>
           <AskConstra />
         </ErrorBoundary>
       </div>
 
       {/* Crew on site — horizontal avatar scroll */}
-      <div className="px-4 pt-5">
-        <div className="flex items-center justify-between mb-3">
+      <div className="px-5 pt-7">
+        <div className="flex items-center justify-between mb-3.5">
           <div className="flex items-center gap-2">
-            <h3 className="text-[14px] font-black text-white">Crew on Site</h3>
+            <h3 className="text-[15px] font-bold text-white">Crew on Site</h3>
             {clockedInWorkers.length > 0 && (
-              <span className="flex items-center gap-1 text-[10px] bg-green-500/15 text-green-400 px-2 py-0.5 rounded-full font-bold">
+              <span className="flex items-center gap-1 text-[10px] bg-green-500/15 text-green-400 px-2 py-0.5 rounded-full font-semibold">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                 {clockedInWorkers.length} live
               </span>
             )}
           </div>
-          <Link href="/time-tracking" className="text-[11px] text-amber-400/70 flex items-center gap-1">
-            All <ArrowRight size={11} />
+          <Link href="/time-tracking" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+            See all <ArrowRight size={11} />
           </Link>
         </div>
         {clockedInWorkers.length === 0 ? (
@@ -918,7 +910,7 @@ export default function DashboardPage() {
                 <Link
                   key={w.id}
                   href="/time-tracking"
-                  className="flex-shrink-0 flex flex-col items-center gap-1.5 bg-[#131110] border border-white/[0.07] hover:border-green-500/20 rounded-2xl p-3 w-[84px] transition-colors duration-150 active:scale-95"
+                  className="flex-shrink-0 flex flex-col items-center gap-2 bg-[#131110] border border-white/[0.07] hover:border-green-500/20 rounded-2xl p-3.5 w-[90px] transition-colors duration-150 active:scale-95"
                 >
                   <div className="relative">
                     <div
@@ -952,11 +944,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Active projects */}
-      <div className="px-4 pt-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[14px] font-black text-white">Active Jobs</h3>
-          <Link href="/projects" className="text-[11px] text-amber-400/70 flex items-center gap-1">
-            All <ArrowRight size={11} />
+      <div className="px-5 pt-7">
+        <div className="flex items-center justify-between mb-3.5">
+          <h3 className="text-[15px] font-bold text-white">Active Jobs</h3>
+          <Link href="/projects" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+            See all <ArrowRight size={11} />
           </Link>
         </div>
         {activeProjects.length === 0 ? (
@@ -973,7 +965,7 @@ export default function DashboardPage() {
                 <Link
                   key={p.id}
                   href="/projects"
-                  className="flex items-center gap-3.5 bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:bg-white/[0.04]"
+                  className="flex items-center gap-3.5 bg-[#131110] border border-white/[0.07] rounded-2xl p-5 active:bg-white/[0.04]"
                 >
                   <div className="w-1 h-12 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
                   <div className="flex-1 min-w-0">
@@ -995,20 +987,17 @@ export default function DashboardPage() {
 
       {/* Recent activity */}
       {activityFeed.length > 0 && (
-        <div className="px-4 pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[14px] font-black text-white">Recent Activity</h3>
-            <div className="flex items-center gap-1 text-[10px] text-white/25">
-              <Activity size={10} />
-              Today
-            </div>
+        <div className="px-5 pt-7">
+          <div className="flex items-center justify-between mb-3.5">
+            <h3 className="text-[15px] font-bold text-white">Activity</h3>
+            <span className="text-[11px] text-white/25">Today</span>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
             {activityFeed.slice(0, 5).map((event) => {
               const iconDef = ACTIVITY_ICONS[event.type] ?? ACTIVITY_ICONS["task-updated"];
               const AIcon = iconDef.icon;
               return (
-                <Link key={event.id} href={iconDef.href} className="flex gap-3 p-3.5 active:bg-white/[0.03]">
+                <Link key={event.id} href={iconDef.href} className="flex gap-3.5 p-4 active:bg-white/[0.03]">
                   <div
                     className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5"
                     style={{ backgroundColor: iconDef.color + "18" }}
@@ -1028,11 +1017,11 @@ export default function DashboardPage() {
 
       {/* Upcoming tasks */}
       {projects.flatMap((p) => p.tasks.filter((t) => t.status !== "completed")).length > 0 && (
-        <div className="px-4 pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[14px] font-black text-white">Upcoming Tasks</h3>
-            <Link href="/tasks" className="text-[11px] text-amber-400/70 flex items-center gap-1">
-              All <ArrowRight size={11} />
+        <div className="px-5 pt-7">
+          <div className="flex items-center justify-between mb-3.5">
+            <h3 className="text-[15px] font-bold text-white">Tasks</h3>
+            <Link href="/tasks" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+              See all <ArrowRight size={11} />
             </Link>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
@@ -1042,7 +1031,7 @@ export default function DashboardPage() {
               const worker = getWorkerById(task.workerId);
               const isLate = task.endDate < now && task.progress < 100;
               return (
-                <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-3.5 active:bg-white/[0.03]">
+                <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-4 active:bg-white/[0.03]">
                   <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: task.projectColor }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] text-white/80 font-semibold truncate">{task.name}</p>
@@ -1063,10 +1052,10 @@ export default function DashboardPage() {
 
       {/* Priority Issues */}
       {openPunchItems.length > 0 && (
-        <div className="px-4 pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[14px] font-black text-white">Priority Issues</h3>
-            <Link href="/punch-list" className="text-[11px] text-amber-400/70 flex items-center gap-1">
+        <div className="px-5 pt-7">
+          <div className="flex items-center justify-between mb-3.5">
+            <h3 className="text-[15px] font-bold text-white">Issues</h3>
+            <Link href="/punch-list" className="text-[11px] text-amber-400/60 flex items-center gap-1">
               Punch list <ArrowRight size={11} />
             </Link>
           </div>
@@ -1074,7 +1063,7 @@ export default function DashboardPage() {
             {openPunchItems.sort((a, b) => a.priority === "high" ? -1 : b.priority === "high" ? 1 : 0).slice(0, 4).map((item) => {
               const prioColors: Record<string, string> = { high: "text-red-400 bg-red-500/12", medium: "text-amber-400 bg-amber-500/12", low: "text-white/40 bg-white/[0.06]" };
               return (
-                <Link key={item.id} href="/punch-list" className="flex items-center gap-3 p-3.5 active:bg-white/[0.03]">
+                <Link key={item.id} href="/punch-list" className="flex items-center gap-3 p-4 active:bg-white/[0.03]">
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] text-white/80 font-semibold truncate">{item.title}</p>
                     <p className="text-[10px] text-white/30 truncate">{getProjectById(item.projectId)?.name ?? item.projectId}</p>
@@ -1091,10 +1080,10 @@ export default function DashboardPage() {
 
       {/* Budget Health — mobile */}
       {canSeeFinancials && activeProjects.some((p) => p.budget > 0) && (
-        <div className="px-4 pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[14px] font-black text-white">Budget Health</h3>
-            <Link href="/projects" className="text-[11px] text-amber-400/70 flex items-center gap-1">
+        <div className="px-5 pt-7">
+          <div className="flex items-center justify-between mb-3.5">
+            <h3 className="text-[15px] font-bold text-white">Budget Health</h3>
+            <Link href="/projects" className="text-[11px] text-amber-400/60 flex items-center gap-1">
               Projects <ArrowRight size={11} />
             </Link>
           </div>
@@ -1134,26 +1123,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Weekly Summary — mobile */}
-      {canSeeFinancials && (
-        <div className="px-4 pt-5 pb-2">
-          <h3 className="text-[14px] font-black text-white mb-3">Weekly Summary</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: "Hours This Week",   value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, sub: `${clockedInWorkers.length} workers active` },
-              { label: "Active Projects",   value: activeProjects.length, sub: `${upcomingProjects.length} upcoming` },
-              { label: "Open Items",        value: openPunchItems.length, sub: `${highPriority.length} high priority` },
-              { label: "Revenue Collected", value: formatCurrencyCompact(totalPaid, currency as never), sub: `${formatCurrencyCompact(totalOutstanding, currency as never)} outstanding` },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-1">{stat.label}</p>
-                <p className="text-[20px] font-black text-white">{stat.value}</p>
-                <p className="text-[10px] text-white/30 mt-0.5">{stat.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="pb-4" />
     </div>
 
     {/* ── DESKTOP DASHBOARD ─────────────────────────────────────────────── */}

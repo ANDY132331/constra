@@ -88,7 +88,7 @@ function CustomTabBanner() {
 
           <button
             onClick={dismiss}
-            className="p-1 text-white/25 hover:text-white/60 transition-colors flex-shrink-0 -mt-1 -mr-1"
+            className="w-9 h-9 flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.05] rounded-xl transition-colors flex-shrink-0 -mt-1 -mr-1.5"
             aria-label="Dismiss"
           >
             <X size={15} />
@@ -150,7 +150,7 @@ export default function PwaInstall() {
               className="text-[11px] font-bold text-black bg-amber-500 hover:bg-amber-400 px-2.5 py-1.5 rounded-lg transition-colors">
               Install
             </button>
-            <button onClick={() => setDismissed(true)} className="p-1 text-white/30 hover:text-white/60 transition-colors">
+            <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.05] rounded-lg transition-colors">
               <X size={13} />
             </button>
           </div>

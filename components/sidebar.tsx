@@ -79,20 +79,26 @@ function NavItem({
     <Link
       href={href}
       onClick={onClose}
-      className={`group flex items-center gap-3 py-2 rounded-lg text-[13px] transition-all duration-150 mb-0.5 ${
+      className={`group flex items-center gap-3 py-2.5 rounded-xl text-[13px] transition-all duration-150 mb-0.5 relative overflow-hidden ${
         active
-          ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-400/70 pl-[10px] pr-3"
-          : "text-white/45 hover:text-white/80 hover:bg-white/[0.06] px-3"
+          ? "bg-amber-500/[0.12] text-amber-400 pl-3 pr-3"
+          : "text-white/50 hover:text-white/85 hover:bg-white/[0.06] px-3"
       }`}
+      style={active ? { boxShadow: "inset 2px 0 0 #F5C400" } : {}}
     >
+      {/* Active bg shimmer */}
+      {active && (
+        <span className="absolute inset-0 rounded-xl pointer-events-none"
+          style={{ background: "linear-gradient(90deg, rgba(245,196,0,0.07) 0%, transparent 70%)" }} />
+      )}
       <Icon
         size={15}
-        className={`flex-shrink-0 transition-all duration-150 ${active ? "text-amber-400 scale-110" : "text-white/30 group-hover:text-white/60 group-hover:scale-110"}`}
+        className={`flex-shrink-0 transition-all duration-150 relative ${active ? "text-amber-400" : "text-white/30 group-hover:text-white/60"}`}
       />
-      <span className="flex-1 font-medium">{label}</span>
+      <span className={`flex-1 relative ${active ? "font-semibold" : "font-medium"}`}>{label}</span>
       {badge && (
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
-          active ? "bg-amber-500/25 text-amber-300" : "bg-amber-500/20 text-amber-400"
+        <span className={`text-[10px] min-w-[18px] h-[18px] px-1.5 flex items-center justify-center rounded-full font-bold relative ${
+          active ? "bg-amber-500/30 text-amber-300" : "bg-amber-500/20 text-amber-400"
         }`}>
           {badge}
         </span>
@@ -139,8 +145,9 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
       lg:static lg:translate-x-0 lg:z-auto
       ${open ? "translate-x-0 shadow-[8px_0_40px_rgba(0,0,0,0.6)]" : "-translate-x-full"}
     `}>
-      {/* Logo */}
-      <div className="flex items-center justify-between px-5 h-14 border-b border-white/[0.06] flex-shrink-0">
+      {/* Logo — padding-top accounts for notch/Dynamic Island on mobile */}
+      <div className="flex items-center justify-between px-5 border-b border-white/[0.06] flex-shrink-0"
+        style={{height:"calc(3.5rem + env(safe-area-inset-top))", paddingTop:"env(safe-area-inset-top)"}}>
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
             <HardHat size={15} className="text-black" />
@@ -152,9 +159,10 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
         </div>
         <button
           onClick={onClose}
-          className="lg:hidden p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all"
+          aria-label="Close menu"
+          className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/5 active:bg-white/10 transition-all -mr-1"
         >
-          <X size={16} />
+          <X size={18} />
         </button>
       </div>
 
@@ -247,7 +255,8 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
       </div>
 
       {/* User profile */}
-      <div className="border-t border-white/[0.06] p-3 flex-shrink-0">
+      <div className="border-t border-white/[0.06] flex-shrink-0"
+        style={{padding:"12px 12px calc(12px + env(safe-area-inset-bottom)) 12px"}}>
         <Link href="/settings" className="w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.04] transition-colors">
           <div
             className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold flex-shrink-0"

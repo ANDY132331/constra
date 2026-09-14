@@ -30,7 +30,7 @@ export function ConfirmModal({
       <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
         <div className="flex items-start justify-between gap-2 mb-3">
           <h3 className="text-[15px] font-bold text-white leading-snug">{title}</h3>
-          <button onClick={onCancel} className="p-0.5 text-white/25 hover:text-white/60 transition-colors flex-shrink-0 mt-0.5">
+          <button onClick={onCancel} aria-label="Close" className="w-8 h-8 flex items-center justify-center text-white/25 hover:text-white/60 hover:bg-white/[0.05] rounded-lg transition-colors flex-shrink-0 -mt-1 -mr-1">
             <X size={14} />
           </button>
         </div>
@@ -38,16 +38,16 @@ export function ConfirmModal({
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] text-white/70 font-semibold text-[13px] py-2.5 rounded-xl transition-colors"
+            className="flex-1 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.14] text-white/70 font-semibold text-[13px] py-3 rounded-xl transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 font-bold text-[13px] py-2.5 rounded-xl transition-colors ${
+            className={`flex-1 font-bold text-[13px] py-3 rounded-xl transition-colors active:scale-[0.98] ${
               danger
-                ? "bg-red-500 hover:bg-red-400 text-white"
-                : "bg-amber-500 hover:bg-amber-400 text-black"
+                ? "bg-red-500 hover:bg-red-400 active:bg-red-600 text-white"
+                : "bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black"
             }`}
           >
             {confirmLabel}

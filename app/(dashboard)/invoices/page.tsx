@@ -6,13 +6,14 @@ import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Send, CheckCircle2, AlertTriangle, Lock,
   Trash2, X, FileText, ChevronRight, Download, Eye,
-  Mail, Pencil,
+  Mail, Pencil, Link2, Check,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import type { Invoice } from "@/lib/mock-data";
 import { exportInvoicePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 
@@ -126,7 +127,16 @@ function InvoiceDetail({
   const [sendLoading, setSendLoading] = useState(false);
   const [sendStatus, setSendStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [template, setTemplate] = useTemplateChoice("constra_invoice_template");
+
+  function copyPaymentLink() {
+    const url = `${window.location.origin}/pay/${invoice.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    });
+  }
 
   useEffect(() => {
     if (!sendStatus) return;
@@ -146,8 +156,8 @@ function InvoiceDetail({
       {/* ── Toolbar ── */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         <div className="flex items-center gap-2.5">
-          <button onClick={onClose} aria-label="Back to invoices" className="lg:hidden p-1.5 rounded-lg text-white/30 hover:text-white/60 transition-colors">
-            <ChevronRight size={15} className="rotate-180" />
+          <button onClick={onClose} aria-label="Back to invoices" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
+            <ChevronRight size={16} className="rotate-180" />
           </button>
           <span className="font-mono text-[12px] text-white/35 tracking-wider">{invoice.number}</span>
           <span className={`flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
@@ -210,6 +220,14 @@ function InvoiceDetail({
             <Mail size={13} />
             <span className="hidden sm:inline">{sendLoading ? "Sending…" : invoice.status === "overdue" ? "Send Reminder" : "Send"}</span>
           </button>
+          <button
+            onClick={copyPaymentLink}
+            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors ${linkCopied ? "text-emerald-400 bg-emerald-500/10" : "text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09]"}`}
+            title="Copy payment link"
+          >
+            {linkCopied ? <Check size={13} /> : <Link2 size={13} />}
+            <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Link"}</span>
+          </button>
           <TemplatePicker value={template} onChange={setTemplate} />
           <button
             onClick={async () => {
@@ -222,11 +240,11 @@ function InvoiceDetail({
           >
             <Download size={13} /> <span className="hidden sm:inline">{pdfLoading ? "…" : "PDF"}</span>
           </button>
-          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
+          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
             <Pencil size={14} />
           </button>
           <button onClick={() => setDeleteConfirm(true)} aria-label="Delete invoice"
-            className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
             <Trash2 size={14} />
           </button>
         </div>
@@ -606,56 +624,67 @@ export default function InvoicesPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3">
-          <h1 className="text-[22px] font-black text-white">Invoices</h1>
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
+          <div>
+            <h1 className="text-[24px] font-bold text-white tracking-tight">Invoices</h1>
+            <p className="text-[12px] text-white/35 mt-0.5">{invoices.length} total</p>
+          </div>
           <button
             onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-amber-500/20"
           >
-            <Plus size={13} /> New Invoice
+            <Plus size={15} /> New
           </button>
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2 px-4 mb-3">
-          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-3">
-            <p className="text-[9px] font-bold text-white/30 uppercase tracking-wider mb-0.5">Outstanding</p>
-            <p className="text-[15px] font-black text-amber-400">{formatCurrencyCompact(Math.round(totalOutstanding), currency as never)}</p>
+        <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
+          <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3.5">
+            <p className="text-[11px] text-white/35 font-medium mb-1">Outstanding</p>
+            <p className="text-[20px] font-bold text-amber-400 leading-none">{formatCurrencyCompact(Math.round(totalOutstanding), currency as never)}</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-3">
-            <p className="text-[9px] font-bold text-white/30 uppercase tracking-wider mb-0.5">Collected</p>
-            <p className="text-[15px] font-black text-emerald-400">{formatCurrencyCompact(Math.round(totalPaid), currency as never)}</p>
+          <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3.5">
+            <p className="text-[11px] text-white/35 font-medium mb-1">Collected</p>
+            <p className="text-[20px] font-bold text-emerald-400 leading-none">{formatCurrencyCompact(Math.round(totalPaid), currency as never)}</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-3">
-            <p className="text-[9px] font-bold text-white/30 uppercase tracking-wider mb-0.5">Overdue</p>
-            <p className={`text-[15px] font-black ${overdueCount > 0 ? "text-red-400" : "text-white/30"}`}>{overdueCount}</p>
-          </div>
+          {overdueCount > 0 && (
+            <div className="flex-shrink-0 bg-red-500/[0.08] border border-red-500/20 rounded-2xl px-4 py-3.5">
+              <p className="text-[11px] text-red-400/70 font-medium mb-1">Overdue</p>
+              <p className="text-[20px] font-bold text-red-400 leading-none">{overdueCount}</p>
+            </div>
+          )}
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-white/[0.05] mx-4 mb-3 px-3 py-2.5 rounded-xl">
-          <Search size={13} className="text-white/30" />
+        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.06] mx-5 mb-3 px-3.5 py-3 rounded-xl">
+          <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
-            className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-            placeholder="Search client or number…"
+            className="bg-transparent text-[13px] text-white/80 placeholder:text-white/30 outline-none flex-1"
+            placeholder="Search client or invoice #…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
         {/* Status filter pills */}
-        <div className="flex gap-1.5 px-4 pb-3 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 px-5 pb-3 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
-              className={`flex-shrink-0 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-colors ${statusFilter === tab.key ? "bg-amber-500/15 text-amber-400" : "text-white/35 bg-white/[0.04]"}`}
+              className={`flex-shrink-0 snap-start flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full transition-all ${
+                statusFilter === tab.key
+                  ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
+                  : "text-white/40 bg-white/[0.04] border border-transparent"
+              }`}
             >
               {tab.label}
               {tab.count > 0 && (
-                <span className={`text-[9px] px-1 py-0.5 rounded-full ${statusFilter === tab.key ? "bg-amber-500/25 text-amber-300" : "bg-white/[0.07] text-white/25"}`}>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                  statusFilter === tab.key ? "bg-amber-500/25 text-amber-300" : "bg-white/[0.07] text-white/25"
+                }`}>
                   {tab.count}
                 </span>
               )}
@@ -665,13 +694,14 @@ export default function InvoicesPage() {
 
         {/* Invoice list */}
         {filtered.length === 0 ? (
-          <div className="text-center py-16 text-white/25 space-y-2 px-4">
-            <FileText size={32} className="mx-auto opacity-30" />
-            <p className="text-[13px]">No invoices</p>
-            <button onClick={() => setShowModal(true)} className="text-amber-400 text-[12px]">+ Create one</button>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title="No invoices yet"
+            body="Create your first invoice to start getting paid faster."
+            action={{ label: "Create Invoice", onClick: () => setShowModal(true) }}
+          />
         ) : (
-          <div className="divide-y divide-white/[0.05]">
+          <div className="mx-5 bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
             {filtered.map((inv) => {
               const total = invoiceTotal(inv);
               const cfg = STATUS_CONFIG[inv.status];
@@ -681,21 +711,21 @@ export default function InvoicesPage() {
                 <button
                   key={inv.id}
                   onClick={() => setMobilePreviewId(inv.id)}
-                  className="px-4 py-3.5 w-full text-left active:bg-white/[0.03] transition-colors"
+                  className="px-4 py-4 w-full text-left active:bg-white/[0.05] transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-mono text-[10px] text-white/30">{inv.number}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
+                        <span className="font-mono text-[10px] text-white/25">{inv.number}</span>
                       </div>
                       <p className="text-[14px] font-semibold text-white/90 truncate">{inv.clientName}</p>
-                      <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/35"}`}>
-                        {isOverdue ? "Overdue · " : "Due "}
+                      <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
+                        {isOverdue ? "⚠ Overdue · " : "Due "}
                         {inv.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                       </p>
                     </div>
-                    <p className={`text-[16px] font-black flex-shrink-0 ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
+                    <p className={`text-[17px] font-bold flex-shrink-0 ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
                       {formatCurrencyCompact(Math.round(total), currency as never)}
                     </p>
                   </div>
@@ -784,7 +814,7 @@ export default function InvoicesPage() {
           </div>
 
           {/* List */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-scroll">
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center gap-2 py-16 text-white/25">
                 <FileText size={28} className="opacity-40" />
@@ -835,19 +865,19 @@ export default function InvoicesPage() {
 
       {/* ── New Invoice Modal ── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <div>
                 <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Invoice" : "New Invoice"}</h3>
                 {!editId && <p className="text-[11px] text-white/30 mt-0.5 font-mono">{nextNumber}</p>}
               </div>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} aria-label="Close" className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1">
                 <X size={16} />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Client Name *</label>
@@ -898,20 +928,28 @@ export default function InvoicesPage() {
                   <button onClick={addItem} className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold transition-colors">+ Add line</button>
                 </div>
                 <div className="space-y-2">
-                  <div className="grid grid-cols-[1fr_56px_80px_20px] gap-1.5 text-[9px] font-bold text-white/25 uppercase tracking-wider px-1">
+                  <div className="hidden sm:grid sm:grid-cols-[1fr_56px_80px_20px] gap-1.5 text-[9px] font-bold text-white/25 uppercase tracking-wider px-1">
                     <span>Description</span><span>Qty</span><span>Rate</span><span />
                   </div>
                   {form.items.map((item, idx) => (
-                    <div key={idx} className="grid grid-cols-[1fr_56px_80px_20px] gap-1.5 items-center">
-                      <input className={inp} placeholder="Labour, material…" value={item.description}
+                    <div key={idx} className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-[1fr_56px_80px_20px] sm:gap-1.5 sm:items-center bg-white/[0.03] sm:bg-transparent rounded-lg p-2 sm:p-0">
+                      <input className={inp} placeholder="Description (e.g. Labour)" value={item.description}
                         onChange={(e) => updateItem(idx, "description", e.target.value)} />
-                      <input className={inp} type="number" placeholder="1" value={item.qty}
-                        onChange={(e) => updateItem(idx, "qty", e.target.value)} />
-                      <input className={inp} type="number" placeholder="0.00" value={item.rate}
-                        onChange={(e) => updateItem(idx, "rate", e.target.value)} />
-                      <button onClick={() => removeItem(idx)} className="text-white/20 hover:text-red-400 transition-colors p-1">
-                        <X size={13} />
-                      </button>
+                      <div className="flex gap-2 sm:contents">
+                        <div className="flex-1">
+                          <p className="text-[9px] font-bold text-white/25 uppercase tracking-wider mb-1 sm:hidden">Qty</p>
+                          <input className={inp} type="number" placeholder="1" value={item.qty}
+                            onChange={(e) => updateItem(idx, "qty", e.target.value)} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[9px] font-bold text-white/25 uppercase tracking-wider mb-1 sm:hidden">Rate ($)</p>
+                          <input className={inp} type="number" placeholder="0.00" value={item.rate}
+                            onChange={(e) => updateItem(idx, "rate", e.target.value)} />
+                        </div>
+                        <button onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-500/10">
+                          <X size={14} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -939,7 +977,7 @@ export default function InvoicesPage() {
               </div>
             </div>
 
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 Cancel

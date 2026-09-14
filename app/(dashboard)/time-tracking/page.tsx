@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation, Download, BarChart3 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { useStore } from "@/lib/store";
 const CameraCapture = dynamic(
   () => import("@/components/camera-capture").then((m) => ({ default: m.CameraCapture })),
@@ -67,14 +68,14 @@ function EditEntryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-      <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-sm">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+      <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-sm">
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06]">
           <div>
             <h3 className="text-[15px] font-bold text-white">Edit Time Entry</h3>
             <p className="text-[11px] text-white/35 mt-0.5">{entry.workerName}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -138,14 +139,14 @@ function ProjectPickerModal({
   const [selected, setSelected] = useState(projects[0]?.id ?? "");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-      <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-sm">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+      <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-sm">
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06]">
           <div>
             <h3 className="text-[15px] font-bold text-white">Select Project</h3>
             <p className="text-[11px] text-white/35 mt-0.5">Clocking in {worker.name}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -262,8 +263,8 @@ function GeofenceWarningModal({
   onCancel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 sheet">
-      <div className="bg-[#161616] border border-amber-500/25 rounded-2xl w-full max-w-sm shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/75 backdrop-blur-sm">
+      <div className="sheet bg-[#161616] border border-amber-500/25 rounded-t-2xl sm:rounded-2xl w-full max-w-sm shadow-2xl">
         {/* Top amber bar */}
         <div className="h-1 bg-amber-500 rounded-t-2xl" />
         <div className="p-6">
@@ -581,7 +582,7 @@ export default function TimeTrackingPage() {
   return (
     <>
     {/* ── MOBILE ── */}
-    <div className="lg:hidden -mx-4 -mt-4 pb-6">
+    <div className="lg:hidden -mx-5 -mt-5 pb-6">
       {!isOnline && (
         <div className="mx-4 mt-4 mb-3 flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[12px] font-semibold px-4 py-2.5 rounded-xl">
           <WifiOff size={14} />
@@ -590,8 +591,8 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-3">
-        <h2 className="text-[18px] font-bold text-white tracking-tight">Time Tracking</h2>
+      <div className="flex items-center justify-between px-5 pt-5 pb-4">
+        <h2 className="text-[22px] font-bold text-white">Time</h2>
         <div className="flex items-center gap-2">
           {clockEntries.filter((e) => e.clockOut).length > 0 && !isEmployee && (
             <button onClick={exportCsv} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-lg">
@@ -617,68 +618,100 @@ export default function TimeTrackingPage() {
       </div>
 
       {/* ── Big hero clock-in / clock-out card — employees & foremen ── */}
-      <div className="px-4 pb-4">
-        <div className={`rounded-2xl p-5 border transition-all ${
+      <div className="px-5 pb-5">
+        <div className={`rounded-3xl overflow-hidden border transition-all relative ${
           isCurrentUserClockedIn
-            ? "bg-green-500/[0.07] border-green-500/20"
-            : "bg-amber-500/[0.07] border-amber-500/20"
-        }`}>
-          {isCurrentUserClockedIn ? (
-            <div className="flex items-center gap-4 mb-4">
-              <div className="relative flex-shrink-0">
-                <div className="absolute -inset-1 rounded-full bg-green-500/20 animate-ping" />
-                <div className="relative w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <span className="w-3.5 h-3.5 bg-green-400 rounded-full" />
+            ? "border-green-500/25"
+            : "border-amber-500/20"
+        }`} style={{
+          background: isCurrentUserClockedIn
+            ? "linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.03) 100%)"
+            : "linear-gradient(135deg, rgba(245,196,0,0.08) 0%, rgba(245,196,0,0.03) 100%)"
+        }}>
+          {/* Ambient glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: isCurrentUserClockedIn
+              ? "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(34,197,94,0.12) 0%, transparent 100%)"
+              : "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(245,196,0,0.10) 0%, transparent 100%)"
+          }} />
+
+          <div className="relative p-5">
+            {isCurrentUserClockedIn ? (
+              <div className="flex items-center gap-4 mb-5">
+                <div className="relative flex-shrink-0">
+                  <div className="absolute -inset-2 rounded-full bg-green-500/15 animate-ping" style={{animationDuration:"2.5s"}} />
+                  <div className="relative w-14 h-14 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                    <span className="w-4 h-4 bg-green-400 rounded-full" style={{boxShadow:"0 0 12px rgba(34,197,94,0.6)"}} />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[11px] font-bold text-green-400/80 uppercase tracking-widest">On Site</span>
+                  </div>
+                  <p className="text-[28px] font-black text-green-400 leading-none tracking-tight tabular-nums">
+                    {elapsed(currentUser.clockInTime ?? new Date())}
+                  </p>
+                  {(() => {
+                    const myEntry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
+                    const proj = myEntry ? getProjectById(myEntry.projectId) : null;
+                    return proj ? (
+                      <p className="text-[12px] text-white/40 mt-1 flex items-center gap-1">
+                        <MapPin size={10} className="flex-shrink-0 text-white/25" />
+                        <span className="truncate">{proj.name}</span>
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-bold text-white">On Site</p>
-                <p className="text-[22px] font-black text-green-400 leading-tight tracking-tight">
-                  {elapsed(currentUser.clockInTime ?? new Date())}
-                </p>
-                {(() => {
-                  const myEntry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
-                  const proj = myEntry ? getProjectById(myEntry.projectId) : null;
-                  return proj ? <p className="text-[12px] text-white/40 truncate">{proj.name}</p> : null;
-                })()}
+            ) : (
+              <div className="text-center mb-5 pt-2">
+                <div className="w-16 h-16 rounded-full bg-amber-500/15 border border-amber-500/25 flex items-center justify-center mx-auto mb-3">
+                  <LogIn size={28} className="text-amber-400" strokeWidth={2} />
+                </div>
+                <p className="text-[17px] font-bold text-white">Ready to start your shift?</p>
+                <p className="text-[12px] text-white/35 mt-1">GPS + photo verification</p>
               </div>
-            </div>
-          ) : (
-            <div className="text-center mb-4 py-2">
-              <p className="text-[16px] font-bold text-white/80">Ready to start your shift?</p>
-              <p className="text-[12px] text-white/35 mt-1">Tap below to clock in with GPS verification</p>
-            </div>
-          )}
-          {isCurrentUserClockedIn ? (
-            <button
-              onClick={() => handleClockOut(currentUser.id)}
-              className="w-full py-4 rounded-2xl text-[17px] font-black text-white bg-red-500 active:bg-red-600 transition-colors flex items-center justify-center gap-2.5 shadow-lg shadow-red-500/25"
-            >
-              <LogOut size={20} strokeWidth={2.5} />
-              Clock Out
-            </button>
-          ) : (
-            <button
-              onClick={() => requestClockIn(currentUser)}
-              disabled={geofenceChecking}
-              className="w-full py-4 rounded-2xl text-[17px] font-black text-black bg-amber-500 active:bg-amber-600 disabled:opacity-60 transition-colors flex items-center justify-center gap-2.5 shadow-lg shadow-amber-500/25"
-            >
-              {geofenceChecking ? (
-                <><Loader2 size={20} className="animate-spin" /> Checking location…</>
-              ) : (
-                <><LogIn size={20} strokeWidth={2.5} /> Clock In</>
-              )}
-            </button>
-          )}
+            )}
+
+            {isCurrentUserClockedIn ? (
+              <button
+                onClick={() => handleClockOut(currentUser.id)}
+                className="w-full py-4 rounded-2xl text-[17px] font-black text-white transition-all flex items-center justify-center gap-2.5 active:scale-[0.97]"
+                style={{
+                  background: "linear-gradient(145deg, #ef4444, #dc2626)",
+                  boxShadow: "0 6px 28px rgba(239,68,68,0.30), inset 0 1px 0 rgba(255,255,255,0.12)"
+                }}
+              >
+                <LogOut size={20} strokeWidth={2.5} />
+                Clock Out
+              </button>
+            ) : (
+              <button
+                onClick={() => requestClockIn(currentUser)}
+                disabled={geofenceChecking}
+                className="w-full py-4 rounded-2xl text-[17px] font-black text-black disabled:opacity-60 transition-all flex items-center justify-center gap-2.5 active:scale-[0.97]"
+                style={{
+                  background: geofenceChecking ? "rgba(245,196,0,0.5)" : "linear-gradient(145deg, #F5C400, #d4a900)",
+                  boxShadow: geofenceChecking ? "none" : "0 6px 28px rgba(245,196,0,0.30), inset 0 1px 0 rgba(255,255,255,0.20)"
+                }}
+              >
+                {geofenceChecking ? (
+                  <><Loader2 size={20} className="animate-spin" /> Checking location…</>
+                ) : (
+                  <><LogIn size={20} strokeWidth={2.5} /> Clock In</>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Search + project filter — foreman/admin only */}
       {!isEmployee && (
-        <div className="flex gap-2 px-4 pb-3">
-          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3 py-2 flex-1">
-            <Search size={13} className="text-white/30 flex-shrink-0" />
-            <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
+        <div className="flex gap-2 px-5 pb-4">
+          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3 flex-1">
+            <Search size={14} className="text-white/30 flex-shrink-0" />
+            <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1 min-w-0"
               placeholder="Search workers…" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <CustomSelect
@@ -722,7 +755,7 @@ export default function TimeTrackingPage() {
       })()}
 
       {/* Stats row */}
-      <div className="flex gap-3 px-4 pb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-3 px-5 pb-5 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex items-center gap-2.5">
           <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0" />
           <div>
@@ -748,7 +781,7 @@ export default function TimeTrackingPage() {
 
       {/* Clocked In Now */}
       {clockedIn.length > 0 && (
-        <div className="px-4 mb-4">
+        <div className="px-5 mb-5">
           <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
             Clocked In Now
@@ -757,7 +790,7 @@ export default function TimeTrackingPage() {
             const project = getProjectById(worker.projectIds[0]);
             const ci = worker.clockInTime ?? new Date();
             return (
-              <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 flex items-center gap-3 mb-2">
+              <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[13px] font-bold"
                   style={{ backgroundColor: worker.color + "25", color: worker.color }}>
                   {worker.photo
@@ -783,11 +816,11 @@ export default function TimeTrackingPage() {
 
       {/* Clock In Worker (admin / PM / foreman only) */}
       {(currentUser.role === "Admin" || currentUser.role === "Project Manager" || currentUser.role === "Foreman") && workers.filter((w) => !w.clockedIn).length > 0 && (
-        <div className="px-4 mb-4">
-          <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5">Clock In Worker</p>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden">
+        <div className="px-5 mb-5">
+          <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-3">Clock In Worker</p>
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden">
             {workers.filter((w) => !w.clockedIn).map((worker, idx, arr) => (
-              <div key={worker.id} className={`flex items-center gap-3 px-4 py-2.5 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""}`}>
+              <div key={worker.id} className={`flex items-center gap-3 px-4 py-3.5 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""}`}>
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
                   style={{ backgroundColor: worker.color + "25", color: worker.color }}>
                   {worker.photo
@@ -826,7 +859,7 @@ export default function TimeTrackingPage() {
         }
 
         return (
-          <div className="px-4">
+          <div className="px-5">
             {/* Company header */}
             {companyName && (
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/[0.06]">
@@ -888,7 +921,7 @@ export default function TimeTrackingPage() {
                       const hrs = entry.clockOut ? ((entry.clockOut.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1) : null;
 
                       return (
-                        <div key={entry.id} className={`px-4 py-3.5 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""} ${worstSev === "high" ? "bg-red-500/[0.03]" : ""}`}>
+                        <div key={entry.id} className={`px-4 py-4 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""} ${worstSev === "high" ? "bg-red-500/[0.03]" : ""}`}>
                           <div className="flex items-center gap-3">
                             {/* Avatar — square */}
                             <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-black"
@@ -1240,11 +1273,11 @@ export default function TimeTrackingPage() {
 
       {/* Entries table */}
       {allEntries.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-16 text-center">
-          <Clock size={32} className="text-white/10" />
-          <p className="text-[13px] text-white/25">No time entries yet.</p>
-          <p className="text-[12px] text-white/20">Use the Clock In button above to start tracking time.</p>
-        </div>
+        <EmptyState
+          icon={Clock}
+          title="No time entries yet"
+          body="Use the Clock In button above to start tracking time for your crew."
+        />
       ) : (
         <div className="overflow-x-auto rounded-xl">
         <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[700px]">

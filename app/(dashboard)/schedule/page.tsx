@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind, AlertTriangle, MapPin, RefreshCw, X, Briefcase, Truck, ClipboardCheck, Calendar, Pencil } from "lucide-react";
@@ -290,10 +290,10 @@ export default function SchedulePage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <h2 className="text-xl font-bold text-white tracking-tight">Schedule</h2>
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <h2 className="text-[22px] font-bold text-white">Schedule</h2>
           <button
             onClick={() => {
               setEditEventId(null);
@@ -305,15 +305,15 @@ export default function SchedulePage() {
               });
               setShowAddModal(true);
             }}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
           >
             <Plus size={14} />
-            Add Event
+            Add
           </button>
         </div>
 
         {/* Location + weather toggle */}
-        <div className="flex items-center gap-2 px-4 pb-3">
+        <div className="flex items-center gap-2 px-5 pb-3">
           <div className="relative">
             <button
               onClick={() => setShowLocationPicker(!showLocationPicker)}
@@ -367,7 +367,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Month navigation */}
-        <div className="flex items-center justify-between px-4 mb-3">
+        <div className="flex items-center justify-between px-5 mb-3">
           <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className="w-9 h-9 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-colors">
             <ChevronLeft size={18} />
@@ -380,7 +380,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Day strip */}
-        <div className="overflow-x-auto scrollbar-none px-4 mb-4">
+        <div className="overflow-x-auto scrollbar-none px-5 mb-4">
           <div className="flex gap-1.5 pb-0.5" style={{ minWidth: "max-content" }}>
             {days.map((day) => {
               const todayFlag = isToday(day);
@@ -426,7 +426,7 @@ export default function SchedulePage() {
 
         {/* Selected day content */}
         {selectedDay ? (
-          <div className="px-4 space-y-2">
+          <div className="px-5 space-y-3">
             <div className="flex items-center justify-between mb-1">
               <h4 className="text-[13px] font-bold text-white/60">{format(selectedDay, "EEEE, MMMM d")}</h4>
               <span className="text-[11px] text-white/30">{selectedEvents.length} event{selectedEvents.length !== 1 ? "s" : ""}</span>
@@ -499,11 +499,11 @@ export default function SchedulePage() {
                       {customEvt && (
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <button onClick={() => openEditEvent(customEvt)}
-                            className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
                             <Pencil size={12} />
                           </button>
                           <button onClick={() => setDeleteEventConfirm(e.id)}
-                            className="p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
                             <X size={12} />
                           </button>
                         </div>
@@ -515,7 +515,7 @@ export default function SchedulePage() {
             )}
           </div>
         ) : (
-          <div className="px-4 text-center py-6 text-white/25">
+          <div className="px-5 text-center py-6 text-white/25">
             <p className="text-[13px]">Tap a day to see events</p>
           </div>
         )}
@@ -797,15 +797,15 @@ export default function SchedulePage() {
 
       {/* Add Event Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06] flex-shrink-0">
               <h3 className="text-[15px] font-bold text-white">{editEventId ? "Edit Event" : "Add Event"}</h3>
-              <button onClick={() => { setShowAddModal(false); setEditEventId(null); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5">
+              <button onClick={() => { setShowAddModal(false); setEditEventId(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-scroll overscroll-y-contain flex-1" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Event Title *</label>
                 <input className={inp} placeholder="e.g. Site inspection with engineer"
@@ -840,7 +840,7 @@ export default function SchedulePage() {
                 </span>
               </div>
             </div>
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex gap-3 px-6 pb-6 flex-shrink-0">
               <button onClick={() => { setShowAddModal(false); setEditEventId(null); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
               <button onClick={handleAddEvent} disabled={!addForm.title.trim() || !addForm.date}

@@ -167,7 +167,7 @@ export function SearchModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] sm:pt-[15vh] px-4"
       onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={close} />
@@ -184,7 +184,7 @@ export function SearchModal() {
             className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none"
           />
           {query && (
-            <button onClick={() => { setQuery(""); setActiveIndex(-1); }} className="text-white/25 hover:text-white/50 transition-colors">
+            <button onClick={() => { setQuery(""); setActiveIndex(-1); }} aria-label="Clear search" className="w-8 h-8 flex items-center justify-center text-white/25 hover:text-white/50 hover:bg-white/[0.05] rounded-lg transition-colors flex-shrink-0">
               <X size={14} />
             </button>
           )}
@@ -192,7 +192,7 @@ export function SearchModal() {
         </div>
 
         {/* Results */}
-        <div className="max-h-[360px] overflow-y-auto" ref={listRef}>
+        <div className="max-h-[360px] overflow-y-auto overscroll-contain" style={{WebkitOverflowScrolling:"touch" as never}} ref={listRef}>
           {q.length > 0 ? (
             results.length > 0 ? (
               <div className="py-2">

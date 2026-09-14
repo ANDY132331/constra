@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { getClient } from "@/lib/supabase/client";
 import { BlueprintViewer } from "@/components/blueprint-viewer";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { EmptyState } from "@/components/empty-state";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
 const PIN_TYPE_LABELS = { issue: "Issues", safety: "Safety", rfi: "RFIs", info: "Info" } as const;
@@ -81,9 +82,9 @@ export default function BlueprintsPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Header */}
-        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Layers size={18} className="text-amber-400" />
             <h2 className="text-[22px] font-black text-white">Blueprints</h2>
@@ -97,7 +98,7 @@ export default function BlueprintsPage() {
           </button>
         </div>
         {/* Project selector */}
-        <div className="px-4 mb-3">
+        <div className="px-5 mb-4">
           <CustomSelect
             value={selectedProjectId}
             onChange={(v) => { setSelectedProjectId(v); setSelectedDocId(null); }}
@@ -114,15 +115,14 @@ export default function BlueprintsPage() {
         )}
         {/* Blueprint list */}
         {projectBlueprints.length === 0 ? (
-          <div className="px-4 text-center py-16 text-white/25 space-y-2">
-            <FileImage size={36} className="mx-auto opacity-25" />
-            <p className="text-[14px] font-semibold">No blueprints yet</p>
-            <button onClick={() => fileInputRef.current?.click()} className="text-amber-400 text-[12px]">
-              Upload a blueprint
-            </button>
-          </div>
+          <EmptyState
+            icon={FileImage}
+            title="No blueprints yet"
+            body="Upload a PDF or image blueprint to annotate and share with your crew."
+            action={{ label: "Upload Blueprint", onClick: () => { setUploadError(null); fileInputRef.current?.click(); } }}
+          />
         ) : (
-          <div className="px-4 space-y-2">
+          <div className="px-5 space-y-3">
             {projectBlueprints.map((doc) => {
               const pins = blueprintPins.filter((p) => p.documentId === doc.id);
               const openPins = pins.filter((p) => !p.resolved).length;
@@ -131,7 +131,7 @@ export default function BlueprintsPage() {
                 <button
                   key={doc.id}
                   onClick={() => setSelectedDocId(doc.id)}
-                  className={`w-full text-left bg-[#131110] border rounded-xl p-4 transition-colors ${isActive ? "border-amber-500/30 bg-amber-500/[0.04]" : "border-white/[0.07]"}`}
+                  className={`w-full text-left bg-[#131110] border rounded-2xl p-4 active:scale-[0.985] active:opacity-90 transition-all ${isActive ? "border-amber-500/30 bg-amber-500/[0.04]" : "border-white/[0.07]"}`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0">

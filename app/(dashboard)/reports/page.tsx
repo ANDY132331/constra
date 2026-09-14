@@ -210,9 +210,9 @@ export default function ReportsPage() {
       )}
 
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Header */}
-        <div className="px-4 pt-5 pb-3 flex items-center justify-between gap-2">
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between gap-2">
           <div>
             <h2 className="text-[22px] font-black text-white">Reports</h2>
             <p className="text-white/35 text-[12px] mt-0.5">{periodLabel}</p>
@@ -259,7 +259,7 @@ export default function ReportsPage() {
           )}
         </div>
         {/* Period selector */}
-        <div className="px-4 mb-4">
+        <div className="px-5 mb-4">
           <div className="flex gap-1 bg-[#131110] border border-white/[0.07] rounded-xl p-1">
             {(["week", "month", "quarter"] as const).map((p) => (
               <button key={p} onClick={() => setPeriod(p)}
@@ -270,7 +270,7 @@ export default function ReportsPage() {
           </div>
         </div>
         {/* KPI cards 2-col */}
-        <div className="px-4 grid grid-cols-2 gap-2 mb-4">
+        <div className="px-5 grid grid-cols-2 gap-3 mb-4">
           {[
             { label: "Total Hours", icon: Clock, color: "text-amber-400", value: hasHoursData ? `${totalHours.toFixed(1)}h` : "0h", sub: hasHoursData ? `${periodEntries.length} sessions` : "No sessions" },
             { label: "On Site Now", icon: Users, color: "text-blue-400", value: activeWorkers.toString(), sub: `of ${workers.length} crew` },
@@ -286,7 +286,7 @@ export default function ReportsPage() {
           ))}
         </div>
         {/* Hours bar chart */}
-        <div className="px-4 mb-4">
+        <div className="px-5 mb-4">
           <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
             <p className="text-[13px] font-bold text-white mb-4">{period === "week" ? "Daily" : "Weekly"} Hours</p>
             {!hasHoursData ? (
@@ -312,7 +312,7 @@ export default function ReportsPage() {
         </div>
         {/* Budget bars */}
         {projectBudgets.length > 0 && (
-          <div className="px-4 mb-4">
+          <div className="px-5 mb-4">
             <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 space-y-4">
               <p className="text-[13px] font-bold text-white">Budget Tracking</p>
               {projectBudgets.map((p) => {
@@ -344,7 +344,7 @@ export default function ReportsPage() {
         )}
         {/* Top workers */}
         {topWorkers.length > 0 && (
-          <div className="px-4">
+          <div className="px-5">
             <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 space-y-3">
               <p className="text-[13px] font-bold text-white">Top Workers</p>
               {topWorkers.map((worker, i) => {

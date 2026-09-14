@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
-import { BarChart2, List, CalendarDays, Plus, Search, MapPin, X, AlertCircle, Map, Trash2, Pencil, ShieldCheck, Share2, FolderKanban } from "lucide-react";
+import { BarChart2, List, CalendarDays, Plus, Search, MapPin, X, AlertCircle, Map, Trash2, Pencil, ShieldCheck, Share2, FolderKanban, ChevronLeft } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { GanttChart, type GanttProject } from "@/components/gantt-chart";
 import { formatCurrencyCompact } from "@/lib/currency";
@@ -18,6 +18,9 @@ type View = "gantt" | "table" | "cards" | "map";
 const COLORS = ["#F5C400","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#F5C400"];
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
+// Mobile-optimised variants — larger touch targets
+const mInp = "w-full bg-[#161616] border border-white/[0.08] rounded-xl px-4 py-3.5 text-[15px] text-white/90 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
+const mLbl = "block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2";
 
 function StatusBadge({ status, pending }: { status: string; pending?: boolean }) {
   if (pending) return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400">Pending Approval</span>;
@@ -57,6 +60,7 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
+  const [mobileStep, setMobileStep] = useState(1);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(blank);
   type GeoResult = { display_name: string; lat: string; lon: string };
@@ -79,6 +83,16 @@ export default function ProjectsPage() {
     });
   };
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditId(null);
+    setGeoConfirmed("");
+    setGeoQuery("");
+    setGeoResults([]);
+    setFormError("");
+    setMobileStep(1);
+  };
 
   const openEdit = (project: typeof projects[0]) => {
     setEditId(project.id);
@@ -124,7 +138,7 @@ export default function ProjectsPage() {
   };
 
   const handleGeoSelect = (r: GeoResult) => {
-    setForm((f) => ({ ...f, gpsLat: r.lat, gpsLng: r.lon }));
+    setForm((f) => ({ ...f, gpsLat: r.lat, gpsLng: r.lon, address: r.display_name }));
     setGeoConfirmed(r.display_name);
     setGeoQuery("");
     setGeoResults([]);
@@ -221,13 +235,13 @@ export default function ProjectsPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Top bar */}
-        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
-          <h1 className="text-[22px] font-black text-white">Projects</h1>
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+          <h1 className="text-[22px] font-bold text-white">Projects</h1>
           {isForeman && (
             <button
-              onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setShowModal(true); }}
+              onClick={() => { setEditId(null); setForm(blank); setGeoConfirmed(""); setMobileStep(1); setShowModal(true); }}
               className="bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
             >
               <Plus size={14} />
@@ -238,7 +252,7 @@ export default function ProjectsPage() {
 
         {/* Pending Approval — admin only */}
         {isAdmin && pendingProjects.length > 0 && (
-          <div className="px-4 mb-3">
+          <div className="px-5 mb-4">
             <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl p-4 space-y-2">
               <div className="flex items-center gap-2 mb-1">
                 <ShieldCheck size={14} className="text-amber-400 flex-shrink-0" />
@@ -274,7 +288,7 @@ export default function ProjectsPage() {
         )}
 
         {/* Stats row */}
-        <div className="px-4 mb-3 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-5 mb-4 flex gap-2 overflow-x-auto no-scrollbar">
           <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
             <span className="text-white font-bold">{projects.filter((p) => !p.pendingApproval).length}</span> Total
           </div>
@@ -292,19 +306,22 @@ export default function ProjectsPage() {
         </div>
 
         {/* Search + filter */}
-        <div className="px-4 mb-3 space-y-2">
-          <input
-            className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 text-[14px] text-white/80 placeholder:text-white/30 outline-none"
-            placeholder="Search projects or clients…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="px-5 mb-4 space-y-2.5">
+          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30 flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input
+              className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
+              placeholder="Search projects or clients…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             {["all", "active", "upcoming", "completed"].map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 rounded-full text-[12px] font-bold capitalize whitespace-nowrap transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold capitalize whitespace-nowrap transition-all ${
                   statusFilter === s
                     ? "bg-amber-500 text-black"
                     : "bg-[#131110] border border-white/[0.07] text-white/50"
@@ -317,7 +334,7 @@ export default function ProjectsPage() {
         </div>
 
         {/* Project cards */}
-        <div className="px-4 space-y-2">
+        <div className="px-5 space-y-3">
           {filtered.length === 0 && (
             <EmptyState
               icon={FolderKanban}
@@ -340,51 +357,51 @@ export default function ProjectsPage() {
               <div
                 key={p.id}
                 onClick={() => isForeman && openEdit(p)}
-                className={`bg-[#131110] border border-white/[0.07] rounded-xl overflow-hidden ${isForeman ? "active:bg-white/[0.03] cursor-pointer" : ""}`}
+                className={`bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden ${isForeman ? "active:scale-[0.985] active:opacity-90 transition-transform cursor-pointer" : ""}`}
                 style={{ borderLeft: `3px solid ${p.color}` }}
               >
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-[14px] font-bold text-white flex-1 min-w-0 truncate">{p.name}</p>
+                <div className="p-4.5">
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <p className="text-[15px] font-bold text-white flex-1 min-w-0 truncate">{p.name}</p>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <StatusBadge status={p.status} pending={p.pendingApproval} />
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[12px] text-white/35 truncate flex-1">{p.client}</p>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <p className="text-[13px] text-white/40 truncate flex-1">{p.client}</p>
                     {manager && <p className="text-[12px] text-white/35 flex-shrink-0 ml-2">{manager.name}</p>}
                   </div>
-                  <div className="flex items-center justify-between mb-2.5">
-                    <p className="text-[12px] text-white/50 font-medium">{formatCurrencyCompact(p.budget, currency as never)}</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[13px] text-white/60 font-semibold">{formatCurrencyCompact(p.budget, currency as never)}</p>
                     <p className="text-[12px] text-white/35">
                       {p.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
                     </p>
                   </div>
-                  <div className="mb-3">
+                  <div className="mb-3.5">
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-[11px] text-white/35">{completedTasks}/{totalTasks} tasks</p>
                       <p className="text-[11px] font-bold text-white/50">{p.progress}%</p>
                     </div>
-                    <div className="h-1 bg-white/[0.08] rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${p.progress}%`, backgroundColor: p.color }} />
                     </div>
                   </div>
                   {/* Action strip — edit for foremen+, delete for admins only */}
                   {isForeman && (
-                    <div className="flex gap-2 pt-2.5 border-t border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2 pt-3 border-t border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => openEdit(p)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-white/[0.05] text-white/50 active:bg-white/[0.1] transition-colors text-[12px] font-semibold"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white/[0.05] text-white/50 active:bg-white/[0.1] transition-colors text-[12px] font-semibold"
                       >
-                        <Pencil size={11} />
+                        <Pencil size={12} />
                         Edit
                       </button>
                       {isAdmin && (
                         <button
                           onClick={() => setDeleteConfirm(p.id)}
-                          className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.05] text-white/35 active:bg-red-500/15 active:text-red-400 transition-colors"
+                          className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white/[0.05] text-white/35 active:bg-red-500/15 active:text-red-400 transition-colors"
                         >
-                          <Trash2 size={11} />
+                          <Trash2 size={12} />
                         </button>
                       )}
                     </div>
@@ -713,15 +730,216 @@ export default function ProjectsPage() {
 
       {/* Modals — fixed position, work on all screen sizes */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <>
+        {/* ─── MOBILE: Full-screen step wizard ─── */}
+        {/* Outer wrapper clips the sliding panel so background never bleeds through */}
+        <div className="lg:hidden fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop: visible immediately, before the panel slides up */}
+          <div className="absolute inset-0 bg-[#0a0a0a]" />
+          {/* Panel slides up from bottom over the solid backdrop */}
+          <div className="absolute inset-0 flex flex-col" style={{animation:"slideUpFull 0.3s cubic-bezier(0.16,1,0.3,1) both"}}>
+          {/* Header with safe-area-inset-top for notch/Dynamic Island */}
+          <div className="flex items-center gap-2 px-4 flex-shrink-0 border-b border-white/[0.07]"
+            style={{paddingTop:"calc(env(safe-area-inset-top) + 16px)", paddingBottom:"16px"}}>
+            <button
+              onClick={() => mobileStep > 1 ? setMobileStep(mobileStep - 1) : closeModal()}
+              className="p-2 -ml-1 text-white/60 active:text-white transition-colors flex-shrink-0"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <div className="flex-1">
+              <p className="text-[11px] text-white/35 font-medium mb-0.5">
+                {editId ? "Edit Project" : "New Project"} · Step {mobileStep} of 3
+              </p>
+              <h3 className="text-[18px] font-bold text-white leading-tight">
+                {mobileStep === 1 ? "Basic Info" : mobileStep === 2 ? "Location" : "Details"}
+              </h3>
+            </div>
+            <button onClick={closeModal} className="p-2 -mr-1 text-white/30 active:text-white/70 transition-colors flex-shrink-0">
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Step progress bar */}
+          <div className="flex gap-1.5 px-5 py-3 flex-shrink-0">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className={`h-1 flex-1 rounded-full transition-all duration-300 ${s <= mobileStep ? "bg-amber-500" : "bg-white/[0.08]"}`} />
+            ))}
+          </div>
+
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto px-5 pt-2 pb-8 space-y-5" style={{touchAction:"pan-y",overscrollBehavior:"contain",WebkitOverflowScrolling:"touch" as never}}>
+            {/* Step 1: Basic Info */}
+            {mobileStep === 1 && (
+              <>
+                <div>
+                  <label className={mLbl}>Project Name *</label>
+                  <input className={mInp} placeholder="e.g. Riverside Apartment Complex"
+                    value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} autoFocus />
+                </div>
+                <div>
+                  <label className={mLbl}>Client</label>
+                  <input className={mInp} placeholder="Client name"
+                    value={form.client} onChange={(e) => setForm((f) => ({ ...f, client: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={mLbl}>Status</label>
+                  <CustomSelect className={mInp} value={form.status}
+                    onChange={(v) => setForm((f) => ({ ...f, status: v as FormState["status"] }))}
+                    options={[
+                      { value: "active", label: "Active" },
+                      { value: "upcoming", label: "Upcoming" },
+                      { value: "completed", label: "Completed" },
+                    ]}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Step 2: Location */}
+            {mobileStep === 2 && (
+              <>
+                <div>
+                  <label className={mLbl}>Site Address</label>
+                  <input className={mInp} placeholder="123 Main St, City, Province"
+                    value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
+                </div>
+                <div className="relative">
+                  <label className={mLbl}>GPS Location <span className="text-white/20 normal-case font-normal">(optional)</span></label>
+                  <div className="relative">
+                    <input className={mInp} placeholder="Search address for GPS pin…"
+                      value={geoQuery} onChange={(e) => handleGeoSearch(e.target.value)} autoComplete="off" />
+                    {geoLoading && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] text-white/30">Searching…</span>}
+                  </div>
+                  {geoResults.length > 0 && (
+                    <div className="mt-1 rounded-xl overflow-hidden shadow-2xl" style={{background:"#1c1c1c",border:"1px solid rgba(255,255,255,0.1)"}}>
+                      {geoResults.map((r, i) => (
+                        <button key={i} type="button" onClick={() => handleGeoSelect(r)}
+                          className="w-full text-left px-4 py-3.5 active:bg-white/[0.08] transition-colors border-b border-white/[0.04] last:border-0">
+                          <p className="text-[14px] text-white/80 truncate">{r.display_name}</p>
+                          <p className="text-[11px] text-white/30 mt-0.5">{parseFloat(r.lat).toFixed(5)}, {parseFloat(r.lon).toFixed(5)}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {geoConfirmed && form.gpsLat && form.gpsLng ? (
+                    <div className="mt-3 space-y-3">
+                      <div className="rounded-2xl overflow-hidden border border-white/[0.08]" style={{height:240}}>
+                        <GeofenceMapEditor key={mapSeed} lat={parseFloat(form.gpsLat)} lng={parseFloat(form.gpsLng)}
+                          radiusM={parseInt(form.geofenceRadius) || 500} color={form.color || "#F5C400"}
+                          className="w-full h-full"
+                          onChange={(newLat, newLng, newRadius) => {
+                            setForm((f) => ({...f, gpsLat:newLat.toString(), gpsLng:newLng.toString(), geofenceRadius:Math.round(newRadius).toString()}));
+                          }} />
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[11px] text-white/25 leading-snug">
+                          <span className="text-amber-400/70">Drag</span> ring to resize · <span className="text-amber-400/70">Drag</span> center to repin
+                        </p>
+                        <span className="text-[12px] font-bold text-amber-400 flex-shrink-0 bg-amber-500/10 px-2.5 py-1 rounded-full">
+                          {(() => { const r = parseInt(form.geofenceRadius) || 500; return r >= 1000 ? `${(r/1000).toFixed(2).replace(/\.?0+$/,"")} km` : `${r} m`; })()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 bg-green-500/8 border border-green-500/15 rounded-xl px-3.5 py-2.5">
+                        <div className="flex items-center gap-2 text-green-400 min-w-0">
+                          <MapPin size={13} className="flex-shrink-0" />
+                          <span className="text-[12px] truncate">{geoConfirmed}</span>
+                        </div>
+                        <button type="button"
+                          onClick={() => { setGeoConfirmed(""); setGeoQuery(""); setForm((f) => ({...f,gpsLat:"",gpsLng:""})); }}
+                          className="text-[11px] text-white/30 flex-shrink-0 hover:text-white/55 transition-colors">
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-[12px] text-white/25 mt-2 leading-relaxed">Search an address above — then drag the circle to set the clock-in boundary.</p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Step 3: Details */}
+            {mobileStep === 3 && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={mLbl}>Start Date</label>
+                    <input className={mInp} type="date" value={form.startDate}
+                      onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className={mLbl}>End Date</label>
+                    <input className={mInp} type="date" value={form.endDate}
+                      onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className={mLbl}>Budget ({currency})</label>
+                  <input className={mInp} type="number" placeholder="0"
+                    value={form.budget} onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={mLbl}>Project Manager</label>
+                  <CustomSelect className={mInp} value={form.managerId}
+                    onChange={(v) => setForm((f) => ({ ...f, managerId: v }))}
+                    options={[
+                      { value: "", label: "Select manager" },
+                      ...workers.map((w) => ({ value: w.id, label: w.name })),
+                    ]}
+                  />
+                </div>
+                <div>
+                  <label className={mLbl}>Project Color</label>
+                  <div className="flex gap-3 flex-wrap">
+                    {COLORS.map((c) => (
+                      <button key={c} onClick={() => setForm((f) => ({ ...f, color: c }))}
+                        className="w-10 h-10 rounded-xl active:scale-90 transition-transform"
+                        style={{ backgroundColor: c, outline: form.color === c ? `3px solid ${c}` : "none", outlineOffset: "3px" }} />
+                    ))}
+                  </div>
+                </div>
+                {formError && (
+                  <div className="flex items-center gap-2.5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <AlertCircle size={15} className="text-red-400 flex-shrink-0" />
+                    <p className="text-[13px] text-red-300">{formError}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Footer CTA — safe-area-inset-bottom for home indicator */}
+          <div className="flex-shrink-0 px-5 pt-4 border-t border-white/[0.07]"
+            style={{paddingBottom:"calc(env(safe-area-inset-bottom) + 24px)"}}>
+            {mobileStep < 3 ? (
+              <button
+                onClick={() => setMobileStep(mobileStep + 1)}
+                disabled={mobileStep === 1 && !form.name.trim()}
+                className="w-full py-4 rounded-2xl text-[16px] font-bold text-black bg-amber-500 active:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Continue
+              </button>
+            ) : (
+              <button onClick={handleSave} disabled={!form.name.trim()}
+                className="w-full py-4 rounded-2xl text-[16px] font-bold text-black bg-amber-500 active:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                {editId ? "Save Changes" : "Create Project"}
+              </button>
+            )}
+          </div>
+          </div>{/* end panel */}
+        </div>{/* end outer wrapper */}
+
+        {/* ─── DESKTOP: Centered modal (unchanged) ─── */}
+        <div className="hidden lg:flex fixed inset-0 z-50 items-center justify-center p-4 bg-black/70 sheet">
+          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Project" : "New Project"}</h3>
-              <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); setGeoQuery(""); setGeoResults([]); setFormError(""); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Project Name *</label>
                 <input className={inp} placeholder="e.g. Riverside Apartment Complex"
@@ -886,7 +1104,7 @@ export default function ProjectsPage() {
                 <p className="text-[12px] text-red-300">{formError}</p>
               </div>
             )}
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); setGeoConfirmed(""); setGeoQuery(""); setGeoResults([]); setFormError(""); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}
@@ -898,6 +1116,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       <ConfirmModal

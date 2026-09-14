@@ -109,17 +109,24 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   };
 
   return (
-    <header className="h-14 border-b border-white/[0.06] bg-[#0d0d0d] flex items-center px-4 md:px-6 gap-3 flex-shrink-0 relative z-30">
+    <header className="h-14 border-b border-white/[0.05] flex items-center px-4 md:px-6 gap-3 flex-shrink-0 relative z-30"
+      style={{
+        background: "rgba(10,10,10,0.97)",
+        backdropFilter: "blur(24px) saturate(160%)",
+        WebkitBackdropFilter: "blur(24px) saturate(160%)",
+      }}
+    >
       {/* Mobile hamburger */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden w-11 h-11 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-xl transition-all flex-shrink-0 -ml-1"
+        aria-label="Open menu"
+        className="lg:hidden w-10 h-10 flex items-center justify-center text-white/35 hover:text-white/70 active:text-white/80 rounded-xl transition-colors flex-shrink-0 -ml-1"
       >
-        <Menu size={20} />
+        <Menu size={20} strokeWidth={1.8} />
       </button>
 
       <div className="flex-1 min-w-0">
-        <h1 className="text-[15px] font-semibold text-white/90 leading-none truncate">{title}</h1>
+        <h1 className="text-[16px] font-bold text-white/90 leading-none truncate tracking-tight">{title}</h1>
         <p className="text-[11px] text-white/30 mt-0.5 hidden sm:block">{dateStr}</p>
       </div>
 
@@ -128,6 +135,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <div ref={newRef} className="relative">
           <button
             onClick={() => { setShowNew((v) => !v); setShowNotif(false); setShowUser(false); }}
+            aria-label="Quick add"
+            aria-expanded={showNew}
+            aria-haspopup="true"
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[13px] font-bold px-3 py-2 sm:py-1.5 rounded-xl sm:rounded-lg transition-all duration-100"
           >
             <Plus size={15} className="sm:hidden" />
@@ -157,6 +167,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <button
           onClick={openSearch}
           title="Search (⌘K)"
+          aria-label="Search"
           className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-xl sm:rounded-lg transition-all"
         >
           <Search size={16} className="sm:hidden" />
@@ -167,6 +178,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           className="hidden sm:flex w-8 h-8 items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-lg transition-all"
         >
           {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
@@ -176,6 +188,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <div ref={notifRef} className="relative">
           <button
             onClick={() => { setShowNotif((v) => !v); setShowNew(false); setShowUser(false); if (!readNotifs) setReadNotifs(true); }}
+            aria-label={hasUnread ? `Notifications — ${unreadCount} unread` : "Notifications"}
+            aria-expanded={showNotif}
+            aria-haspopup="true"
             className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-xl sm:rounded-lg transition-all relative"
           >
             <Bell size={15} />
@@ -190,7 +205,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             <div className="pop-in absolute right-0 top-full mt-2 w-80 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
               <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/[0.06]">
                 <p className="text-[13px] font-bold text-white">Notifications</p>
-                <button onClick={() => setShowNotif(false)} className="text-white/30 hover:text-white/60 transition-colors">
+                <button onClick={() => setShowNotif(false)} aria-label="Close notifications" className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.05] rounded-lg transition-colors -mr-1">
                   <X size={14} />
                 </button>
               </div>
@@ -201,7 +216,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                   <p className="text-[11px] text-white/20">Activity from your projects will show here</p>
                 </div>
               ) : (
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-80 overflow-y-auto overscroll-contain" style={{WebkitOverflowScrolling:"touch" as never}}>
                   {/* Insurance expiry alerts — shown first */}
                   {expiryAlerts.map((p) => {
                     const ms = new Date(p.expiryDate).getTime() - Date.now();
@@ -266,7 +281,10 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <div ref={userRef} className="relative">
           <button
             onClick={() => { setShowUser((v) => !v); setShowNew(false); setShowNotif(false); }}
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/[0.05] active:bg-white/[0.08] transition-colors"
+            aria-label="Account menu"
+            aria-expanded={showUser}
+            aria-haspopup="true"
+            className="flex items-center gap-2 rounded-xl sm:rounded-lg px-2 py-2 sm:py-1.5 hover:bg-white/[0.05] active:bg-white/[0.08] transition-colors min-h-[40px] sm:min-h-0"
           >
             <div
               className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold flex-shrink-0"

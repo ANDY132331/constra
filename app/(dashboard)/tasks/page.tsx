@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { CheckCircle2, Circle, Clock, AlertTriangle, Plus, Search, X, Pencil, Trash2, ClipboardList } from "lucide-react";
@@ -131,9 +131,9 @@ export default function TasksPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
-        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
-          <h2 className="text-[22px] font-black text-white">Tasks</h2>
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+          <h2 className="text-[22px] font-bold text-white">Tasks</h2>
           <button
             onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-xl"
@@ -141,22 +141,22 @@ export default function TasksPage() {
             <Plus size={15} /> New
           </button>
         </div>
-        <div className="px-4 mb-3 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-5 mb-4 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           {FILTER_TABS.map((tab) => (
             <button key={tab.key} onClick={() => setFilterStatus(tab.key)}
-              className={`flex-shrink-0 text-[12px] font-bold px-3 py-1.5 rounded-full border transition-colors ${filterStatus === tab.key ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
-              {tab.label} <span className="opacity-60">{counts[tab.key] ?? 0}</span>
+              className={`flex-shrink-0 snap-start text-[12px] font-semibold px-3.5 py-2 rounded-full border transition-all ${filterStatus === tab.key ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
+              {tab.label} <span className="opacity-50">{counts[tab.key] ?? 0}</span>
             </button>
           ))}
         </div>
-        <div className="px-4 mb-3">
-          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3">
-            <Search size={14} className="text-white/30" />
+        <div className="px-5 mb-4">
+          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+            <Search size={14} className="text-white/30 flex-shrink-0" />
             <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
               placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
-        <div className="px-4 space-y-2">
+        <div className="px-5 space-y-2.5">
           {filtered.length === 0 && (
             <EmptyState
               icon={ClipboardList}
@@ -174,14 +174,16 @@ export default function TasksPage() {
             const cfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG["not-started"];
             const MIcon = cfg.icon;
             const isOverdueMobile = task.status !== "completed" && isBefore(task.endDate, today);
+            const borderAccent = isOverdueMobile ? "#ef4444" : task.status === "delayed" ? "#ef4444" : task.status === "in-progress" ? "#F5C400" : task.status === "completed" ? "#22c55e" : "#3b82f6";
             return (
-              <div key={task.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
-                <div className="flex items-start gap-3 mb-2">
-                  <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} className="mt-0.5 flex-shrink-0">
-                    <MIcon size={16} className={cfg.className} />
+              <div key={task.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 transition-transform overflow-hidden relative"
+                style={{ borderLeftColor: borderAccent, borderLeftWidth: 3 }}>
+                <div className="flex items-start gap-3 mb-3">
+                  <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} aria-label={`Status: ${cfg.label} — tap to cycle`} className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl -ml-1 -mt-1 active:bg-white/[0.06] transition-colors">
+                    <MIcon size={18} className={cfg.className} />
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-bold text-white/90 leading-tight">{task.name}</p>
+                    <p className="text-[14px] font-bold text-white leading-tight">{task.name}</p>
                     {mProject && (
                       <div className="flex items-center gap-1.5 mt-1">
                         <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: mProject.color }} />
@@ -199,25 +201,25 @@ export default function TasksPage() {
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pt-1">
                   {mWorker ? (
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-black flex-shrink-0"
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[9px] font-black flex-shrink-0"
                         style={{ backgroundColor: mWorker.color + "25", color: mWorker.color }}>
                         {mWorker.photo ? <img src={mWorker.photo} alt={mWorker.name} className="w-full h-full object-cover" /> : mWorker.initials}
                       </div>
-                      <span className="text-[11px] text-white/40">{mWorker.name.split(" ")[0]}</span>
+                      <span className="text-[12px] text-white/45">{mWorker.name.split(" ")[0]}</span>
                     </div>
                   ) : <span />}
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-20 h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{
                         width: `${task.progress}%`,
                         backgroundColor: task.status === "completed" ? "#22c55e" : task.status === "delayed" ? "#ef4444" : "#F5C400"
                       }} />
                     </div>
-                    <span className="text-[10px] text-white/30">{task.progress}%</span>
-                    <span className="text-[11px] text-white/25">{format(task.endDate, "MMM d")}</span>
+                    <span className="text-[11px] text-white/35 font-medium">{task.progress}%</span>
+                    <span className="text-[11px] text-white/30">{format(task.endDate, "MMM d")}</span>
                   </div>
                 </div>
               </div>
@@ -333,7 +335,8 @@ export default function TasksPage() {
               </div>
               <button
                 onClick={() => cycleStatus(task.projectId, task.id, task.status)}
-                className="text-[10px] font-bold text-white/30 hover:text-amber-400 transition-colors text-center"
+                className="w-8 h-8 flex items-center justify-center text-[13px] font-bold text-white/30 hover:text-amber-400 hover:bg-amber-500/[0.08] rounded-lg transition-colors"
+                aria-label="Cycle status"
                 title="Click to cycle status"
               >
                 ↻
@@ -358,15 +361,15 @@ export default function TasksPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editTaskId ? "Edit Task" : "New Task"}</h3>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               {!editTaskId && (
                 <div>
                   <label className={lbl}>Project *</label>
@@ -446,7 +449,7 @@ export default function TasksPage() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditTaskId(null); setEditProjectId(null); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}

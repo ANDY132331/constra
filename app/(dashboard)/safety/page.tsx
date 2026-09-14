@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
@@ -165,10 +165,10 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Top bar */}
-        <div className="px-4 pt-5 pb-3 flex items-center justify-between">
-          <h1 className="text-[22px] font-black text-white">Safety</h1>
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+          <h1 className="text-[22px] font-bold text-white">Safety</h1>
           <button
             onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
             className="bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
@@ -178,36 +178,37 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
           </button>
         </div>
 
-        {/* Stats row */}
-        <div className="px-4 mb-4 flex gap-2 overflow-x-auto no-scrollbar">
-          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
-            <span className="text-white font-bold">{safetyIncidents.length}</span> Total
+        {/* Stats chips */}
+        <div className="px-5 mb-4 flex gap-2.5 overflow-x-auto no-scrollbar">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-white leading-none">{safetyIncidents.length}</p>
+            <p className="text-[11px] text-white/40 font-medium mt-0.5">Total</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
-            <span className="text-white font-bold">{safetyIncidents.filter((i) => i.severity === "critical").length}</span> Critical
+          <div className="bg-[#131110] border border-red-500/20 rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-red-400 leading-none">{safetyIncidents.filter((i) => i.severity === "critical").length}</p>
+            <p className="text-[11px] text-red-400/60 font-medium mt-0.5">Critical</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
-            <span className="text-white font-bold">{safetyIncidents.filter((i) => i.severity === "high").length}</span> High
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-orange-400 leading-none">{safetyIncidents.filter((i) => i.severity === "high").length}</p>
+            <p className="text-[11px] text-orange-400/60 font-medium mt-0.5">High</p>
           </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-sky-500 flex-shrink-0" />
-            <span className="text-white font-bold">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</span> OSHA
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
+            <p className="text-[22px] font-bold text-sky-400 leading-none">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
+            <p className="text-[11px] text-sky-400/60 font-medium mt-0.5">OSHA</p>
           </div>
         </div>
 
         {/* Search */}
-        <div className="px-4 mb-3">
-          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-2.5">
-            <Search size={13} className="text-white/30 flex-shrink-0" />
-            <input className="bg-transparent text-[13px] text-white/70 placeholder:text-white/30 outline-none flex-1"
+        <div className="px-5 mb-4">
+          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+            <Search size={14} className="text-white/30 flex-shrink-0" />
+            <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
               placeholder="Search incidents…" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
 
         {/* Type filter tabs */}
-        <div className="px-4 mb-2 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+        <div className="px-5 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
           {(["all", "near-miss", "injury", "property-damage", "environmental"] as const).map((type) => {
             const isAll = type === "all";
             const label = isAll ? "All" : TYPE_CONFIG[type].label;
@@ -215,7 +216,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               <button
                 key={type}
                 onClick={() => setTypeFilter(type)}
-                className={`px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all ${
                   typeFilter === type
                     ? "bg-amber-500 text-black"
                     : "bg-[#131110] border border-white/[0.07] text-white/50"
@@ -228,10 +229,10 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         </div>
 
         {/* Severity filter */}
-        <div className="px-4 mb-3 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+        <div className="px-5 mb-4 flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
           {(["all", "critical", "high", "medium", "low"] as const).map((sev) => (
             <button key={sev} onClick={() => setSeverityFilter(sev)}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap flex-shrink-0 transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
                 severityFilter === sev ? "bg-amber-500 text-black" : "bg-[#131110] border border-white/[0.07] text-white/50"
               }`}>
               {sev === "all" ? "All Severity" : sev.charAt(0).toUpperCase() + sev.slice(1)}
@@ -471,15 +472,15 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
 
       {/* Modals — fixed position, work on all screen sizes */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 sheet">
-          <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Incident" : "Log Incident"}</h3>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Type</label>
@@ -585,7 +586,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                 </p>
               </div>
             </div>
-            <div className="flex gap-3 px-6 pb-6">
+            <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={() => { setShowModal(false); setEditId(null); }}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">{t.common.cancel}</button>
               <button onClick={handleSave} disabled={!form.description.trim()}

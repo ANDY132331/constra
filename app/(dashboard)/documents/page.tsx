@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
 import {
@@ -6,6 +6,7 @@ import {
   Download, Search, ChevronDown, History, RefreshCw,
 } from "lucide-react";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/empty-state";
 import { useStore } from "@/lib/store";
 import type { ProjectDocument, DocumentVersion } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
@@ -165,25 +166,25 @@ export default function DocumentsPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3">
-          <h1 className="text-[22px] font-black text-white">Documents</h1>
-          <label className={`flex items-center gap-1.5 ${uploading ? "bg-amber-500/40" : "bg-amber-500 hover:bg-amber-400"} text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors cursor-pointer`}>
-            <Upload size={13} />
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
+          <h1 className="text-[22px] font-bold text-white">Documents</h1>
+          <label className={`flex items-center gap-1.5 ${uploading ? "bg-amber-500/40" : "bg-amber-500 active:bg-amber-600"} text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors cursor-pointer`}>
+            <Upload size={14} />
             {uploading ? "Uploading…" : "Upload"}
             <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
           </label>
         </div>
 
         {downloadErrorMsg && (
-          <div className="mx-4 mb-3 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-[12px] text-red-300">
+          <div className="mx-5 mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-[13px] text-red-300">
             {downloadErrorMsg}
           </div>
         )}
 
         {/* Project + category selectors */}
-        <div className="px-4 mb-3 flex gap-2">
+        <div className="px-5 mb-4 flex gap-2">
           <CustomSelect
             value={selectedProject}
             onChange={(v) => setSelectedProject(v)}
@@ -199,8 +200,8 @@ export default function DocumentsPage() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-white/[0.05] mx-4 mb-3 px-3 py-2.5 rounded-xl">
-          <Search size={13} className="text-white/30" />
+        <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-xl">
+          <Search size={14} className="text-white/30" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -210,10 +211,10 @@ export default function DocumentsPage() {
         </div>
 
         {/* Category filter pills */}
-        <div className="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 px-4 pb-3 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           <button
             onClick={() => setSelectedCategory("all")}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${selectedCategory === "all" ? "bg-white/15 text-white" : "bg-white/[0.05] text-white/40"}`}
+            className={`flex-shrink-0 snap-start px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all border ${selectedCategory === "all" ? "bg-white/15 text-white border-white/20" : "bg-white/[0.04] border-white/[0.06] text-white/40"}`}
           >
             All ({documents.filter((d) => !selectedProject || d.projectId === selectedProject).length})
           </button>
@@ -223,7 +224,7 @@ export default function DocumentsPage() {
               <button
                 key={cat.value}
                 onClick={() => setSelectedCategory(cat.value)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${selectedCategory === cat.value ? "text-black" : "bg-white/[0.05] text-white/40"}`}
+                className={`flex-shrink-0 snap-start px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all border ${selectedCategory === cat.value ? "text-black border-transparent" : "bg-white/[0.04] border-white/[0.06] text-white/40"}`}
                 style={selectedCategory === cat.value ? { backgroundColor: cat.color } : undefined}
               >
                 {cat.label} ({count})
@@ -234,10 +235,12 @@ export default function DocumentsPage() {
 
         {/* Document list */}
         {filteredDocs.length === 0 ? (
-          <div className="mx-4 bg-white/[0.03] border border-white/[0.06] rounded-2xl py-14 text-center">
-            <FolderOpen size={28} className="text-white/15 mx-auto mb-2" />
-            <p className="text-[12px] text-white/25">No files here yet</p>
-          </div>
+          <EmptyState
+            icon={FolderOpen}
+            title="No files here yet"
+            body="Upload contracts, permits, inspection reports, blueprints, and more."
+            isFiltered={documents.filter((d) => !selectedProject || d.projectId === selectedProject).length > 0}
+          />
         ) : (
           <div className="divide-y divide-white/[0.05]">
             {filteredDocs.map((doc) => {
@@ -247,18 +250,18 @@ export default function DocumentsPage() {
                 <button
                   key={doc.id}
                   onClick={() => setPreviewDoc(doc)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-white/[0.03] transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-white/[0.04] transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: cat.color + "18" }}>
-                    <Icon size={18} style={{ color: cat.color + "cc" }} />
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: cat.color + "15" }}>
+                    <Icon size={20} style={{ color: cat.color + "cc" }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-white/80 truncate">{doc.name}</p>
+                    <p className="text-[13px] font-semibold text-white/85 truncate">{doc.name}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded text-[9px]"
-                        style={{ backgroundColor: cat.color + "22", color: cat.color }}>{cat.label}</span>
-                      <span className="text-[10px] text-white/30">{formatBytes(doc.sizeBytes)}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                        style={{ backgroundColor: cat.color + "20", color: cat.color }}>{cat.label}</span>
+                      {doc.sizeBytes ? <span className="text-[10px] text-white/30">{formatBytes(doc.sizeBytes)}</span> : null}
                     </div>
                   </div>
                   <span className="text-[10px] text-white/25 flex-shrink-0">
@@ -353,11 +356,13 @@ export default function DocumentsPage() {
 
       {/* File grid */}
       {filteredDocs.length === 0 ? (
-        <div className="bg-[#111] border border-white/[0.06] rounded-xl py-20 text-center">
-          <FolderOpen size={32} className="text-white/15 mx-auto mb-3" />
-          <p className="text-[13px] text-white/25">No files here yet</p>
-          <p className="text-[11px] text-white/15 mt-1">Upload blueprints, permits, contracts, and more</p>
-        </div>
+        <EmptyState
+          icon={FolderOpen}
+          title="No files here yet"
+          body="Upload blueprints, permits, contracts, and more to keep everything organized."
+          action={{ label: "Upload File", onClick: () => fileInputRef.current?.click() }}
+          isFiltered={selectedCategory !== "all"}
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {filteredDocs.map((doc) => {
@@ -423,9 +428,8 @@ export default function DocumentsPage() {
 
       {/* Preview lightbox */}
       {previewDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setPreviewDoc(null)} />
-          <div className="relative bg-[#141414] border border-white/[0.1] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setPreviewDoc(null); }}>
+          <div className="sheet relative bg-[#141414] border border-white/[0.1] rounded-t-2xl sm:rounded-2xl max-w-3xl w-full max-h-[90dvh] overflow-hidden flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
               <div>
                 <p className="text-[14px] font-bold text-white">{previewDoc.name}</p>
@@ -450,7 +454,7 @@ export default function DocumentsPage() {
                   <Download size={12} /> Download
                 </button>
                 <button onClick={() => { setPreviewDoc(null); setShowVersions(false); }}
-                  className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5">
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                   ✕
                 </button>
               </div>

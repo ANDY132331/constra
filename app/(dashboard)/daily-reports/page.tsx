@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -151,7 +151,7 @@ export default function DailyReportsPage() {
   return (
     <>
       {/* MOBILE */}
-      <div className="lg:hidden -mx-4 -mt-4 pb-6">
+      <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {selected ? (
           /* Mobile detail view */
           <div>
@@ -205,21 +205,21 @@ export default function DailyReportsPage() {
         ) : (
           /* Mobile list view */
           <div>
-            <div className="flex items-center justify-between px-4 pt-4 pb-3">
-              <h1 className="text-[22px] font-black text-white">Daily Reports</h1>
+            <div className="flex items-center justify-between px-5 pt-5 pb-4">
+              <h1 className="text-[22px] font-bold text-white">Daily Reports</h1>
               <button
                 onClick={() => { setForm(emptyForm()); setShowForm(true); }}
-                className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[12px] px-3 py-2 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors"
               >
-                <Plus size={13} /> New
+                <Plus size={14} /> New
               </button>
             </div>
 
             {/* Search */}
-            <div className="flex items-center gap-2 bg-white/[0.05] mx-4 mb-3 px-3 py-2.5 rounded-xl">
-              <Search size={13} className="text-white/30" />
+            <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-xl">
+              <Search size={14} className="text-white/30 flex-shrink-0" />
               <input
-                className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
+                className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
                 placeholder="Search reports…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -227,7 +227,7 @@ export default function DailyReportsPage() {
             </div>
 
             {/* Project filter */}
-            <div className="px-4 mb-3">
+            <div className="px-5 mb-4">
               <CustomSelect
                 className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-[12px] text-white/60 outline-none"
                 value={projectFilter}
@@ -240,7 +240,7 @@ export default function DailyReportsPage() {
             </div>
 
             {/* Stats pill */}
-            <div className="px-4 mb-2">
+            <div className="px-5 mb-3">
               <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
                 <ClipboardList size={14} className="text-amber-400" />
                 <span className="text-[13px] font-bold text-white">{filtered.length}</span>
@@ -270,17 +270,24 @@ export default function DailyReportsPage() {
                     <button
                       key={report.id}
                       onClick={() => setSelected(report)}
-                      className="w-full text-left px-4 py-3.5 active:bg-white/[0.03] transition-colors"
+                      className="w-full text-left px-5 py-4 active:bg-white/[0.04] transition-colors"
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[13px] font-bold text-white/85">
-                          {report.date.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
-                        </span>
-                        <ChevronRight size={14} className="text-white/25" />
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div>
+                          <span className="text-[14px] font-bold text-white/90 leading-none">
+                            {report.date.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+                          </span>
+                          <p className="text-[11px] text-white/35 mt-0.5">{proj?.name ?? "Unknown project"}</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {report.delays && (
+                            <span className="text-[9px] font-bold bg-amber-500/15 text-amber-400 px-1.5 py-0.5 rounded-full">DELAY</span>
+                          )}
+                          <ChevronRight size={14} className="text-white/20" />
+                        </div>
                       </div>
-                      <p className="text-[11px] text-white/40 mb-1">{proj?.name ?? "Unknown project"}</p>
-                      <p className="text-[12px] text-white/55 line-clamp-2">{report.workCompleted}</p>
-                      <div className="flex items-center gap-3 mt-2">
+                      <p className="text-[12px] text-white/55 line-clamp-2 mb-2">{report.workCompleted}</p>
+                      <div className="flex items-center gap-3">
                         <span className="flex items-center gap-1 text-[10px] text-white/30">
                           <Cloud size={10} /> {report.weather}
                         </span>
@@ -348,7 +355,7 @@ export default function DailyReportsPage() {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-scroll">
           {filtered.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <EmptyState
@@ -425,18 +432,18 @@ export default function DailyReportsPage() {
               {isAdminOrAbove(currentUser.role) && (
                 <button
                   onClick={() => setDeleteConfirm(selected.id)}
-                  className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
               )}
-              <button onClick={() => setSelected(null)} className="p-1.5 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
+              <button onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
                 <X size={14} />
               </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          <div className="flex-1 overflow-y-scroll px-6 py-5 space-y-5">
             {/* Conditions */}
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
@@ -487,13 +494,13 @@ export default function DailyReportsPage() {
 
       {/* New Report Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#111] border border-white/[0.08] rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
+          <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-xl w-full max-w-lg max-h-[90dvh] sm:max-h-[85dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-[14px] font-bold text-white/90">New Daily Report</h3>
-              <button onClick={() => setShowForm(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-colors"><X size={14} /></button>
+              <button onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
             </div>
-            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+            <div className="overflow-y-scroll flex-1 px-5 py-4 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Project *</label>

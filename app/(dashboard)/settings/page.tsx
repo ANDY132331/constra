@@ -413,12 +413,30 @@ function SettingsInner() {
   return (
     <div className="space-y-4">
     <div className="flex flex-col sm:flex-row gap-6 max-w-[1100px]">
-      {/* Sidebar tabs — horizontal scroll on mobile */}
+      {/* Sidebar tabs — horizontal scroll on mobile, vertical on desktop */}
       <div className="w-full sm:w-48 flex-shrink-0">
-        <div className="flex sm:flex-col gap-1 overflow-x-auto pb-1 sm:pb-0">
+        {/* Mobile: pill tabs with scroll + active indicator line */}
+        <div className="sm:hidden overflow-x-auto [&::-webkit-scrollbar]:hidden flex gap-1 pb-2 -mx-5 px-5 snap-x snap-mandatory">
           {TABS.filter((t) => !t.adminOnly || isAdmin).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => setTab(id)}
-              className={`flex-shrink-0 sm:w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 rounded-lg text-[12px] sm:text-[13px] font-medium transition-colors text-left whitespace-nowrap ${tab === id ? "bg-amber-500/12 text-amber-400" : "text-white/45 hover:text-white/70 hover:bg-white/5"}`}>
+              className={`flex-shrink-0 snap-start flex items-center gap-2 px-3.5 py-2 rounded-full text-[13px] font-semibold transition-all whitespace-nowrap border ${
+                tab === id
+                  ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                  : "text-white/45 border-white/[0.06] bg-white/[0.03] hover:text-white/70 hover:bg-white/[0.06]"
+              }`}>
+              <Icon size={13} className={tab === id ? "text-amber-400" : "text-white/30"} />
+              {label}
+            </button>
+          ))}
+        </div>
+        {/* Desktop: vertical sidebar tabs */}
+        <div className="hidden sm:flex flex-col gap-1">
+          {TABS.filter((t) => !t.adminOnly || isAdmin).map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => setTab(id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors text-left whitespace-nowrap relative overflow-hidden ${
+                tab === id ? "bg-amber-500/12 text-amber-400" : "text-white/45 hover:text-white/70 hover:bg-white/5"
+              }`}
+              style={tab === id ? { boxShadow: "inset 2px 0 0 rgba(245,196,0,0.7)" } : {}}>
               <Icon size={14} className={tab === id ? "text-amber-400" : "text-white/30"} />
               {label}
             </button>
@@ -1042,8 +1060,8 @@ function SettingsInner() {
 
         {/* Delete account confirmation modal */}
         {showDeleteModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70">
-            <div className="bg-[#1a1a1a] border border-red-500/20 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+          <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+            <div className="sheet bg-[#1a1a1a] border border-red-500/20 rounded-t-2xl sm:rounded-2xl p-6 w-full max-w-sm shadow-2xl">
               {deleteStatus === "requested" ? (
                 <>
                   <div className="w-11 h-11 rounded-full bg-green-500/15 flex items-center justify-center mb-3">
@@ -1439,8 +1457,8 @@ function AccessControlTab({
 
       {/* PIN verification modal */}
       {pinModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
-          <div className="bg-[#161616] border border-white/[0.10] rounded-2xl w-full max-w-sm shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/75 backdrop-blur-sm">
+          <div className="sheet bg-[#161616] border border-white/[0.10] rounded-t-2xl sm:rounded-2xl w-full max-w-sm shadow-2xl">
             <div className="h-1 bg-amber-500 rounded-t-2xl" />
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-3">

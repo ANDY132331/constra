@@ -194,9 +194,10 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
           </div>
           <button
             onClick={() => { stopStream(); onClose(); }}
-            className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all"
+            aria-label="Close camera"
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
