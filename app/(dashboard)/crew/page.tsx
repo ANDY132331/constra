@@ -351,7 +351,7 @@ export default function CrewPage() {
     const text = fullUrl
       ? `${window.location.origin}/login?join=${inviteCode}`
       : inviteCode;
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(text).then(() => toast.success(fullUrl ? "Invite link copied" : "Invite code copied"));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

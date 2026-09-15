@@ -448,7 +448,7 @@ export default function EquipmentPage() {
         title="Delete Equipment"
         body={deleteConfirm ? `Delete "${deleteConfirm.name}"? This cannot be undone.` : ""}
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) deleteEquipment(deleteConfirm.id); setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteEquipment(deleteConfirm.id); toast.success(`${deleteConfirm.name} removed`); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

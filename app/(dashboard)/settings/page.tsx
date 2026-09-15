@@ -1281,9 +1281,11 @@ function AccessControlTab({
     const { workerId, action } = pinModal;
     if (action === "save") {
       updateWorker(workerId, { grantedPages: getDraft(workers.find((w) => w.id === workerId)!) });
+      toast.success("Access saved");
     } else {
       updateWorker(workerId, { grantedPages: undefined });
       setDraftPages((d) => { const n = { ...d }; delete n[workerId]; return n; });
+      toast.success("Access reset to role defaults");
     }
     setSuccessId(workerId);
     setTimeout(() => setSuccessId(null), 2500);

@@ -864,7 +864,7 @@ export default function SchedulePage() {
         title="Delete Event"
         body="Delete this scheduled event? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteEventConfirm) deleteCustomEvent(deleteEventConfirm); setDeleteEventConfirm(null); }}
+        onConfirm={() => { if (deleteEventConfirm) { deleteCustomEvent(deleteEventConfirm); toast.success("Event deleted"); } setDeleteEventConfirm(null); }}
         onCancel={() => setDeleteEventConfirm(null)}
       />
     </>

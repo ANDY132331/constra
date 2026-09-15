@@ -607,7 +607,7 @@ export default function DailyReportsPage() {
         title="Delete Daily Report"
         body="Delete this daily report? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) { deleteDailyReport(deleteConfirm); setSelected(null); } setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteDailyReport(deleteConfirm); setSelected(null); toast.success("Daily report deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

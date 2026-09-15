@@ -169,7 +169,7 @@ export default function BudgetPage() {
   }
 
   function handleDelete() {
-    if (deleteId) deleteBudgetLine(deleteId);
+    if (deleteId) { deleteBudgetLine(deleteId); toast.success("Budget line deleted"); }
     setDeleteId(null);
   }
 

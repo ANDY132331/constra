@@ -136,6 +136,7 @@ function InvoiceDetail({
     navigator.clipboard.writeText(url).then(() => {
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2500);
+      toast.success("Payment link copied");
     });
   }
 
@@ -205,8 +206,10 @@ function InvoiceDetail({
                 if (res.ok) {
                   if (invoice.status === "draft") onUpdate(invoice.id, { status: "sent" });
                   setSendStatus({ ok: true, msg: `Sent to ${invoice.clientEmail}` });
+                  toast.success(`Invoice sent to ${invoice.clientEmail}`);
                 } else {
                   setSendStatus({ ok: false, msg: "Failed to send. Check RESEND_API_KEY in Vercel." });
+                  toast.error("Failed to send invoice");
                 }
               } finally {
                 setSendLoading(false);
@@ -423,25 +426,25 @@ function InvoiceDetail({
       {/* â”€â”€ Action bar â”€â”€ */}
       <div className="flex items-center gap-2 px-5 py-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         {invoice.status === "draft" && (
-          <button onClick={() => onUpdate(invoice.id, { status: "sent" })}
+          <button onClick={() => { onUpdate(invoice.id, { status: "sent" }); toast.success("Invoice marked as sent"); }}
             className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-full transition-colors">
             <Send size={13} /> Mark as Sent
           </button>
         )}
         {invoice.status === "sent" && (
           <>
-            <button onClick={() => onUpdate(invoice.id, { status: "paid" })}
+            <button onClick={() => { onUpdate(invoice.id, { status: "paid" }); toast.success("Invoice marked as paid"); }}
               className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-full transition-colors">
               <CheckCircle2 size={13} /> Mark Paid
             </button>
-            <button onClick={() => onUpdate(invoice.id, { status: "overdue" })}
+            <button onClick={() => { onUpdate(invoice.id, { status: "overdue" }); toast.success("Invoice marked as overdue"); }}
               className="flex items-center gap-1.5 text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-full transition-colors">
               <AlertTriangle size={12} /> Mark Overdue
             </button>
           </>
         )}
         {invoice.status === "overdue" && (
-          <button onClick={() => onUpdate(invoice.id, { status: "paid" })}
+          <button onClick={() => { onUpdate(invoice.id, { status: "paid" }); toast.success("Invoice marked as paid"); }}
             className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-full transition-colors">
             <CheckCircle2 size={13} /> Mark Paid
           </button>
@@ -460,7 +463,7 @@ function InvoiceDetail({
         title={`Delete ${invoice.number}?`}
         body="This invoice will be permanently removed."
         confirmLabel="Delete"
-        onConfirm={() => { onDelete(invoice.id); onClose(); }}
+        onConfirm={() => { onDelete(invoice.id); toast.success("Invoice deleted"); onClose(); }}
         onCancel={() => setDeleteConfirm(false)}
       />
     </div>

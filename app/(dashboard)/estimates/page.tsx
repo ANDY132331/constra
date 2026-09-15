@@ -117,6 +117,7 @@ function EstimateDetail({
     navigator.clipboard.writeText(url).then(() => {
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2500);
+      toast.success("Link copied to clipboard");
     });
   }
 
@@ -561,6 +562,7 @@ export default function EstimatesPage() {
     setConvertedNotice(nextInvNum);
     if (convertedTimerRef.current) clearTimeout(convertedTimerRef.current);
     convertedTimerRef.current = setTimeout(() => setConvertedNotice(null), 5000);
+    toast.success(`Invoice ${nextInvNum} created`);
   };
 
   const filtered = estimates.filter((e) => {

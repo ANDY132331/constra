@@ -619,7 +619,7 @@ export default function MaterialsPage() {
         title="Delete Material Entry"
         body="Delete this material log entry? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) deleteMaterialEntry(deleteConfirm); setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteMaterialEntry(deleteConfirm); toast.success("Entry deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

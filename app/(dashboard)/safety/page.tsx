@@ -606,7 +606,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         title="Delete Incident Log"
         body="Delete this safety incident log? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) deleteSafetyIncident(deleteConfirm); setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteSafetyIncident(deleteConfirm); toast.success("Incident log deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>
