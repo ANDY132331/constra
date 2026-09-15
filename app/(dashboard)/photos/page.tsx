@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { toast } from "sonner";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, ChevronRight, Layers, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -110,6 +111,7 @@ export default function PhotosPage() {
       gradient: `linear-gradient(135deg, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40)`,
       url: photoUrl ?? undefined,
     });
+    toast.success("Photo added");
     closeModal();
   };
 
@@ -704,7 +706,7 @@ export default function PhotosPage() {
         title="Delete Photo"
         body="Delete this photo? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) deletePhoto(deleteConfirm); setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deletePhoto(deleteConfirm); toast.success("Photo deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

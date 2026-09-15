@@ -88,6 +88,7 @@ export default function TasksPage() {
 
   const handleSave = () => {
     if (!form.name.trim()) return;
+    const wasEditing = !!(editTaskId && editProjectId);
     if (editTaskId && editProjectId) {
       updateTask(editProjectId, editTaskId, {
         name: form.name.trim(),
@@ -112,6 +113,7 @@ export default function TasksPage() {
     setEditTaskId(null);
     setEditProjectId(null);
     setShowModal(false);
+    toast.success(wasEditing ? "Task updated" : "Task added");
   };
 
   const handleDelete = (projectId: string, taskId: string, name: string) => {
@@ -127,6 +129,8 @@ export default function TasksPage() {
     };
     const next = cycle[current] ?? "in-progress";
     updateTask(projectId, taskId, { status: next });
+    const label = STATUS_CONFIG[next]?.label ?? next;
+    toast.success(`Status → ${label}`);
   };
 
   return (
@@ -469,7 +473,7 @@ export default function TasksPage() {
         title="Delete Task"
         body={deleteTaskConfirm ? `Delete "${deleteTaskConfirm.name}"? This cannot be undone.` : ""}
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteTaskConfirm) deleteTask(deleteTaskConfirm.projectId, deleteTaskConfirm.taskId); setDeleteTaskConfirm(null); }}
+        onConfirm={() => { if (deleteTaskConfirm) { deleteTask(deleteTaskConfirm.projectId, deleteTaskConfirm.taskId); toast.success("Task deleted"); } setDeleteTaskConfirm(null); }}
         onCancel={() => setDeleteTaskConfirm(null)}
       />
     </>

@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { toast } from "sonner";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
@@ -48,15 +49,11 @@ export default function ReportsPage() {
   } = useStore();
   const router = useRouter();
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const t = useT();
   const exportMenuRef = useRef<HTMLDivElement>(null);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useCallback((msg: string) => {
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToast(msg);
-    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
+    toast.success(msg);
   }, []);
 
   useEffect(() => {
@@ -194,21 +191,12 @@ export default function ReportsPage() {
       return;
     }
     exportPayroll(adapterId, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings);
+    toast.success("Payroll exported");
     setExportMenuOpen(false);
   }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings, showToast]);
 
   return (
     <>
-      {/* Toast notification */}
-      {toast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <div className="bg-[#1e1e1e] border border-white/10 text-white text-[13px] font-semibold px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 whitespace-nowrap">
-            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full flex-shrink-0" />
-            {toast}
-          </div>
-        </div>
-      )}
-
       {/* MOBILE */}
       <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {/* Header */}
@@ -222,7 +210,7 @@ export default function ReportsPage() {
               <button
                 onClick={async () => {
                   setPdfLoading(true);
-                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName }); }
+                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName }); toast.success("PDF downloaded"); }
                   finally { setPdfLoading(false); }
                 }}
                 disabled={pdfLoading}
@@ -461,6 +449,7 @@ export default function ReportsPage() {
                   setPdfLoading(true);
                   try {
                     await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName });
+                    toast.success("PDF downloaded");
                   } finally {
                     setPdfLoading(false);
                   }

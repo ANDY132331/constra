@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { toast } from "sonner";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -500,6 +501,7 @@ export default function TimeTrackingPage() {
         body: `${hrs}h on ${project?.name ?? "project"}`,
         url: "/time-tracking",
       });
+      toast.success(`${worker?.name ?? "Worker"} clocked out — ${hrs}h logged`);
     }
     updateWorker(workerId, { clockedIn: false, clockInTime: undefined, clockInGps: undefined });
     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(60);
@@ -547,6 +549,7 @@ export default function TimeTrackingPage() {
     a.download = `constra-time-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success("CSV exported");
   };
 
   const allEntries = [
@@ -1457,7 +1460,7 @@ export default function TimeTrackingPage() {
       body={`Clock out all ${clockedIn.length} workers currently on site? This cannot be undone.`}
       confirmLabel="Clock Out All"
       danger={false}
-      onConfirm={() => { clockedIn.forEach((w) => handleClockOut(w.id)); setClockOutAllConfirm(false); }}
+      onConfirm={() => { const count = clockedIn.length; clockedIn.forEach((w) => handleClockOut(w.id)); setClockOutAllConfirm(false); toast.success(`${count} workers clocked out`); }}
       onCancel={() => setClockOutAllConfirm(false)}
     />
     </>
