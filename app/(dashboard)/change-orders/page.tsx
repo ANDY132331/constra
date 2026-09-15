@@ -267,12 +267,12 @@ export default function ChangeOrdersPage() {
               {selected.status === "pending" && (
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); }}
+                    onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); toast.success("Change order approved"); }}
                     className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors">
                     <CheckCircle2 size={12} /> Approve
                   </button>
                   <button
-                    onClick={() => { updateChangeOrder(selected.id, { status: "rejected" }); setSelected((p) => p ? { ...p, status: "rejected" } : null); }}
+                    onClick={() => { updateChangeOrder(selected.id, { status: "rejected" }); setSelected((p) => p ? { ...p, status: "rejected" } : null); toast.success("Change order rejected"); }}
                     className="flex items-center gap-1.5 text-[11px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-full transition-colors">
                     <XCircle size={12} /> Reject
                   </button>
@@ -456,13 +456,13 @@ export default function ChangeOrdersPage() {
               {selected.status === "pending" && (
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); }}
+                    onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); toast.success("Change order approved"); }}
                     className="flex items-center gap-1.5 text-[12px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors"
                   >
                     <CheckCircle2 size={13} /> Approve
                   </button>
                   <button
-                    onClick={() => { updateChangeOrder(selected.id, { status: "rejected" }); setSelected((p) => p ? { ...p, status: "rejected" } : null); }}
+                    onClick={() => { updateChangeOrder(selected.id, { status: "rejected" }); setSelected((p) => p ? { ...p, status: "rejected" } : null); toast.success("Change order rejected"); }}
                     className="flex items-center gap-1.5 text-[12px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-full transition-colors"
                   >
                     <XCircle size={13} /> Reject

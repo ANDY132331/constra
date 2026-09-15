@@ -533,7 +533,7 @@ export default function DocumentsPage() {
         title="Delete Document"
         body="Delete this document and all its versions? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) deleteDocument(deleteConfirm); setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteDocument(deleteConfirm); toast.success("Document deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

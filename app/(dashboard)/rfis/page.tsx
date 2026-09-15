@@ -376,7 +376,7 @@ export default function RFIsPage() {
                               </button>
                               <button onClick={() => {
                                 if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
-                                updateRFI(rfi.id, { status: "closed" });
+                                updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed");
                               }}
                                 className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
                                 Close RFI
@@ -386,11 +386,11 @@ export default function RFIsPage() {
                         )}
                         {rfi.status === "answered" && (
                           <div className="flex gap-2 pt-1">
-                            <button onClick={() => updateRFI(rfi.id, { status: "closed" })}
+                            <button onClick={() => { updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed"); }}
                               className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
                               Close RFI
                             </button>
-                            <button onClick={() => updateRFI(rfi.id, { status: "open", answer: undefined })}
+                            <button onClick={() => { updateRFI(rfi.id, { status: "open", answer: undefined }); toast.success("RFI reopened"); }}
                               className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
                               Reopen
                             </button>
@@ -529,7 +529,7 @@ export default function RFIsPage() {
         body="This RFI has no answer yet. Close it anyway?"
         confirmLabel="Close RFI"
         danger={false}
-        onConfirm={() => { if (closeNoAnswerConfirm) updateRFI(closeNoAnswerConfirm, { status: "closed" }); setCloseNoAnswerConfirm(null); }}
+        onConfirm={() => { if (closeNoAnswerConfirm) { updateRFI(closeNoAnswerConfirm, { status: "closed" }); toast.success("RFI closed"); } setCloseNoAnswerConfirm(null); }}
         onCancel={() => setCloseNoAnswerConfirm(null)}
       />
     </>

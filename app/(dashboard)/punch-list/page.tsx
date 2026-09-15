@@ -120,7 +120,7 @@ export default function PunchListPage() {
           <div className="flex items-center gap-2">
             {canEdit && counts.open > 0 && (
               <button
-                onClick={() => { punchItems.filter(i => i.status === "open").forEach(i => updatePunchItem(i.id, { status: "resolved" })); }}
+                onClick={() => { const open = punchItems.filter(i => i.status === "open"); open.forEach(i => updatePunchItem(i.id, { status: "resolved" })); toast.success(`${open.length} items resolved`); }}
                 className="text-[12px] font-bold text-white/40 px-3 py-2 rounded-full border border-white/[0.07] active:bg-white/[0.05] transition-colors"
               >
                 Resolve All
@@ -549,7 +549,7 @@ export default function PunchListPage() {
         title="Delete Punch Item"
         body="Delete this punch list item? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) deletePunchItem(deleteConfirm); setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deletePunchItem(deleteConfirm); toast.success("Item deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

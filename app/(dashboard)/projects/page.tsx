@@ -276,7 +276,7 @@ export default function ProjectsPage() {
                         Reject
                       </button>
                       <button
-                        onClick={() => approveProject(p.id)}
+                        onClick={() => { approveProject(p.id); toast.success("Project approved"); }}
                         className="flex-1 text-[12px] font-bold py-1.5 rounded-full bg-green-500/15 text-green-400 active:bg-green-500/25"
                       >
                         Approve
@@ -445,7 +445,7 @@ export default function ProjectsPage() {
                         Reject
                       </button>
                       <button
-                        onClick={() => approveProject(p.id)}
+                        onClick={() => { approveProject(p.id); toast.success("Project approved"); }}
                         className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
                       >
                         Approve
@@ -1132,7 +1132,7 @@ export default function ProjectsPage() {
         })()}
         confirmLabel="Delete"
         danger
-        onConfirm={() => { if (deleteConfirm) { deleteProject(deleteConfirm); setDeleteConfirm(null); } }}
+        onConfirm={() => { if (deleteConfirm) { deleteProject(deleteConfirm); toast.success("Project deleted"); setDeleteConfirm(null); } }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>
