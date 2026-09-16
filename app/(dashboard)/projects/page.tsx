@@ -867,7 +867,7 @@ export default function ProjectsPage() {
             {/* Step 3: Details */}
             {mobileStep === 3 && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-3">
                   <div>
                     <label className={mLbl}>Start Date</label>
                     <input className={mInp} type="date" value={form.startDate}
