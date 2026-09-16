@@ -244,12 +244,12 @@ function InvoiceDetail({
           >
             <Download size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
           </button>
-          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
-            <Pencil size={14} />
+          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-9 h-9 flex items-center justify-center rounded-full text-white/60 hover:text-white bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+            <Pencil size={15} />
           </button>
           <button onClick={() => setDeleteConfirm(true)} aria-label="Delete invoice"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
-            <Trash2 size={14} />
+            className="w-9 h-9 flex items-center justify-center rounded-full text-red-400/70 hover:text-red-400 bg-red-500/[0.07] hover:bg-red-500/[0.14] transition-colors">
+            <Trash2 size={15} />
           </button>
         </div>
       </div>
@@ -454,8 +454,13 @@ function InvoiceDetail({
             <CheckCircle2 size={13} /> Collected
           </span>
         )}
-        <div className="ml-auto text-[11px] text-white/20">
-          {invoice.items.length} line item{invoice.items.length !== 1 ? "s" : ""}
+        <div className="ml-auto flex items-center gap-1.5">
+          <button onClick={() => onEdit(invoice)} className="lg:hidden flex items-center gap-1.5 text-[12px] font-bold text-white/60 bg-white/[0.06] hover:bg-white/10 px-3 py-2 rounded-full transition-colors">
+            <Pencil size={13} /> Edit
+          </button>
+          <button onClick={() => setDeleteConfirm(true)} className="lg:hidden flex items-center gap-1.5 text-[12px] font-bold text-red-400/80 bg-red-500/[0.08] hover:bg-red-500/15 px-3 py-2 rounded-full transition-colors">
+            <Trash2 size={13} /> Delete
+          </button>
         </div>
       </div>
       <ConfirmModal
