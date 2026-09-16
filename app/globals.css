@@ -514,23 +514,11 @@ button, a, [role="button"], input, select, textarea {
 /* Add class "sheet" to the modal wrapper div for this behaviour */
 @media (max-width: 640px) {
   .sheet {
-    align-items: flex-end !important;
-    padding: 0 !important;
-  }
-  .sheet > div {
-    border-radius: 20px 20px 0 0 !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-bottom: none !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: 92dvh;
+    /* Slide the card up from the bottom on mobile */
     animation: slide-up-sheet 0.32s cubic-bezier(0.16,1,0.3,1) both;
-    /* safe-area so content isn't hidden behind home bar */
-    padding-bottom: env(safe-area-inset-bottom);
   }
-  /* Ensure the scrollable content area inside a sheet scrolls on iOS */
-  .sheet > div [class*="overflow-y"] {
+  /* Scrollable content areas inside a sheet (only scroll containers, not header/footer) */
+  .sheet > div[class*="overflow-y"] {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
@@ -1053,15 +1041,17 @@ button {
     overflow-y: scroll !important;
     touch-action: pan-y;
   }
-  /* Bottom-sheet inner scroll */
-  .sheet > div {
+  /* Bottom-sheet inner scroll — only target the scrollable body, not header/footer */
+  .sheet > div[class*="overflow-y-scroll"],
+  .sheet > div[class*="overflow-y-auto"] {
     overflow-y: scroll !important;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
   }
-  /* When keyboard opens on Android, dvh adjusts — ensure modal fits */
-  .sheet > div,
+  /* When keyboard opens on Android, dvh adjusts — cap the scrollable body */
+  .sheet > div[class*="overflow-y-scroll"],
+  .sheet > div[class*="overflow-y-auto"],
   .fixed.inset-0 [class*="max-h-"] {
     max-height: 85dvh !important;
   }
@@ -1133,8 +1123,8 @@ select:focus {
     animation: page-in-mobile 0.20s cubic-bezier(0.25,1,0.5,1) both;
   }
   @keyframes page-in-mobile {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: none; }
+    from { transform: translateY(8px); }
+    to   { transform: none; }
   }
 }
 
@@ -1235,7 +1225,8 @@ button, a, [role="button"] {
    Add a small pill handle at the top of sheet modals on mobile.
    ══════════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .sheet > div::before {
+  /* Drag handle pill — only on the first child (header) so it appears at the top of the sheet */
+  .sheet > div:first-child::before {
     content: '';
     display: block;
     width: 36px;

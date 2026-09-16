@@ -255,7 +255,7 @@ function InvoiceDetail({
       </div>
 
       {/* â”€â”€ Invoice document (white-paper preview) â”€â”€ */}
-      <div className="flex-1 overflow-y-auto bg-[#1a1a1a]">
+      <div className=”flex-1 overflow-y-scroll bg-[#1a1a1a]” style={{touchAction:”pan-y”}}>
         <div className="max-w-[640px] mx-auto my-4 sm:my-6 px-3 sm:px-4">
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
 
