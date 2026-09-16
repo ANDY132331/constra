@@ -13,23 +13,36 @@ export class ErrorBoundary extends Component<Props, State> {
     return { error };
   }
 
+  componentDidCatch(error: Error, info: { componentStack: string }) {
+    console.error("[ErrorBoundary]", error.message, info.componentStack);
+  }
+
   render() {
     if (this.state.error) {
+      const msg = this.state.error.message;
       return this.props.fallback ?? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4 text-center px-6">
           <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
             <AlertTriangle size={22} className="text-red-400" />
           </div>
           <div>
-            <h3 className="text-[15px] font-bold text-white mb-1">Something went wrong</h3>
-            <p className="text-[12px] text-white/40 max-w-xs">{this.state.error.message}</p>
+            <h3 className="text-[15px] font-bold text-white mb-2">Something went wrong</h3>
+            <p className="text-[11px] text-white/50 max-w-xs font-mono bg-white/[0.04] px-3 py-2 rounded-lg border border-white/[0.06] break-all">{msg}</p>
           </div>
-          <button
-            onClick={() => { this.setState({ error: null }); window.location.reload(); }}
-            className="flex items-center gap-2 bg-white/[0.06] hover:bg-white/10 text-white/60 text-[13px] font-semibold px-4 py-2 rounded-xl transition-colors"
-          >
-            <RefreshCw size={14} /> Reload
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigator.clipboard?.writeText(msg)}
+              className="flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.07] text-white/40 text-[12px] font-semibold px-3 py-2 rounded-xl transition-colors"
+            >
+              Copy error
+            </button>
+            <button
+              onClick={() => { this.setState({ error: null }); window.location.reload(); }}
+              className="flex items-center gap-2 bg-white/[0.06] hover:bg-white/10 text-white/60 text-[13px] font-semibold px-4 py-2 rounded-xl transition-colors"
+            >
+              <RefreshCw size={14} /> Reload
+            </button>
+          </div>
         </div>
       );
     }
