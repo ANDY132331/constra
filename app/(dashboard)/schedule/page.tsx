@@ -503,11 +503,11 @@ export default function SchedulePage() {
                       {customEvt && (
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <button onClick={() => openEditEvent(customEvt)}
-                            className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                            className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                             <Pencil size={12} />
                           </button>
                           <button onClick={() => setDeleteEventConfirm(e.id)}
-                            className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                             <X size={12} />
                           </button>
                         </div>

@@ -509,11 +509,11 @@ export default function CrewPage() {
                   )}
                   {canEdit && (
                     <>
-                      <button onClick={() => openEdit(worker)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/30 active:bg-white/5 transition-all">
+                      <button onClick={() => openEdit(worker)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
                       </button>
                       {worker.id !== currentUser.id && (
-                        <button onClick={() => handleDelete(worker.id)} className="p-1.5 rounded-full text-white/30 active:bg-red-500/10 transition-all">
+                        <button onClick={() => handleDelete(worker.id)} className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                           <Trash2 size={13} />
                         </button>
                       )}

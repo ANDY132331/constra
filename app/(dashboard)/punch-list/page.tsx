@@ -248,11 +248,11 @@ export default function PunchListPage() {
                   {canEdit && (
                     <div className="flex items-center gap-1 ml-auto">
                       <button onClick={() => openEdit(item)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-white/60 hover:bg-white/5 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
                       </button>
                       <button onClick={() => setDeleteConfirm(item.id)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                         <X size={13} />
                       </button>
                     </div>

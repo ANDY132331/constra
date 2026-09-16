@@ -198,10 +198,10 @@ export default function TasksPage() {
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0">
                     {isOverdueMobile && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full mr-1">OVERDUE</span>}
-                    <button onClick={() => openEdit(task)} className="p-1.5 text-white/25 hover:text-white/60 transition-colors">
+                    <button onClick={() => openEdit(task)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors">
                       <Pencil size={13} />
                     </button>
-                    <button onClick={() => handleDelete(task.projectId, task.id, task.name)} className="p-1.5 text-white/25 hover:text-red-400 transition-colors">
+                    <button onClick={() => handleDelete(task.projectId, task.id, task.name)} className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors">
                       <Trash2 size={13} />
                     </button>
                   </div>
