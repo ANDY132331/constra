@@ -822,11 +822,16 @@ html[data-theme] footer {
    ══════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 640px) {
-  /* Sheet card: clip at boundary, let flex children handle scroll */
-  .sheet > div {
-    overflow: hidden !important;
-    overscroll-behavior-y: contain;
+  /* Sheet card: clip so rounded corners work; the flex-1 body inside handles scroll */
+  .sheet {
+    overflow: hidden;
   }
+}
+
+/* Allow flex-1 children of sheet modals to shrink — prevents min-height:auto
+   from overflowing max-h-[90dvh] and blocking scroll */
+.sheet > * {
+  min-height: 0;
 }
 
 /* The scrollable body inside any modal (flex-1 overflow-y-scroll) */

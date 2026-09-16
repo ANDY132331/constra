@@ -881,7 +881,7 @@ export default function InvoicesPage() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
+            <div className="flex-1 min-h-0 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Client Name *</label>
