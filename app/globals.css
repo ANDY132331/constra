@@ -940,16 +940,13 @@ aside > div::-webkit-scrollbar {
    from causing layout jank. Use the viewport-fit=cover viewport.
    ══════════════════════════════════════════════════════════════════ */
 
-/* Ensure no element inside the app can inadvertently grow the document */
-body > * {
-  max-height: 100dvh;
-  overflow: hidden;
-}
-
-/* The main scroll container is the ONLY thing allowed to scroll */
+/* The main scroll container — allows vertical pan on Android WebView */
 .main-scroll {
   max-height: none !important;
   overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
 }
 
 /* ══════════════════════════════════════════════════════════════════
