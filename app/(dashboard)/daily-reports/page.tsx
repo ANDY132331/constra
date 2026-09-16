@@ -174,7 +174,7 @@ export default function DailyReportsPage() {
               {isAdminOrAbove(currentUser.role) && (
                 <button
                   onClick={() => setDeleteConfirm(selected.id)}
-                  className="p-1.5 rounded-lg text-white/20 hover:text-red-400 active:bg-red-500/[0.08]"
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>

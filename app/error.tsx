@@ -22,10 +22,26 @@ export default function GlobalError({
           <HardHat size={24} className="text-black" />
         </div>
         <h1 className="text-[22px] font-black text-white mb-2">Something went wrong</h1>
-        <p className="text-[13px] text-white/40 mb-8">
+        <p className="text-[13px] text-white/40 mb-4">
           An unexpected error occurred. Try refreshing the page — if it keeps happening, contact{" "}
           <a href="mailto:hello@getconstra.com" className="text-amber-400 hover:text-amber-300">hello@getconstra.com</a>.
         </p>
+        {(error.message || error.digest) && (
+          <div className="mb-6 text-left bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 space-y-1">
+            {error.message && (
+              <p className="text-[11px] font-mono text-white/50 break-all">{error.message}</p>
+            )}
+            {error.digest && (
+              <p className="text-[10px] font-mono text-white/25">digest: {error.digest}</p>
+            )}
+            <button
+              onClick={() => navigator.clipboard?.writeText(`${error.message ?? ""}${error.digest ? ` (digest: ${error.digest})` : ""}`)}
+              className="text-[10px] text-white/30 hover:text-white/50 transition-colors mt-1"
+            >
+              Copy error
+            </button>
+          </div>
+        )}
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={reset}

@@ -822,11 +822,11 @@ function SettingsInner() {
                     ) : (
                       <>
                         <span className="text-[13px] text-white/70 flex-1">{role}</span>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
                           <button onClick={() => { setEditingRole(role); setEditRoleValue(role); }}
-                            className="w-5 h-5 flex items-center justify-center text-white/30 hover:text-white/60 rounded"><Edit2 size={10} /></button>
+                            className="w-7 h-7 flex items-center justify-center text-white/40 bg-white/[0.04] active:bg-white/10 rounded-full transition-colors"><Edit2 size={10} /></button>
                           <button onClick={() => setDeleteRoleConfirm(role)}
-                            className="w-5 h-5 flex items-center justify-center text-white/20 hover:text-red-400 rounded"><Trash2 size={10} /></button>
+                            className="w-7 h-7 flex items-center justify-center text-red-400/50 bg-red-500/[0.06] active:bg-red-500/15 rounded-full transition-colors"><Trash2 size={10} /></button>
                         </div>
                       </>
                     )}

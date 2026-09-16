@@ -275,7 +275,7 @@ export default function MaterialsPage() {
                       <span>{format(new Date(entry.date), "MMM d, yyyy")}</span>
                     </div>
                     <button onClick={() => setDeleteConfirm(entry.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                      className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                       <Trash2 size={12} />
                     </button>
                   </div>
