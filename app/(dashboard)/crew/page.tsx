@@ -457,44 +457,49 @@ export default function CrewPage() {
       <div className="px-5 space-y-3">
         {filtered.map((worker) => {
           const roleCfg = ROLE_CONFIG[worker.role] ?? ROLE_CONFIG.Worker;
+          const workerHours = (() => { const h = getWorkerTotalHours(worker.id); return h > 0 ? `${h.toFixed(1)}h` : null; })();
           return (
-            <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4.5">
+            <div
+              key={worker.id}
+              className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4.5 hover:border-white/[0.12]"
+              style={{ borderLeftColor: worker.clockedIn ? "#22c55e" : "transparent", borderLeftWidth: 3 }}
+            >
               {/* Row 1: Avatar + Name + Role badge */}
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[14px] font-black"
+                <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[14px] font-black ring-2 ring-white/10"
                   style={{ backgroundColor: worker.color + "20", color: worker.color }}>
                   {worker.photo
                     ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                     : worker.initials}
                 </div>
-                <p className="text-[14px] font-bold text-white flex-1 min-w-0 truncate">{worker.name}</p>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${roleCfg.className}`}>
-                  {roleCfg.label}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold text-white truncate">{worker.name}</p>
+                  <p className="text-[11px] text-white/35 truncate">{worker.customRole}</p>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {worker.clockedIn ? (
+                    <div className="flex items-center gap-1 bg-green-500/10 border border-green-500/20 rounded-full px-2 py-0.5">
+                      <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                      <span className="text-[10px] text-green-400 font-bold">LIVE</span>
+                    </div>
+                  ) : (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${roleCfg.className}`}>
+                      {roleCfg.label}
+                    </span>
+                  )}
+                </div>
               </div>
-              {/* Row 2: custom role + clock status */}
-              <div className="flex items-center justify-between pl-14 mb-1.5">
-                <p className="text-[12px] text-white/35 truncate">{worker.customRole}</p>
-                {worker.clockedIn ? (
-                  <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                    <span className="text-[11px] text-green-400 font-semibold">Clocked In</span>
-                  </div>
-                ) : (
-                  <span className="text-[11px] text-white/30 flex-shrink-0 ml-2">Off</span>
-                )}
-              </div>
-              {/* Row 3: hours + email + actions */}
+              {/* Row 2: hours + email + actions */}
               <div className="flex items-center justify-between pl-14">
                 <div className="flex items-center gap-2 min-w-0">
                   {worker.email ? (
-                    <a href={`mailto:${worker.email}`} className="text-[11px] text-white/30 truncate max-w-[120px]">
+                    <a href={`mailto:${worker.email}`} className="text-[11px] text-white/30 truncate max-w-[130px] hover:text-white/60 transition-colors">
                       {worker.email}
                     </a>
                   ) : null}
-                  <span className="text-[11px] text-white/25 flex-shrink-0">
-                    {(() => { const h = getWorkerTotalHours(worker.id); return h > 0 ? `${h.toFixed(1)}h total` : null; })()}
-                  </span>
+                  {workerHours && (
+                    <span className="text-[11px] text-white/25 font-semibold tabular-nums flex-shrink-0 bg-white/[0.04] px-2 py-0.5 rounded-full">{workerHours}</span>
+                  )}
                 </div>
                 <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
                   {canEdit && isAdminOrAbove(currentUser.role) && (

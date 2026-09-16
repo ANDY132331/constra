@@ -153,7 +153,7 @@ export function MobileNav() {
             <Link
               key={label}
               href={href!}
-              className="flex-1 flex flex-col items-center justify-center gap-[5px] relative transition-all duration-150"
+              className="flex-1 flex flex-col items-center justify-center gap-[5px] relative transition-all duration-150 active:scale-95 active:opacity-70"
               style={{ color: active ? "#F5C400" : "rgba(255,255,255,0.28)" }}
             >
               {/* Active indicator — thin line at top */}

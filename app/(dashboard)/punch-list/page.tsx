@@ -180,7 +180,7 @@ export default function PunchListPage() {
 
             const priorityBorder = item.priority === "high" ? "#ef4444" : item.priority === "medium" ? "#F5C400" : "#374151";
             return (
-              <div key={item.id} className={`bg-[#131110] border rounded-2xl p-4 active:scale-[0.985] active:opacity-90 transition-transform ${overdue ? "border-red-500/25" : "border-white/[0.07]"}`}
+              <div key={item.id} className={`card-hover bg-[#131110] border rounded-2xl p-4 active:scale-[0.985] active:opacity-90 overflow-hidden ${overdue ? "border-red-500/25 hover:border-red-500/40" : "border-white/[0.07] hover:border-white/[0.12]"}`}
                 style={{ borderLeftColor: priorityBorder, borderLeftWidth: 3 }}>
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2 min-w-0">

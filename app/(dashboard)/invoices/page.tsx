@@ -266,7 +266,7 @@ function InvoiceDetail({
                 {/* Logo + company */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {companyLogo ? (
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl overflow-hidden flex-shrink-0">
                       <img src={companyLogo} alt={companyName} className="w-full h-full object-cover" />
                     </div>
                   ) : (
@@ -299,7 +299,7 @@ function InvoiceDetail({
 
             {/* â”€â”€ Status banners â”€â”€ */}
             {isOverdue && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
                 <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />
                 <div>
                   <p className="text-[12px] font-bold text-red-600">Payment Overdue</p>
@@ -308,7 +308,7 @@ function InvoiceDetail({
               </div>
             )}
             {isPaid && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
                 <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-emerald-700">Paid in Full â€” Thank you!</p>
               </div>
@@ -391,7 +391,7 @@ function InvoiceDetail({
                   <span className="text-gray-700 font-bold">Total</span>
                   <span className="text-gray-900 font-bold">{formatCurrency(Math.round(total), currency as never)}</span>
                 </div>
-                <div className={`flex justify-between items-center px-4 py-3 mt-2 rounded-xl ${ps.balanceBg}`}>
+                <div className={`flex justify-between items-center px-4 py-3 mt-2 rounded-2xl ${ps.balanceBg}`}>
                   <span className="text-[12px] font-black text-white">Balance Due</span>
                   <span className="text-[16px] sm:text-[18px] font-black text-white">
                     {formatCurrency(isPaid ? 0 : Math.round(total), currency as never)}
@@ -402,7 +402,7 @@ function InvoiceDetail({
 
             {/* â”€â”€ Notes â”€â”€ */}
             {invoice.notes && (
-              <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Notes</p>
                 <p className="text-[12px] text-gray-600 leading-relaxed">{invoice.notes}</p>
               </div>
@@ -663,7 +663,7 @@ export default function InvoicesPage() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.06] mx-5 mb-3 px-3.5 py-3 rounded-xl">
+        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.06] mx-5 mb-3 px-3.5 py-3 rounded-2xl">
           <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
             className="bg-transparent text-[13px] text-white/80 placeholder:text-white/30 outline-none flex-1"
@@ -706,7 +706,7 @@ export default function InvoicesPage() {
             action={{ label: "Create Invoice", onClick: () => setShowModal(true) }}
           />
         ) : (
-          <div className="mx-5 bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.05]">
+          <div className="mx-5 space-y-2.5">
             {filtered.map((inv) => {
               const total = invoiceTotal(inv);
               const cfg = STATUS_CONFIG[inv.status];
@@ -716,12 +716,12 @@ export default function InvoicesPage() {
                 <button
                   key={inv.id}
                   onClick={() => setMobilePreviewId(inv.id)}
-                  className="px-4 py-4 w-full text-left active:bg-white/[0.05] transition-colors"
+                  className="card-hover w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden active:scale-[0.985] active:opacity-90"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
                         <span className="font-mono text-[10px] text-white/25">{inv.number}</span>
                       </div>
                       <p className="text-[14px] font-semibold text-white/90 truncate">{inv.clientName}</p>
@@ -730,7 +730,7 @@ export default function InvoicesPage() {
                         {inv.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                       </p>
                     </div>
-                    <p className={`text-[17px] font-bold flex-shrink-0 ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
+                    <p className={`text-[18px] font-black flex-shrink-0 tabular-nums ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
                       {formatCurrencyCompact(Math.round(total), currency as never)}
                     </p>
                   </div>
@@ -1018,6 +1018,7 @@ export default function InvoicesPage() {
     </>
   );
 }
+
 
 
 

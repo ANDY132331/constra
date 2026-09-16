@@ -196,7 +196,7 @@ export default function ChangeOrdersPage() {
               </div>
             </div>
             <div className="px-5 mb-4">
-              <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+              <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-2xl px-3.5 py-3">
                 <Search size={14} className="text-white/30 flex-shrink-0" />
                 <input className="flex-1 bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none"
                   placeholder="Search change orders…" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -225,15 +225,26 @@ export default function ChangeOrdersPage() {
                 const proj = projectMap.get(co.projectId);
                 const cfg = STATUS_CONFIG[co.status];
                 return (
-                  <button key={co.id} onClick={() => setSelected(co)} className="w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 transition-transform">
+                  <button
+                    key={co.id}
+                    onClick={() => setSelected(co)}
+                    className="card-hover w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 hover:border-white/[0.12] overflow-hidden"
+                    style={{
+                      borderLeftColor: co.status === "approved" ? "#22c55e" : co.status === "rejected" ? "#ef4444" : co.status === "pending" ? "#F5C400" : "#52525b",
+                      borderLeftWidth: 3,
+                    }}
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-mono text-white/30">{co.number}</p>
-                        <p className="text-[13px] font-semibold text-white/85 mt-0.5 line-clamp-1">{co.title}</p>
-                        <p className="text-[11px] text-white/40 mt-0.5">{proj?.name ?? "Unknown project"}</p>
+                        <p className="text-[14px] font-bold text-white/85 mt-0.5 line-clamp-1">{co.title}</p>
+                        <p className="text-[11px] text-white/40 mt-1 flex items-center gap-1.5">
+                          {proj && <span className="w-1.5 h-1.5 rounded-full inline-block flex-shrink-0" style={{ backgroundColor: proj.color }} />}
+                          {proj?.name ?? "Unknown project"}
+                        </p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-[13px] font-bold font-mono text-white/80">{formatCurrency(co.amount, currency as never)}</p>
+                        <p className="text-[15px] font-black font-mono text-white/80 tabular-nums">{formatCurrency(co.amount, currency as never)}</p>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${cfg.bg} ${cfg.text}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                           {cfg.label}
@@ -443,7 +454,7 @@ export default function ChangeOrdersPage() {
 
           <div className="flex-1 overflow-y-scroll px-6 py-5 space-y-5">
             {/* Amount */}
-            <div className="bg-white/[0.03] rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-white/[0.03] rounded-2xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-amber-500/15 rounded-lg flex items-center justify-center">
                   <DollarSign size={16} className="text-amber-400" />
@@ -497,7 +508,7 @@ export default function ChangeOrdersPage() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
-          <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-xl w-full max-w-lg max-h-[90dvh] flex flex-col">
+          <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-[14px] font-bold text-white/90">{editing ? "Edit Change Order" : "New Change Order"}</h3>
               <button onClick={() => { setShowForm(false); setEditing(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
@@ -606,6 +617,7 @@ function DetailSection({ title, content }: { title: string; content: string }) {
     </div>
   );
 }
+
 
 
 

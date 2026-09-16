@@ -399,9 +399,13 @@ export default function TimeTrackingPage() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const clockedIn = isEmployee
+  // Cross-check: only show worker as "live" if they have an actual open clock entry (no clockOut).
+  // This prevents a phantom running timer when the worker.clockedIn flag is stale in Supabase
+  // (e.g. the profile update failed while offline but the clock entry was written correctly).
+  const clockedIn = (isEmployee
     ? workers.filter((w) => w.clockedIn && w.id === currentUser.id)
-    : workers.filter((w) => w.clockedIn);
+    : workers.filter((w) => w.clockedIn)
+  ).filter((w) => clockEntries.some((e) => e.workerId === w.id && !e.clockOut));
 
   const todayHours = clockEntries
     .filter((e) => e.clockOut && e.clockIn >= todayStart)
@@ -488,10 +492,13 @@ export default function TimeTrackingPage() {
   }, [cameraTarget, clockEntries, addClockEntry, updateClockEntry, updateWorker, getProjectById, companyId]);
 
   const handleClockOut = useCallback((workerId: string) => {
-    const entry = [...clockEntries].reverse().find((e) => e.workerId === workerId && !e.clockOut);
     const now = new Date();
+    // Find ALL open entries for this worker and close them all (prevents orphaned running timers)
+    const openEntries = clockEntries.filter((e) => e.workerId === workerId && !e.clockOut);
+    const entry = openEntries[openEntries.length - 1]; // most recent
+    // Close every open entry (defensive: should only ever be one)
+    openEntries.forEach((e) => updateClockEntry(e.id, { clockOut: now }));
     if (entry) {
-      updateClockEntry(entry.id, { clockOut: now });
       const worker = getWorkerById(workerId);
       const project = getProjectById(entry.projectId);
       const hrs = ((now.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1);
@@ -503,6 +510,7 @@ export default function TimeTrackingPage() {
       });
       toast.success(`${worker?.name ?? "Worker"} clocked out — ${hrs}h logged`);
     }
+    // Always clear the worker's live status, even if no open entry was found (fixes stale Supabase state)
     updateWorker(workerId, { clockedIn: false, clockInTime: undefined, clockInGps: undefined });
     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(60);
   }, [clockEntries, updateClockEntry, updateWorker, getWorkerById, getProjectById, companyId]);
@@ -558,8 +566,10 @@ export default function TimeTrackingPage() {
       return {
         id: `live-${w.id}`,
         workerId: w.id,
-        projectId: w.projectIds[0] ?? "",
-        clockIn: w.clockInTime ?? new Date(),
+        // Prefer the actual clock entry projectId; fall back to worker's primary project
+        projectId: activeEntry?.projectId ?? w.projectIds[0] ?? "",
+        // Prefer the actual clock entry clockIn timestamp — w.clockInTime can be stale
+        clockIn: activeEntry?.clockIn ?? w.clockInTime ?? new Date(),
         clockOut: undefined as Date | undefined,
         live: true,
         verificationFlags: activeEntry?.verificationFlags,

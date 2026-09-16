@@ -180,7 +180,7 @@ export default function MessagesPage() {
                 {currentUser.initials}
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-xl px-3 py-2.5" style={{ background: C.barBg }}>
+            <div className="flex items-center gap-2 rounded-full px-3 py-2.5" style={{ background: C.barBg }}>
               <Search size={14} style={{ color: C.secondaryText }} />
               <input
                 value={sidebarSearch}
@@ -207,7 +207,7 @@ export default function MessagesPage() {
                   <button
                     key={p.id}
                     onClick={() => { setSelectedProjectId(p.id); setMobileSidebarOpen(false); }}
-                    className="w-full text-start flex items-center gap-3 px-4 py-3.5 transition-all relative"
+                    className="w-full text-start flex items-center gap-3 px-4 py-3.5 transition-all relative active:scale-[0.98] active:opacity-85"
                     style={{
                       background: active ? C.activeRow : "transparent",
                       borderLeft: `3px solid ${active ? C.activeBorder : "transparent"}`,

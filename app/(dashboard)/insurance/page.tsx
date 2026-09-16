@@ -243,7 +243,7 @@ export default function InsurancePage() {
           action={!search && typeFilter === "all" && statusFilter === "all" && isAdmin ? { label: "Add Policy", onClick: () => setShowModal(true) } : undefined}
         />
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {filtered.map((policy) => {
             const status = expiryStatus(policy.expiryDate);
             const cfg = STATUS_CONFIG[status];
@@ -252,10 +252,12 @@ export default function InsurancePage() {
             const days = daysUntilExpiry(policy.expiryDate);
             const worker = policy.workerId ? workers.find((w) => w.id === policy.workerId) : null;
 
+            const borderColor = status === "expired" ? "#ef4444" : status === "soon" ? "#F5C400" : "#22c55e";
             return (
               <div
                 key={policy.id}
-                className="group bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-4 hover:border-white/[0.10] active:scale-[0.985] active:opacity-90 transition-all"
+                className="card-hover group bg-[#131110] border border-white/[0.06] rounded-2xl px-4 py-4 hover:border-white/[0.10] active:scale-[0.985] active:opacity-90 overflow-hidden"
+                style={{ borderLeftColor: borderColor, borderLeftWidth: 3 }}
               >
                 <div className="flex items-start gap-3">
                   {/* Status dot */}

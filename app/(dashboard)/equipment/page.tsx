@@ -182,8 +182,12 @@ export default function EquipmentPage() {
               const project = eq.projectId ? getProjectById(eq.projectId) : null;
               const cfg = STATUS_CONFIG[eq.status];
               const serviceOverdue = eq.nextService <= new Date();
+              const statusDot = STATUS_CONFIG[eq.status].dot;
               return (
-                <div key={eq.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                <div key={eq.id}
+                  className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 hover:border-white/[0.12] overflow-hidden"
+                  style={{ borderLeftColor: statusDot, borderLeftWidth: 3 }}
+                >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="min-w-0">
                       <p className="text-[14px] font-bold text-white/85">{eq.name}</p>

@@ -147,7 +147,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
 
           {showNew && (
-            <div className="pop-in absolute right-0 top-full mt-2 w-48 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
+            <div className="pop-in absolute right-0 top-full mt-2 w-48 bg-[#1a1a1a] border border-white/[0.10] rounded-2xl shadow-2xl overflow-hidden z-50">
               <p className="text-[9px] font-bold uppercase tracking-widest text-white/25 px-4 pt-3 pb-2">Quick Add</p>
               {QUICK_ADD.map(({ label, icon: Icon, href }) => (
                 <button
@@ -202,7 +202,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
 
           {showNotif && (
-            <div className="pop-in absolute right-0 top-full mt-2 w-80 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
+            <div className="pop-in absolute right-0 top-full mt-2 w-80 bg-[#1a1a1a] border border-white/[0.10] rounded-2xl shadow-2xl overflow-hidden z-50">
               <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-white/[0.06]">
                 <p className="text-[13px] font-bold text-white">Notifications</p>
                 <button onClick={() => setShowNotif(false)} aria-label="Close notifications" className="w-8 h-8 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/[0.05] rounded-full transition-colors -mr-1">
@@ -298,7 +298,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
 
           {showUser && (
-            <div className="pop-in absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50">
+            <div className="pop-in absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/[0.10] rounded-2xl shadow-2xl overflow-hidden z-50">
               {/* User identity */}
               <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
                 {companyLogo ? (
@@ -359,4 +359,5 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
     </header>
   );
 }
+
 

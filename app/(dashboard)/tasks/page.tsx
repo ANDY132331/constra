@@ -181,7 +181,7 @@ export default function TasksPage() {
             const isOverdueMobile = task.status !== "completed" && isBefore(task.endDate, today);
             const borderAccent = isOverdueMobile ? "#ef4444" : task.status === "delayed" ? "#ef4444" : task.status === "in-progress" ? "#F5C400" : task.status === "completed" ? "#22c55e" : "#3b82f6";
             return (
-              <div key={task.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 transition-transform overflow-hidden relative"
+              <div key={task.id} className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 overflow-hidden relative hover:border-white/[0.12]"
                 style={{ borderLeftColor: borderAccent, borderLeftWidth: 3 }}>
                 <div className="flex items-start gap-3 mb-3">
                   <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} aria-label={`Status: ${cfg.label} — tap to cycle`} className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full -ml-1 -mt-1 active:bg-white/[0.06] transition-colors">

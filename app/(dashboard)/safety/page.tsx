@@ -265,8 +265,12 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
             const typeCfg = TYPE_CONFIG[incident.type];
             const sevCfg = SEVERITY_CONFIG[incident.severity];
             const TypeIcon = typeCfg.icon;
+            const severityBorderColor = incident.severity === "critical" ? "#ef4444" : incident.severity === "high" ? "#f97316" : incident.severity === "medium" ? "#F5C400" : "#3b82f6";
             return (
-              <div key={incident.id} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+              <div key={incident.id}
+                className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 hover:border-white/[0.12] overflow-hidden"
+                style={{ borderLeftColor: severityBorderColor, borderLeftWidth: 3 }}
+              >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <span style={{ color: typeCfg.color }}><TypeIcon size={15} /></span>
@@ -276,13 +280,13 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
                     <button
                       onClick={() => openEdit(incident)}
-                      className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-white/70 transition-colors"
+                      className="p-1.5 rounded-full bg-white/[0.05] text-white/40 active:text-white/70 transition-colors"
                     >
                       <Pencil size={12} />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(incident.id)}
-                      className="p-1.5 rounded-lg bg-white/[0.05] text-white/40 active:text-red-400 transition-colors"
+                      className="p-1.5 rounded-full bg-white/[0.05] text-white/40 active:text-red-400 transition-colors"
                     >
                       <Trash2 size={12} />
                     </button>

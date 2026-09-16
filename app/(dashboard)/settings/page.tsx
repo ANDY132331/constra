@@ -66,7 +66,7 @@ function SignOutOtherDevices() {
   }
 
   return (
-    <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+    <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
       <h4 className="text-[14px] font-bold text-white mb-1">Active Sessions</h4>
       <p className="text-[12px] text-white/40 mb-4">
         Sign out of all other devices where you&apos;re currently logged in. Your current session stays active.
@@ -460,7 +460,7 @@ function SettingsInner() {
                 </span>
               )}
             </div>
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 space-y-4">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4">
               {/* Logo upload */}
               <div>
                 <label className={lbl}>Company Logo</label>
@@ -535,7 +535,7 @@ function SettingsInner() {
             </div>
 
             {/* ── Overtime Rules ── */}
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 space-y-4">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Clock size={16} className="text-amber-400" />
@@ -614,7 +614,7 @@ function SettingsInner() {
               </button>
             </div>
 
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <h4 className="text-[14px] font-bold text-white mb-1">Team Invite Code</h4>
               <p className="text-[12px] text-white/40 mb-4">Share this code so workers can join your workspace from the sign-in page.</p>
               <div className="flex items-center gap-3">
@@ -654,7 +654,7 @@ function SettingsInner() {
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">App Preferences</h3>
 
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-4">
                 <Globe size={16} className="text-amber-400" />
                 <div>
@@ -673,7 +673,7 @@ function SettingsInner() {
               </div>
             </div>
 
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-4">
                 <DollarSign size={16} className="text-amber-400" />
                 <div>
@@ -696,7 +696,7 @@ function SettingsInner() {
               </div>
             </div>
 
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-4">
                 <Briefcase size={16} className="text-amber-400" />
                 <div>
@@ -725,7 +725,7 @@ function SettingsInner() {
                 + Add new worker →
               </Link>
             </div>
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl overflow-hidden">
               <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
                 style={{ gridTemplateColumns: "2fr 1fr 120px 80px" }}>
                 <span>Worker</span><span>Contact</span><span>Role</span><span className="text-right">Action</span>
@@ -782,7 +782,7 @@ function SettingsInner() {
             </div>
 
             {/* System roles */}
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <p className="text-[11px] font-bold uppercase tracking-widest text-white/25 mb-3">System Roles (read-only)</p>
               <div className="grid grid-cols-2 gap-2">
                 {["Admin / Owner", "Project Manager", "Foreman / Supervisor", "Worker / Labourer"].map((role) => (
@@ -795,7 +795,7 @@ function SettingsInner() {
             </div>
 
             {/* Custom roles */}
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <p className="text-[11px] font-bold uppercase tracking-widest text-white/25 mb-3">Your Custom Roles</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {customRoles.length === 0 && (
@@ -856,12 +856,12 @@ function SettingsInner() {
           <div className="space-y-5">
             <h3 className="text-[17px] font-bold text-white">Notification Preferences</h3>
             {notifPerms === "unsupported" ? (
-              <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 flex items-center gap-4">
+              <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 flex items-center gap-4">
                 <BellOff size={20} className="text-white/20 flex-shrink-0" />
                 <p className="text-[13px] text-white/40">Your browser doesn&apos;t support notifications.</p>
               </div>
             ) : notifPerms === "denied" ? (
-              <div className="bg-[#111111] border border-red-500/20 rounded-xl p-5 flex items-start gap-4">
+              <div className="bg-[#111111] border border-red-500/20 rounded-2xl p-5 flex items-start gap-4">
                 <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center flex-shrink-0">
                   <BellOff size={16} className="text-red-400" />
                 </div>
@@ -871,7 +871,7 @@ function SettingsInner() {
                 </div>
               </div>
             ) : notifPerms === "default" ? (
-              <div className="bg-[#111111] border border-amber-500/20 rounded-xl p-5 flex items-center gap-4">
+              <div className="bg-[#111111] border border-amber-500/20 rounded-2xl p-5 flex items-center gap-4">
                 <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
                   <Bell size={16} className="text-amber-400" />
                 </div>
@@ -885,13 +885,13 @@ function SettingsInner() {
                 </button>
               </div>
             ) : (
-              <div className="bg-[#111111] border border-green-500/20 rounded-xl p-4 flex items-center gap-3">
+              <div className="bg-[#111111] border border-green-500/20 rounded-2xl p-4 flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                 <p className="text-[13px] text-green-400 font-medium">Browser notifications are active</p>
               </div>
             )}
 
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl divide-y divide-white/[0.05]">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.05]">
               {(Object.keys(CATEGORY_LABELS) as NotifCategory[]).map((cat) => {
                 const { label, description } = CATEGORY_LABELS[cat];
                 const on = notifPrefs[cat];
@@ -919,7 +919,7 @@ function SettingsInner() {
             <h3 className="text-[17px] font-bold text-white">Security</h3>
 
             {/* Change password */}
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <h4 className="text-[14px] font-bold text-white mb-1">Change Password</h4>
               <p className="text-[12px] text-white/40 mb-4">Must be at least 8 characters.</p>
 
@@ -1028,7 +1028,7 @@ function SettingsInner() {
             <SignOutOtherDevices />
 
             {/* 2FA — informational only for now */}
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <h4 className="text-[14px] font-bold text-white mb-1">Two-Factor Authentication</h4>
               <p className="text-[12px] text-white/40 mb-4">
                 2FA is managed through Supabase Auth. Contact your account admin or visit the Supabase dashboard to enable TOTP-based 2FA for your organisation.
@@ -1040,7 +1040,7 @@ function SettingsInner() {
             </div>
 
             {/* Danger zone */}
-            <div className="bg-[#111111] border border-red-500/15 rounded-xl p-5">
+            <div className="bg-[#111111] border border-red-500/15 rounded-2xl p-5">
               <h4 className="text-[14px] font-bold text-red-400 mb-1">Danger Zone</h4>
               {isAdminOrAbove(currentUser.role) ? (
                 <p className="text-[12px] text-white/40 mb-4">
@@ -1315,7 +1315,7 @@ function AccessControlTab({
       </div>
 
       {/* Permissions PIN section */}
-      <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 space-y-4">
+      <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[13px] font-bold text-white">Permissions PIN</p>
@@ -1376,7 +1376,7 @@ function AccessControlTab({
             const isSuccess = successId === worker.id;
 
             return (
-              <div key={worker.id} className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden">
+              <div key={worker.id} className="bg-[#111111] border border-white/[0.06] rounded-2xl overflow-hidden">
                 {/* Worker row */}
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : worker.id)}
@@ -1524,6 +1524,7 @@ function AccessControlTab({
     </div>
   );
 }
+
 
 
 

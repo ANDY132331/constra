@@ -246,7 +246,7 @@ function EstimateDetail({
                 {/* Logo + company */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {companyLogo ? (
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl overflow-hidden flex-shrink-0">
                       <img src={companyLogo} alt={companyName} className="w-full h-full object-cover" />
                     </div>
                   ) : (
@@ -279,19 +279,19 @@ function EstimateDetail({
 
             {/* â”€â”€ Status banners â”€â”€ */}
             {isAccepted && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
                 <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-emerald-700">Estimate Accepted</p>
               </div>
             )}
             {isDeclined && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
                 <XCircle size={14} className="text-red-600 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-red-700">Estimate Declined</p>
               </div>
             )}
             {isExpired && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3">
+              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
                 <Clock size={14} className="text-orange-500 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-orange-700">Expired â€” was valid until {estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
               </div>
@@ -379,7 +379,7 @@ function EstimateDetail({
                   <span className="text-gray-700 font-bold">Total</span>
                   <span className="text-gray-900 font-bold">{formatCurrency(Math.round(total), currency as never)}</span>
                 </div>
-                <div className={`flex justify-between items-center px-4 py-3 mt-2 rounded-xl ${ps.totalBg}`}>
+                <div className={`flex justify-between items-center px-4 py-3 mt-2 rounded-2xl ${ps.totalBg}`}>
                   <span className="text-[12px] font-black text-white">Estimate Total</span>
                   <span className="text-[16px] sm:text-[18px] font-black text-white">
                     {formatCurrency(Math.round(total), currency as never)}
@@ -390,7 +390,7 @@ function EstimateDetail({
 
             {/* â”€â”€ Notes â”€â”€ */}
             {estimate.notes && (
-              <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Notes &amp; Scope</p>
                 <p className="text-[12px] text-gray-600 leading-relaxed">{estimate.notes}</p>
               </div>
@@ -646,7 +646,7 @@ export default function EstimatesPage() {
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â• MOBILE â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <div className="lg:hidden -mx-5 -mt-5 pb-6">
         {convertedNotice && (
-          <div className="flex items-center justify-between gap-3 mx-4 mt-4 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+          <div className="flex items-center justify-between gap-3 mx-4 mt-4 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
             <p className="text-[13px] text-emerald-400 font-semibold">Invoice {convertedNotice} created â€” find it in Invoices.</p>
             <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400">âœ•</button>
           </div>
@@ -680,7 +680,7 @@ export default function EstimatesPage() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-xl">
+        <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-2xl">
           <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
             className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
@@ -717,28 +717,30 @@ export default function EstimatesPage() {
             action={{ label: "New Estimate", onClick: () => setShowModal(true) }}
           />
         ) : (
-          <div className="divide-y divide-white/[0.05]">
+          <div className="px-5 space-y-2.5 pb-4">
             {filtered.map((est) => {
               const total = estimateTotal(est);
               const cfg = STATUS_CONFIG[est.status];
               const isAccepted = est.status === "accepted";
               const isDeclined = est.status === "declined";
+              const borderColor = isAccepted ? "#22c55e" : isDeclined ? "#ef4444" : est.status === "sent" ? "#3b82f6" : "#52525b";
               return (
                 <button
                   key={est.id}
                   onClick={() => setMobilePreviewId(est.id)}
-                  className="px-5 py-4 w-full text-left active:bg-white/[0.03] transition-colors"
+                  className="card-hover w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden active:scale-[0.985] active:opacity-90 hover:border-white/[0.12]"
+                  style={{ borderLeftColor: borderColor, borderLeftWidth: 3 }}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="px-4 py-4 flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
+                      <div className="flex items-center gap-2 mb-1">
                         <span className="font-mono text-[10px] text-white/30">{est.number}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
                       </div>
-                      <p className="text-[14px] font-semibold text-white/90 truncate">{est.projectName}</p>
+                      <p className="text-[14px] font-bold text-white/90 truncate">{est.projectName}</p>
                       <p className="text-[11px] mt-0.5 text-white/35">{est.clientName}</p>
                     </div>
-                    <p className={`text-[16px] font-black flex-shrink-0 ${isAccepted ? "text-emerald-400" : isDeclined ? "text-red-400" : "text-white"}`}>
+                    <p className={`text-[18px] font-black flex-shrink-0 tabular-nums ${isAccepted ? "text-emerald-400" : isDeclined ? "text-red-400" : "text-white"}`}>
                       {formatCurrencyCompact(Math.round(total), currency as never)}
                     </p>
                   </div>
@@ -1049,6 +1051,7 @@ export default function EstimatesPage() {
     </>
   );
 }
+
 
 
 

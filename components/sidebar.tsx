@@ -79,23 +79,23 @@ function NavItem({
     <Link
       href={href}
       onClick={onClose}
-      className={`group flex items-center gap-3 py-2.5 rounded-xl text-[13px] transition-all duration-150 mb-0.5 relative overflow-hidden ${
+      className={`group flex items-center gap-3 py-2.5 rounded-2xl text-[13px] transition-all duration-150 mb-0.5 relative overflow-hidden active:scale-[0.97] active:opacity-80 ${
         active
-          ? "bg-amber-500/[0.12] text-amber-400 pl-3 pr-3"
+          ? "bg-amber-500/[0.13] text-amber-400 pl-3 pr-3"
           : "text-white/50 hover:text-white/85 hover:bg-white/[0.06] px-3"
       }`}
-      style={active ? { boxShadow: "inset 2px 0 0 #F5C400" } : {}}
+      style={active ? { boxShadow: "inset 3px 0 0 #F5C400" } : {}}
     >
       {/* Active bg shimmer */}
       {active && (
-        <span className="absolute inset-0 rounded-xl pointer-events-none"
-          style={{ background: "linear-gradient(90deg, rgba(245,196,0,0.07) 0%, transparent 70%)" }} />
+        <span className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{ background: "linear-gradient(90deg, rgba(245,196,0,0.09) 0%, transparent 65%)" }} />
       )}
       <Icon
         size={15}
         className={`flex-shrink-0 transition-all duration-150 relative ${active ? "text-amber-400" : "text-white/30 group-hover:text-white/60"}`}
       />
-      <span className={`flex-1 relative ${active ? "font-semibold" : "font-medium"}`}>{label}</span>
+      <span className={`flex-1 relative ${active ? "font-bold" : "font-medium"}`}>{label}</span>
       {badge && (
         <span className={`text-[10px] min-w-[18px] h-[18px] px-1.5 flex items-center justify-center rounded-full font-bold relative ${
           active ? "bg-amber-500/30 text-amber-300" : "bg-amber-500/20 text-amber-400"
@@ -173,7 +173,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
             onClose?.();
             window.dispatchEvent(new CustomEvent("open-search"));
           }}
-          className="w-full flex items-center gap-2.5 bg-white/[0.04] hover:bg-white/[0.07] rounded-lg px-3 py-2 transition-colors text-left"
+          className="w-full flex items-center gap-2.5 bg-white/[0.04] hover:bg-white/[0.07] rounded-xl px-3 py-2 transition-colors text-left active:scale-[0.98]"
         >
           <Search size={13} className="text-white/30 flex-shrink-0" />
           <span className="text-[12px] text-white/25 flex-1">{t.common.search}…</span>

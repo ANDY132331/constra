@@ -161,7 +161,7 @@ export default function RFIsPage() {
         </div>
 
         {/* List */}
-        <div className="divide-y divide-white/[0.04]">
+        <div className="px-5 pb-4 space-y-2.5">
           {rfis.length === 0 ? (
             <EmptyState
               icon={MessageSquare}
@@ -182,11 +182,13 @@ export default function RFIsPage() {
               const statusCfg = STATUS_CONFIG[rfi.status];
               const prioCfg = PRIORITY_CONFIG[rfi.priority];
               const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
+              const borderColor = rfi.priority === "critical" ? "#ef4444" : rfi.priority === "urgent" ? "#F5C400" : "#3b82f6";
               return (
                 <button
                   key={rfi.id}
                   onClick={() => { setExpanded(expanded === rfi.id ? null : rfi.id); }}
-                  className={`w-full text-left px-5 py-4 active:bg-white/[0.04] transition-colors ${isOverdue ? "bg-red-500/[0.03]" : ""}`}
+                  className={`card-hover w-full text-left bg-[#131110] border rounded-2xl p-4 active:scale-[0.985] active:opacity-90 ${isOverdue ? "border-red-500/25" : "border-white/[0.07] hover:border-white/[0.12]"}`}
+                  style={{ borderLeftColor: borderColor, borderLeftWidth: 3 }}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -207,7 +209,7 @@ export default function RFIsPage() {
                         {project.name}
                       </span>
                     ) : <span />}
-                    <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                    <span className={isOverdue ? "text-red-400 font-semibold" : ""}>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
                   </div>
                   {/* Expanded answer view on mobile */}
                   {expanded === rfi.id && rfi.answer && (
@@ -293,7 +295,8 @@ export default function RFIsPage() {
               const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
 
               return (
-                <div key={rfi.id} className={`bg-[#111111] border rounded-xl overflow-hidden transition-all ${isOverdue ? "border-red-500/20" : "border-white/[0.06] hover:border-white/10"}`}>
+                <div key={rfi.id} className={`card-hover bg-[#111111] border rounded-2xl overflow-hidden ${isOverdue ? "border-red-500/20 hover:border-red-500/35" : "border-white/[0.06] hover:border-white/[0.12]"}`}
+                  style={{ borderLeftColor: rfi.priority === "critical" ? "#ef4444" : rfi.priority === "urgent" ? "#F5C400" : "#3b82f6", borderLeftWidth: 3 }}>
                   <button className="w-full flex items-center gap-4 px-5 py-4 text-left"
                     onClick={() => setExpanded(isOpen ? null : rfi.id)}>
                     <StatusIcon size={16} className={statusCfg.className.split(" ")[1]} />

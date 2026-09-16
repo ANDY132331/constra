@@ -103,11 +103,11 @@ export default function BlueprintsPage() {
             value={selectedProjectId}
             onChange={(v) => { setSelectedProjectId(v); setSelectedDocId(null); }}
             options={projects.map((p) => ({ value: p.id, label: p.name }))}
-            className="w-full bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 text-[14px] text-white/80 outline-none focus:border-amber-500/30"
+            className="w-full bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 text-[14px] text-white/80 outline-none focus:border-amber-500/30"
           />
         </div>
         {uploadError && (
-          <div className="px-4 mb-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl py-2.5 mx-4">
+          <div className="px-4 mb-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-2xl py-2.5 mx-4">
             <AlertTriangle size={13} className="text-red-400 flex-shrink-0" />
             <p className="text-[12px] text-red-300 flex-1">{uploadError}</p>
             <button onClick={() => setUploadError(null)} className="text-red-400/50 hover:text-red-400"><X size={12} /></button>
@@ -164,7 +164,7 @@ export default function BlueprintsPage() {
                   href={selectedDoc.publicUrl ?? selectedDoc.dataUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 text-[13px] font-bold active:scale-95 transition-transform"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-400 text-[13px] font-bold active:scale-95 transition-transform"
                 >
                   <ExternalLink size={14} /> Open
                 </a>
@@ -173,7 +173,7 @@ export default function BlueprintsPage() {
                 <a
                   href={selectedDoc.publicUrl ?? selectedDoc.dataUrl}
                   download={selectedDoc.name}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/[0.05] border border-white/[0.07] rounded-xl text-white/60 text-[13px] font-bold active:scale-95 transition-transform"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/[0.05] border border-white/[0.07] rounded-2xl text-white/60 text-[13px] font-bold active:scale-95 transition-transform"
                 >
                   <Download size={14} /> Download
                 </a>
@@ -400,5 +400,6 @@ export default function BlueprintsPage() {
     </>
   );
 }
+
 
 

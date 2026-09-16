@@ -218,7 +218,7 @@ export default function DailyReportsPage() {
             </div>
 
             {/* Search */}
-            <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-xl">
+            <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-2xl">
               <Search size={14} className="text-white/30 flex-shrink-0" />
               <input
                 className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
@@ -231,7 +231,7 @@ export default function DailyReportsPage() {
             {/* Project filter */}
             <div className="px-5 mb-4">
               <CustomSelect
-                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 text-[12px] text-white/60 outline-none"
+                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-2xl px-3 py-2.5 text-[12px] text-white/60 outline-none"
                 value={projectFilter}
                 onChange={(v) => setProjectFilter(v)}
                 options={[
@@ -251,7 +251,7 @@ export default function DailyReportsPage() {
             </div>
 
             {/* List */}
-            <div className="divide-y divide-white/[0.05]">
+            <div className="px-5 pb-4 space-y-2.5">
               {filtered.length === 0 ? (
                 <EmptyState
                   icon={ClipboardList}
@@ -272,9 +272,10 @@ export default function DailyReportsPage() {
                     <button
                       key={report.id}
                       onClick={() => setSelected(report)}
-                      className="w-full text-left px-5 py-4 active:bg-white/[0.04] transition-colors"
+                      className="card-hover w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 hover:border-white/[0.12]"
+                      style={{ borderLeftColor: proj?.color ?? "#F5C400", borderLeftWidth: 3 }}
                     >
-                      <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
                         <div>
                           <span className="text-[14px] font-bold text-white/90 leading-none">
                             {report.date.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
@@ -288,7 +289,7 @@ export default function DailyReportsPage() {
                           <ChevronRight size={14} className="text-white/20" />
                         </div>
                       </div>
-                      <p className="text-[12px] text-white/55 line-clamp-2 mb-2">{report.workCompleted}</p>
+                      <p className="text-[12px] text-white/55 line-clamp-2 mb-2.5">{report.workCompleted}</p>
                       <div className="flex items-center gap-3">
                         <span className="flex items-center gap-1 text-[10px] text-white/30">
                           <Cloud size={10} /> {report.weather}
@@ -497,7 +498,7 @@ export default function DailyReportsPage() {
       {/* New Report Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
-          <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-xl w-full max-w-lg max-h-[90dvh] sm:max-h-[85dvh] flex flex-col">
+          <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] sm:max-h-[85dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-[14px] font-bold text-white/90">New Daily Report</h3>
               <button onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
@@ -622,6 +623,7 @@ function Section({ title, content, color }: { title: string; content: string; co
     </div>
   );
 }
+
 
 
 

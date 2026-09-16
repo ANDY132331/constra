@@ -265,7 +265,7 @@ export default function ReportsPage() {
             { label: "Budget Used", icon: DollarSign, color: "text-green-400", value: totalBudget > 0 ? `${((totalSpent / totalBudget) * 100).toFixed(0)}%` : "—", sub: totalBudget > 0 ? `${formatCurrencyCompact(totalSpent, currency)} spent` : "No budgets" },
             { label: "Avg Hrs/Worker", icon: TrendingUp, color: "text-purple-400", value: workers.length > 0 && hasHoursData ? `${(totalHours / workers.length).toFixed(1)}h` : "—", sub: "This period" },
           ].map((kpi) => (
-            <div key={kpi.label} className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+            <div key={kpi.label} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
               <kpi.icon size={15} className={`${kpi.color} mb-2`} />
               <p className="text-[24px] font-black text-white">{kpi.value}</p>
               <p className="text-[10px] font-bold text-white/30 uppercase tracking-wide mt-0.5">{kpi.label}</p>
@@ -275,7 +275,7 @@ export default function ReportsPage() {
         </div>
         {/* Hours bar chart */}
         <div className="px-5 mb-4">
-          <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
             <p className="text-[13px] font-bold text-white mb-4">{period === "week" ? "Daily" : "Weekly"} Hours</p>
             {!hasHoursData ? (
               <div className="flex flex-col items-center justify-center h-24 gap-2">
@@ -301,7 +301,7 @@ export default function ReportsPage() {
         {/* Budget bars */}
         {projectBudgets.length > 0 && (
           <div className="px-5 mb-4">
-            <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 space-y-4">
+            <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 space-y-4">
               <p className="text-[13px] font-bold text-white">Budget Tracking</p>
               {projectBudgets.map((p) => {
                 const over = p.pct > 90;
@@ -333,7 +333,7 @@ export default function ReportsPage() {
         {/* Top workers */}
         {topWorkers.length > 0 && (
           <div className="px-5">
-            <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4 space-y-3">
+            <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 space-y-3">
               <p className="text-[13px] font-bold text-white">Top Workers</p>
               {topWorkers.map((worker, i) => {
                 const maxH = topWorkers[0].hoursThisPeriod;
@@ -385,7 +385,7 @@ export default function ReportsPage() {
           if (projectCosts.length === 0) return null;
           return (
             <div className="px-4 mt-4">
-              <div className="bg-[#131110] border border-white/[0.07] rounded-xl p-4">
+              <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
                 <p className="text-[13px] font-bold text-white mb-3">Cost per Project</p>
                 <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-[11px] min-w-[420px]">
@@ -513,7 +513,7 @@ export default function ReportsPage() {
             sub: hasHoursData ? "This period per worker" : "No hours recorded yet",
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
+          <div key={kpi.label} className="bg-[#111111] border border-white/[0.06] rounded-2xl p-4">
             <kpi.icon size={16} className={`${kpi.color} mb-3`} />
             <p className="text-[26px] font-black text-white">{kpi.value}</p>
             <p className="text-[10px] font-bold text-white/30 mt-0.5 uppercase tracking-wide">{kpi.label}</p>
@@ -524,7 +524,7 @@ export default function ReportsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Daily/Weekly Hours Chart — real data */}
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+        <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-[14px] font-bold text-white">
               {period === "week" ? "Daily" : period === "month" ? "Weekly" : "Weekly"} Hours
@@ -556,7 +556,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Budget Tracking — real project data */}
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+        <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-[14px] font-bold text-white">Budget Tracking</h3>
             <span className="text-[11px] text-white/30">Active Projects</span>
@@ -612,7 +612,7 @@ export default function ReportsPage() {
         }).filter((p) => p.labourHours > 0 || p.budget > 0);
         if (projectCosts.length === 0) return null;
         return (
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[14px] font-bold text-white">Cost per Project</h3>
               <span className="text-[11px] text-white/30">Labour × rate + budget · {periodLabel}</span>
@@ -655,7 +655,7 @@ export default function ReportsPage() {
       })()}
 
       {/* Top Workers — real hours only */}
-      <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+      <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[14px] font-bold text-white">Top Workers</h3>
           <span className="text-[11px] text-white/30">By Hours · {periodLabel}</span>
@@ -713,4 +713,5 @@ export default function ReportsPage() {
     </>
   );
 }
+
 

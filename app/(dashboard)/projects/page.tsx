@@ -20,7 +20,7 @@ const COLORS = ["#F5C400","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
 // Mobile-optimised variants — larger touch targets
-const mInp = "w-full bg-[#161616] border border-white/[0.08] rounded-xl px-4 py-3.5 text-[15px] text-white/90 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
+const mInp = "w-full bg-[#161616] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-[15px] text-white/90 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const mLbl = "block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2";
 
 function StatusBadge({ status, pending }: { status: string; pending?: boolean }) {
@@ -255,7 +255,7 @@ export default function ProjectsPage() {
         {/* Pending Approval — admin only */}
         {isAdmin && pendingProjects.length > 0 && (
           <div className="px-5 mb-4">
-            <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl p-4 space-y-2">
+            <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-2xl p-4 space-y-2">
               <div className="flex items-center gap-2 mb-1">
                 <ShieldCheck size={14} className="text-amber-400 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-amber-400">
@@ -309,7 +309,7 @@ export default function ProjectsPage() {
 
         {/* Search + filter */}
         <div className="px-5 mb-4 space-y-2.5">
-          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-2xl px-3.5 py-3">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30 flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input
               className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
@@ -359,7 +359,7 @@ export default function ProjectsPage() {
               <div
                 key={p.id}
                 onClick={() => isForeman && openEdit(p)}
-                className={`bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden ${isForeman ? "active:scale-[0.985] active:opacity-90 transition-transform cursor-pointer" : ""}`}
+                className={`card-hover bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden hover:border-white/[0.12] ${isForeman ? "active:scale-[0.985] active:opacity-90 cursor-pointer" : ""}`}
                 style={{ borderLeft: `3px solid ${p.color}` }}
               >
                 <div className="p-4.5">
@@ -371,21 +371,24 @@ export default function ProjectsPage() {
                   </div>
                   <div className="flex items-center justify-between mb-2.5">
                     <p className="text-[13px] text-white/40 truncate flex-1">{p.client}</p>
-                    {manager && <p className="text-[12px] text-white/35 flex-shrink-0 ml-2">{manager.name}</p>}
+                    {manager && (
+                      <p className="text-[11px] text-white/30 flex-shrink-0 ml-2 bg-white/[0.04] px-2 py-0.5 rounded-full">{manager.name}</p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[13px] text-white/60 font-semibold">{formatCurrencyCompact(p.budget, currency as never)}</p>
-                    <p className="text-[12px] text-white/35">
+                    <p className="text-[13px] text-white/60 font-semibold tabular-nums">{formatCurrencyCompact(p.budget, currency as never)}</p>
+                    <div className="flex items-center gap-1.5 text-[11px] text-white/30">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                       {p.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
-                    </p>
+                    </div>
                   </div>
                   <div className="mb-3.5">
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1.5">
                       <p className="text-[11px] text-white/35">{completedTasks}/{totalTasks} tasks</p>
-                      <p className="text-[11px] font-bold text-white/50">{p.progress}%</p>
+                      <p className="text-[11px] font-black tabular-nums" style={{ color: p.color }}>{p.progress}%</p>
                     </div>
                     <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${p.progress}%`, backgroundColor: p.color }} />
+                      <div className="h-full rounded-full progress-bar" style={{ width: `${p.progress}%`, backgroundColor: p.color }} />
                     </div>
                   </div>
                   {/* Action strip — edit for foremen+, delete for admins only */}
@@ -393,7 +396,7 @@ export default function ProjectsPage() {
                     <div className="flex gap-2 pt-3 border-t border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => openEdit(p)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white/[0.05] text-white/50 active:bg-white/[0.1] transition-colors text-[12px] font-semibold"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full bg-white/[0.05] text-white/50 active:bg-white/[0.1] transition-colors text-[12px] font-semibold"
                       >
                         <Pencil size={12} />
                         Edit
@@ -401,7 +404,7 @@ export default function ProjectsPage() {
                       {isAdmin && (
                         <button
                           onClick={() => setDeleteConfirm(p.id)}
-                          className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white/[0.05] text-white/35 active:bg-red-500/15 active:text-red-400 transition-colors"
+                          className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.05] text-white/35 active:bg-red-500/15 active:text-red-400 transition-colors"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -420,7 +423,7 @@ export default function ProjectsPage() {
         <div className="space-y-5 max-w-[1400px]">
           {/* ── Pending Approval (admin only) ────────────────────────────────── */}
           {isAdmin && pendingProjects.length > 0 && (
-            <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-xl p-4 space-y-3">
+            <div className="bg-amber-500/[0.06] border border-amber-500/20 rounded-2xl p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <ShieldCheck size={15} className="text-amber-400 flex-shrink-0" />
                 <h3 className="text-[13px] font-bold text-amber-400">
@@ -534,8 +537,8 @@ export default function ProjectsPage() {
           )}
 
           {view === "table" && (
-            <div className="overflow-x-auto rounded-xl">
-            <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[760px]">
+            <div className="overflow-x-auto rounded-2xl">
+            <div className="bg-[#111111] border border-white/[0.06] rounded-2xl overflow-hidden min-w-[760px]">
               <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
                 style={{ gridTemplateColumns: "2fr 1fr 80px 120px 100px 100px 80px 64px" }}>
                 <span>Project</span><span>Client</span><span className="text-center">Status</span>
@@ -627,7 +630,7 @@ export default function ProjectsPage() {
                 const overBudget = project.spent > project.budget;
                 const budgetPct = project.budget > 0 ? Math.min(100, (project.spent / project.budget) * 100) : 0;
                 return (
-                  <div key={project.id} onClick={() => openEdit(project)} className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/10 transition-colors group cursor-pointer">
+                  <div key={project.id} onClick={() => openEdit(project)} className="bg-[#111111] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-white/10 transition-colors group cursor-pointer">
                     <div className="h-1" style={{ backgroundColor: project.color }} />
                     <div className="p-5">
                       <div className="flex items-start justify-between mb-3">
@@ -709,7 +712,7 @@ export default function ProjectsPage() {
             <div className="space-y-3">
               {mapPins.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-4">
                     <Map size={20} className="text-white/25" />
                   </div>
                   <p className="text-white/40 text-[14px] font-medium">No GPS locations set</p>
@@ -717,7 +720,7 @@ export default function ProjectsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="w-full rounded-xl overflow-hidden h-[480px] max-h-[50dvh]">
+                  <div className="w-full rounded-2xl overflow-hidden h-[480px] max-h-[50dvh]">
                     <MapView pins={mapPins} className="w-full h-full" />
                   </div>
                   <p className="text-[11px] text-white/25 text-center">
@@ -814,7 +817,7 @@ export default function ProjectsPage() {
                     {geoLoading && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] text-white/30">Searching…</span>}
                   </div>
                   {geoResults.length > 0 && (
-                    <div className="mt-1 rounded-xl overflow-hidden shadow-2xl" style={{background:"#1c1c1c",border:"1px solid rgba(255,255,255,0.1)"}}>
+                    <div className="mt-1 rounded-2xl overflow-hidden shadow-2xl" style={{background:"#1c1c1c",border:"1px solid rgba(255,255,255,0.1)"}}>
                       {geoResults.map((r, i) => (
                         <button key={i} type="button" onClick={() => handleGeoSelect(r)}
                           className="w-full text-left px-4 py-3.5 active:bg-white/[0.08] transition-colors border-b border-white/[0.04] last:border-0">
@@ -842,7 +845,7 @@ export default function ProjectsPage() {
                           {(() => { const r = parseInt(form.geofenceRadius) || 500; return r >= 1000 ? `${(r/1000).toFixed(2).replace(/\.?0+$/,"")} km` : `${r} m`; })()}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between gap-2 bg-green-500/8 border border-green-500/15 rounded-xl px-3.5 py-2.5">
+                      <div className="flex items-center justify-between gap-2 bg-green-500/8 border border-green-500/15 rounded-2xl px-3.5 py-2.5">
                         <div className="flex items-center gap-2 text-green-400 min-w-0">
                           <MapPin size={13} className="flex-shrink-0" />
                           <span className="text-[12px] truncate">{geoConfirmed}</span>
@@ -896,13 +899,13 @@ export default function ProjectsPage() {
                   <div className="flex gap-3 flex-wrap">
                     {COLORS.map((c) => (
                       <button key={c} onClick={() => setForm((f) => ({ ...f, color: c }))}
-                        className="w-10 h-10 rounded-xl active:scale-90 transition-transform"
+                        className="w-10 h-10 rounded-2xl active:scale-90 transition-transform"
                         style={{ backgroundColor: c, outline: form.color === c ? `3px solid ${c}` : "none", outlineOffset: "3px" }} />
                     ))}
                   </div>
                 </div>
                 {formError && (
-                  <div className="flex items-center gap-2.5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                  <div className="flex items-center gap-2.5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl">
                     <AlertCircle size={15} className="text-red-400 flex-shrink-0" />
                     <p className="text-[13px] text-red-300">{formError}</p>
                   </div>
@@ -987,7 +990,7 @@ export default function ProjectsPage() {
                   )}
                 </div>
                 {geoResults.length > 0 && (
-                  <div className="mt-1 rounded-xl overflow-hidden shadow-2xl" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)" }}>
+                  <div className="mt-1 rounded-2xl overflow-hidden shadow-2xl" style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)" }}>
                     {geoResults.map((r, i) => (
                       <button
                         key={i}
@@ -1004,7 +1007,7 @@ export default function ProjectsPage() {
                 {geoConfirmed && form.gpsLat && form.gpsLng ? (
                   <div className="mt-2 space-y-2">
                     {/* ── Interactive geofence editor ── */}
-                    <div className="rounded-xl overflow-hidden border border-white/[0.08]" style={{ height: 260 }}>
+                    <div className="rounded-2xl overflow-hidden border border-white/[0.08]" style={{ height: 260 }}>
                       <GeofenceMapEditor
                         key={mapSeed}
                         lat={parseFloat(form.gpsLat)}
@@ -1138,6 +1141,7 @@ export default function ProjectsPage() {
     </>
   );
 }
+
 
 
 

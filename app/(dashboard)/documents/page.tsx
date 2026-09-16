@@ -244,7 +244,7 @@ export default function DocumentsPage() {
             isFiltered={documents.filter((d) => !selectedProject || d.projectId === selectedProject).length > 0}
           />
         ) : (
-          <div className="divide-y divide-white/[0.05]">
+          <div className="px-4 pb-4 space-y-2.5">
             {filteredDocs.map((doc) => {
               const cat = catInfo(doc.category);
               const Icon = fileIcon(doc.name);
@@ -252,16 +252,17 @@ export default function DocumentsPage() {
                 <button
                   key={doc.id}
                   onClick={() => setPreviewDoc(doc)}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-white/[0.04] transition-colors"
+                  className="card-hover w-full flex items-center gap-3 bg-[#131110] border border-white/[0.07] rounded-2xl p-3.5 text-left active:scale-[0.985] active:opacity-90 hover:border-white/[0.12] overflow-hidden"
+                  style={{ borderLeftColor: cat.color, borderLeftWidth: 3 }}
                 >
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: cat.color + "15" }}>
-                    <Icon size={20} style={{ color: cat.color + "cc" }} />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: cat.color + "18" }}>
+                    <Icon size={18} style={{ color: cat.color + "dd" }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-white/85 truncate">{doc.name}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                         style={{ backgroundColor: cat.color + "20", color: cat.color }}>{cat.label}</span>
                       {doc.sizeBytes ? <span className="text-[10px] text-white/30">{formatBytes(doc.sizeBytes)}</span> : null}
                     </div>
@@ -337,7 +338,7 @@ export default function DocumentsPage() {
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setSelectedCategory("all")}
-          className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${selectedCategory === "all" ? "bg-white/10 text-white" : "bg-white/[0.04] text-white/40 hover:text-white/70"}`}
+          className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${selectedCategory === "all" ? "bg-white/10 text-white" : "bg-white/[0.04] text-white/40 hover:text-white/70"}`}
         >
           All ({documents.filter((d) => !selectedProject || d.projectId === selectedProject).length})
         </button>
@@ -347,7 +348,7 @@ export default function DocumentsPage() {
             <button
               key={cat.value}
               onClick={() => setSelectedCategory(cat.value)}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${selectedCategory === cat.value ? "text-black" : "bg-white/[0.04] text-white/40 hover:text-white/70"}`}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors ${selectedCategory === cat.value ? "text-black" : "bg-white/[0.04] text-white/40 hover:text-white/70"}`}
               style={selectedCategory === cat.value ? { backgroundColor: cat.color } : undefined}
             >
               {cat.label} ({count})
@@ -374,7 +375,7 @@ export default function DocumentsPage() {
             return (
               <div
                 key={doc.id}
-                className="group bg-[#111] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/[0.14] transition-colors cursor-pointer"
+                className="group card-hover bg-[#111] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-white/[0.14] cursor-pointer"
                 onClick={() => setPreviewDoc(doc)}
               >
                 {/* Preview area */}

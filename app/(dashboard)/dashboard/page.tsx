@@ -85,8 +85,8 @@ function StatCard({
   href?: string;
 }) {
   const inner = (
-    <div className="card-hover bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/20 overflow-hidden relative">
-      <div className="progress-bar absolute bottom-0 left-0 h-[2px] rounded-b-xl opacity-50" style={{ backgroundColor: iconColor, right: 0 }} />
+    <div className="card-hover bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/20 overflow-hidden relative">
+      <div className="progress-bar absolute bottom-0 left-0 h-[2px] rounded-b-2xl opacity-50" style={{ backgroundColor: iconColor, right: 0 }} />
       <div className="flex items-start justify-between mb-3">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: iconColor + "18" }}>
           <span style={{ color: iconColor }}><Icon size={17} /></span>
@@ -148,7 +148,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
   const mins = Math.floor((elapsed % 3600000) / 60000);
 
   return (
-    <Link href="/crew" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/25 group">
+    <Link href="/crew" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/25 group">
       <div className="w-full h-28 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden"
         style={{ background: `${worker.color}15` }}>
         {worker.photo ? (
@@ -195,7 +195,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
   const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
   const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
   return (
-    <Link href="/projects" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-xl p-4 hover:border-amber-500/20">
+    <Link href="/projects" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/20">
       <div className="flex items-start gap-3 mb-3">
         <div className="w-1.5 h-12 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: project.color }} />
         <div className="flex-1 min-w-0">
@@ -265,7 +265,7 @@ function ShareNudge() {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl border"
+      className="flex items-center gap-3 px-4 py-3 mb-4 rounded-2xl border"
       style={{ background: "rgba(245,196,0,.07)", borderColor: "rgba(245,196,0,.2)" }}
     >
       <span className="text-amber-400 flex-shrink-0 text-[18px]">🏗️</span>
@@ -798,13 +798,13 @@ export default function DashboardPage() {
       {activeProjects.length === 0 && projects.length === 0 && (
         <div className="px-5 pt-4">
           <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-4">
-            <p className="text-[13px] font-black text-amber-400 mb-1">🏗️ Let's get you set up</p>
+            <p className="text-[13px] font-black text-amber-400 mb-1">🏗️ Let&apos;s get you set up</p>
             <p className="text-[12px] text-white/50 mb-3 leading-snug">Create your first project, add your crew, and start tracking work.</p>
             <div className="flex gap-2 flex-wrap">
               <Link href="/projects" className="flex items-center gap-1.5 bg-amber-500 text-black text-[12px] font-black px-3 py-2 rounded-full">
                 <FolderKanban size={13} /> New Project
               </Link>
-              <Link href="/crew" className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.08] text-white/70 text-[12px] font-bold px-3 py-2 rounded-xl">
+              <Link href="/crew" className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.08] text-white/70 text-[12px] font-bold px-3 py-2 rounded-full">
                 <Users size={13} /> Add Crew
               </Link>
             </div>
@@ -812,27 +812,51 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* ── Urgent alerts panel ──────────────────────────────────────────── */}
+      {urgentItems.length > 0 && (
+        <div className="px-5 pt-4">
+          <div className="bg-red-500/[0.06] border border-red-500/20 rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-2 px-4 pt-3.5 pb-2.5 border-b border-red-500/10">
+              <AlertTriangle size={13} className="text-red-400 flex-shrink-0" />
+              <p className="text-[12px] font-black text-red-400 uppercase tracking-wider">
+                {urgentItems.length} Item{urgentItems.length !== 1 ? "s" : ""} Need Attention
+              </p>
+            </div>
+            <div className="divide-y divide-red-500/[0.07]">
+              {urgentItems.map((item) => (
+                <Link key={item.id} href={item.href} className="flex items-center gap-3 px-4 py-3 active:bg-red-500/[0.05]">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                  <p className="text-[12px] text-white/70 flex-1 leading-snug">{item.label}</p>
+                  <ArrowRight size={12} className="text-white/25 flex-shrink-0" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stat chips — horizontal scroll */}
       <div className="px-5 pt-6">
-        <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
           {(([
-            { label: "Hours/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9" },
-            { label: "Open Issues",   value: openPunchItems.length, color: dk ? "#F5C400" : "#d97706" },
-            { label: "High Priority", value: highPriority.length, color: "#ef4444" },
+            { label: "Hrs/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9",                    href: "/time-tracking" },
+            { label: "Open Issues", value: openPunchItems.length,                              color: dk ? "#F5C400" : "#d97706",   href: "/punch-list"    },
+            { label: "Priority",    value: highPriority.length,                                color: "#ef4444",                    href: "/punch-list"    },
             ...(canSeeFinancials
               ? [
-                  { label: "Collected",   value: formatCurrencyCompact(totalPaid, currency as never), color: "#22c55e" },
-                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: dk ? "#F5C400" : "#d97706" },
+                  { label: "Collected",   value: formatCurrencyCompact(totalPaid, currency as never),        color: "#22c55e", href: "/invoices" },
+                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: dk ? "#F5C400" : "#d97706", href: "/invoices" },
                 ]
               : []),
-          ]) as { label: string; value: string | number; color: string }[]).map((chip) => (
-            <div
+          ]) as { label: string; value: string | number; color: string; href: string }[]).map((chip) => (
+            <Link
               key={chip.label}
-              className={`flex-shrink-0 rounded-2xl px-4 py-3 border ${dk ? "bg-[#131110] border-white/[0.07]" : "bg-white border-gray-200 shadow-sm"}`}
+              href={chip.href}
+              className={`flex-shrink-0 rounded-2xl px-4 py-3 border active:scale-[0.96] transition-transform ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 shadow-sm"}`}
             >
-              <p className="text-[20px] font-black tabular-nums" style={{ color: chip.color }}>{chip.value}</p>
-              <p className={`text-[10px] font-semibold mt-0.5 whitespace-nowrap ${dk ? "text-white/35" : "text-gray-500"}`}>{chip.label}</p>
-            </div>
+              <p className="text-[22px] font-black tabular-nums leading-none" style={{ color: chip.color }}>{chip.value}</p>
+              <p className={`text-[10px] font-semibold mt-1.5 whitespace-nowrap ${dk ? "text-white/35" : "text-gray-500"}`}>{chip.label}</p>
+            </Link>
           ))}
         </div>
       </div>
@@ -961,22 +985,45 @@ export default function DashboardPage() {
               const doneTasks = p.tasks.filter((t) => t.status === "completed").length;
               const totalTasks = p.tasks.length;
               const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+              const budgetPct = p.budget > 0 ? Math.min(100, Math.round((p.spent / p.budget) * 100)) : 0;
+              const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
+              const daysLeft = Math.ceil((p.endDate.getTime() - Date.now()) / 86400000);
               return (
                 <Link
                   key={p.id}
                   href="/projects"
-                  className="flex items-center gap-3.5 bg-[#131110] border border-white/[0.07] rounded-2xl p-5 active:bg-white/[0.04]"
+                  className="card-hover flex items-start gap-3.5 bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:bg-white/[0.04] hover:border-white/[0.12]"
                 >
-                  <div className="w-1 h-12 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                  <div className="w-1 h-full min-h-[52px] rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: p.color }} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <p className="text-[13px] font-bold text-white truncate pr-2">{p.name}</p>
-                      <span className="text-[11px] font-black text-white/50 flex-shrink-0">{pct}%</span>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="text-[13px] font-bold text-white truncate">{p.name}</p>
+                      <span className={`text-[11px] font-black tabular-nums flex-shrink-0 ${daysLeft < 7 ? "text-red-400" : daysLeft < 30 ? "text-amber-400" : "text-white/40"}`}>
+                        {daysLeft > 0 ? `${daysLeft}d` : "Due"}
+                      </span>
                     </div>
-                    <div className="h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                    <p className="text-[10px] text-white/30 mb-2.5">{p.client}</p>
+                    {/* Progress */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-white/30">Progress</span>
+                        <span className="text-[10px] font-bold text-white/50 tabular-nums">{pct}%</span>
+                      </div>
+                      <div className="h-1 bg-white/[0.07] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full progress-bar" style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                      </div>
+                      {canSeeFinancials && (
+                        <>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-[10px] text-white/25">Budget</span>
+                            <span className="text-[10px] font-bold tabular-nums" style={{ color: burnColor }}>{budgetPct}%</span>
+                          </div>
+                          <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${budgetPct}%`, backgroundColor: burnColor }} />
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <p className="text-[10px] text-white/30 mt-1.5">{p.client} · {doneTasks}/{totalTasks} tasks</p>
                   </div>
                 </Link>
               );
@@ -1163,7 +1210,7 @@ export default function DashboardPage() {
             <RefreshCw size={13} className={refreshing ? "animate-spin text-amber-400" : ""} />
             <span className="hidden sm:inline">{refreshing ? `${t.common.refresh}…` : t.common.refresh}</span>
           </button>
-          <div className="hidden sm:flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm">
+          <div className="hidden sm:flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-2xl px-4 py-2.5 text-sm">
             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
             <span className="text-white/50 font-mono text-[12px]">
               {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
@@ -1174,7 +1221,7 @@ export default function DashboardPage() {
 
       {/* 7-day weather forecast panel */}
       {weather && weatherExpanded && weather.forecast.length > 0 && (
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
+        <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[12px] font-bold text-white/50 uppercase tracking-widest">7-Day Forecast</span>
             <Link href="/schedule" className="text-[11px] text-amber-400/70 hover:text-amber-400 transition-colors flex items-center gap-1">
@@ -1222,7 +1269,7 @@ export default function DashboardPage() {
               { n: "3", label: "Clock in your first worker", sub: "Start tracking hours from the time tracking page.", href: "/time-tracking", done: workers.some((w) => w.clockedIn) },
             ].map((step) => (
               <Link key={step.n} href={step.href}
-                className={`flex items-start gap-3 p-4 rounded-xl border transition-colors ${step.done ? "border-green-500/20 bg-green-500/[0.05]" : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05]"}`}>
+                className={`flex items-start gap-3 p-4 rounded-2xl border transition-colors ${step.done ? "border-green-500/20 bg-green-500/[0.05]" : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05]"}`}>
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black ${step.done ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
                   {step.done ? <CheckCircle2 size={14} /> : step.n}
                 </div>
@@ -1303,7 +1350,7 @@ export default function DashboardPage() {
 
       {/* Urgent Items */}
       {urgentItems.length > 0 && (
-        <div className="bg-[#0f0a0a] border border-red-500/20 rounded-xl p-4">
+        <div className="bg-[#0f0a0a] border border-red-500/20 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle size={14} className="text-red-400" />
             <span className="text-[13px] font-bold text-red-400">Needs Attention</span>
@@ -1337,7 +1384,7 @@ export default function DashboardPage() {
           </Link>
         </div>
         {clockedInWorkers.length === 0 ? (
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-10 flex flex-col items-center gap-3 text-center">
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-10 flex flex-col items-center gap-3 text-center">
             <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center">
               <Timer size={20} className="text-white/20" />
             </div>
@@ -1398,7 +1445,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {activeProjects.map((p) => <ProjectStatusCard key={p.id} project={p} currency={currency} showFinancials={canSeeFinancials} />)}
               {upcomingProjects.slice(0, 1).map((p) => (
-                <Link key={p.id} href="/projects" className="block bg-[#111111] border border-white/[0.06] rounded-xl p-4 opacity-70 hover:opacity-90 hover:border-white/10 transition-all">
+                <Link key={p.id} href="/projects" className="block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 opacity-70 hover:opacity-90 hover:border-white/10 transition-all">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-1.5 h-12 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
                     <div className="flex-1 min-w-0">
@@ -1436,7 +1483,7 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl divide-y divide-white/[0.04]">
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04]">
             {activityFeed.length === 0 ? (
               <div className="p-8 flex flex-col items-center gap-2 text-center">
                 <Activity size={22} className="text-white/15" />
@@ -1471,7 +1518,7 @@ export default function DashboardPage() {
               {t.dashboard.seeAll} <ArrowRight size={12} />
             </Link>
           </div>
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl divide-y divide-white/[0.04]">
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04]">
             {projects.flatMap((p) =>
               p.tasks.filter((t) => t.status !== "completed").map((t) => ({ ...t, projectName: p.name, projectColor: p.color }))
             ).slice(0, 6).map((task) => {
@@ -1510,7 +1557,7 @@ export default function DashboardPage() {
               Punch list <ArrowRight size={12} />
             </Link>
           </div>
-          <div className="bg-[#111111] border border-white/[0.06] rounded-xl divide-y divide-white/[0.04]">
+          <div className="bg-[#111111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04]">
             {openPunchItems.sort((a, b) => a.priority === "high" ? -1 : b.priority === "high" ? 1 : 0).slice(0, 6).map((item) => {
               const prioColors: Record<string, string> = { high: "text-red-400 bg-red-500/12", medium: "text-amber-400 bg-amber-500/12", low: "text-white/40 bg-white/8" };
               const statusIcons: Record<string, React.ReactNode> = {
@@ -1544,7 +1591,7 @@ export default function DashboardPage() {
 
       {/* Budget Variance */}
       {canSeeFinancials && activeProjects.some((p) => p.budget > 0) && (
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5">
+        <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-[15px] font-bold text-white">Budget Health</h3>
@@ -1600,7 +1647,7 @@ export default function DashboardPage() {
 
       {/* Weekly Digest */}
       {canSeeFinancials && (
-        <div className="bg-[#111111] border border-white/[0.06] rounded-xl p-5 pb-6">
+        <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5 pb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-[15px] font-bold text-white">Weekly Summary</h3>
@@ -1655,5 +1702,7 @@ export default function DashboardPage() {
     </>
   );
 }
+
+
 
 

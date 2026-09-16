@@ -188,7 +188,7 @@ export default function PhotosPage() {
               const mProject = getProjectById(photo.projectId);
               return (
                 <div key={photo.id} onClick={() => setLightboxIdx(idx)}
-                  className="bg-[#131110] border border-white/[0.06] rounded-xl overflow-hidden cursor-pointer group relative">
+                  className="card-hover bg-[#131110] border border-white/[0.06] rounded-2xl overflow-hidden cursor-pointer group relative hover:border-white/[0.12]">
                   <div className="w-full aspect-square relative overflow-hidden" style={!photo.url ? { background: photo.gradient } : {}}>
                     {photo.url
                       ? <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" />
@@ -347,7 +347,7 @@ export default function PhotosPage() {
                 const uploader = getWorkerById(photo.uploadedById);
                 const project = getProjectById(photo.projectId);
                 return (
-                  <div key={photo.id} onClick={() => setLightboxIdx(idx)} className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/12 transition-all group cursor-pointer">
+                  <div key={photo.id} onClick={() => setLightboxIdx(idx)} className="card-hover bg-[#111111] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-white/[0.14] group cursor-pointer">
                     <div className="w-full h-44 relative overflow-hidden" style={!photo.url ? { background: photo.gradient } : {}}>
                       {photo.url
                         ? <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" />

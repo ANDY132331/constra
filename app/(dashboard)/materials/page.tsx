@@ -237,7 +237,10 @@ export default function MaterialsPage() {
               const project = projects.find((p) => p.id === entry.projectId);
               const tradeColor = color(entry.trade);
               return (
-                <div key={entry.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
+                <div key={entry.id}
+                  className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 hover:border-white/[0.12] overflow-hidden"
+                  style={{ borderLeftColor: entry.type === "delivery" ? "#22c55e" : "#F5C400", borderLeftWidth: 3 }}
+                >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -248,7 +251,7 @@ export default function MaterialsPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-[14px] font-bold text-white/85 truncate">{entry.materialName}</p>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase"
                           style={{ backgroundColor: tradeColor + "22", color: tradeColor }}>
                           {entry.trade}
                         </span>

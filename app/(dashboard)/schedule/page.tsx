@@ -485,7 +485,7 @@ export default function SchedulePage() {
                 const customEvt = customEvents.find((c) => c.id === e.id);
                 const cfg = customEvt ? EVENT_TYPE_CONFIG[customEvt.type] : null;
                 return (
-                  <div key={e.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4"
+                  <div key={e.id} className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 hover:border-white/[0.12] overflow-hidden"
                     style={{ borderLeftColor: e.color, borderLeftWidth: 3 }}>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">

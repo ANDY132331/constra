@@ -209,7 +209,7 @@ export default function BudgetPage() {
               color: totals.variance > 0 ? "text-emerald-400" : totals.variance < 0 ? "text-red-400" : "text-white/40",
             },
           ].map(({ label, value, color }) => (
-            <div key={label} className="flex-shrink-0 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3">
+            <div key={label} className="flex-shrink-0 bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
               <p className={`text-[18px] font-bold leading-none ${color}`}>{value}</p>
               <p className="text-[11px] text-white/35 font-medium mt-1">{label}</p>
             </div>
@@ -266,7 +266,7 @@ export default function BudgetPage() {
             const isExpanded = expandedProject === null || expandedProject === projectId;
 
             return (
-              <div key={projectId} className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+              <div key={projectId} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
                 {/* Project header */}
                 <button
                   onClick={() => setExpandedProject(isExpanded && grouped.size > 1 ? (expandedProject === projectId ? null : projectId) : null)}
@@ -518,4 +518,5 @@ export default function BudgetPage() {
     </div>
   );
 }
+
 
