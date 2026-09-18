@@ -773,7 +773,7 @@ export default function ProjectsPage() {
           </div>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto px-5 pt-2 pb-8 space-y-5" style={{touchAction:"pan-y",overscrollBehavior:"contain",WebkitOverflowScrolling:"touch" as never}}>
+          <div className="flex-1 overflow-y-scroll px-5 pt-2 pb-8 space-y-5" style={{touchAction:"pan-y",overscrollBehavior:"contain",WebkitOverflowScrolling:"touch" as never}}>
             {/* Step 1: Basic Info */}
             {mobileStep === 1 && (
               <>

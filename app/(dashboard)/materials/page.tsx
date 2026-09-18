@@ -486,7 +486,7 @@ export default function MaterialsPage() {
               </button>
             </div>
 
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-scroll" style={{touchAction:"pan-y"}}>
               {/* Type toggle */}
               <div className="flex gap-2">
                 {(["delivery", "usage"] as const).map((t) => (
