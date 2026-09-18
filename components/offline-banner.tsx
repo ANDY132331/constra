@@ -1,11 +1,11 @@
 "use client";
 
 import { WifiOff, RefreshCw, CheckCircle2, Cloud } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { useTransientStore } from "@/lib/store";
 import { useEffect, useRef, useState } from "react";
 
 export function OfflineBanner() {
-  const { isOnline, pendingSync, isSaving, savedRecently } = useStore();
+  const { isOnline, pendingSync, isSaving, savedRecently } = useTransientStore();
   const [justSynced, setJustSynced] = useState(false);
   const prevPendingSync = useRef(0);
 

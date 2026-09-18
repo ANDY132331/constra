@@ -59,15 +59,20 @@ export function genId(): string {
   });
 }
 
-type StoreState = {
-  companyId: string | null;
-  authUserId: string | null;
-  isLoading: boolean;
+// ── Transient state — UI indicators only, kept in a separate context so that
+// frequent saves/reconnects don't cause every useStore() consumer to re-render.
+type TransientState = {
   isOnline: boolean;
   pendingSync: number;
   isRealtimeConnected: boolean;
   isSaving: boolean;
   savedRecently: boolean;
+};
+
+type StoreState = {
+  companyId: string | null;
+  authUserId: string | null;
+  isLoading: boolean;
   companyName: string;
   isPro: boolean;
   language: Locale;
@@ -110,11 +115,6 @@ type StoreState = {
 };
 
 type StoreCtx = StoreState & {
-  isOnline: boolean;
-  pendingSync: number;
-  isRealtimeConnected: boolean;
-  isSaving: boolean;
-  savedRecently: boolean;
   addWorker: (w: Omit<Worker, "id">) => void;
   updateWorker: (id: string, u: Partial<Worker>) => void;
   deleteWorker: (id: string) => void;
@@ -230,11 +230,6 @@ function defaultState(): StoreState {
     companyId: null,
     authUserId: null,
     isLoading: SUPABASE_ENABLED,
-    isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
-    pendingSync: 0,
-    isRealtimeConnected: false,
-    isSaving: false,
-    savedRecently: false,
     companyName: "",
     isPro: true,
     language: "en",
@@ -318,37 +313,50 @@ function loadState(): StoreState {
 }
 
 const Ctx = createContext<StoreCtx | null>(null);
+const TransientCtx = createContext<TransientState>({
+  isOnline: true, pendingSync: 0, isRealtimeConnected: false, isSaving: false, savedRecently: false,
+});
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<StoreState>(() => loadState());
+  const [transient, setTransient] = useState<TransientState>({
+    isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
+    pendingSync: 0, isRealtimeConnected: false, isSaving: false, savedRecently: false,
+  });
   // Keep a ref so action callbacks can read current state without stale closure
   const stateRef = useRef(state);
   const companyIdRef = useRef<string | null>(null);
   const isOnlineRef = useRef(typeof navigator !== "undefined" ? navigator.onLine : true);
   const savingCountRef = useRef(0);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const localSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     stateRef.current = state;
     companyIdRef.current = state.companyId ?? null;
-    isOnlineRef.current = state.isOnline;
   }, [state]);
 
-  // Persist to localStorage (keep as offline cache)
+  // Persist to localStorage — debounced 500ms so rapid saves (isSaving toggles,
+  // realtime updates) don't block the main thread with large JSON.stringify calls.
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    if (localSaveTimerRef.current) clearTimeout(localSaveTimerRef.current);
+    localSaveTimerRef.current = setTimeout(() => {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }, 500);
+    return () => { if (localSaveTimerRef.current) clearTimeout(localSaveTimerRef.current); };
   }, [state]);
 
   // Track online/offline and flush queued ops when reconnected
   useEffect(() => {
     const goOnline = async () => {
-      setState((s) => ({ ...s, isOnline: true, pendingSync: queueLength() }));
+      isOnlineRef.current = true;
+      setTransient((t) => ({ ...t, isOnline: true, pendingSync: queueLength() }));
       if (SUPABASE_ENABLED) {
         const synced = await flushQueue(getClient());
-        if (synced > 0) setState((s) => ({ ...s, pendingSync: 0 }));
+        if (synced > 0) setTransient((t) => ({ ...t, pendingSync: 0 }));
       }
     };
-    const goOffline = () => setState((s) => ({ ...s, isOnline: false }));
+    const goOffline = () => { isOnlineRef.current = false; setTransient((t) => ({ ...t, isOnline: false })); };
     window.addEventListener("online", goOnline);
     window.addEventListener("offline", goOffline);
     return () => {
@@ -619,7 +627,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           else if (p.eventType === "DELETE") setState((s) => ({ ...s, blueprintPins: s.blueprintPins.filter(x => x.id !== (p.old as {id:string}).id) }));
         })
         .subscribe((status) => {
-          setState((s) => ({ ...s, isRealtimeConnected: status === "SUBSCRIBED" }));
+          setTransient((t) => ({ ...t, isRealtimeConnected: status === "SUBSCRIBED" }));
         });
     }
 
@@ -688,20 +696,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!isOnlineRef.current) {
       if (queuedOp) {
         enqueue(queuedOp);
-        setState((s) => ({ ...s, pendingSync: queueLength() }));
+        setTransient((t) => ({ ...t, pendingSync: queueLength() }));
       }
       return;
     }
     savingCountRef.current++;
-    setState((s) => ({ ...s, isSaving: true, savedRecently: false }));
+    setTransient((t) => ({ ...t, isSaving: true, savedRecently: false }));
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
     Promise.resolve(fn()).then((result: { error: unknown } | null) => {
       if (result?.error) console.error(`[store:${label}]`, result.error);
     }).finally(() => {
       savingCountRef.current = Math.max(0, savingCountRef.current - 1);
       if (savingCountRef.current === 0) {
-        setState((s) => ({ ...s, isSaving: false, savedRecently: true }));
-        savedTimerRef.current = setTimeout(() => setState((s) => ({ ...s, savedRecently: false })), 2000);
+        setTransient((t) => ({ ...t, isSaving: false, savedRecently: true }));
+        savedTimerRef.current = setTimeout(() => setTransient((t) => ({ ...t, savedRecently: false })), 2000);
       }
     });
   }
@@ -1379,49 +1387,51 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
 
   return (
-    <Ctx.Provider value={{
-      ...state,
-      hoursAdjustments: state.hoursAdjustments ?? [],
-      isPro: state.isPro ?? false,
-      language: state.language ?? "en",
-      currency: state.currency ?? "USD",
-      industry: state.industry ?? "Construction",
-      onboarded: state.onboarded ?? false,
-      addWorker, updateWorker, deleteWorker,
-      addProject, updateProject, deleteProject, approveProject,
-      addTask, updateTask, deleteTask,
-      addClockEntry, updateClockEntry, deleteClockEntry,
-      addPunchItem, updatePunchItem, deletePunchItem,
-      addSafetyIncident, updateSafetyIncident, deleteSafetyIncident,
-      addEquipment, updateEquipment, deleteEquipment,
-      addRFI, updateRFI, deleteRFI,
-      addInvoice, updateInvoice, deleteInvoice,
-      addEstimate, updateEstimate, deleteEstimate,
-      addPhoto, deletePhoto,
-      addActivity,
-      addHoursAdjustment,
-      getWorkerTotalHours,
-      addMaterialType, updateMaterialType, deleteMaterialType, incrementMaterialUse,
-      addMaterialEntry, deleteMaterialEntry,
-      addBlueprintPin, updateBlueprintPin, deleteBlueprintPin,
-      addBudgetLine, updateBudgetLine, deleteBudgetLine,
-      addInsurancePolicy, updateInsurancePolicy, deleteInsurancePolicy,
-      addDocument, deleteDocument, addDocumentVersion,
-      addMessage, deleteMessage,
-      addDailyReport, updateDailyReport, deleteDailyReport,
-      addChangeOrder, updateChangeOrder, deleteChangeOrder,
-      addCustomRole, deleteCustomRole,
-      setCompanyAddress, setBusinessNumber, setDefaultTaxRate, setOvertimeSettings, setPermissionsPin,
-      setCompanyName, setCompanyLogo, setIsPro,
-      setLanguage, setCurrency, setIndustry, setOnboarded,
-      getWorkerById, getProjectById,
-      signOut,
-      currentUser,
-      theme: state.theme,
-      setTheme,
-    }}>
-      {children}
-    </Ctx.Provider>
+    <TransientCtx.Provider value={transient}>
+      <Ctx.Provider value={{
+        ...state,
+        hoursAdjustments: state.hoursAdjustments ?? [],
+        isPro: state.isPro ?? false,
+        language: state.language ?? "en",
+        currency: state.currency ?? "USD",
+        industry: state.industry ?? "Construction",
+        onboarded: state.onboarded ?? false,
+        addWorker, updateWorker, deleteWorker,
+        addProject, updateProject, deleteProject, approveProject,
+        addTask, updateTask, deleteTask,
+        addClockEntry, updateClockEntry, deleteClockEntry,
+        addPunchItem, updatePunchItem, deletePunchItem,
+        addSafetyIncident, updateSafetyIncident, deleteSafetyIncident,
+        addEquipment, updateEquipment, deleteEquipment,
+        addRFI, updateRFI, deleteRFI,
+        addInvoice, updateInvoice, deleteInvoice,
+        addEstimate, updateEstimate, deleteEstimate,
+        addPhoto, deletePhoto,
+        addActivity,
+        addHoursAdjustment,
+        getWorkerTotalHours,
+        addMaterialType, updateMaterialType, deleteMaterialType, incrementMaterialUse,
+        addMaterialEntry, deleteMaterialEntry,
+        addBlueprintPin, updateBlueprintPin, deleteBlueprintPin,
+        addBudgetLine, updateBudgetLine, deleteBudgetLine,
+        addInsurancePolicy, updateInsurancePolicy, deleteInsurancePolicy,
+        addDocument, deleteDocument, addDocumentVersion,
+        addMessage, deleteMessage,
+        addDailyReport, updateDailyReport, deleteDailyReport,
+        addChangeOrder, updateChangeOrder, deleteChangeOrder,
+        addCustomRole, deleteCustomRole,
+        setCompanyAddress, setBusinessNumber, setDefaultTaxRate, setOvertimeSettings, setPermissionsPin,
+        setCompanyName, setCompanyLogo, setIsPro,
+        setLanguage, setCurrency, setIndustry, setOnboarded,
+        getWorkerById, getProjectById,
+        signOut,
+        currentUser,
+        theme: state.theme,
+        setTheme,
+      }}>
+        {children}
+      </Ctx.Provider>
+    </TransientCtx.Provider>
   );
 }
 
@@ -1429,4 +1439,8 @@ export function useStore(): StoreCtx {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useStore must be inside StoreProvider");
   return ctx;
+}
+
+export function useTransientStore(): TransientState {
+  return useContext(TransientCtx);
 }

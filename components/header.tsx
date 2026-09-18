@@ -7,7 +7,7 @@ import {
   FileText, ShieldAlert, Truck, X, CheckCheck, Menu, Settings, LogOut,
   User, Moon, Sun,
 } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { useStore, useTransientStore } from "@/lib/store";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { Shield } from "lucide-react";
 
@@ -63,7 +63,8 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => voi
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, activityFeed, insurancePolicies, isRealtimeConnected, companyName, companyLogo, signOut, theme, setTheme } = useStore();
+  const { currentUser, activityFeed, insurancePolicies, companyName, companyLogo, signOut, theme, setTheme } = useStore();
+  const { isRealtimeConnected } = useTransientStore();
   const isAdmin = isAdminOrAbove(currentUser.role);
   const isForeman = isForemanOrAbove(currentUser.role);
 

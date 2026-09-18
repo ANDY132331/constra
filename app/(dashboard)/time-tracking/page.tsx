@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { toast } from "sonner";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation, Download, BarChart3 } from "lucide-react";
@@ -396,32 +396,35 @@ export default function TimeTrackingPage() {
   // Workers (employees) only see their own data
   const isEmployee = !isForemanOrAbove(currentUser.role);
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const activeProjects = useMemo(() => projects.filter((p) => p.status === "active"), [projects]);
+
+  const todayStart = useMemo(() => {
+    const d = new Date(); d.setHours(0, 0, 0, 0); return d;
+  // Recompute when tick fires (which happens every 30s — cheap date reset)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tick]);
 
   // Cross-check: only show worker as "live" if they have an actual open clock entry (no clockOut).
-  // This prevents a phantom running timer when the worker.clockedIn flag is stale in Supabase
-  // (e.g. the profile update failed while offline but the clock entry was written correctly).
-  const clockedIn = (isEmployee
+  const clockedIn = useMemo(() => (isEmployee
     ? workers.filter((w) => w.clockedIn && w.id === currentUser.id)
     : workers.filter((w) => w.clockedIn)
-  ).filter((w) => clockEntries.some((e) => e.workerId === w.id && !e.clockOut));
+  ).filter((w) => clockEntries.some((e) => e.workerId === w.id && !e.clockOut)),
+  [isEmployee, workers, currentUser.id, clockEntries]);
 
-  const todayHours = clockEntries
+  const todayHours = useMemo(() => clockEntries
     .filter((e) => e.clockOut && e.clockIn >= todayStart)
-    .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+    .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0),
+  [clockEntries, todayStart]);
 
-  // Intentionally impure: `tick` (bumped every 30s above) is what drives this
-  // recomputation on a timer so the live-elapsed-hours display keeps counting up.
-  const liveHours = clockedIn.reduce((s, w) => {
+  // tick drives live-elapsed recomputation every 30s
+  const liveHours = useMemo(() => clockedIn.reduce((s, w) => {
     if (!w.clockInTime) return s;
-    // eslint-disable-next-line react-hooks/purity
     return s + (Date.now() - w.clockInTime.getTime()) / 3600000;
-  }, 0);
+  }, 0),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [clockedIn, tick]);
 
   const todayTotal = (todayHours + liveHours).toFixed(1);
-
-  const activeProjects = projects.filter((p) => p.status === "active");
 
   const proceedToCamera = useCallback(async (worker: Worker, projectId: string) => {
     const project = getProjectById(projectId);

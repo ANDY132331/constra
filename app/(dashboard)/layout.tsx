@@ -120,8 +120,8 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
             /* ── Full-screen standalone messaging shell ── */
             <div className="h-[100dvh] w-screen overflow-hidden" style={{ background: "#070c18" }}>
               <ErrorBoundary>{children}</ErrorBoundary>
-              <OfflineBanner />
-              <NotifPermissionPrompt />
+              <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>
+              <ErrorBoundary fallback={null}><NotifPermissionPrompt /></ErrorBoundary>
             </div>
           ) : (
             /* ── Standard dashboard shell ── */
@@ -132,9 +132,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                   onClick={() => setSidebarOpen(false)}
                 />
               )}
-              <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+              <ErrorBoundary fallback={null}><Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /></ErrorBoundary>
               <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
-                <Header onMenuClick={() => setSidebarOpen((v) => !v)} />
+                <ErrorBoundary fallback={null}><Header onMenuClick={() => setSidebarOpen((v) => !v)} /></ErrorBoundary>
                 <main ref={mainRef} className="flex-1 min-h-0 overflow-y-scroll p-5 md:p-6 bg-[#0a0a0a] main-scroll mobile-main-padding">
                   {(pullY > 8 || refreshing) && (
                     <div
@@ -163,11 +163,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                   </div>
                 </main>
               </div>
-              <MobileNav />
-              <AIChatWidget />
-              <SearchModal />
-              <OfflineBanner />
-              <NotifPermissionPrompt />
+              <ErrorBoundary fallback={null}><MobileNav /></ErrorBoundary>
+              <ErrorBoundary fallback={null}><AIChatWidget /></ErrorBoundary>
+              <ErrorBoundary fallback={null}><SearchModal /></ErrorBoundary>
+              <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>
+              <ErrorBoundary fallback={null}><NotifPermissionPrompt /></ErrorBoundary>
             </div>
           )}
         </I18nProvider>

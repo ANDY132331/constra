@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Users, Clock, FolderKanban, ClipboardList,
   TrendingUp, TrendingDown, ArrowRight, MapPin, Calendar,
@@ -322,31 +322,34 @@ export default function DashboardPage() {
   };
 
   // ── Computed ─────────────────────────────────────────────────────────────────
-  const clockedInWorkers = workers.filter((w) => w.clockedIn);
+  const clockedInWorkers = useMemo(() => workers.filter((w) => w.clockedIn), [workers]);
   const canSeeFinancials = currentUser.role === "Admin" || currentUser.role === "Project Manager";
-  const activeProjects = projects.filter((p) => p.status === "active");
-  const upcomingProjects = projects.filter((p) => p.status === "upcoming");
-  const completedProjects = projects.filter((p) => p.status === "completed");
-  const openPunchItems = punchItems.filter((p) => p.status !== "resolved");
-  const highPriority = openPunchItems.filter((p) => p.priority === "high");
+  const activeProjects = useMemo(() => projects.filter((p) => p.status === "active"), [projects]);
+  const upcomingProjects = useMemo(() => projects.filter((p) => p.status === "upcoming"), [projects]);
+  const completedProjects = useMemo(() => projects.filter((p) => p.status === "completed"), [projects]);
+  const openPunchItems = useMemo(() => punchItems.filter((p) => p.status !== "resolved"), [punchItems]);
+  const highPriority = useMemo(() => openPunchItems.filter((p) => p.priority === "high"), [openPunchItems]);
 
-  const weekStart = new Date(now);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(now.getDate() - now.getDay());
-  const weeklyHours = clockEntries
+  const weekStart = useMemo(() => {
+    const d = new Date(now); d.setHours(0, 0, 0, 0); d.setDate(now.getDate() - now.getDay()); return d;
+  }, [now]);
+
+  const weeklyHours = useMemo(() => clockEntries
     .filter((e) => e.clockOut && e.clockIn >= weekStart)
-    .reduce((sum, e) => sum + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
-  const todayActiveHours = clockedInWorkers.reduce((sum, w) => {
+    .reduce((sum, e) => sum + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0),
+  [clockEntries, weekStart]);
+
+  const todayActiveHours = useMemo(() => clockedInWorkers.reduce((sum, w) => {
     if (!w.clockInTime) return sum;
     return sum + (Date.now() - w.clockInTime.getTime()) / 3600000;
-  }, 0);
+  }, 0), [clockedInWorkers]);
 
   // Financial stats
-  const totalBilled = invoices.reduce((s, inv) => s + invoiceTotal(inv), 0);
-  const totalPaid = invoices.filter((i) => i.status === "paid").reduce((s, i) => s + invoiceTotal(i), 0);
-  const totalOutstanding = invoices.filter((i) => i.status === "sent").reduce((s, i) => s + invoiceTotal(i), 0);
-  const overdueInvoices = invoices.filter((i) => i.status === "overdue");
-  const pendingCOs = changeOrders.filter((co) => co.status === "pending");
+  const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);
+  const totalPaid = useMemo(() => invoices.filter((i) => i.status === "paid").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
+  const totalOutstanding = useMemo(() => invoices.filter((i) => i.status === "sent").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
+  const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue"), [invoices]);
+  const pendingCOs = useMemo(() => changeOrders.filter((co) => co.status === "pending"), [changeOrders]);
   const overdueTasks = projects.flatMap((p) =>
     p.tasks.filter((t) => t.status !== "completed" && t.endDate < now)
   );
