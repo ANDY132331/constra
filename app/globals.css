@@ -407,6 +407,17 @@
   .cl-ticker-track{animation-duration:18s}
 }
 
+/* ── BB-style landing page responsive ────────────────────────────────────── */
+@media(max-width:900px){
+  /* Hero: stack stats */
+  /* Who we are: single column */
+  /* Safety: single column */
+}
+@media(max-width:640px){
+  /* Nav: hide text links, keep logo + CTA */
+  /* Pricing comparison: single column */
+}
+
 /* ══════════════════════════════════════════════════════════════════
    MICRO-INTERACTIONS & POLISH
    ══════════════════════════════════════════════════════════════════ */
