@@ -317,7 +317,7 @@ export default function PunchListPage() {
             <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 flex-1 max-w-56">
               <Search size={13} className="text-white/30" />
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-                placeholder="Search items…" value={search} onChange={(e) => setSearch(e.target.value)} />
+                placeholder="Search items…" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
             </div>
             <CustomSelect
               className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"

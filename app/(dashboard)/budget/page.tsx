@@ -161,11 +161,15 @@ export default function BudgetPage() {
     if (editId) {
       updateBudgetLine(editId, data);
       toast.success("Budget line updated");
+      closeForm();
     } else {
       addBudgetLine(data);
       toast.success("Budget line added");
+      const keepProjectId = form.projectId;
+      setShowForm(false);
+      setEditId(null);
+      setForm({ ...emptyForm(), projectId: keepProjectId });
     }
-    closeForm();
   }
 
   function handleDelete() {
@@ -224,6 +228,7 @@ export default function BudgetPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search cost codes…"
+              autoComplete="off" spellCheck={false}
               className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40"
             />
           </div>
@@ -395,15 +400,15 @@ export default function BudgetPage() {
       {/* Add / Edit drawer */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) closeForm(); }}>
-          <div className="sheet relative w-full sm:max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl max-h-[90dvh] overflow-y-scroll overscroll-y-contain" style={{touchAction:"pan-y"}}>
-            <div className="flex items-center justify-between mb-5">
+          <form onSubmit={handleSubmit} className="sheet relative w-full sm:max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[90dvh] flex flex-col">
+            <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
               <h2 className="text-[15px] font-semibold text-white/90">{editId ? "Edit Line Item" : "Add Budget Line"}</h2>
-              <button onClick={closeForm} className="w-10 h-10 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-colors">
+              <button type="button" onClick={closeForm} className="w-10 h-10 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-colors">
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="flex-1 overflow-y-scroll overscroll-y-contain px-5 py-4 space-y-3" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Project *</label>
                 <CustomSelect
@@ -490,19 +495,19 @@ export default function BudgetPage() {
                   })()}
                 </div>
               )}
+            </div>
 
-              <div className="flex gap-2 pt-1">
-                <button type="button" onClick={closeForm}
-                  className="flex-1 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 text-[13px] font-medium py-2.5 rounded-full transition-colors">
-                  Cancel
-                </button>
-                <button type="submit"
-                  className="flex-1 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-semibold py-2.5 rounded-full transition-colors">
-                  {editId ? "Save Changes" : "Add Line"}
-                </button>
-              </div>
-            </form>
-          </div>
+            <div className="flex gap-2 px-5 py-4 border-t border-white/[0.06] flex-shrink-0">
+              <button type="button" onClick={closeForm}
+                className="flex-1 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 text-[13px] font-medium py-2.5 rounded-full transition-colors">
+                Cancel
+              </button>
+              <button type="submit"
+                className="flex-1 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-semibold py-2.5 rounded-full transition-colors">
+                {editId ? "Save Changes" : "Add Line"}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

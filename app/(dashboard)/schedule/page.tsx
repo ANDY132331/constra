@@ -817,13 +817,14 @@ export default function SchedulePage() {
                 <label className={lbl}>Event Title *</label>
                 <input className={inp} placeholder="e.g. Site inspection with engineer"
                   value={addForm.title} onChange={(e) => setAddForm((f) => ({ ...f, title: e.target.value }))}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddEvent()} autoFocus />
+                  onKeyDown={(e) => e.key === "Enter" && handleAddEvent()} autoComplete="off" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Date *</label>
                   <input className={inp} type="date" value={addForm.date}
-                    onChange={(e) => setAddForm((f) => ({ ...f, date: e.target.value }))} />
+                    onChange={(e) => setAddForm((f) => ({ ...f, date: e.target.value }))}
+                    onKeyDown={(e) => e.key === "Enter" && handleAddEvent()} />
                 </div>
                 <div>
                   <label className={lbl}>Type</label>

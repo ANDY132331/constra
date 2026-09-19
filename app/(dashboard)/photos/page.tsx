@@ -182,7 +182,7 @@ export default function PhotosPage() {
           <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3">
             <Search size={14} className="text-white/30" />
             <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
-              placeholder="Search photos..." value={search} onChange={(e) => setSearch(e.target.value)} />
+              placeholder="Search photos..." value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
           </div>
         </div>
         {/* Photo grid */}

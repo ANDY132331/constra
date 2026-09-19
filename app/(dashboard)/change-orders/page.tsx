@@ -238,7 +238,7 @@ export default function ChangeOrdersPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-mono text-white/30">{co.number}</p>
-                        <p className="text-[14px] font-bold text-white/85 mt-0.5 line-clamp-1">{co.title}</p>
+                        <p className="text-[14px] font-bold text-white/85 mt-0.5 line-clamp-1" title={co.title}>{co.title}</p>
                         <p className="text-[11px] text-white/40 mt-1 flex items-center gap-1.5">
                           {proj && <span className="w-1.5 h-1.5 rounded-full inline-block flex-shrink-0" style={{ backgroundColor: proj.color }} />}
                           {proj?.name ?? "Unknown project"}
@@ -328,6 +328,7 @@ export default function ChangeOrdersPage() {
               placeholder="Search change orders…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoComplete="off" spellCheck={false}
             />
           </div>
           <button

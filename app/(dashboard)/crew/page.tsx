@@ -373,7 +373,7 @@ export default function CrewPage() {
   return (
     <>
     {/* ── MOBILE ── */}
-    <div className="lg:hidden -mx-5 -mt-5 pb-6">
+    <div className="lg:hidden -mx-5 -mt-5 pb-10">
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <h2 className="text-[22px] font-bold text-white">Crew</h2>
@@ -451,6 +451,7 @@ export default function CrewPage() {
             placeholder="Search crew..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off" spellCheck={false}
             className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
           />
         </div>
@@ -603,7 +604,7 @@ export default function CrewPage() {
         <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2">
           <Search size={13} className="text-white/30" />
           <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none w-48"
-            placeholder={`${t.common.search} crew…`} value={search} onChange={(e) => setSearch(e.target.value)} />
+            placeholder={`${t.common.search} crew…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
         </div>
         <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
           {["all", "Admin", "Project Manager", "Foreman", "Worker"].map((r) => (

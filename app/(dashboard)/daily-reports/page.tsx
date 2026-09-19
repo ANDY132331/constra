@@ -227,6 +227,7 @@ export default function DailyReportsPage() {
                 placeholder="Search reports…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                autoComplete="off" spellCheck={false}
               />
             </div>
 
@@ -328,6 +329,7 @@ export default function DailyReportsPage() {
               placeholder="Search reports…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoComplete="off" spellCheck={false}
             />
           </div>
           <button
