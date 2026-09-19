@@ -84,7 +84,10 @@ export default function DocumentsPage() {
     return documents.filter((d) => {
       if (selectedProject && d.projectId !== selectedProject) return false;
       if (selectedCategory !== "all" && d.category !== selectedCategory) return false;
-      if (searchQuery && !d.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        if (!d.name.toLowerCase().includes(q) && !d.category.toLowerCase().includes(q)) return false;
+      }
       return true;
     }).sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
   }, [documents, selectedProject, selectedCategory, searchQuery]);

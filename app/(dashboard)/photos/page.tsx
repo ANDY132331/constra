@@ -616,9 +616,10 @@ export default function PhotosPage() {
                     onDrop={handleDrop}
                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                     onDragLeave={() => setDragOver(false)}
+                    onPaste={(e) => { const files = Array.from(e.clipboardData.files).filter((f) => f.type.startsWith("image/")); if (files.length) processFiles(files); }}
                     className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all ${dragOver ? "border-amber-500/50 bg-amber-500/[0.05]" : "border-white/[0.08] hover:border-amber-500/30 hover:bg-amber-500/[0.02]"}`}>
                     <Upload size={20} className="text-white/25" />
-                    <p className="text-[12px] text-white/30">Click or drag photos here</p>
+                    <p className="text-[12px] text-white/30">Click, drag, or paste photos</p>
                     <p className="text-[10px] text-white/20">Select multiple at once</p>
                   </button>
                 ) : null}

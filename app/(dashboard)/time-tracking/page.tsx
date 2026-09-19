@@ -590,7 +590,11 @@ export default function TimeTrackingPage() {
     if (!worker) return false;
     // Employees only see their own entries
     if (isEmployee && e.workerId !== currentUser.id) return false;
-    if (search && !worker.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const proj = getProjectById(e.projectId);
+      if (!worker.name.toLowerCase().includes(q) && !(proj?.name.toLowerCase().includes(q))) return false;
+    }
     if (selectedProject !== "all" && e.projectId !== selectedProject) return false;
     return true;
   });

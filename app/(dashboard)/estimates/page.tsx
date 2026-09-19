@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Send, CheckCircle2, XCircle, Clock,
-  Lock, Trash2, X, FileText, FileDown, Eye, ChevronRight, Pencil, Mail, Link2, Check,
+  Lock, Trash2, X, FileText, FileDown, Eye, ChevronRight, Pencil, Mail, Link2, Check, Copy,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
@@ -92,7 +92,7 @@ function estimatePaperStyles(t: InvoiceTemplate, isAccepted: boolean) {
 
 function EstimateDetail({
   estimate, currency, companyName, companyAddress, companyLogo,
-  onUpdate, onDelete, onEdit, onConvert, onClose,
+  onUpdate, onDelete, onEdit, onDuplicate, onConvert, onClose,
 }: {
   estimate: Estimate;
   currency: string;
@@ -102,6 +102,7 @@ function EstimateDetail({
   onUpdate: (id: string, u: Partial<Estimate>) => void;
   onDelete: (id: string) => void;
   onEdit: (estimate: Estimate) => void;
+  onDuplicate: (estimate: Estimate) => void;
   onConvert: (estimate: Estimate) => void;
   onClose: () => void;
 }) {
@@ -222,6 +223,9 @@ function EstimateDetail({
             className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40"
           >
             <FileDown size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
+          </button>
+          <button onClick={() => onDuplicate(estimate)} aria-label="Duplicate estimate" title="Duplicate" className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:text-white/80 hover:bg-white/[0.06] transition-colors">
+            <Copy size={14} />
           </button>
           <button onClick={() => onEdit(estimate)} aria-label="Edit estimate"
             className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:text-white/80 hover:bg-white/[0.06] transition-colors">
@@ -589,6 +593,14 @@ export default function EstimatesPage() {
     return `EST-${String(max + 1).padStart(3, "0")}`;
   })();
 
+  function handleDuplicateEstimate(est: Estimate) {
+    const nums = estimates.map((e) => parseInt(e.number.replace("EST-", "")) || 0);
+    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    const num = `EST-${String(max + 1).padStart(3, "0")}`;
+    addEstimate({ number: num, projectName: est.projectName, clientName: est.clientName, clientEmail: est.clientEmail, status: "draft", issueDate: new Date(), validUntil: new Date(Date.now() + 30 * 86400000), items: est.items, taxRate: est.taxRate, notes: est.notes });
+    toast.success(`Estimate duplicated as ${num}`);
+  }
+
   const updateItem = (idx: number, field: keyof LineItem, val: string) =>
     setForm((f) => ({ ...f, items: f.items.map((it, i) => i === idx ? { ...it, [field]: val } : it) }));
   const addItem    = () => setForm((f) => ({ ...f, items: [...f.items, blankItem()] }));
@@ -870,6 +882,7 @@ export default function EstimatesPage() {
                   onUpdate={updateEstimate}
                   onDelete={(id) => { deleteEstimate(id); setSelectedId(null); }}
                   onEdit={openEdit}
+                  onDuplicate={handleDuplicateEstimate}
                   onConvert={handleConvertToInvoice}
                   onClose={() => setSelectedId(null)}
                 />
@@ -1043,6 +1056,7 @@ export default function EstimatesPage() {
               onUpdate={(id, u) => updateEstimate(id, u)}
               onDelete={(id) => { deleteEstimate(id); setMobilePreviewId(null); }}
               onEdit={(e) => { setMobilePreviewId(null); openEdit(e); }}
+              onDuplicate={handleDuplicateEstimate}
               onConvert={(e) => { handleConvertToInvoice(e); setMobilePreviewId(null); }}
               onClose={() => setMobilePreviewId(null)}
             />

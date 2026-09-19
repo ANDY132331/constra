@@ -7,7 +7,7 @@ import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Send, CheckCircle2, AlertTriangle, Lock,
   Trash2, X, FileText, ChevronRight, Download, Eye,
-  Mail, Pencil, Link2, Check,
+  Mail, Pencil, Link2, Check, Copy,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
@@ -112,7 +112,7 @@ function invoicePaperStyles(t: InvoiceTemplate, isPaid: boolean) {
 
 function InvoiceDetail({
   invoice, currency, companyName, companyAddress, companyLogo,
-  onUpdate, onDelete, onEdit, onClose,
+  onUpdate, onDelete, onEdit, onDuplicate, onClose,
 }: {
   invoice: Invoice;
   currency: string;
@@ -122,6 +122,7 @@ function InvoiceDetail({
   onUpdate: (id: string, u: Partial<Invoice>) => void;
   onDelete: (id: string) => void;
   onEdit: (invoice: Invoice) => void;
+  onDuplicate: (invoice: Invoice) => void;
   onClose: () => void;
 }) {
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -243,6 +244,9 @@ function InvoiceDetail({
             className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40"
           >
             <Download size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
+          </button>
+          <button onClick={() => onDuplicate(invoice)} aria-label="Duplicate invoice" title="Duplicate" className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-white bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+            <Copy size={14} />
           </button>
           <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-white bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
             <Pencil size={15} />
@@ -579,6 +583,14 @@ export default function InvoicesPage() {
     return `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
   })();
 
+  function handleDuplicateInvoice(inv: Invoice) {
+    const nums = invoices.map((i) => parseInt(i.number.replace(/\D/g, ""), 10)).filter(Boolean);
+    const max = nums.length ? Math.max(...nums) : 0;
+    const num = `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
+    addInvoice({ number: num, clientName: inv.clientName, clientEmail: inv.clientEmail, clientAddress: inv.clientAddress, status: "draft", issueDate: new Date(), dueDate: new Date(Date.now() + 30 * 86400000), items: inv.items, taxRate: inv.taxRate, notes: inv.notes });
+    toast.success(`Invoice duplicated as ${num}`);
+  }
+
   const updateItem   = (idx: number, field: keyof LineItem, val: string) =>
     setForm((f) => ({ ...f, items: f.items.map((it, i) => i === idx ? { ...it, [field]: val } : it) }));
   const addItem      = () => setForm((f) => ({ ...f, items: [...f.items, blankItem()] }));
@@ -859,6 +871,7 @@ export default function InvoicesPage() {
               onUpdate={updateInvoice}
               onDelete={deleteInvoice}
               onEdit={openEdit}
+              onDuplicate={handleDuplicateInvoice}
               onClose={() => setSelectedId(null)}
             />
           </div>
@@ -1016,6 +1029,7 @@ export default function InvoicesPage() {
               onUpdate={(id, u) => updateInvoice(id, u)}
               onDelete={(id) => { deleteInvoice(id); setMobilePreviewId(null); }}
               onEdit={(invoice) => { setMobilePreviewId(null); openEdit(invoice); setShowModal(true); }}
+              onDuplicate={handleDuplicateInvoice}
               onClose={() => setMobilePreviewId(null)}
             />
           </div>

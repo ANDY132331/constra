@@ -29,11 +29,13 @@ type EqForm = {
   lastService: string; nextService: string; certExpiry: string;
 };
 
-const blank: EqForm = {
+const todayStr = () => new Date().toISOString().slice(0, 10);
+const ninetyStr = () => new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
+const blank = (): EqForm => ({
   name: "", type: "", status: "available",
   projectId: "", dailyRate: "",
-  lastService: "", nextService: "", certExpiry: "",
-};
+  lastService: todayStr(), nextService: ninetyStr(), certExpiry: "",
+});
 
 export default function EquipmentPage() {
   const { equipment, projects, addEquipment, updateEquipment, deleteEquipment, getProjectById, currency, currentUser } = useStore();
@@ -46,7 +48,7 @@ export default function EquipmentPage() {
   useEffect(() => { if (prefill) setSearch(prefill); }, [prefill]);
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState<EqForm>(blank);
+  const [form, setForm] = useState<EqForm>(blank());
 
   const filtered = equipment.filter((e) => {
     if (search && !e.name.toLowerCase().includes(search.toLowerCase()) && !e.type.toLowerCase().includes(search.toLowerCase())) return false;
@@ -59,7 +61,7 @@ export default function EquipmentPage() {
 
   function openAdd() {
     setEditId(null);
-    setForm(blank);
+    setForm(blank());
     setShowModal(true);
   }
 
@@ -96,7 +98,7 @@ export default function EquipmentPage() {
       addEquipment(payload);
     }
     const wasEditing = !!editId;
-    setForm(blank);
+    setForm(blank());
     setEditId(null);
     setShowModal(false);
     toast.success(wasEditing ? "Equipment updated" : "Equipment added");

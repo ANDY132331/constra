@@ -35,9 +35,11 @@ type TaskForm = {
   progress: string;
 };
 
-const blankTask: TaskForm = {
-  projectId: "", name: "", workerId: "", startDate: "", endDate: "", status: "not-started", progress: "0",
-};
+const todayIso = () => new Date().toISOString().slice(0, 10);
+const weekIso  = () => new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+const blankTask = (): TaskForm => ({
+  projectId: "", name: "", workerId: "", startDate: todayIso(), endDate: weekIso(), status: "not-started", progress: "0",
+});
 
 export default function TasksPage() {
   const { projects, workers, addTask, updateTask, deleteTask, getWorkerById, getProjectById } = useStore();
@@ -48,7 +50,7 @@ export default function TasksPage() {
   const [showModal, setShowModal] = useState(false);
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
-  const [form, setForm] = useState<TaskForm>(blankTask);
+  const [form, setForm] = useState<TaskForm>(blankTask());
   const [deleteTaskConfirm, setDeleteTaskConfirm] = useState<{ projectId: string; taskId: string; name: string } | null>(null);
   const today = new Date();
 
@@ -109,7 +111,8 @@ export default function TasksPage() {
         status: form.status,
       });
     }
-    setForm(blankTask);
+    const keepProjectId = !wasEditing ? form.projectId : "";
+    setForm({ ...blankTask(), projectId: keepProjectId });
     setEditTaskId(null);
     setEditProjectId(null);
     setShowModal(false);
@@ -140,7 +143,7 @@ export default function TasksPage() {
         <div className="px-5 pt-5 pb-4 flex items-center justify-between">
           <h2 className="text-[22px] font-bold text-white">Tasks</h2>
           <button
-            onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask); setShowModal(true); }}
+            onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask()); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-full"
           >
             <Plus size={15} /> New
@@ -243,7 +246,7 @@ export default function TasksPage() {
           </p>
         </div>
         <button
-          onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask); setShowModal(true); }}
+          onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask()); setShowModal(true); }}
           className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
         >
           <Plus size={15} />

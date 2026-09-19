@@ -49,7 +49,10 @@ export default function PunchListPage() {
   const [form, setForm] = useState<ItemForm>(blank);
 
   const filtered = punchItems.filter((item) => {
-    if (search && !item.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      if (!item.title.toLowerCase().includes(q) && !(item.description?.toLowerCase().includes(q)) && !(item.location?.toLowerCase().includes(q))) return false;
+    }
     if (statusFilter !== "all" && item.status !== statusFilter) return false;
     if (priorityFilter !== "all" && item.priority !== priorityFilter) return false;
     if (projectFilter !== "all" && item.projectId !== projectFilter) return false;
@@ -104,7 +107,8 @@ export default function PunchListPage() {
         location: form.location.trim() || undefined,
       });
     }
-    setForm(blank);
+    const keepProjectId = !editId ? form.projectId : "";
+    setForm({ ...blank, projectId: keepProjectId });
     setEditId(null);
     setShowModal(false);
     toast.success(editId ? "Item updated" : "Item added to punch list");
