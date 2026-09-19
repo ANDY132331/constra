@@ -397,7 +397,7 @@ export default function ChangeOrdersPage() {
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1 min-w-0">
                       <span className="text-[11px] font-mono text-white/35 mr-2">{co.number}</span>
-                      <span className="text-[13px] font-semibold text-white/80 line-clamp-1">{co.title}</span>
+                      <span className="text-[13px] font-semibold text-white/80 line-clamp-1" title={co.title}>{co.title}</span>
                     </div>
                     <ChevronRight size={12} className="text-white/20 flex-shrink-0 mt-0.5" />
                   </div>

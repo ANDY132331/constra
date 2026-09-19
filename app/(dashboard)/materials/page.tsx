@@ -275,8 +275,8 @@ export default function MaterialsPage() {
                       <span>{format(new Date(entry.date), "MMM d, yyyy")}</span>
                     </div>
                     <button onClick={() => setDeleteConfirm(entry.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
-                      <Trash2 size={12} />
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                      <Trash2 size={13} />
                     </button>
                   </div>
                   {entry.note && <p className="text-[11px] text-white/35 mt-1.5 italic">"{entry.note}"</p>}
@@ -477,7 +477,7 @@ export default function MaterialsPage() {
       {/* Add Material Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}>
-          <div className="sheet relative bg-[#141414] border border-white/[0.1] rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+          <div className="sheet relative bg-[#141414] border border-white/[0.1] rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col">
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
               <h3 className="text-[15px] font-bold text-white">Log Material</h3>
@@ -486,7 +486,7 @@ export default function MaterialsPage() {
               </button>
             </div>
 
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-scroll" style={{touchAction:"pan-y"}}>
+            <div className="p-5 space-y-4 flex-1 overflow-y-scroll overscroll-y-contain" style={{touchAction:"pan-y"}}>
               {/* Type toggle */}
               <div className="flex gap-2">
                 {(["delivery", "usage"] as const).map((t) => (

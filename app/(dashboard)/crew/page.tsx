@@ -473,7 +473,7 @@ export default function CrewPage() {
                     : worker.initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-bold text-white truncate">{worker.name}</p>
+                  <p className="text-[14px] font-bold text-white truncate" title={worker.name}>{worker.name}</p>
                   <p className="text-[11px] text-white/35 truncate">{worker.customRole}</p>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -503,17 +503,17 @@ export default function CrewPage() {
                 </div>
                 <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
                   {canEdit && isAdminOrAbove(currentUser.role) && (
-                    <button onClick={() => setHoursWorker(worker)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
+                    <button onClick={() => setHoursWorker(worker)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
                       <Clock size={13} />
                     </button>
                   )}
                   {canEdit && (
                     <>
-                      <button onClick={() => openEdit(worker)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
+                      <button onClick={() => openEdit(worker)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
                       </button>
                       {worker.id !== currentUser.id && (
-                        <button onClick={() => handleDelete(worker.id)} className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        <button onClick={() => handleDelete(worker.id)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                           <Trash2 size={13} />
                         </button>
                       )}

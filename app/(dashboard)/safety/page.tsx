@@ -280,15 +280,15 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
                     <button
                       onClick={() => openEdit(incident)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
                     >
-                      <Pencil size={12} />
+                      <Pencil size={13} />
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(incident.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>

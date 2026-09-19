@@ -329,7 +329,7 @@ export default function BudgetPage() {
                           return (
                             <tr key={b.id} className="hover:bg-white/[0.02] transition-colors group">
                               <td className="px-4 py-2.5 font-mono text-[11px] text-white/60 font-semibold whitespace-nowrap">{b.code}</td>
-                              <td className="px-3 py-2.5 text-white/75 max-w-[200px] truncate">{b.description}</td>
+                              <td className="px-3 py-2.5 text-white/75 max-w-[200px] truncate" title={b.description}>{b.description}</td>
                               <td className="px-3 py-2.5">
                                 <span className={`flex items-center gap-1.5 ${cat.color}`}>
                                   <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cat.dot}`} />
@@ -346,7 +346,7 @@ export default function BudgetPage() {
                               </td>
                               {isAdmin && (
                                 <td className="px-3 py-2.5">
-                                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="flex items-center justify-end gap-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                     <button
                                       onClick={() => openEdit(b)}
                                       className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors"
@@ -398,7 +398,7 @@ export default function BudgetPage() {
           <div className="sheet relative w-full sm:max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl max-h-[90dvh] overflow-y-scroll overscroll-y-contain" style={{touchAction:"pan-y"}}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[15px] font-semibold text-white/90">{editId ? "Edit Line Item" : "Add Budget Line"}</h2>
-              <button onClick={closeForm} className="text-white/40 hover:text-white/70 transition-colors">
+              <button onClick={closeForm} className="w-10 h-10 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-colors">
                 <X size={16} />
               </button>
             </div>

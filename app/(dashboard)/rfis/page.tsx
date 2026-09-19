@@ -306,7 +306,7 @@ export default function RFIsPage() {
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
                         {isOverdue && <span className="text-[10px] font-bold bg-red-500/15 text-red-400 px-2 py-0.5 rounded-full">OVERDUE</span>}
                       </div>
-                      <p className="text-[14px] font-bold text-white/85 truncate">{rfi.subject}</p>
+                      <p className="text-[14px] font-bold text-white/85 truncate" title={rfi.subject}>{rfi.subject}</p>
                       <div className="flex items-center gap-3 mt-1 text-[11px] text-white/30">
                         {project && <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} /><span>{project.name}</span></div>}
                         <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>

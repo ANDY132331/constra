@@ -198,10 +198,10 @@ export default function TasksPage() {
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0">
                     {isOverdueMobile && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full mr-1">OVERDUE</span>}
-                    <button onClick={() => openEdit(task)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors">
+                    <button onClick={() => openEdit(task)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors">
                       <Pencil size={13} />
                     </button>
-                    <button onClick={() => handleDelete(task.projectId, task.id, task.name)} className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors">
+                    <button onClick={() => handleDelete(task.projectId, task.id, task.name)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors">
                       <Trash2 size={13} />
                     </button>
                   </div>
@@ -308,7 +308,7 @@ export default function TasksPage() {
             <div key={task.id} className="grid grid-cols-[1fr_160px_130px_120px_100px_80px_64px] items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors last:border-0 group">
               <div className="flex items-center gap-3 min-w-0">
                 <Icon size={15} className={cfg.className} />
-                <span className="text-[13px] font-semibold text-white/80 truncate">{task.name}</span>
+                <span className="text-[13px] font-semibold text-white/80 truncate" title={task.name}>{task.name}</span>
                 {isOverdue && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full flex-shrink-0">OVERDUE</span>}
               </div>
               <div className="flex items-center gap-1.5 min-w-0">

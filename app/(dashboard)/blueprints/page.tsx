@@ -239,6 +239,7 @@ export default function BlueprintsPage() {
           <input
             ref={fileInputRef}
             type="file"
+            multiple
             accept=".pdf,.png,.jpg,.jpeg,.webp"
             className="hidden"
             onChange={handleUpload}
