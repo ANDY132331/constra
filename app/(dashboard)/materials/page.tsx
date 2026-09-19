@@ -92,7 +92,11 @@ export default function MaterialsPage() {
     return materialEntries.filter((e) => {
       if (selectedProject !== "all" && e.projectId !== selectedProject) return false;
       if (selectedTrade !== "all" && e.trade !== selectedTrade) return false;
-      if (searchQuery && !e.materialName.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const proj = projects.find((p) => p.id === e.projectId);
+        if (!e.materialName.toLowerCase().includes(q) && !(e.note?.toLowerCase().includes(q)) && !(e.trade?.toLowerCase().includes(q)) && !(proj?.name.toLowerCase().includes(q))) return false;
+      }
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [materialEntries, selectedProject, selectedTrade, searchQuery]);
@@ -185,15 +189,15 @@ export default function MaterialsPage() {
         {/* Stats chips */}
         <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
-            <p className="text-[22px] font-bold text-white leading-none">{materialEntries.length}</p>
+            <p className="text-[22px] font-bold text-white leading-none">{filteredEntries.length}</p>
             <p className="text-[11px] text-white/40 font-medium mt-0.5">Total</p>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
-            <p className="text-[22px] font-bold text-emerald-400 leading-none">{materialEntries.filter((e) => e.type === "delivery").length}</p>
+            <p className="text-[22px] font-bold text-emerald-400 leading-none">{filteredEntries.filter((e) => e.type === "delivery").length}</p>
             <p className="text-[11px] text-emerald-400/60 font-medium mt-0.5">Deliveries</p>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
-            <p className="text-[22px] font-bold text-amber-400 leading-none">{materialEntries.filter((e) => e.type === "usage").length}</p>
+            <p className="text-[22px] font-bold text-amber-400 leading-none">{filteredEntries.filter((e) => e.type === "usage").length}</p>
             <p className="text-[11px] text-amber-400/60 font-medium mt-0.5">Usage</p>
           </div>
         </div>
@@ -477,11 +481,11 @@ export default function MaterialsPage() {
       {/* Add Material Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}>
-          <div className="sheet relative bg-[#141414] border border-white/[0.1] rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col">
+          <form onSubmit={(e) => { e.preventDefault(); handleAddEntry(); }} className="sheet relative bg-[#141414] border border-white/[0.1] rounded-t-2xl sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col">
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
               <h3 className="text-[15px] font-bold text-white">Log Material</h3>
-              <button onClick={() => setShowAddModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+              <button type="button" onClick={() => setShowAddModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>
@@ -606,14 +610,14 @@ export default function MaterialsPage() {
 
               {/* Submit */}
               <button
-                onClick={handleAddEntry}
+                type="submit"
                 disabled={!selectedMaterial || !quantity || !entryProjectId}
                 className="w-full py-3 bg-amber-500 hover:bg-amber-400 disabled:opacity-30 disabled:cursor-not-allowed text-black font-bold text-[14px] rounded-full transition-colors"
               >
                 Log {entryType === "delivery" ? "Delivery" : "Usage"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 

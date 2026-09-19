@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useRef } from "react";
+import { toast } from "sonner";
 import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus, Download, ExternalLink } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getClient } from "@/lib/supabase/client";
@@ -45,29 +46,22 @@ export default function BlueprintsPage() {
   const openCount = blueprintPins.filter((p) => p.documentId === selectedDoc?.id && !p.resolved).length;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !companyId) return;
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length || !companyId) return;
 
     setUploading(true);
     setUploadError(null);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
-      const path = `${companyId}/blueprints/${Date.now()}.${ext}`;
-      const supabase = getClient();
-      const { error: uploadErr } = await supabase.storage.from("documents").upload(path, file);
-      if (uploadErr) throw uploadErr;
-
-      const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(path);
-
-      addDocument({
-        projectId: selectedProjectId,
-        name: file.name.replace(/\.[^.]+$/, ""),
-        category: "blueprint",
-        publicUrl,
-        uploadedById: "",
-        uploadedAt: new Date(),
-        sizeBytes: file.size,
-      });
+      await Promise.all(files.map(async (file) => {
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
+        const path = `${companyId}/blueprints/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const supabase = getClient();
+        const { error: uploadErr } = await supabase.storage.from("documents").upload(path, file);
+        if (uploadErr) throw uploadErr;
+        const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(path);
+        addDocument({ projectId: selectedProjectId, name: file.name.replace(/\.[^.]+$/, ""), category: "blueprint", publicUrl, uploadedById: "", uploadedAt: new Date(), sizeBytes: file.size });
+      }));
+      if (files.length > 1) toast.success(`${files.length} blueprints uploaded`);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Upload failed. Please try again.");
     } finally {

@@ -232,10 +232,13 @@ export default function CrewPage() {
   }, [qrDataUrl, inviteCode]);
 
   const filtered = workers.filter((w) => {
+    const q = search.toLowerCase();
     const matchSearch =
-      w.name.toLowerCase().includes(search.toLowerCase()) ||
-      w.role.toLowerCase().includes(search.toLowerCase()) ||
-      w.customRole.toLowerCase().includes(search.toLowerCase());
+      w.name.toLowerCase().includes(q) ||
+      w.role.toLowerCase().includes(q) ||
+      w.customRole.toLowerCase().includes(q) ||
+      w.email.toLowerCase().includes(q) ||
+      w.phone.includes(search);
     const matchRole = filterRole === "all" || w.role === filterRole;
     return matchSearch && matchRole;
   });
@@ -770,10 +773,10 @@ export default function CrewPage() {
       {/* Add/Edit Worker Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
-          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Worker" : "Add Worker"}</h3>
-              <button onClick={() => setShowModal(false)}
+              <button type="button" onClick={() => setShowModal(false)}
                 className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
@@ -919,16 +922,16 @@ export default function CrewPage() {
               </p>
             )}
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
-              <button onClick={() => { setShowModal(false); setSaveError(""); }}
+              <button type="button" onClick={() => { setShowModal(false); setSaveError(""); }}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 Cancel
               </button>
-              <button onClick={handleSave} disabled={!form.name.trim() || saving}
+              <button type="submit" disabled={!form.name.trim() || saving}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {saving ? "Adding…" : editId ? "Save Changes" : "Add Worker"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 

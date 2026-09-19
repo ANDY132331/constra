@@ -128,7 +128,9 @@ export default function DailyReportsPage() {
       notes: form.notes.trim(),
       submittedById: currentUser.id,
     });
-    setForm(emptyForm());
+    const nextDay = new Date(form.date);
+    nextDay.setDate(nextDay.getDate() + 1);
+    setForm({ ...emptyForm(), projectId: form.projectId, weather: form.weather, temperatureF: form.temperatureF, date: nextDay.toISOString().slice(0, 10) });
     setShowForm(false);
     toast.success("Daily report created");
   }, [form, addDailyReport, currentUser.id]);
@@ -498,10 +500,10 @@ export default function DailyReportsPage() {
       {/* New Report Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
-          <div className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] sm:max-h-[85dvh] flex flex-col">
+          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] sm:max-h-[85dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-[14px] font-bold text-white/90">New Daily Report</h3>
-              <button onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
+              <button type="button" onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
             </div>
             <div className="overflow-y-scroll overscroll-y-contain flex-1 px-5 py-4 space-y-4" style={{touchAction:"pan-y"}}>
               <div className="grid grid-cols-2 gap-3">
@@ -590,16 +592,16 @@ export default function DailyReportsPage() {
               </div>
             </div>
             <div className="px-5 py-4 border-t border-white/[0.06] flex justify-end gap-2">
-              <button onClick={() => setShowForm(false)} className="px-4 py-2 text-[13px] text-white/50 hover:text-white/80 rounded-full hover:bg-white/[0.05] transition-colors">Cancel</button>
+              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-[13px] text-white/50 hover:text-white/80 rounded-full hover:bg-white/[0.05] transition-colors">Cancel</button>
               <button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={!form.projectId || !form.date || !form.workCompleted.trim()}
                 className="px-4 py-2 text-[13px] font-bold bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-black rounded-full transition-colors"
               >
                 Submit Report
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 

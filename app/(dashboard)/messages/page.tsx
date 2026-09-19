@@ -99,14 +99,27 @@ export default function MessagesPage() {
   }, [projectMessages.length, selectedProjectId]);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const data = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    });
-    setPendingAttachment({ name: file.name, data });
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    if (files.length === 1) {
+      const file = files[0];
+      const data = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+      setPendingAttachment({ name: file.name, data });
+    } else {
+      // Multiple files — send each as its own message immediately
+      for (const file of files) {
+        const data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+        addMessage({ projectId: selectedProjectId!, senderId: currentUser.id, senderName: currentUser.name, senderInitials: currentUser.initials, senderColor: currentUser.color, timestamp: new Date(), text: "", attachmentName: file.name, attachmentData: data });
+      }
+    }
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -491,7 +504,7 @@ export default function MessagesPage() {
             >
               <Paperclip size={18} className="text-white" />
             </button>
-            <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
+            <input ref={fileRef} type="file" multiple className="hidden" onChange={handleFile} />
 
             {/* Text */}
             <div

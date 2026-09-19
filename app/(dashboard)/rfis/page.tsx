@@ -34,7 +34,7 @@ type RFIForm = {
 const blank: RFIForm = {
   projectId: "", subject: "", question: "",
   submittedById: "", assignedToId: "",
-  priority: "routine", dueDate: "",
+  priority: "routine", dueDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
 };
 
 export default function RFIsPage() {
@@ -52,7 +52,10 @@ export default function RFIsPage() {
 
   const filtered = rfis.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
-    return r.subject.toLowerCase().includes(search.toLowerCase()) || r.number.toLowerCase().includes(search.toLowerCase());
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const proj = getProjectById(r.projectId);
+    return r.subject.toLowerCase().includes(q) || r.number.toLowerCase().includes(q) || r.question.toLowerCase().includes(q) || !!(proj?.name.toLowerCase().includes(q));
   });
 
   const nextNumber = (() => {
@@ -420,12 +423,12 @@ export default function RFIsPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
-          <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">
                 {editId ? "Edit RFI" : <>New RFI <span className="text-white/30 font-normal text-[13px]">{nextNumber}</span></>}
               </h3>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button type="button" onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -507,14 +510,14 @@ export default function RFIsPage() {
               </div>
             </div>
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
-              <button onClick={() => { setShowModal(false); setEditId(null); }}
+              <button type="button" onClick={() => { setShowModal(false); setEditId(null); }}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
-              <button onClick={handleSave} disabled={!form.subject.trim()}
+              <button type="submit" disabled={!form.subject.trim()}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 {editId ? "Save Changes" : "Submit RFI"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 
