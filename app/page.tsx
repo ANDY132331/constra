@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, ChevronRight } from "lucide-react";
 
@@ -106,22 +105,18 @@ function TiltCard({ children, style }: { children: React.ReactNode; style?: Reac
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const router = useRouter();
-  const [checking, setChecking] = useState(true);
+  const [alreadyIn, setAlreadyIn] = useState(false);
   const heroRef = useParallax();
   const heroMouseRef = useRef<HTMLElement>(null);
 
+  // Detect returning user — show "Go to Dashboard" in nav, but never auto-redirect
+  // so the landing page is always visible to everyone who opens the URL.
   useEffect(() => {
-    if (isAlreadyOnboarded()) {
-      router.replace("/dashboard");
-    } else {
-      setChecking(false);
-    }
-  }, [router]);
+    setAlreadyIn(isAlreadyOnboarded());
+  }, []);
 
   // Mouse parallax on hero
   useEffect(() => {
-    if (checking) return;
     const el = heroMouseRef.current;
     if (!el) return;
     const onMove = (e: MouseEvent) => {
@@ -136,11 +131,10 @@ export default function LandingPage() {
     };
     el.addEventListener("mousemove", onMove);
     return () => el.removeEventListener("mousemove", onMove);
-  }, [checking]);
+  }, []);
 
   // Scroll reveal + counters
   useEffect(() => {
-    if (checking) return;
     let cancelled = false;
     document.body.classList.add("reveal-active");
     const revObs = new IntersectionObserver((entries) => {
@@ -173,9 +167,7 @@ export default function LandingPage() {
     }
 
     return () => { cancelled = true; document.body.classList.remove("reveal-active"); };
-  }, [checking]);
-
-  if (checking) return <div style={{ background: "#050505", width: "100vw", height: "100vh" }} aria-hidden />;
+  }, []);
 
   return (
     <>
@@ -392,9 +384,11 @@ export default function LandingPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
               <a href="#tools" className="nav-link" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Tools</a>
               <a href="#testimonials" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Reviews</a>
-              <Link href="/login" className="nav-link" style={{ fontSize: 11, color: "rgba(255,255,255,.3)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Sign In</Link>
-              <Link href="/onboarding" className="btn-3d" style={{ background: "#F5C400", color: "#000", fontWeight: 900, fontFamily: BC, fontSize: 12, padding: "10px 22px", textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", boxShadow: "0 0 20px rgba(245,196,0,.25)" }}>
-                Get Started →
+              {!alreadyIn && (
+                <Link href="/login" className="nav-link" style={{ fontSize: 11, color: "rgba(255,255,255,.3)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Sign In</Link>
+              )}
+              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d" style={{ background: "#F5C400", color: "#000", fontWeight: 900, fontFamily: BC, fontSize: 12, padding: "10px 22px", textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", boxShadow: "0 0 20px rgba(245,196,0,.25)" }}>
+                {alreadyIn ? "Go to Dashboard →" : "Get Started →"}
               </Link>
             </div>
           </div>
@@ -503,8 +497,8 @@ export default function LandingPage() {
 
             {/* CTAs */}
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 64 }}>
-              <Link href="/onboarding" className="btn-3d" style={{ fontFamily: BC, fontWeight: 900, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", background: "#F5C400", color: "#000", display: "inline-flex", alignItems: "center", gap: 10 }}>
-                GET STARTED FREE →
+              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d" style={{ fontFamily: BC, fontWeight: 900, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", background: "#F5C400", color: "#000", display: "inline-flex", alignItems: "center", gap: 10 }}>
+                {alreadyIn ? "GO TO DASHBOARD →" : "GET STARTED FREE →"}
               </Link>
               <a href="#tools" className="btn-ghost" style={{ fontFamily: BC, fontWeight: 800, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", border: "1px solid rgba(255,255,255,.16)", color: "rgba(255,255,255,.6)", display: "inline-flex", alignItems: "center", gap: 8 }}>
                 SEE OUR TOOLS ↓
@@ -852,12 +846,14 @@ export default function LandingPage() {
               The only construction app that covers everything — from first clock-in to final invoice. Free, forever.
             </p>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-              <Link href="/onboarding" className="btn-3d" style={{ background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 16, letterSpacing: ".06em", textTransform: "uppercase", padding: "20px 56px", textDecoration: "none", display: "flex", alignItems: "center", gap: 10, maxWidth: 440, width: "100%", justifyContent: "center" }}>
-                CREATE FREE ACCOUNT →
+              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d" style={{ background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 16, letterSpacing: ".06em", textTransform: "uppercase", padding: "20px 56px", textDecoration: "none", display: "flex", alignItems: "center", gap: 10, maxWidth: 440, width: "100%", justifyContent: "center" }}>
+                {alreadyIn ? "GO TO DASHBOARD →" : "CREATE FREE ACCOUNT →"}
               </Link>
-              <Link href="/login" style={{ fontSize: 11, color: "rgba(255,255,255,.28)", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, letterSpacing: ".04em", textTransform: "uppercase", fontWeight: 600 }}>
-                Already have an account? Sign In <ChevronRight size={11} />
-              </Link>
+              {!alreadyIn && (
+                <Link href="/login" style={{ fontSize: 11, color: "rgba(255,255,255,.28)", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, letterSpacing: ".04em", textTransform: "uppercase", fontWeight: 600 }}>
+                  Already have an account? Sign In <ChevronRight size={11} />
+                </Link>
+              )}
             </div>
           </div>
         </section>
