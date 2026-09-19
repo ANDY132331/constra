@@ -25,19 +25,16 @@ export default function PhotosPage() {
   const [showModal, setShowModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [form, setForm] = useState<PhotoForm>({ caption: "", projectId: "", uploadedById: "", tags: "" });
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [isImageFile, setIsImageFile] = useState(true);
+  const [photoItems, setPhotoItems] = useState<Array<{ url: string; name: string; isImage: boolean }>>([]);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const openModal = useCallback(() => {
     setForm({ caption: "", projectId: projects[0]?.id ?? "", uploadedById: currentUser.id, tags: "" });
-    setPhotoUrl(null);
-    setFileName(null);
-    setIsImageFile(true);
+    setPhotoItems([]);
     setUploading(false);
     setUploadError(null);
     if (fileRef.current) fileRef.current.value = "";
@@ -46,9 +43,7 @@ export default function PhotosPage() {
 
   const closeModal = useCallback(() => {
     setShowModal(false);
-    setPhotoUrl(null);
-    setFileName(null);
-    setIsImageFile(true);
+    setPhotoItems([]);
     setUploading(false);
     setUploadError(null);
     if (fileRef.current) fileRef.current.value = "";
@@ -72,46 +67,67 @@ export default function PhotosPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [lightboxIdx, filtered.length]);
 
-  const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const isImage = file.type.startsWith("image/");
-    setIsImageFile(isImage);
-    setFileName(file.name);
+  const processFiles = useCallback(async (files: File[]) => {
+    if (!files.length) return;
     setUploadError(null);
 
     if (SUPABASE_ENABLED) {
       setUploading(true);
-      const ext = file.name.split(".").pop() ?? "bin";
-      const prefix = companyId ?? "shared";
-      const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { data, error } = await getClient().storage.from("photos").upload(path, file, { upsert: false });
-      setUploading(false);
-      if (error) {
-        setUploadError(error?.message ?? "Upload failed. Please try again or contact support.");
-        return;
+      try {
+        const results = await Promise.all(files.map(async (file) => {
+          const ext = file.name.split(".").pop() ?? "bin";
+          const prefix = companyId ?? "shared";
+          const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          const { data, error } = await getClient().storage.from("photos").upload(path, file, { upsert: false });
+          if (error) throw error;
+          const { data: { publicUrl } } = getClient().storage.from("photos").getPublicUrl(data.path);
+          return { url: publicUrl, name: file.name, isImage: file.type.startsWith("image/") };
+        }));
+        setPhotoItems((prev) => [...prev, ...results]);
+      } catch (err: unknown) {
+        setUploadError((err as Error).message ?? "Upload failed. Please try again.");
+      } finally {
+        setUploading(false);
+        if (fileRef.current) fileRef.current.value = "";
       }
-      const { data: { publicUrl } } = getClient().storage.from("photos").getPublicUrl(data.path);
-      setPhotoUrl(publicUrl);
     } else {
-      const reader = new FileReader();
-      reader.onload = (ev) => setPhotoUrl(ev.target?.result as string);
-      reader.readAsDataURL(file);
+      const results = await Promise.all(files.map((file) => new Promise<{ url: string; name: string; isImage: boolean }>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve({ url: ev.target?.result as string, name: file.name, isImage: file.type.startsWith("image/") });
+        reader.readAsDataURL(file);
+      })));
+      setPhotoItems((prev) => [...prev, ...results]);
+      if (fileRef.current) fileRef.current.value = "";
     }
-  }, []);
+  }, [companyId]);
+
+  const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    await processFiles(files);
+  }, [processFiles]);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/") || f.type.startsWith("video/"));
+    await processFiles(files);
+  }, [processFiles]);
 
   const handleSave = () => {
-    if (!form.caption.trim() || !photoUrl) return;
-    addPhoto({
-      projectId: form.projectId || (projects[0]?.id ?? ""),
-      caption: form.caption.trim(),
-      uploadedById: form.uploadedById,
-      uploadedAt: new Date(),
-      tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
-      gradient: `linear-gradient(135deg, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40)`,
-      url: photoUrl ?? undefined,
+    if (!form.caption.trim() || photoItems.length === 0) return;
+    const tags = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+    photoItems.forEach(({ url }) => {
+      addPhoto({
+        projectId: form.projectId || (projects[0]?.id ?? ""),
+        caption: form.caption.trim(),
+        uploadedById: form.uploadedById,
+        uploadedAt: new Date(),
+        tags,
+        gradient: `linear-gradient(135deg, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40, #${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}40)`,
+        url,
+      });
     });
-    toast.success("Photo added");
+    toast.success(`${photoItems.length} photo${photoItems.length !== 1 ? "s" : ""} added`);
     closeModal();
   };
 
@@ -202,8 +218,9 @@ export default function PhotosPage() {
                         <span className="text-[9px] text-white/70 font-medium truncate max-w-[60px]">{mProject.name}</span>
                       </div>
                     )}
+                    {/* Always-visible on mobile (no hover), hover-revealed on desktop */}
                     <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
-                      className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 rounded-full flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                       <X size={11} className="text-white" />
                     </button>
                   </div>
@@ -557,43 +574,54 @@ export default function PhotosPage() {
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
-              <h3 className="text-[15px] font-bold text-white">Upload Photo</h3>
+              <h3 className="text-[15px] font-bold text-white">Upload Photos</h3>
               <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
             <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
-                <label className={lbl}>Photo</label>
-                <input ref={fileRef} type="file" onChange={handleFile} className="hidden" />
-                {photoUrl ? (
-                  <div className="relative">
-                    {isImageFile
-                      ? <img src={photoUrl} alt="preview" className="w-full h-40 object-cover rounded-xl border border-white/[0.08]" />
-                      : (
-                        <div className="w-full h-40 rounded-xl border border-white/[0.08] bg-white/[0.03] flex flex-col items-center justify-center gap-2">
-                          <Upload size={24} className="text-amber-400/60" />
-                          <p className="text-[12px] text-white/50 font-medium truncate max-w-[200px]">{fileName}</p>
-                        </div>
-                      )
-                    }
-                    <button onClick={() => { setPhotoUrl(null); setFileName(null); setIsImageFile(true); if (fileRef.current) fileRef.current.value = ""; }}
-                      className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
-                      <X size={11} className="text-white" />
+                <label className={lbl}>Photos</label>
+                <input ref={fileRef} type="file" multiple accept="image/*,video/*" onChange={handleFile} className="hidden" />
+                {/* Thumbnail strip */}
+                {photoItems.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2 mb-2" style={{scrollbarWidth:"none"}}>
+                    {photoItems.map((item, i) => (
+                      <div key={i} className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-white/[0.08] bg-white/[0.03]">
+                        {item.isImage
+                          ? <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-1"><Upload size={16} className="text-amber-400/60" /><p className="text-[8px] text-white/40 text-center truncate w-full">{item.name}</p></div>
+                        }
+                        <button onClick={() => setPhotoItems((prev) => prev.filter((_, j) => j !== i))}
+                          className="absolute top-1 right-1 w-5 h-5 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
+                          <X size={9} className="text-white" />
+                        </button>
+                      </div>
+                    ))}
+                    {/* Add more button */}
+                    <button onClick={() => fileRef.current?.click()}
+                      className="flex-shrink-0 w-20 h-20 rounded-xl border-2 border-dashed border-white/[0.08] flex items-center justify-center hover:border-amber-500/30 transition-colors">
+                      <span className="text-white/30 text-2xl leading-none">+</span>
                     </button>
                   </div>
-                ) : uploading ? (
-                  <div className="w-full h-32 border-2 border-dashed border-amber-500/30 rounded-xl flex flex-col items-center justify-center gap-2 bg-amber-500/[0.02]">
+                )}
+                {/* Drop zone */}
+                {uploading ? (
+                  <div className="w-full h-28 border-2 border-dashed border-amber-500/30 rounded-xl flex flex-col items-center justify-center gap-2 bg-amber-500/[0.02]">
                     <Loader2 size={20} className="text-amber-400 animate-spin" />
                     <p className="text-[12px] text-amber-400/70">Uploading…</p>
                   </div>
-                ) : (
+                ) : photoItems.length === 0 ? (
                   <button onClick={() => fileRef.current?.click()}
-                    className="w-full h-32 border-2 border-dashed border-white/[0.08] rounded-xl flex flex-col items-center justify-center gap-2 hover:border-amber-500/30 hover:bg-amber-500/[0.02] transition-all">
+                    onDrop={handleDrop}
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all ${dragOver ? "border-amber-500/50 bg-amber-500/[0.05]" : "border-white/[0.08] hover:border-amber-500/30 hover:bg-amber-500/[0.02]"}`}>
                     <Upload size={20} className="text-white/25" />
-                    <p className="text-[12px] text-white/30">Click to upload photo or file</p>
+                    <p className="text-[12px] text-white/30">Click or drag photos here</p>
+                    <p className="text-[10px] text-white/20">Select multiple at once</p>
                   </button>
-                )}
+                ) : null}
                 {uploadError && (
                   <p className="text-[11px] text-red-400 mt-1.5">{uploadError}</p>
                 )}
@@ -638,9 +666,9 @@ export default function PhotosPage() {
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
               <button onClick={closeModal}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">Cancel</button>
-              <button onClick={handleSave} disabled={!form.caption.trim() || !photoUrl || uploading}
+              <button onClick={handleSave} disabled={!form.caption.trim() || photoItems.length === 0 || uploading}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
-                {uploading ? <><Loader2 size={14} className="animate-spin" /> Uploading…</> : "Upload"}
+                {uploading ? <><Loader2 size={14} className="animate-spin" /> Uploading…</> : photoItems.length > 0 ? `Upload ${photoItems.length} Photo${photoItems.length !== 1 ? "s" : ""}` : "Upload"}
               </button>
             </div>
           </div>
