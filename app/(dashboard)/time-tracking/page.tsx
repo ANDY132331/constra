@@ -70,7 +70,7 @@ function EditEntryModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
-      <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-sm">
+      <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-sm max-h-[90dvh] flex flex-col">
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06]">
           <div>
             <h3 className="text-[15px] font-bold text-white">Edit Time Entry</h3>

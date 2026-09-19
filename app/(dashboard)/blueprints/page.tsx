@@ -363,15 +363,15 @@ export default function BlueprintsPage() {
                             <div className="flex gap-1">
                               <button
                                 onClick={() => updateBlueprintPin(pin.id, { resolved: !pin.resolved })}
-                                className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${pin.resolved ? "bg-white/[0.05] text-white/30" : "bg-green-500/15 text-green-400 hover:bg-green-500/25"}`}
+                                className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${pin.resolved ? "bg-white/[0.05] text-white/30" : "bg-green-500/15 text-green-400 hover:bg-green-500/25"}`}
                               >
-                                <Check size={9} />
+                                <Check size={11} />
                               </button>
                               <button
                                 onClick={() => setDeletePinConfirm(pin.id)}
-                                className="w-5 h-5 rounded bg-white/[0.05] text-white/30 hover:bg-red-500/15 hover:text-red-400 flex items-center justify-center transition-colors"
+                                className="w-7 h-7 rounded bg-white/[0.05] text-white/30 hover:bg-red-500/15 hover:text-red-400 flex items-center justify-center transition-colors"
                               >
-                                <X size={9} />
+                                <X size={11} />
                               </button>
                             </div>
                           </div>

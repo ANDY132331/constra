@@ -174,7 +174,7 @@ export default function DailyReportsPage() {
               {isAdminOrAbove(currentUser.role) && (
                 <button
                   onClick={() => setDeleteConfirm(selected.id)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -503,7 +503,7 @@ export default function DailyReportsPage() {
               <h3 className="text-[14px] font-bold text-white/90">New Daily Report</h3>
               <button onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
             </div>
-            <div className="overflow-y-scroll flex-1 px-5 py-4 space-y-4">
+            <div className="overflow-y-scroll overscroll-y-contain flex-1 px-5 py-4 space-y-4" style={{touchAction:"pan-y"}}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Project *</label>

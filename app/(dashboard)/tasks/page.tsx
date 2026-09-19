@@ -184,7 +184,7 @@ export default function TasksPage() {
               <div key={task.id} className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 overflow-hidden relative hover:border-white/[0.12]"
                 style={{ borderLeftColor: borderAccent, borderLeftWidth: 3 }}>
                 <div className="flex items-start gap-3 mb-3">
-                  <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} aria-label={`Status: ${cfg.label} — tap to cycle`} className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full -ml-1 -mt-1 active:bg-white/[0.06] transition-colors">
+                  <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} aria-label={`Status: ${cfg.label} — tap to cycle`} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full -ml-1 -mt-1 active:bg-white/[0.06] transition-colors">
                     <MIcon size={18} className={cfg.className} />
                   </button>
                   <div className="flex-1 min-w-0">

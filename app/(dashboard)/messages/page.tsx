@@ -443,7 +443,7 @@ export default function MessagesPage() {
                         {isMe && (
                           <button
                             onClick={() => deleteMessage(msg.id)}
-                            className="opacity-0 group-hover/bubble:opacity-100 sm:group-hover/bubble:opacity-100 mt-0.5 self-end p-1.5 rounded-full transition-all active:scale-90"
+                            className="lg:opacity-0 lg:group-hover/bubble:opacity-100 mt-0.5 self-end p-1.5 rounded-full transition-all active:scale-90"
                             style={{ color: C.secondaryText, WebkitTapHighlightColor: "transparent" }}
                             aria-label="Delete message"
                           >

@@ -224,11 +224,11 @@ function EstimateDetail({
             <FileDown size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
           </button>
           <button onClick={() => onEdit(estimate)} aria-label="Edit estimate"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors">
+            className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:text-white/80 hover:bg-white/[0.06] transition-colors">
             <Pencil size={14} />
           </button>
           <button onClick={() => setDeleteConfirm(true)} aria-label="Delete estimate"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
+            className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
             <Trash2 size={14} />
           </button>
         </div>
@@ -684,7 +684,8 @@ export default function EstimatesPage() {
           <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
             className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
-            placeholder="Search project or clientâ€¦"
+            placeholder="Search project or client…"
+            autoComplete="off" spellCheck={false}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

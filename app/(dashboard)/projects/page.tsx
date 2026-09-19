@@ -314,6 +314,7 @@ export default function ProjectsPage() {
             <input
               className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
               placeholder="Search projects or clients…"
+              autoComplete="off" spellCheck={false}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -364,7 +365,7 @@ export default function ProjectsPage() {
               >
                 <div className="p-4.5">
                   <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <p className="text-[15px] font-bold text-white flex-1 min-w-0 truncate">{p.name}</p>
+                    <p className="text-[15px] font-bold text-white flex-1 min-w-0 truncate" title={p.name}>{p.name}</p>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <StatusBadge status={p.status} pending={p.pendingApproval} />
                     </div>

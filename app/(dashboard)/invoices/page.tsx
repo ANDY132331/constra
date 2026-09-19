@@ -244,11 +244,11 @@ function InvoiceDetail({
           >
             <Download size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
           </button>
-          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-9 h-9 flex items-center justify-center rounded-full text-white/60 hover:text-white bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
+          <button onClick={() => onEdit(invoice)} aria-label="Edit invoice" className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-white bg-white/[0.06] hover:bg-white/[0.10] transition-colors">
             <Pencil size={15} />
           </button>
           <button onClick={() => setDeleteConfirm(true)} aria-label="Delete invoice"
-            className="w-9 h-9 flex items-center justify-center rounded-full text-red-400/70 hover:text-red-400 bg-red-500/[0.07] hover:bg-red-500/[0.14] transition-colors">
+            className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/70 hover:text-red-400 bg-red-500/[0.07] hover:bg-red-500/[0.14] transition-colors">
             <Trash2 size={15} />
           </button>
         </div>
@@ -498,7 +498,7 @@ function InvoiceRow({ invoice, currency, selected, onClick }: {
             <span className="font-mono text-[10px] text-white/30">{invoice.number}</span>
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>
           </div>
-          <p className="text-[13px] font-semibold text-white/90 truncate">{invoice.clientName}</p>
+          <p className="text-[13px] font-semibold text-white/90 truncate" title={invoice.clientName}>{invoice.clientName}</p>
           <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/35"}`}>
             {isOverdue ? "Overdue Â· " : "Due "}
             {invoice.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
@@ -672,7 +672,8 @@ export default function InvoicesPage() {
           <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
             className="bg-transparent text-[13px] text-white/80 placeholder:text-white/30 outline-none flex-1"
-            placeholder="Search client or invoice #â€¦"
+            placeholder="Search client or invoice #…"
+            autoComplete="off" spellCheck={false}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

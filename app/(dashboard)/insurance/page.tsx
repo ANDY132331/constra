@@ -211,6 +211,7 @@ export default function InsurancePage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search holder, insurer, policy…"
+            autoComplete="off" spellCheck={false}
             className="w-full bg-white/[0.04] border border-white/[0.07] rounded-xl pl-8 pr-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/30"
           />
         </div>
@@ -268,7 +269,7 @@ export default function InsurancePage() {
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[14px] font-bold text-white/90 truncate">{policy.holderName}</span>
+                          <span className="text-[14px] font-bold text-white/90 truncate" title={policy.holderName}>{policy.holderName}</span>
                           {worker && (
                             <span className="text-[11px] text-white/40">({worker.name})</span>
                           )}
@@ -305,13 +306,13 @@ export default function InsurancePage() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openEdit(policy)}
-                              className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
+                              className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
                             >
                               <Pencil size={13} />
                             </button>
                             <button
                               onClick={() => setDeleteId(policy.id)}
-                              className="w-8 h-8 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
+                              className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                             >
                               <Trash2 size={13} />
                             </button>

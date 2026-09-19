@@ -208,6 +208,7 @@ export default function DocumentsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search files…"
+            autoComplete="off" spellCheck={false}
             className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
           />
         </div>
@@ -260,7 +261,7 @@ export default function DocumentsPage() {
                     <Icon size={18} style={{ color: cat.color + "dd" }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-white/85 truncate">{doc.name}</p>
+                    <p className="text-[13px] font-semibold text-white/85 truncate" title={doc.name}>{doc.name}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                         style={{ backgroundColor: cat.color + "20", color: cat.color }}>{cat.label}</span>
@@ -398,7 +399,7 @@ export default function DocumentsPage() {
                 </div>
                 {/* Info row */}
                 <div className="px-3 py-2.5">
-                  <p className="text-[12px] font-semibold text-white/80 truncate">{doc.name}</p>
+                  <p className="text-[12px] font-semibold text-white/80 truncate" title={doc.name}>{doc.name}</p>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-[10px] text-white/30">{formatBytes(doc.sizeBytes)}</span>
                     <span className="text-[10px] text-white/25">{format(new Date(doc.uploadedAt), "MMM d")}</span>
@@ -502,7 +503,7 @@ export default function DocumentsPage() {
               )}
             </div>
             {showVersions && previewDoc.versions && previewDoc.versions.length > 0 && (
-              <div className="border-t border-white/[0.07] px-5 py-4 max-h-52 overflow-y-auto">
+              <div className="border-t border-white/[0.07] px-5 py-4 max-h-52 overflow-y-auto overscroll-y-contain">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-3">Version History</p>
                 <div className="space-y-2">
                   {previewDoc.versions.map((v, i) => (
