@@ -55,6 +55,25 @@ const TESTIMONIALS = [
 
 const BC = "var(--font-barlow-condensed)";
 
+// ── YouTube background iframe ─────────────────────────────────────────────────
+function YTBg({ id, opacity = 0.45 }: { id: string; opacity?: number }) {
+  return (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", opacity }}>
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=0&playsinline=1`}
+        allow="autoplay; encrypted-media"
+        style={{
+          position: "absolute", top: "50%", left: "50%",
+          width: "177.78vh", height: "56.25vw",
+          minWidth: "100%", minHeight: "100%",
+          transform: "translate(-50%,-50%)",
+          border: "none",
+        }}
+      />
+    </div>
+  );
+}
+
 // ── 3D tilt card hook ─────────────────────────────────────────────────────────
 function useTilt(strength = 12) {
   const ref = useRef<HTMLDivElement>(null);
@@ -389,8 +408,8 @@ export default function LandingPage() {
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 
-        /* 3D cursor */
-        body { cursor: none; }
+        /* 3D cursor — only hide cursor within the page scroll area */
+        .page-root { cursor: none; }
         .cursor-dot {
           position: fixed; top: -4px; left: -4px; width: 8px; height: 8px;
           border-radius: 50%; pointer-events: none; z-index: 99999; will-change: transform;
@@ -425,7 +444,7 @@ export default function LandingPage() {
       <div ref={cursorDotRef} className="cursor-dot" aria-hidden />
       <div ref={cursorRingRef} className="cursor-ring" aria-hidden />
 
-      <div style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", background: "#050505", color: "#fff" }}>
+      <div className="page-root" style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", background: "#050505", color: "#fff" }}>
 
         {/* ── NAV ───────────────────────────────────────────────────────────── */}
         <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(5,5,5,.88)", borderBottom: "1px solid rgba(255,255,255,.05)", backdropFilter: "blur(24px)" }}>
@@ -463,18 +482,11 @@ export default function LandingPage() {
           }}
           style={{ position: "relative", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", background: "#050505", overflow: "hidden", paddingTop: 60 }}
         >
-          {/* Background video with Ken Burns fallback */}
-          <video
-            className="par-bg kb1"
-            autoPlay muted loop playsInline
-            poster="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "115%", objectFit: "cover", opacity: 0.32, willChange: "transform" }}
-          >
-            <source src="https://videos.pexels.com/video-files/3785170/3785170-hd_1920_1080_25fps.mp4" type="video/mp4" />
-            <source src="https://videos.pexels.com/video-files/2499611/2499611-hd_1920_1080_24fps.mp4" type="video/mp4" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="kb1" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </video>
+          {/* YouTube video background — Torre Reforma cinematic 4K timelapse */}
+          <YTBg id="LAmkFK5BsAo" opacity={0.32} />
+          {/* Fallback image shown before iframe loads */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="kb1" aria-hidden src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "115%", objectFit: "cover", opacity: 0.32, willChange: "transform", zIndex: -1 }} />
 
           {/* Perspective grid floor */}
           <div className="perspective-grid" style={{ position: "absolute", inset: 0 }}>
@@ -715,14 +727,9 @@ export default function LandingPage() {
 
         {/* ── VIDEO BREAK: GPS ─────────────────────────────────────────────── */}
         <section style={{ position: "relative", minHeight: "80vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          <video autoPlay muted loop playsInline
-            poster="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "120%", objectFit: "cover", opacity: 0.4, transform: "translateY(-10%)" }}>
-            <source src="https://videos.pexels.com/video-files/1953781/1953781-hd_1920_1080_30fps.mp4" type="video/mp4" />
-            <source src="https://videos.pexels.com/video-files/5765220/5765220-hd_1920_1080_30fps.mp4" type="video/mp4" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="kb2" src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </video>
+          <YTBg id="TPyXCFmG2Ws" opacity={0.4} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="kb2" aria-hidden src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.80) 50%, rgba(0,0,0,.45) 100%)" }} />
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #22c55e 20%, #22c55e 80%, transparent)", boxShadow: "0 0 24px rgba(34,197,94,.5)" }} />
 
@@ -783,13 +790,9 @@ export default function LandingPage() {
 
         {/* ── CINEMATIC VIDEO BREAK: BUILT WHERE THE WORK HAPPENS ──────────── */}
         <section style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          <video autoPlay muted loop playsInline className="vid-bg kb3" style={{ opacity: 0.48 }}
-            poster="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&q=80">
-            <source src="https://videos.pexels.com/video-files/2942826/2942826-hd_1920_1080_24fps.mp4" type="video/mp4" />
-            <source src="https://videos.pexels.com/video-files/8521507/8521507-hd_1920_1080_25fps.mp4" type="video/mp4" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="kb3" src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </video>
+          <YTBg id="4BzjUq921Y4" opacity={0.48} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="kb3" aria-hidden src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,.97) 0%, rgba(0,0,0,.75) 55%, rgba(0,0,0,.25) 100%)" }} />
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 220, background: "linear-gradient(to top, #080808, transparent)" }} />
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 160, background: "linear-gradient(to bottom, #080808, transparent)" }} />
@@ -807,14 +810,9 @@ export default function LandingPage() {
 
         {/* ── VIDEO BREAK: Invoice ─────────────────────────────────────────── */}
         <section style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          <video autoPlay muted loop playsInline
-            poster="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "120%", objectFit: "cover", opacity: 0.38, transform: "translateY(-10%)" }}>
-            <source src="https://videos.pexels.com/video-files/7484012/7484012-hd_1920_1080_25fps.mp4" type="video/mp4" />
-            <source src="https://videos.pexels.com/video-files/5765220/5765220-hd_1920_1080_30fps.mp4" type="video/mp4" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="kb3" src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </video>
+          <YTBg id="c-y7qQai14Y" opacity={0.38} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="kb3" aria-hidden src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.82) 50%, rgba(0,0,0,.45) 100%)" }} />
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #F5C400 20%, #F5C400 80%, transparent)", boxShadow: "0 0 24px rgba(245,196,0,.5)" }} />
 
@@ -851,13 +849,9 @@ export default function LandingPage() {
 
         {/* ── CINEMATIC VIDEO BREAK: ZERO PHANTOM HOURS ────────────────────── */}
         <section style={{ position: "relative", minHeight: "68vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", background: "#000", textAlign: "center" }}>
-          <video autoPlay muted loop playsInline className="vid-bg kb1" style={{ opacity: 0.38 }}
-            poster="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80">
-            <source src="https://videos.pexels.com/video-files/1953781/1953781-hd_1920_1080_30fps.mp4" type="video/mp4" />
-            <source src="https://videos.pexels.com/video-files/7484012/7484012-hd_1920_1080_25fps.mp4" type="video/mp4" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="kb1" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </video>
+          <YTBg id="W8sOpDb3s5o" opacity={0.38} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="kb1" aria-hidden src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(0,0,0,.94) 85%)" }} />
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#F5C400", boxShadow: "0 0 20px rgba(245,196,0,.5)" }} />
           <div className="reveal" style={{ position: "relative", zIndex: 2, padding: "80px 28px" }}>
@@ -957,13 +951,9 @@ export default function LandingPage() {
 
         {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
         <section style={{ position: "relative", padding: "130px 28px", background: "#000", overflow: "hidden", textAlign: "center" }}>
-          <video autoPlay muted loop playsInline className="vid-bg kb2" style={{ opacity: 0.22 }}
-            poster="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80">
-            <source src="https://videos.pexels.com/video-files/2499611/2499611-hd_1920_1080_24fps.mp4" type="video/mp4" />
-            <source src="https://videos.pexels.com/video-files/3785170/3785170-hd_1920_1080_25fps.mp4" type="video/mp4" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="kb2" src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </video>
+          <YTBg id="PHezq3zCgGs" opacity={0.22} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="kb2" aria-hidden src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.82)" }} />
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#F5C400", boxShadow: "0 0 24px rgba(245,196,0,.5)" }} />
 

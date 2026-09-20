@@ -11,10 +11,10 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://meet.jit.si",
+      "script-src 'self' 'unsafe-inline' https://meet.jit.si https://va.vercel-scripts.com",
       "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://images.pexels.com https://server.arcgisonline.com https://*.jit.si",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://geocoding-api.open-meteo.com https://vitals.vercel-insights.com https://nominatim.openstreetmap.org https://api.groq.com https://*.jit.si wss://*.jit.si https://*.8x8.vc wss://*.8x8.vc",
-      "frame-src 'self' blob: https://meet.jit.si https://*.8x8.vc https://*.supabase.co",
+      "frame-src 'self' blob: https://meet.jit.si https://*.8x8.vc https://*.supabase.co https://www.youtube-nocookie.com",
       "font-src 'self' https://fonts.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "media-src 'self' blob: https://videos.pexels.com",
