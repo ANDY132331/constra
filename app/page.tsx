@@ -108,6 +108,8 @@ export default function LandingPage() {
   const [alreadyIn, setAlreadyIn] = useState(false);
   const heroRef = useParallax();
   const heroMouseRef = useRef<HTMLElement>(null);
+  const cursorDotRef = useRef<HTMLDivElement>(null);
+  const cursorRingRef = useRef<HTMLDivElement>(null);
 
   // Detect returning user — show "Go to Dashboard" in nav, but never auto-redirect
   // so the landing page is always visible to everyone who opens the URL.
@@ -131,6 +133,30 @@ export default function LandingPage() {
     };
     el.addEventListener("mousemove", onMove);
     return () => el.removeEventListener("mousemove", onMove);
+  }, []);
+
+  // 3D cursor
+  useEffect(() => {
+    const dot = cursorDotRef.current;
+    const ring = cursorRingRef.current;
+    if (!dot || !ring) return;
+    let tx = -100, ty = -100, rx = -100, ry = -100, rafId = 0;
+    const onMove = (e: MouseEvent) => { tx = e.clientX; ty = e.clientY; };
+    const onEnter = () => ring.classList.add("ring-hover");
+    const onLeave = () => ring.classList.remove("ring-hover");
+    const animate = () => {
+      rx += (tx - rx) * 0.1; ry += (ty - ry) * 0.1;
+      dot.style.transform = `translate(${tx}px, ${ty}px)`;
+      ring.style.transform = `translate(${rx}px, ${ry}px)`;
+      rafId = requestAnimationFrame(animate);
+    };
+    window.addEventListener("mousemove", onMove);
+    document.querySelectorAll("a, button").forEach(el => {
+      el.addEventListener("mouseenter", onEnter);
+      el.addEventListener("mouseleave", onLeave);
+    });
+    rafId = requestAnimationFrame(animate);
+    return () => { window.removeEventListener("mousemove", onMove); cancelAnimationFrame(rafId); };
   }, []);
 
   // Scroll reveal + counters
@@ -362,7 +388,42 @@ export default function LandingPage() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+        /* 3D cursor */
+        body { cursor: none; }
+        .cursor-dot {
+          position: fixed; top: -4px; left: -4px; width: 8px; height: 8px;
+          border-radius: 50%; pointer-events: none; z-index: 99999; will-change: transform;
+          background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.9) 0%, #F5C400 55%, #b8900a 100%);
+          box-shadow: 0 0 8px rgba(245,196,0,.9), 0 0 20px rgba(245,196,0,.4), 0 0 40px rgba(245,196,0,.15);
+        }
+        .cursor-ring {
+          position: fixed; top: -20px; left: -20px; width: 40px; height: 40px;
+          border-radius: 50%; border: 1.5px solid rgba(245,196,0,.5); pointer-events: none;
+          z-index: 99998; will-change: transform; mix-blend-mode: plus-lighter;
+          transition: width .25s ease, height .25s ease, top .25s ease, left .25s ease, border-color .25s ease;
+        }
+        .cursor-ring.ring-hover {
+          top: -28px; left: -28px; width: 56px; height: 56px; border-color: rgba(245,196,0,.9);
+          background: rgba(245,196,0,.04);
+        }
+        @media (hover: none) { .cursor-dot, .cursor-ring { display: none !important; } body { cursor: auto; } }
+
+        /* Video / image background layer */
+        .vid-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+
+        /* Ken Burns slow zoom for cinematic feel on fallback images */
+        @keyframes kb1 { 0%{transform:scale(1) translate(0%,0%)} 100%{transform:scale(1.12) translate(-2%,-1%)} }
+        @keyframes kb2 { 0%{transform:scale(1.1) translate(2%,1%)} 100%{transform:scale(1) translate(-1%,0%)} }
+        @keyframes kb3 { 0%{transform:scale(1) translate(-1%,1%)} 100%{transform:scale(1.08) translate(2%,-1%)} }
+        .kb1 { animation: kb1 18s ease-in-out infinite alternate; }
+        .kb2 { animation: kb2 22s ease-in-out infinite alternate; }
+        .kb3 { animation: kb3 16s ease-in-out infinite alternate; }
       `}</style>
+
+      {/* 3D cursor elements */}
+      <div ref={cursorDotRef} className="cursor-dot" aria-hidden />
+      <div ref={cursorRingRef} className="cursor-ring" aria-hidden />
 
       <div style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", background: "#050505", color: "#fff" }}>
 
@@ -402,15 +463,18 @@ export default function LandingPage() {
           }}
           style={{ position: "relative", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", background: "#050505", overflow: "hidden", paddingTop: 60 }}
         >
-          {/* Background photo - parallax layer */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="par-bg"
-            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80"
-            alt=""
-            aria-hidden
-            style={{ position: "absolute", inset: 0, width: "100%", height: "115%", objectFit: "cover", opacity: 0.28, willChange: "transform" }}
-          />
+          {/* Background video with Ken Burns fallback */}
+          <video
+            className="par-bg kb1"
+            autoPlay muted loop playsInline
+            poster="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "115%", objectFit: "cover", opacity: 0.32, willChange: "transform" }}
+          >
+            <source src="https://videos.pexels.com/video-files/3785170/3785170-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/2499611/2499611-hd_1920_1080_24fps.mp4" type="video/mp4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="kb1" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </video>
 
           {/* Perspective grid floor */}
           <div className="perspective-grid" style={{ position: "absolute", inset: 0 }}>
@@ -649,10 +713,16 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── PHOTO BREAK: GPS ─────────────────────────────────────────────── */}
+        {/* ── VIDEO BREAK: GPS ─────────────────────────────────────────────── */}
         <section style={{ position: "relative", minHeight: "80vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80" alt="" aria-hidden style={{ position: "absolute", inset: 0, width: "100%", height: "120%", objectFit: "cover", opacity: 0.35, transform: "translateY(-10%)" }} />
+          <video autoPlay muted loop playsInline
+            poster="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "120%", objectFit: "cover", opacity: 0.4, transform: "translateY(-10%)" }}>
+            <source src="https://videos.pexels.com/video-files/1953781/1953781-hd_1920_1080_30fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/5765220/5765220-hd_1920_1080_30fps.mp4" type="video/mp4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="kb2" src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </video>
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.80) 50%, rgba(0,0,0,.45) 100%)" }} />
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #22c55e 20%, #22c55e 80%, transparent)", boxShadow: "0 0 24px rgba(34,197,94,.5)" }} />
 
@@ -711,10 +781,40 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── PHOTO BREAK: Invoice ─────────────────────────────────────────── */}
+        {/* ── CINEMATIC VIDEO BREAK: BUILT WHERE THE WORK HAPPENS ──────────── */}
+        <section style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
+          <video autoPlay muted loop playsInline className="vid-bg kb3" style={{ opacity: 0.48 }}
+            poster="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&q=80">
+            <source src="https://videos.pexels.com/video-files/2942826/2942826-hd_1920_1080_24fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/8521507/8521507-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="kb3" src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </video>
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,.97) 0%, rgba(0,0,0,.75) 55%, rgba(0,0,0,.25) 100%)" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 220, background: "linear-gradient(to top, #080808, transparent)" }} />
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 160, background: "linear-gradient(to bottom, #080808, transparent)" }} />
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #F5C400 20%, #F5C400 80%, transparent)", boxShadow: "0 0 24px rgba(245,196,0,.4)" }} />
+          <div className="reveal" style={{ position: "relative", zIndex: 2, maxWidth: 1320, margin: "0 auto", padding: "80px 28px", width: "100%" }}>
+            <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 20 }}>FOR THE FIELD</p>
+            <h2 className="cinematic-text" style={{ fontSize: "clamp(52px,9vw,130px)", color: "#fff", marginBottom: 32 }}>
+              BUILT WHERE<br />THE WORK<br /><span style={{ color: "#F5C400", textShadow: "0 0 60px rgba(245,196,0,.5)" }}>HAPPENS.</span>
+            </h2>
+            <p style={{ fontSize: 16, lineHeight: 1.8, color: "rgba(255,255,255,.45)", maxWidth: 440 }}>
+              Designed for job sites, not boardrooms. Works offline, handles rough conditions, and fits in your pocket.
+            </p>
+          </div>
+        </section>
+
+        {/* ── VIDEO BREAK: Invoice ─────────────────────────────────────────── */}
         <section style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80" alt="" aria-hidden style={{ position: "absolute", inset: 0, width: "100%", height: "120%", objectFit: "cover", opacity: 0.3, transform: "translateY(-10%)" }} />
+          <video autoPlay muted loop playsInline
+            poster="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "120%", objectFit: "cover", opacity: 0.38, transform: "translateY(-10%)" }}>
+            <source src="https://videos.pexels.com/video-files/7484012/7484012-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/5765220/5765220-hd_1920_1080_30fps.mp4" type="video/mp4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="kb3" src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </video>
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.82) 50%, rgba(0,0,0,.45) 100%)" }} />
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #F5C400 20%, #F5C400 80%, transparent)", boxShadow: "0 0 24px rgba(245,196,0,.5)" }} />
 
@@ -729,6 +829,42 @@ export default function LandingPage() {
             <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#F5C400", fontWeight: 800, fontSize: 12, textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", borderBottom: "1px solid rgba(245,196,0,.35)", paddingBottom: 4 }}>
               START INVOICING FREE <ChevronRight size={13} />
             </Link>
+          </div>
+        </section>
+
+        {/* ── CINEMATIC IMAGE REEL ─────────────────────────────────────────── */}
+        <section style={{ background: "#030303", padding: 0, overflow: "hidden" }}>
+          <div style={{ display: "flex", gap: 3 }}>
+            {[
+              { img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", cls: "kb1" },
+              { img: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80", cls: "kb2" },
+              { img: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", cls: "kb3" },
+            ].map((v, i) => (
+              <div key={i} style={{ flex: "0 0 33.333%", aspectRatio: "16/9", position: "relative", overflow: "hidden", background: "#111" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={v.img} alt="" aria-hidden className={v.cls} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "contrast(1.1) saturate(0.8)", display: "block" }} />
+                <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.42)" }} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── CINEMATIC VIDEO BREAK: ZERO PHANTOM HOURS ────────────────────── */}
+        <section style={{ position: "relative", minHeight: "68vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", background: "#000", textAlign: "center" }}>
+          <video autoPlay muted loop playsInline className="vid-bg kb1" style={{ opacity: 0.38 }}
+            poster="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80">
+            <source src="https://videos.pexels.com/video-files/1953781/1953781-hd_1920_1080_30fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/7484012/7484012-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="kb1" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </video>
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(0,0,0,.94) 85%)" }} />
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#F5C400", boxShadow: "0 0 20px rgba(245,196,0,.5)" }} />
+          <div className="reveal" style={{ position: "relative", zIndex: 2, padding: "80px 28px" }}>
+            <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 20, textAlign: "center" }}>RESULTS</p>
+            <h2 className="cinematic-text" style={{ fontSize: "clamp(44px,8vw,112px)", color: "#fff", textAlign: "center" }}>
+              ZERO PHANTOM HOURS.<br /><span style={{ color: "#F5C400", textShadow: "0 0 50px rgba(245,196,0,.45)" }}>ZERO CHASED INVOICES.</span>
+            </h2>
           </div>
         </section>
 
@@ -821,8 +957,13 @@ export default function LandingPage() {
 
         {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
         <section style={{ position: "relative", padding: "130px 28px", background: "#000", overflow: "hidden", textAlign: "center" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80" alt="" aria-hidden style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.18 }} />
+          <video autoPlay muted loop playsInline className="vid-bg kb2" style={{ opacity: 0.22 }}
+            poster="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80">
+            <source src="https://videos.pexels.com/video-files/2499611/2499611-hd_1920_1080_24fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/3785170/3785170-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="kb2" src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          </video>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.82)" }} />
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#F5C400", boxShadow: "0 0 24px rgba(245,196,0,.5)" }} />
 
