@@ -60,6 +60,7 @@ function YTBg({ id, opacity = 0.45 }: { id: string; opacity?: number }) {
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", opacity }}>
       <iframe
+        loading="lazy"
         src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=0&playsinline=1`}
         allow="autoplay; encrypted-media"
         style={{
@@ -636,6 +637,7 @@ export default function LandingPage() {
 
         {/* ── ABOUT SECTION ─────────────────────────────────────────────────── */}
         <section className="reveal" style={{ background: "#080808", padding: "110px 28px", position: "relative", overflow: "hidden" }}>
+          <YTBg id="njw5ZgisSBI" opacity={0.08} />
           {/* Glow blob */}
           <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.06)", top: "10%", right: "0%" }} />
 
@@ -750,6 +752,7 @@ export default function LandingPage() {
 
         {/* ── SAFETY SECTION ───────────────────────────────────────────────── */}
         <section style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
+          <YTBg id="cFlKA0_h51I" opacity={0.07} />
           <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(239,68,68,.04)", top: "10%", right: "0%" }} />
 
           <div style={{ maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))", gap: 80, alignItems: "center", position: "relative", zIndex: 1 }}>
@@ -830,18 +833,19 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── CINEMATIC IMAGE REEL ─────────────────────────────────────────── */}
+        {/* ── LIVE VIDEO REEL ──────────────────────────────────────────────── */}
         <section style={{ background: "#030303", padding: 0, overflow: "hidden" }}>
           <div style={{ display: "flex", gap: 3 }}>
             {[
-              { img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", cls: "kb1" },
-              { img: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80", cls: "kb2" },
-              { img: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", cls: "kb3" },
+              { id: "TdZQjSwykV0", fb: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", cls: "kb1" },
+              { id: "AdJB6Dt0JQ0", fb: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80", cls: "kb2" },
+              { id: "0K-0BXrXvuI", fb: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", cls: "kb3" },
             ].map((v, i) => (
               <div key={i} style={{ flex: "0 0 33.333%", aspectRatio: "16/9", position: "relative", overflow: "hidden", background: "#111" }}>
+                <YTBg id={v.id} opacity={1} />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={v.img} alt="" aria-hidden className={v.cls} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "contrast(1.1) saturate(0.8)", display: "block" }} />
-                <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.42)" }} />
+                <img src={v.fb} alt="" aria-hidden className={v.cls} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "contrast(1.1) saturate(0.8)", zIndex: -1 }} />
+                <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.28)", pointerEvents: "none" }} />
               </div>
             ))}
           </div>
@@ -864,6 +868,7 @@ export default function LandingPage() {
 
         {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
         <section id="testimonials" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
+          <YTBg id="PnDv_iij5Po" opacity={0.07} />
           <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.05)", top: "20%", left: "-10%" }} />
 
           <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
