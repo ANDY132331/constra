@@ -173,21 +173,26 @@ function LoginForm() {
       return;
     }
 
-    const supabase = getClient();
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    if (err) {
-      setLoading(false);
-      failCount.current += 1;
-      if (failCount.current >= 5) {
-        failCount.current = 0;
-        setLockedUntil(Date.now() + 30_000);
-        setError("Too many failed attempts. Wait 30 seconds before trying again.");
-      } else {
-        setError(err.message);
+    try {
+      const supabase = getClient();
+      const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+      if (err) {
+        setLoading(false);
+        failCount.current += 1;
+        if (failCount.current >= 5) {
+          failCount.current = 0;
+          setLockedUntil(Date.now() + 30_000);
+          setError("Too many failed attempts. Wait 30 seconds before trying again.");
+        } else {
+          setError(err.message);
+        }
+        return;
       }
-      return;
+      window.location.href = "/dashboard";
+    } catch {
+      setLoading(false);
+      setError("Network error — check your connection and try again.");
     }
-    window.location.href = "/dashboard";
   }
 
   async function handleForgotPassword() {
@@ -221,28 +226,33 @@ function LoginForm() {
       return;
     }
 
-    const res = await fetch("/api/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        inviteCode: joinCode,
+    try {
+      const res = await fetch("/api/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          inviteCode: joinCode,
+          email: joinEmail,
+          password: joinPassword,
+          firstName: joinFirstName,
+          lastName: joinLastName,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setLoading(false); setError(data.error ?? "Join failed."); return; }
+
+      const supabase = getClient();
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
         email: joinEmail,
         password: joinPassword,
-        firstName: joinFirstName,
-        lastName: joinLastName,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) { setLoading(false); setError(data.error ?? "Join failed."); return; }
-
-    const supabase = getClient();
-    const { error: signInErr } = await supabase.auth.signInWithPassword({
-      email: joinEmail,
-      password: joinPassword,
-    });
-    setLoading(false);
-    if (signInErr) { setError(signInErr.message); return; }
-    window.location.href = "/dashboard";
+      });
+      setLoading(false);
+      if (signInErr) { setError(signInErr.message); return; }
+      window.location.href = "/dashboard";
+    } catch {
+      setLoading(false);
+      setError("Network error — check your connection and try again.");
+    }
   }
 
   return (

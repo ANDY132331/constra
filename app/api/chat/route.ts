@@ -1,6 +1,10 @@
 // Uses Gemini REST API directly (no SDK) for maximum compatibility
 
 export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
+import { createClient } from "@/lib/supabase/server";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function GET() {
   return Response.json({ configured: !!process.env.GROQ_API_KEY });
@@ -136,6 +140,14 @@ If you can't resolve an issue, direct users to human support:
 - If asked about pricing, billing issues, or account-specific problems, recommend contacting support directly`;
 
 export async function POST(request: Request) {
+  // Auth guard — only authenticated users can use the AI chat
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
+  // Rate limit: 30 messages per user per minute
+  if (!rateLimit(`chat:${user.id}`, 30, 60_000)) return rateLimitResponse();
+
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return new Response("AI not configured — add GROQ_API_KEY in Vercel", { status: 503 });

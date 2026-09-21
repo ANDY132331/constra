@@ -268,7 +268,7 @@ function defaultState(): StoreState {
     inviteCode: "",
     companyLogo: "",
     permissionsPin: "",
-    theme: (typeof window !== "undefined" ? (localStorage.getItem("constra_theme") as "dark" | "light" | null) : null) ?? "dark",
+    theme: (typeof window !== "undefined" ? (() => { try { return localStorage.getItem("constra_theme") as "dark" | "light" | null; } catch { return null; } })() : null) ?? "dark",
   };
 }
 

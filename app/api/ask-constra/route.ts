@@ -3,6 +3,8 @@
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+import { createClient } from "@/lib/supabase/server";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import type { CompanySnap } from "@/lib/ask-constra-types";
 
 const SYSTEM_PROMPT = `You are the Constra AI — the financial and operations brain for a construction company. You have access to real company data.
@@ -87,6 +89,14 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Auth guard — only authenticated users can query the AI
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
+
+  // Rate limit: 20 queries per user per minute
+  if (!rateLimit(`ask-constra:${user.id}`, 20, 60_000)) return rateLimitResponse();
+
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return new Response("GROQ_API_KEY not set in Vercel environment", { status: 503 });

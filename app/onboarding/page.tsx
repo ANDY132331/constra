@@ -148,35 +148,40 @@ export default function OnboardingPage() {
       return;
     }
 
-    const res = await fetch("/api/create-company", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        password,
-        firstName,
-        lastName,
-        companyName: company,
-        currency: selectedCountry?.currency ?? "USD",
-        language: "en",
-        industry,
-      }),
-    });
+    try {
+      const res = await fetch("/api/create-company", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          firstName,
+          lastName,
+          companyName: company,
+          currency: selectedCountry?.currency ?? "USD",
+          language: "en",
+          industry,
+        }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
+      const data = await res.json();
+      if (!res.ok) {
+        setLoading(false);
+        setError(data.error ?? "Failed to create account.");
+        return;
+      }
+
+      // Sign in immediately after account creation
+      const supabase = getClient();
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
-      setError(data.error ?? "Failed to create account.");
-      return;
+      if (signInErr) { setError(signInErr.message); return; }
+
+      window.location.href = "/dashboard";
+    } catch {
+      setLoading(false);
+      setError("Network error — check your connection and try again.");
     }
-
-    // Sign in immediately after account creation
-    const supabase = getClient();
-    const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (signInErr) { setError(signInErr.message); return; }
-
-    window.location.href = "/dashboard";
   }
 
   async function handleJoin() {
@@ -193,34 +198,39 @@ export default function OnboardingPage() {
       return;
     }
 
-    const res = await fetch("/api/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        inviteCode: inviteCode.trim().toUpperCase(),
+    try {
+      const res = await fetch("/api/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          inviteCode: inviteCode.trim().toUpperCase(),
+          email: joinEmail,
+          password: joinPassword,
+          firstName: joinFirstName,
+          lastName: joinLastName,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setLoading(false);
+        setError(data.error ?? "Failed to join workspace.");
+        return;
+      }
+
+      const supabase = getClient();
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
         email: joinEmail,
         password: joinPassword,
-        firstName: joinFirstName,
-        lastName: joinLastName,
-      }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
+      });
       setLoading(false);
-      setError(data.error ?? "Failed to join workspace.");
-      return;
+      if (signInErr) { setError(signInErr.message); return; }
+
+      window.location.href = "/dashboard";
+    } catch {
+      setLoading(false);
+      setError("Network error — check your connection and try again.");
     }
-
-    const supabase = getClient();
-    const { error: signInErr } = await supabase.auth.signInWithPassword({
-      email: joinEmail,
-      password: joinPassword,
-    });
-    setLoading(false);
-    if (signInErr) { setError(signInErr.message); return; }
-
-    window.location.href = "/dashboard";
   }
 
   // ── Step indicator ──
