@@ -785,6 +785,13 @@ export default function LandingPage() {
             </div>
 
             <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <TiltCard style={{ borderRadius: 1, overflow: "hidden", boxShadow: "0 40px 80px rgba(0,0,0,.85), 0 0 0 1px rgba(239,68,68,.1)", position: "relative", aspectRatio: "16/9", width: "100%" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=900&q=80" alt="Construction safety crew" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "contrast(1.1) saturate(0.75)" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.72) 0%, transparent 55%)" }} />
+                <div style={{ position: "absolute", top: 12, left: 14, fontSize: 9, fontWeight: 700, color: "#ef4444", letterSpacing: ".1em", textTransform: "uppercase", textShadow: "0 0 8px rgba(239,68,68,.4)" }}>CONSTRA · SAFETY FIRST</div>
+                <div style={{ position: "absolute", bottom: 14, left: 14, fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.7)", letterSpacing: ".04em", textTransform: "uppercase" }}>ALL HAZARDS LOGGED · 0 INCIDENTS</div>
+              </TiltCard>
               {[
                 { title: "INCIDENT LOGGING", body: "Log near-misses, injuries, and hazards on the spot with photo evidence.", color: "#ef4444" },
                 { title: "COMPLIANCE REPORTS", body: "Generate safety reports for any date range, job site, or worker in seconds.", color: "#f97316" },
@@ -847,15 +854,23 @@ export default function LandingPage() {
         <section style={{ background: "#030303", padding: 0, overflow: "hidden" }}>
           <div style={{ display: "flex", gap: 3 }}>
             {[
-              { id: "TdZQjSwykV0", fb: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", cls: "kb1" },
-              { id: "AdJB6Dt0JQ0", fb: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80", cls: "kb2" },
-              { id: "0K-0BXrXvuI", fb: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", cls: "kb3" },
+              { id: "TdZQjSwykV0", fb: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", cls: "kb1", label: "CREW MANAGEMENT", sub: "GPS · CLOCK-IN" },
+              { id: "AdJB6Dt0JQ0", fb: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80", cls: "kb2", label: "PROJECT TRACKING", sub: "REAL-TIME UPDATES" },
+              { id: "0K-0BXrXvuI", fb: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", cls: "kb3", label: "INVOICING", sub: "SENT SAME-DAY" },
             ].map((v, i) => (
               <div key={i} style={{ flex: "0 0 33.333%", aspectRatio: "16/9", position: "relative", overflow: "hidden", background: "#111" }}>
                 <YTBg id={v.id} opacity={1} />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={v.fb} alt="" aria-hidden className={v.cls} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "contrast(1.1) saturate(0.8)", zIndex: -1 }} />
                 <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.38)", pointerEvents: "none", zIndex: 2 }} />
+                <div style={{ position: "absolute", bottom: 14, left: 14, zIndex: 3 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#F5C400", boxShadow: "0 0 6px rgba(245,196,0,.9)", animation: "pulse 2s ease-in-out infinite" }} />
+                    <span style={{ fontSize: 8, fontWeight: 700, color: "#F5C400", letterSpacing: ".12em", textTransform: "uppercase" }}>LIVE</span>
+                  </div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: ".06em", textTransform: "uppercase" }}>{v.label}</div>
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,.4)", letterSpacing: ".08em", textTransform: "uppercase", marginTop: 2 }}>{v.sub}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -867,7 +882,7 @@ export default function LandingPage() {
             {[
               { src: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=900&q=80", label: "CONCRETE POUR", sub: "PHASE 2 · ON SCHEDULE" },
               { src: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", label: "STEEL ERECTION", sub: "CREW OF 24 · GPS CLOCKED" },
-              { src: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=900&q=80", label: "SITE SURVEY", sub: "BLUEPRINTS UPLOADED" },
+              { src: "https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=900&q=80", label: "SITE SURVEY", sub: "BLUEPRINTS UPLOADED" },
               { src: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", label: "AERIAL VIEW", sub: "DRONE · JOB SITE DOCS" },
             ].map((p, i) => (
               <TiltCard key={i} style={{ flex: "0 0 25%", overflow: "hidden", position: "relative", aspectRatio: "3/4" }}>
@@ -895,6 +910,19 @@ export default function LandingPage() {
             <h2 className="cinematic-text" style={{ fontSize: "clamp(44px,8vw,112px)", color: "#fff", textAlign: "center" }}>
               ZERO PHANTOM HOURS.<br /><span style={{ color: "#F5C400", textShadow: "0 0 50px rgba(245,196,0,.45)" }}>ZERO CHASED INVOICES.</span>
             </h2>
+            <div style={{ display: "flex", gap: 1, justifyContent: "center", marginTop: 52, flexWrap: "wrap" }}>
+              {[
+                { n: "$4,000+", label: "Avg. monthly savings", sub: "From stopped phantom hours" },
+                { n: "94%", label: "Fewer time disputes", sub: "GPS verification on every clock-in" },
+                { n: "2× faster", label: "Invoice payments", sub: "Send same day, get paid faster" },
+              ].map((s, i) => (
+                <div key={i} style={{ flex: "0 0 220px", padding: "28px 24px", background: "rgba(0,0,0,.5)", border: "1px solid rgba(245,196,0,.12)", borderTop: "3px solid #F5C400", textAlign: "center", backdropFilter: "blur(12px)" }}>
+                  <div style={{ fontFamily: BC, fontWeight: 900, fontSize: 38, color: "#F5C400", lineHeight: 1, marginBottom: 6, textShadow: "0 0 20px rgba(245,196,0,.3)" }}>{s.n}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: ".04em", textTransform: "uppercase", marginBottom: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)" }}>{s.sub}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -919,6 +947,14 @@ export default function LandingPage() {
                 <div key={i} className={`test-card reveal stagger-${i + 1}`} style={{ background: "#0a0a0a", padding: "36px 30px", borderTop: "3px solid #F5C400", position: "relative", overflow: "hidden" }}>
                   {/* Quote glow */}
                   <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: "radial-gradient(circle at top right, rgba(245,196,0,.06), transparent 70%)", pointerEvents: "none" }} />
+                  <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 14 }}>
+                    {[...Array(5)].map((_, si) => (
+                      <svg key={si} width="12" height="12" viewBox="0 0 24 24" fill="#F5C400">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    ))}
+                    <span style={{ fontSize: 9, color: "rgba(255,255,255,.25)", marginLeft: 4, fontWeight: 600, letterSpacing: ".04em" }}>VERIFIED CONTRACTOR</span>
+                  </div>
                   <div style={{ fontFamily: BC, fontWeight: 900, fontSize: 80, color: "#F5C400", lineHeight: 0.7, marginBottom: 18, opacity: 0.5, textShadow: "0 0 20px rgba(245,196,0,.3)" }}>&ldquo;</div>
                   <p style={{ fontSize: 14, color: "rgba(255,255,255,.6)", lineHeight: 1.85, marginBottom: 28, fontStyle: "italic" }}>
                     &ldquo;{t.quote}&rdquo;
