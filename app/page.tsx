@@ -61,7 +61,7 @@ function YTBg({ id, opacity = 0.45 }: { id: string; opacity?: number }) {
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", opacity }}>
       <iframe
         loading="lazy"
-        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=0&playsinline=1`}
+        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=0&playsinline=1&fs=0&disablekb=1`}
         allow="autoplay; encrypted-media"
         style={{
           position: "absolute", top: "50%", left: "50%",
@@ -409,7 +409,6 @@ export default function LandingPage() {
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 
-        /* 3D cursor — only hide cursor within the page scroll area */
         .page-root { cursor: none; }
         .cursor-dot {
           position: fixed; top: -4px; left: -4px; width: 8px; height: 8px;
@@ -637,7 +636,7 @@ export default function LandingPage() {
 
         {/* ── ABOUT SECTION ─────────────────────────────────────────────────── */}
         <section className="reveal" style={{ background: "#080808", padding: "110px 28px", position: "relative", overflow: "hidden" }}>
-          <YTBg id="njw5ZgisSBI" opacity={0.08} />
+          <YTBg id="njw5ZgisSBI" opacity={0.28} />
           {/* Glow blob */}
           <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.06)", top: "10%", right: "0%" }} />
 
@@ -663,6 +662,16 @@ export default function LandingPage() {
               </Link>
             </div>
 
+            {/* Right column: 3D image + stat tiles */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {/* 3D floating construction photo */}
+            <TiltCard style={{ borderRadius: 1, overflow: "hidden", boxShadow: "0 40px 80px rgba(0,0,0,.85), 0 0 0 1px rgba(245,196,0,.1)", position: "relative", aspectRatio: "16/9", width: "100%" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80" alt="Construction site drone view" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "contrast(1.1) saturate(0.85)" }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 55%)" }} />
+              <div style={{ position: "absolute", top: 12, left: 14, fontSize: 9, fontWeight: 700, color: "#F5C400", letterSpacing: ".1em", textTransform: "uppercase", textShadow: "0 0 8px rgba(245,196,0,.4)" }}>CONSTRA · LIVE JOB SITE</div>
+              <div style={{ position: "absolute", bottom: 14, left: 14, fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.7)", letterSpacing: ".04em", textTransform: "uppercase" }}>STEEL FRAME · PHASE 1</div>
+            </TiltCard>
             {/* Stat tiles — 3D hover */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
               {[
@@ -679,6 +688,7 @@ export default function LandingPage() {
                   <div style={{ fontSize: 11, color: "rgba(255,255,255,.28)" }}>{s.sub}</div>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         </section>
@@ -752,7 +762,7 @@ export default function LandingPage() {
 
         {/* ── SAFETY SECTION ───────────────────────────────────────────────── */}
         <section style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
-          <YTBg id="cFlKA0_h51I" opacity={0.07} />
+          <YTBg id="cFlKA0_h51I" opacity={0.22} />
           <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(239,68,68,.04)", top: "10%", right: "0%" }} />
 
           <div style={{ maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))", gap: 80, alignItems: "center", position: "relative", zIndex: 1 }}>
@@ -845,8 +855,30 @@ export default function LandingPage() {
                 <YTBg id={v.id} opacity={1} />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={v.fb} alt="" aria-hidden className={v.cls} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "contrast(1.1) saturate(0.8)", zIndex: -1 }} />
-                <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.28)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.38)", pointerEvents: "none", zIndex: 2 }} />
               </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 3D PHOTO ROW ─────────────────────────────────────────────────── */}
+        <section style={{ background: "#030303", padding: "3px 3px 0", overflow: "hidden" }}>
+          <div style={{ display: "flex", gap: 3 }}>
+            {[
+              { src: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=900&q=80", label: "CONCRETE POUR", sub: "PHASE 2 · ON SCHEDULE" },
+              { src: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", label: "STEEL ERECTION", sub: "CREW OF 24 · GPS CLOCKED" },
+              { src: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=900&q=80", label: "SITE SURVEY", sub: "BLUEPRINTS UPLOADED" },
+              { src: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", label: "AERIAL VIEW", sub: "DRONE · JOB SITE DOCS" },
+            ].map((p, i) => (
+              <TiltCard key={i} style={{ flex: "0 0 25%", overflow: "hidden", position: "relative", aspectRatio: "3/4" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.src} alt={p.label} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "contrast(1.12) saturate(0.75)" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.1) 50%, transparent 100%)" }} />
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px 14px" }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: "#F5C400", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 3 }}>{p.label}</div>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,.45)", letterSpacing: ".07em", textTransform: "uppercase" }}>{p.sub}</div>
+                </div>
+              </TiltCard>
             ))}
           </div>
         </section>
@@ -868,7 +900,7 @@ export default function LandingPage() {
 
         {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
         <section id="testimonials" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
-          <YTBg id="PnDv_iij5Po" opacity={0.07} />
+          <YTBg id="PnDv_iij5Po" opacity={0.20} />
           <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.05)", top: "20%", left: "-10%" }} />
 
           <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
