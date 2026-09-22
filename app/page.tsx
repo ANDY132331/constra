@@ -414,6 +414,23 @@ export default function LandingPage() {
           .photo-row > * { flex: 0 0 auto !important; aspect-ratio: 16/9 !important; }
           .results-stats { gap: 8px !important; }
           .results-stats > * { flex: 1 1 100% !important; }
+
+          /* Section vertical padding */
+          .section-pad { padding-top: 64px !important; padding-bottom: 64px !important; }
+
+          /* Hero content */
+          .hero-par { padding: 20px 20px 80px !important; }
+          .badge .eyebrow { font-size: 9px !important; letter-spacing: .08em !important; }
+          .hero-cta-row { flex-direction: column !important; gap: 10px !important; }
+          .hero-cta-primary { width: 100% !important; justify-content: center !important; }
+          .hero-cta-ghost { display: none !important; }
+
+          /* Announcement strip */
+          .announce-sep { display: none !important; }
+
+          /* Sticky CTA bar */
+          .mobile-sticky-cta { display: flex !important; }
+          .page-root { padding-bottom: 65px; }
         }
 
         /* Scrollbar */
@@ -556,7 +573,7 @@ export default function LandingPage() {
           </div>
 
           {/* Hero content - parallax mid */}
-          <div className="par-mid" style={{ position: "relative", zIndex: 4, maxWidth: 1320, margin: "0 auto", padding: "60px 28px 80px", width: "100%", willChange: "transform" }}>
+          <div className="par-mid hero-par" style={{ position: "relative", zIndex: 4, maxWidth: 1320, margin: "0 auto", padding: "60px 28px 80px", width: "100%", willChange: "transform" }}>
 
             {/* Badge */}
             <div className="badge" style={{ marginBottom: 32, display: "inline-flex" }}>
@@ -580,11 +597,11 @@ export default function LandingPage() {
             </p>
 
             {/* CTAs */}
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 64 }}>
-              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d" style={{ fontFamily: BC, fontWeight: 900, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", background: "#F5C400", color: "#000", display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <div className="hero-cta-row" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 64 }}>
+              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d hero-cta-primary" style={{ fontFamily: BC, fontWeight: 900, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", background: "#F5C400", color: "#000", display: "inline-flex", alignItems: "center", gap: 10 }}>
                 {alreadyIn ? "GO TO DASHBOARD →" : "GET STARTED FREE →"}
               </Link>
-              <a href="#tools" className="btn-ghost" style={{ fontFamily: BC, fontWeight: 800, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", border: "1px solid rgba(255,255,255,.16)", color: "rgba(255,255,255,.6)", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <a href="#tools" className="btn-ghost hero-cta-ghost" style={{ fontFamily: BC, fontWeight: 800, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", border: "1px solid rgba(255,255,255,.16)", color: "rgba(255,255,255,.6)", display: "inline-flex", alignItems: "center", gap: 8 }}>
                 SEE OUR TOOLS ↓
               </a>
             </div>
@@ -617,7 +634,7 @@ export default function LandingPage() {
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#000" }}>
             Now available on Android & iOS — Download free
           </span>
-          <div style={{ width: 1, height: 16, background: "rgba(0,0,0,.2)" }} />
+          <div className="announce-sep" style={{ width: 1, height: 16, background: "rgba(0,0,0,.2)" }} />
           <a href="https://play.google.com/store/apps/details?id=com.getconstra.app" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 900, letterSpacing: ".12em", textTransform: "uppercase", color: "#000", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
             GOOGLE PLAY <ChevronRight size={12} />
           </a>
@@ -643,7 +660,7 @@ export default function LandingPage() {
         </div>
 
         {/* ── ABOUT SECTION ─────────────────────────────────────────────────── */}
-        <section className="reveal" style={{ background: "#080808", padding: "110px 28px", position: "relative", overflow: "hidden" }}>
+        <section className="reveal section-pad" style={{ background: "#080808", padding: "110px 28px", position: "relative", overflow: "hidden" }}>
           <YTBg id="njw5ZgisSBI" opacity={0.28} />
           {/* Glow blob */}
           <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.06)", top: "10%", right: "0%" }} />
@@ -702,7 +719,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── TOOLS ────────────────────────────────────────────────────────── */}
-        <section id="tools" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
+        <section id="tools" className="section-pad" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
           <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(59,130,246,.04)", bottom: "0%", left: "-5%" }} />
 
           <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
@@ -769,7 +786,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── SAFETY SECTION ───────────────────────────────────────────────── */}
-        <section style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
+        <section className="section-pad" style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
           <YTBg id="cFlKA0_h51I" opacity={0.22} />
           <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(239,68,68,.04)", top: "10%", right: "0%" }} />
 
@@ -935,7 +952,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
-        <section id="testimonials" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
+        <section id="testimonials" className="section-pad" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
           <YTBg id="PnDv_iij5Po" opacity={0.20} />
           <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.05)", top: "20%", left: "-10%" }} />
 
@@ -979,7 +996,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── PRICING ──────────────────────────────────────────────────────── */}
-        <section id="pricing" style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
+        <section id="pricing" className="section-pad" style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
           <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(245,196,0,.06)", bottom: "0%", right: "5%" }} />
 
           <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
@@ -1031,7 +1048,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
-        <section style={{ position: "relative", padding: "130px 28px", background: "#000", overflow: "hidden", textAlign: "center" }}>
+        <section className="section-pad" style={{ position: "relative", padding: "130px 28px", background: "#000", overflow: "hidden", textAlign: "center" }}>
           <YTBg id="PHezq3zCgGs" opacity={0.22} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="kb2" aria-hidden src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
@@ -1105,6 +1122,16 @@ export default function LandingPage() {
           </div>
         </footer>
 
+      </div>
+
+      {/* ── MOBILE STICKY CTA BAR ────────────────────────────────────────── */}
+      <div className="mobile-sticky-cta" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200, padding: "10px 16px 14px", background: "rgba(5,5,5,.95)", borderTop: "1px solid rgba(245,196,0,.25)", backdropFilter: "blur(16px)", gap: 10, alignItems: "center" }}>
+        <Link href={alreadyIn ? "/dashboard" : "/onboarding"} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 13, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 16px", textDecoration: "none", gap: 8 }}>
+          {alreadyIn ? "GO TO DASHBOARD →" : "GET STARTED FREE →"}
+        </Link>
+        <Link href="/login" style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.07)", color: "rgba(255,255,255,.6)", fontFamily: BC, fontWeight: 800, fontSize: 12, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 14px", textDecoration: "none", border: "1px solid rgba(255,255,255,.1)" }}>
+          SIGN IN
+        </Link>
       </div>
     </>
   );
