@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, HardHat } from "lucide-react";
 
 // ── Auth check ────────────────────────────────────────────────────────────────
 function isAlreadyOnboarded(): boolean {
@@ -406,6 +406,14 @@ export default function LandingPage() {
           .nav-links { gap: 12px !important; }
           .nav-cta { padding: 7px 13px !important; font-size: 11px !important; }
           .hero-h1 { font-size: clamp(36px, 9.5vw, 152px) !important; }
+          .stats-strip { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 24px 0 !important; }
+          .stat-item { padding-right: 0 !important; margin-right: 0 !important; border-right: none !important; margin-bottom: 0 !important; }
+          .pricing-free-card { padding: 28px 20px !important; }
+          .pricing-free-badge { left: 20px !important; }
+          .photo-row { flex-direction: column !important; }
+          .photo-row > * { flex: 0 0 auto !important; aspect-ratio: 16/9 !important; }
+          .results-stats { gap: 8px !important; }
+          .results-stats > * { flex: 1 1 100% !important; }
         }
 
         /* Scrollbar */
@@ -455,12 +463,8 @@ export default function LandingPage() {
           <div className="nav-inner" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 28px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             {/* Logo */}
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 34, height: 34, background: "#F5C400", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 20px rgba(245,196,0,.3)" }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="1" y="8" width="4" height="7" rx="0.5" fill="#000"/>
-                  <rect x="6" y="3" width="4" height="12" rx="0.5" fill="#000"/>
-                  <rect x="11" y="5.5" width="4" height="9.5" rx="0.5" fill="#000"/>
-                </svg>
+              <div style={{ width: 34, height: 34, background: "#F5C400", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 20px rgba(245,196,0,.3)" }}>
+                <HardHat size={16} color="#000" />
               </div>
               <span style={{ fontFamily: BC, fontWeight: 900, fontSize: 22, letterSpacing: "0.04em", textTransform: "uppercase" }}>Constra</span>
             </div>
@@ -586,14 +590,14 @@ export default function LandingPage() {
             </div>
 
             {/* Stats strip */}
-            <div style={{ display: "flex", gap: 0, flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,.07)", paddingTop: 32 }}>
+            <div className="stats-strip" style={{ display: "flex", gap: 0, flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,.07)", paddingTop: 32 }}>
               {[
                 { n: "12+", label: "Tools Built In" },
                 { n: "15", label: "Languages" },
                 { n: "$0", label: "To Get Started" },
                 { n: "100%", label: "Offline Capable" },
               ].map((s, i) => (
-                <div key={i} style={{ paddingRight: 40, marginRight: 40, borderRight: i < 3 ? "1px solid rgba(255,255,255,.07)" : "none", marginBottom: 16 }}>
+                <div key={i} className="stat-item" style={{ paddingRight: 40, marginRight: 40, borderRight: i < 3 ? "1px solid rgba(255,255,255,.07)" : "none", marginBottom: 16 }}>
                   <div style={{ fontFamily: BC, fontWeight: 900, fontSize: "clamp(32px,4vw,52px)", color: "#F5C400", lineHeight: 1, letterSpacing: "-0.02em", textShadow: "0 0 30px rgba(245,196,0,.3)" }}>{s.n}</div>
                   <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,.35)", letterSpacing: ".1em", textTransform: "uppercase", marginTop: 4 }}>{s.label}</div>
                 </div>
@@ -882,7 +886,7 @@ export default function LandingPage() {
 
         {/* ── 3D PHOTO ROW ─────────────────────────────────────────────────── */}
         <section style={{ background: "#030303", padding: "3px 3px 0", overflow: "hidden" }}>
-          <div style={{ display: "flex", gap: 3 }}>
+          <div className="photo-row" style={{ display: "flex", gap: 3 }}>
             {[
               { src: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=900&q=80", label: "CONCRETE POUR", sub: "PHASE 2 · ON SCHEDULE" },
               { src: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", label: "STEEL ERECTION", sub: "CREW OF 24 · GPS CLOCKED" },
@@ -914,7 +918,7 @@ export default function LandingPage() {
             <h2 className="cinematic-text" style={{ fontSize: "clamp(44px,8vw,112px)", color: "#fff", textAlign: "center" }}>
               ZERO PHANTOM HOURS.<br /><span style={{ color: "#F5C400", textShadow: "0 0 50px rgba(245,196,0,.45)" }}>ZERO CHASED INVOICES.</span>
             </h2>
-            <div style={{ display: "flex", gap: 1, justifyContent: "center", marginTop: 52, flexWrap: "wrap" }}>
+            <div className="results-stats" style={{ display: "flex", gap: 1, justifyContent: "center", marginTop: 52, flexWrap: "wrap" }}>
               {[
                 { n: "$4,000+", label: "Avg. monthly savings", sub: "From stopped phantom hours" },
                 { n: "94%", label: "Fewer time disputes", sub: "GPS verification on every clock-in" },
@@ -1004,8 +1008,8 @@ export default function LandingPage() {
             </div>
 
             {/* Free card — 3D glass */}
-            <div className="reveal glass-gold" style={{ maxWidth: 780, borderTop: "4px solid #F5C400", padding: "48px", position: "relative", animation: "glowpulse 4s ease-in-out infinite" }}>
-              <div style={{ position: "absolute", top: -14, left: 48, background: "#F5C400", color: "#000", fontSize: 10, fontWeight: 900, padding: "5px 18px", letterSpacing: ".1em", textTransform: "uppercase" }}>FREE ACCESS</div>
+            <div className="reveal glass-gold pricing-free-card" style={{ maxWidth: 780, borderTop: "4px solid #F5C400", padding: "48px", position: "relative", animation: "glowpulse 4s ease-in-out infinite" }}>
+              <div className="pricing-free-badge" style={{ position: "absolute", top: -14, left: 48, background: "#F5C400", color: "#000", fontSize: 10, fontWeight: 900, padding: "5px 18px", letterSpacing: ".1em", textTransform: "uppercase" }}>FREE ACCESS</div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24, marginBottom: 36 }}>
                 <div>
                   <div style={{ fontFamily: BC, fontWeight: 900, fontSize: 76, lineHeight: 1, color: "#fff", textShadow: "0 0 40px rgba(245,196,0,.2)" }}>$0</div>
@@ -1072,12 +1076,8 @@ export default function LandingPage() {
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 40, marginBottom: 40 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 30, height: 30, background: "#F5C400", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 16px rgba(245,196,0,.3)" }}>
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                      <rect x="1" y="8" width="4" height="7" rx="0.5" fill="#000"/>
-                      <rect x="6" y="3" width="4" height="12" rx="0.5" fill="#000"/>
-                      <rect x="11" y="5.5" width="4" height="9.5" rx="0.5" fill="#000"/>
-                    </svg>
+                  <div style={{ width: 30, height: 30, background: "#F5C400", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 16px rgba(245,196,0,.3)" }}>
+                    <HardHat size={14} color="#000" />
                   </div>
                   <span style={{ fontFamily: BC, fontWeight: 900, fontSize: 20, letterSpacing: ".04em", textTransform: "uppercase" }}>CONSTRA</span>
                 </div>
