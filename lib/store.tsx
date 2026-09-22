@@ -354,7 +354,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTransient((t) => ({ ...t, isOnline: true, pendingSync: queueLength() }));
       if (SUPABASE_ENABLED) {
         const synced = await flushQueue(getClient());
-        if (synced > 0) setTransient((t) => ({ ...t, pendingSync: 0 }));
+        if (synced > 0) {
+          setTransient((t) => ({ ...t, pendingSync: 0 }));
+          toast.success(`${synced} offline change${synced > 1 ? "s" : ""} synced`);
+        }
       }
     };
     const goOffline = () => { isOnlineRef.current = false; setTransient((t) => ({ ...t, isOnline: false })); };

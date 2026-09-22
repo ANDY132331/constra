@@ -47,7 +47,7 @@ export default function BlueprintsPage() {
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    if (!files.length || !companyId) return;
+    if (!files.length || !companyId) { if (!companyId) toast.error("Company not loaded — try refreshing"); return; }
 
     setUploading(true);
     setUploadError(null);

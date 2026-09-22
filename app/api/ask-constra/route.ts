@@ -113,6 +113,9 @@ export async function POST(request: Request) {
   if (!messages?.length || !companyData) {
     return new Response("Missing messages or companyData", { status: 400 });
   }
+  if (messages.length > 40) {
+    return new Response("Too many messages", { status: 400 });
+  }
 
   const context = buildContext(companyData);
   const groqMessages = [

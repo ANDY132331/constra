@@ -165,8 +165,9 @@ function EstimateDetail({
           {/* Email send button */}
           <button
             disabled={sendLoading || !estimate.clientEmail}
+            title={!estimate.clientEmail ? "Add a client email to send" : "Send estimate by email"}
             onClick={async () => {
-              if (!estimate.clientEmail) return;
+              if (!estimate.clientEmail) { toast.error("Add a client email address to this estimate first"); return; }
               setSendLoading(true);
               try {
                 const amountStr = formatCurrency(Math.round(total), currency as never);

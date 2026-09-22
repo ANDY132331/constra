@@ -176,8 +176,9 @@ function InvoiceDetail({
           )}
           <button
             disabled={sendLoading || !invoice.clientEmail}
+            title={!invoice.clientEmail ? "Add a client email to send" : "Send invoice by email"}
             onClick={async () => {
-              if (!invoice.clientEmail) return;
+              if (!invoice.clientEmail) { toast.error("Add a client email address to this invoice first"); return; }
               setSendLoading(true);
               try {
                 const t = invoice.items.reduce((s, i) => s + i.qty * i.rate, 0) * (1 + invoice.taxRate / 100);

@@ -160,7 +160,8 @@ export async function POST(request: Request) {
     return new Response("Invalid JSON", { status: 400 });
   }
 
-  const userMessages = (body.messages ?? []).filter(
+  const rawMessages = (body.messages ?? []).slice(0, 40);
+  const userMessages = rawMessages.filter(
     (m) => (m.role === "user" || m.role === "assistant") && m.content?.trim()
   );
 

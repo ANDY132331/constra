@@ -3,11 +3,14 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { sendEmail, taskAssignedEmail } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const authClient = await createClient();
   const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  if (!rateLimit(`task-notify:${user.id}`, 20, 60_000)) return rateLimitResponse();
 
   if (!process.env.RESEND_API_KEY) return NextResponse.json({ skipped: true });
 
