@@ -1,7 +1,8 @@
 ﻿"use client";
 import { toast } from "sonner";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { BarChart2, List, CalendarDays, Plus, Search, MapPin, X, AlertCircle, Map, Trash2, Pencil, ShieldCheck, Share2, FolderKanban, ChevronLeft } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { GanttChart, type GanttProject } from "@/components/gantt-chart";
@@ -64,6 +65,8 @@ export default function ProjectsPage() {
   const [mobileStep, setMobileStep] = useState(1);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(blank);
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setMobileStep(1); setShowModal(true); } }, [searchParams]);
   type GeoResult = { display_name: string; lat: string; lon: string };
   const [geoResults, setGeoResults] = useState<GeoResult[]>([]);
   const [geoLoading, setGeoLoading] = useState(false);

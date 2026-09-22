@@ -38,12 +38,12 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 const ALL_QUICK_ADD = [
-  { label: "Log Incident",  icon: ShieldAlert,  href: "/safety",     minLevel: "all" as const },
-  { label: "New Project",   icon: FolderKanban, href: "/projects",   minLevel: "foreman" as const },
-  { label: "Add Punch Item",icon: ClipboardList,href: "/punch-list", minLevel: "foreman" as const },
-  { label: "Add Equipment", icon: Truck,        href: "/equipment",  minLevel: "foreman" as const },
-  { label: "Add Worker",    icon: Users,        href: "/crew",       minLevel: "admin" as const },
-  { label: "New Invoice",   icon: FileText,     href: "/invoices",   minLevel: "admin" as const },
+  { label: "Log Incident",  icon: ShieldAlert,  href: "/safety?new=1",     minLevel: "all" as const },
+  { label: "New Project",   icon: FolderKanban, href: "/projects?new=1",   minLevel: "foreman" as const },
+  { label: "Add Punch Item",icon: ClipboardList,href: "/punch-list?new=1", minLevel: "foreman" as const },
+  { label: "Add Equipment", icon: Truck,        href: "/equipment?new=1",  minLevel: "foreman" as const },
+  { label: "Add Worker",    icon: Users,        href: "/crew?new=1",       minLevel: "admin" as const },
+  { label: "New Invoice",   icon: FileText,     href: "/invoices?new=1",   minLevel: "admin" as const },
 ];
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, cb: () => void) {

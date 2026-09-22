@@ -527,7 +527,7 @@ export default function RFIsPage() {
         title="Delete RFI"
         body="Delete this RFI and all its responses? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) deleteRFI(deleteConfirm); setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteRFI(deleteConfirm); toast.success("RFI deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
       <ConfirmModal

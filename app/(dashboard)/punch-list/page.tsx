@@ -1,7 +1,8 @@
 ﻿"use client";
 import { toast } from "sonner";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus, Search, Circle, Timer, CheckCircle2, MapPin, Calendar, X, Pencil } from "lucide-react";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { useStore } from "@/lib/store";
@@ -45,8 +46,11 @@ export default function PunchListPage() {
   const [projectFilter, setProjectFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [resolveAllConfirm, setResolveAllConfirm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<ItemForm>(blank);
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setShowModal(true); } }, [searchParams]);
 
   const filtered = punchItems.filter((item) => {
     if (search) {
@@ -124,7 +128,7 @@ export default function PunchListPage() {
           <div className="flex items-center gap-2">
             {canEdit && counts.open > 0 && (
               <button
-                onClick={() => { const open = punchItems.filter(i => i.status === "open"); open.forEach(i => updatePunchItem(i.id, { status: "resolved" })); toast.success(`${open.length} items resolved`); }}
+                onClick={() => setResolveAllConfirm(true)}
                 className="text-[12px] font-bold text-white/40 px-3 py-2 rounded-full border border-white/[0.07] active:bg-white/[0.05] transition-colors"
               >
                 Resolve All
@@ -551,10 +555,18 @@ export default function PunchListPage() {
       <ConfirmModal
         open={!!deleteConfirm}
         title="Delete Punch Item"
-        body="Delete this punch list item? This cannot be undone."
+        body={`Delete "${punchItems.find(p => p.id === deleteConfirm)?.title ?? "this item"}"? This cannot be undone.`}
         confirmLabel="Delete"
         onConfirm={() => { if (deleteConfirm) { deletePunchItem(deleteConfirm); toast.success("Item deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
+      />
+      <ConfirmModal
+        open={resolveAllConfirm}
+        title="Resolve All Open Items"
+        body={`Mark all ${punchItems.filter(i => i.status === "open").length} open items as resolved?`}
+        confirmLabel="Resolve All"
+        onConfirm={() => { const open = punchItems.filter(i => i.status === "open"); open.forEach(i => updatePunchItem(i.id, { status: "resolved" })); toast.success(`${open.length} items resolved`); setResolveAllConfirm(false); }}
+        onCancel={() => setResolveAllConfirm(false)}
       />
     </>
   );

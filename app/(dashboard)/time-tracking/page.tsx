@@ -521,11 +521,13 @@ export default function TimeTrackingPage() {
   const handleEditSave = useCallback((id: string, clockIn: Date, clockOut: Date | undefined) => {
     updateClockEntry(id, { clockIn, clockOut });
     setEditEntry(null);
+    toast.success("Time entry updated");
   }, [updateClockEntry]);
 
   const handleEditDelete = useCallback((id: string) => {
     deleteClockEntry(id);
     setEditEntry(null);
+    toast.success("Time entry deleted");
   }, [deleteClockEntry]);
 
   const isCurrentUserClockedIn = currentUser.clockedIn;

@@ -2,6 +2,7 @@
 import { toast } from "sonner";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus, Search, AlertTriangle, X, Pencil, Trash2, Truck } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
@@ -49,6 +50,8 @@ export default function EquipmentPage() {
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<EqForm>(blank());
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank()); setShowModal(true); } }, [searchParams]);
 
   const filtered = equipment.filter((e) => {
     if (search && !e.name.toLowerCase().includes(search.toLowerCase()) && !e.type.toLowerCase().includes(search.toLowerCase())) return false;

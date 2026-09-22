@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Send, CheckCircle2, AlertTriangle, Lock,
@@ -536,6 +536,8 @@ export default function InvoicesPage() {
   const [form, setForm]               = useState<InvForm>(blank);
   const [selectedId, setSelectedId]   = useState<string | null>(invoices[0]?.id ?? null);
   const [mobilePreviewId, setMobilePreviewId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); } }, [searchParams, defaultTaxRate]);
 
   const openEdit = (invoice: Invoice) => {
     setEditId(invoice.id);

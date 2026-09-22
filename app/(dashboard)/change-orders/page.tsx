@@ -584,7 +584,7 @@ export default function ChangeOrdersPage() {
         title="Delete Change Order"
         body="Delete this change order permanently? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) { deleteChangeOrder(deleteConfirm); setSelected(null); } setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteChangeOrder(deleteConfirm); setSelected(null); toast.success("Change order deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

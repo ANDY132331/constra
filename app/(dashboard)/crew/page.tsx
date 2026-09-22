@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import QRCode from "qrcode";
 import {
@@ -211,6 +211,8 @@ export default function CrewPage() {
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(blank);
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setShowModal(true); } }, [searchParams]);
   const [hoursWorker, setHoursWorker] = useState<Worker | null>(null);
   const [certifications, setCertifications] = useState<WorkerCertification[]>([]);
   const [showQR, setShowQR] = useState(false);

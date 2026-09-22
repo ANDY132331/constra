@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
@@ -53,6 +54,8 @@ export default function SafetyPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<IncidentForm>(blank);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setShowModal(true); } }, [searchParams]);
 
   const filtered = safetyIncidents.filter((i) => {
     if (typeFilter !== "all" && i.type !== typeFilter) return false;
