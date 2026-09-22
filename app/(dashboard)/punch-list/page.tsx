@@ -83,8 +83,8 @@ export default function PunchListPage() {
   };
 
   const handleSave = () => {
-    if (!form.title.trim()) return;
-    if (!editId && !form.projectId) return;
+    if (!form.title.trim()) { toast.error("Title is required"); return; }
+    if (!editId && !form.projectId) { toast.error("Select a project"); return; }
     if (editId) {
       updatePunchItem(editId, {
         title: form.title.trim(),

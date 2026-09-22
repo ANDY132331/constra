@@ -113,7 +113,7 @@ export default function DailyReportsPage() {
   }).sort((a, b) => b.date.getTime() - a.date.getTime());
 
   const handleSubmit = useCallback(() => {
-    if (!form.projectId || !form.date || !form.workCompleted.trim()) return;
+    if (!form.projectId || !form.date || !form.workCompleted.trim()) { toast.error("Select a project and fill in work completed"); return; }
     addDailyReport({
       projectId: form.projectId,
       date: new Date(form.date + "T12:00:00"),

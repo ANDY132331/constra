@@ -25,29 +25,46 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
-  const {
-    to,
-    invoiceNumber,
-    invoiceId,
-    clientName,
-    amount,
-    dueDate,
-    companyName,
-    notes,
-    pdfDataUrl,
-    isReminder,
-  } = body as {
-    to: string;
-    invoiceNumber: string;
+  const { invoiceId, pdfDataUrl, isReminder, notes } = body as {
     invoiceId?: string;
-    clientName: string;
-    amount: string;
-    dueDate: string;
-    companyName: string;
-    notes?: string;
     pdfDataUrl?: string;
     isReminder?: boolean;
+    notes?: string;
   };
+
+  if (!invoiceId) return NextResponse.json({ error: "Missing invoiceId" }, { status: 400 });
+
+  // Fetch invoice from DB and verify ownership — never trust client-supplied fields
+  const { data: invoiceRow, error: invErr } = await authClient
+    .from("invoices")
+    .select("id, invoice_number, client_name, client_email, total, due_date, company_id")
+    .eq("id", invoiceId)
+    .single();
+
+  if (invErr || !invoiceRow) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+
+  const { data: profile } = await authClient
+    .from("profiles")
+    .select("company_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || profile.company_id !== invoiceRow.company_id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { data: company } = await authClient
+    .from("companies")
+    .select("name")
+    .eq("id", invoiceRow.company_id)
+    .single();
+
+  const to: string = invoiceRow.client_email ?? "";
+  const invoiceNumber: string = invoiceRow.invoice_number ?? "";
+  const clientName: string = invoiceRow.client_name ?? "";
+  const amount: string = String(invoiceRow.total ?? 0);
+  const dueDate: string = invoiceRow.due_date ? new Date(invoiceRow.due_date).toLocaleDateString() : "";
+  const companyName: string = company?.name ?? "Constra";
 
   // Build the payment link — direct to client pay page if invoiceId is available
   const payLink = invoiceId ? `${APP_URL}/pay/${invoiceId}` : `${APP_URL}/invoices`;

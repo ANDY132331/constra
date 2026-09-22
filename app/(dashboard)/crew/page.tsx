@@ -270,7 +270,7 @@ export default function CrewPage() {
   }, []);
 
   const handleSave = async () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) { toast.error("Name is required"); return; }
     setSaveError("");
 
     if (editId) {

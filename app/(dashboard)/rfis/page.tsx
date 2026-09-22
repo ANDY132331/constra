@@ -79,7 +79,7 @@ export default function RFIsPage() {
   };
 
   const handleSave = () => {
-    if (!form.subject.trim()) return;
+    if (!form.subject.trim()) { toast.error("Subject is required"); return; }
     if (editId) {
       updateRFI(editId, {
         subject: form.subject.trim(),

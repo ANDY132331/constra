@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -20,6 +21,8 @@ export async function POST(request: Request) {
   const authClient = await createClient();
   const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+  if (!rateLimit(`regen-invite:${user.id}`, 10, 3_600_000)) return rateLimitResponse();
 
   const { data: profile } = await authClient
     .from("profiles")

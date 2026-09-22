@@ -108,7 +108,7 @@ export default function ChangeOrdersPage() {
   };
 
   const handleSubmit = useCallback(() => {
-    if (!form.projectId || !form.title.trim() || !form.number.trim()) return;
+    if (!form.projectId || !form.title.trim() || !form.number.trim()) { toast.error("Select a project and fill in title and number"); return; }
     if (editing) {
       updateChangeOrder(editing.id, {
         projectId: form.projectId,

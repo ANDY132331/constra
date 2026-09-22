@@ -193,7 +193,7 @@ export default function ProjectsPage() {
 
   const handleSave = () => {
     setFormError("");
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) { toast.error("Project name is required"); return; }
     if (form.startDate && form.endDate && new Date(form.endDate) <= new Date(form.startDate)) {
       setFormError("End date must be after start date.");
       return;

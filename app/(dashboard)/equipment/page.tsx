@@ -81,7 +81,7 @@ export default function EquipmentPage() {
   }
 
   const handleSave = () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) { toast.error("Name is required"); return; }
     const payload = {
       name: form.name.trim(),
       type: form.type.trim(),

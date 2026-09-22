@@ -114,7 +114,7 @@ export default function PhotosPage() {
   }, [processFiles]);
 
   const handleSave = () => {
-    if (!form.caption.trim() || photoItems.length === 0) return;
+    if (!form.caption.trim() || photoItems.length === 0) { toast.error(!form.caption.trim() ? "Caption is required" : "Add at least one photo"); return; }
     const tags = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
     photoItems.forEach(({ url }) => {
       addPhoto({

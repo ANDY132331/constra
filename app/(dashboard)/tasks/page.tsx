@@ -89,7 +89,7 @@ export default function TasksPage() {
   };
 
   const handleSave = () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) { toast.error("Task name is required"); return; }
     const wasEditing = !!(editTaskId && editProjectId);
     if (editTaskId && editProjectId) {
       updateTask(editProjectId, editTaskId, {
@@ -101,7 +101,7 @@ export default function TasksPage() {
         progress: Math.min(100, Math.max(0, parseInt(form.progress) || 0)),
       });
     } else {
-      if (!form.projectId) return;
+      if (!form.projectId) { toast.error("Select a project"); return; }
       addTask(form.projectId, {
         name: form.name.trim(),
         workerId: form.workerId || (workers[0]?.id ?? ""),

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const key = `push:sub:${user.id}`;
     if (!rateLimit(key, 10, 60_000)) return rateLimitResponse();
 
-    const { subscription, companyId, userId } = await req.json();
+    const { subscription, companyId } = await req.json();
     if (!subscription?.endpoint || !companyId) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -26,8 +26,9 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Always use user.id from verified session — never trust client-supplied userId
     await serviceSupabase.from("push_subscriptions").upsert(
-      { company_id: companyId, user_id: userId ?? user.id, subscription, endpoint: subscription.endpoint },
+      { company_id: companyId, user_id: user.id, subscription, endpoint: subscription.endpoint },
       { onConflict: "endpoint" }
     );
 

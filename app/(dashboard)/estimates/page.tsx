@@ -607,7 +607,7 @@ export default function EstimatesPage() {
   const removeItem = (idx: number) => setForm((f) => ({ ...f, items: f.items.filter((_, i) => i !== idx) }));
 
   const handleSave = () => {
-    if (!form.projectName.trim() || !form.clientName.trim()) return;
+    if (!form.projectName.trim() || !form.clientName.trim()) { toast.error("Project name and client name are required"); return; }
     const items = form.items
       .filter((i) => i.description.trim())
       .map((i) => ({ description: i.description.trim(), qty: parseFloat(i.qty) || 1, rate: parseFloat(i.rate) || 0, category: i.category }));
