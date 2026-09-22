@@ -402,6 +402,10 @@ export default function LandingPage() {
           .tool-card:hover { transform: none; }
           .test-card:hover { transform: translateY(-4px); }
           .stat-tile:hover { transform: translateY(-2px); }
+          .nav-inner { padding: 0 16px !important; }
+          .nav-links { gap: 12px !important; }
+          .nav-cta { padding: 7px 13px !important; font-size: 11px !important; }
+          .hero-h1 { font-size: clamp(36px, 9.5vw, 152px) !important; }
         }
 
         /* Scrollbar */
@@ -448,7 +452,7 @@ export default function LandingPage() {
 
         {/* ── NAV ───────────────────────────────────────────────────────────── */}
         <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(5,5,5,.88)", borderBottom: "1px solid rgba(255,255,255,.05)", backdropFilter: "blur(24px)" }}>
-          <div style={{ maxWidth: 1320, margin: "0 auto", padding: "0 28px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div className="nav-inner" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 28px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             {/* Logo */}
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 34, height: 34, background: "#F5C400", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 20px rgba(245,196,0,.3)" }}>
@@ -461,14 +465,14 @@ export default function LandingPage() {
               <span style={{ fontFamily: BC, fontWeight: 900, fontSize: 22, letterSpacing: "0.04em", textTransform: "uppercase" }}>Constra</span>
             </div>
             {/* Nav links */}
-            <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-              <a href="#tools" className="nav-link" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Tools</a>
+            <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: 32 }}>
+              <a href="#tools" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Tools</a>
               <a href="#testimonials" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Reviews</a>
               {!alreadyIn && (
-                <Link href="/login" className="nav-link" style={{ fontSize: 11, color: "rgba(255,255,255,.3)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Sign In</Link>
+                <Link href="/login" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.3)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Sign In</Link>
               )}
-              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d" style={{ background: "#F5C400", color: "#000", fontWeight: 900, fontFamily: BC, fontSize: 12, padding: "10px 22px", textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", boxShadow: "0 0 20px rgba(245,196,0,.25)" }}>
-                {alreadyIn ? "Go to Dashboard →" : "Get Started →"}
+              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d nav-cta" style={{ background: "#F5C400", color: "#000", fontWeight: 900, fontFamily: BC, fontSize: 12, padding: "10px 22px", textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", boxShadow: "0 0 20px rgba(245,196,0,.25)" }}>
+                {alreadyIn ? "Dashboard →" : "Get Started →"}
               </Link>
             </div>
           </div>
@@ -557,7 +561,7 @@ export default function LandingPage() {
             </div>
 
             {/* Headline */}
-            <h1 className="cinematic-text" style={{ fontSize: "clamp(68px, 11vw, 152px)", marginBottom: 28, color: "#fff", maxWidth: 780 }}>
+            <h1 className="cinematic-text hero-h1" style={{ fontSize: "clamp(68px, 11vw, 152px)", marginBottom: 28, color: "#fff", maxWidth: 780 }}>
               CONSTRA<br />
               <span style={{ color: "#F5C400", textShadow: "0 0 60px rgba(245,196,0,.35)" }}>BUILT FOR</span><br />
               THE JOB SITE.
