@@ -21,9 +21,11 @@ export function getQueue(): QueuedOp[] {
 }
 
 export function enqueue(op: Omit<QueuedOp, "id" | "timestamp">): void {
-  const queue = getQueue();
-  queue.push({ ...op, id: crypto.randomUUID(), timestamp: Date.now() });
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  try {
+    const queue = getQueue();
+    queue.push({ ...op, id: crypto.randomUUID(), timestamp: Date.now() });
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  } catch { /* silently drop if storage is unavailable */ }
 }
 
 export function queueLength(): number {

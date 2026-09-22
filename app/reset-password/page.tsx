@@ -66,14 +66,19 @@ function ResetPasswordForm() {
     }
     setStatus("loading");
     setErrorMsg("");
-    const supabase = getClient();
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) {
-      setErrorMsg(error.message);
+    try {
+      const supabase = getClient();
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        setErrorMsg(error.message);
+        setStatus("error");
+      } else {
+        setStatus("success");
+        setTimeout(() => router.push("/dashboard"), 2500);
+      }
+    } catch {
+      setErrorMsg("Network error — check your connection and try again.");
       setStatus("error");
-    } else {
-      setStatus("success");
-      setTimeout(() => router.push("/dashboard"), 2500);
     }
   }
 
