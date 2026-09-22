@@ -126,15 +126,26 @@ function TiltCard({ children, style }: { children: React.ReactNode; style?: Reac
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const [alreadyIn, setAlreadyIn] = useState(false);
+  const [stickyVisible, setStickyVisible] = useState(false);
   const heroRef = useParallax();
   const heroMouseRef = useRef<HTMLElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
+  const pageRootRef = useRef<HTMLDivElement>(null);
 
   // Detect returning user — show "Go to Dashboard" in nav, but never auto-redirect
   // so the landing page is always visible to everyone who opens the URL.
   useEffect(() => {
     setAlreadyIn(isAlreadyOnboarded());
+  }, []);
+
+  // Show sticky bar only after user scrolls past hero (~400px)
+  useEffect(() => {
+    const root = pageRootRef.current;
+    if (!root) return;
+    const onScroll = () => setStickyVisible(root.scrollTop > 400);
+    root.addEventListener("scroll", onScroll, { passive: true });
+    return () => root.removeEventListener("scroll", onScroll);
   }, []);
 
   // Mouse parallax on hero
@@ -473,7 +484,7 @@ export default function LandingPage() {
       <div ref={cursorDotRef} className="cursor-dot" aria-hidden />
       <div ref={cursorRingRef} className="cursor-ring" aria-hidden />
 
-      <div className="page-root" style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", background: "#050505", color: "#fff" }}>
+      <div ref={pageRootRef} className="page-root" style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", background: "#050505", color: "#fff" }}>
 
         {/* ── NAV ───────────────────────────────────────────────────────────── */}
         <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(5,5,5,.88)", borderBottom: "1px solid rgba(255,255,255,.05)", backdropFilter: "blur(24px)" }}>
@@ -1125,13 +1136,15 @@ export default function LandingPage() {
       </div>
 
       {/* ── MOBILE STICKY CTA BAR ────────────────────────────────────────── */}
-      <div className="mobile-sticky-cta" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200, padding: "10px 16px 14px", background: "rgba(5,5,5,.95)", borderTop: "1px solid rgba(245,196,0,.25)", backdropFilter: "blur(16px)", gap: 10, alignItems: "center" }}>
+      <div className="mobile-sticky-cta" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200, padding: "10px 16px 14px", background: "rgba(5,5,5,.96)", borderTop: "1px solid rgba(245,196,0,.2)", backdropFilter: "blur(20px)", gap: 10, alignItems: "center", transform: stickyVisible ? "translateY(0)" : "translateY(110%)", transition: "transform 0.35s cubic-bezier(.4,0,.2,1)" }}>
         <Link href={alreadyIn ? "/dashboard" : "/onboarding"} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 13, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 16px", textDecoration: "none", gap: 8 }}>
           {alreadyIn ? "GO TO DASHBOARD →" : "GET STARTED FREE →"}
         </Link>
-        <Link href="/login" style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.07)", color: "rgba(255,255,255,.6)", fontFamily: BC, fontWeight: 800, fontSize: 12, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 14px", textDecoration: "none", border: "1px solid rgba(255,255,255,.1)" }}>
-          SIGN IN
-        </Link>
+        {!alreadyIn && (
+          <Link href="/login" style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.07)", color: "rgba(255,255,255,.6)", fontFamily: BC, fontWeight: 800, fontSize: 12, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 14px", textDecoration: "none", border: "1px solid rgba(255,255,255,.1)" }}>
+            SIGN IN
+          </Link>
+        )}
       </div>
     </>
   );
