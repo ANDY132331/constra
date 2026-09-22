@@ -101,7 +101,7 @@ export default function DocumentsPage() {
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
-    if (!files || !selectedProject) return;
+    if (!files || !selectedProject) { if (!selectedProject) toast.error("Select a project first"); return; }
     setUploading(true);
     for (const file of Array.from(files)) {
       const dataUrl = await new Promise<string>((resolve) => {

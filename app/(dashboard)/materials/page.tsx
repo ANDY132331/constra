@@ -124,9 +124,9 @@ export default function MaterialsPage() {
   }, [materialEntries, selectedProject]);
 
   function handleAddEntry() {
-    if (!selectedMaterial || !quantity || !entryProjectId) return;
+    if (!selectedMaterial || !quantity || !entryProjectId) { toast.error("Select a material, project, and enter quantity"); return; }
     const q = parseFloat(quantity);
-    if (isNaN(q) || q <= 0) return;
+    if (isNaN(q) || q <= 0) { toast.error("Enter a valid quantity greater than 0"); return; }
 
     // Ensure material type exists in store
     let typeId = selectedMaterial.id;

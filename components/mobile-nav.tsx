@@ -54,10 +54,10 @@ export function MobileNav() {
   } else {
     tabs = [
       { href: "/dashboard", icon: LayoutDashboard, label: "Home" },
-      { href: "/schedule",  icon: CalendarDays,    label: "Schedule" },
+      { href: "/messages",  icon: MessagesSquare,  label: "Chat" },
       clockTab,
       { href: "/projects",  icon: FolderKanban,    label: "Projects" },
-      { href: "/messages",  icon: MessagesSquare,  label: "Chat" },
+      moreTab,
     ];
   }
 

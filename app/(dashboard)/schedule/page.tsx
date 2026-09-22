@@ -252,7 +252,7 @@ export default function SchedulePage() {
   }
 
   function handleAddEvent() {
-    if (!addForm.title.trim() || !addForm.date) return;
+    if (!addForm.title.trim() || !addForm.date) { toast.error("Title and date are required"); return; }
     const cfg = EVENT_TYPE_CONFIG[addForm.type];
     if (editEventId) {
       const updated = customEvents.map((e) =>

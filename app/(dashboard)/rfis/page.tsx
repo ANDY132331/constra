@@ -109,7 +109,7 @@ export default function RFIsPage() {
   };
 
   const handleAnswer = (rfiId: string) => {
-    if (!answerText.trim()) return;
+    if (!answerText.trim()) { toast.error("Enter an answer before submitting"); return; }
     updateRFI(rfiId, { status: "answered", answer: answerText.trim() });
     setAnswerRfiId(null);
     setAnswerText("");

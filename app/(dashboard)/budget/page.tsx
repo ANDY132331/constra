@@ -157,7 +157,7 @@ export default function BudgetPage() {
       budgeted: parseFloat(form.budgeted) || 0,
       actual: parseFloat(form.actual) || 0,
     };
-    if (!data.projectId || !data.code || !data.description) return;
+    if (!data.projectId || !data.code || !data.description) { toast.error("Project, code, and description are required"); return; }
     if (editId) {
       updateBudgetLine(editId, data);
       toast.success("Budget line updated");

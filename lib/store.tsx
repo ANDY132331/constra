@@ -13,6 +13,7 @@ import type { Locale } from "./i18n/locales";
 import type { CurrencyCode } from "./currency";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { enqueue, flushQueue, queueLength } from "@/lib/offline-queue";
+import { toast } from "sonner";
 import type { QueuedOp } from "@/lib/offline-queue";
 import {
   notifyClockIn, notifyClockOut, notifySafetyIncident,
@@ -704,7 +705,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setTransient((t) => ({ ...t, isSaving: true, savedRecently: false }));
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
     Promise.resolve(fn()).then((result: { error: unknown } | null) => {
-      if (result?.error) console.error(`[store:${label}]`, result.error);
+      if (result?.error) {
+        console.error(`[store:${label}]`, result.error);
+        toast.error("Save failed — check your connection and try again");
+      }
     }).finally(() => {
       savingCountRef.current = Math.max(0, savingCountRef.current - 1);
       if (savingCountRef.current === 0) {

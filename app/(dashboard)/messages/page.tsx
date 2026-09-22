@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { toast } from "sonner";
 import {
   Send, Paperclip, X, Download, Trash2, MessagesSquare,
   Search, Info, ChevronLeft, Mic, ArrowLeft,
@@ -126,7 +127,7 @@ export default function MessagesPage() {
   const sendMessage = useCallback(() => {
     const trimmed = text.trim();
     if (!trimmed && !pendingAttachment) return;
-    if (!selectedProjectId) return;
+    if (!selectedProjectId) { toast.error("Select a project first"); return; }
     addMessage({
       projectId: selectedProjectId,
       senderId: currentUser.id,

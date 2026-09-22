@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 function getAdmin() {
   return createClient(
@@ -11,9 +12,12 @@ function getAdmin() {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ invoiceId: string }> }
 ) {
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  if (!rateLimit(`pay-invoice-view:${ip}`, 30, 60_000)) return rateLimitResponse();
+
   const { invoiceId } = await params;
 
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
