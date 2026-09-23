@@ -225,7 +225,7 @@ function InvoiceDetail({
   return (
     <div className="flex flex-col h-full">
       {/* â"€â"€ Toolbar â"€â"€ */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
+      <div className="flex items-center justify-between px-5 pb-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]" style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}>
         <div className="flex items-center gap-2.5">
           <button onClick={onClose} aria-label="Back to invoices" className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
             <ChevronRight size={16} className="rotate-180" />
