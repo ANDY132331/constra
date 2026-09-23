@@ -228,7 +228,7 @@ export function GanttChart({
     <div
       className="flex overflow-hidden border border-white/[0.07] rounded-xl bg-[#0f0f0f]"
       style={{
-        height: "calc(100vh - 280px)",
+        height: "calc(100dvh - 280px)",
         minHeight: 400,
         cursor: dragState ? (dragState.type === "resize" ? "col-resize" : "grabbing") : "default",
       }}

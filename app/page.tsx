@@ -516,7 +516,7 @@ export default function LandingPage() {
             (heroRef as React.MutableRefObject<HTMLElement | null>).current = el;
             (heroMouseRef as React.MutableRefObject<HTMLElement | null>).current = el;
           }}
-          style={{ position: "relative", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", background: "#050505", overflow: "hidden", paddingTop: 60 }}
+          style={{ position: "relative", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", background: "#050505", overflow: "hidden", paddingTop: 60 }}
         >
           {/* YouTube video background — Torre Reforma cinematic 4K timelapse */}
           <YTBg id="LAmkFK5BsAo" opacity={0.32} />
@@ -1136,7 +1136,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── MOBILE STICKY CTA BAR ────────────────────────────────────────── */}
-      <div className="mobile-sticky-cta" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200, padding: "10px 16px 14px", background: "rgba(5,5,5,.96)", borderTop: "1px solid rgba(245,196,0,.2)", backdropFilter: "blur(20px)", gap: 10, alignItems: "center", transform: stickyVisible ? "translateY(0)" : "translateY(110%)", transition: "transform 0.35s cubic-bezier(.4,0,.2,1)" }}>
+      <div className="mobile-sticky-cta" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200, padding: "10px 16px calc(14px + env(safe-area-inset-bottom))", background: "rgba(5,5,5,.96)", borderTop: "1px solid rgba(245,196,0,.2)", backdropFilter: "blur(20px)", gap: 10, alignItems: "center", transform: stickyVisible ? "translateY(0)" : "translateY(110%)", transition: "transform 0.35s cubic-bezier(.4,0,.2,1)" }}>
         <Link href={alreadyIn ? "/dashboard" : "/onboarding"} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 13, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 16px", textDecoration: "none", gap: 8 }}>
           {alreadyIn ? "GO TO DASHBOARD →" : "GET STARTED FREE →"}
         </Link>

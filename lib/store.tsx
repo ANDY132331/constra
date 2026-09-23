@@ -480,6 +480,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         insurancePolicies: (insurancePoliciesData ?? []).map((p) => dbToInsurancePolicy(p as DbInsurancePolicy)),
         customRoles: co?.custom_roles ?? s.customRoles,
         permissionsPin: co?.permissions_pin ?? s.permissionsPin,
+        theme: (co as { theme?: string })?.theme as "dark" | "light" ?? s.theme,
         inviteCode: co?.invite_code ?? "",
         companyAddress: co?.address ?? "",
         businessNumber: co?.business_number ?? "",
@@ -1400,6 +1401,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setTheme = useCallback((t: "dark" | "light") => {
     up((s) => ({ ...s, theme: t }));
     if (typeof window !== "undefined") localStorage.setItem("constra_theme", t);
+    bg(() => getClient().from("companies").update({ theme: t }).eq("id", companyIdRef.current!), "setTheme");
   }, [up]);
 
   const setOnboarded = useCallback((v: boolean) =>
