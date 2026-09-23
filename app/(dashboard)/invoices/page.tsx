@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Send, CheckCircle2, AlertTriangle, Lock,
-  Trash2, X, FileText, ChevronRight, Download, Eye,
+  Trash2, X, FileText, ChevronRight, Download,
   Mail, Pencil, Link2, Check, Copy,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -655,8 +655,8 @@ function InvoiceDetail({
 
 // â"€â"€ Invoice list row â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
-function InvoiceRow({ invoice, currency, selected, onClick }: {
-  invoice: Invoice; currency: string; selected: boolean; onClick: () => void;
+function InvoiceRow({ invoice, currency, onClick }: {
+  invoice: Invoice; currency: string; onClick: () => void;
 }) {
   const total = invoiceTotal(invoice);
   const cfg = STATUS_CONFIG[invoice.status];
@@ -666,9 +666,7 @@ function InvoiceRow({ invoice, currency, selected, onClick }: {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-4 py-3.5 border-b border-white/[0.04] transition-all hover:bg-white/[0.04] active:bg-white/[0.06] group relative ${
-        selected ? "bg-white/[0.06] border-l-2 border-l-amber-500" : "border-l-2 border-l-transparent"
-      }`}
+      className="w-full text-left px-4 py-3.5 border-b border-white/[0.04] transition-all hover:bg-white/[0.04] active:bg-white/[0.06] group relative border-l-2 border-l-transparent hover:border-l-amber-500/40"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -707,8 +705,6 @@ export default function InvoicesPage() {
   const [showModal, setShowModal]     = useState(false);
   const [editId, setEditId]           = useState<string | null>(null);
   const [form, setForm]               = useState<InvForm>(blank);
-  const [selectedId, setSelectedId]   = useState<string | null>(invoices[0]?.id ?? null);
-  const [mobilePreviewId, setMobilePreviewId] = useState<string | null>(null);
   const searchParams = useSearchParams();
   useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); } }, [searchParams, defaultTaxRate]);
 
@@ -734,10 +730,6 @@ export default function InvoicesPage() {
     return !q || i.clientName.toLowerCase().includes(q) || i.number.toLowerCase().includes(q);
   });
 
-  const selectedInvoice = selectedId !== null
-    ? (filtered.find((i) => i.id === selectedId) ?? filtered[0] ?? null)
-    : null;
-
   const totalOutstanding = invoices
     .filter((i) => i.status === "sent" || i.status === "overdue")
     .reduce((s, i) => s + invoiceTotal(i), 0);
@@ -758,14 +750,6 @@ export default function InvoicesPage() {
     const max = nums.length ? Math.max(...nums) : 0;
     return `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
   })();
-
-  function handleDuplicateInvoice(inv: Invoice) {
-    const nums = invoices.map((i) => parseInt(i.number.replace(/\D/g, ""), 10)).filter(Boolean);
-    const max = nums.length ? Math.max(...nums) : 0;
-    const num = `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
-    addInvoice({ number: num, clientName: inv.clientName, clientEmail: inv.clientEmail, clientAddress: inv.clientAddress, status: "draft", issueDate: new Date(), dueDate: new Date(Date.now() + 30 * 86400000), items: inv.items, taxRate: inv.taxRate, notes: inv.notes });
-    toast.success(`Invoice duplicated as ${num}`);
-  }
 
   const updateItem   = (idx: number, field: keyof LineItem, val: string) =>
     setForm((f) => ({ ...f, items: f.items.map((it, i) => i === idx ? { ...it, [field]: val } : it) }));
@@ -909,7 +893,7 @@ export default function InvoicesPage() {
               return (
                 <button
                   key={inv.id}
-                  onClick={() => setMobilePreviewId(inv.id)}
+                  onClick={() => router.push(`/invoices/${inv.id}`)}
                   className="card-hover w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden active:scale-[0.985] active:opacity-90"
                 >
                   <div className="px-4 py-4 flex items-center justify-between gap-3">
@@ -977,8 +961,8 @@ export default function InvoicesPage() {
       {/* â"€â"€ Master / Detail layout â"€â"€ */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Left: list panel */}
-        <div className={`flex flex-col border-r border-white/[0.06] flex-shrink-0 ${selectedId !== null ? "hidden" : "flex w-full"}`}>
+        {/* List panel */}
+        <div className="flex flex-col flex-1 overflow-hidden">
           {/* Search + filter */}
           <div className="px-3 py-3 border-b border-white/[0.05] space-y-2 flex-shrink-0">
             <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
@@ -1028,36 +1012,13 @@ export default function InvoicesPage() {
                   key={inv.id}
                   invoice={inv}
                   currency={currency}
-                  selected={selectedInvoice?.id === inv.id}
-                  onClick={() => setSelectedId(inv.id)}
+                  onClick={() => router.push(`/invoices/${inv.id}`)}
                 />
               ))
             )}
           </div>
         </div>
 
-        {/* Right: detail panel */}
-        {selectedInvoice ? (
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <InvoiceDetail
-              invoice={selectedInvoice}
-              currency={currency}
-              companyName={companyName}
-              companyAddress={companyAddress}
-              companyLogo={companyLogo}
-              onUpdate={updateInvoice}
-              onDelete={deleteInvoice}
-              onEdit={openEdit}
-              onDuplicate={handleDuplicateInvoice}
-              onClose={() => setSelectedId(null)}
-            />
-          </div>
-        ) : (
-          <div className="hidden lg:flex flex-1 items-center justify-center flex-col gap-3 text-white/20">
-            <Eye size={36} className="opacity-40" />
-            <p className="text-[14px]">Select an invoice to preview</p>
-          </div>
-        )}
       </div>
 
         </div>
@@ -1191,27 +1152,6 @@ export default function InvoicesPage() {
         </div>
       )}
 
-      {/* MOBILE PREVIEW MODAL */}
-      {mobilePreviewId && (() => {
-        const inv = invoices.find((i) => i.id === mobilePreviewId);
-        if (!inv) return null;
-        return (
-          <div className="lg:hidden fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col">
-            <InvoiceDetail
-              invoice={inv}
-              currency={currency}
-              companyName={companyName}
-              companyAddress={companyAddress ?? ""}
-              companyLogo={companyLogo ?? ""}
-              onUpdate={(id, u) => updateInvoice(id, u)}
-              onDelete={(id) => { deleteInvoice(id); setMobilePreviewId(null); }}
-              onEdit={(invoice) => { setMobilePreviewId(null); openEdit(invoice); setShowModal(true); }}
-              onDuplicate={handleDuplicateInvoice}
-              onClose={() => setMobilePreviewId(null)}
-            />
-          </div>
-        );
-      })()}
     </>
   );
 }

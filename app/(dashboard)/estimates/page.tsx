@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Send, CheckCircle2, XCircle, Clock,
-  Lock, Trash2, X, FileText, FileDown, Eye, ChevronRight, Pencil, Mail, Link2, Check, Copy,
+  Lock, Trash2, X, FileText, FileDown, ChevronRight, Pencil, Mail, Link2, Check, Copy,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
@@ -518,17 +518,8 @@ export default function EstimatesPage() {
   const [showModal, setShowModal]     = useState(false);
   const [editId, setEditId]           = useState<string | null>(null);
   const [form, setForm]               = useState<EstForm>(blank);
-  const [selectedId, setSelectedId]   = useState<string | null>(estimates[0]?.id ?? null);
-  const [mobilePreviewId, setMobilePreviewId] = useState<string | null>(null);
   const [convertedNotice, setConvertedNotice] = useState<string | null>(null);
   const convertedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // estimates arrives asynchronously from the store (Supabase load after mount) â€”
-  // auto-selecting the first one once it's actually available.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (!selectedId && estimates[0]?.id) setSelectedId(estimates[0].id);
-  }, [estimates, selectedId]);
 
   const openEdit = (estimate: Estimate) => {
     setEditId(estimate.id);
@@ -577,10 +568,6 @@ export default function EstimatesPage() {
     return !q || e.projectName.toLowerCase().includes(q) || e.clientName.toLowerCase().includes(q) || e.number.toLowerCase().includes(q);
   });
 
-  const selectedEstimate = selectedId !== null
-    ? (filtered.find((e) => e.id === selectedId) ?? filtered[0] ?? null)
-    : null;
-
   const totalPending = estimates
     .filter((e) => e.status === "sent")
     .reduce((s, e) => s + estimateTotal(e), 0);
@@ -594,14 +581,6 @@ export default function EstimatesPage() {
     const max = nums.length > 0 ? Math.max(...nums) : 0;
     return `EST-${String(max + 1).padStart(3, "0")}`;
   })();
-
-  function handleDuplicateEstimate(est: Estimate) {
-    const nums = estimates.map((e) => parseInt(e.number.replace("EST-", "")) || 0);
-    const max = nums.length > 0 ? Math.max(...nums) : 0;
-    const num = `EST-${String(max + 1).padStart(3, "0")}`;
-    addEstimate({ number: num, projectName: est.projectName, clientName: est.clientName, clientEmail: est.clientEmail, status: "draft", issueDate: new Date(), validUntil: new Date(Date.now() + 30 * 86400000), items: est.items, taxRate: est.taxRate, notes: est.notes });
-    toast.success(`Estimate duplicated as ${num}`);
-  }
 
   const updateItem = (idx: number, field: keyof LineItem, val: string) =>
     setForm((f) => ({ ...f, items: f.items.map((it, i) => i === idx ? { ...it, [field]: val } : it) }));
@@ -742,7 +721,7 @@ export default function EstimatesPage() {
               return (
                 <button
                   key={est.id}
-                  onClick={() => setMobilePreviewId(est.id)}
+                  onClick={() => router.push(`/estimates/${est.id}`)}
                   className="card-hover w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden active:scale-[0.985] active:opacity-90 hover:border-white/[0.12]"
                   style={{ borderLeftColor: borderColor, borderLeftWidth: 3 }}
                 >
@@ -814,8 +793,8 @@ export default function EstimatesPage() {
           {/* â”€â”€ Master / Detail layout â”€â”€ */}
           <div className="flex flex-1 overflow-hidden">
 
-            {/* Left: list panel */}
-            <div className={`flex flex-col border-r border-white/[0.06] flex-shrink-0 ${selectedId !== null ? "hidden" : "flex w-full"}`}>
+            {/* List panel */}
+            <div className="flex flex-col flex-1 overflow-hidden">
               {/* Search + filter */}
               <div className="px-3 py-3 border-b border-white/[0.05] space-y-2 flex-shrink-0">
                 <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
@@ -864,37 +843,14 @@ export default function EstimatesPage() {
                       key={est.id}
                       estimate={est}
                       currency={currency}
-                      selected={selectedEstimate?.id === est.id}
-                      onClick={() => setSelectedId(est.id)}
+                      selected={false}
+                      onClick={() => router.push(`/estimates/${est.id}`)}
                     />
                   ))
                 )}
               </div>
             </div>
 
-            {/* Right: detail panel */}
-            {selectedEstimate ? (
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <EstimateDetail
-                  estimate={selectedEstimate}
-                  currency={currency}
-                  companyName={companyName}
-                  companyAddress={companyAddress ?? ""}
-                  companyLogo={companyLogo ?? ""}
-                  onUpdate={updateEstimate}
-                  onDelete={(id) => { deleteEstimate(id); setSelectedId(null); }}
-                  onEdit={openEdit}
-                  onDuplicate={handleDuplicateEstimate}
-                  onConvert={handleConvertToInvoice}
-                  onClose={() => setSelectedId(null)}
-                />
-              </div>
-            ) : (
-              <div className="hidden lg:flex flex-1 items-center justify-center flex-col gap-3 text-white/20">
-                <Eye size={36} className="opacity-40" />
-                <p className="text-[14px]">Select an estimate to preview</p>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -1043,28 +999,6 @@ export default function EstimatesPage() {
         </div>
       )}
 
-      {/* â”€â”€ Mobile preview modal â”€â”€ */}
-      {mobilePreviewId && (() => {
-        const est = estimates.find((e) => e.id === mobilePreviewId);
-        if (!est) return null;
-        return (
-          <div className="lg:hidden fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col">
-            <EstimateDetail
-              estimate={est}
-              currency={currency}
-              companyName={companyName}
-              companyAddress={companyAddress ?? ""}
-              companyLogo={companyLogo ?? ""}
-              onUpdate={(id, u) => updateEstimate(id, u)}
-              onDelete={(id) => { deleteEstimate(id); setMobilePreviewId(null); }}
-              onEdit={(e) => { setMobilePreviewId(null); openEdit(e); }}
-              onDuplicate={handleDuplicateEstimate}
-              onConvert={(e) => { handleConvertToInvoice(e); setMobilePreviewId(null); }}
-              onClose={() => setMobilePreviewId(null)}
-            />
-          </div>
-        );
-      })()}
     </>
   );
 }
