@@ -171,6 +171,7 @@ function InvoiceDetail({
       .filter((i) => i.description.trim())
       .map((i) => ({ description: i.description.trim(), qty: parseFloat(i.qty) || 1, rate: parseFloat(i.rate) || 0 }));
     if (items.length === 0) { toast.error("Add at least one line item"); return; }
+    const taxRate = parseFloat(draft.taxRate) || 0;
     onUpdate(invoice.id, {
       clientName: draft.clientName.trim(),
       clientEmail: draft.clientEmail.trim(),
@@ -178,8 +179,19 @@ function InvoiceDetail({
       issueDate: draft.issueDate ? new Date(draft.issueDate) : invoice.issueDate,
       dueDate: draft.dueDate ? new Date(draft.dueDate) : invoice.dueDate,
       items,
-      taxRate: parseFloat(draft.taxRate) || 0,
+      taxRate,
       notes: draft.notes.trim() || undefined,
+    });
+    // Normalize draft to match what the store will return so isDirty → false immediately
+    setDraft({
+      clientName: draft.clientName.trim(),
+      clientEmail: draft.clientEmail.trim(),
+      clientAddress: draft.clientAddress.trim(),
+      issueDate: draft.issueDate,
+      dueDate: draft.dueDate,
+      taxRate: String(taxRate),
+      notes: draft.notes.trim(),
+      items: items.map((i) => ({ description: i.description, qty: String(i.qty), rate: String(i.rate) })),
     });
     toast.success("Invoice saved");
   };
@@ -900,7 +912,7 @@ export default function InvoicesPage() {
                   onClick={() => setMobilePreviewId(inv.id)}
                   className="card-hover w-full text-left bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden active:scale-[0.985] active:opacity-90"
                 >
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="px-4 py-4 flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>{cfg.label}</span>

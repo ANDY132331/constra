@@ -110,8 +110,8 @@ export default function DailyReportsPage() {
   useEffect(() => {
     if (!form.projectId) return;
     const project = projects.find((p) => p.id === form.projectId);
-    if (project?.gps?.lat && project?.gps?.lon) {
-      fetchWeatherForCoords(project.gps.lat, project.gps.lon);
+    if (project?.gps?.lat && project?.gps?.lng) {
+      fetchWeatherForCoords(project.gps.lat, project.gps.lng);
     }
   }, [form.projectId, projects, fetchWeatherForCoords]);
 

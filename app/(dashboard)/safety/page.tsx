@@ -136,6 +136,7 @@ export default function SafetyPage() {
     const typeCfg = TYPE_CONFIG[incident.type];
     const sevCfg = SEVERITY_CONFIG[incident.severity];
     const dateStr = incident.date.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
+    const h = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Incident Report — ${dateStr}</title>
 <style>
   body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; color: #111; }
@@ -155,13 +156,13 @@ export default function SafetyPage() {
 <h1>Safety Incident Report</h1>
 <div class="meta">Generated ${new Date().toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })} · Constra Workforce OS</div>
 <hr>
-<div><span class="badge badge-sev">${typeCfg.label} · ${sevCfg.label}</span>${incident.reportedToOSHA ? '<span class="badge badge-osha">OSHA REPORTED</span>' : ""}</div>
+<div><span class="badge badge-sev">${h(typeCfg.label)} · ${h(sevCfg.label)}</span>${incident.reportedToOSHA ? '<span class="badge badge-osha">OSHA REPORTED</span>' : ""}</div>
 <div class="section"><div class="label">Date of Incident</div><div class="value">${dateStr}</div></div>
-<div class="section"><div class="label">Project</div><div class="value">${project?.name ?? "—"}</div></div>
-<div class="section"><div class="label">Description</div><div class="value">${incident.description}</div></div>
-${incident.actionTaken ? `<div class="action"><div class="label">Corrective Action Taken</div><div class="value">${incident.actionTaken}</div></div>` : ""}
-${reporter ? `<div class="section"><div class="label">Reported By</div><div class="value">${reporter.name}</div></div>` : ""}
-${injured ? `<div class="section"><div class="label">Injured Worker</div><div class="value">${injured.name}</div></div>` : ""}
+<div class="section"><div class="label">Project</div><div class="value">${h(project?.name ?? "—")}</div></div>
+<div class="section"><div class="label">Description</div><div class="value">${h(incident.description)}</div></div>
+${incident.actionTaken ? `<div class="action"><div class="label">Corrective Action Taken</div><div class="value">${h(incident.actionTaken)}</div></div>` : ""}
+${reporter ? `<div class="section"><div class="label">Reported By</div><div class="value">${h(reporter.name)}</div></div>` : ""}
+${injured ? `<div class="section"><div class="label">Injured Worker</div><div class="value">${h(injured.name)}</div></div>` : ""}
 ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Reporting Status</div><div class="value">Reported to OSHA as required</div></div>` : ""}
 <hr>
 <div class="footer">This document was generated from the Constra safety log. Keep a signed copy for compliance records.</div>

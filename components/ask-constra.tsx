@@ -137,6 +137,12 @@ function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
 }
 
 // ── Render markdown-style text ────────────────────────────────────────────────
+function esc(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function boldHtml(raw: string, cls = "") {
+  return esc(raw).replace(/\*\*([^*]+)\*\*/g, `<strong${cls ? ` class="${cls}"` : ""}>$1</strong>`);
+}
 function ResponseText({ text, streaming }: { text: string; streaming: boolean }) {
   const lines = text.split("\n");
   return (
@@ -158,7 +164,7 @@ function ResponseText({ text, streaming }: { text: string; streaming: boolean })
           return (
             <div key={i} className="flex gap-2 text-[12.5px] text-white/70 leading-relaxed">
               <span className="text-amber-500/60 flex-shrink-0 mt-0.5 text-[10px]">▸</span>
-              <span dangerouslySetInnerHTML={{ __html: content.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>") }} />
+              <span dangerouslySetInnerHTML={{ __html: boldHtml(content) }} />
             </div>
           );
         }
@@ -166,7 +172,7 @@ function ResponseText({ text, streaming }: { text: string; streaming: boolean })
           <p
             key={i}
             className="text-[12.5px] text-white/75 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: trimmed.replace(/\*\*([^*]+)\*\*/g, "<strong class='text-white font-semibold'>$1</strong>") }}
+            dangerouslySetInnerHTML={{ __html: boldHtml(trimmed, "text-white font-semibold") }}
           />
         );
       })}
