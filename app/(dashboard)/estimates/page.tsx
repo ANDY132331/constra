@@ -418,7 +418,7 @@ function EstimateDetail({
       </div>
 
       {/* â”€â”€ Action bar â”€â”€ */}
-      <div className=”flex items-center gap-2 px-5 pt-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]” style={{ paddingBottom: “calc(0.875rem + env(safe-area-inset-bottom))” }}>
+      <div className="flex items-center gap-2 px-5 pt-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]" style={{ paddingBottom: 'calc(0.875rem + env(safe-area-inset-bottom))' }}>
         {isDraft && (
           <button onClick={() => { onUpdate(estimate.id, { status: "sent" }); toast.success("Estimate marked as sent"); }}
             className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-full transition-colors">
