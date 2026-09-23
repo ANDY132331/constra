@@ -528,7 +528,14 @@ button, a, [role="button"], input, select, textarea {
   .sheet {
     /* Slide the card up from the bottom on mobile */
     animation: slide-up-sheet 0.32s cubic-bezier(0.16,1,0.3,1) both;
+    /* Clear iPhone home indicator for sheets where inner div has its own padding */
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
   }
+  /* When p-X is on .sheet directly, max() preserves padding on non-notch devices */
+  .sheet[class~="p-4"] { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important; }
+  .sheet[class~="p-5"] { padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px)) !important; }
+  .sheet[class~="p-6"] { padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px)) !important; }
+  .sheet[class~="p-8"] { padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)) !important; }
   /* Scrollable content areas inside a sheet (only scroll containers, not header/footer) */
   .sheet > div[class*="overflow-y"] {
     -webkit-overflow-scrolling: touch;
