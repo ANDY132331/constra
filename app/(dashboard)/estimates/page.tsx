@@ -1,23 +1,19 @@
 ﻿"use client";
 import { toast } from "sonner";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
-  Plus, Search, Send, CheckCircle2, XCircle, Clock,
-  Lock, Trash2, X, FileText, FileDown, ChevronRight, Pencil, Mail, Link2, Check, Copy,
+  Plus, Search, Lock, Trash2, X, FileText, ChevronRight,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import type { Estimate } from "@/lib/mock-data";
-import { exportEstimatePdf } from "@/lib/pdf-export";
-import type { InvoiceTemplate } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 
 // â”€â”€ Status config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STATUS_CONFIG = {
@@ -51,419 +47,6 @@ function estimateTotal(est: Estimate) {
   return sub * (1 + est.taxRate / 100);
 }
 
-// â”€â”€ Template-aware paper styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function estimatePaperStyles(t: InvoiceTemplate, isAccepted: boolean) {
-  if (t === "modern") return {
-    headerBg: "bg-[#1c2026]", headerBorder: "border-[#2a2e38]",
-    accentStrip: true, companyNameColor: "text-white",
-    companyAddrColor: "text-white/40", titleColor: "text-amber-400",
-    numColor: "text-white/35", totalLabelColor: "text-white/40",
-    totalAmtColor: "text-white", tableHeadBg: "bg-[#1c2026]",
-    tableHeadText: "text-white/80", altRowBg: "bg-gray-50",
-    totalBg: isAccepted ? "bg-emerald-500" : "bg-amber-500",
-    footerBg: "bg-[#1c2026]", footerText: "text-white/60",
-    clientNameColor: "text-amber-400",
-  } as const;
-  if (t === "minimal") return {
-    headerBg: "bg-white", headerBorder: "border-gray-200",
-    accentStrip: false, companyNameColor: "text-gray-700",
-    companyAddrColor: "text-gray-400", titleColor: "text-gray-300",
-    numColor: "text-gray-400", totalLabelColor: "text-gray-400",
-    totalAmtColor: "text-gray-800", tableHeadBg: "bg-gray-50",
-    tableHeadText: "text-gray-500", altRowBg: "",
-    totalBg: isAccepted ? "bg-emerald-500" : "bg-gray-800",
-    footerBg: "bg-gray-100", footerText: "text-gray-400",
-    clientNameColor: "text-gray-700",
-  } as const;
-  return { // classic
-    headerBg: "bg-white", headerBorder: "border-gray-100",
-    accentStrip: false, companyNameColor: "text-amber-600",
-    companyAddrColor: "text-gray-400", titleColor: "text-gray-800",
-    numColor: "text-gray-400", totalLabelColor: "text-gray-400",
-    totalAmtColor: "text-gray-900", tableHeadBg: "bg-amber-500",
-    tableHeadText: "text-white", altRowBg: "bg-gray-50",
-    totalBg: isAccepted ? "bg-emerald-500" : "bg-amber-500",
-    footerBg: "bg-amber-500", footerText: "text-white/80",
-    clientNameColor: "text-amber-600",
-  } as const;
-}
-
-// â”€â”€ Estimate detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-function EstimateDetail({
-  estimate, currency, companyName, companyAddress, companyLogo,
-  onUpdate, onDelete, onEdit, onDuplicate, onConvert, onClose,
-}: {
-  estimate: Estimate;
-  currency: string;
-  companyName: string;
-  companyAddress: string;
-  companyLogo: string;
-  onUpdate: (id: string, u: Partial<Estimate>) => void;
-  onDelete: (id: string) => void;
-  onEdit: (estimate: Estimate) => void;
-  onDuplicate: (estimate: Estimate) => void;
-  onConvert: (estimate: Estimate) => void;
-  onClose: () => void;
-}) {
-  const [pdfLoading, setPdfLoading]     = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [sendLoading, setSendLoading]   = useState(false);
-  const [sendStatus, setSendStatus]     = useState<{ ok: boolean; msg: string } | null>(null);
-  const [linkCopied, setLinkCopied]     = useState(false);
-  const [template, setTemplate] = useTemplateChoice("constra_estimate_template");
-
-  function copyEstimateLink() {
-    const url = `${window.location.origin}/share/${estimate.id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2500);
-      toast.success("Link copied to clipboard");
-    });
-  }
-
-  useEffect(() => {
-    if (!sendStatus) return;
-    const t = setTimeout(() => setSendStatus(null), 4000);
-    return () => clearTimeout(t);
-  }, [sendStatus]);
-
-  const sub   = estimate.items.reduce((s, i) => s + i.qty * i.rate, 0);
-  const tax   = sub * (estimate.taxRate / 100);
-  const total = sub + tax;
-  const cfg       = STATUS_CONFIG[estimate.status];
-  const isDraft   = estimate.status === "draft";
-  const isSent    = estimate.status === "sent";
-  const isAccepted = estimate.status === "accepted";
-  const isDeclined = estimate.status === "declined";
-  const isExpired = estimate.validUntil < new Date() && isSent;
-  const ps = estimatePaperStyles(template, isAccepted);
-
-  return (
-    <div className="flex flex-col h-full">
-      {/* â”€â”€ Toolbar â”€â”€ */}
-      <div className="flex items-center justify-between px-5 pb-3 border-b border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]" style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}>
-        <div className="flex items-center gap-2.5">
-          <button onClick={onClose} aria-label="Back" className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 active:bg-white/[0.05] transition-colors -ml-1">
-            <ChevronRight size={16} className="rotate-180" />
-          </button>
-          <span className="font-mono text-[12px] text-white/35 tracking-wider">{estimate.number}</span>
-          <span className={`flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-            {cfg.label}
-          </span>
-          {isExpired && (
-            <span className="text-[10px] text-red-400 font-semibold bg-red-500/10 px-2 py-0.5 rounded-full">EXPIRED</span>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          {sendStatus && (
-            <span className={`hidden sm:inline text-[11px] font-semibold mr-1 ${sendStatus.ok ? "text-emerald-400" : "text-red-400"}`}>
-              {sendStatus.msg}
-            </span>
-          )}
-          {/* Email send button */}
-          <button
-            disabled={sendLoading || !estimate.clientEmail}
-            title={!estimate.clientEmail ? "Add a client email to send" : "Send estimate by email"}
-            onClick={async () => {
-              if (!estimate.clientEmail) { toast.error("Add a client email address to this estimate first"); return; }
-              setSendLoading(true);
-              try {
-                const amountStr = formatCurrency(Math.round(total), currency as never);
-                const validStr = estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
-                const res = await fetch("/api/invoice/email", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    to: estimate.clientEmail,
-                    invoiceNumber: estimate.number,
-                    clientName: estimate.clientName,
-                    amount: amountStr,
-                    dueDate: validStr,
-                    companyName,
-                    notes: estimate.notes,
-                    isReminder: false,
-                  }),
-                });
-                if (res.ok) {
-                  if (isDraft) onUpdate(estimate.id, { status: "sent" });
-                  setSendStatus({ ok: true, msg: `Sent to ${estimate.clientEmail}` });
-                } else {
-                  setSendStatus({ ok: false, msg: "Failed â€” check RESEND_API_KEY in Vercel." });
-                }
-              } catch {
-                setSendStatus({ ok: false, msg: "Network error." });
-              } finally {
-                setSendLoading(false);
-              }
-            }}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40"
-          >
-            <Mail size={13} />
-            <span className="hidden sm:inline">{sendLoading ? "Sendingâ€¦" : "Send"}</span>
-          </button>
-          {/* Copy share link */}
-          <button
-            onClick={copyEstimateLink}
-            className={`flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1.5 rounded-full transition-colors ${linkCopied ? "text-emerald-400 bg-emerald-500/10" : "text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09]"}`}
-            title="Copy share link"
-          >
-            {linkCopied ? <Check size={13} /> : <Link2 size={13} />}
-            <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Link"}</span>
-          </button>
-          {/* PDF template + button */}
-          <TemplatePicker value={template} onChange={setTemplate} />
-          <button
-            onClick={async () => {
-              setPdfLoading(true);
-              try { await exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template); toast.success("PDF downloaded"); }
-              catch { toast.error("Failed to export PDF"); }
-              finally { setPdfLoading(false); }
-            }}
-            disabled={pdfLoading}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-2.5 py-1.5 rounded-full transition-colors disabled:opacity-40"
-          >
-            <FileDown size={13} /> <span className="hidden sm:inline">{pdfLoading ? "â€¦" : "PDF"}</span>
-          </button>
-          <button onClick={() => onDuplicate(estimate)} aria-label="Duplicate estimate" title="Duplicate" className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:text-white/80 hover:bg-white/[0.06] transition-colors">
-            <Copy size={14} />
-          </button>
-          <button onClick={() => onEdit(estimate)} aria-label="Edit estimate"
-            className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:text-white/80 hover:bg-white/[0.06] transition-colors">
-            <Pencil size={14} />
-          </button>
-          <button onClick={() => setDeleteConfirm(true)} aria-label="Delete estimate"
-            className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
-            <Trash2 size={14} />
-          </button>
-        </div>
-      </div>
-
-      {/* â”€â”€ Estimate document (white-paper preview) â”€â”€ */}
-      <div className="flex-1 overflow-y-auto bg-[#1a1a1a]">
-        <div className="max-w-[640px] mx-auto my-4 sm:my-6 px-3 sm:px-4">
-          <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
-
-            {/* â”€â”€ Header â”€â”€ */}
-            <div className={`relative px-5 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b ${ps.headerBg} ${ps.headerBorder}`}>
-              {ps.accentStrip && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />}
-              <div className="flex items-start justify-between gap-3">
-                {/* Logo + company */}
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  {companyLogo ? (
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl overflow-hidden flex-shrink-0">
-                      <img src={companyLogo} alt={companyName} className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-[18px] sm:text-[22px] font-black">{(companyName ?? "C").charAt(0)}</span>
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className={`text-[15px] sm:text-[17px] font-black leading-tight truncate ${ps.companyNameColor}`}>{companyName}</p>
-                    {companyAddress && (
-                      <p className={`text-[10px] sm:text-[11px] mt-0.5 leading-snug ${ps.companyAddrColor}`}>
-                        {companyAddress.split(",").slice(0, 2).map((s) => s.trim()).join(", ")}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {/* Estimate title + number + total */}
-                <div className="text-right flex-shrink-0">
-                  <p className={`text-[18px] sm:text-[28px] font-black leading-none tracking-tight ${ps.titleColor}`}>ESTIMATE</p>
-                  <p className={`text-[10px] mt-0.5 font-mono ${ps.numColor}`}>#{estimate.number}</p>
-                  <div className="mt-2">
-                    <p className={`text-[9px] uppercase tracking-wider font-bold ${ps.totalLabelColor}`}>Total Amount</p>
-                    <p className={`text-[16px] sm:text-[22px] font-black leading-tight ${ps.totalAmtColor}`}>
-                      {formatCurrency(Math.round(total), currency as never)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* â”€â”€ Status banners â”€â”€ */}
-            {isAccepted && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3">
-                <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
-                <p className="text-[12px] font-bold text-emerald-700">Estimate Accepted</p>
-              </div>
-            )}
-            {isDeclined && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
-                <XCircle size={14} className="text-red-600 flex-shrink-0" />
-                <p className="text-[12px] font-bold text-red-700">Estimate Declined</p>
-              </div>
-            )}
-            {isExpired && (
-              <div className="mx-4 sm:mx-8 mt-4 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
-                <Clock size={14} className="text-orange-500 flex-shrink-0" />
-                <p className="text-[12px] font-bold text-orange-700">Expired â€” was valid until {estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
-              </div>
-            )}
-
-            {/* â”€â”€ Prepared For / Dates â”€â”€ */}
-            <div className="px-5 sm:px-8 pt-5 pb-4 border-b border-gray-100">
-              <div className="flex flex-col sm:flex-row sm:gap-8">
-                <div className="flex-1 mb-4 sm:mb-0">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Prepared For</p>
-                  <p className={`text-[14px] font-bold ${ps.clientNameColor}`}>{estimate.clientName}</p>
-                  {estimate.clientEmail && (
-                    <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
-                      <Mail size={10} className="text-gray-300" />{estimate.clientEmail}
-                    </p>
-                  )}
-                  {estimate.projectName && (
-                    <div className="mt-2">
-                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Project</p>
-                      <p className="text-[12px] text-gray-700 font-semibold">{estimate.projectName}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-row sm:flex-col gap-6 sm:gap-3 flex-shrink-0">
-                  <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Issue Date</p>
-                    <p className="text-[12px] text-gray-700 font-semibold">
-                      {estimate.issueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-0.5">Valid Until</p>
-                    <p className={`text-[12px] font-semibold ${isExpired ? "text-red-600" : "text-gray-700"}`}>
-                      {estimate.validUntil.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* â”€â”€ Line items â”€â”€ */}
-            <div className="px-5 sm:px-8 pt-4 pb-2">
-              <div className="overflow-x-auto">
-                <table className="w-full text-[12px] min-w-[380px]">
-                  <thead>
-                    <tr className={ps.tableHeadBg}>
-                      <th className={`text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 rounded-tl-lg w-7 ${ps.tableHeadText}`}>#</th>
-                      <th className={`text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 ${ps.tableHeadText}`}>Description</th>
-                      <th className={`text-left text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 w-20 hidden sm:table-cell ${ps.tableHeadText}`}>Category</th>
-                      <th className={`text-center text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 w-10 ${ps.tableHeadText}`}>Qty</th>
-                      <th className={`text-right text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 w-20 ${ps.tableHeadText}`}>Rate</th>
-                      <th className={`text-right text-[9px] font-black uppercase tracking-[0.12em] px-3 py-2.5 rounded-tr-lg w-24 ${ps.tableHeadText}`}>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {estimate.items.map((item, i) => (
-                      <tr key={i} className={`border-b border-gray-100 ${i % 2 === 1 ? ps.altRowBg : ""}`}>
-                        <td className="py-3 px-3 text-gray-400 text-center">{i + 1}</td>
-                        <td className="py-3 px-3 text-gray-800 font-medium">{item.description}</td>
-                        <td className="py-3 px-3 text-gray-400 hidden sm:table-cell">{item.category}</td>
-                        <td className="py-3 px-3 text-center text-gray-500">{item.qty}</td>
-                        <td className="py-3 px-3 text-right text-gray-500">{formatCurrency(item.rate, currency as never)}</td>
-                        <td className="py-3 px-3 text-right text-gray-800 font-bold">{formatCurrency(item.qty * item.rate, currency as never)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* â”€â”€ Totals â”€â”€ */}
-            <div className="px-5 sm:px-8 pt-3 pb-6 flex justify-end">
-              <div className="w-full sm:w-64">
-                <div className="flex justify-between py-1.5 text-[12px]">
-                  <span className="text-gray-500">Sub Total</span>
-                  <span className="text-gray-800 font-semibold">{formatCurrency(sub, currency as never)}</span>
-                </div>
-                {estimate.taxRate > 0 && (
-                  <div className="flex justify-between py-1.5 text-[12px] border-b border-gray-100">
-                    <span className="text-gray-500">Tax {estimate.taxRate}%</span>
-                    <span className="text-gray-800 font-semibold">{formatCurrency(tax, currency as never)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between py-1.5 text-[12px] border-b border-gray-200">
-                  <span className="text-gray-700 font-bold">Total</span>
-                  <span className="text-gray-900 font-bold">{formatCurrency(Math.round(total), currency as never)}</span>
-                </div>
-                <div className={`flex justify-between items-center px-4 py-3 mt-2 rounded-2xl ${ps.totalBg}`}>
-                  <span className="text-[12px] font-black text-white">Estimate Total</span>
-                  <span className="text-[16px] sm:text-[18px] font-black text-white">
-                    {formatCurrency(Math.round(total), currency as never)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* â”€â”€ Notes â”€â”€ */}
-            {estimate.notes && (
-              <div className="mx-4 sm:mx-8 mb-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Notes &amp; Scope</p>
-                <p className="text-[12px] text-gray-600 leading-relaxed">{estimate.notes}</p>
-              </div>
-            )}
-
-            {/* â”€â”€ Terms â”€â”€ */}
-            <div className="mx-4 sm:mx-8 mb-5 sm:mb-7">
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Terms &amp; Conditions</p>
-              <p className="text-[11px] text-gray-400 leading-relaxed">This estimate is valid until the date stated above. Prices are subject to change after expiry. Acceptance constitutes agreement to the stated scope and pricing.</p>
-            </div>
-
-            {/* â”€â”€ Footer band â”€â”€ */}
-            <div className={`${ps.footerBg} px-5 sm:px-8 py-3 flex items-center justify-between`}>
-              <p className={`text-[10px] font-medium ${ps.footerText}`}>{companyName} Â· {estimate.number}</p>
-              <p className={`text-[10px] ${ps.footerText} opacity-70`}>Page 1</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* â”€â”€ Action bar â”€â”€ */}
-      <div className="flex items-center gap-2 px-5 pt-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]" style={{ paddingBottom: 'calc(0.875rem + env(safe-area-inset-bottom))' }}>
-        {isDraft && (
-          <button onClick={() => { onUpdate(estimate.id, { status: "sent" }); toast.success("Estimate marked as sent"); }}
-            className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-full transition-colors">
-            <Send size={13} /> Mark as Sent
-          </button>
-        )}
-        {isSent && (
-          <>
-            <button onClick={() => { onUpdate(estimate.id, { status: "accepted" }); toast.success("Estimate accepted"); }}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-full transition-colors">
-              <CheckCircle2 size={13} /> Mark Accepted
-            </button>
-            <button onClick={() => { onUpdate(estimate.id, { status: "declined" }); toast.success("Estimate declined"); }}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-full transition-colors">
-              <XCircle size={12} /> Mark Declined
-            </button>
-          </>
-        )}
-        {isAccepted && (
-          <button onClick={() => onConvert(estimate)}
-            className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-4 py-2 rounded-full transition-colors">
-            <FileDown size={13} /> Convert to Invoice
-          </button>
-        )}
-        {isDeclined && (
-          <span className="flex items-center gap-1.5 text-[12px] font-bold text-red-400">
-            <XCircle size={13} /> Declined
-          </span>
-        )}
-        <div className="ml-auto text-[11px] text-white/20">
-          {estimate.items.length} line item{estimate.items.length !== 1 ? "s" : ""}
-        </div>
-      </div>
-
-      <ConfirmModal
-        open={deleteConfirm}
-        title={`Delete ${estimate.number}?`}
-        body="This estimate will be permanently removed."
-        confirmLabel="Delete"
-        onConfirm={() => { onDelete(estimate.id); onClose(); }}
-        onCancel={() => setDeleteConfirm(false)}
-      />
-    </div>
-  );
-}
 
 // â”€â”€ Estimate list row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -505,7 +88,7 @@ function EstimateRow({ estimate, currency, selected, onClick }: {
 // â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function EstimatesPage() {
-  const { estimates, addEstimate, updateEstimate, deleteEstimate, invoices, addInvoice, currency, companyName, companyAddress, companyLogo, currentUser, defaultTaxRate } = useStore();
+  const { estimates, addEstimate, updateEstimate, deleteEstimate, currency, companyName, companyAddress, companyLogo, currentUser, defaultTaxRate } = useStore();
   const router = useRouter();
   const t = useT();
 
@@ -518,50 +101,6 @@ export default function EstimatesPage() {
   const [showModal, setShowModal]     = useState(false);
   const [editId, setEditId]           = useState<string | null>(null);
   const [form, setForm]               = useState<EstForm>(blank);
-  const [convertedNotice, setConvertedNotice] = useState<string | null>(null);
-  const convertedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const openEdit = (estimate: Estimate) => {
-    setEditId(estimate.id);
-    setForm({
-      projectName: estimate.projectName,
-      clientName: estimate.clientName,
-      clientEmail: estimate.clientEmail,
-      status: estimate.status,
-      issueDate: estimate.issueDate.toISOString().split("T")[0],
-      validUntil: estimate.validUntil.toISOString().split("T")[0],
-      taxRate: estimate.taxRate.toString(),
-      notes: estimate.notes ?? "",
-      items: estimate.items.map((i) => ({ description: i.description, qty: i.qty.toString(), rate: i.rate.toString(), category: i.category ?? "Labour" })),
-    });
-    setShowModal(true);
-  };
-
-  const handleConvertToInvoice = (estimate: Estimate) => {
-    const nums = invoices.map((i) => parseInt(i.number.replace(/\D/g, ""), 10)).filter(Boolean);
-    const max = nums.length ? Math.max(...nums) : 0;
-    const nextInvNum = `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
-    const now = new Date();
-    const dueDate = new Date(now);
-    dueDate.setDate(dueDate.getDate() + 30);
-    addInvoice({
-      number: nextInvNum,
-      clientName: estimate.clientName,
-      clientEmail: estimate.clientEmail,
-      clientAddress: "",
-      issueDate: now,
-      dueDate,
-      status: "draft",
-      items: estimate.items.map(({ description, qty, rate }) => ({ description, qty, rate })),
-      taxRate: estimate.taxRate,
-      notes: estimate.notes,
-    });
-    setConvertedNotice(nextInvNum);
-    if (convertedTimerRef.current) clearTimeout(convertedTimerRef.current);
-    convertedTimerRef.current = setTimeout(() => setConvertedNotice(null), 5000);
-    toast.success(`Invoice ${nextInvNum} created`);
-  };
-
   const filtered = estimates.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
     const q = search.toLowerCase();
@@ -638,13 +177,6 @@ export default function EstimatesPage() {
     <>
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â• MOBILE â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <div className="lg:hidden -mx-5 -mt-5 pb-6">
-        {convertedNotice && (
-          <div className="flex items-center justify-between gap-3 mx-4 mt-4 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-            <p className="text-[13px] text-emerald-400 font-semibold">Invoice {convertedNotice} created â€” find it in Invoices.</p>
-            <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400">âœ•</button>
-          </div>
-        )}
-
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h1 className="text-[22px] font-bold text-white">Estimates</h1>
@@ -769,12 +301,6 @@ export default function EstimatesPage() {
                   <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Declined</p>
                   <p className="text-[18px] font-black text-red-400 mt-0.5">{declinedCount}</p>
                 </div>
-              </div>
-            )}
-            {convertedNotice && (
-              <div className="flex items-center gap-3 px-4 py-3 border-r border-white/[0.05] bg-emerald-500/5">
-                <p className="text-[12px] text-emerald-400 font-semibold">Invoice {convertedNotice} created!</p>
-                <button onClick={() => setConvertedNotice(null)} className="text-emerald-400/50 hover:text-emerald-400">âœ•</button>
               </div>
             )}
             <div className="flex items-center gap-2 px-5 py-3.5 ml-auto flex-shrink-0">
