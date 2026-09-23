@@ -74,6 +74,7 @@ export default function ProjectsPage() {
   const [geoConfirmed, setGeoConfirmed] = useState("");
   const [formError, setFormError] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [rejectConfirm, setRejectConfirm] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState<string | null>(null);
   // Incrementing key that forces the GeofenceMapEditor to remount when the user
   // picks a new geocoder result or opens an existing project for editing.
@@ -84,7 +85,8 @@ export default function ProjectsPage() {
     navigator.clipboard.writeText(url).then(() => {
       setShareCopied(projectId);
       setTimeout(() => setShareCopied(null), 2000);
-    });
+      toast.success("Share link copied");
+    }).catch(() => toast.error("Could not copy link"));
   };
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -273,7 +275,7 @@ export default function ProjectsPage() {
                     <p className="text-[11px] text-white/40 mb-2">Submitted by {creator?.name ?? "Unknown"}</p>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setDeleteConfirm(p.id)}
+                        onClick={() => setRejectConfirm(p.id)}
                         className="flex-1 text-[12px] font-bold py-1.5 rounded-full bg-red-500/10 text-red-400 active:bg-red-500/20"
                       >
                         Reject
@@ -446,7 +448,7 @@ export default function ProjectsPage() {
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <button
-                        onClick={() => setDeleteConfirm(p.id)}
+                        onClick={() => setRejectConfirm(p.id)}
                         className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                       >
                         Reject
@@ -783,12 +785,12 @@ export default function ProjectsPage() {
               <>
                 <div>
                   <label className={mLbl}>Project Name *</label>
-                  <input className={mInp} placeholder="e.g. Riverside Apartment Complex"
+                  <input className={mInp} placeholder="e.g. Riverside Apartment Complex" maxLength={100}
                     value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} autoFocus />
                 </div>
                 <div>
                   <label className={mLbl}>Client</label>
-                  <input className={mInp} placeholder="Client name"
+                  <input className={mInp} placeholder="Client name" maxLength={100}
                     value={form.client} onChange={(e) => setForm((f) => ({ ...f, client: e.target.value }))} />
                 </div>
                 <div>
@@ -951,13 +953,13 @@ export default function ProjectsPage() {
             <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Project Name *</label>
-                <input className={inp} placeholder="e.g. Riverside Apartment Complex"
+                <input className={inp} placeholder="e.g. Riverside Apartment Complex" maxLength={100}
                   value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Client</label>
-                  <input className={inp} placeholder="Client name"
+                  <input className={inp} placeholder="Client name" maxLength={100}
                     value={form.client} onChange={(e) => setForm((f) => ({ ...f, client: e.target.value }))} />
                 </div>
                 <div>
@@ -976,7 +978,7 @@ export default function ProjectsPage() {
               </div>
               <div>
                 <label className={lbl}>Site Address</label>
-                <input className={inp} placeholder="123 Main St, City, Province"
+                <input className={inp} placeholder="123 Main St, City, Province" maxLength={200}
                   value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
               </div>
               <div className="relative">
@@ -1141,6 +1143,21 @@ export default function ProjectsPage() {
         danger
         onConfirm={() => { if (deleteConfirm) { deleteProject(deleteConfirm); toast.success("Project deleted"); setDeleteConfirm(null); } }}
         onCancel={() => setDeleteConfirm(null)}
+      />
+
+      <ConfirmModal
+        open={!!rejectConfirm}
+        title="Reject Project"
+        body={(() => {
+          const proj = projects.find((p) => p.id === rejectConfirm);
+          return proj
+            ? `Reject "${proj.name}"? The project will be sent back to draft.`
+            : "Reject this project?";
+        })()}
+        confirmLabel="Reject"
+        danger
+        onConfirm={() => { if (rejectConfirm) { deleteProject(rejectConfirm); toast.success("Project rejected"); setRejectConfirm(null); } }}
+        onCancel={() => setRejectConfirm(null)}
       />
     </>
   );

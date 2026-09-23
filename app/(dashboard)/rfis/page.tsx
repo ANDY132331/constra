@@ -160,7 +160,7 @@ export default function RFIsPage() {
             placeholder="Search RFIs…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            autoComplete="off" spellCheck={false}
+            autoComplete="off" spellCheck={false} maxLength={100}
           />
         </div>
 
@@ -269,7 +269,7 @@ export default function RFIsPage() {
           <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-64">
             <Search size={13} className="text-white/30" />
             <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-              placeholder="Search RFIs…" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+              placeholder="Search RFIs…" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
           </div>
 
           <div className="space-y-2">
@@ -362,7 +362,7 @@ export default function RFIsPage() {
                         {rfi.status === "open" && (
                           answerRfiId === rfi.id ? (
                             <div className="space-y-2">
-                              <textarea className={inp + " resize-none"} rows={3} placeholder="Type your response..."
+                              <textarea className={inp + " resize-none"} rows={3} placeholder="Type your response..." maxLength={2000}
                                 value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
                               <div className="flex gap-2">
                                 <button onClick={() => handleAnswer(rfi.id)}
@@ -405,7 +405,7 @@ export default function RFIsPage() {
                         )}
                         {rfi.status === "closed" && (
                           <div className="flex gap-2 pt-1">
-                            <button onClick={() => updateRFI(rfi.id, { status: "open" })}
+                            <button onClick={() => { updateRFI(rfi.id, { status: "open" }); toast.success("RFI reopened"); }}
                               className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
                               Reopen RFI
                             </button>
@@ -436,7 +436,7 @@ export default function RFIsPage() {
             <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Subject *</label>
-                <input className={inp} placeholder="e.g. Footing depth variance at grid C-4"
+                <input className={inp} placeholder="e.g. Footing depth variance at grid C-4" maxLength={150}
                   value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} />
               </div>
               <div>
@@ -444,7 +444,7 @@ export default function RFIsPage() {
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Question</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, question: (f.question ? f.question + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={inp + " resize-none"} rows={3} placeholder="Describe the issue or question..."
+                <textarea className={inp + " resize-none"} rows={3} placeholder="Describe the issue or question..." maxLength={2000}
                   value={form.question} onChange={(e) => setForm((f) => ({ ...f, question: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">

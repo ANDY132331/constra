@@ -211,6 +211,7 @@ export default function ReportsPage() {
                 onClick={async () => {
                   setPdfLoading(true);
                   try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName }); toast.success("PDF downloaded"); }
+                  catch { toast.error("Failed to export PDF"); }
                   finally { setPdfLoading(false); }
                 }}
                 disabled={pdfLoading}
@@ -387,7 +388,7 @@ export default function ReportsPage() {
             <div className="px-4 mt-4">
               <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
                 <p className="text-[13px] font-bold text-white mb-3">Cost per Project</p>
-                <div className="overflow-x-auto no-scrollbar">
+                <div className="overflow-x-auto">
                   <table className="w-full text-[11px] min-w-[420px]">
                     <thead>
                       <tr className="border-b border-white/[0.06]">
@@ -450,6 +451,8 @@ export default function ReportsPage() {
                   try {
                     await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName });
                     toast.success("PDF downloaded");
+                  } catch {
+                    toast.error("Failed to export PDF");
                   } finally {
                     setPdfLoading(false);
                   }

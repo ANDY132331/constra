@@ -67,11 +67,11 @@ export function MobileNav() {
     <nav
       className="lg:hidden fixed bottom-0 inset-x-0 z-40"
       style={{
-        background: "rgba(8,8,8,0.98)",
-        backdropFilter: "blur(32px) saturate(180%)",
-        WebkitBackdropFilter: "blur(32px) saturate(180%)",
-        borderTop: "1px solid rgba(255,255,255,0.07)",
-        boxShadow: "0 -1px 0 rgba(255,255,255,0.04), 0 -20px 60px rgba(0,0,0,0.9)",
+        background: "rgba(7,7,7,0.96)",
+        backdropFilter: "blur(40px) saturate(200%) brightness(0.92)",
+        WebkitBackdropFilter: "blur(40px) saturate(200%) brightness(0.92)",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 -1px 0 rgba(255,255,255,0.06), 0 -2px 0 rgba(245,196,0,0.04), 0 -24px 72px rgba(0,0,0,0.92)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >

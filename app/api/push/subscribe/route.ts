@@ -51,10 +51,11 @@ export async function DELETE(req: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
-      await serviceSupabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
+      await serviceSupabase.from("push_subscriptions").delete().eq("endpoint", endpoint).eq("user_id", user.id);
     }
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (err) {
+    console.error("Push unsubscribe error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

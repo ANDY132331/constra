@@ -125,7 +125,7 @@ function AudioMicButton({
           <button
             type="button"
             disabled={processing}
-            onClick={async () => { const r = await stop(); if (r) onAudio(r.dataUrl, r.durationSeconds); }}
+            onClick={async () => { try { const r = await stop(); if (r) onAudio(r.dataUrl, r.durationSeconds); } catch {} }}
             className={`${dim} flex items-center justify-center rounded-full border transition-all relative
               ${processing
                 ? "bg-gray-100 border-gray-300 text-gray-400 cursor-wait"
@@ -156,7 +156,7 @@ function AudioMicButton({
           {processing ? "…" : `${mins}:${secs}`}
         </span>
         <button type="button" disabled={processing}
-          onClick={async () => { const r = await stop(); if (r) onAudio(r.dataUrl, r.durationSeconds); }}
+          onClick={async () => { try { const r = await stop(); if (r) onAudio(r.dataUrl, r.durationSeconds); } catch {} }}
           className={`${dim} flex items-center justify-center rounded-lg border transition-all relative
             ${processing ? "bg-white/[0.05] border-white/[0.08] text-white/30 cursor-wait"
               : "bg-red-500/15 border-red-500/35 text-red-400 hover:bg-red-500/25"}`}

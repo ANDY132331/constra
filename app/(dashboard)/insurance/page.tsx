@@ -211,7 +211,7 @@ export default function InsurancePage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search holder, insurer, policy…"
-            autoComplete="off" spellCheck={false}
+            autoComplete="off" spellCheck={false} maxLength={100}
             className="w-full bg-white/[0.04] border border-white/[0.07] rounded-xl pl-8 pr-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/30"
           />
         </div>
@@ -366,7 +366,7 @@ export default function InsurancePage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Holder Name *</label>
-                  <input value={form.holderName} onChange={(e) => f("holderName", e.target.value)} placeholder="ABC Subcontractors Inc." className={inp} />
+                  <input value={form.holderName} onChange={(e) => f("holderName", e.target.value)} placeholder="ABC Subcontractors Inc." maxLength={100} className={inp} />
                 </div>
                 <div>
                   <label className={lbl}>Holder Type</label>
@@ -409,11 +409,11 @@ export default function InsurancePage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Insurance Company *</label>
-                  <input value={form.insurer} onChange={(e) => f("insurer", e.target.value)} placeholder="Intact Insurance" className={inp} />
+                  <input value={form.insurer} onChange={(e) => f("insurer", e.target.value)} placeholder="Intact Insurance" maxLength={100} className={inp} />
                 </div>
                 <div>
                   <label className={lbl}>Policy Number *</label>
-                  <input value={form.policyNumber} onChange={(e) => f("policyNumber", e.target.value)} placeholder="GL-2024-001234" className={inp} />
+                  <input value={form.policyNumber} onChange={(e) => f("policyNumber", e.target.value)} placeholder="GL-2024-001234" maxLength={50} className={inp} />
                 </div>
               </div>
 
@@ -432,7 +432,7 @@ export default function InsurancePage() {
               {/* Notes */}
               <div>
                 <label className={lbl}>Notes</label>
-                <textarea value={form.notes} onChange={(e) => f("notes", e.target.value)} placeholder="Additional notes…" rows={2} className={`${inp} resize-none`} />
+                <textarea value={form.notes} onChange={(e) => f("notes", e.target.value)} placeholder="Additional notes…" rows={2} maxLength={500} className={`${inp} resize-none`} />
               </div>
 
               <div className="flex gap-3 pt-1">

@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Circle, Clock, AlertTriangle, Plus, Search, X, Pencil, Trash2, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
@@ -51,6 +52,8 @@ export default function TasksPage() {
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
   const [form, setForm] = useState<TaskForm>(blankTask());
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditTaskId(null); setEditProjectId(null); setForm(blankTask()); setShowModal(true); } }, [searchParams]);
   const [deleteTaskConfirm, setDeleteTaskConfirm] = useState<{ projectId: string; taskId: string; name: string } | null>(null);
   const today = new Date();
 
@@ -161,7 +164,7 @@ export default function TasksPage() {
           <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
             <Search size={14} className="text-white/30 flex-shrink-0" />
             <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
-              placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+              placeholder="Search tasks..." value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
           </div>
         </div>
         <div className="px-5 space-y-2.5">
@@ -268,7 +271,7 @@ export default function TasksPage() {
         <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2">
           <Search size={13} className="text-white/30" />
           <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none w-48"
-            placeholder={`${t.common.search} tasks…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+            placeholder={`${t.common.search} tasks…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
         </div>
         <CustomSelect
           className="bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 text-[12px] text-white/60 outline-none"
@@ -394,7 +397,7 @@ export default function TasksPage() {
               )}
               <div>
                 <label className={lbl}>Task Name *</label>
-                <input className={inp} placeholder="e.g. Foundation Pour"
+                <input className={inp} placeholder="e.g. Foundation Pour" maxLength={120}
                   value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">

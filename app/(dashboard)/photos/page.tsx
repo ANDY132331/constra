@@ -182,7 +182,7 @@ export default function PhotosPage() {
           <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3">
             <Search size={14} className="text-white/30" />
             <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
-              placeholder="Search photos..." value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+              placeholder="Search photos..." value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
           </div>
         </div>
         {/* Photo grid */}
@@ -334,7 +334,7 @@ export default function PhotosPage() {
             <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 flex-1 sm:max-w-64">
               <Search size={13} className="text-white/30" />
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-                placeholder="Search photos, tags…" value={search} onChange={(e) => setSearch(e.target.value)} />
+                placeholder="Search photos, tags…" value={search} onChange={(e) => setSearch(e.target.value)} maxLength={100} />
             </div>
             <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-lg p-0.5 gap-0.5 ml-auto">
               <button onClick={() => setView("grid")} title="Grid" className={`p-2 rounded-md transition-colors ${view === "grid" ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70"}`}>
@@ -396,7 +396,7 @@ export default function PhotosPage() {
                     </div>
                     <div className="p-3">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: project?.color }} />
+                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: project?.color ?? "#555" }} />
                         <span className="text-[11px] text-white/40 truncate">{project?.name}</span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -535,7 +535,7 @@ export default function PhotosPage() {
                       </button>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project?.color }} />
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project?.color ?? "#555" }} />
                       <span className="text-[11px] text-white/40 truncate">{project?.name}</span>
                     </div>
                     <div className="flex gap-1 flex-wrap">
@@ -629,7 +629,7 @@ export default function PhotosPage() {
               </div>
               <div>
                 <label className={lbl}>Caption *</label>
-                <input className={inp} placeholder="e.g. Foundation pour complete"
+                <input className={inp} placeholder="e.g. Foundation pour complete" maxLength={200}
                   value={form.caption} onChange={(e) => setForm((f) => ({ ...f, caption: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -660,7 +660,7 @@ export default function PhotosPage() {
               </div>
               <div>
                 <label className={lbl}>Tags (comma separated)</label>
-                <input className={inp} placeholder="progress, concrete, structural"
+                <input className={inp} placeholder="progress, concrete, structural" maxLength={200}
                   value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))} />
               </div>
             </div>

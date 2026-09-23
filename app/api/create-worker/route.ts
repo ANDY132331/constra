@@ -33,14 +33,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
 
+  const VALID_ROLES = ["Admin", "Project Manager", "Worker", "Foreman", "Subcontractor", "Estimator", "Safety Officer"];
+  const safeRole = VALID_ROLES.includes(role) ? role : "Worker";
+
+  const workerEmail = email?.trim() || null;
+  if (workerEmail && !workerEmail.includes("@")) {
+    return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+  }
+
   const service = await createServiceClient();
   const companyId = callerProfile.company_id;
 
   // Build a deterministic but secure temporary password.
   // Workers will be sent a password-reset email so they can set their own.
   const tempPassword = crypto.randomUUID().replace(/-/g, "") + "Cc1!";
-
-  const workerEmail = email?.trim() || null;
 
   // If no email provided, use a placeholder so auth.admin.createUser doesn't fail.
   const authEmail = workerEmail ?? `worker-${crypto.randomUUID()}@placeholder.getconstra.com`;
@@ -67,7 +73,7 @@ export async function POST(request: NextRequest) {
     company_id: companyId,
     name: trimmedName,
     initials,
-    role: role ?? "Worker",
+    role: safeRole,
     custom_role: customRole?.trim() ?? "",
     email: workerEmail ?? "",
     phone: phone?.trim() ?? "",

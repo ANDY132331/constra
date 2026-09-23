@@ -236,19 +236,19 @@ export default function PunchListPage() {
                 </div>
                 <div className="flex items-center gap-2 pt-2 border-t border-white/[0.05]">
                   {item.status === "open" && (
-                    <button onClick={() => updatePunchItem(item.id, { status: "in-progress" })}
+                    <button onClick={() => { updatePunchItem(item.id, { status: "in-progress" }); toast.success("Item started"); }}
                       className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full transition-colors">
                       Start
                     </button>
                   )}
                   {item.status !== "resolved" && (
-                    <button onClick={() => updatePunchItem(item.id, { status: "resolved" })}
+                    <button onClick={() => { updatePunchItem(item.id, { status: "resolved" }); toast.success("Item resolved"); }}
                       className="text-[11px] font-semibold text-green-400 bg-green-500/10 px-3 py-1 rounded-full transition-colors">
                       Resolve
                     </button>
                   )}
                   {item.status === "resolved" && (
-                    <button onClick={() => updatePunchItem(item.id, { status: "open" })}
+                    <button onClick={() => { updatePunchItem(item.id, { status: "open" }); toast.success("Item reopened"); }}
                       className="text-[11px] font-semibold text-white/30 bg-white/5 px-3 py-1 rounded-full transition-colors">
                       Reopen
                     </button>
@@ -321,7 +321,7 @@ export default function PunchListPage() {
             <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 flex-1 max-w-56">
               <Search size={13} className="text-white/30" />
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-                placeholder="Search items…" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+                placeholder="Search items…" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
             </div>
             <CustomSelect
               className="bg-[#111111] border border-white/[0.06] text-white/55 text-[12px] rounded-lg px-3 py-2 outline-none cursor-pointer"
@@ -422,19 +422,19 @@ export default function PunchListPage() {
                   {canEdit && (
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.05]">
                       {item.status === "open" && (
-                        <button onClick={() => updatePunchItem(item.id, { status: "in-progress" })}
+                        <button onClick={() => { updatePunchItem(item.id, { status: "in-progress" }); toast.success("Item started"); }}
                           className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1 rounded-full transition-colors">
                           Start Work
                         </button>
                       )}
                       {item.status !== "resolved" && (
-                        <button onClick={() => updatePunchItem(item.id, { status: "resolved" })}
+                        <button onClick={() => { updatePunchItem(item.id, { status: "resolved" }); toast.success("Item resolved"); }}
                           className="text-[11px] font-semibold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/15 px-3 py-1 rounded-full transition-colors">
                           Mark Resolved
                         </button>
                       )}
                       {item.status === "resolved" && (
-                        <button onClick={() => updatePunchItem(item.id, { status: "open" })}
+                        <button onClick={() => { updatePunchItem(item.id, { status: "open" }); toast.success("Item reopened"); }}
                           className="text-[11px] font-semibold text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/8 px-3 py-1 rounded-full transition-colors">
                           Reopen
                         </button>
@@ -473,7 +473,7 @@ export default function PunchListPage() {
             <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Title *</label>
-                <input className={inp} placeholder="e.g. Crack in south wall"
+                <input className={inp} placeholder="e.g. Crack in south wall" maxLength={100}
                   value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
               </div>
               <div>
@@ -481,7 +481,7 @@ export default function PunchListPage() {
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Description</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, description: (f.description ? f.description + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={inp + " resize-none"} rows={3} placeholder="Describe the issue..."
+                <textarea className={inp + " resize-none"} rows={3} placeholder="Describe the issue..." maxLength={500}
                   value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -534,7 +534,7 @@ export default function PunchListPage() {
               </div>
               <div>
                 <label className={lbl}>Location</label>
-                <input className={inp} placeholder="e.g. Building A, 3rd Floor"
+                <input className={inp} placeholder="e.g. Building A, 3rd Floor" maxLength={100}
                   value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} />
               </div>
             </div>

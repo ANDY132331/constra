@@ -14,7 +14,7 @@ const PIN_TYPE_LABELS = { issue: "Issues", safety: "Safety", rfi: "RFIs", info: 
 
 export default function BlueprintsPage() {
   const {
-    projects, documents, companyId,
+    projects, documents, companyId, currentUser,
     addDocument, blueprintPins, addBlueprintPin, updateBlueprintPin, deleteBlueprintPin,
   } = useStore();
 
@@ -59,9 +59,9 @@ export default function BlueprintsPage() {
         const { error: uploadErr } = await supabase.storage.from("documents").upload(path, file);
         if (uploadErr) throw uploadErr;
         const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(path);
-        addDocument({ projectId: selectedProjectId, name: file.name.replace(/\.[^.]+$/, ""), category: "blueprint", publicUrl, uploadedById: "", uploadedAt: new Date(), sizeBytes: file.size });
+        addDocument({ projectId: selectedProjectId, name: file.name.replace(/\.[^.]+$/, ""), category: "blueprint", publicUrl, uploadedById: currentUser.id, uploadedAt: new Date(), sizeBytes: file.size });
       }));
-      if (files.length > 1) toast.success(`${files.length} blueprints uploaded`);
+      toast.success(files.length > 1 ? `${files.length} blueprints uploaded` : "Blueprint uploaded");
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Upload failed. Please try again.");
     } finally {
@@ -356,7 +356,7 @@ export default function BlueprintsPage() {
                             <span className="text-[10px] font-bold capitalize" style={{ color: COLOR }}>{pin.type}</span>
                             <div className="flex gap-1">
                               <button
-                                onClick={() => updateBlueprintPin(pin.id, { resolved: !pin.resolved })}
+                                onClick={() => { updateBlueprintPin(pin.id, { resolved: !pin.resolved }); toast.success(pin.resolved ? "Pin reopened" : "Pin resolved"); }}
                                 className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${pin.resolved ? "bg-white/[0.05] text-white/30" : "bg-green-500/15 text-green-400 hover:bg-green-500/25"}`}
                               >
                                 <Check size={11} />
@@ -388,7 +388,7 @@ export default function BlueprintsPage() {
         body="Remove this pin from the blueprint? This cannot be undone."
         confirmLabel="Delete"
         danger
-        onConfirm={() => { if (deletePinConfirm) { deleteBlueprintPin(deletePinConfirm); setDeletePinConfirm(null); } }}
+        onConfirm={() => { if (deletePinConfirm) { deleteBlueprintPin(deletePinConfirm); toast.success("Pin deleted"); setDeletePinConfirm(null); } }}
         onCancel={() => setDeletePinConfirm(null)}
       />
       </div>

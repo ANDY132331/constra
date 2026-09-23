@@ -14,7 +14,9 @@ function generateInviteCode(): string {
 }
 
 export async function POST(request: Request) {
-  const { companyId } = await request.json();
+  let body: { companyId?: string };
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
+  const { companyId } = body;
   if (!companyId) return NextResponse.json({ error: "Missing companyId." }, { status: 400 });
 
   // Verify caller is authenticated and is an Admin of the requested company

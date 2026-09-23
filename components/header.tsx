@@ -103,18 +103,21 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const hasUnread = !readNotifs && (activityFeed.length > 0 || expiryAlerts.length > 0);
   const unreadCount = expiryAlerts.length + (activityFeed.length > 0 ? 1 : 0);
 
+  const [signingOut, setSigningOut] = useState(false);
   const handleSignOut = async () => {
     setShowUser(false);
-    await signOut();
+    setSigningOut(true);
+    try { await signOut(); } catch {}
     window.location.href = "/login";
   };
 
   return (
     <header className="h-14 border-b border-white/[0.05] flex items-center px-4 md:px-6 gap-3 flex-shrink-0 relative z-30"
       style={{
-        background: "rgba(10,10,10,0.97)",
-        backdropFilter: "blur(24px) saturate(160%)",
-        WebkitBackdropFilter: "blur(24px) saturate(160%)",
+        background: "rgba(9,9,9,0.94)",
+        backdropFilter: "blur(28px) saturate(180%) brightness(0.94)",
+        WebkitBackdropFilter: "blur(28px) saturate(180%) brightness(0.94)",
+        boxShadow: "0 1px 0 rgba(255,255,255,0.055), 0 4px 24px rgba(0,0,0,0.4)",
       }}
     >
       {/* Mobile hamburger */}
@@ -347,7 +350,8 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
               <div className="border-t border-white/[0.06] py-1">
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/40 hover:text-red-400 hover:bg-red-500/[0.07] transition-colors text-left"
+                  disabled={signingOut}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/40 hover:text-red-400 hover:bg-red-500/[0.07] transition-colors text-left disabled:opacity-50"
                 >
                   <LogOut size={14} />
                   Sign Out

@@ -166,7 +166,7 @@ export default function EquipmentPage() {
               placeholder="Search equipment…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              autoComplete="off" spellCheck={false}
+              autoComplete="off" spellCheck={false} maxLength={100}
             />
           </div>
         </div>
@@ -290,7 +290,7 @@ export default function EquipmentPage() {
             <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-56">
               <Search size={13} className="text-white/30" />
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-                placeholder={`${t.common.search} equipment…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+                placeholder={`${t.common.search} equipment…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
             </div>
           </div>
 
@@ -374,13 +374,13 @@ export default function EquipmentPage() {
             <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Equipment Name *</label>
-                <input className={inp} placeholder="e.g. CAT 320 Excavator"
+                <input className={inp} placeholder="e.g. CAT 320 Excavator" maxLength={100}
                   value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} autoFocus />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Type</label>
-                  <input className={inp} placeholder="e.g. Heavy Equipment"
+                  <input className={inp} placeholder="e.g. Heavy Equipment" maxLength={60}
                     value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} />
                 </div>
                 <div>

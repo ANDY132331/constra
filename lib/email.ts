@@ -111,7 +111,7 @@ export function safetyIncidentEmail({
   description: string;
   severity?: string;
 }) {
-  const color = severity === "Critical" ? "#ef4444" : severity === "High" ? "#F5C400" : "#F5C400";
+  const color = severity === "Critical" ? "#ef4444" : severity === "High" ? "#F5C400" : severity === "Medium" ? "#3b82f6" : "#6b7280";
   const r = esc(reporterName);
   const p = esc(projectName);
   const d = esc(description.length > 400 ? description.slice(0, 400) + "…" : description);

@@ -106,7 +106,7 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
       <div className="ss-grid absolute inset-0 pointer-events-none">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="ss-grid" width="52" height="52" patternUnits="userSpaceOnUse">
+            <pattern id="ss-grid" width="52" height="52" patternUnits="userSpaceOnUse" patternTransform="translate(26,26)">
               <path d="M52 0L0 0 0 52" fill="none" stroke="#F5C400" strokeWidth="0.45" />
             </pattern>
           </defs>

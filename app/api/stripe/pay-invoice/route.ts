@@ -53,28 +53,32 @@ export async function POST(req: NextRequest) {
     ? Math.round(amount)
     : Math.round(amount * 100);
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: stripeCurrency,
-          product_data: {
-            name: description,
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: stripeCurrency,
+            product_data: {
+              name: description,
+            },
+            unit_amount: unitAmount,
           },
-          unit_amount: unitAmount,
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    metadata: { invoiceId },
-    success_url: `${APP_URL}/pay/${invoiceId}/success`,
-    cancel_url: `${APP_URL}/pay/${invoiceId}`,
-    payment_intent_data: {
+      ],
       metadata: { invoiceId },
-    },
-  });
-
-  return NextResponse.json({ url: session.url });
+      success_url: `${APP_URL}/pay/${invoiceId}/success`,
+      cancel_url: `${APP_URL}/pay/${invoiceId}`,
+      payment_intent_data: {
+        metadata: { invoiceId },
+      },
+    });
+    return NextResponse.json({ url: session.url });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Stripe error";
+    return NextResponse.json({ error: msg }, { status: 502 });
+  }
 }

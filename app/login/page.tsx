@@ -165,6 +165,7 @@ function LoginForm() {
   async function handleSignIn() {
     if (isLocked) return;
     if (!email || !password) { setError("Please enter your email and password."); return; }
+    if (!email.includes("@")) { setError("Enter a valid email address."); return; }
     setError(""); setLoading(true);
 
     if (!SUPABASE_ENABLED) {
@@ -214,6 +215,7 @@ function LoginForm() {
       setError("Invite code, name, email, and password are required.");
       return;
     }
+    if (!joinEmail.includes("@")) { setError("Enter a valid email address."); return; }
     if (joinPassword.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
@@ -403,6 +405,7 @@ function LoginForm() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
+                        maxLength={254}
                       />
                     </div>
                     <div>
@@ -417,6 +420,7 @@ function LoginForm() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
+                          maxLength={128}
                         />
                         <button
                           type="button"
@@ -454,6 +458,7 @@ function LoginForm() {
                         placeholder="CN-XXXX-XXXX"
                         value={joinCode}
                         onChange={(e) => { setJoinCode(e.target.value.toUpperCase()); setError(""); }}
+                        maxLength={20}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -467,6 +472,7 @@ function LoginForm() {
                           value={joinFirstName}
                           onChange={(e) => setJoinFirstName(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                          maxLength={50}
                         />
                       </div>
                       <div>
@@ -479,6 +485,7 @@ function LoginForm() {
                           value={joinLastName}
                           onChange={(e) => setJoinLastName(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                          maxLength={50}
                         />
                       </div>
                     </div>
@@ -496,6 +503,7 @@ function LoginForm() {
                         value={joinEmail}
                         onChange={(e) => setJoinEmail(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                        maxLength={254}
                       />
                     </div>
                     <div>
@@ -510,6 +518,7 @@ function LoginForm() {
                           value={joinPassword}
                           onChange={(e) => setJoinPassword(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                          maxLength={128}
                         />
                         <button
                           type="button"

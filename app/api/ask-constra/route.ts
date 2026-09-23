@@ -120,7 +120,9 @@ export async function POST(request: Request) {
   const context = buildContext(companyData);
   const groqMessages = [
     { role: "system", content: `${SYSTEM_PROMPT}\n\n${context}` },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ...messages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({ role: m.role, content: String(m.content).slice(0, 4000) })),
   ];
 
   try {

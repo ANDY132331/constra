@@ -161,9 +161,9 @@ export async function POST(request: Request) {
   }
 
   const rawMessages = (body.messages ?? []).slice(0, 40);
-  const userMessages = rawMessages.filter(
-    (m) => (m.role === "user" || m.role === "assistant") && m.content?.trim()
-  );
+  const userMessages = rawMessages
+    .filter((m) => (m.role === "user" || m.role === "assistant") && m.content?.trim())
+    .map((m) => ({ ...m, content: String(m.content).slice(0, 4000) }));
 
   if (!userMessages.length) {
     return new Response("No messages provided", { status: 400 });

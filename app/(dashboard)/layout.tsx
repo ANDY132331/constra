@@ -158,7 +158,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                       </div>
                     </div>
                   )}
-                  <div key={pathname} className="page-enter">
+                  <div key={pathname} className="page-enter lg:h-full lg:min-h-0">
                     <ErrorBoundary>{children}</ErrorBoundary>
                   </div>
                 </main>

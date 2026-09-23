@@ -9,6 +9,7 @@ import {
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 // ── Design tokens — rich blue messaging palette ───────────────────────────────
 const C = {
@@ -64,6 +65,7 @@ export default function MessagesPage() {
   const [text, setText] = useState("");
   const [pendingAttachment, setPendingAttachment] = useState<{ name: string; data: string } | null>(null);
   const [lightboxData, setLightboxData] = useState<{ name: string; data: string } | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const bottomRef    = useRef<HTMLDivElement>(null);
   const fileRef      = useRef<HTMLInputElement>(null);
@@ -104,20 +106,23 @@ export default function MessagesPage() {
     if (!files.length) return;
     if (files.length === 1) {
       const file = files[0];
-      const data = await new Promise<string>((resolve) => {
+      const data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("File read failed"));
         reader.readAsDataURL(file);
-      });
-      setPendingAttachment({ name: file.name, data });
+      }).catch(() => { toast.error("Could not read file"); return null; });
+      if (data) setPendingAttachment({ name: file.name, data });
     } else {
       // Multiple files — send each as its own message immediately
       for (const file of files) {
-        const data = await new Promise<string>((resolve) => {
+        const data = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error("File read failed"));
           reader.readAsDataURL(file);
-        });
+        }).catch(() => { toast.error(`Could not read ${file.name}`); return null; });
+        if (!data) continue;
         addMessage({ projectId: selectedProjectId!, senderId: currentUser.id, senderName: currentUser.name, senderInitials: currentUser.initials, senderColor: currentUser.color, timestamp: new Date(), text: "", attachmentName: file.name, attachmentData: data });
       }
     }
@@ -202,6 +207,7 @@ export default function MessagesPage() {
                 placeholder="Search projects…"
                 className="flex-1 bg-transparent text-[13px] outline-none"
                 style={{ color: C.titleColor }}
+                maxLength={100}
               />
             </div>
           </div>
@@ -456,7 +462,7 @@ export default function MessagesPage() {
                         {/* Delete — visible on hover (desktop) and always visible as small button on touch */}
                         {isMe && (
                           <button
-                            onClick={() => deleteMessage(msg.id)}
+                            onClick={() => setDeleteConfirmId(msg.id)}
                             className="lg:opacity-0 lg:group-hover/bubble:opacity-100 mt-0.5 self-end p-1.5 rounded-full transition-all active:scale-90"
                             style={{ color: C.secondaryText, WebkitTapHighlightColor: "transparent" }}
                             aria-label="Delete message"
@@ -524,6 +530,7 @@ export default function MessagesPage() {
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="Message…"
+                maxLength={2000}
                 rows={1}
                 inputMode="text"
                 enterKeyHint="send"
@@ -544,6 +551,16 @@ export default function MessagesPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        open={!!deleteConfirmId}
+        title="Delete message"
+        body="This message will be permanently deleted."
+        confirmLabel="Delete"
+        danger
+        onConfirm={() => { deleteMessage(deleteConfirmId!); toast.success("Message deleted"); setDeleteConfirmId(null); }}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
 
       {/* ── Image lightbox ──────────────────────────────────────────────────── */}
       {lightboxData && (

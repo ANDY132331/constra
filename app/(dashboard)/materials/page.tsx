@@ -539,6 +539,7 @@ export default function MaterialsPage() {
                     value={pickerSearch}
                     onChange={(e) => setPickerSearch(e.target.value)}
                     placeholder="Search or type a new material…"
+                    maxLength={100}
                     className="w-full bg-[#1a1a1a] border border-white/[0.08] rounded-lg ps-8 pe-3 py-2.5 text-[13px] text-white placeholder-white/25 outline-none focus:border-amber-500/40"
                   />
                 </div>
@@ -604,6 +605,7 @@ export default function MaterialsPage() {
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="e.g. Delivered by XYZ Supply, Job #34…"
+                  maxLength={300}
                   className="w-full bg-[#1a1a1a] border border-white/[0.08] rounded-lg px-3 py-2.5 text-[13px] text-white placeholder-white/20 outline-none focus:border-amber-500/40"
                 />
               </div>

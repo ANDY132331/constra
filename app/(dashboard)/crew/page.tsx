@@ -339,7 +339,8 @@ export default function CrewPage() {
           { duration: 5000 }
         );
         setShowModal(false);
-      } catch {
+      } catch (err) {
+        console.error("Create worker failed:", err);
         setSaveError("Network error — please try again");
       } finally {
         setSaving(false);
@@ -453,7 +454,7 @@ export default function CrewPage() {
             placeholder="Search crew..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            autoComplete="off" spellCheck={false}
+            autoComplete="off" spellCheck={false} maxLength={100}
             className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
           />
         </div>
@@ -606,7 +607,7 @@ export default function CrewPage() {
         <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2">
           <Search size={13} className="text-white/30" />
           <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none w-48"
-            placeholder={`${t.common.search} crew…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+            placeholder={`${t.common.search} crew…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
         </div>
         <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
           {["all", "Admin", "Project Manager", "Foreman", "Worker"].map((r) => (
@@ -810,7 +811,7 @@ export default function CrewPage() {
 
               <div>
                 <label className={lbl}>Full Name *</label>
-                <input className={inp} placeholder="e.g. John Smith"
+                <input className={inp} placeholder="e.g. John Smith" maxLength={80}
                   value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
               </div>
 
@@ -831,7 +832,7 @@ export default function CrewPage() {
                 </div>
                 <div>
                   <label className={lbl}>Job Title</label>
-                  <input className={inp} placeholder="e.g. Pipe Layer"
+                  <input className={inp} placeholder="e.g. Pipe Layer" maxLength={80}
                     value={form.customRole} onChange={(e) => setForm((f) => ({ ...f, customRole: e.target.value }))} />
                 </div>
               </div>
@@ -844,7 +845,7 @@ export default function CrewPage() {
                 </div>
                 <div>
                   <label className={lbl}>Phone</label>
-                  <input className={inp} placeholder="+1 (416) 555-0100"
+                  <input className={inp} placeholder="+1 (416) 555-0100" maxLength={20}
                     value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
                 </div>
               </div>
@@ -886,6 +887,7 @@ export default function CrewPage() {
                           <input
                             className={`${inp} flex-1`}
                             placeholder="Certification name (e.g. WHMIS 2015)"
+                            maxLength={100}
                             value={cert.name}
                             onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, name: e.target.value } : c))} />
                           <button

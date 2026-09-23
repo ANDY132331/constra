@@ -33,28 +33,30 @@ export async function POST(request: Request) {
     .select("company_id")
     .eq("id", user.id)
     .single();
-  if (callerProfile) {
-    const { data: targetProfile } = await authClient
-      .from("profiles")
-      .select("id")
-      .eq("company_id", callerProfile.company_id)
-      .eq("email", to)
-      .maybeSingle();
-    if (!targetProfile) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+  if (!callerProfile) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  const { data: targetProfile } = await authClient
+    .from("profiles")
+    .select("id")
+    .eq("company_id", callerProfile.company_id)
+    .eq("email", to)
+    .maybeSingle();
+  if (!targetProfile) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const safeName = (s: unknown, max = 100) => String(s ?? "").slice(0, max).replace(/[<>"'&]/g, "");
   try {
     await sendEmail({
       to,
-      subject: `You've been assigned: "${taskName}" — ${projectName}`,
+      subject: `You've been assigned: "${safeName(taskName)}" — ${safeName(projectName)}`,
       html: taskAssignedEmail({
-        company: companyName ?? "Constra",
-        assigneeName: assigneeName ?? "there",
-        assignerName: assignerName ?? "Your manager",
-        taskName,
-        projectName,
+        company: safeName(companyName ?? "Constra"),
+        assigneeName: safeName(assigneeName ?? "there"),
+        assignerName: safeName(assignerName ?? "Your manager"),
+        taskName: safeName(taskName),
+        projectName: safeName(projectName),
         dueDate,
       }),
     });

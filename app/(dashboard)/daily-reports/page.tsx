@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, FileText, Cloud, Thermometer, Users, Trash2, X,
@@ -69,6 +69,8 @@ export default function DailyReportsPage() {
   const [selected, setSelected] = useState<DailyReport | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<ReportForm>(emptyForm());
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setForm(emptyForm()); setShowForm(true); } }, [searchParams]);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [fetchingWeather, setFetchingWeather] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -77,30 +79,41 @@ export default function DailyReportsPage() {
     if (!isForeman) router.replace("/dashboard");
   }, [isForeman, router]);
 
+  const fetchWeatherForCoords = useCallback((lat: number, lon: number) => {
+    setFetchingWeather(true);
+    fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`
+    )
+      .then((r) => r.json())
+      .then((d) => {
+        const cw = d.current_weather;
+        setForm((f) => ({
+          ...f,
+          weather: wmoToWeather(cw.weathercode),
+          temperatureF: String(Math.round(cw.temperature)),
+        }));
+      })
+      .catch(() => { toast.error("Could not fetch weather"); })
+      .finally(() => setFetchingWeather(false));
+  }, []);
+
   const fetchWeather = useCallback(() => {
     if (!navigator.geolocation) return;
     setFetchingWeather(true);
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const { latitude: lat, longitude: lon } = coords;
-        fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`
-        )
-          .then((r) => r.json())
-          .then((d) => {
-            const cw = d.current_weather;
-            setForm((f) => ({
-              ...f,
-              weather: wmoToWeather(cw.weathercode),
-              temperatureF: String(Math.round(cw.temperature)),
-            }));
-          })
-          .catch(() => {})
-          .finally(() => setFetchingWeather(false));
-      },
-      () => setFetchingWeather(false)
+      ({ coords }) => fetchWeatherForCoords(coords.latitude, coords.longitude),
+      () => { setFetchingWeather(false); toast.error("Location access denied"); }
     );
-  }, []);
+  }, [fetchWeatherForCoords]);
+
+  // Auto-fetch weather for the selected project's job site when project changes
+  useEffect(() => {
+    if (!form.projectId) return;
+    const project = projects.find((p) => p.id === form.projectId);
+    if (project?.gps?.lat && project?.gps?.lon) {
+      fetchWeatherForCoords(project.gps.lat, project.gps.lon);
+    }
+  }, [form.projectId, projects, fetchWeatherForCoords]);
 
   const filtered = dailyReports.filter((r) => {
     if (projectFilter !== "all" && r.projectId !== projectFilter) return false;
@@ -142,6 +155,8 @@ export default function DailyReportsPage() {
       const project = projects.find((p) => p.id === report.projectId);
       const submitter = workers.find((w) => w.id === report.submittedById);
       await exportDailyReportPdf({ report, projectName: project?.name ?? "Unknown", submitterName: submitter?.name ?? "Unknown" });
+    } catch {
+      toast.error("Failed to export PDF");
     } finally {
       setPdfLoading(false);
     }
@@ -537,7 +552,7 @@ export default function DailyReportsPage() {
                       className="flex items-center gap-1 text-[10px] text-amber-400 hover:text-amber-300 disabled:opacity-40 transition-colors"
                     >
                       <Zap size={9} className={fetchingWeather ? "animate-pulse" : ""} />
-                      {fetchingWeather ? "Fetching…" : "Auto-fill"}
+                      {fetchingWeather ? "Fetching…" : "My Location"}
                     </button>
                   </div>
                   <CustomSelect
@@ -565,32 +580,32 @@ export default function DailyReportsPage() {
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Work Completed *</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, workCompleted: (f.workCompleted ? f.workCompleted + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={`${inp} resize-none`} rows={4} placeholder="Describe work completed today…" value={form.workCompleted} onChange={(e) => setForm((f) => ({ ...f, workCompleted: e.target.value }))} />
+                <textarea className={`${inp} resize-none`} rows={4} placeholder="Describe work completed today…" maxLength={2000} value={form.workCompleted} onChange={(e) => setForm((f) => ({ ...f, workCompleted: e.target.value }))} />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Materials Used</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, materialsUsed: (f.materialsUsed ? f.materialsUsed + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={`${inp} resize-none`} rows={2} placeholder="Concrete, rebar, lumber…" value={form.materialsUsed} onChange={(e) => setForm((f) => ({ ...f, materialsUsed: e.target.value }))} />
+                <textarea className={`${inp} resize-none`} rows={2} placeholder="Concrete, rebar, lumber…" maxLength={1000} value={form.materialsUsed} onChange={(e) => setForm((f) => ({ ...f, materialsUsed: e.target.value }))} />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Delays / Issues</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, delays: (f.delays ? f.delays + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={`${inp} resize-none`} rows={2} placeholder="Any delays or issues encountered…" value={form.delays} onChange={(e) => setForm((f) => ({ ...f, delays: e.target.value }))} />
+                <textarea className={`${inp} resize-none`} rows={2} placeholder="Any delays or issues encountered…" maxLength={1000} value={form.delays} onChange={(e) => setForm((f) => ({ ...f, delays: e.target.value }))} />
               </div>
               <div>
                 <label className={lbl}>Visitor Log</label>
-                <input className={inp} placeholder="Inspector, owner, etc." value={form.visitorLog} onChange={(e) => setForm((f) => ({ ...f, visitorLog: e.target.value }))} />
+                <input className={inp} placeholder="Inspector, owner, etc." maxLength={200} value={form.visitorLog} onChange={(e) => setForm((f) => ({ ...f, visitorLog: e.target.value }))} />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Notes</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, notes: (f.notes ? f.notes + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={`${inp} resize-none`} rows={2} placeholder="Additional notes…" value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+                <textarea className={`${inp} resize-none`} rows={2} placeholder="Additional notes…" maxLength={1000} value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
               </div>
             </div>
             <div className="px-5 py-4 border-t border-white/[0.06] flex justify-end gap-2">

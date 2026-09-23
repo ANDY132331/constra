@@ -85,8 +85,8 @@ function StatCard({
   href?: string;
 }) {
   const inner = (
-    <div className="card-hover bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/20 overflow-hidden relative">
-      <div className="progress-bar absolute bottom-0 left-0 h-[2px] rounded-b-2xl opacity-50" style={{ backgroundColor: iconColor, right: 0 }} />
+    <div className="card-hover bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/20 overflow-hidden relative" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.045)" }}>
+      <div className="progress-bar absolute bottom-0 left-0 h-[2px] rounded-b-2xl opacity-60" style={{ backgroundColor: iconColor, right: 0, boxShadow: `0 0 8px 1px ${iconColor}55` }} />
       <div className="flex items-start justify-between mb-3">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: iconColor + "18" }}>
           <span style={{ color: iconColor }}><Icon size={17} /></span>
@@ -148,7 +148,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
   const mins = Math.floor((elapsed % 3600000) / 60000);
 
   return (
-    <Link href="/crew" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/25 group">
+    <Link href="/crew" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/25 group" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)" }}>
       <div className="w-full h-28 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden"
         style={{ background: `${worker.color}15` }}>
         {worker.photo ? (
@@ -195,7 +195,7 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
   const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
   const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
   return (
-    <Link href="/projects" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/20">
+    <Link href="/projects" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/20" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)" }}>
       <div className="flex items-start gap-3 mb-3">
         <div className="w-1.5 h-12 rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: project.color }} />
         <div className="flex-1 min-w-0">
@@ -430,7 +430,7 @@ export default function DashboardPage() {
     const weekPct = Math.min(((myWeekHours + liveElapsed) / weekTarget) * 100, 100);
 
     return (
-      <div className="-mx-5 -mt-5 pb-2">
+      <div className="-mx-5 -mt-5 pb-24">
 
         {/* ── Hero ─────────────────────────────────────────────────────────────── */}
         <div
@@ -440,6 +440,9 @@ export default function DashboardPage() {
               ? dk ? "linear-gradient(155deg, #003d1a 0%, #001a0a 50%, #080808 100%)" : "linear-gradient(155deg, #ecfdf5 0%, #d1fae5 55%, #f0fdf4 100%)"
               : dk ? "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)" : "linear-gradient(155deg, #fffbeb 0%, #fef3c7 60%, #fff7ed 100%)",
             borderBottom: `1px solid ${currentUser.clockedIn ? (dk ? "rgba(34,197,94,0.2)" : "rgba(34,197,94,0.35)") : (dk ? "rgba(245,158,11,0.18)" : "rgba(245,158,11,0.35)")}`,
+            boxShadow: dk
+              ? `0 8px 40px rgba(0,0,0,0.65), 0 2px 0 ${currentUser.clockedIn ? "rgba(34,197,94,0.06)" : "rgba(245,158,11,0.08)"} inset`
+              : "0 8px 24px rgba(0,0,0,0.12), 0 2px 0 rgba(245,158,11,0.1) inset",
           }}
         >
           {/* Blueprint grid */}
@@ -672,7 +675,7 @@ export default function DashboardPage() {
     <ShareNudge />
 
     {/* ── MOBILE DASHBOARD ──────────────────────────────────────────────── */}
-    <div className="lg:hidden -mx-5 -mt-5 pb-2">
+    <div className="lg:hidden -mx-5 -mt-5 pb-24">
 
       {/* Hero panel — edge-to-edge, amber glow, blueprint grid */}
       <div
@@ -682,6 +685,9 @@ export default function DashboardPage() {
             ? "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)"
             : "linear-gradient(155deg, #fffbeb 0%, #fef3c7 60%, #fff7ed 100%)",
           borderBottom: dk ? "1px solid rgba(245,158,11,0.18)" : "1px solid rgba(245,158,11,0.35)",
+          boxShadow: dk
+            ? "0 8px 32px rgba(0,0,0,0.6), 0 2px 0 rgba(245,158,11,0.08) inset"
+            : "0 8px 24px rgba(0,0,0,0.15), 0 2px 0 rgba(245,158,11,0.12) inset",
         }}
       >
         {/* Blueprint grid — clearly visible */}

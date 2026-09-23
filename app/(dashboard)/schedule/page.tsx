@@ -2,6 +2,7 @@
 
 import { toast } from "sonner";
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind, AlertTriangle, MapPin, RefreshCw, X, Briefcase, Truck, ClipboardCheck, Calendar, Pencil } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, getDay, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
@@ -54,7 +55,7 @@ function loadCustomEvents(): CustomEvent[] {
   } catch { return []; }
 }
 function saveCustomEvents(events: CustomEvent[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch (e) { console.error("Failed to save events to localStorage", e); }
 }
 
 function wmoToLabel(code: number): string {
@@ -122,6 +123,8 @@ export default function SchedulePage() {
   const [customEvents, setCustomEvents] = useState<CustomEvent[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEventId, setEditEventId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditEventId(null); setAddForm({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); } }, [searchParams]);
   const [deleteEventConfirm, setDeleteEventConfirm] = useState<string | null>(null);
   const [addForm, setAddForm] = useState({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting" as CustomEventType, description: "" });
 
@@ -184,7 +187,7 @@ export default function SchedulePage() {
       setWeatherError(true);
     }
     setWeatherLoading(false);
-  }, [locationName]);
+  }, [locationName, lat, lon]);
 
   useEffect(() => {
     const fallbackFn = () => {
@@ -815,7 +818,7 @@ export default function SchedulePage() {
             <div className="p-6 space-y-4 overflow-y-scroll overscroll-y-contain flex-1" style={{touchAction:"pan-y"}}>
               <div>
                 <label className={lbl}>Event Title *</label>
-                <input className={inp} placeholder="e.g. Site inspection with engineer"
+                <input className={inp} placeholder="e.g. Site inspection with engineer" maxLength={120}
                   value={addForm.title} onChange={(e) => setAddForm((f) => ({ ...f, title: e.target.value }))}
                   onKeyDown={(e) => e.key === "Enter" && handleAddEvent()} autoComplete="off" />
               </div>
@@ -838,7 +841,7 @@ export default function SchedulePage() {
               </div>
               <div>
                 <label className={lbl}>Notes (optional)</label>
-                <textarea className={inp + " resize-none"} rows={2} placeholder="Details, attendees, location…"
+                <textarea className={inp + " resize-none"} rows={2} placeholder="Details, attendees, location…" maxLength={500}
                   value={addForm.description} onChange={(e) => setAddForm((f) => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="flex items-center gap-2 p-3 rounded-xl" style={{ backgroundColor: EVENT_TYPE_CONFIG[addForm.type].color + "18" }}>

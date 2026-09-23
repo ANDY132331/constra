@@ -468,12 +468,7 @@ export default function TimeTrackingPage() {
 
     // Fire push notification to all subscribed devices
     const proj = getProjectById(projectId);
-    sendPushEvent({
-      companyId: companyId ?? undefined,
-      title: `${worker.name} clocked in`,
-      body: `Working on ${proj?.name ?? "a project"}`,
-      url: "/time-tracking",
-    });
+    try { sendPushEvent({ companyId: companyId ?? undefined, title: `${worker.name} clocked in`, body: `Working on ${proj?.name ?? "a project"}`, url: "/time-tracking" }); } catch {}
 
     // Update device history
     const existing = worker.deviceHistory ?? [];
@@ -484,6 +479,7 @@ export default function TimeTrackingPage() {
     updateWorker(worker.id, { deviceHistory: updatedHistory });
 
     setCameraTarget(null);
+    toast.success(`${worker.name} clocked in`);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([80, 30, 80]);
 
     // Run background verification silently after UI is updated
@@ -505,12 +501,7 @@ export default function TimeTrackingPage() {
       const worker = getWorkerById(workerId);
       const project = getProjectById(entry.projectId);
       const hrs = ((now.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1);
-      sendPushEvent({
-        companyId: companyId ?? undefined,
-        title: `${worker?.name ?? "Worker"} clocked out`,
-        body: `${hrs}h on ${project?.name ?? "project"}`,
-        url: "/time-tracking",
-      });
+      try { sendPushEvent({ companyId: companyId ?? undefined, title: `${worker?.name ?? "Worker"} clocked out`, body: `${hrs}h on ${project?.name ?? "project"}`, url: "/time-tracking" }); } catch {}
       toast.success(`${worker?.name ?? "Worker"} clocked out — ${hrs}h logged`);
     }
     // Always clear the worker's live status, even if no open entry was found (fixes stale Supabase state)
@@ -1082,41 +1073,6 @@ export default function TimeTrackingPage() {
         </div>
       </div>
 
-      {/* Mobile hero clock-in card */}
-      <div className="sm:hidden">
-        {isCurrentUserClockedIn ? (
-          <div className="bg-[#0f1a0f] border border-green-500/30 rounded-2xl p-5 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-bold text-green-400">You&apos;re clocked in</p>
-              {currentUser.clockInTime && (
-                <p className="text-[12px] text-white/40 mt-0.5">Since {currentUser.clockInTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
-              )}
-            </div>
-            <button
-              onClick={() => handleClockOut(currentUser.id)}
-              className="flex flex-col items-center gap-1 bg-red-500/15 active:bg-red-500/25 border border-red-500/30 text-red-400 font-bold text-[12px] px-4 py-3 rounded-xl transition-all"
-            >
-              <LogOut size={18} />
-              Clock Out
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => requestClockIn(currentUser)}
-            className="w-full bg-green-500/10 active:bg-green-500/20 border-2 border-green-500/40 text-green-400 rounded-2xl py-6 flex flex-col items-center gap-2 transition-all"
-          >
-            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
-              <LogIn size={28} />
-            </div>
-            <span className="text-[18px] font-black tracking-tight">Clock In</span>
-            <span className="text-[12px] text-green-400/60">Tap to start your shift</span>
-          </button>
-        )}
-      </div>
-
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
@@ -1201,8 +1157,8 @@ export default function TimeTrackingPage() {
           <h3 className="text-[14px] font-bold text-white/50 mb-3">Off Site</h3>
           <div className="flex gap-2 flex-wrap">
             {workers.filter((w) => !w.clockedIn).map((worker) => (
-              <button key={worker.id} onClick={() => requestClockIn(worker)}
-                className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] hover:border-green-500/30 hover:bg-green-500/[0.04] rounded-full px-3 py-2 transition-all group">
+              <button key={worker.id} onClick={() => requestClockIn(worker)} disabled={geofenceChecking}
+                className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] hover:border-green-500/30 hover:bg-green-500/[0.04] rounded-full px-3 py-2 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                 <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[9px] font-bold flex-shrink-0"
                   style={{ backgroundColor: worker.color + "25", color: worker.color }}>
                   {worker.photo

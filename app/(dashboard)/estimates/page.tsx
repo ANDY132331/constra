@@ -217,7 +217,8 @@ function EstimateDetail({
           <button
             onClick={async () => {
               setPdfLoading(true);
-              try { await exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template); }
+              try { await exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template); toast.success("PDF downloaded"); }
+              catch { toast.error("Failed to export PDF"); }
               finally { setPdfLoading(false); }
             }}
             disabled={pdfLoading}
@@ -240,7 +241,7 @@ function EstimateDetail({
       </div>
 
       {/* â”€â”€ Estimate document (white-paper preview) â”€â”€ */}
-      <div className="flex-1 overflow-y-scroll bg-[#1a1a1a]" style={{touchAction:"pan-y"}}>
+      <div className="flex-1 overflow-y-auto bg-[#1a1a1a]">
         <div className="max-w-[640px] mx-auto my-4 sm:my-6 px-3 sm:px-4">
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
 
@@ -419,18 +420,18 @@ function EstimateDetail({
       {/* â”€â”€ Action bar â”€â”€ */}
       <div className="flex items-center gap-2 px-5 py-3.5 border-t border-white/[0.06] flex-shrink-0 bg-[#0d0d0d]">
         {isDraft && (
-          <button onClick={() => onUpdate(estimate.id, { status: "sent" })}
+          <button onClick={() => { onUpdate(estimate.id, { status: "sent" }); toast.success("Estimate marked as sent"); }}
             className="flex items-center gap-1.5 text-[12px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-full transition-colors">
             <Send size={13} /> Mark as Sent
           </button>
         )}
         {isSent && (
           <>
-            <button onClick={() => onUpdate(estimate.id, { status: "accepted" })}
+            <button onClick={() => { onUpdate(estimate.id, { status: "accepted" }); toast.success("Estimate accepted"); }}
               className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-4 py-2 rounded-full transition-colors">
               <CheckCircle2 size={13} /> Mark Accepted
             </button>
-            <button onClick={() => onUpdate(estimate.id, { status: "declined" })}
+            <button onClick={() => { onUpdate(estimate.id, { status: "declined" }); toast.success("Estimate declined"); }}
               className="flex items-center gap-1.5 text-[12px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 px-3 py-2 rounded-full transition-colors">
               <XCircle size={12} /> Mark Declined
             </button>
@@ -849,7 +850,7 @@ export default function EstimatesPage() {
               </div>
 
               {/* List */}
-              <div className="flex-1 overflow-y-scroll">
+              <div className="flex-1 overflow-y-auto">
                 {filtered.length === 0 ? (
                   <EmptyState
                     icon={FileText}
@@ -912,16 +913,16 @@ export default function EstimatesPage() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-scroll overscroll-y-contain p-6 space-y-4" style={{touchAction:"pan-y"}}>
+            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Project Name *</label>
-                  <input className={inp} placeholder="Westside Condo Framing"
+                  <input className={inp} placeholder="Westside Condo Framing" maxLength={100}
                     value={form.projectName} onChange={(e) => setForm((f) => ({ ...f, projectName: e.target.value }))} />
                 </div>
                 <div>
                   <label className={lbl}>Client Name *</label>
-                  <input className={inp} placeholder="Acme Corp"
+                  <input className={inp} placeholder="Acme Corp" maxLength={100}
                     value={form.clientName} onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))} />
                 </div>
               </div>
@@ -983,7 +984,7 @@ export default function EstimatesPage() {
                           { value: "Other", label: "Other" },
                         ]}
                       />
-                      <input className={inp} placeholder="Descriptionâ€¦" value={item.description}
+                      <input className={inp} placeholder="Description…" maxLength={200} value={item.description}
                         onChange={(e) => updateItem(idx, "description", e.target.value)} />
                       <div className="flex gap-2 sm:contents">
                         <div className="flex-1">
@@ -1023,7 +1024,7 @@ export default function EstimatesPage() {
 
               <div>
                 <label className={lbl}>Notes &amp; Scope</label>
-                <textarea className={inp + " resize-none"} rows={2} placeholder="Scope, assumptions, exclusionsâ€¦"
+                <textarea className={inp + " resize-none"} rows={2} placeholder="Scope, assumptions, exclusions…" maxLength={1000}
                   value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
               </div>
             </div>

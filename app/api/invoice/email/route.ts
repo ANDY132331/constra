@@ -72,6 +72,9 @@ export async function POST(request: NextRequest) {
   if (!to || !invoiceNumber) {
     return NextResponse.json({ error: "Missing to or invoiceNumber" }, { status: 400 });
   }
+  if (!to.includes("@")) {
+    return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+  }
 
   const cn = esc(clientName ?? "");
   const inv = esc(invoiceNumber ?? "");
@@ -133,8 +136,9 @@ export async function POST(request: NextRequest) {
         `,
       });
 
-  const attachments = pdfDataUrl
-    ? [{ filename: `${invoiceNumber}.pdf`, content: pdfDataUrl.split(",")[1], type: "application/pdf", disposition: "attachment" as const }]
+  const pdfBase64 = pdfDataUrl?.includes(",") ? pdfDataUrl.split(",")[1] : undefined;
+  const attachments = pdfBase64
+    ? [{ filename: `${invoiceNumber}.pdf`, content: pdfBase64, type: "application/pdf", disposition: "attachment" as const }]
     : undefined;
 
   const subject = isReminder

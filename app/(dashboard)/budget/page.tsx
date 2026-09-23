@@ -228,7 +228,7 @@ export default function BudgetPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search cost codes…"
-              autoComplete="off" spellCheck={false}
+              autoComplete="off" spellCheck={false} maxLength={100}
               className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40"
             />
           </div>
@@ -427,6 +427,7 @@ export default function BudgetPage() {
                     placeholder="e.g. 03-100"
                     value={form.code}
                     onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+                    maxLength={30}
                     required
                   />
                 </div>
@@ -448,6 +449,7 @@ export default function BudgetPage() {
                   placeholder="e.g. Concrete foundations"
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  maxLength={200}
                   required
                 />
               </div>

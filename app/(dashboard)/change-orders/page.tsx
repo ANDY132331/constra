@@ -151,6 +151,8 @@ export default function ChangeOrdersPage() {
       const project = projects.find((p) => p.id === co.projectId);
       const submitter = workers.find((w) => w.id === co.submittedById);
       await exportChangeOrderPdf({ changeOrder: co, projectName: project?.name ?? "Unknown", submitterName: submitter?.name ?? "Unknown", currency });
+    } catch {
+      toast.error("Failed to export PDF");
     } finally {
       setPdfLoading(false);
     }
@@ -200,7 +202,7 @@ export default function ChangeOrdersPage() {
               <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-2xl px-3.5 py-3">
                 <Search size={14} className="text-white/30 flex-shrink-0" />
                 <input className="flex-1 bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none"
-                  placeholder="Search change orders…" value={search} onChange={(e) => setSearch(e.target.value)} />
+                  placeholder="Search change orders…" value={search} onChange={(e) => setSearch(e.target.value)} maxLength={100} />
               </div>
             </div>
             <div className="flex gap-2 px-5 mb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
@@ -328,7 +330,7 @@ export default function ChangeOrdersPage() {
               placeholder="Search change orders…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              autoComplete="off" spellCheck={false}
+              autoComplete="off" spellCheck={false} maxLength={100}
             />
           </div>
           <button
@@ -519,7 +521,7 @@ export default function ChangeOrdersPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>CO Number *</label>
-                  <input className={inp} placeholder={nextNumber} value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} />
+                  <input className={inp} placeholder={nextNumber} maxLength={30} value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} />
                 </div>
                 <div>
                   <label className={lbl}>Status</label>
@@ -550,7 +552,7 @@ export default function ChangeOrdersPage() {
               </div>
               <div>
                 <label className={lbl}>Title *</label>
-                <input className={inp} placeholder="Additional foundation waterproofing" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+                <input className={inp} placeholder="Additional foundation waterproofing" maxLength={100} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
               </div>
               <div>
                 <label className={lbl}>Amount ($)</label>
@@ -558,11 +560,11 @@ export default function ChangeOrdersPage() {
               </div>
               <div>
                 <label className={lbl}>Description</label>
-                <textarea className={`${inp} resize-none`} rows={3} placeholder="Describe the change in scope…" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
+                <textarea className={`${inp} resize-none`} rows={3} placeholder="Describe the change in scope…" maxLength={1000} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
                 <label className={lbl}>Reason</label>
-                <textarea className={`${inp} resize-none`} rows={2} placeholder="Why is this change needed?" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} />
+                <textarea className={`${inp} resize-none`} rows={2} placeholder="Why is this change needed?" maxLength={500} value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} />
               </div>
             </div>
             <div className="px-5 py-4 border-t border-white/[0.06] flex justify-end gap-2">

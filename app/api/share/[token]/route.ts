@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 function getAdmin() {
   return createClient(
@@ -10,7 +11,10 @@ function getAdmin() {
   );
 }
 
-export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  if (!rateLimit(`share:${ip}`, 60, 60_000)) return rateLimitResponse();
+
   const { token } = await params;
 
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {

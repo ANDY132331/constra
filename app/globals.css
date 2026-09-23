@@ -458,10 +458,11 @@
 /* ── Card hover lift ────────────────────────────────────────────── */
 .card-hover {
   transition: transform 0.18s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.03) inset;
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.05) inset;
 }
 
 /* ── Button press feel ──────────────────────────────────────────── */
@@ -1345,4 +1346,141 @@ button, a, [role="button"] {
 }
 [data-theme="light"] .field-label {
   color: rgba(0,0,0,0.40);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   3D DEPTH SYSTEM — Procore-level elevation and materiality
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Base card surfaces — raised from the background ── */
+.bg-\[\#111111\],
+.bg-\[\#111\] {
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.5),
+    0 4px 16px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -1px 0 rgba(0,0,0,0.25);
+}
+
+/* ── Cards deeper in the stack (#131313 / #141414) ── */
+.bg-\[\#131313\],
+.bg-\[\#131110\],
+.bg-\[\#141414\] {
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.55),
+    0 3px 12px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+/* ── Desktop card hover: perspective tilt + dramatic shadow ── */
+@media (pointer: fine) {
+  .card-hover {
+    transform-style: preserve-3d;
+  }
+  .card-hover:hover {
+    transform: translateY(-3px) perspective(600px) rotateX(1.5deg);
+    box-shadow:
+      0 24px 60px rgba(0,0,0,0.65),
+      0 8px 24px rgba(0,0,0,0.4),
+      0 1px 0 rgba(255,255,255,0.06) inset;
+  }
+}
+
+/* ── Amber-glow card variant — active/selected states ── */
+.card-amber-glow {
+  box-shadow:
+    0 0 0 1px rgba(245,196,0,0.18),
+    0 4px 20px rgba(245,196,0,0.08),
+    0 2px 8px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(245,196,0,0.06);
+}
+
+/* ── Page-level depth: main bg with subtle vignette ── */
+main.main-scroll {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(245,196,0,0.025) 0%, transparent 60%),
+    #0a0a0a !important;
+}
+
+/* ── Header: glass-like top bar with depth ── */
+:root:not([data-theme="light"]) header {
+  background: rgba(10,10,10,0.88) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.35) !important;
+}
+
+/* ── Sidebar: deep shadow + subtle inner border ── */
+:root:not([data-theme="light"]) aside {
+  background: #0b0b0b !important;
+  box-shadow: 2px 0 0 rgba(255,255,255,0.04), 6px 0 24px rgba(0,0,0,0.35) !important;
+}
+
+/* ── Modals / sheets: pop off the page ── */
+[class*="fixed"][class*="inset-0"] > div[class*="bg-\[#"] {
+  box-shadow:
+    0 32px 80px rgba(0,0,0,0.85),
+    0 0 0 1px rgba(255,255,255,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+/* ── Elevated pill badges and status chips ── */
+.rounded-full.bg-amber-500\/15,
+.rounded-full.bg-amber-500\/10 {
+  box-shadow: 0 1px 4px rgba(245,196,0,0.12), inset 0 1px 0 rgba(245,196,0,0.08);
+}
+
+/* ── Icon containers: extruded cube feel ── */
+.rounded-xl[class*="bg-"] {
+  background-clip: padding-box;
+}
+
+/* ── Amber primary buttons: glass + glow ── */
+.bg-amber-500,
+.bg-amber-400 {
+  box-shadow: 0 4px 16px rgba(245,196,0,0.28), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.14);
+}
+.bg-amber-500:not(:disabled):hover,
+.bg-amber-400:not(:disabled):hover {
+  box-shadow: 0 6px 24px rgba(245,196,0,0.38), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(0,0,0,0.12);
+}
+
+/* ── Inputs: recessed well effect ── */
+:root:not([data-theme="light"]) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(.hidden),
+:root:not([data-theme="light"]) textarea,
+:root:not([data-theme="light"]) select {
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.45), inset 0 1px 0 rgba(0,0,0,0.2);
+}
+:root:not([data-theme="light"]) input:focus,
+:root:not([data-theme="light"]) textarea:focus,
+:root:not([data-theme="light"]) select:focus {
+  box-shadow: 0 0 0 2px rgba(245,196,0,0.22), 0 0 0 1px rgba(245,196,0,0.38), inset 0 1px 3px rgba(0,0,0,0.35) !important;
+}
+
+/* ── Stat tiles: layered depth ── */
+.rounded-2xl[class*="border"][class*="bg-"] {
+  backdrop-filter: blur(0px);
+}
+
+/* ── Mobile bottom nav: elevated glass tray ── */
+@media (max-width: 1023px) {
+  :root:not([data-theme="light"]) nav[class*="fixed"][class*="bottom"] {
+    backdrop-filter: blur(28px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+    box-shadow: 0 -1px 0 rgba(255,255,255,0.05), 0 -8px 32px rgba(0,0,0,0.5) !important;
+  }
+}
+
+/* ── Dividers: hairline with depth ── */
+.border-white\/\[0\.06\] {
+  border-color: rgba(255,255,255,0.055);
+  box-shadow: none;
+}
+
+/* ── List rows: hover depth ── */
+@media (pointer: fine) {
+  .tap-row:hover {
+    background: rgba(255,255,255,0.03) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  }
 }

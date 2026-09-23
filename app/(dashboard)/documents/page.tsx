@@ -76,7 +76,7 @@ export default function DocumentsPage() {
       const url = URL.createObjectURL(blob);
       pdfBlobRef.current = url;
       setPdfBlobUrl(url);
-    }).catch(() => {});
+    }).catch(() => { setPdfBlobUrl(null); });
     return () => { if (pdfBlobRef.current) { URL.revokeObjectURL(pdfBlobRef.current); pdfBlobRef.current = null; } };
   }, [previewDoc?.dataUrl]);
 
@@ -103,40 +103,45 @@ export default function DocumentsPage() {
     const files = e.target.files;
     if (!files || !selectedProject) { if (!selectedProject) toast.error("Select a project first"); return; }
     setUploading(true);
-    for (const file of Array.from(files)) {
-      const dataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
+    try {
+      for (const file of Array.from(files)) {
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
 
-      // Try Supabase Storage first; fall back to base64 in localStorage
-      if (SUPABASE_ENABLED && companyId) {
-        const url = await uploadDocument(dataUrl, companyId, file.name);
-        addDocument({
-          projectId: selectedProject,
-          name: file.name,
-          category: uploadCategory,
-          uploadedAt: new Date(),
-          uploadedById: currentUser.id,
-          sizeBytes: file.size,
-          dataUrl: url ?? dataUrl,
-        });
-      } else {
-        addDocument({
-          projectId: selectedProject,
-          name: file.name,
-          category: uploadCategory,
-          uploadedAt: new Date(),
-          uploadedById: currentUser.id,
-          sizeBytes: file.size,
-          dataUrl,
-        });
+        // Try Supabase Storage first; fall back to base64 in localStorage
+        if (SUPABASE_ENABLED && companyId) {
+          const url = await uploadDocument(dataUrl, companyId, file.name);
+          addDocument({
+            projectId: selectedProject,
+            name: file.name,
+            category: uploadCategory,
+            uploadedAt: new Date(),
+            uploadedById: currentUser.id,
+            sizeBytes: file.size,
+            dataUrl: url ?? dataUrl,
+          });
+        } else {
+          addDocument({
+            projectId: selectedProject,
+            name: file.name,
+            category: uploadCategory,
+            uploadedAt: new Date(),
+            uploadedById: currentUser.id,
+            sizeBytes: file.size,
+            dataUrl,
+          });
+        }
       }
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      toast.success("Document uploaded");
+    } catch {
+      toast.error("Upload failed");
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    toast.success("Document uploaded");
   }
 
   function downloadDoc(doc: ProjectDocument) {
@@ -155,15 +160,21 @@ export default function DocumentsPage() {
     const file = e.target.files?.[0];
     if (!file || !previewDoc) return;
     setUploadingVersion(true);
-    const dataUrl = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    });
-    addDocumentVersion(previewDoc.id, dataUrl, file.size, currentUser.id);
-    setPreviewDoc((prev) => prev ? { ...prev, dataUrl, sizeBytes: file.size, uploadedAt: new Date(), versions: [{ versionedAt: prev.uploadedAt, uploadedById: prev.uploadedById, sizeBytes: prev.sizeBytes, dataUrl: prev.dataUrl }, ...(prev.versions ?? [])] } : null);
-    setUploadingVersion(false);
-    if (versionInputRef.current) versionInputRef.current.value = "";
+    try {
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+      addDocumentVersion(previewDoc.id, dataUrl, file.size, currentUser.id);
+      setPreviewDoc((prev) => prev ? { ...prev, dataUrl, sizeBytes: file.size, uploadedAt: new Date(), versions: [{ versionedAt: prev.uploadedAt, uploadedById: prev.uploadedById, sizeBytes: prev.sizeBytes, dataUrl: prev.dataUrl }, ...(prev.versions ?? [])] } : null);
+      toast.success("New version uploaded");
+      if (versionInputRef.current) versionInputRef.current.value = "";
+    } catch {
+      toast.error("Version upload failed");
+    } finally {
+      setUploadingVersion(false);
+    }
   }
 
   const catInfo = (cat: Category) => CATEGORIES.find((c) => c.value === cat)!;
@@ -178,7 +189,7 @@ export default function DocumentsPage() {
           <label className={`flex items-center gap-1.5 ${uploading ? "bg-amber-500/40" : "bg-amber-500 active:bg-amber-600"} text-black font-bold text-[13px] px-4 py-2 rounded-xl transition-colors cursor-pointer`}>
             <Upload size={14} />
             {uploading ? "Uploading…" : "Upload"}
-            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
+            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} disabled={uploading} />
           </label>
         </div>
 
@@ -211,7 +222,7 @@ export default function DocumentsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search files…"
-            autoComplete="off" spellCheck={false}
+            autoComplete="off" spellCheck={false} maxLength={100}
             className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
           />
         </div>
@@ -304,6 +315,7 @@ export default function DocumentsPage() {
                 multiple
                 className="hidden"
                 onChange={handleFileChange}
+                disabled={uploading}
               />
             </label>
           </div>
@@ -332,7 +344,7 @@ export default function DocumentsPage() {
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search files…"
+            placeholder="Search files…" maxLength={100}
             className="bg-[#111] border border-white/[0.07] rounded-lg ps-8 pe-3 py-2 text-[13px] text-white placeholder-white/25 outline-none focus:border-amber-500/40 w-48"
           />
         </div>

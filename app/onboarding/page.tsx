@@ -316,23 +316,24 @@ export default function OnboardingPage() {
               placeholder="CN-XXXX-XXXX"
               value={inviteCode}
               onChange={(e) => { setInviteCode(e.target.value.toUpperCase()); setError(""); }}
+              maxLength={20}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={lbl}>First Name *</label>
-              <input className={inp} placeholder="Jane" value={joinFirstName} onChange={(e) => setJoinFirstName(e.target.value)} />
+              <input className={inp} placeholder="Jane" maxLength={50} value={joinFirstName} onChange={(e) => setJoinFirstName(e.target.value)} />
             </div>
             <div>
               <label className={lbl}>Last Name</label>
-              <input className={inp} placeholder="Smith" value={joinLastName} onChange={(e) => setJoinLastName(e.target.value)} />
+              <input className={inp} placeholder="Smith" maxLength={50} value={joinLastName} onChange={(e) => setJoinLastName(e.target.value)} />
             </div>
           </div>
 
           <div>
             <label className={lbl}>Work Email *</label>
-            <input type="email" className={inp} placeholder="you@company.com" value={joinEmail} onChange={(e) => setJoinEmail(e.target.value)} />
+            <input type="email" className={inp} placeholder="you@company.com" maxLength={254} value={joinEmail} onChange={(e) => setJoinEmail(e.target.value)} />
           </div>
 
           <div>
@@ -342,6 +343,7 @@ export default function OnboardingPage() {
                 type={showJoinPw ? "text" : "password"}
                 className={`${inp} pr-10`}
                 placeholder="At least 8 characters"
+                maxLength={128}
                 value={joinPassword}
                 onChange={(e) => setJoinPassword(e.target.value)}
               />
@@ -460,7 +462,7 @@ export default function OnboardingPage() {
 
           <div>
             <label className={lbl}>Company Name *</label>
-            <input className={inp} placeholder="Acme Services Ltd." value={company} onChange={(e) => setCompany(e.target.value)} />
+            <input className={inp} placeholder="Acme Services Ltd." maxLength={100} value={company} onChange={(e) => setCompany(e.target.value)} />
           </div>
 
           <div>
@@ -532,17 +534,17 @@ export default function OnboardingPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={lbl}>First Name *</label>
-              <input className={inp} placeholder="Jane" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              <input className={inp} placeholder="Jane" maxLength={50} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
             </div>
             <div>
               <label className={lbl}>Last Name</label>
-              <input className={inp} placeholder="Smith" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <input className={inp} placeholder="Smith" maxLength={50} value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
           </div>
 
           <div>
             <label className={lbl}>Work Email *</label>
-            <input type="email" className={inp} placeholder="jane@company.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input type="email" className={inp} placeholder="jane@company.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
           <div>
@@ -552,6 +554,7 @@ export default function OnboardingPage() {
                 type={showPw ? "text" : "password"}
                 className={`${inp} pr-10`}
                 placeholder="At least 8 characters"
+                maxLength={128}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

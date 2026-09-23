@@ -212,7 +212,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
           <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
             <Search size={14} className="text-white/30 flex-shrink-0" />
             <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
-              placeholder="Search incidents…" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+              placeholder="Search incidents…" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
           </div>
         </div>
 
@@ -389,7 +389,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
             <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 max-w-64">
               <Search size={13} className="text-white/30" />
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
-                placeholder={`${t.common.search} incidents…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} />
+                placeholder={`${t.common.search} incidents…`} value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
             </div>
             <CustomSelect
               value={severityFilter}
@@ -529,7 +529,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Description *</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, description: (f.description ? f.description + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={inp + " resize-none"} rows={3} placeholder="Describe what happened..."
+                <textarea className={inp + " resize-none"} rows={3} placeholder="Describe what happened..." maxLength={1000}
                   value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
@@ -537,7 +537,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                   <label className="block text-[10px] font-bold text-white/35 uppercase tracking-wider">Corrective Action Taken</label>
                   <MicButton size="sm" onResult={(t) => setForm((f) => ({ ...f, actionTaken: (f.actionTaken ? f.actionTaken + " " : "") + t.trim() }))} />
                 </div>
-                <textarea className={inp + " resize-none"} rows={2} placeholder="What was done to address this..."
+                <textarea className={inp + " resize-none"} rows={2} placeholder="What was done to address this..." maxLength={500}
                   value={form.actionTaken} onChange={(e) => setForm((f) => ({ ...f, actionTaken: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">

@@ -138,6 +138,7 @@ function ResetPasswordForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="New password (min 8 characters)"
                     required
+                    maxLength={128}
                     disabled={!sessionReady}
                     className={inp}
                   />
@@ -179,6 +180,7 @@ function ResetPasswordForm() {
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Confirm new password"
                     required
+                    maxLength={128}
                     disabled={!sessionReady}
                     className={inp}
                   />
