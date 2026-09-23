@@ -41,8 +41,10 @@ import {
   dbToChangeOrder, changeOrderToDb,
   dbToBlueprintPin, blueprintPinToDb,
   dbToBudgetLine, budgetLineToDb,
+  dbToInsurancePolicy, insurancePolicyToDb,
   type DbTask, type DbMessage, type DbMaterialType, type DbMaterialEntry, type DbDocument,
   type DbDailyReport, type DbChangeOrder, type DbBlueprintPin, type DbBudgetLine,
+  type DbInsurancePolicy,
 } from "@/lib/supabase/db";
 
 function reviveDates(_key: string, value: unknown): unknown {
@@ -399,6 +401,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { data: changeOrdersData },
         { data: blueprintPinsData },
         { data: budgetLinesData },
+        { data: insurancePoliciesData },
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("company_id", companyId),
         supabase.from("companies").select("*").eq("id", companyId).single(),
@@ -429,6 +432,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           .order("submitted_at", { ascending: false }),
         supabase.from("blueprint_pins").select("*").eq("company_id", companyId),
         supabase.from("budget_lines").select("*").eq("company_id", companyId).order("created_at", { ascending: true }),
+        supabase.from("insurance_policies").select("*").eq("company_id", companyId).order("expiry_date", { ascending: true }),
       ]);
 
       // Group tasks by project_id for efficient lookup
@@ -438,7 +442,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         tasksByProject[t.project_id].push(t as DbTask);
       });
 
-      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number; overtime_enabled?: boolean; overtime_daily_threshold?: number | null; overtime_weekly_threshold?: number | null; overtime_multiplier?: number } | null;
+      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number; overtime_enabled?: boolean; overtime_daily_threshold?: number | null; overtime_weekly_threshold?: number | null; overtime_multiplier?: number; custom_roles?: string[]; permissions_pin?: string } | null;
 
       const isPro = true; // free during launch period
 
@@ -473,6 +477,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         changeOrders: (changeOrdersData ?? []).map((c) => dbToChangeOrder(c as DbChangeOrder)),
         blueprintPins: (blueprintPinsData ?? []).map((p) => dbToBlueprintPin(p as DbBlueprintPin)),
         budgetLines: (budgetLinesData ?? []).map((b) => dbToBudgetLine(b as DbBudgetLine)),
+        insurancePolicies: (insurancePoliciesData ?? []).map((p) => dbToInsurancePolicy(p as DbInsurancePolicy)),
+        customRoles: co?.custom_roles ?? s.customRoles,
+        permissionsPin: co?.permissions_pin ?? s.permissionsPin,
         inviteCode: co?.invite_code ?? "",
         companyAddress: co?.address ?? "",
         businessNumber: co?.business_number ?? "",
@@ -629,6 +636,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (p.eventType === "INSERT") setState((s) => ({ ...s, blueprintPins: [...s.blueprintPins.filter(x => x.id !== (p.new as {id:string}).id), dbToBlueprintPin(p.new as DbBlueprintPin)] }));
           else if (p.eventType === "UPDATE") setState((s) => ({ ...s, blueprintPins: s.blueprintPins.map(x => x.id === (p.new as {id:string}).id ? dbToBlueprintPin(p.new as DbBlueprintPin) : x) }));
           else if (p.eventType === "DELETE") setState((s) => ({ ...s, blueprintPins: s.blueprintPins.filter(x => x.id !== (p.old as {id:string}).id) }));
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "insurance_policies", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") setState((s) => ({ ...s, insurancePolicies: [...s.insurancePolicies.filter(x => x.id !== (p.new as {id:string}).id), dbToInsurancePolicy(p.new as DbInsurancePolicy)] }));
+          else if (p.eventType === "UPDATE") setState((s) => ({ ...s, insurancePolicies: s.insurancePolicies.map(x => x.id === (p.new as {id:string}).id ? dbToInsurancePolicy(p.new as DbInsurancePolicy) : x) }));
+          else if (p.eventType === "DELETE") setState((s) => ({ ...s, insurancePolicies: s.insurancePolicies.filter(x => x.id !== (p.old as {id:string}).id) }));
         })
         .subscribe((status) => {
           setTransient((t) => ({ ...t, isRealtimeConnected: status === "SUBSCRIBED" }));
@@ -1276,25 +1288,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addInsurancePolicy = useCallback((p: Omit<InsurancePolicy, "id">) => {
     const id = genId();
-    up((s) => ({ ...s, insurancePolicies: [...s.insurancePolicies, { ...p, id }] }));
+    const policy = { ...p, id };
+    up((s) => ({ ...s, insurancePolicies: [...s.insurancePolicies, policy] }));
+    bg(() => getClient().from("insurance_policies").insert(insurancePolicyToDb(policy, companyIdRef.current!)), "addInsurancePolicy");
   }, [up]);
 
   const updateInsurancePolicy = useCallback((id: string, u: Partial<InsurancePolicy>) => {
     up((s) => ({ ...s, insurancePolicies: s.insurancePolicies.map((p) => p.id === id ? { ...p, ...u } : p) }));
+    bg(() => {
+      const merged = stateRef.current.insurancePolicies.find((p) => p.id === id);
+      if (!merged) return Promise.resolve({ error: null });
+      return getClient().from("insurance_policies").update(insurancePolicyToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
+    }, "updateInsurancePolicy");
   }, [up]);
 
   const deleteInsurancePolicy = useCallback((id: string) => {
     up((s) => ({ ...s, insurancePolicies: s.insurancePolicies.filter((p) => p.id !== id) }));
+    bg(() => getClient().from("insurance_policies").delete().eq("id", id), "deleteInsurancePolicy");
   }, [up]);
 
   // ── Custom roles ──────────────────────────────────────────────────────────────
 
   const addCustomRole = useCallback((role: string) => {
-    up((s) => ({ ...s, customRoles: [...s.customRoles.filter((r) => r !== role), role] }));
+    up((s) => {
+      const newRoles = [...s.customRoles.filter((r) => r !== role), role];
+      bg(() => getClient().from("companies").update({ custom_roles: newRoles }).eq("id", companyIdRef.current!), "addCustomRole");
+      return { ...s, customRoles: newRoles };
+    });
   }, [up]);
 
   const deleteCustomRole = useCallback((role: string) => {
-    up((s) => ({ ...s, customRoles: s.customRoles.filter((r) => r !== role) }));
+    up((s) => {
+      const filtered = s.customRoles.filter((r) => r !== role);
+      bg(() => getClient().from("companies").update({ custom_roles: filtered }).eq("id", companyIdRef.current!), "deleteCustomRole");
+      return { ...s, customRoles: filtered };
+    });
   }, [up]);
 
   // ── Company extended fields ───────────────────────────────────────────────────
@@ -1334,6 +1362,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setPermissionsPin = useCallback((hashedPin: string) => {
     up((s) => ({ ...s, permissionsPin: hashedPin }));
+    bg(() => getClient().from("companies").update({ permissions_pin: hashedPin }).eq("id", companyIdRef.current!), "setPermissionsPin");
   }, [up]);
 
   // ── Company settings ──────────────────────────────────────────────────────────

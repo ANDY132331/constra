@@ -5,6 +5,7 @@ import type {
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   GpsLocation, VerificationFlag, Message, MaterialType, MaterialEntry, ProjectDocument,
   DailyReport, ChangeOrder, BlueprintPin, BudgetLine, BudgetLineCategory,
+  InsurancePolicy, InsuranceCoverageType,
 } from "@/lib/mock-data";
 
 // ── Geo helper ─────────────────────────────────────────────────────────────────
@@ -1065,5 +1066,56 @@ export function budgetLineToDb(b: BudgetLine, companyId: string): Omit<DbBudgetL
     category: b.category,
     budgeted: b.budgeted,
     actual: b.actual,
+  };
+}
+
+// ── Insurance policies ─────────────────────────────────────────────────────────
+
+export type DbInsurancePolicy = {
+  id: string;
+  company_id: string;
+  holder_name: string;
+  holder_type: string;
+  worker_id: string | null;
+  coverage_type: string;
+  insurer: string;
+  policy_number: string;
+  coverage_amount: number;
+  issue_date: string;
+  expiry_date: string;
+  notes: string | null;
+  created_at: string;
+};
+
+export function dbToInsurancePolicy(row: DbInsurancePolicy): InsurancePolicy {
+  return {
+    id: row.id,
+    holderName: row.holder_name,
+    holderType: row.holder_type as InsurancePolicy["holderType"],
+    workerId: row.worker_id ?? undefined,
+    coverageType: row.coverage_type as InsuranceCoverageType,
+    insurer: row.insurer,
+    policyNumber: row.policy_number,
+    coverageAmount: Number(row.coverage_amount),
+    issueDate: new Date(row.issue_date),
+    expiryDate: new Date(row.expiry_date),
+    notes: row.notes ?? undefined,
+  };
+}
+
+export function insurancePolicyToDb(p: InsurancePolicy, companyId: string): Omit<DbInsurancePolicy, "created_at"> {
+  return {
+    id: p.id,
+    company_id: companyId,
+    holder_name: p.holderName,
+    holder_type: p.holderType,
+    worker_id: p.workerId ?? null,
+    coverage_type: p.coverageType,
+    insurer: p.insurer,
+    policy_number: p.policyNumber,
+    coverage_amount: p.coverageAmount,
+    issue_date: p.issueDate.toISOString().split("T")[0],
+    expiry_date: p.expiryDate.toISOString().split("T")[0],
+    notes: p.notes ?? null,
   };
 }
