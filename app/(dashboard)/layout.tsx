@@ -140,7 +140,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                     <div
                       className="fixed left-0 right-0 z-30 flex items-center justify-center pointer-events-none lg:hidden"
                       style={{
-                        top: 56,
+                        top: "calc(3.5rem + env(safe-area-inset-top))",
                         transform: `translateY(${Math.min(pullY, 72) - 72}px)`,
                         opacity: Math.min(pullY / 36, 1),
                         transition: refreshing ? "none" : "transform 0.08s, opacity 0.08s",
