@@ -136,7 +136,11 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
               <ErrorBoundary fallback={null}><Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /></ErrorBoundary>
               <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
                 {!isDocDetail && <ErrorBoundary fallback={null}><Header onMenuClick={() => setSidebarOpen((v) => !v)} /></ErrorBoundary>}
-                <main ref={mainRef} className={`flex-1 min-h-0 overflow-y-scroll bg-[#0a0a0a] main-scroll ${isDocDetail ? "p-0" : "p-5 md:p-6 mobile-main-padding"}`}>
+                <main
+                  ref={mainRef}
+                  className={`flex-1 min-h-0 overflow-y-scroll ${isDocDetail ? "p-0 bg-[#080808]" : "bg-[#0a0a0a] p-5 md:p-6 mobile-main-padding main-scroll"}`}
+                  style={isDocDetail ? { touchAction: "pan-y pinch-zoom", WebkitOverflowScrolling: "touch" as never, overscrollBehaviorY: "contain" } : undefined}
+                >
                   {!isDocDetail && (pullY > 8 || refreshing) && (
                     <div
                       className="fixed left-0 right-0 z-30 flex items-center justify-center pointer-events-none lg:hidden"
