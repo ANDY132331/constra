@@ -43,6 +43,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+  const isDocDetail = /^\/(invoices|estimates)\/[^/]+$/.test(pathname);
 
   // Allow MobileNav "More" tab to open sidebar via custom event
   useEffect(() => {
@@ -134,9 +135,9 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
               )}
               <ErrorBoundary fallback={null}><Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /></ErrorBoundary>
               <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
-                <ErrorBoundary fallback={null}><Header onMenuClick={() => setSidebarOpen((v) => !v)} /></ErrorBoundary>
-                <main ref={mainRef} className="flex-1 min-h-0 overflow-y-scroll p-5 md:p-6 bg-[#0a0a0a] main-scroll mobile-main-padding">
-                  {(pullY > 8 || refreshing) && (
+                {!isDocDetail && <ErrorBoundary fallback={null}><Header onMenuClick={() => setSidebarOpen((v) => !v)} /></ErrorBoundary>}
+                <main ref={mainRef} className={`flex-1 min-h-0 overflow-y-scroll bg-[#0a0a0a] main-scroll ${isDocDetail ? "p-0" : "p-5 md:p-6 mobile-main-padding"}`}>
+                  {!isDocDetail && (pullY > 8 || refreshing) && (
                     <div
                       className="fixed left-0 right-0 z-30 flex items-center justify-center pointer-events-none lg:hidden"
                       style={{
@@ -163,7 +164,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                   </div>
                 </main>
               </div>
-              <ErrorBoundary fallback={null}><MobileNav /></ErrorBoundary>
+              {!isDocDetail && <ErrorBoundary fallback={null}><MobileNav /></ErrorBoundary>}
               <ErrorBoundary fallback={null}><AIChatWidget /></ErrorBoundary>
               <ErrorBoundary fallback={null}><SearchModal /></ErrorBoundary>
               <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>

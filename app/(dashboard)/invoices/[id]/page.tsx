@@ -199,11 +199,12 @@ export default function InvoiceDetailPage() {
   }
 
   return (
-    <div className="-mx-5 -mt-5 md:-mx-6 md:-mt-6 bg-[#080808]" style={{ minHeight: 'calc(100dvh - 3.5rem - env(safe-area-inset-top))' }}>
+    <div className="bg-[#080808]" style={{ minHeight: '100dvh' }}>
 
       {/* ── Top toolbar ─────────────────────────────────────────────────── */}
       <div
-        className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm"
+        className="flex items-center gap-2 px-4 border-b border-white/[0.06] sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm"
+        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))', paddingBottom: '0.75rem' }}
       >
         {/* Back */}
         <button
@@ -320,7 +321,7 @@ export default function InvoiceDetailPage() {
       )}
 
       {/* ── Paper content ───────────────────────────────────────────────── */}
-      <div className="max-w-3xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
+      <div className="max-w-3xl mx-auto px-3 sm:px-6 pt-6 sm:pt-10" style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}>
 
           {/* Edit hint */}
           <div className="flex items-center gap-1.5 text-[11px] text-amber-400/60 font-medium mb-3 px-1">
