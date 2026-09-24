@@ -52,10 +52,6 @@ export default function ReportsPage() {
   const t = useT();
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
-  const showToast = useCallback((msg: string) => {
-    toast.success(msg);
-  }, []);
-
   useEffect(() => {
     if (!isAdminOrAbove(currentUser.role)) router.replace("/dashboard");
   }, [currentUser.role, router]);
@@ -186,14 +182,14 @@ export default function ReportsPage() {
 
   const handlePayrollExport = useCallback((adapterId: string) => {
     if (periodEntries.length === 0) {
-      showToast("No entries in this period — add clock-ins first");
+      toast.success("No entries in this period — add clock-ins first");
       setExportMenuOpen(false);
       return;
     }
     exportPayroll(adapterId, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings);
     toast.success("Payroll exported");
     setExportMenuOpen(false);
-  }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings, showToast]);
+  }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings]);
 
   return (
     <>
