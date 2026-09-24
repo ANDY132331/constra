@@ -262,7 +262,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                 : "Try changing your search or filters."}
               action={safetyIncidents.length === 0 ? {
                 label: "Log Incident",
-                onClick: () => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); },
+                onClick: () => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); },
               } : undefined}
               isFiltered={safetyIncidents.length > 0 && filtered.length === 0}
             />
@@ -417,7 +417,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                   : "Try changing your search or filters."}
                 action={safetyIncidents.length === 0 ? {
                   label: "Log Incident",
-                  onClick: () => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); },
+                  onClick: () => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); },
                 } : undefined}
                 isFiltered={safetyIncidents.length > 0 && filtered.length === 0}
               />

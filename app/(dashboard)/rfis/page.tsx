@@ -60,8 +60,8 @@ export default function RFIsPage() {
   });
 
   const nextNumber = (() => {
-    const nums = rfis.map((r) => parseInt(r.number.replace("RFI-", "")) || 0);
-    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    const nums = rfis.map((r) => parseInt(r.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const max = nums.length ? Math.max(...nums) : 0;
     return `RFI-${String(max + 1).padStart(3, "0")}`;
   })();
 

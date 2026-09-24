@@ -65,8 +65,8 @@ export default function ChangeOrdersPage() {
   }, [isAdmin, router]);
 
   const nextNumber = (() => {
-    const nums = changeOrders.map((c) => parseInt(c.number.replace("CO-", "")) || 0);
-    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    const nums = changeOrders.map((c) => parseInt(c.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const max = nums.length ? Math.max(...nums) : 0;
     return `CO-${String(max + 1).padStart(3, "0")}`;
   })();
 
