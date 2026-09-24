@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
-  Plus, Search, Lock, Trash2, X, FileText, ChevronRight,
+  Plus, Search, Lock, X, FileText, ChevronRight,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
@@ -88,7 +88,7 @@ function EstimateRow({ estimate, currency, selected, onClick }: {
 // â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function EstimatesPage() {
-  const { estimates, addEstimate, updateEstimate, deleteEstimate, currency, companyName, companyAddress, companyLogo, currentUser, defaultTaxRate } = useStore();
+  const { estimates, addEstimate, currency, currentUser, defaultTaxRate } = useStore();
   const router = useRouter();
   const t = useT();
 
@@ -99,7 +99,6 @@ export default function EstimatesPage() {
   const [search, setSearch]           = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | Estimate["status"]>("all");
   const [showModal, setShowModal]     = useState(false);
-  const [editId, setEditId]           = useState<string | null>(null);
   const [form, setForm]               = useState<EstForm>(blank);
   const filtered = estimates.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
@@ -131,36 +130,21 @@ export default function EstimatesPage() {
     const items = form.items
       .filter((i) => i.description.trim())
       .map((i) => ({ description: i.description.trim(), qty: parseFloat(i.qty) || 1, rate: parseFloat(i.rate) || 0, category: i.category }));
-    if (editId) {
-      updateEstimate(editId, {
-        projectName: form.projectName.trim(),
-        clientName: form.clientName.trim(),
-        clientEmail: form.clientEmail.trim(),
-        status: form.status,
-        issueDate: form.issueDate ? new Date(form.issueDate) : new Date(),
-        validUntil: form.validUntil ? new Date(form.validUntil) : new Date(Date.now() + 30 * 86400000),
-        items,
-        taxRate: parseFloat(form.taxRate) || 0,
-        notes: form.notes.trim() || undefined,
-      });
-    } else {
-      addEstimate({
-        number: nextNumber,
-        projectName: form.projectName.trim(),
-        clientName: form.clientName.trim(),
-        clientEmail: form.clientEmail.trim(),
-        status: form.status,
-        issueDate: form.issueDate ? new Date(form.issueDate) : new Date(),
-        validUntil: form.validUntil ? new Date(form.validUntil) : new Date(Date.now() + 30 * 86400000),
-        items,
-        taxRate: parseFloat(form.taxRate) || 0,
-        notes: form.notes.trim() || undefined,
-      });
-    }
+    addEstimate({
+      number: nextNumber,
+      projectName: form.projectName.trim(),
+      clientName: form.clientName.trim(),
+      clientEmail: form.clientEmail.trim(),
+      status: form.status,
+      issueDate: form.issueDate ? new Date(form.issueDate) : new Date(),
+      validUntil: form.validUntil ? new Date(form.validUntil) : new Date(Date.now() + 30 * 86400000),
+      items,
+      taxRate: parseFloat(form.taxRate) || 0,
+      notes: form.notes.trim() || undefined,
+    });
     setForm({ ...blank, taxRate: String(defaultTaxRate) });
-    setEditId(null);
     setShowModal(false);
-    toast.success(editId ? "Estimate updated" : "Estimate created");
+    toast.success("Estimate created");
   };
 
   const previewTotal = form.items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0) * (1 + (parseFloat(form.taxRate) || 0) / 100);
@@ -181,7 +165,7 @@ export default function EstimatesPage() {
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h1 className="text-[22px] font-bold text-white">Estimates</h1>
           <button
-            onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
+            onClick={() => { setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New
@@ -308,7 +292,7 @@ export default function EstimatesPage() {
                 <Lock size={9} /> Private
               </div>
               <button
-                onClick={() => { setEditId(null); setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
+                onClick={() => { setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
                 className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-full transition-colors"
               >
                 <Plus size={14} /> New Estimate
@@ -387,10 +371,10 @@ export default function EstimatesPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <div>
-                <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Estimate" : "New Estimate"}</h3>
-                {!editId && <p className="text-[11px] text-white/30 mt-0.5 font-mono">{nextNumber}</p>}
+                <h3 className="text-[15px] font-bold text-white">New Estimate</h3>
+                <p className="text-[11px] text-white/30 mt-0.5 font-mono">{nextNumber}</p>
               </div>
-              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-1.5 rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -512,13 +496,13 @@ export default function EstimatesPage() {
             </div>
 
             <div className="flex-shrink-0 flex gap-3 px-5 pb-5 pt-3 border-t border-white/[0.06]">
-              <button onClick={() => { setShowModal(false); setEditId(null); }}
+              <button onClick={() => setShowModal(false)}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
                 {t.common.cancel}
               </button>
               <button onClick={handleSave} disabled={!form.projectName.trim() || !form.clientName.trim()}
                 className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                {editId ? "Save Changes" : "Create Estimate"}
+                Create Estimate
               </button>
             </div>
           </div>
