@@ -214,10 +214,10 @@ export default function EstimateDetailPage() {
   }
 
   return (
-    <div className="-mx-5 -mt-5 md:-mx-6 md:-mt-6 flex flex-col bg-[#080808]" style={{ minHeight: 'calc(100dvh - 3.5rem - env(safe-area-inset-top))' }}>
+    <div className="-mx-5 -mt-5 md:-mx-6 md:-mt-6 bg-[#080808]" style={{ minHeight: 'calc(100dvh - 3.5rem - env(safe-area-inset-top))' }}>
 
       {/* ── Top toolbar ─────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] flex-shrink-0 sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm">
         {/* Back */}
         <button
           onClick={() => router.push("/estimates")}
@@ -335,9 +335,8 @@ export default function EstimateDetailPage() {
         )}
       </div>
 
-      {/* ── Paper scroll area ───────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
+      {/* ── Paper content ───────────────────────────────────────────────── */}
+      <div className="max-w-3xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
 
           {/* Edit hint */}
           <div className="flex items-center gap-1.5 text-[11px] text-amber-400/60 font-medium mb-3 px-1">
@@ -605,7 +604,6 @@ export default function EstimateDetailPage() {
 
           {isDirty && <div className="h-20" />}
         </div>
-      </div>
 
       {/* ── Floating save bar ──────────────────────────────────────────── */}
       {isDirty && (
