@@ -841,7 +841,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             companyId: companyIdRef.current,
             data: {
               assigneeUserId: u.workerId,
-              assignerName: stateRef.current.workers.find((w) => w.id === stateRef.current.authUserId) ?? stateRef.current.workers[0].name,
+              assignerName: stateRef.current.workers.find((w) => w.id === stateRef.current.authUserId)?.name ?? stateRef.current.workers[0]?.name ?? "",
               taskName: task.name,
               projectName: project.name,
               dueDate: u.endDate ? new Date(u.endDate).toLocaleDateString() : (task.endDate ? new Date(task.endDate).toLocaleDateString() : ""),
@@ -1127,8 +1127,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [up]);
 
   const incrementMaterialUse = useCallback((id: string) => {
+    const newCount = (stateRef.current.materialTypes.find(m => m.id === id)?.useCount ?? 0) + 1;
     up((s) => ({ ...s, materialTypes: s.materialTypes.map((m) => m.id === id ? { ...m, useCount: m.useCount + 1 } : m) }));
-    bg(() => getClient().from("material_types").update({ use_count: (stateRef.current.materialTypes.find(m => m.id === id)?.useCount ?? 1) }).eq("id", id), "incrementMaterialUse");
+    bg(() => getClient().from("material_types").update({ use_count: newCount }).eq("id", id), "incrementMaterialUse");
   }, [up]);
 
   // ── Material entries ──────────────────────────────────────────────────────────

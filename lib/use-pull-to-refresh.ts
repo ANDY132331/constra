@@ -11,6 +11,8 @@ export function usePullToRefresh(
   const startYRef = useRef(0);
   const pullYRef = useRef(0);
   const activeRef = useRef(false);
+  const onRefreshRef = useRef(onRefresh);
+  useEffect(() => { onRefreshRef.current = onRefresh; }, [onRefresh]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -40,7 +42,7 @@ export function usePullToRefresh(
         setRefreshing(true);
         setPullY(THRESHOLD);
         pullYRef.current = 0;
-        try { await onRefresh(); } finally { setRefreshing(false); setPullY(0); }
+        try { await onRefreshRef.current(); } finally { setRefreshing(false); setPullY(0); }
       } else {
         pullYRef.current = 0;
         setPullY(0);
@@ -55,7 +57,7 @@ export function usePullToRefresh(
       el.removeEventListener("touchmove", onMove);
       el.removeEventListener("touchend", onEnd);
     };
-  }, [containerRef, onRefresh]);
+  }, [containerRef]);
 
   return { pullY, refreshing, threshold: THRESHOLD };
 }

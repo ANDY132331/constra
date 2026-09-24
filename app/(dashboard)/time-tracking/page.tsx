@@ -494,7 +494,8 @@ export default function TimeTrackingPage() {
     const now = new Date();
     // Find ALL open entries for this worker and close them all (prevents orphaned running timers)
     const openEntries = clockEntries.filter((e) => e.workerId === workerId && !e.clockOut);
-    const entry = openEntries[openEntries.length - 1]; // most recent
+    const entry = openEntries.reduce<typeof openEntries[0] | undefined>((latest, e) =>
+      !latest || e.clockIn > latest.clockIn ? e : latest, undefined);
     // Close every open entry (defensive: should only ever be one)
     openEntries.forEach((e) => updateClockEntry(e.id, { clockOut: now }));
     if (entry) {
@@ -800,7 +801,8 @@ export default function TimeTrackingPage() {
             Clocked In Now
           </p>
           {clockedIn.map((worker) => {
-            const project = getProjectById(worker.projectIds[0]);
+            const activeEntry = clockEntries.find((e) => e.workerId === worker.id && !e.clockOut);
+            const project = getProjectById(activeEntry?.projectId ?? worker.projectIds[0] ?? "");
             const ci = worker.clockInTime ?? new Date();
             return (
               <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 flex items-center gap-3 mb-3">
@@ -1098,7 +1100,8 @@ export default function TimeTrackingPage() {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {clockedIn.map((worker) => {
-              const project = getProjectById(worker.projectIds[0]);
+              const activeEntry = clockEntries.find((e) => e.workerId === worker.id && !e.clockOut);
+              const project = getProjectById(activeEntry?.projectId ?? worker.projectIds[0] ?? "");
               const ci = worker.clockInTime ?? new Date();
               return (
                 <div key={worker.id} className="bg-[#111111] border border-green-500/20 rounded-xl p-4 relative overflow-hidden">

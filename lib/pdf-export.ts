@@ -208,9 +208,10 @@ export async function exportReportPdf(input: PdfReportInput) {
         clockIn: e.clockIn.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
         clockOut: e.clockOut!.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
         hours,
+        sortMs: e.clockIn.getTime(),
       };
     })
-    .sort((a, b) => a.date.localeCompare(b.date) || a.worker.localeCompare(b.worker));
+    .sort((a, b) => a.sortMs - b.sortMs || a.worker.localeCompare(b.worker));
 
   if (timesheetRows.length === 0) {
     doc.setTextColor(140, 140, 140);
