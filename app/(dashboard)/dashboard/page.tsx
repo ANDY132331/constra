@@ -359,7 +359,7 @@ export default function DashboardPage() {
     ...overdueInvoices.map((i) => ({
       id: i.id,
       label: `Invoice ${i.number} overdue — ${formatCurrencyCompact(invoiceTotal(i), currency as never)}`,
-      href: "/invoices",
+      href: `/invoices/${i.id}`,
       color: "#ef4444",
     })),
     ...pendingCOs.map((co) => ({
