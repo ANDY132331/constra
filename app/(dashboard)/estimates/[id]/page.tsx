@@ -214,7 +214,7 @@ export default function EstimateDetailPage() {
   }
 
   return (
-    <div className="-mx-5 -mt-5 -mb-5 md:-mx-6 md:-mt-6 md:-mb-6 flex flex-col min-h-full bg-[#080808]">
+    <div className="-mx-5 -mt-5 md:-mx-6 md:-mt-6 flex flex-col bg-[#080808]" style={{ minHeight: 'calc(100dvh - 3.5rem - env(safe-area-inset-top))' }}>
 
       {/* ── Top toolbar ─────────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] flex-shrink-0 sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm">
