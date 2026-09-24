@@ -154,7 +154,7 @@ export default function MaterialsPage() {
       trade: selectedMaterial.trade,
       quantity: q,
       type: entryType,
-      date: new Date(entryDate),
+      date: new Date(entryDate + "T12:00:00"),
       note: note.trim() || undefined,
     };
     addMaterialEntry(entry);

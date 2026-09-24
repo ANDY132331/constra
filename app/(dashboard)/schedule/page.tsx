@@ -135,10 +135,13 @@ export default function SchedulePage() {
   }, []);
 
   const taskEvents: CalEvent[] = projects.flatMap((p) =>
-    p.tasks.flatMap((t) => [
-      { id: t.id + "-start", title: t.name + " (Start)", date: t.startDate, color: p.color, source: "task" as const },
-      { id: t.id + "-end", title: t.name + " (Due)", date: t.endDate, color: p.color, source: "task" as const },
-    ])
+    p.tasks.flatMap((t) => {
+      const toDate = (d: Date | string) => d instanceof Date ? d : new Date(d + "T12:00:00");
+      return [
+        { id: t.id + "-start", title: t.name + " (Start)", date: toDate(t.startDate), color: p.color, source: "task" as const },
+        { id: t.id + "-end", title: t.name + " (Due)", date: toDate(t.endDate), color: p.color, source: "task" as const },
+      ];
+    })
   );
 
   const customCalEvents: CalEvent[] = customEvents.map((e) => ({

@@ -350,9 +350,14 @@ export default function DashboardPage() {
   const totalOutstanding = useMemo(() => invoices.filter((i) => i.status === "sent").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
   const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue"), [invoices]);
   const pendingCOs = useMemo(() => changeOrders.filter((co) => co.status === "pending"), [changeOrders]);
-  const overdueTasks = projects.flatMap((p) =>
-    p.tasks.filter((t) => t.status !== "completed" && t.endDate < now)
-  );
+  const overdueTasks = useMemo(() =>
+    projects.flatMap((p) =>
+      p.tasks.filter((t) => {
+        const end = t.endDate instanceof Date ? t.endDate : new Date(t.endDate + "T12:00:00");
+        return t.status !== "completed" && end < now;
+      })
+    ),
+  [projects, now]);
 
   // Urgent alerts (max 6)
   const urgentItems: { id: string; label: string; href: string; color: string }[] = [
@@ -381,7 +386,7 @@ export default function DashboardPage() {
   if (isWorker) {
     const myEntries = clockEntries.filter((e) => e.workerId === currentUser.id);
     const wkStart = new Date(); wkStart.setDate(wkStart.getDate() - wkStart.getDay()); wkStart.setHours(0, 0, 0, 0);
-    const todayStart = new Date(now.toDateString());
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     const myWeekHours = myEntries
       .filter((e) => e.clockOut && e.clockIn >= wkStart)
