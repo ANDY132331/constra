@@ -115,9 +115,9 @@ export default function EstimatesPage() {
   const declinedCount = estimates.filter((e) => e.status === "declined").length;
 
   const nextNumber = (() => {
-    const nums = estimates.map((e) => parseInt(e.number.replace("EST-", "")) || 0);
-    const max = nums.length > 0 ? Math.max(...nums) : 0;
-    return `EST-${String(max + 1).padStart(3, "0")}`;
+    const nums = estimates.map((e) => parseInt(e.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const max = nums.length ? Math.max(...nums) : 0;
+    return `EST-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
   })();
 
   const updateItem = (idx: number, field: keyof LineItem, val: string) =>
