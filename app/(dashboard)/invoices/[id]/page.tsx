@@ -199,7 +199,7 @@ export default function InvoiceDetailPage() {
   }
 
   return (
-    <div className="-mx-5 -mt-5 md:-mx-6 md:-mt-6 flex flex-col min-h-[calc(100dvh-3.5rem-env(safe-area-inset-top))] bg-[#080808]">
+    <div className="-mx-5 -mt-5 -mb-5 md:-mx-6 md:-mt-6 md:-mb-6 flex flex-col min-h-full bg-[#080808]">
 
       {/* ── Top toolbar ─────────────────────────────────────────────────── */}
       <div
