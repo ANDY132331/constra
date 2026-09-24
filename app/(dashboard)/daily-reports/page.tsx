@@ -14,6 +14,7 @@ import { MicButton } from "@/components/mic-button";
 import { useStore } from "@/lib/store";
 import type { DailyReport } from "@/lib/mock-data";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { toLocalDateString } from "@/lib/utils";
 
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
@@ -47,7 +48,7 @@ type ReportForm = {
 
 const emptyForm = (): ReportForm => ({
   projectId: "",
-  date: new Date().toISOString().slice(0, 10),
+  date: toLocalDateString(new Date()),
   weather: "Clear",
   temperatureF: "72",
   crewCount: "",
@@ -141,9 +142,9 @@ export default function DailyReportsPage() {
       notes: form.notes.trim(),
       submittedById: currentUser.id,
     });
-    const nextDay = new Date(form.date);
+    const nextDay = new Date(form.date + "T12:00:00");
     nextDay.setDate(nextDay.getDate() + 1);
-    setForm({ ...emptyForm(), projectId: form.projectId, weather: form.weather, temperatureF: form.temperatureF, date: nextDay.toISOString().slice(0, 10) });
+    setForm({ ...emptyForm(), projectId: form.projectId, weather: form.weather, temperatureF: form.temperatureF, date: toLocalDateString(nextDay) });
     setShowForm(false);
     toast.success("Daily report created");
   }, [form, addDailyReport, currentUser.id]);

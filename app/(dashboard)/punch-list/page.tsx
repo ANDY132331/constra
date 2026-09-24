@@ -10,6 +10,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { toLocalDateString } from "@/lib/utils";
 
 const PRIORITY_CONFIG = {
   high: { label: "HIGH", className: "bg-red-500/15 text-red-400" },
@@ -81,7 +82,7 @@ export default function PunchListPage() {
       priority: item.priority,
       assignedToId: item.assignedToId ?? "",
       location: item.location ?? "",
-      dueDate: item.dueDate ? item.dueDate.toISOString().split("T")[0] : "",
+      dueDate: item.dueDate ? toLocalDateString(item.dueDate) : "",
     });
     setShowModal(true);
   };
@@ -95,7 +96,7 @@ export default function PunchListPage() {
         description: form.description.trim(),
         priority: form.priority,
         assignedToId: form.assignedToId || undefined,
-        dueDate: form.dueDate ? new Date(form.dueDate) : undefined,
+        dueDate: form.dueDate ? new Date(form.dueDate + "T12:00:00") : undefined,
         location: form.location.trim() || undefined,
       });
     } else {
@@ -107,7 +108,7 @@ export default function PunchListPage() {
         priority: form.priority,
         assignedToId: form.assignedToId || undefined,
         createdAt: new Date(),
-        dueDate: form.dueDate ? new Date(form.dueDate) : undefined,
+        dueDate: form.dueDate ? new Date(form.dueDate + "T12:00:00") : undefined,
         location: form.location.trim() || undefined,
       });
     }

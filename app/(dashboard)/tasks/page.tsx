@@ -10,6 +10,7 @@ import { format, isBefore } from "date-fns";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { EmptyState } from "@/components/empty-state";
+import { toLocalDateString } from "@/lib/utils";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
   completed: { label: "Completed", icon: CheckCircle2, className: "text-green-400" },
@@ -36,8 +37,8 @@ type TaskForm = {
   progress: string;
 };
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
-const weekIso  = () => new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+const todayIso = () => toLocalDateString(new Date());
+const weekIso  = () => toLocalDateString(new Date(Date.now() + 7 * 86400000));
 const blankTask = (): TaskForm => ({
   projectId: "", name: "", workerId: "", startDate: todayIso(), endDate: weekIso(), status: "not-started", progress: "0",
 });
@@ -83,8 +84,8 @@ export default function TasksPage() {
       projectId: task.projectId,
       name: task.name,
       workerId: task.workerId,
-      startDate: task.startDate.toISOString().split("T")[0],
-      endDate: task.endDate.toISOString().split("T")[0],
+      startDate: toLocalDateString(task.startDate),
+      endDate: toLocalDateString(task.endDate),
       status: task.status,
       progress: task.progress.toString(),
     });
@@ -98,8 +99,8 @@ export default function TasksPage() {
       updateTask(editProjectId, editTaskId, {
         name: form.name.trim(),
         workerId: form.workerId || undefined,
-        startDate: form.startDate ? new Date(form.startDate) : undefined,
-        endDate: form.endDate ? new Date(form.endDate) : undefined,
+        startDate: form.startDate ? new Date(form.startDate + "T12:00:00") : undefined,
+        endDate: form.endDate ? new Date(form.endDate + "T12:00:00") : undefined,
         status: form.status,
         progress: Math.min(100, Math.max(0, parseInt(form.progress) || 0)),
       });
@@ -108,8 +109,8 @@ export default function TasksPage() {
       addTask(form.projectId, {
         name: form.name.trim(),
         workerId: form.workerId || (workers[0]?.id ?? ""),
-        startDate: form.startDate ? new Date(form.startDate) : new Date(),
-        endDate: form.endDate ? new Date(form.endDate) : new Date(Date.now() + 14 * 86400000),
+        startDate: form.startDate ? new Date(form.startDate + "T12:00:00") : new Date(),
+        endDate: form.endDate ? new Date(form.endDate + "T12:00:00") : new Date(Date.now() + 14 * 86400000),
         progress: 0,
         status: form.status,
       });

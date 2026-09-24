@@ -13,6 +13,7 @@ import type { Invoice } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { toLocalDateString } from "@/lib/utils";
 
 const STATUS_CONFIG = {
   draft:   { label: "Draft",   bg: "bg-zinc-700/60",       text: "text-zinc-300",   dot: "bg-zinc-400",   bar: "bg-zinc-600" },
@@ -97,7 +98,7 @@ export default function InvoicesPage() {
   const [showModal, setShowModal]     = useState(false);
   const [form, setForm]               = useState<InvForm>(blank);
   const searchParams = useSearchParams();
-  useEffect(() => { if (searchParams.get("new") === "1") { setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); } }, [searchParams, defaultTaxRate]);
+  useEffect(() => { if (searchParams.get("new") === "1") { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); } }, [searchParams, defaultTaxRate]);
 
   const filtered = invoices.filter((i) => {
     if (statusFilter !== "all" && i.status !== statusFilter) return false;
@@ -121,7 +122,7 @@ export default function InvoicesPage() {
   }, []);
 
   const nextNumber = (() => {
-    const nums = invoices.map((i) => parseInt(i.number.replace(/\D/g, ""), 10)).filter(Boolean);
+    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter(Boolean);
     const max = nums.length ? Math.max(...nums) : 0;
     return `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
   })();
@@ -142,8 +143,8 @@ export default function InvoicesPage() {
       clientEmail: form.clientEmail.trim(),
       clientAddress: form.clientAddress.trim(),
       status: form.status,
-      issueDate: form.issueDate ? new Date(form.issueDate) : new Date(),
-      dueDate: form.dueDate ? new Date(form.dueDate) : new Date(Date.now() + 30 * 86400000),
+      issueDate: form.issueDate ? new Date(form.issueDate + "T12:00:00") : new Date(),
+      dueDate: form.dueDate ? new Date(form.dueDate + "T12:00:00") : new Date(Date.now() + 30 * 86400000),
       items,
       taxRate: parseFloat(form.taxRate) || 0,
       notes: form.notes.trim() || undefined,
@@ -174,7 +175,7 @@ export default function InvoicesPage() {
             <p className="text-[12px] text-white/35 mt-0.5">{invoices.length} total</p>
           </div>
           <button
-            onClick={() => { setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
+            onClick={() => { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-full transition-colors shadow-lg shadow-amber-500/20"
           >
             <Plus size={15} /> New
@@ -310,7 +311,7 @@ export default function InvoicesPage() {
             <Lock size={9} /> Private
           </div>
           <button
-            onClick={() => { setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
+            onClick={() => { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New Invoice

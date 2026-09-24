@@ -8,6 +8,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { toLocalDateString } from "@/lib/utils";
 
 const STATUS_CONFIG = {
   open: { label: "Open", className: "bg-red-500/15 text-red-400", icon: Clock },
@@ -34,7 +35,7 @@ type RFIForm = {
 const blank: RFIForm = {
   projectId: "", subject: "", question: "",
   submittedById: "", assignedToId: "",
-  priority: "routine", dueDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+  priority: "routine", dueDate: toLocalDateString(new Date(Date.now() + 7 * 86400000)),
 };
 
 export default function RFIsPage() {
@@ -73,7 +74,7 @@ export default function RFIsPage() {
       submittedById: rfi.submittedById,
       assignedToId: rfi.assignedToId,
       priority: rfi.priority,
-      dueDate: rfi.dueDate.toISOString().split("T")[0],
+      dueDate: toLocalDateString(rfi.dueDate),
     });
     setShowModal(true);
   };
@@ -86,7 +87,7 @@ export default function RFIsPage() {
         question: form.question.trim(),
         assignedToId: form.assignedToId || undefined,
         priority: form.priority,
-        dueDate: form.dueDate ? new Date(form.dueDate) : undefined,
+        dueDate: form.dueDate ? new Date(form.dueDate + "T12:00:00") : undefined,
       });
     } else {
       addRFI({
@@ -99,7 +100,7 @@ export default function RFIsPage() {
         status: "open",
         priority: form.priority,
         createdAt: new Date(),
-        dueDate: form.dueDate ? new Date(form.dueDate) : new Date(Date.now() + 7 * 86400000),
+        dueDate: form.dueDate ? new Date(form.dueDate + "T12:00:00") : new Date(Date.now() + 7 * 86400000),
       });
     }
     setForm(blank);

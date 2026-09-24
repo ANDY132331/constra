@@ -12,6 +12,7 @@ import { useT } from "@/lib/i18n";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 import { isAdminOrAbove } from "@/lib/permissions";
+import { toLocalDateString } from "@/lib/utils";
 
 const STATUS_CONFIG = {
   available:   { label: "Available",   className: "bg-green-500/15 text-green-400",  dot: "#22c55e" },
@@ -30,8 +31,8 @@ type EqForm = {
   lastService: string; nextService: string; certExpiry: string;
 };
 
-const todayStr = () => new Date().toISOString().slice(0, 10);
-const ninetyStr = () => new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
+const todayStr = () => toLocalDateString(new Date());
+const ninetyStr = () => toLocalDateString(new Date(Date.now() + 90 * 86400000));
 const blank = (): EqForm => ({
   name: "", type: "", status: "available",
   projectId: "", dailyRate: "",
@@ -76,9 +77,9 @@ export default function EquipmentPage() {
       status: eq.status,
       projectId: eq.projectId ?? "",
       dailyRate: eq.dailyRate.toString(),
-      lastService: eq.lastService.toISOString().split("T")[0],
-      nextService: eq.nextService.toISOString().split("T")[0],
-      certExpiry: eq.certExpiry ? eq.certExpiry.toISOString().split("T")[0] : "",
+      lastService: toLocalDateString(eq.lastService),
+      nextService: toLocalDateString(eq.nextService),
+      certExpiry: eq.certExpiry ? toLocalDateString(eq.certExpiry) : "",
     });
     setShowModal(true);
   }
@@ -91,9 +92,9 @@ export default function EquipmentPage() {
       status: form.status,
       projectId: form.projectId || undefined,
       dailyRate: parseFloat(form.dailyRate) || 0,
-      lastService: form.lastService ? new Date(form.lastService) : new Date(),
-      nextService: form.nextService ? new Date(form.nextService) : new Date(Date.now() + 90 * 86400000),
-      certExpiry: form.certExpiry ? new Date(form.certExpiry) : undefined,
+      lastService: form.lastService ? new Date(form.lastService + "T12:00:00") : new Date(),
+      nextService: form.nextService ? new Date(form.nextService + "T12:00:00") : new Date(Date.now() + 90 * 86400000),
+      certExpiry: form.certExpiry ? new Date(form.certExpiry + "T12:00:00") : undefined,
     };
     if (editId) {
       updateEquipment(editId, payload);

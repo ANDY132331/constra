@@ -14,6 +14,7 @@ import type { Estimate } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { toLocalDateString } from "@/lib/utils";
 
 // â”€â”€ Status config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STATUS_CONFIG = {
@@ -136,8 +137,8 @@ export default function EstimatesPage() {
       clientName: form.clientName.trim(),
       clientEmail: form.clientEmail.trim(),
       status: form.status,
-      issueDate: form.issueDate ? new Date(form.issueDate) : new Date(),
-      validUntil: form.validUntil ? new Date(form.validUntil) : new Date(Date.now() + 30 * 86400000),
+      issueDate: form.issueDate ? new Date(form.issueDate + "T12:00:00") : new Date(),
+      validUntil: form.validUntil ? new Date(form.validUntil + "T12:00:00") : new Date(Date.now() + 30 * 86400000),
       items,
       taxRate: parseFloat(form.taxRate) || 0,
       notes: form.notes.trim() || undefined,
@@ -165,7 +166,7 @@ export default function EstimatesPage() {
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h1 className="text-[22px] font-bold text-white">Estimates</h1>
           <button
-            onClick={() => { setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
+            onClick={() => { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New
@@ -292,7 +293,7 @@ export default function EstimatesPage() {
                 <Lock size={9} /> Private
               </div>
               <button
-                onClick={() => { setForm({ ...blank, issueDate: new Date().toISOString().split("T")[0], taxRate: String(defaultTaxRate) }); setShowModal(true); }}
+                onClick={() => { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); }}
                 className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-full transition-colors"
               >
                 <Plus size={14} /> New Estimate

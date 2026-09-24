@@ -54,7 +54,7 @@ type Draft = {
 };
 
 function toDraft(inv: Invoice): Draft {
-  const ds = (d: Date | string) => (d instanceof Date ? d : new Date(d)).toISOString().split("T")[0];
+  const ds = (d: Date | string) => { const t = d instanceof Date ? d : new Date(d); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; };
   return {
     clientName: inv.clientName ?? "",
     clientEmail: inv.clientEmail ?? "",
@@ -133,8 +133,8 @@ export default function InvoiceDetailPage() {
       clientName: draft.clientName.trim(),
       clientEmail: draft.clientEmail.trim(),
       clientAddress: draft.clientAddress.trim() || undefined,
-      issueDate: draft.issueDate ? new Date(draft.issueDate) : invoice.issueDate,
-      dueDate: draft.dueDate ? new Date(draft.dueDate) : invoice.dueDate,
+      issueDate: draft.issueDate ? new Date(draft.issueDate + "T12:00:00") : invoice.issueDate,
+      dueDate: draft.dueDate ? new Date(draft.dueDate + "T12:00:00") : invoice.dueDate,
       items, taxRate,
       notes: draft.notes.trim() || undefined,
     });
@@ -152,7 +152,7 @@ export default function InvoiceDetailPage() {
 
   function handleDuplicate() {
     if (!invoice) return;
-    const nums = invoices.map((i) => parseInt(i.number.replace(/\D/g, ""), 10)).filter(Boolean);
+    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter(Boolean);
     const num = `INV-${new Date().getFullYear()}-${String(Math.max(...nums, 0) + 1).padStart(3, "0")}`;
     addInvoice({ number: num, clientName: invoice.clientName, clientEmail: invoice.clientEmail, clientAddress: invoice.clientAddress, status: "draft", issueDate: new Date(), dueDate: new Date(Date.now() + 30 * 86400000), items: invoice.items, taxRate: invoice.taxRate, notes: invoice.notes });
     toast.success(`Duplicated as ${num}`);

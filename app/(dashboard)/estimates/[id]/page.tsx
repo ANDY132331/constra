@@ -54,7 +54,7 @@ type Draft = {
 };
 
 function toDraft(est: Estimate): Draft {
-  const ds = (d: Date | string) => (d instanceof Date ? d : new Date(d)).toISOString().split("T")[0];
+  const ds = (d: Date | string) => { const t = d instanceof Date ? d : new Date(d); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; };
   return {
     projectName: est.projectName ?? "",
     clientName: est.clientName ?? "",
@@ -139,8 +139,8 @@ export default function EstimateDetailPage() {
       projectName: draft.projectName.trim(),
       clientName: draft.clientName.trim(),
       clientEmail: draft.clientEmail.trim(),
-      issueDate: draft.issueDate ? new Date(draft.issueDate) : estimate.issueDate,
-      validUntil: draft.validUntil ? new Date(draft.validUntil) : estimate.validUntil,
+      issueDate: draft.issueDate ? new Date(draft.issueDate + "T12:00:00") : estimate.issueDate,
+      validUntil: draft.validUntil ? new Date(draft.validUntil + "T12:00:00") : estimate.validUntil,
       items, taxRate,
       notes: draft.notes.trim() || undefined,
     });

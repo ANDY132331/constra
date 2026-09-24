@@ -14,6 +14,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toast } from "sonner";
+import { toLocalDateString } from "@/lib/utils";
 
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
@@ -39,7 +40,7 @@ const blank: FormState = {
   insurer: "",
   policyNumber: "",
   coverageAmount: "",
-  issueDate: new Date().toISOString().split("T")[0],
+  issueDate: toLocalDateString(new Date()),
   expiryDate: "",
   notes: "",
 };
@@ -124,8 +125,8 @@ export default function InsurancePage() {
       insurer:        p.insurer,
       policyNumber:   p.policyNumber,
       coverageAmount: String(p.coverageAmount),
-      issueDate:      new Date(p.issueDate).toISOString().split("T")[0],
-      expiryDate:     new Date(p.expiryDate).toISOString().split("T")[0],
+      issueDate:      toLocalDateString(p.issueDate),
+      expiryDate:     toLocalDateString(p.expiryDate),
       notes:          p.notes ?? "",
     });
     setEditId(p.id);
@@ -145,8 +146,8 @@ export default function InsurancePage() {
       insurer:        form.insurer.trim(),
       policyNumber:   form.policyNumber.trim(),
       coverageAmount: parseFloat(form.coverageAmount) || 0,
-      issueDate:      new Date(form.issueDate),
-      expiryDate:     new Date(form.expiryDate),
+      issueDate:      new Date(form.issueDate + "T12:00:00"),
+      expiryDate:     new Date(form.expiryDate + "T12:00:00"),
       notes:          form.notes.trim() || undefined,
     };
     if (editId) {

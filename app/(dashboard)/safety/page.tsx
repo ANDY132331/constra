@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { toLocalDateString } from "@/lib/utils";
 
 const TYPE_CONFIG = {
   "near-miss": { label: "Near Miss", icon: AlertTriangle, color: "#F5C400" },
@@ -41,7 +42,7 @@ const blank: IncidentForm = {
   projectId: "", type: "near-miss", severity: "low",
   description: "", actionTaken: "",
   reportedById: "", injuredId: "",
-  date: new Date().toISOString().split("T")[0], reportedToOSHA: false,
+  date: toLocalDateString(new Date()), reportedToOSHA: false,
 };
 
 export default function SafetyPage() {
@@ -80,7 +81,7 @@ export default function SafetyPage() {
       actionTaken: incident.actionTaken,
       reportedById: incident.reportedById,
       injuredId: incident.injuredId ?? "",
-      date: incident.date.toISOString().split("T")[0],
+      date: toLocalDateString(incident.date),
       reportedToOSHA: incident.reportedToOSHA,
     });
     setShowModal(true);
@@ -95,7 +96,7 @@ export default function SafetyPage() {
         description: form.description.trim(),
         actionTaken: form.actionTaken.trim(),
         injuredId: form.injuredId || undefined,
-        date: form.date ? new Date(form.date) : new Date(),
+        date: form.date ? new Date(form.date + "T12:00:00") : new Date(),
         reportedToOSHA: form.reportedToOSHA,
       });
     } else {
@@ -107,7 +108,7 @@ export default function SafetyPage() {
         actionTaken: form.actionTaken.trim(),
         reportedById: form.reportedById || (workers[0]?.id ?? ""),
         injuredId: form.injuredId || undefined,
-        date: form.date ? new Date(form.date) : new Date(),
+        date: form.date ? new Date(form.date + "T12:00:00") : new Date(),
         reportedToOSHA: form.reportedToOSHA,
       });
     }
@@ -180,7 +181,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         <div className="px-5 pt-5 pb-4 flex items-center justify-between">
           <h1 className="text-[22px] font-bold text-white">Safety</h1>
           <button
-            onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            onClick={() => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); }}
             className="bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
           >
             <Plus size={14} />
@@ -336,7 +337,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                 {safetyIncidents.length} incidents logged · OSHA reporting required for injuries
               </p>
             </div>
-            <button onClick={() => { setEditId(null); setForm({ ...blank, date: new Date().toISOString().split("T")[0] }); setShowModal(true); }}
+            <button onClick={() => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); }}
               className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-full transition-colors flex-shrink-0">
               <Plus size={15} />
               Log Incident

@@ -18,6 +18,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 import { toast } from "sonner";
+import { toLocalDateString } from "@/lib/utils";
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Admin: { label: "Admin", className: "bg-purple-500/15 text-purple-400" },
@@ -902,16 +903,16 @@ export default function CrewPage() {
                             <input
                               className={inp}
                               type="date"
-                              value={cert.issuedDate ? cert.issuedDate.toISOString().split("T")[0] : ""}
-                              onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, issuedDate: e.target.value ? new Date(e.target.value) : undefined } : c))} />
+                              value={cert.issuedDate ? toLocalDateString(cert.issuedDate) : ""}
+                              onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, issuedDate: e.target.value ? new Date(e.target.value + "T12:00:00") : undefined } : c))} />
                           </div>
                           <div>
                             <label className="block text-[9px] font-bold text-white/25 uppercase tracking-wider mb-1">Expires</label>
                             <input
                               className={inp}
                               type="date"
-                              value={cert.expiryDate ? cert.expiryDate.toISOString().split("T")[0] : ""}
-                              onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, expiryDate: e.target.value ? new Date(e.target.value) : undefined } : c))} />
+                              value={cert.expiryDate ? toLocalDateString(cert.expiryDate) : ""}
+                              onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, expiryDate: e.target.value ? new Date(e.target.value + "T12:00:00") : undefined } : c))} />
                           </div>
                         </div>
                       </div>

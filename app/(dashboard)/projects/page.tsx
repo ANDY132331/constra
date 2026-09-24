@@ -14,6 +14,7 @@ import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { EmptyState } from "@/components/empty-state";
+import { toLocalDateString } from "@/lib/utils";
 
 type View = "gantt" | "table" | "cards" | "map";
 
@@ -110,8 +111,8 @@ export default function ProjectsPage() {
       gpsLng: project.gps?.lng.toString() ?? "",
       geofenceRadius: project.geofenceRadius?.toString() ?? "500",
       status: project.status,
-      startDate: project.startDate.toISOString().split("T")[0],
-      endDate: project.endDate.toISOString().split("T")[0],
+      startDate: toLocalDateString(project.startDate),
+      endDate: toLocalDateString(project.endDate),
       budget: project.budget.toString(),
       color: project.color,
       managerId: project.managerId,
@@ -199,7 +200,7 @@ export default function ProjectsPage() {
   const handleSave = () => {
     setFormError("");
     if (!form.name.trim()) { toast.error("Project name is required"); return; }
-    if (form.startDate && form.endDate && new Date(form.endDate) <= new Date(form.startDate)) {
+    if (form.startDate && form.endDate && new Date(form.endDate + "T12:00:00") <= new Date(form.startDate + "T12:00:00")) {
       setFormError("End date must be after start date.");
       return;
     }
@@ -213,8 +214,8 @@ export default function ProjectsPage() {
       gps,
       geofenceRadius: parseInt(form.geofenceRadius) || 500,
       status: form.status,
-      startDate: form.startDate ? new Date(form.startDate) : new Date(),
-      endDate: form.endDate ? new Date(form.endDate) : new Date(Date.now() + 90 * 86400000),
+      startDate: form.startDate ? new Date(form.startDate + "T12:00:00") : new Date(),
+      endDate: form.endDate ? new Date(form.endDate + "T12:00:00") : new Date(Date.now() + 90 * 86400000),
       budget: parseFloat(form.budget) || 0,
       color: form.color,
       managerId: form.managerId,
