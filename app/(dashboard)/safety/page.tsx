@@ -89,6 +89,7 @@ export default function SafetyPage() {
 
   const handleSave = () => {
     if (!form.description.trim()) { toast.error("Description is required"); return; }
+    if (!editId && !form.projectId) { toast.error("Select a project"); return; }
     if (editId) {
       updateSafetyIncident(editId, {
         type: form.type,

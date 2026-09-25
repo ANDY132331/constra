@@ -283,9 +283,9 @@ export default function BudgetPage() {
                       <span className="text-[11px] text-white/30 bg-white/[0.05] px-2 py-0.5 rounded-full">{lines.length} lines</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="hidden sm:flex items-center gap-4 text-[12px]">
-                        <span className="text-white/40">Budget: <span className="text-white/70 font-medium">{fmt(projTotals.budgeted)}</span></span>
-                        <span className="text-white/40">Actual: <span className="text-blue-400 font-medium">{fmt(projTotals.actual)}</span></span>
+                      <div className="flex items-center gap-3 text-[12px]">
+                        <span className="hidden sm:inline text-white/40">Budget: <span className="text-white/70 font-medium">{fmt(projTotals.budgeted)}</span></span>
+                        <span className="hidden sm:inline text-white/40">Actual: <span className="text-blue-400 font-medium">{fmt(projTotals.actual)}</span></span>
                         <span className={`font-semibold ${projVariance >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                           {projVariance >= 0 ? "▼" : "▲"} {fmt(Math.abs(projVariance))}
                         </span>

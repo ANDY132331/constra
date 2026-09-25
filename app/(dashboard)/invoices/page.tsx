@@ -52,8 +52,9 @@ function InvoiceRow({ invoice, currency, onClick }: {
   invoice: Invoice; currency: string; onClick: () => void;
 }) {
   const total = invoiceTotal(invoice);
-  const cfg = STATUS_CONFIG[invoice.status];
-  const isOverdue = invoice.status === "overdue";
+  const isPastDue = invoice.status === "sent" && invoice.dueDate < new Date();
+  const cfg = isPastDue ? STATUS_CONFIG.overdue : STATUS_CONFIG[invoice.status];
+  const isOverdue = invoice.status === "overdue" || isPastDue;
   const isPaid = invoice.status === "paid";
 
   return (
@@ -114,7 +115,8 @@ export default function InvoicesPage() {
     .filter((i) => i.status === "paid")
     .reduce((s, i) => s + invoiceTotal(i), 0);
 
-  const overdueCount = invoices.filter((i) => i.status === "overdue").length;
+  const now = new Date();
+  const overdueCount = invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && i.dueDate < now)).length;
 
   const calcTotal = useCallback((items: LineItem[], taxRate: string) => {
     const sub = items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0);
@@ -122,7 +124,7 @@ export default function InvoicesPage() {
   }, []);
 
   const nextNumber = (() => {
-    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const max = nums.length ? Math.max(...nums) : 0;
     return `INV-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
   })();
@@ -134,9 +136,13 @@ export default function InvoicesPage() {
 
   const handleSave = () => {
     if (!form.clientName.trim()) { toast.error("Client name is required"); return; }
+    if (form.issueDate && form.dueDate && new Date(form.dueDate + "T12:00:00") <= new Date(form.issueDate + "T12:00:00")) {
+      toast.error("Due date must be after issue date"); return;
+    }
     const items = form.items
       .filter((i) => i.description.trim())
       .map((i) => ({ description: i.description.trim(), qty: parseFloat(i.qty) || 1, rate: parseFloat(i.rate) || 0 }));
+    if (!items.length) { toast.error("Add at least one line item"); return; }
     addInvoice({
       number: nextNumber,
       clientName: form.clientName.trim(),

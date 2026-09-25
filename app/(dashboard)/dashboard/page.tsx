@@ -348,7 +348,7 @@ export default function DashboardPage() {
   const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);
   const totalPaid = useMemo(() => invoices.filter((i) => i.status === "paid").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
   const totalOutstanding = useMemo(() => invoices.filter((i) => i.status === "sent").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
-  const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue"), [invoices]);
+  const overdueInvoices = useMemo(() => { const t = new Date(); return invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && i.dueDate < t)); }, [invoices]);
   const pendingCOs = useMemo(() => changeOrders.filter((co) => co.status === "pending"), [changeOrders]);
   const overdueTasks = useMemo(() =>
     projects.flatMap((p) =>

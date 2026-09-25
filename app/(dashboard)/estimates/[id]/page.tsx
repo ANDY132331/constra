@@ -166,7 +166,7 @@ export default function EstimateDetailPage() {
 
   function handleDuplicate() {
     if (!estimate) return;
-    const nums = estimates.map((e) => parseInt(e.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const nums = estimates.map((e) => parseInt(e.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const num = `EST-${new Date().getFullYear()}-${String(Math.max(...nums, 0) + 1).padStart(3, "0")}`;
     addEstimate({ number: num, projectName: estimate.projectName, clientName: estimate.clientName, clientEmail: estimate.clientEmail, status: "draft", issueDate: new Date(), validUntil: new Date(Date.now() + 30 * 86400000), items: estimate.items, taxRate: estimate.taxRate, notes: estimate.notes });
     toast.success(`Duplicated as ${num}`);

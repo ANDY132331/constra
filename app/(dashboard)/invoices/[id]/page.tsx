@@ -160,7 +160,7 @@ export default function InvoiceDetailPage() {
 
   function handleDuplicate() {
     if (!invoice) return;
-    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const num = `INV-${new Date().getFullYear()}-${String(Math.max(...nums, 0) + 1).padStart(3, "0")}`;
     addInvoice({ number: num, clientName: invoice.clientName, clientEmail: invoice.clientEmail, clientAddress: invoice.clientAddress, status: "draft", issueDate: new Date(), dueDate: new Date(Date.now() + 30 * 86400000), items: invoice.items, taxRate: invoice.taxRate, notes: invoice.notes });
     toast.success(`Duplicated as ${num}`);

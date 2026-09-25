@@ -60,7 +60,7 @@ export default function RFIsPage() {
   });
 
   const nextNumber = (() => {
-    const nums = rfis.map((r) => parseInt(r.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const nums = rfis.map((r) => parseInt(r.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const max = nums.length ? Math.max(...nums) : 0;
     return `RFI-${String(max + 1).padStart(3, "0")}`;
   })();
@@ -81,6 +81,7 @@ export default function RFIsPage() {
 
   const handleSave = () => {
     if (!form.subject.trim()) { toast.error("Subject is required"); return; }
+    if (!editId && !form.projectId) { toast.error("Select a project"); return; }
     if (editId) {
       updateRFI(editId, {
         subject: form.subject.trim(),

@@ -61,7 +61,8 @@ export default function EquipmentPage() {
   });
 
   const totalDailyValue = equipment.filter((e) => e.status === "in-use").reduce((s, e) => s + e.dailyRate, 0);
-  const needsService = equipment.filter((e) => e.nextService <= new Date());
+  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+  const needsService = equipment.filter((e) => e.nextService <= todayEnd);
 
   function openAdd() {
     setEditId(null);
@@ -188,7 +189,7 @@ export default function EquipmentPage() {
             filtered.map((eq) => {
               const project = eq.projectId ? getProjectById(eq.projectId) : null;
               const cfg = STATUS_CONFIG[eq.status];
-              const serviceOverdue = eq.nextService <= new Date();
+              const serviceOverdue = eq.nextService <= todayEnd;
               const statusDot = STATUS_CONFIG[eq.status].dot;
               return (
                 <div key={eq.id}
@@ -314,7 +315,7 @@ export default function EquipmentPage() {
               {filtered.map((eq) => {
                 const project = eq.projectId ? getProjectById(eq.projectId) : null;
                 const cfg = STATUS_CONFIG[eq.status];
-                const serviceOverdue = eq.nextService <= new Date();
+                const serviceOverdue = eq.nextService <= todayEnd;
                 return (
                   <div key={eq.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
                     style={{ gridTemplateColumns: "2fr 120px 100px 1fr 100px 100px 80px 64px" }}>

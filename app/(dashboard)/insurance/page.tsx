@@ -138,6 +138,9 @@ export default function InsurancePage() {
       toast.error("Please fill in all required fields");
       return;
     }
+    if (form.issueDate && form.expiryDate && new Date(form.expiryDate + "T12:00:00") <= new Date(form.issueDate + "T12:00:00")) {
+      toast.error("Expiry date must be after the effective date"); return;
+    }
     const payload: Omit<InsurancePolicy, "id"> = {
       holderName:     form.holderName.trim(),
       holderType:     form.holderType,
@@ -294,7 +297,7 @@ export default function InsurancePage() {
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="text-right hidden sm:block">
+                        <div className="text-right">
                           <p className="text-[13px] font-bold text-white/80">
                             {formatCurrency(policy.coverageAmount, currency)}
                           </p>

@@ -116,7 +116,7 @@ export default function EstimatesPage() {
   const declinedCount = estimates.filter((e) => e.status === "declined").length;
 
   const nextNumber = (() => {
-    const nums = estimates.map((e) => parseInt(e.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const nums = estimates.map((e) => parseInt(e.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const max = nums.length ? Math.max(...nums) : 0;
     return `EST-${new Date().getFullYear()}-${String(max + 1).padStart(3, "0")}`;
   })();
@@ -128,9 +128,13 @@ export default function EstimatesPage() {
 
   const handleSave = () => {
     if (!form.projectName.trim() || !form.clientName.trim()) { toast.error("Project name and client name are required"); return; }
+    if (form.issueDate && form.validUntil && new Date(form.validUntil + "T12:00:00") <= new Date(form.issueDate + "T12:00:00")) {
+      toast.error("Valid until date must be after issue date"); return;
+    }
     const items = form.items
       .filter((i) => i.description.trim())
       .map((i) => ({ description: i.description.trim(), qty: parseFloat(i.qty) || 1, rate: parseFloat(i.rate) || 0, category: i.category }));
+    if (!items.length) { toast.error("Add at least one line item"); return; }
     addEstimate({
       number: nextNumber,
       projectName: form.projectName.trim(),
