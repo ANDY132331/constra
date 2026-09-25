@@ -480,7 +480,7 @@ export default function EstimatesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Tax Rate (%)</label>
-                  <input className={inp} type="number" placeholder="13" value={form.taxRate}
+                  <input className={inp} type="number" placeholder="13" min="0" max="100" step="0.01" value={form.taxRate}
                     onChange={(e) => setForm((f) => ({ ...f, taxRate: e.target.value }))} />
                 </div>
                 <div className="flex flex-col justify-end">

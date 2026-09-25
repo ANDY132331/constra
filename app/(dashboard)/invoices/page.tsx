@@ -102,7 +102,11 @@ export default function InvoicesPage() {
   useEffect(() => { if (searchParams.get("new") === "1") { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); } }, [searchParams, defaultTaxRate]);
 
   const filtered = invoices.filter((i) => {
-    if (statusFilter !== "all" && i.status !== statusFilter) return false;
+    if (statusFilter !== "all") {
+      const isPastDue = i.status === "sent" && i.dueDate < now;
+      const effectiveStatus = isPastDue ? "overdue" : i.status;
+      if (effectiveStatus !== statusFilter) return false;
+    }
     const q = search.toLowerCase();
     return !q || i.clientName.toLowerCase().includes(q) || i.number.toLowerCase().includes(q);
   });
@@ -486,7 +490,7 @@ export default function InvoicesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Tax Rate (%)</label>
-                  <input className={inp} type="number" placeholder="13" value={form.taxRate}
+                  <input className={inp} type="number" placeholder="13" min="0" max="100" step="0.01" value={form.taxRate}
                     onChange={(e) => setForm((f) => ({ ...f, taxRate: e.target.value }))} />
                 </div>
                 <div className="flex flex-col justify-end">
