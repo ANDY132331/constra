@@ -1,10 +1,10 @@
 "use client";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
-  ChevronLeft, Send, CheckCircle2, XCircle, Clock, Mail,
-  FileDown, Link2, Check, Copy, Trash2, Plus, X, Pencil,
+  ChevronLeft, Send, CheckCircle2, XCircle, Mail,
+  FileDown, Link2, Check, Copy, Trash2, Plus, X, MoreVertical, AlertTriangle, Clock,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/currency";
@@ -107,6 +107,14 @@ export default function EstimateDetailPage() {
   const [linkCopied, setLinkCopied]     = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [template, setTemplate] = useTemplateChoice("constra_estimate_template");
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false); };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [menuOpen]);
 
   if (!estimate) return null;
 
@@ -217,132 +225,108 @@ export default function EstimateDetailPage() {
     <div className="bg-[#080808]" style={{ minHeight: '100dvh' }}>
 
       {/* ── Top toolbar ─────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 px-4 border-b border-white/[0.06] sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm"
-        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))', paddingBottom: '0.75rem' }}>
-        {/* Back */}
+      <div
+        className="flex items-center gap-2 px-3 border-b border-white/[0.06] sticky top-0 z-20 bg-[#080808]/95 backdrop-blur-sm"
+        style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))', paddingBottom: '0.75rem' }}
+      >
         <button
           onClick={() => router.push("/estimates")}
-          className="flex items-center gap-1.5 text-white/40 hover:text-white/80 transition-colors mr-1"
+          className="flex items-center gap-1 text-white/50 hover:text-white transition-colors shrink-0"
         >
-          <ChevronLeft size={18} />
-          <span className="text-[12px] font-semibold hidden sm:inline">Estimates</span>
+          <ChevronLeft size={20} />
+          <span className="text-[13px] font-medium hidden sm:inline">Estimates</span>
         </button>
 
-        {/* Number + status */}
-        <span className="font-mono text-[12px] text-white/40 tracking-wider">{estimate.number}</span>
-        <span className={`flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-          {cfg.label}
-        </span>
-        {isExpired && (
-          <span className="text-[10px] text-orange-400 font-semibold bg-orange-500/10 px-2 py-0.5 rounded-full">EXPIRED</span>
-        )}
-
-        {/* Status actions */}
-        <div className="ml-2 hidden sm:flex items-center gap-1">
-          {isDraft && (
-            <button onClick={() => { updateEstimate(estimate.id, { status: "sent" }); toast.success("Marked as sent"); }}
-              className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-full transition-colors">
-              Mark Sent
-            </button>
-          )}
-          {isSent && (
-            <>
-              <button onClick={() => { updateEstimate(estimate.id, { status: "accepted" }); toast.success("Marked as accepted"); }}
-                className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors">
-                Accepted
-              </button>
-              <button onClick={() => { updateEstimate(estimate.id, { status: "declined" }); toast.success("Marked as declined"); }}
-                className="text-[11px] font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/15 px-3 py-1.5 rounded-full transition-colors">
-                Declined
-              </button>
-            </>
-          )}
-          {isAccepted && (
-            <button onClick={handleConvertToInvoice}
-              className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-full transition-colors">
-              → Convert to Invoice
-            </button>
+        <div className="flex items-center gap-2 flex-1 min-w-0 mx-1">
+          <span className="font-mono text-[12px] text-white/50 tracking-wider truncate">{estimate.number}</span>
+          <span className={`flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0 ${cfg.bg} ${cfg.text}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+            {cfg.label}
+          </span>
+          {isExpired && (
+            <span className="text-[10px] text-orange-400 font-semibold bg-orange-500/10 px-2 py-0.5 rounded-full shrink-0">EXPIRED</span>
           )}
         </div>
 
-        <div className="flex-1" />
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={handleSend}
+            disabled={sendLoading || !estimate.clientEmail}
+            title={!estimate.clientEmail ? "Add a client email first" : "Send estimate by email"}
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/70 bg-white/[0.08] hover:bg-white/[0.12] px-3 py-1.5 rounded-full transition-colors disabled:opacity-40"
+          >
+            <Mail size={13} />
+            <span className="hidden sm:inline">{sendLoading ? "Sending…" : "Send"}</span>
+          </button>
 
-        {/* Actions */}
-        <button
-          onClick={handleSend}
-          disabled={sendLoading || !estimate.clientEmail}
-          title={!estimate.clientEmail ? "Add a client email first" : "Send estimate by email"}
-          className="flex items-center gap-1.5 text-[12px] font-semibold text-white/60 bg-white/[0.06] hover:bg-white/[0.10] hover:text-white px-3 py-1.5 rounded-full transition-colors disabled:opacity-40"
-        >
-          <Mail size={13} />
-          <span className="hidden sm:inline">{sendLoading ? "Sending…" : "Send"}</span>
-        </button>
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen(v => !v)}
+              className="w-9 h-9 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
+            >
+              <MoreVertical size={18} />
+            </button>
 
-        <button
-          onClick={copyLink}
-          className={`flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full transition-colors ${
-            linkCopied ? "text-emerald-400 bg-emerald-500/10" : "text-white/60 bg-white/[0.06] hover:bg-white/[0.10] hover:text-white"
-          }`}
-        >
-          {linkCopied ? <Check size={13} /> : <Link2 size={13} />}
-          <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Link"}</span>
-        </button>
-
-        <TemplatePicker value={template} onChange={setTemplate} />
-
-        <button
-          onClick={async () => {
-            setPdfLoading(true);
-            try { await exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template); toast.success("PDF downloaded"); }
-            catch { toast.error("Failed to export PDF"); }
-            finally { setPdfLoading(false); }
-          }}
-          disabled={pdfLoading}
-          className="flex items-center gap-1.5 text-[12px] font-semibold text-white/60 bg-white/[0.06] hover:bg-white/[0.10] hover:text-white px-3 py-1.5 rounded-full transition-colors disabled:opacity-40"
-        >
-          <FileDown size={13} />
-          <span className="hidden sm:inline">{pdfLoading ? "…" : "PDF"}</span>
-        </button>
-
-        <button onClick={handleDuplicate} title="Duplicate"
-          className="w-9 h-9 flex items-center justify-center rounded-full text-white/50 hover:text-white/80 hover:bg-white/[0.06] transition-colors">
-          <Copy size={14} />
-        </button>
-
-        <button onClick={() => setDeleteConfirm(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-full text-red-400/60 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors">
-          <Trash2 size={14} />
-        </button>
-      </div>
-
-      {/* ── Mobile status actions ────────────────────────────────────────── */}
-      <div className="sm:hidden flex flex-wrap gap-2 px-4 py-2.5 border-b border-white/[0.04]">
-        {isDraft && (
-          <button onClick={() => { updateEstimate(estimate.id, { status: "sent" }); toast.success("Marked as sent"); }}
-            className="text-[12px] font-semibold text-blue-400 bg-blue-500/10 px-4 py-2 rounded-full">Mark Sent</button>
-        )}
-        {isSent && (
-          <>
-            <button onClick={() => { updateEstimate(estimate.id, { status: "accepted" }); toast.success("Accepted"); }}
-              className="text-[12px] font-semibold text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full">Accepted</button>
-            <button onClick={() => { updateEstimate(estimate.id, { status: "declined" }); toast.success("Declined"); }}
-              className="text-[12px] font-semibold text-red-400 bg-red-500/10 px-4 py-2 rounded-full">Declined</button>
-          </>
-        )}
-        {isAccepted && (
-          <button onClick={handleConvertToInvoice}
-            className="text-[12px] font-semibold text-amber-400 bg-amber-500/10 px-4 py-2 rounded-full">Convert to Invoice</button>
-        )}
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-56 bg-[#1a1a1a] border border-white/[0.08] rounded-2xl shadow-2xl z-40 py-1.5 overflow-hidden">
+                {isDraft && (
+                  <button onClick={() => { updateEstimate(estimate.id, { status: "sent" }); toast.success("Marked as sent"); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-blue-400 hover:bg-white/[0.05] transition-colors text-left">
+                    <Send size={14} /> Mark as Sent
+                  </button>
+                )}
+                {isSent && (
+                  <>
+                    <button onClick={() => { updateEstimate(estimate.id, { status: "accepted" }); toast.success("Marked as accepted"); setMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-emerald-400 hover:bg-white/[0.05] transition-colors text-left">
+                      <CheckCircle2 size={14} /> Mark as Accepted
+                    </button>
+                    <button onClick={() => { updateEstimate(estimate.id, { status: "declined" }); toast.success("Marked as declined"); setMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-red-400 hover:bg-white/[0.05] transition-colors text-left">
+                      <XCircle size={14} /> Mark as Declined
+                    </button>
+                  </>
+                )}
+                {isAccepted && (
+                  <button onClick={() => { handleConvertToInvoice(); setMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-amber-400 hover:bg-white/[0.05] transition-colors text-left">
+                    <AlertTriangle size={14} /> Convert to Invoice
+                  </button>
+                )}
+                <div className="my-1 border-t border-white/[0.06]" />
+                <button onClick={() => { copyLink(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/70 hover:bg-white/[0.05] hover:text-white transition-colors text-left">
+                  {linkCopied ? <Check size={14} className="text-emerald-400" /> : <Link2 size={14} />}
+                  {linkCopied ? "Copied!" : "Copy Estimate Link"}
+                </button>
+                <button
+                  onClick={async () => { setMenuOpen(false); setPdfLoading(true); try { await exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template); toast.success("PDF downloaded"); } catch { toast.error("Failed to export PDF"); } finally { setPdfLoading(false); } }}
+                  disabled={pdfLoading}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/70 hover:bg-white/[0.05] hover:text-white transition-colors disabled:opacity-40 text-left"
+                >
+                  <FileDown size={14} /> {pdfLoading ? "Generating…" : "Download PDF"}
+                </button>
+                <div className="px-4 py-2 flex items-center justify-between">
+                  <span className="text-[12px] text-white/40">Template</span>
+                  <TemplatePicker value={template} onChange={setTemplate} />
+                </div>
+                <button onClick={() => { handleDuplicate(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/70 hover:bg-white/[0.05] hover:text-white transition-colors text-left">
+                  <Copy size={14} /> Duplicate
+                </button>
+                <div className="my-1 border-t border-white/[0.06]" />
+                <button onClick={() => { setDeleteConfirm(true); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-red-400 hover:bg-red-500/[0.08] transition-colors text-left">
+                  <Trash2 size={14} /> Delete Estimate
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ── Paper content ───────────────────────────────────────────────── */}
       <div className="max-w-3xl mx-auto px-3 sm:px-6 pt-6 sm:pt-10" style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}>
-
-          {/* Edit hint */}
-          <div className="flex items-center gap-1.5 text-[11px] text-amber-400/60 font-medium mb-3 px-1">
-            <Pencil size={10} /> Click any field to edit directly on the estimate
-          </div>
 
           {/* ── White paper ────────────────────────────────────────────── */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-[0_8px_64px_rgba(0,0,0,0.7)] ring-1 ring-white/10">
