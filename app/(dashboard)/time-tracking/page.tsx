@@ -538,7 +538,7 @@ export default function TimeTrackingPage() {
         const hrs = ((e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000).toFixed(2);
         rows.push([
           w?.name ?? e.workerId,
-          w?.customRole ?? "",
+          w?.customRole || w?.role || "",
           p?.name ?? e.projectId,
           e.clockIn.toLocaleDateString("en-CA"),
           fmt12(e.clockIn),

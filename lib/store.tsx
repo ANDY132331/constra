@@ -790,8 +790,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [up]);
 
   const approveProject = useCallback((id: string) => {
-    up((s) => ({ ...s, projects: s.projects.map((p) => p.id === id ? { ...p, pendingApproval: false } : p) }));
-    bg(() => getClient().from("projects").update({ pending_approval: false }).eq("id", id), "approveProject");
+    up((s) => ({ ...s, projects: s.projects.map((p) => p.id === id ? { ...p, pendingApproval: false, status: "active" } : p) }));
+    bg(() => getClient().from("projects").update({ pending_approval: false, status: "active" }).eq("id", id), "approveProject");
   }, [up]);
 
   // ── Tasks ─────────────────────────────────────────────────────────────────────

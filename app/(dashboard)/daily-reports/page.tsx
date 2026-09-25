@@ -62,7 +62,7 @@ const emptyForm = (): ReportForm => ({
 
 export default function DailyReportsPage() {
   const router = useRouter();
-  const { currentUser, projects, workers, dailyReports, addDailyReport, deleteDailyReport } = useStore();
+  const { currentUser, projects, workers, dailyReports, addDailyReport, deleteDailyReport, currency } = useStore();
   const isForeman = isForemanOrAbove(currentUser.role);
 
   const [search, setSearch] = useState("");
@@ -82,16 +82,20 @@ export default function DailyReportsPage() {
 
   const fetchWeatherForCoords = useCallback((lat: number, lon: number) => {
     setFetchingWeather(true);
+    const useMetric = currency !== "USD";
+    const tempUnit = useMetric ? "celsius" : "fahrenheit";
     fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=${tempUnit}`
     )
       .then((r) => r.json())
       .then((d) => {
         const cw = d.current_weather;
+        const rawTemp = Math.round(cw.temperature);
+        const displayTemp = useMetric ? String(Math.round((rawTemp * 9) / 5 + 32)) : String(rawTemp);
         setForm((f) => ({
           ...f,
           weather: wmoToWeather(cw.weathercode),
-          temperatureF: String(Math.round(cw.temperature)),
+          temperatureF: displayTemp,
         }));
       })
       .catch(() => { toast.error("Could not fetch weather"); })

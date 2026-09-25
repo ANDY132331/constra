@@ -174,7 +174,7 @@ export default function MessagesPage() {
       <div
         ref={containerRef}
         className="flex overflow-hidden"
-        style={{ height: "100dvh", background: C.chatBg }}
+        style={{ height: "100%", background: C.chatBg }}
       >
         {/* ══════════════════════════════ SIDEBAR ════════════════════════════ */}
         <div

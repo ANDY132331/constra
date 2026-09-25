@@ -115,10 +115,11 @@ export default function PhotosPage() {
 
   const handleSave = () => {
     if (!form.caption.trim() || photoItems.length === 0) { toast.error(!form.caption.trim() ? "Caption is required" : "Add at least one photo"); return; }
+    if (!form.projectId) { toast.error("Select a project"); return; }
     const tags = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
     photoItems.forEach(({ url }) => {
       addPhoto({
-        projectId: form.projectId || (projects[0]?.id ?? ""),
+        projectId: form.projectId,
         caption: form.caption.trim(),
         uploadedById: form.uploadedById,
         uploadedAt: new Date(),

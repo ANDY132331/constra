@@ -182,7 +182,7 @@ export default function ReportsPage() {
 
   const handlePayrollExport = useCallback((adapterId: string) => {
     if (periodEntries.length === 0) {
-      toast.success("No entries in this period — add clock-ins first");
+      toast.error("No entries in this period — add clock-ins first");
       setExportMenuOpen(false);
       return;
     }

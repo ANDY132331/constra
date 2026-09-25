@@ -70,8 +70,10 @@ export default function PunchListPage() {
     resolved: punchItems.filter((p) => p.status === "resolved").length,
   };
 
-  const isOverdue = (item: typeof punchItems[0]) =>
-    item.dueDate && item.dueDate < new Date() && item.status !== "resolved";
+  const isOverdue = (item: typeof punchItems[0]) => {
+    const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+    return item.dueDate && item.dueDate < todayEnd && item.status !== "resolved";
+  };
 
   const openEdit = (item: typeof punchItems[0]) => {
     setEditId(item.id);

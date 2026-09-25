@@ -339,10 +339,14 @@ export default function DashboardPage() {
     .reduce((sum, e) => sum + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0),
   [clockEntries, weekStart]);
 
-  const todayActiveHours = useMemo(() => clockedInWorkers.reduce((sum, w) => {
-    if (!w.clockInTime) return sum;
-    return sum + (Date.now() - w.clockInTime.getTime()) / 3600000;
-  }, 0), [clockedInWorkers]);
+  const todayActiveHours = useMemo(() => {
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    return clockedInWorkers.reduce((sum, w) => {
+      if (!w.clockInTime) return sum;
+      const effectiveStart = w.clockInTime < todayStart ? todayStart : w.clockInTime;
+      return sum + (Date.now() - effectiveStart.getTime()) / 3600000;
+    }, 0);
+  }, [clockedInWorkers]);
 
   // Financial stats
   const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);
