@@ -378,9 +378,8 @@ export default function MessagesPage() {
                                 {fmtTime(ts)}
                               </span>
                               {isMe && (
-                                <svg width="13" height="8" viewBox="0 0 13 8" fill="none">
-                                  <path d="M1 4L4 7L7 1" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                  <path d="M6 4L9 7L12 1" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                <svg width="9" height="8" viewBox="0 0 9 8" fill="none">
+                                  <path d="M1 4L3.5 6.5L8 1" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                               )}
                             </div>

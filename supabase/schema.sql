@@ -404,3 +404,19 @@ create policy "crew_messages_tenant" on crew_messages
 -- Enable Realtime on this table (run once in Supabase Dashboard > Database > Replication
 -- or via SQL editor):
 -- alter publication supabase_realtime add table crew_messages;
+
+-- ── Schedule Events ───────────────────────────────────────────────────────────
+create table if not exists schedule_events (
+  id          text        primary key,
+  company_id  uuid        not null references companies(id) on delete cascade,
+  title       text        not null,
+  date        date        not null,
+  type        text        not null default 'other'
+                check (type in ('meeting','inspection','delivery','permit','other')),
+  description text        not null default '',
+  color       text        not null default '#6b7280',
+  created_at  timestamptz default now()
+);
+alter table schedule_events enable row level security;
+create index if not exists schedule_events_company on schedule_events(company_id, date);
+create policy "schedule_events_tenant" on schedule_events for all using (company_id = public.my_company_id());

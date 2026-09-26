@@ -731,8 +731,9 @@ function SettingsInner() {
               </Link>
             </div>
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
               <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
-                style={{ gridTemplateColumns: "2fr 1fr 120px 80px" }}>
+                style={{ gridTemplateColumns: "2fr 1fr 120px 80px", minWidth: "420px" }}>
                 <span>Worker</span><span>Contact</span><span>Role</span><span className="text-right">Action</span>
               </div>
               {workers.map((worker) => {
@@ -740,7 +741,7 @@ function SettingsInner() {
                 const isMe = worker.id === currentUser.id;
                 return (
                   <div key={worker.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors"
-                    style={{ gridTemplateColumns: "2fr 1fr 120px 80px" }}>
+                    style={{ gridTemplateColumns: "2fr 1fr 120px 80px", minWidth: "420px" }}>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold flex-shrink-0"
                         style={{ backgroundColor: worker.color + "25", color: worker.color }}>
@@ -774,6 +775,7 @@ function SettingsInner() {
                   No workers yet — <Link href="/crew" className="text-amber-400 hover:text-amber-300">add from Crew page</Link>
                 </div>
               )}
+              </div>
             </div>
           </div>
         )}

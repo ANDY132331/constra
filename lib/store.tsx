@@ -7,7 +7,7 @@ import type {
   Worker, Project, Task, ClockEntry, PunchItem, SafetyIncident,
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   MaterialType, MaterialEntry, ProjectDocument, Message,
-  DailyReport, ChangeOrder, BlueprintPin, BudgetLine, InsurancePolicy,
+  DailyReport, ChangeOrder, BlueprintPin, BudgetLine, InsurancePolicy, ScheduleEvent,
 } from "./mock-data";
 import type { Locale } from "./i18n/locales";
 import type { CurrencyCode } from "./currency";
@@ -42,6 +42,7 @@ import {
   dbToBlueprintPin, blueprintPinToDb,
   dbToBudgetLine, budgetLineToDb,
   dbToInsurancePolicy, insurancePolicyToDb,
+  dbToScheduleEvent, scheduleEventToDb,
   type DbTask, type DbMessage, type DbMaterialType, type DbMaterialEntry, type DbDocument,
   type DbDailyReport, type DbChangeOrder, type DbBlueprintPin, type DbBudgetLine,
   type DbInsurancePolicy,
@@ -103,6 +104,7 @@ type StoreState = {
   blueprintPins: BlueprintPin[];
   budgetLines: BudgetLine[];
   insurancePolicies: InsurancePolicy[];
+  scheduleEvents: ScheduleEvent[];
   customRoles: string[];
   companyAddress: string;
   businessNumber: string;
@@ -202,6 +204,10 @@ type StoreCtx = StoreState & {
   updateChangeOrder: (id: string, u: Partial<ChangeOrder>) => void;
   deleteChangeOrder: (id: string) => void;
 
+  addScheduleEvent: (e: Omit<ScheduleEvent, "id">) => void;
+  updateScheduleEvent: (id: string, u: Partial<ScheduleEvent>) => void;
+  deleteScheduleEvent: (id: string) => void;
+
   addCustomRole: (role: string) => void;
   deleteCustomRole: (role: string) => void;
   setCompanyAddress: (a: string) => void;
@@ -260,6 +266,7 @@ function defaultState(): StoreState {
     blueprintPins: [],
     budgetLines: [],
     insurancePolicies: [],
+    scheduleEvents: [],
     customRoles: [],
     companyAddress: "",
     businessNumber: "",
@@ -402,6 +409,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { data: blueprintPinsData },
         { data: budgetLinesData },
         { data: insurancePoliciesData },
+        { data: scheduleEventsData },
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("company_id", companyId),
         supabase.from("companies").select("*").eq("id", companyId).single(),
@@ -433,6 +441,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         supabase.from("blueprint_pins").select("*").eq("company_id", companyId),
         supabase.from("budget_lines").select("*").eq("company_id", companyId).order("created_at", { ascending: true }),
         supabase.from("insurance_policies").select("*").eq("company_id", companyId).order("expiry_date", { ascending: true }),
+        supabase.from("schedule_events").select("*").eq("company_id", companyId).order("date", { ascending: true }),
       ]);
 
       // Group tasks by project_id for efficient lookup
@@ -478,6 +487,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         blueprintPins: (blueprintPinsData ?? []).map((p) => dbToBlueprintPin(p as DbBlueprintPin)),
         budgetLines: (budgetLinesData ?? []).map((b) => dbToBudgetLine(b as DbBudgetLine)),
         insurancePolicies: (insurancePoliciesData ?? []).map((p) => dbToInsurancePolicy(p as DbInsurancePolicy)),
+        scheduleEvents: (scheduleEventsData ?? []).map(dbToScheduleEvent),
         customRoles: co?.custom_roles ?? s.customRoles,
         permissionsPin: co?.permissions_pin ?? s.permissionsPin,
         theme: (co as { theme?: string })?.theme as "dark" | "light" ?? s.theme,
@@ -790,8 +800,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [up]);
 
   const approveProject = useCallback((id: string) => {
-    up((s) => ({ ...s, projects: s.projects.map((p) => p.id === id ? { ...p, pendingApproval: false, status: "active" } : p) }));
-    bg(() => getClient().from("projects").update({ pending_approval: false, status: "active" }).eq("id", id), "approveProject");
+    up((s) => ({ ...s, projects: s.projects.map((p) => p.id === id ? { ...p, pendingApproval: false } : p) }));
+    bg(() => getClient().from("projects").update({ pending_approval: false }).eq("id", id), "approveProject");
   }, [up]);
 
   // ── Tasks ─────────────────────────────────────────────────────────────────────
@@ -1309,6 +1319,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     bg(() => getClient().from("insurance_policies").delete().eq("id", id), "deleteInsurancePolicy");
   }, [up]);
 
+  // ── Schedule events ───────────────────────────────────────────────────────────
+
+  const addScheduleEvent = useCallback((e: Omit<ScheduleEvent, "id">) => {
+    const event = { ...e, id: genId() };
+    up((s) => ({ ...s, scheduleEvents: [...s.scheduleEvents, event] }));
+    bg(() => getClient().from("schedule_events").insert(scheduleEventToDb(event, companyIdRef.current!)), "addScheduleEvent");
+  }, [up]);
+
+  const updateScheduleEvent = useCallback((id: string, u: Partial<ScheduleEvent>) => {
+    up((s) => ({ ...s, scheduleEvents: s.scheduleEvents.map((e) => e.id === id ? { ...e, ...u } : e) }));
+    bg(() => {
+      const merged = stateRef.current.scheduleEvents.find((e) => e.id === id);
+      if (!merged) return Promise.resolve({ error: null });
+      return getClient().from("schedule_events").update(scheduleEventToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
+    }, "updateScheduleEvent");
+  }, [up]);
+
+  const deleteScheduleEvent = useCallback((id: string) => {
+    up((s) => ({ ...s, scheduleEvents: s.scheduleEvents.filter((e) => e.id !== id) }));
+    bg(() => getClient().from("schedule_events").delete().eq("id", id), "deleteScheduleEvent");
+  }, [up]);
+
   // ── Custom roles ──────────────────────────────────────────────────────────────
 
   const addCustomRole = useCallback((role: string) => {
@@ -1458,6 +1490,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         addMessage, deleteMessage,
         addDailyReport, updateDailyReport, deleteDailyReport,
         addChangeOrder, updateChangeOrder, deleteChangeOrder,
+        addScheduleEvent, updateScheduleEvent, deleteScheduleEvent,
         addCustomRole, deleteCustomRole,
         setCompanyAddress, setBusinessNumber, setDefaultTaxRate, setOvertimeSettings, setPermissionsPin,
         setCompanyName, setCompanyLogo, setIsPro,

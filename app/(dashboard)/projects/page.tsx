@@ -1157,7 +1157,7 @@ export default function ProjectsPage() {
         })()}
         confirmLabel="Reject"
         danger
-        onConfirm={() => { if (rejectConfirm) { updateProject(rejectConfirm, { pendingApproval: false, status: "draft" }); toast.success("Project sent back to draft"); setRejectConfirm(null); } }}
+        onConfirm={() => { if (rejectConfirm) { updateProject(rejectConfirm, { pendingApproval: false }); toast.success("Project sent back to foreman"); setRejectConfirm(null); } }}
         onCancel={() => setRejectConfirm(null)}
       />
     </>

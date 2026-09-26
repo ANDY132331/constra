@@ -46,17 +46,6 @@ const EVENT_TYPE_CONFIG: Record<CustomEventType, { label: string; color: string;
   other:      { label: "Other",      color: "#6b7280", icon: Calendar },
 };
 
-const STORAGE_KEY = "constra_schedule_events";
-
-function loadCustomEvents(): CustomEvent[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-function saveCustomEvents(events: CustomEvent[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch (e) { console.error("Failed to save events to localStorage", e); }
-}
 
 function wmoToLabel(code: number): string {
   if (code === 0) return "Clear";
@@ -104,7 +93,7 @@ const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
 
 export default function SchedulePage() {
-  const { projects, currency } = useStore();
+  const { projects, currency, scheduleEvents, addScheduleEvent, updateScheduleEvent, deleteScheduleEvent } = useStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -113,26 +102,19 @@ export default function SchedulePage() {
   const [lon, setLon] = useState(DEFAULT_LON);
   const [locationName, setLocationName] = useState("Toronto, ON");
   const [weatherError, setWeatherError] = useState(false);
-  // Sync with global currency preference — USD → imperial (°F / mph)
   const [imperial, setImperial] = useState(currency === "USD");
+  useEffect(() => { setImperial(currency === "USD"); }, [currency]);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [locationInput, setLocationInput] = useState("");
   const [geoResults, setGeoResults] = useState<{ name: string; country: string; admin1?: string; lat: number; lon: number }[]>([]);
   const [geoLoading, setGeoLoading] = useState(false);
 
-  const [customEvents, setCustomEvents] = useState<CustomEvent[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEventId, setEditEventId] = useState<string | null>(null);
   const searchParams = useSearchParams();
   useEffect(() => { if (searchParams.get("new") === "1") { setEditEventId(null); setAddForm({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); } }, [searchParams]);
   const [deleteEventConfirm, setDeleteEventConfirm] = useState<string | null>(null);
   const [addForm, setAddForm] = useState({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting" as CustomEventType, description: "" });
-
-  // Reading from localStorage (external system) on mount.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCustomEvents(loadCustomEvents());
-  }, []);
 
   const taskEvents: CalEvent[] = projects.flatMap((p) =>
     p.tasks.flatMap((t) => {
@@ -144,7 +126,7 @@ export default function SchedulePage() {
     })
   );
 
-  const customCalEvents: CalEvent[] = customEvents.map((e) => ({
+  const customCalEvents: CalEvent[] = scheduleEvents.map((e) => ({
     id: e.id,
     title: e.title,
     date: new Date(e.date + "T12:00:00"),
@@ -251,7 +233,7 @@ export default function SchedulePage() {
     await fetchWeather(result.lat, result.lon, label);
   }
 
-  function openEditEvent(evt: CustomEvent) {
+  function openEditEvent(evt: { id: string; title: string; date: string; type: CustomEventType; description?: string }) {
     setEditEventId(evt.id);
     setAddForm({ title: evt.title, date: evt.date, type: evt.type, description: evt.description ?? "" });
     setShowAddModal(true);
@@ -261,25 +243,21 @@ export default function SchedulePage() {
     if (!addForm.title.trim() || !addForm.date) { toast.error("Title and date are required"); return; }
     const cfg = EVENT_TYPE_CONFIG[addForm.type];
     if (editEventId) {
-      const updated = customEvents.map((e) =>
-        e.id === editEventId
-          ? { ...e, title: addForm.title.trim(), date: addForm.date, type: addForm.type, description: addForm.description.trim() || undefined, color: cfg.color }
-          : e
-      );
-      setCustomEvents(updated);
-      saveCustomEvents(updated);
-    } else {
-      const newEvent: CustomEvent = {
-        id: `evt-${Date.now()}`,
+      updateScheduleEvent(editEventId, {
         title: addForm.title.trim(),
         date: addForm.date,
         type: addForm.type,
-        description: addForm.description.trim() || undefined,
+        description: addForm.description.trim(),
         color: cfg.color,
-      };
-      const updated = [...customEvents, newEvent];
-      setCustomEvents(updated);
-      saveCustomEvents(updated);
+      });
+    } else {
+      addScheduleEvent({
+        title: addForm.title.trim(),
+        date: addForm.date,
+        type: addForm.type,
+        description: addForm.description.trim(),
+        color: cfg.color,
+      });
     }
     setAddForm({ title: "", date: format(new Date(), "yyyy-MM-dd"), type: "meeting", description: "" });
     const wasEditing = !!editEventId;
@@ -289,9 +267,7 @@ export default function SchedulePage() {
   }
 
   function deleteCustomEvent(id: string) {
-    const updated = customEvents.filter((e) => e.id !== id);
-    setCustomEvents(updated);
-    saveCustomEvents(updated);
+    deleteScheduleEvent(id);
   }
 
   const selectedWeather = selectedDay ? getWeatherForDay(selectedDay) : null;
@@ -488,7 +464,7 @@ export default function SchedulePage() {
               </div>
             ) : (
               selectedEvents.map((e) => {
-                const customEvt = customEvents.find((c) => c.id === e.id);
+                const customEvt = scheduleEvents.find((c) => c.id === e.id);
                 const cfg = customEvt ? EVENT_TYPE_CONFIG[customEvt.type] : null;
                 return (
                   <div key={e.id} className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 hover:border-white/[0.12] overflow-hidden"
@@ -776,7 +752,7 @@ export default function SchedulePage() {
               ) : (
                 <div className="space-y-2">
                   {selectedEvents.map((e) => {
-                    const customEvt = customEvents.find((c) => c.id === e.id);
+                    const customEvt = scheduleEvents.find((c) => c.id === e.id);
                     return (
                       <div key={e.id} className="flex items-center gap-3 group">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: e.color }} />

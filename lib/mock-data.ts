@@ -306,6 +306,19 @@ export type Message = {
 };
 
 
+// ── Schedule events ───────────────────────────────────────────────────────────
+
+export type ScheduleEventType = "meeting" | "inspection" | "delivery" | "permit" | "other";
+
+export type ScheduleEvent = {
+  id: string;
+  title: string;
+  date: string; // yyyy-MM-dd
+  type: ScheduleEventType;
+  description: string;
+  color: string;
+};
+
 // ── Insurance / COI tracking ──────────────────────────────────────────────────
 
 export type InsuranceCoverageType =

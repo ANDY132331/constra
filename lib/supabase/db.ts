@@ -5,7 +5,7 @@ import type {
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   GpsLocation, VerificationFlag, Message, MaterialType, MaterialEntry, ProjectDocument,
   DailyReport, ChangeOrder, BlueprintPin, BudgetLine, BudgetLineCategory,
-  InsurancePolicy, InsuranceCoverageType,
+  InsurancePolicy, InsuranceCoverageType, ScheduleEvent, ScheduleEventType,
 } from "@/lib/mock-data";
 
 // ── Geo helper ─────────────────────────────────────────────────────────────────
@@ -1117,5 +1117,41 @@ export function insurancePolicyToDb(p: InsurancePolicy, companyId: string): Omit
     issue_date: p.issueDate.toISOString().split("T")[0],
     expiry_date: p.expiryDate.toISOString().split("T")[0],
     notes: p.notes ?? null,
+  };
+}
+
+// ── Schedule events ────────────────────────────────────────────────────────────
+
+export type DbScheduleEvent = {
+  id: string;
+  company_id: string;
+  title: string;
+  date: string; // yyyy-MM-dd
+  type: string;
+  description: string;
+  color: string;
+  created_at: string;
+};
+
+export function dbToScheduleEvent(row: DbScheduleEvent): ScheduleEvent {
+  return {
+    id: row.id,
+    title: row.title,
+    date: row.date,
+    type: row.type as ScheduleEventType,
+    description: row.description,
+    color: row.color,
+  };
+}
+
+export function scheduleEventToDb(e: ScheduleEvent, companyId: string): Omit<DbScheduleEvent, "created_at"> {
+  return {
+    id: e.id,
+    company_id: companyId,
+    title: e.title,
+    date: e.date,
+    type: e.type,
+    description: e.description,
+    color: e.color,
   };
 }
