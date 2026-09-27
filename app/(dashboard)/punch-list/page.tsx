@@ -566,9 +566,9 @@ export default function PunchListPage() {
       <ConfirmModal
         open={resolveAllConfirm}
         title="Resolve All Open Items"
-        body={`Mark all ${punchItems.filter(i => i.status === "open").length} open items as resolved?`}
+        body={`Mark all ${filtered.filter(i => i.status === "open").length} open items in this view as resolved?`}
         confirmLabel="Resolve All"
-        onConfirm={() => { const open = punchItems.filter(i => i.status === "open"); open.forEach(i => updatePunchItem(i.id, { status: "resolved" })); toast.success(`${open.length} items resolved`); setResolveAllConfirm(false); }}
+        onConfirm={() => { const open = filtered.filter(i => i.status === "open"); open.forEach(i => updatePunchItem(i.id, { status: "resolved" })); toast.success(`${open.length} items resolved`); setResolveAllConfirm(false); }}
         onCancel={() => setResolveAllConfirm(false)}
       />
     </>

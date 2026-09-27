@@ -615,12 +615,14 @@ export default function ProjectsPage() {
                         <Pencil size={11} />
                         Edit
                       </button>
-                      <button
-                        onClick={() => setDeleteConfirm(project.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
-                      >
-                        <Trash2 size={12} />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => setDeleteConfirm(project.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -1152,12 +1154,12 @@ export default function ProjectsPage() {
         body={(() => {
           const proj = projects.find((p) => p.id === rejectConfirm);
           return proj
-            ? `Reject "${proj.name}"? The project will be sent back to draft.`
+            ? `Reject "${proj.name}"? This will delete the submission — the foreman can resubmit after making changes.`
             : "Reject this project?";
         })()}
         confirmLabel="Reject"
         danger
-        onConfirm={() => { if (rejectConfirm) { updateProject(rejectConfirm, { pendingApproval: false }); toast.success("Project sent back to foreman"); setRejectConfirm(null); } }}
+        onConfirm={() => { if (rejectConfirm) { deleteProject(rejectConfirm); toast.success("Project rejected"); setRejectConfirm(null); } }}
         onCancel={() => setRejectConfirm(null)}
       />
     </>

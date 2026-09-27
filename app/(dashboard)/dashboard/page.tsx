@@ -352,7 +352,7 @@ export default function DashboardPage() {
   const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);
   const totalPaid = useMemo(() => invoices.filter((i) => i.status === "paid").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
   const totalOutstanding = useMemo(() => invoices.filter((i) => i.status === "sent" || i.status === "overdue").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
-  const overdueInvoices = useMemo(() => { const t = new Date(); return invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && i.dueDate < t)); }, [invoices]);
+  const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && i.dueDate < now)), [invoices, now]);
   const pendingCOs = useMemo(() => changeOrders.filter((co) => co.status === "pending"), [changeOrders]);
   const overdueTasks = useMemo(() =>
     projects.flatMap((p) =>
@@ -648,7 +648,7 @@ export default function DashboardPage() {
               {myPunchItems.slice(0, 3).map((item) => (
                 <div key={item.id} className="flex items-center gap-3 px-4 py-3">
                   <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.priority === "high" ? "bg-red-400" : item.priority === "medium" ? "bg-amber-400" : "bg-white/30"}`} />
-                  <p className="text-[13px] text-white/70 truncate flex-1">{item.description}</p>
+                  <p className="text-[13px] text-white/70 truncate flex-1">{item.title}</p>
                   <span className="text-[10px] text-white/25 capitalize flex-shrink-0">{item.status}</span>
                 </div>
               ))}
