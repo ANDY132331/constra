@@ -213,7 +213,7 @@ export default function CrewPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(blank);
   const searchParams = useSearchParams();
-  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setShowModal(true); } }, [searchParams]);
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setCertifications([]); setSaveError(""); setShowModal(true); } }, [searchParams]);
   const [hoursWorker, setHoursWorker] = useState<Worker | null>(null);
   const [certifications, setCertifications] = useState<WorkerCertification[]>([]);
   const [showQR, setShowQR] = useState(false);
