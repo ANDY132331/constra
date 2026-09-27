@@ -11,7 +11,7 @@ import {
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { useStore } from "@/lib/store";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, getCurrencySymbol } from "@/lib/currency";
 import type { ChangeOrder } from "@/lib/mock-data";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 
@@ -84,7 +84,7 @@ export default function ChangeOrdersPage() {
   const totals = {
     pending: changeOrders.filter((c) => c.status === "pending").reduce((s, c) => s + c.amount, 0),
     approved: changeOrders.filter((c) => c.status === "approved").reduce((s, c) => s + c.amount, 0),
-    all: changeOrders.reduce((s, c) => s + (c.status === "approved" ? c.amount : 0), 0),
+    all: changeOrders.reduce((s, c) => s + c.amount, 0),
   };
 
   const openNew = () => {
@@ -122,7 +122,7 @@ export default function ChangeOrdersPage() {
         approvedBy: form.status === "approved" && editing.status !== "approved" ? currentUser.name : editing.approvedBy,
       });
       if (selected?.id === editing.id) {
-        setSelected((prev) => prev ? { ...prev, ...{ projectId: form.projectId, title: form.title.trim(), status: form.status } } : null);
+        setSelected((prev) => prev ? { ...prev, projectId: form.projectId, number: form.number.trim(), title: form.title.trim(), description: form.description.trim(), reason: form.reason.trim(), amount: parseFloat(form.amount) || 0, status: form.status } : null);
       }
     } else {
       addChangeOrder({
@@ -195,7 +195,7 @@ export default function ChangeOrdersPage() {
               </div>
               <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3">
                 <p className="text-[20px] font-bold font-mono text-white/70 leading-none">{formatCurrency(totals.all, currency as never)}</p>
-                <p className="text-[11px] text-white/40 font-medium mt-0.5">Total</p>
+                <p className="text-[11px] text-white/40 font-medium mt-0.5">All COs</p>
               </div>
             </div>
             <div className="px-5 mb-4">
@@ -555,7 +555,7 @@ export default function ChangeOrdersPage() {
                 <input className={inp} placeholder="Additional foundation waterproofing" maxLength={100} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
               </div>
               <div>
-                <label className={lbl}>Amount ($)</label>
+                <label className={lbl}>Amount ({getCurrencySymbol(currency as never)})</label>
                 <input className={inp} type="number" placeholder="0.00" step="0.01" value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} />
               </div>
               <div>

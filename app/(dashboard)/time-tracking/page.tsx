@@ -830,7 +830,7 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Clock In Worker (admin / PM / foreman only) */}
-      {(currentUser.role === "Admin" || currentUser.role === "Project Manager" || currentUser.role === "Foreman") && workers.filter((w) => !w.clockedIn).length > 0 && (
+      {isForemanOrAbove(currentUser.role) && workers.filter((w) => !w.clockedIn).length > 0 && (
         <div className="px-5 mb-5">
           <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-3">Clock In Worker</p>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden">

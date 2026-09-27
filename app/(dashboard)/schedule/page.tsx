@@ -763,13 +763,13 @@ export default function SchedulePage() {
                           )}
                         </div>
                         {customEvt && (
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                          <div className="flex items-center gap-1">
                             <button onClick={() => openEditEvent(customEvt)}
-                              className="p-1 rounded text-white/25 hover:text-white/60 transition-colors">
+                              className="p-1 rounded text-white/25 hover:text-white/60 active:text-white/60 transition-colors">
                               <Pencil size={11} />
                             </button>
                             <button onClick={() => setDeleteEventConfirm(e.id)}
-                              className="p-1 rounded text-white/25 hover:text-red-400 transition-colors">
+                              className="p-1 rounded text-white/25 hover:text-red-400 active:text-red-400 transition-colors">
                               <X size={12} />
                             </button>
                           </div>

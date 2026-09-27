@@ -131,6 +131,7 @@ export default function InvoiceDetailPage() {
 
   function handleSave() {
     if (!invoice) return;
+    if (isPaid) { toast.error("Cannot edit a paid invoice"); return; }
     if (!draft.clientName.trim()) { toast.error("Client name is required"); return; }
     const items = draft.items
       .filter((i) => i.description.trim())
@@ -164,7 +165,7 @@ export default function InvoiceDetailPage() {
     const num = `INV-${new Date().getFullYear()}-${String(Math.max(...nums, 0) + 1).padStart(3, "0")}`;
     addInvoice({ number: num, clientName: invoice.clientName, clientEmail: invoice.clientEmail, clientAddress: invoice.clientAddress, status: "draft", issueDate: new Date(), dueDate: new Date(Date.now() + 30 * 86400000), items: invoice.items, taxRate: invoice.taxRate, notes: invoice.notes });
     toast.success(`Duplicated as ${num}`);
-    router.push("/invoices");
+    router.push(`/invoices/${num}`);
   }
 
   async function handleSend() {

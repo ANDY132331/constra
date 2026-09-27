@@ -274,7 +274,7 @@ export default function BudgetPage() {
               <div key={projectId} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
                 {/* Project header */}
                 <button
-                  onClick={() => setExpandedProject(isExpanded && grouped.size > 1 ? (expandedProject === projectId ? null : projectId) : null)}
+                  onClick={() => setExpandedProject(!isExpanded ? projectId : expandedProject === projectId ? null : projectId)}
                   className="w-full flex flex-col px-4 py-3 hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="flex items-center justify-between w-full">

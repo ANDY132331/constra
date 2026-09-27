@@ -299,7 +299,7 @@ export default function DashboardPage() {
   const {
     workers, projects, punchItems, clockEntries, activityFeed,
     currentUser, getWorkerById, getProjectById, currency,
-    invoices, changeOrders, updateWorker, updateClockEntry, theme,
+    invoices, changeOrders, updateWorker, updateClockEntry, addActivity, theme,
   } = useStore();
   const dk = theme !== "light"; // dark mode flag for hero section
   const t = useT();
@@ -427,9 +427,11 @@ export default function DashboardPage() {
     );
 
     const handleWorkerClockOut = () => {
+      const now = new Date();
       const entry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
-      if (entry) updateClockEntry(entry.id, { clockOut: new Date() });
+      if (entry) updateClockEntry(entry.id, { clockOut: now });
       updateWorker(currentUser.id, { clockedIn: false, clockInTime: undefined });
+      addActivity({ type: "clock-out", description: `${currentUser.name} clocked out`, workerId: currentUser.id, timestamp: now });
     };
 
     const totalToday = myTodayHours + liveElapsed;

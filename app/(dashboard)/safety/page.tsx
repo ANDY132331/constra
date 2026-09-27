@@ -172,6 +172,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
 </body></html>`;
     const win = window.open("", "_blank");
     if (win) { win.document.write(html); win.document.close(); }
+    else { toast.error("Popup blocked — allow popups to export the report"); }
   };
 
   return (
@@ -288,6 +289,13 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
                     <button
+                      onClick={() => exportPdf(incident)}
+                      title="Export PDF"
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-amber-400/20 transition-colors"
+                    >
+                      <FileText size={13} />
+                    </button>
+                    <button
                       onClick={() => openEdit(incident)}
                       className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
                     >
@@ -365,7 +373,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
             <div className="flex items-center gap-4 sm:flex-col sm:gap-0 sm:flex-shrink-0">
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-green-500/30 flex items-center justify-center">
                 <span className="text-lg sm:text-xl font-black text-green-400">
-                  {Math.max(0, 100 - safetyIncidents.filter((i) => i.severity === "critical" || i.severity === "high").length * 5)}
+                  {Math.max(0, 100 - safetyIncidents.filter((i) => (i.severity === "critical" || i.severity === "high") && i.date.getFullYear() === new Date().getFullYear()).length * 5)}
                 </span>
               </div>
               <p className="text-[10px] text-white/30 sm:text-center sm:mt-1.5">Safety Score</p>
@@ -452,15 +460,15 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                             {incident.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                           </span>
                           <button onClick={() => exportPdf(incident)} title="Export PDF"
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/8 text-white/20 hover:text-amber-400 transition-all">
+                            className="p-1 rounded hover:bg-white/8 text-white/30 hover:text-amber-400 active:text-amber-400 transition-all">
                             <FileText size={12} />
                           </button>
                           <button onClick={() => openEdit(incident)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-all">
+                            className="p-1 rounded hover:bg-white/8 text-white/30 hover:text-white/60 active:text-white/60 transition-all">
                             <Pencil size={12} />
                           </button>
                           <button onClick={() => setDeleteConfirm(incident.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
+                            className="p-1 rounded hover:bg-red-500/15 text-white/30 hover:text-red-400 active:text-red-400 transition-all">
                             <Trash2 size={12} />
                           </button>
                         </div>

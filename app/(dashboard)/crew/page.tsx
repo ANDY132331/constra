@@ -27,7 +27,7 @@ const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Worker: { label: "Worker", className: "bg-white/8 text-white/50" },
 };
 
-const COLORS = ["#F5C400","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#F5C400","#84cc16","#a78bfa"];
+const COLORS = ["#F5C400","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#f97316","#84cc16","#a78bfa"];
 
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
@@ -693,7 +693,7 @@ export default function CrewPage() {
                       {totalHours > 0 ? `${totalHours.toFixed(1)}h total` : "No hours logged"}
                     </span>
                   </div>
-                  {currentUser.role === "Admin" && (
+                  {isAdminOrAbove(currentUser.role) && (
                     <button onClick={() => setHoursWorker(worker)}
                       className="text-[10px] font-bold text-amber-400/60 hover:text-amber-400 bg-amber-500/[0.06] hover:bg-amber-500/10 px-2 py-0.5 rounded-full transition-colors">
                       Manage Hours
@@ -861,7 +861,7 @@ export default function CrewPage() {
                 <label className={lbl}>Accent Color</label>
                 <div className="flex gap-2 flex-wrap">
                   {COLORS.map((c) => (
-                    <button key={c} onClick={() => setForm((f) => ({ ...f, color: c }))}
+                    <button type="button" key={c} onClick={() => setForm((f) => ({ ...f, color: c }))}
                       className="w-7 h-7 rounded-lg transition-transform hover:scale-110"
                       style={{ backgroundColor: c, outline: form.color === c ? `2px solid ${c}` : "none", outlineOffset: "2px" }} />
                   ))}
@@ -872,7 +872,7 @@ export default function CrewPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className={lbl} style={{ marginBottom: 0 }}>Certifications</label>
-                  <button
+                  <button type="button"
                     onClick={() => setCertifications((prev) => [...prev, { id: `cert-${Date.now()}`, name: "" }])}
                     className="flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors">
                     <Plus size={11} /> Add
@@ -891,7 +891,7 @@ export default function CrewPage() {
                             maxLength={100}
                             value={cert.name}
                             onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, name: e.target.value } : c))} />
-                          <button
+                          <button type="button"
                             onClick={() => setCertifications((prev) => prev.filter((_, i) => i !== idx))}
                             className="p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
                             <X size={13} />

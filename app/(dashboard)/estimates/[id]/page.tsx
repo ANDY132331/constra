@@ -175,7 +175,7 @@ export default function EstimateDetailPage() {
 
   function handleConvertToInvoice() {
     if (!estimate) return;
-    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter(Boolean);
+    const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const num = `INV-${new Date().getFullYear()}-${String(Math.max(...nums, 0) + 1).padStart(3, "0")}`;
     addInvoice({
       number: num, clientName: estimate.clientName, clientEmail: estimate.clientEmail,
@@ -290,7 +290,7 @@ export default function EstimateDetailPage() {
                 {isAccepted && (
                   <button onClick={() => { handleConvertToInvoice(); setMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-amber-400 hover:bg-white/[0.05] transition-colors text-left">
-                    <AlertTriangle size={14} /> Convert to Invoice
+                    <FileDown size={14} /> Convert to Invoice
                   </button>
                 )}
                 <div className="my-1 border-t border-white/[0.06]" />

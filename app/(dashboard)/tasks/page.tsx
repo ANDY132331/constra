@@ -94,6 +94,7 @@ export default function TasksPage() {
 
   const handleSave = () => {
     if (!form.name.trim()) { toast.error("Task name is required"); return; }
+    if (form.startDate && form.endDate && form.endDate < form.startDate) { toast.error("Due date must be after start date"); return; }
     const wasEditing = !!(editTaskId && editProjectId);
     if (editTaskId && editProjectId) {
       updateTask(editProjectId, editTaskId, {

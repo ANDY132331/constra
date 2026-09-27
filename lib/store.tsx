@@ -429,7 +429,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           .order("timestamp", { ascending: false }).limit(50),
         supabase.from("hours_adjustments").select("*").eq("company_id", companyId),
         supabase.from("crew_messages").select("*").eq("company_id", companyId)
-          .order("timestamp", { ascending: true }).limit(500),
+          .order("timestamp", { ascending: false }).limit(500),
         supabase.from("material_types").select("*").eq("company_id", companyId),
         supabase.from("material_entries").select("*").eq("company_id", companyId),
         supabase.from("documents").select("*").eq("company_id", companyId)
@@ -478,7 +478,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         photos: (photosData ?? []).map(dbToPhoto),
         activityFeed: (activityData ?? []).map(dbToActivity),
         hoursAdjustments: (adjustmentsData ?? []).map(dbToHoursAdjustment),
-        messages: (messagesData ?? []).map((m) => dbToMessage(m as DbMessage)),
+        messages: (messagesData ?? []).map((m) => dbToMessage(m as DbMessage)).reverse(),
         materialTypes: (materialTypesData ?? []).map((m) => dbToMaterialType(m as DbMaterialType)),
         materialEntries: (materialEntriesData ?? []).map((e) => dbToMaterialEntry(e as DbMaterialEntry)),
         documents: (documentsData ?? []).map((d) => dbToDocument(d as DbDocument)),
