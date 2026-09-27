@@ -869,7 +869,7 @@ export function dbToDailyReport(row: DbDailyReport): DailyReport {
   return {
     id: row.id,
     projectId: row.project_id,
-    date: new Date(row.date),
+    date: new Date(row.date.length === 10 ? row.date + "T12:00:00" : row.date),
     weather: row.weather ?? "",
     temperatureF: row.temperature_f ?? 0,
     crewCount: row.crew_count ?? 0,
@@ -1097,8 +1097,8 @@ export function dbToInsurancePolicy(row: DbInsurancePolicy): InsurancePolicy {
     insurer: row.insurer,
     policyNumber: row.policy_number,
     coverageAmount: Number(row.coverage_amount),
-    issueDate: new Date(row.issue_date),
-    expiryDate: new Date(row.expiry_date),
+    issueDate: new Date(row.issue_date.length === 10 ? row.issue_date + "T12:00:00" : row.issue_date),
+    expiryDate: new Date(row.expiry_date.length === 10 ? row.expiry_date + "T12:00:00" : row.expiry_date),
     notes: row.notes ?? undefined,
   };
 }

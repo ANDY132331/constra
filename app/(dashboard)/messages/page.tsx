@@ -57,6 +57,16 @@ export default function MessagesPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState("");
+  // Track last-read timestamp per project to compute unread counts
+  const [lastRead, setLastRead] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem("constra_msg_lastread") ?? "{}"); } catch { return {}; }
+  });
+
+  const markRead = useCallback((projectId: string) => {
+    const updated = { ...lastRead, [projectId]: Date.now() };
+    setLastRead(updated);
+    try { localStorage.setItem("constra_msg_lastread", JSON.stringify(updated)); } catch {}
+  }, [lastRead]);
 
   useEffect(() => {
     if (!selectedProjectId && projects[0]?.id) setSelectedProjectId(projects[0].id);
@@ -96,6 +106,12 @@ export default function MessagesPage() {
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
     [messages, selectedProjectId],
   );
+
+  // Mark current project as read when it becomes active or gets new messages
+  useEffect(() => {
+    if (selectedProjectId) markRead(selectedProjectId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProjectId, projectMessages.length]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -223,6 +239,10 @@ export default function MessagesPage() {
                   .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
                 const last = projectMsgs[0];
                 const active = p.id === selectedProjectId;
+                const lr = lastRead[p.id] ?? 0;
+                const unread = projectMsgs.filter(
+                  (m) => m.senderId !== currentUser.id && new Date(m.timestamp).getTime() > lr
+                ).length;
                 return (
                   <button
                     key={p.id}
@@ -240,15 +260,23 @@ export default function MessagesPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1 mb-0.5">
                         <span className="text-[13.5px] font-bold truncate" style={{ color: active ? C.activeTitle : C.titleColor }}>{p.name}</span>
-                        {last && (
-                          <span className="text-[10px] flex-shrink-0 font-medium" style={{ color: C.secondaryText }}>
-                            {isToday(new Date(last.timestamp))
-                              ? format(new Date(last.timestamp), "h:mm a")
-                              : format(new Date(last.timestamp), "MM/dd")}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {unread > 0 && !active && (
+                            <span className="min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center text-[10px] font-black"
+                              style={{ background: C.activeBorder, color: "#fff" }}>
+                              {unread > 99 ? "99+" : unread}
+                            </span>
+                          )}
+                          {last && (
+                            <span className="text-[10px] font-medium" style={{ color: C.secondaryText }}>
+                              {isToday(new Date(last.timestamp))
+                                ? format(new Date(last.timestamp), "h:mm a")
+                                : format(new Date(last.timestamp), "MM/dd")}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-[12px] truncate" style={{ color: C.secondaryText }}>
+                      <p className="text-[12px] truncate" style={{ color: unread > 0 && !active ? C.titleColor : C.secondaryText, fontWeight: unread > 0 && !active ? 600 : 400 }}>
                         {last
                           ? (last.attachmentName?.startsWith("voice-")
                             ? "🎙 Voice message"

@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   // Fetch invoice from DB and verify ownership — never trust client-supplied fields
   const { data: invoiceRow, error: invErr } = await authClient
     .from("invoices")
-    .select("id, invoice_number, client_name, client_email, total, due_date, company_id")
+    .select("id, number, client_name, client_email, items, tax_rate, due_date, company_id")
     .eq("id", invoiceId)
     .single();
 
@@ -60,9 +60,13 @@ export async function POST(request: NextRequest) {
     .single();
 
   const to: string = invoiceRow.client_email ?? "";
-  const invoiceNumber: string = invoiceRow.invoice_number ?? "";
+  const invoiceNumber: string = invoiceRow.number ?? "";
   const clientName: string = invoiceRow.client_name ?? "";
-  const amount: string = String(invoiceRow.total ?? 0);
+  const subtotal = (invoiceRow.items ?? []).reduce(
+    (s: number, item: { qty: number; rate: number }) => s + item.qty * item.rate, 0
+  );
+  const total = subtotal * (1 + (invoiceRow.tax_rate ?? 0) / 100);
+  const amount: string = total.toFixed(2);
   const dueDate: string = invoiceRow.due_date ? new Date(invoiceRow.due_date).toLocaleDateString() : "";
   const companyName: string = company?.name ?? "Constra";
 

@@ -356,6 +356,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...state,
           photos: state.photos.map((ph) => ph.url?.startsWith("data:") ? { ...ph, url: undefined } : ph),
           workers: state.workers.map((w) => w.photo?.startsWith("data:") ? { ...w, photo: undefined } : w),
+          messages: state.messages.map((m) => m.attachmentData ? { ...m, attachmentData: undefined } : m),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
       } catch {}
