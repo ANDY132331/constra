@@ -67,7 +67,7 @@ export default function ProjectsPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(blank);
   const searchParams = useSearchParams();
-  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setMobileStep(1); setShowModal(true); } }, [searchParams]);
+  useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank); setMobileStep(1); setGeoConfirmed(""); setGeoQuery(""); setGeoResults([]); setFormError(""); setShowModal(true); } }, [searchParams]);
   type GeoResult = { display_name: string; lat: string; lon: string };
   const [geoResults, setGeoResults] = useState<GeoResult[]>([]);
   const [geoLoading, setGeoLoading] = useState(false);
