@@ -260,6 +260,8 @@ export default function MessagesPage() {
           });
         };
         reader.readAsDataURL(blob);
+        streamRef.current?.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
       }, { once: true });
     } else {
       streamRef.current?.getTracks().forEach(t => t.stop());
