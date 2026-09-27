@@ -22,7 +22,7 @@ const CATEGORIES: { value: Category; label: string; color: string }[] = [
   { value: "permit",      label: "Permits",             color: "#34d399" },
   { value: "contract",    label: "Contracts",           color: "#F5C400" },
   { value: "inspection",  label: "Inspection Reports",  color: "#a78bfa" },
-  { value: "safety",      label: "Safety Docs",         color: "#F5C400" },
+  { value: "safety",      label: "Safety Docs",         color: "#f97316" },
   { value: "other",       label: "Other",               color: "#64748b" },
 ];
 
@@ -145,13 +145,14 @@ export default function DocumentsPage() {
   }
 
   function downloadDoc(doc: ProjectDocument) {
-    if (!doc.dataUrl) {
+    const url = doc.publicUrl ?? doc.dataUrl;
+    if (!url) {
       setDownloadErrorMsg(`"${doc.name}" has no stored file. Upload a real file to enable downloads.`);
       setTimeout(() => setDownloadErrorMsg(""), 4000);
       return;
     }
     const a = document.createElement("a");
-    a.href = doc.dataUrl;
+    a.href = url;
     a.download = doc.name;
     a.click();
   }
@@ -424,10 +425,10 @@ export default function DocumentsPage() {
                 <div className="opacity-0 group-hover:opacity-100 flex border-t border-white/[0.06] transition-opacity">
                   <button
                     onClick={(e) => { e.stopPropagation(); downloadDoc(doc); }}
-                    title={!doc.dataUrl ? "No stored file — upload to enable download" : undefined}
-                    className={`flex-1 py-2 text-[11px] font-semibold transition-colors flex items-center justify-center gap-1.5 ${doc.dataUrl ? "text-white/40 hover:text-white hover:bg-white/[0.04]" : "text-white/20 cursor-not-allowed"}`}
+                    title={!(doc.publicUrl ?? doc.dataUrl) ? "No stored file — upload to enable download" : undefined}
+                    className={`flex-1 py-2 text-[11px] font-semibold transition-colors flex items-center justify-center gap-1.5 ${(doc.publicUrl ?? doc.dataUrl) ? "text-white/40 hover:text-white hover:bg-white/[0.04]" : "text-white/20 cursor-not-allowed"}`}
                   >
-                    <Download size={11} /> {doc.dataUrl ? "Download" : "No File"}
+                    <Download size={11} /> {(doc.publicUrl ?? doc.dataUrl) ? "Download" : "No File"}
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm(doc.id); }}

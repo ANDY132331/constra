@@ -21,7 +21,7 @@ const TRADE_COLORS: Record<string, string> = {
   "Framing":             "#F5C400",
   "Drywall":             "#60a5fa",
   "Concrete":            "#94a3b8",
-  "Roofing":             "#F5C400",
+  "Roofing":             "#fb923c",
   "Electrical":          "#facc15",
   "Plumbing":            "#38bdf8",
   "Insulation":          "#a78bfa",
@@ -494,7 +494,7 @@ export default function MaterialsPage() {
               {/* Type toggle */}
               <div className="flex gap-2">
                 {(["delivery", "usage"] as const).map((t) => (
-                  <button key={t} onClick={() => setEntryType(t)}
+                  <button type="button" key={t} onClick={() => setEntryType(t)}
                     className={`flex-1 py-2 rounded-lg text-[13px] font-bold capitalize transition-colors ${entryType === t ? "bg-amber-500 text-black" : "bg-white/5 text-white/40 hover:text-white/70"}`}>
                     {t === "delivery" ? "Delivery" : "Usage / Install"}
                   </button>
@@ -520,7 +520,7 @@ export default function MaterialsPage() {
                 <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1.5 block">Trade</label>
                 <div className="flex flex-wrap gap-1.5">
                   {TRADES.map((t) => (
-                    <button key={t} onClick={() => { setPickerTrade(t); setPickerSearch(""); setSelectedMaterial(null); }}
+                    <button type="button" key={t} onClick={() => { setPickerTrade(t); setPickerSearch(""); setSelectedMaterial(null); }}
                       className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${pickerTrade === t ? "text-black" : "bg-white/[0.05] text-white/40 hover:text-white/70"}`}
                       style={pickerTrade === t ? { backgroundColor: color(t) } : undefined}>
                       {t}
@@ -545,7 +545,7 @@ export default function MaterialsPage() {
                 </div>
                 <div className="bg-[#1a1a1a] border border-white/[0.08] rounded-lg max-h-40 overflow-y-auto">
                   {sortedLibrary.length === 0 && pickerSearch && (
-                    <button
+                    <button type="button"
                       onClick={() => setSelectedMaterial({ id: `_custom_${Date.now()}`, name: pickerSearch, unit: "pieces", trade: pickerTrade, useCount: 0, isCustom: true })}
                       className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-amber-400 hover:bg-amber-500/5 text-left"
                     >
@@ -554,6 +554,7 @@ export default function MaterialsPage() {
                   )}
                   {sortedLibrary.map((m) => (
                     <button
+                      type="button"
                       key={m.id}
                       onClick={() => setSelectedMaterial(m)}
                       className={`w-full flex items-center justify-between px-3 py-2 text-[12px] transition-colors text-left ${selectedMaterial?.name === m.name && selectedMaterial?.trade === m.trade ? "bg-amber-500/15 text-amber-300" : "text-white/70 hover:bg-white/[0.04] hover:text-white"}`}

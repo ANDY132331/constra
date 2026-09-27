@@ -32,11 +32,11 @@ type RFIForm = {
   dueDate: string;
 };
 
-const blank: RFIForm = {
+const blank = (): RFIForm => ({
   projectId: "", subject: "", question: "",
   submittedById: "", assignedToId: "",
   priority: "routine", dueDate: toLocalDateString(new Date(Date.now() + 7 * 86400000)),
-};
+});
 
 export default function RFIsPage() {
   const { rfis, projects, workers, addRFI, updateRFI, deleteRFI, getWorkerById, getProjectById } = useStore();
@@ -46,7 +46,7 @@ export default function RFIsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [closeNoAnswerConfirm, setCloseNoAnswerConfirm] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState<RFIForm>(blank);
+  const [form, setForm] = useState<RFIForm>(() => blank());
   const [answerRfiId, setAnswerRfiId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "answered" | "closed">("all");
@@ -104,7 +104,7 @@ export default function RFIsPage() {
         dueDate: form.dueDate ? new Date(form.dueDate + "T12:00:00") : new Date(Date.now() + 7 * 86400000),
       });
     }
-    setForm(blank);
+    setForm(blank());
     setEditId(null);
     setShowModal(false);
     toast.success(editId ? "RFI updated" : "RFI submitted");
@@ -125,7 +125,7 @@ export default function RFIsPage() {
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h1 className="text-[22px] font-bold text-white">RFIs</h1>
           <button
-            onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
+            onClick={() => { setEditId(null); setForm(blank()); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New RFI
@@ -239,7 +239,7 @@ export default function RFIsPage() {
               <h2 className="text-2xl font-bold text-white tracking-tight">RFIs</h2>
               <p className="text-white/35 text-sm mt-0.5">Request For Information — formal clarification and design queries</p>
             </div>
-            <button onClick={() => { setEditId(null); setForm(blank); setShowModal(true); }}
+            <button onClick={() => { setEditId(null); setForm(blank()); setShowModal(true); }}
               className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
               <Plus size={15} />
               New RFI

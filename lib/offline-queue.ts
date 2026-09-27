@@ -49,8 +49,9 @@ export async function flushQueue(client: SupabaseClient): Promise<number> {
       } else if (entry.op === "delete" && entry.eqId) {
         ({ error } = await client.from(entry.table).delete().eq("id", entry.eqId));
       }
-      if (error) {
-        console.warn("[offline-queue] op failed, keeping:", entry, error);
+      const skipped = (entry.op === "update" || entry.op === "delete") && !entry.eqId;
+      if (error || skipped) {
+        console.warn("[offline-queue] op failed or missing eqId, keeping:", entry, error);
         remaining.push(entry);
       } else {
         synced++;

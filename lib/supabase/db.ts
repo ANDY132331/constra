@@ -287,7 +287,7 @@ export function dbToPunchItem(row: DbPunchItem): PunchItem {
     priority: row.priority,
     assignedToId: row.assigned_to_id ?? "",
     createdAt: new Date(row.created_at),
-    dueDate: row.due_date ? new Date(row.due_date) : undefined,
+    dueDate: row.due_date ? new Date(row.due_date.length === 10 ? row.due_date + "T12:00:00" : row.due_date) : undefined,
     location: row.location ?? undefined,
   };
 }
