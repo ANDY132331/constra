@@ -351,7 +351,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (localSaveTimerRef.current) clearTimeout(localSaveTimerRef.current);
     localSaveTimerRef.current = setTimeout(() => {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+      try {
+        const toSave = {
+          ...state,
+          photos: state.photos.map((ph) => ph.url?.startsWith("data:") ? { ...ph, url: undefined } : ph),
+          workers: state.workers.map((w) => w.photo?.startsWith("data:") ? { ...w, photo: undefined } : w),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      } catch {}
     }, 500);
     return () => { if (localSaveTimerRef.current) clearTimeout(localSaveTimerRef.current); };
   }, [state]);
@@ -520,7 +527,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           else if (p.eventType === "UPDATE") {
             const newProj = p.new as { id: string; name: string; status: string };
             const prevProj = stateRef.current.projects.find(x => x.id === newProj.id);
-            setState((s) => ({ ...s, projects: s.projects.map(x => x.id === newProj.id ? dbToProject(p.new as Parameters<typeof dbToProject>[0], stateRef.current.projects.find(pr => pr.id === newProj.id)?.tasks.map(t => ({ id: t.id, project_id: t.projectId, company_id: companyId, name: t.name, progress: t.progress, worker_id: t.workerId ?? null, start_date: t.startDate.toISOString(), end_date: t.endDate.toISOString(), status: t.status, created_at: undefined } as DbTask)) ?? []) : x) }));
+            setState((s) => ({ ...s, projects: s.projects.map(x => {
+              if (x.id !== newProj.id) return x;
+              const updated = dbToProject(p.new as Parameters<typeof dbToProject>[0]);
+              return { ...updated, tasks: x.tasks };
+            }) }));
             if (prevProj && prevProj.status !== newProj.status) {
               notifyProjectStatusChange(newProj.name, newProj.status, newProj.id);
             }

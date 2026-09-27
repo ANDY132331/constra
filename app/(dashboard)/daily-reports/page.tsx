@@ -100,7 +100,7 @@ export default function DailyReportsPage() {
       })
       .catch(() => { toast.error("Could not fetch weather"); })
       .finally(() => setFetchingWeather(false));
-  }, []);
+  }, [currency]);
 
   const fetchWeather = useCallback(() => {
     if (!navigator.geolocation) return;
