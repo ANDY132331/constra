@@ -448,7 +448,7 @@ export default function DocumentsPage() {
 
       {/* Preview lightbox */}
       {previewDoc && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setPreviewDoc(null); }}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) { setPreviewDoc(null); setShowVersions(false); } }}>
           <div className="sheet relative bg-[#141414] border border-white/[0.1] rounded-t-2xl sm:rounded-2xl max-w-3xl w-full max-h-[90dvh] overflow-hidden flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
               <div>
