@@ -99,7 +99,7 @@ export default function MaterialsPage() {
       }
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [materialEntries, selectedProject, selectedTrade, searchQuery]);
+  }, [materialEntries, selectedProject, selectedTrade, searchQuery, projects]);
 
   // Per-project summary grouped by trade
   const projectSummary = useMemo(() => {
