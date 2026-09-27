@@ -45,7 +45,7 @@ import {
   dbToScheduleEvent, scheduleEventToDb,
   type DbTask, type DbMessage, type DbMaterialType, type DbMaterialEntry, type DbDocument,
   type DbDailyReport, type DbChangeOrder, type DbBlueprintPin, type DbBudgetLine,
-  type DbInsurancePolicy,
+  type DbInsurancePolicy, type DbScheduleEvent,
 } from "@/lib/supabase/db";
 
 function reviveDates(_key: string, value: unknown): unknown {
@@ -663,6 +663,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (p.eventType === "INSERT") setState((s) => ({ ...s, insurancePolicies: [...s.insurancePolicies.filter(x => x.id !== (p.new as {id:string}).id), dbToInsurancePolicy(p.new as DbInsurancePolicy)] }));
           else if (p.eventType === "UPDATE") setState((s) => ({ ...s, insurancePolicies: s.insurancePolicies.map(x => x.id === (p.new as {id:string}).id ? dbToInsurancePolicy(p.new as DbInsurancePolicy) : x) }));
           else if (p.eventType === "DELETE") setState((s) => ({ ...s, insurancePolicies: s.insurancePolicies.filter(x => x.id !== (p.old as {id:string}).id) }));
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "budget_lines", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") setState((s) => ({ ...s, budgetLines: [...s.budgetLines.filter(x => x.id !== (p.new as {id:string}).id), dbToBudgetLine(p.new as DbBudgetLine)] }));
+          else if (p.eventType === "UPDATE") setState((s) => ({ ...s, budgetLines: s.budgetLines.map(x => x.id === (p.new as {id:string}).id ? dbToBudgetLine(p.new as DbBudgetLine) : x) }));
+          else if (p.eventType === "DELETE") setState((s) => ({ ...s, budgetLines: s.budgetLines.filter(x => x.id !== (p.old as {id:string}).id) }));
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "material_types", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") setState((s) => ({ ...s, materialTypes: [...s.materialTypes.filter(x => x.id !== (p.new as {id:string}).id), dbToMaterialType(p.new as DbMaterialType)] }));
+          else if (p.eventType === "UPDATE") setState((s) => ({ ...s, materialTypes: s.materialTypes.map(x => x.id === (p.new as {id:string}).id ? dbToMaterialType(p.new as DbMaterialType) : x) }));
+          else if (p.eventType === "DELETE") setState((s) => ({ ...s, materialTypes: s.materialTypes.filter(x => x.id !== (p.old as {id:string}).id) }));
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "material_entries", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") setState((s) => ({ ...s, materialEntries: [...s.materialEntries.filter(x => x.id !== (p.new as {id:string}).id), dbToMaterialEntry(p.new as DbMaterialEntry)] }));
+          else if (p.eventType === "DELETE") setState((s) => ({ ...s, materialEntries: s.materialEntries.filter(x => x.id !== (p.old as {id:string}).id) }));
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "documents", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") setState((s) => ({ ...s, documents: [...s.documents.filter(x => x.id !== (p.new as {id:string}).id), dbToDocument(p.new as DbDocument)] }));
+          else if (p.eventType === "DELETE") setState((s) => ({ ...s, documents: s.documents.filter(x => x.id !== (p.old as {id:string}).id) }));
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "schedule_events", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "INSERT") setState((s) => ({ ...s, scheduleEvents: [...s.scheduleEvents.filter(x => x.id !== (p.new as {id:string}).id), dbToScheduleEvent(p.new as DbScheduleEvent)] }));
+          else if (p.eventType === "UPDATE") setState((s) => ({ ...s, scheduleEvents: s.scheduleEvents.map(x => x.id === (p.new as {id:string}).id ? dbToScheduleEvent(p.new as DbScheduleEvent) : x) }));
+          else if (p.eventType === "DELETE") setState((s) => ({ ...s, scheduleEvents: s.scheduleEvents.filter(x => x.id !== (p.old as {id:string}).id) }));
         })
         .subscribe((status) => {
           setTransient((t) => ({ ...t, isRealtimeConnected: status === "SUBSCRIBED" }));
