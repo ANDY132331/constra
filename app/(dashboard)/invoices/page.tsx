@@ -101,6 +101,9 @@ export default function InvoicesPage() {
   const searchParams = useSearchParams();
   useEffect(() => { if (searchParams.get("new") === "1") { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); } }, [searchParams, defaultTaxRate]);
 
+  // now must be declared before filtered — filtered's callback accesses now synchronously
+  const now = new Date();
+
   const filtered = invoices.filter((i) => {
     if (statusFilter !== "all") {
       const isPastDue = i.status === "sent" && i.dueDate < now;
@@ -119,7 +122,6 @@ export default function InvoicesPage() {
     .filter((i) => i.status === "paid")
     .reduce((s, i) => s + invoiceTotal(i), 0);
 
-  const now = new Date();
   const overdueCount = invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && i.dueDate < now)).length;
 
   const calcTotal = useCallback((items: LineItem[], taxRate: string) => {

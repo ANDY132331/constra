@@ -681,6 +681,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
         .on("postgres_changes", { event: "*", schema: "public", table: "documents", filter: `company_id=eq.${companyId}` }, (p) => {
           if (p.eventType === "INSERT") setState((s) => ({ ...s, documents: [...s.documents.filter(x => x.id !== (p.new as {id:string}).id), dbToDocument(p.new as DbDocument)] }));
+          else if (p.eventType === "UPDATE") setState((s) => ({ ...s, documents: s.documents.map(x => x.id === (p.new as {id:string}).id ? dbToDocument(p.new as DbDocument) : x) }));
           else if (p.eventType === "DELETE") setState((s) => ({ ...s, documents: s.documents.filter(x => x.id !== (p.old as {id:string}).id) }));
         })
         .on("postgres_changes", { event: "*", schema: "public", table: "schedule_events", filter: `company_id=eq.${companyId}` }, (p) => {
