@@ -86,7 +86,7 @@ export async function GET(request: Request) {
           </tr>
         </table>
         <p style="color:#888;font-size:12px">If you have already sent payment, please disregard this notice.</p>
-        <a class="cta" style="background:#ef4444" href="${APP_URL}/invoices">View Invoice →</a>
+        <a class="cta" style="background:#ef4444" href="${APP_URL}/pay/${inv.id}">View &amp; Pay Invoice →</a>
       `,
     });
 

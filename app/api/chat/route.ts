@@ -99,7 +99,8 @@ Constra is a mobile-first PWA for construction workforce management, used by con
 - Offline mode is active if no signal — the clock-in still records, syncs later
 
 **Invite code not working:**
-- Invite codes are single-use and expire after 48 hours — regenerate from Crew → Add Worker
+- Invite codes are permanent until regenerated — go to Crew → Add Worker → Regenerate Code
+- Check the code is typed exactly as shown (CN-XXXX-XXXX format, case-insensitive)
 
 **Worker missing from crew list:**
 - They may not have completed sign-up — check if they used the invite code

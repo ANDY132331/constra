@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   // Fetch real invoice total from DB — never trust client-supplied amount
   const { data: invoice, error: invErr } = await supabase
     .from("invoices")
-    .select("total, status, company_id")
+    .select("items, tax_rate, status, company_id")
     .eq("id", invoiceId)
     .single();
 
@@ -42,7 +42,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
   }
 
-  const amount: number = invoice.total;
+  // Verify caller belongs to the company that owns this invoice
+  const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
+  if (!profile || profile.company_id !== invoice.company_id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  type DbItem = { qty: number; rate: number };
+  const subtotal = (invoice.items as DbItem[] ?? []).reduce((s: number, i: DbItem) => s + i.qty * i.rate, 0);
+  const amount: number = subtotal * (1 + Number(invoice.tax_rate ?? 0) / 100);
   const description = `Invoice payment`;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
