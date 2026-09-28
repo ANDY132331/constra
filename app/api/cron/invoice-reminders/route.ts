@@ -20,8 +20,12 @@ function invoiceTotal(items: { qty: number; rate: number }[], taxRate: number) {
   return sub * (1 + taxRate / 100);
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+function fmt(n: number, currency = "USD") {
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
+  } catch {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
+  }
 }
 
 export async function GET(request: Request) {
@@ -36,10 +40,10 @@ export async function GET(request: Request) {
 
   const supabase = getAdmin();
 
-  // Fetch all overdue invoices with their company name
+  // Fetch all overdue invoices with their company name and currency
   const { data: invoices, error } = await supabase
     .from("invoices")
-    .select("*, companies(name)")
+    .select("*, companies(name, currency)")
     .eq("status", "overdue");
 
   if (error) {
@@ -57,9 +61,11 @@ export async function GET(request: Request) {
   for (const inv of invoices) {
     if (!inv.client_email) continue;
 
-    const companyName = (inv.companies as { name?: string } | null)?.name ?? "Your contractor";
+    const company = inv.companies as { name?: string; currency?: string } | null;
+    const companyName = company?.name ?? "Your contractor";
+    const companyCurrency = company?.currency ?? "USD";
     const total = invoiceTotal(inv.items ?? [], Number(inv.tax_rate ?? 0));
-    const amount = fmt(total);
+    const amount = fmt(total, companyCurrency);
     const dueDate = new Date(inv.due_date).toLocaleDateString("en-US", {
       month: "long", day: "numeric", year: "numeric",
     });
