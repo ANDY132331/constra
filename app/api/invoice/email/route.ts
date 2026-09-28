@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
   const { data: company } = await authClient
     .from("companies")
-    .select("name")
+    .select("name, currency")
     .eq("id", invoiceRow.company_id)
     .single();
 
@@ -66,9 +66,16 @@ export async function POST(request: NextRequest) {
     (s: number, item: { qty: number; rate: number }) => s + item.qty * item.rate, 0
   );
   const total = subtotal * (1 + (invoiceRow.tax_rate ?? 0) / 100);
-  const amount: string = total.toFixed(2);
+  const companyCurrency: string = (company as { name?: string; currency?: string } | null)?.currency ?? "CAD";
+  const amount: string = (() => {
+    try {
+      return new Intl.NumberFormat("en-US", { style: "currency", currency: companyCurrency, maximumFractionDigits: 2 }).format(total);
+    } catch {
+      return total.toFixed(2);
+    }
+  })();
   const dueDate: string = invoiceRow.due_date ? new Date(invoiceRow.due_date).toLocaleDateString() : "";
-  const companyName: string = company?.name ?? "Constra";
+  const companyName: string = (company as { name?: string } | null)?.name ?? "Constra";
 
   // Build the payment link — direct to client pay page if invoiceId is available
   const payLink = invoiceId ? `${APP_URL}/pay/${invoiceId}` : `${APP_URL}/invoices`;
