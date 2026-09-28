@@ -153,7 +153,7 @@ type StoreCtx = StoreState & {
   updateRFI: (id: string, u: Partial<RFI>) => void;
   deleteRFI: (id: string) => void;
 
-  addInvoice: (i: Omit<Invoice, "id">) => void;
+  addInvoice: (i: Omit<Invoice, "id">) => Invoice;
   updateInvoice: (id: string, u: Partial<Invoice>) => void;
   deleteInvoice: (id: string) => void;
 
@@ -1069,10 +1069,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // ── Invoices ──────────────────────────────────────────────────────────────────
 
-  const addInvoice = useCallback((i: Omit<Invoice, "id">) => {
+  const addInvoice = useCallback((i: Omit<Invoice, "id">): Invoice => {
     const item = { ...i, id: genId() };
     up((s) => ({ ...s, invoices: [...s.invoices, item] }));
     bg(() => getClient().from("invoices").insert(invoiceToDb(item, companyIdRef.current!)), "addInvoice");
+    return item;
   }, [up]);
 
   const updateInvoice = useCallback((id: string, u: Partial<Invoice>) => {
