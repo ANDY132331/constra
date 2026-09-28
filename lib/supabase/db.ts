@@ -106,6 +106,7 @@ export type DbProject = {
   forecast?: number | null;
   address: string;
   gps: unknown;
+  geofence_radius?: number | null;
   color: string;
   manager_id: string | null;
   worker_ids: string[];
@@ -155,6 +156,7 @@ export function dbToProject(row: DbProject, tasks: DbTask[] = []): Project {
     forecast: row.forecast != null ? Number(row.forecast) : undefined,
     address: row.address,
     gps: gpsFromJson(row.gps),
+    geofenceRadius: row.geofence_radius != null ? Number(row.geofence_radius) : undefined,
     color: row.color,
     managerId: row.manager_id ?? "",
     workerIds: row.worker_ids ?? [],
@@ -183,6 +185,7 @@ export function projectToDb(
     forecast: p.forecast ?? null,
     address: p.address,
     gps: p.gps ?? null,
+    geofence_radius: p.geofenceRadius ?? null,
     color: p.color,
     manager_id: p.managerId || null,
     worker_ids: p.workerIds,
