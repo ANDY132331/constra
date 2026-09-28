@@ -84,7 +84,11 @@ function buildContext(d: CompanySnap): string {
   return lines.join("\n");
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return Response.json({ configured: false });
+  void request;
   return Response.json({ configured: !!process.env.GROQ_API_KEY });
 }
 
@@ -117,9 +121,14 @@ export async function POST(request: Request) {
     return new Response("Too many messages", { status: 400 });
   }
 
-  const context = buildContext(companyData);
+  let context: string;
+  try {
+    context = buildContext(companyData);
+  } catch {
+    context = "";
+  }
   const groqMessages = [
-    { role: "system", content: `${SYSTEM_PROMPT}\n\n${context}` },
+    { role: "system", content: context ? `${SYSTEM_PROMPT}\n\n${context}` : SYSTEM_PROMPT },
     ...messages
       .filter((m) => m.role === "user" || m.role === "assistant")
       .map((m) => ({ role: m.role, content: String(m.content).slice(0, 4000) })),

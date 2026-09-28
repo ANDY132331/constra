@@ -49,6 +49,16 @@ export async function POST(req: NextRequest) {
     }
 
     if (directSub) {
+      // Verify this subscription belongs to the authenticated user
+      const { data: ownSub } = await serviceSupabase
+        .from("push_subscriptions")
+        .select("user_id")
+        .eq("endpoint", directSub.endpoint)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!ownSub) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       try {
         await webPush.sendNotification(directSub, payload);
       } catch (e: unknown) {

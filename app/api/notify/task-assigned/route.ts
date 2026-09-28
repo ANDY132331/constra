@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         assignerName: safeName(assignerName ?? "Your manager"),
         taskName: safeName(taskName),
         projectName: safeName(projectName),
-        dueDate,
+        dueDate: dueDate ? safeName(dueDate, 50) : undefined,
       }),
     });
     return NextResponse.json({ sent: true });

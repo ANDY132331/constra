@@ -6,7 +6,11 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return Response.json({ configured: false });
+  void request;
   return Response.json({ configured: !!process.env.GROQ_API_KEY });
 }
 
