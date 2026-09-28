@@ -3,6 +3,10 @@ export const dynamic = "force-dynamic";
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
+
+function esc(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // POST /api/join
@@ -96,8 +100,8 @@ export async function POST(request: NextRequest) {
         company: company.name,
         preheader: `You've been added to ${company.name} on Constra`,
         body: `
-          <h2>Welcome to the team, ${firstName.trim()}! 🎉</h2>
-          <p>You've successfully joined <strong>${company.name}</strong> on Constra.</p>
+          <h2>Welcome to the team, ${esc(firstName.trim())}! 🎉</h2>
+          <p>You've successfully joined <strong>${esc(company.name)}</strong> on Constra.</p>
           <p>You can now clock in, view your tasks, and stay connected with your crew — all from your phone or desktop.</p>
           <a class="cta" href="${APP_URL}/dashboard">Go to your dashboard →</a>
           <p style="color:#aaa;font-size:12px;margin-top:24px">Questions? Contact your company admin or reply to this email.</p>
