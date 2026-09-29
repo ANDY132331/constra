@@ -3,7 +3,8 @@ export const dynamic = "force-dynamic";
 import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { APP_URL } from "@/lib/email";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // Stripe zero-decimal currencies (no cents — amount is already the smallest unit)
 const ZERO_DECIMAL = new Set([
@@ -11,10 +12,21 @@ const ZERO_DECIMAL = new Set([
   "UGX","VND","VUV","XAF","XOF","XPF",
 ]);
 
+function getAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
 export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
   }
+
+  // Rate limit by IP — no auth required (this is a public client-facing endpoint)
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  if (!rateLimit(`pay-invoice-create:${ip}`, 10, 60_000)) return rateLimitResponse();
 
   let body: { invoiceId?: string; currency?: string };
   try { body = await req.json(); } catch {
@@ -26,12 +38,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing invoiceId" }, { status: 400 });
   }
 
-  // Auth guard — must be authenticated
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Use service role — clients are unauthenticated, RLS would block them
+  const supabase = getAdmin();
 
-  // Fetch real invoice total from DB — never trust client-supplied amount
   const { data: invoice, error: invErr } = await supabase
     .from("invoices")
     .select("items, tax_rate, status, company_id")
@@ -42,16 +51,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
   }
 
-  // Verify caller belongs to the company that owns this invoice
-  const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
-  if (!profile || profile.company_id !== invoice.company_id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Only allow payment on sent/overdue invoices
+  if (invoice.status === "paid") {
+    return NextResponse.json({ error: "Invoice already paid" }, { status: 409 });
+  }
+  if (invoice.status === "draft") {
+    return NextResponse.json({ error: "Invoice not yet sent" }, { status: 403 });
   }
 
   type DbItem = { qty: number; rate: number };
   const subtotal = (invoice.items as DbItem[] ?? []).reduce((s: number, i: DbItem) => s + i.qty * i.rate, 0);
   const amount: number = subtotal * (1 + Number(invoice.tax_rate ?? 0) / 100);
-  const description = `Invoice payment`;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-06-24.dahlia" as any });
@@ -69,9 +79,7 @@ export async function POST(req: NextRequest) {
         {
           price_data: {
             currency: stripeCurrency,
-            product_data: {
-              name: description,
-            },
+            product_data: { name: "Invoice payment" },
             unit_amount: unitAmount,
           },
           quantity: 1,
@@ -80,9 +88,7 @@ export async function POST(req: NextRequest) {
       metadata: { invoiceId },
       success_url: `${APP_URL}/pay/${invoiceId}/success`,
       cancel_url: `${APP_URL}/pay/${invoiceId}`,
-      payment_intent_data: {
-        metadata: { invoiceId },
-      },
+      payment_intent_data: { metadata: { invoiceId } },
     });
     return NextResponse.json({ url: session.url });
   } catch (err) {

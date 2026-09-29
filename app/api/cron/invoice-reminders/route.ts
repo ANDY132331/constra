@@ -40,6 +40,14 @@ export async function GET(request: Request) {
 
   const supabase = getAdmin();
 
+  // Auto-mark sent invoices whose due_date has passed as overdue
+  const today = new Date().toISOString().split("T")[0];
+  await supabase
+    .from("invoices")
+    .update({ status: "overdue" })
+    .eq("status", "sent")
+    .lt("due_date", today);
+
   // Fetch all overdue invoices with their company name and currency
   const { data: invoices, error } = await supabase
     .from("invoices")
