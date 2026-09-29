@@ -689,7 +689,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* ── Right panel: form ── */}
-      <div className="flex-1 lg:max-w-[480px] overflow-y-auto">
+      <div className="flex-1 lg:max-w-[480px]">
         {/* Mobile background */}
         <div className="absolute inset-0 lg:hidden opacity-[0.03] pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(245,158,11,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,1) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
 
