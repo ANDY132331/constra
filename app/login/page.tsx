@@ -201,9 +201,10 @@ function LoginForm() {
     setError(""); setLoading(true);
     if (!SUPABASE_ENABLED) { setLoading(false); setForgotSent(true); return; }
     try {
-      const supabase = getClient();
-      await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "https://getconstra.com/reset-password",
+      await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
     } catch { /* silently succeed — don't leak whether the email exists */ }
     setLoading(false);
