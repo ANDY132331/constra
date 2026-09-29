@@ -484,7 +484,7 @@ export default function LandingPage() {
       <div ref={cursorDotRef} className="cursor-dot" aria-hidden />
       <div ref={cursorRingRef} className="cursor-ring" aria-hidden />
 
-      <div ref={pageRootRef} className="page-root" style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", background: "#050505", color: "#fff" }}>
+      <div ref={pageRootRef} className="page-root" style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch", background: "#050505", color: "#fff" } as React.CSSProperties}>
 
         {/* ── NAV ───────────────────────────────────────────────────────────── */}
         <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(5,5,5,.88)", borderBottom: "1px solid rgba(255,255,255,.05)", backdropFilter: "blur(24px)" }}>

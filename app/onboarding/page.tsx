@@ -614,6 +614,7 @@ export default function OnboardingPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
+    <div style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch", background: "#080808" } as React.CSSProperties}>
     <div className="min-h-screen bg-[#080808] flex flex-col lg:flex-row">
 
       {/* ── Left panel (desktop only) ── */}
@@ -717,6 +718,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
+    </div>
     </div>
   );
 }

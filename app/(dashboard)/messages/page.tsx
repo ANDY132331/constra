@@ -139,6 +139,8 @@ export default function MessagesPage() {
   const [lightboxData, setLightboxData] = useState<{ name: string; data: string } | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [atBottom, setAtBottom] = useState(true);
+  const [newMsgCount, setNewMsgCount] = useState(0);
+  const prevMsgLenRef = useRef(0);
 
   // Voice recording
   const [recording, setRecording] = useState(false);
@@ -192,24 +194,52 @@ export default function MessagesPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId, projectMessages.length]);
 
-  // Auto-scroll when near bottom; always scroll on project switch
+  // Track new messages from others when scrolled up
+  useEffect(() => {
+    const newLen = projectMessages.length;
+    const prevLen = prevMsgLenRef.current;
+    if (newLen > prevLen) {
+      const added = projectMessages.slice(prevLen);
+      const fromOthers = added.filter(m => m.senderId !== currentUser.id).length;
+      if (!atBottom && fromOthers > 0) setNewMsgCount(n => n + fromOthers);
+      else if (atBottom) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    prevMsgLenRef.current = newLen;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectMessages.length]);
+
+  // Keep scrolled to bottom when already there (handles load & live updates)
   useEffect(() => {
     if (atBottom) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [projectMessages.length, atBottom]);
+  }, [atBottom]);
 
   useEffect(() => {
     setAtBottom(true);
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "instant" }), 0);
+    setNewMsgCount(0);
+    prevMsgLenRef.current = 0;
+    setTimeout(() => {
+      prevMsgLenRef.current = projectMessages.length;
+      bottomRef.current?.scrollIntoView({ behavior: "instant" });
+    }, 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProjectId]);
 
   function handleScrollArea() {
     const el = scrollRef.current;
     if (!el) return;
-    setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 80);
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    if (nearBottom) setNewMsgCount(0);
+    setAtBottom(nearBottom);
   }
 
-  // Worker avatars for project header (up to 5 team members)
-  const teamAvatars = useMemo(() => workers.slice(0, 5), [workers]);
+  // Worker avatars for project header — show project members (up to 5)
+  const teamAvatars = useMemo(() => {
+    const proj = projects.find(p => p.id === selectedProjectId);
+    if (proj?.workerIds?.length) {
+      return workers.filter(w => proj.workerIds.includes(w.id)).slice(0, 5);
+    }
+    return workers.slice(0, 5);
+  }, [workers, projects, selectedProjectId]);
 
   async function startRecording() {
     if (!navigator.mediaDevices?.getUserMedia) { toast.error("Microphone not supported"); return; }
@@ -317,8 +347,11 @@ export default function MessagesPage() {
     });
     setText("");
     setPendingAttachment(null);
+    setAtBottom(true);
+    setNewMsgCount(0);
     const ta = textareaRef.current;
     if (ta) { ta.style.height = "auto"; ta.focus(); }
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 0);
   }, [text, pendingAttachment, selectedProjectId, addMessage, currentUser]);
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -494,7 +527,7 @@ export default function MessagesPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-black leading-tight truncate" style={{ color: C.titleColor }}>{project.name}</p>
                   <p className="text-[11px]" style={{ color: C.secondaryText }}>
-                    {workers.length} member{workers.length !== 1 ? "s" : ""}
+                    {(project.workerIds?.length ?? workers.length)} member{((project.workerIds?.length ?? workers.length) !== 1) ? "s" : ""}
                   </p>
                 </div>
                 {/* Team avatars */}
@@ -516,12 +549,12 @@ export default function MessagesPage() {
                         {w.initials}
                       </div>
                     ))}
-                    {workers.length > 5 && (
+                    {(project.workerIds?.length ?? workers.length) > 5 && (
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold border-2 flex-shrink-0"
                         style={{ background: "rgba(255,255,255,0.06)", color: C.secondaryText, borderColor: C.headerBg, marginLeft: -8 }}
                       >
-                        +{workers.length - 5}
+                        +{(project.workerIds?.length ?? workers.length) - 5}
                       </div>
                     )}
                   </div>
@@ -532,13 +565,14 @@ export default function MessagesPage() {
             )}
           </div>
 
-          {/* Messages scroll area */}
-          <div
-            ref={scrollRef}
-            onScroll={handleScrollArea}
-            className="flex-1 overflow-y-auto px-3 py-2 relative"
-            style={{ overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
-          >
+          {/* Messages scroll area — wrapper lets the scroll-to-bottom button sit at a fixed position within the visible area */}
+          <div className="flex-1 relative min-h-0">
+            <div
+              ref={scrollRef}
+              onScroll={handleScrollArea}
+              className="absolute inset-0 overflow-y-auto px-3 py-2"
+              style={{ overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+            >
             {projectMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-6">
                 <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.08)" }}>
@@ -705,19 +739,25 @@ export default function MessagesPage() {
               </div>
             )}
             <div ref={bottomRef} />
-          </div>
+            </div>
 
-          {/* Scroll-to-bottom button */}
-          {!atBottom && (
-            <button
-              type="button"
-              onClick={() => { setAtBottom(true); bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }}
-              className="absolute bottom-[80px] right-4 w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 z-10"
-              style={{ background: C.activeBorder, color: "#fff" }}
-            >
-              <ChevronDown size={18} />
-            </button>
-          )}
+            {/* Scroll-to-bottom button — absolutely positioned in the visible area of the wrapper */}
+            {!atBottom && (
+              <div className="absolute bottom-3 right-3 z-10">
+                <button
+                  type="button"
+                  onClick={() => { setAtBottom(true); setNewMsgCount(0); bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-full shadow-xl transition-all active:scale-90"
+                  style={{ background: C.activeBorder, color: "#fff" }}
+                >
+                  {newMsgCount > 0 && (
+                    <span className="text-[11px] font-black">{newMsgCount} new</span>
+                  )}
+                  <ChevronDown size={16} />
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Pending attachment preview */}
           {pendingAttachment && (
