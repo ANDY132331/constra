@@ -96,20 +96,24 @@ function useTilt(strength = 12) {
 }
 
 // ── Hero parallax ─────────────────────────────────────────────────────────────
-function useParallax() {
+// containerRef: the actual scroll container (page-root div). Falls back to
+// window when not provided, but on this landing page the container is a fixed
+// overflow-y:auto div — window.scrollY is always 0 there.
+function useParallax(containerRef?: React.RefObject<HTMLDivElement | null>) {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
     const scroll = () => {
       if (!ref.current) return;
-      const y = window.scrollY;
+      const y = containerRef?.current ? containerRef.current.scrollTop : window.scrollY;
       const bg = ref.current.querySelector<HTMLElement>(".par-bg");
       const mid = ref.current.querySelector<HTMLElement>(".par-mid");
       if (bg) bg.style.transform = `translateY(${y * 0.45}px)`;
       if (mid) mid.style.transform = `translateY(${y * 0.18}px)`;
     };
-    window.addEventListener("scroll", scroll, { passive: true });
-    return () => window.removeEventListener("scroll", scroll);
-  }, []);
+    const target: EventTarget = containerRef?.current ?? window;
+    target.addEventListener("scroll", scroll, { passive: true });
+    return () => target.removeEventListener("scroll", scroll);
+  }, [containerRef]);
   return ref;
 }
 
@@ -127,11 +131,11 @@ function TiltCard({ children, style }: { children: React.ReactNode; style?: Reac
 export default function LandingPage() {
   const [alreadyIn, setAlreadyIn] = useState(false);
   const [stickyVisible, setStickyVisible] = useState(false);
-  const heroRef = useParallax();
+  const pageRootRef = useRef<HTMLDivElement>(null);
+  const heroRef = useParallax(pageRootRef);
   const heroMouseRef = useRef<HTMLElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
-  const pageRootRef = useRef<HTMLDivElement>(null);
 
   // Detect returning user — show "Go to Dashboard" in nav, but never auto-redirect
   // so the landing page is always visible to everyone who opens the URL.
@@ -146,6 +150,27 @@ export default function LandingPage() {
     const onScroll = () => setStickyVisible(root.scrollTop > 400);
     root.addEventListener("scroll", onScroll, { passive: true });
     return () => root.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Fix hash navigation — the page scrolls inside the fixed page-root div,
+  // not window, so browser-native href="#id" never reaches the target.
+  // Intercept those clicks and scroll the container manually.
+  useEffect(() => {
+    const root = pageRootRef.current;
+    if (!root) return;
+    const handleHashClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement).closest('a[href^="#"]') as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const id = anchor.getAttribute("href")?.slice(1);
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      e.preventDefault();
+      const top = target.getBoundingClientRect().top + root.scrollTop - 60;
+      root.scrollTo({ top, behavior: "smooth" });
+    };
+    root.addEventListener("click", handleHashClick);
+    return () => root.removeEventListener("click", handleHashClick);
   }, []);
 
   // Mouse parallax on hero
@@ -350,6 +375,7 @@ export default function LandingPage() {
         /* Nav */
         .nav-link { transition: color .15s; }
         .nav-link:hover { color: rgba(255,255,255,.85) !important; }
+        .show-mobile-only { display: none !important; }
 
         /* Depth divider line */
         .depth-line {
@@ -442,6 +468,13 @@ export default function LandingPage() {
           /* Sticky CTA bar */
           .mobile-sticky-cta { display: flex !important; }
           .page-root { padding-bottom: 65px; }
+
+          /* Mobile-only elements (sign-in in nav etc.) */
+          .show-mobile-only { display: inline-flex !important; }
+
+          /* Video reel — stack vertically on mobile */
+          .video-reel { flex-direction: column !important; }
+          .video-reel > * { flex: 0 0 auto !important; width: 100% !important; }
         }
 
         /* Scrollbar */
@@ -502,6 +535,9 @@ export default function LandingPage() {
               <a href="#testimonials" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Reviews</a>
               {!alreadyIn && (
                 <Link href="/login" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.3)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Sign In</Link>
+              )}
+              {!alreadyIn && (
+                <Link href="/login" className="show-mobile-only" style={{ fontSize: 11, color: "rgba(255,255,255,.4)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", alignItems: "center", gap: 3, border: "1px solid rgba(255,255,255,.1)", padding: "7px 11px" }}>Sign In</Link>
               )}
               <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d nav-cta" style={{ background: "#F5C400", color: "#000", fontWeight: 900, fontFamily: BC, fontSize: 12, padding: "10px 22px", textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", boxShadow: "0 0 20px rgba(245,196,0,.25)" }}>
                 {alreadyIn ? "Dashboard →" : "Get Started →"}
@@ -888,7 +924,7 @@ export default function LandingPage() {
 
         {/* ── LIVE VIDEO REEL ──────────────────────────────────────────────── */}
         <section style={{ background: "#030303", padding: 0, overflow: "hidden" }}>
-          <div style={{ display: "flex", gap: 3 }}>
+          <div className="video-reel" style={{ display: "flex", gap: 3 }}>
             {[
               { id: "TdZQjSwykV0", fb: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", cls: "kb1", label: "CREW MANAGEMENT", sub: "GPS · CLOCK-IN" },
               { id: "AdJB6Dt0JQ0", fb: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80", cls: "kb2", label: "PROJECT TRACKING", sub: "REAL-TIME UPDATES" },
