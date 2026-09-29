@@ -46,7 +46,7 @@ const blank: IncidentForm = {
 };
 
 export default function SafetyPage() {
-  const { safetyIncidents, projects, workers, addSafetyIncident, updateSafetyIncident, deleteSafetyIncident, getWorkerById, getProjectById } = useStore();
+  const { safetyIncidents, projects, workers, currentUser, addSafetyIncident, updateSafetyIncident, deleteSafetyIncident, getWorkerById, getProjectById } = useStore();
   const t = useT();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -107,7 +107,7 @@ export default function SafetyPage() {
         severity: form.severity,
         description: form.description.trim(),
         actionTaken: form.actionTaken.trim(),
-        reportedById: form.reportedById || (workers[0]?.id ?? ""),
+        reportedById: form.reportedById || currentUser.id,
         injuredId: form.injuredId || undefined,
         date: form.date ? new Date(form.date + "T12:00:00") : new Date(),
         reportedToOSHA: form.reportedToOSHA,

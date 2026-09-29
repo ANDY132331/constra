@@ -79,7 +79,7 @@ export default function ChangeOrdersPage() {
       if (!c.title.toLowerCase().includes(q) && !c.number.toLowerCase().includes(q) && !(proj?.name.toLowerCase().includes(q)) && !c.description.toLowerCase().includes(q) && !c.reason.toLowerCase().includes(q)) return false;
     }
     return true;
-  }).sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime());
+  }).sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
 
   const totals = {
     pending: changeOrders.filter((c) => c.status === "pending").reduce((s, c) => s + c.amount, 0),

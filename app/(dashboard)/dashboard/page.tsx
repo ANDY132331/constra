@@ -419,7 +419,7 @@ export default function DashboardPage() {
       .flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.name })))
       .filter((t) => t.workerId === currentUser.id && t.status !== "completed");
     const urgentTasks = myTasks.filter((t) => t.endDate <= now);
-    const todayTasks = myTasks.filter((t) => t.endDate.toDateString() === now.toDateString() && t.endDate > now);
+    const todayTasks = myTasks.filter((t) => new Date(t.endDate).toDateString() === now.toDateString() && new Date(t.endDate) > now);
 
     // My punch items (items on my projects)
     const myPunchItems = punchItems.filter(

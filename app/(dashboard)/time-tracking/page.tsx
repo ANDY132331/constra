@@ -484,9 +484,13 @@ export default function TimeTrackingPage() {
 
     // Run background verification silently after UI is updated
     const project = getProjectById(projectId);
-    const flags = await runVerification({ entry: newEntry, worker, project, pastEntries: clockEntries });
-    if (flags.length > 0) {
-      updateClockEntry(entryId, { verificationFlags: flags });
+    try {
+      const flags = await runVerification({ entry: newEntry, worker, project, pastEntries: clockEntries });
+      if (flags.length > 0) {
+        updateClockEntry(entryId, { verificationFlags: flags });
+      }
+    } catch (e) {
+      console.error("[time-tracking] runVerification failed:", e);
     }
   }, [cameraTarget, clockEntries, addClockEntry, updateClockEntry, updateWorker, getProjectById, companyId]);
 

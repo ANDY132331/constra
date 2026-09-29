@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { toast } from "sonner";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Trash2, X, Pencil, DollarSign, TrendingUp, TrendingDown,
@@ -53,6 +54,7 @@ function variancePct(b: BudgetLine) {
 }
 
 export default function BudgetPage() {
+  const router = useRouter();
   const {
     currentUser, projects, budgetLines,
     addBudgetLine, updateBudgetLine, deleteBudgetLine,
@@ -60,6 +62,10 @@ export default function BudgetPage() {
   } = useStore();
 
   const isAdmin = isAdminOrAbove(currentUser.role);
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
 
   const [search, setSearch] = useState("");
   const [filterProject, setFilterProject] = useState("all");

@@ -657,12 +657,14 @@ export default function ProjectsPage() {
                           >
                             <Share2 size={13} />
                           </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
-                            className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
+                              className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 text-[11px] text-white/30 mb-4">

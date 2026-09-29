@@ -96,7 +96,7 @@ export default function RFIsPage() {
         number: nextNumber,
         subject: form.subject.trim(),
         question: form.question.trim(),
-        submittedById: form.submittedById || (workers[0]?.id ?? ""),
+        submittedById: form.submittedById || currentUser.id,
         assignedToId: form.assignedToId || (workers[0]?.id ?? ""),
         status: "open",
         priority: form.priority,

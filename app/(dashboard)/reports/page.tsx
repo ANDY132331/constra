@@ -76,7 +76,7 @@ export default function ReportsPage() {
 
   // Hours within the selected period
   const periodEntries = useMemo(
-    () => clockEntries.filter((e) => e.clockOut && e.clockIn >= periodStart && e.clockIn <= periodEnd),
+    () => clockEntries.filter((e) => e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd),
     [clockEntries, periodStart, periodEnd]
   );
 
