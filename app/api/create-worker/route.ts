@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 
 // POST /api/create-worker
 // Creates a real auth user + profile for a new crew member.
@@ -89,13 +90,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to create profile" }, { status: 500 });
   }
 
-  // 3. Send password-reset email so the worker can set their own password
-  //    (only if they have a real email)
-  if (workerEmail) {
-    await service.auth.admin.generateLink({
-      type: "recovery",
-      email: workerEmail,
-    }).catch(() => {}); // best-effort
+  // 3. Send a welcome email with a password-setup link (only if they have a real email)
+  if (workerEmail && process.env.RESEND_API_KEY) {
+    try {
+      const { data: linkData } = await service.auth.admin.generateLink({
+        type: "recovery",
+        email: workerEmail,
+        options: { redirectTo: `${APP_URL}/reset-password` },
+      });
+      const setupUrl = linkData?.properties?.action_link;
+      if (setupUrl) {
+        const html = emailShell({
+          company: "Constra",
+          preheader: "You've been added to a Constra workspace",
+          body: `
+            <h2>Welcome to Constra</h2>
+            <p>You've been added to a workspace on Constra — the field workforce management app.</p>
+            <p>Click the button below to set your password and get started.</p>
+            <a class="cta" href="${setupUrl}">Set Your Password →</a>
+            <p style="color:#aaa;font-size:12px;margin-top:20px">If you weren't expecting this, you can safely ignore this email.</p>
+          `,
+        });
+        await sendEmail({ to: workerEmail, subject: "You've been added to Constra — set your password", html });
+      }
+    } catch (e) {
+      console.error("[/api/create-worker] welcome email failed:", e);
+      // Don't fail the request — the worker account was created successfully
+    }
   }
 
   return NextResponse.json({ ok: true, id: newUserId, initials });
