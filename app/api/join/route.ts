@@ -107,7 +107,9 @@ export async function POST(request: NextRequest) {
           <p style="color:#aaa;font-size:12px;margin-top:24px">Questions? Contact your company admin or reply to this email.</p>
         `,
       }),
-    }).catch(() => {});
+    }).then((r) => {
+      if ("error" in r && r.error) console.error("[join] email failed:", r.error);
+    }).catch((err) => console.error("[join] email error:", err));
   }
 
   return NextResponse.json({ ok: true, companyName: company.name });

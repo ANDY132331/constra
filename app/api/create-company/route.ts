@@ -112,7 +112,9 @@ export async function POST(request: NextRequest) {
       to: email.trim(),
       subject: `Welcome to Constra — ${companyName.trim()} is ready`,
       html: welcomeEmail({ firstName: firstName.trim(), companyName: companyName.trim(), inviteCode }),
-    }).catch(() => {});
+    }).then((r) => {
+      if ("error" in r && r.error) console.error("[create-company] email failed:", r.error);
+    }).catch((err) => console.error("[create-company] email error:", err));
   }
 
   return NextResponse.json({ ok: true, inviteCode });
