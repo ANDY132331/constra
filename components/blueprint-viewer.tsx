@@ -57,8 +57,7 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
       setRendering(true);
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-          `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pdf = await (pdfjsLib as any).getDocument({ url: fileUrl }).promise;

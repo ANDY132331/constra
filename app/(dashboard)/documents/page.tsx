@@ -70,15 +70,15 @@ export default function DocumentsPage() {
   useEffect(() => {
     if (pdfBlobRef.current) { URL.revokeObjectURL(pdfBlobRef.current); pdfBlobRef.current = null; }
     setPdfBlobUrl(null);
-    const dataUrl = previewDoc?.dataUrl;
-    if (!dataUrl?.startsWith("data:application/pdf")) return;
-    fetch(dataUrl).then(r => r.blob()).then(blob => {
+    const src = previewDoc?.publicUrl ?? previewDoc?.dataUrl;
+    if (!src?.startsWith("data:application/pdf")) return;
+    fetch(src).then(r => r.blob()).then(blob => {
       const url = URL.createObjectURL(blob);
       pdfBlobRef.current = url;
       setPdfBlobUrl(url);
     }).catch(() => { setPdfBlobUrl(null); });
     return () => { if (pdfBlobRef.current) { URL.revokeObjectURL(pdfBlobRef.current); pdfBlobRef.current = null; } };
-  }, [previewDoc?.dataUrl]);
+  }, [previewDoc?.publicUrl, previewDoc?.dataUrl]);
 
   const filteredDocs = useMemo(() => {
     return documents.filter((d) => {
@@ -388,7 +388,8 @@ export default function DocumentsPage() {
           {filteredDocs.map((doc) => {
             const cat = catInfo(doc.category);
             const Icon = fileIcon(doc.name);
-            const isImage = doc.dataUrl?.startsWith("data:image");
+            const effectiveUrl = doc.publicUrl ?? doc.dataUrl;
+            const isImage = effectiveUrl?.startsWith("data:image") || (effectiveUrl?.startsWith("https://") && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(effectiveUrl));
             return (
               <div
                 key={doc.id}
@@ -398,7 +399,7 @@ export default function DocumentsPage() {
                 {/* Preview area */}
                 <div className="aspect-[4/3] bg-[#0d0d0d] flex items-center justify-center overflow-hidden relative">
                   {isImage ? (
-                    <img src={doc.dataUrl} alt={doc.name} className="w-full h-full object-cover" />
+                    <img src={doc.publicUrl ?? doc.dataUrl} alt={doc.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="flex flex-col items-center gap-2">
                       <Icon size={32} style={{ color: cat.color + "90" }} />
@@ -480,43 +481,34 @@ export default function DocumentsPage() {
               </div>
             </div>
             <div className="flex-1 overflow-auto p-5 flex items-center justify-center bg-[#0d0d0d]">
-              {previewDoc.dataUrl?.startsWith("data:image") || (previewDoc.dataUrl?.startsWith("https://") && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(previewDoc.dataUrl)) ? (
-                <img src={previewDoc.dataUrl} alt={previewDoc.name} className="max-w-full max-h-full object-contain rounded-lg" />
-              ) : previewDoc.dataUrl?.startsWith("data:application/pdf") ? (
-                isIOS ? (
+              {(() => {
+                const url = previewDoc.publicUrl ?? previewDoc.dataUrl;
+                const isImg = url?.startsWith("data:image") || (url?.startsWith("https://") && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url));
+                const isDataPdf = url?.startsWith("data:application/pdf");
+                const isHttpsPdf = url?.startsWith("https://") && /\.pdf(\?|$)/i.test(url);
+                if (isImg) return <img src={url} alt={previewDoc.name} className="max-w-full max-h-full object-contain rounded-lg" />;
+                if (isDataPdf) return isIOS ? (
                   <div className="text-center">
                     <File size={48} className="text-white/20 mx-auto mb-3" />
                     <p className="text-[13px] text-white/50 mb-4">PDF preview not supported on iOS Safari</p>
-                    {pdfBlobUrl && (
-                      <a href={pdfBlobUrl} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-full transition-colors">
-                        <Download size={14} /> Open PDF
-                      </a>
-                    )}
+                    {pdfBlobUrl && <a href={pdfBlobUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-full transition-colors"><Download size={14} /> Open PDF</a>}
                   </div>
                 ) : pdfBlobUrl ? (
                   <iframe src={pdfBlobUrl} className="w-full h-[60vh] rounded-lg border-0" title={previewDoc.name} />
+                ) : <div className="text-white/30 text-[13px]">Loading PDF…</div>;
+                if (isHttpsPdf) return isIOS ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-full transition-colors"><Download size={14} /> Open PDF</a>
                 ) : (
-                  <div className="text-white/30 text-[13px]">Loading PDF…</div>
-                )
-              ) : previewDoc.dataUrl?.startsWith("https://") && /\.pdf(\?|$)/i.test(previewDoc.dataUrl) ? (
-                isIOS ? (
-                  <a href={previewDoc.dataUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] rounded-full transition-colors">
-                    <Download size={14} /> Open PDF
-                  </a>
-                ) : (
-                  <iframe src={previewDoc.dataUrl} className="w-full h-[60vh] rounded-lg border-0" title={previewDoc.name} />
-                )
-              ) : (
-                <div className="text-center">
-                  <File size={48} className="text-white/20 mx-auto mb-3" />
-                  <p className="text-[13px] text-white/40">Preview not available</p>
-                  <button onClick={() => downloadDoc(previewDoc)} className="mt-3 text-amber-400 text-[13px] underline">
-                    Download to view
-                  </button>
-                </div>
-              )}
+                  <iframe src={url} className="w-full h-[60vh] rounded-lg border-0" title={previewDoc.name} />
+                );
+                return (
+                  <div className="text-center">
+                    <File size={48} className="text-white/20 mx-auto mb-3" />
+                    <p className="text-[13px] text-white/40">Preview not available</p>
+                    <button onClick={() => downloadDoc(previewDoc)} className="mt-3 text-amber-400 text-[13px] underline">Download to view</button>
+                  </div>
+                );
+              })()}
             </div>
             {showVersions && previewDoc.versions && previewDoc.versions.length > 0 && (
               <div className="border-t border-white/[0.07] px-5 py-4 max-h-52 overflow-y-auto overscroll-y-contain">

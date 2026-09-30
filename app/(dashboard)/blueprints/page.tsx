@@ -134,7 +134,7 @@ export default function BlueprintsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-[14px] font-bold text-white/90 truncate">{doc.name}</p>
                       <p className="text-[11px] text-white/35 mt-0.5">
-                        {doc.uploadedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                        {new Date(doc.uploadedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                         {doc.sizeBytes ? ` · ${(doc.sizeBytes / 1024 / 1024).toFixed(1)} MB` : ""}
                       </p>
                     </div>
