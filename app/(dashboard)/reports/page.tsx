@@ -145,7 +145,7 @@ export default function ReportsPage() {
     return workers
       .map((w) => {
         const workerEntries = periodEntries.filter((e) => e.workerId === w.id);
-        const h = workerEntries.reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+        const h = workerEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
         const projectCount = new Set(workerEntries.map((e) => e.projectId)).size;
         const ot = overtimeEnabled
           ? computeWorkerOvertime(workerEntries, w.hourlyRate ?? 0, {

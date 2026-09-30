@@ -54,7 +54,12 @@ type Draft = {
 };
 
 function toDraft(inv: Invoice): Draft {
-  const ds = (d: Date | string) => { const t = d instanceof Date ? d : new Date(d); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; };
+  const ds = (d: Date | string | undefined | null) => {
+    if (!d) return "";
+    const t = d instanceof Date ? d : new Date(d);
+    if (isNaN(t.getTime())) return "";
+    return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
+  };
   return {
     clientName: inv.clientName ?? "",
     clientEmail: inv.clientEmail ?? "",

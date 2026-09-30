@@ -492,7 +492,7 @@ export default function ChangeOrdersPage() {
               <div>
                 <p className="text-[10px] font-bold text-white/25 uppercase tracking-wider mb-2">Approval</p>
                 <p className="text-[13px] text-white/65">
-                  {selected.status === "approved" ? "Approved" : "Reviewed"} by <strong>{selected.approvedBy}</strong> on {selected.approvedAt.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
+                  {selected.status === "approved" ? "Approved" : "Reviewed"} by <strong>{selected.approvedBy ?? "Unknown"}</strong> on {selected.approvedAt.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
                 </p>
               </div>
             )}

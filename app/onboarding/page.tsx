@@ -144,6 +144,7 @@ export default function OnboardingPage() {
     setError(""); setLoading(true);
 
     if (!SUPABASE_ENABLED) {
+      setLoading(false);
       finishLocally();
       return;
     }
@@ -193,6 +194,7 @@ export default function OnboardingPage() {
     setError(""); setLoading(true);
 
     if (!SUPABASE_ENABLED) {
+      setLoading(false);
       setOnboarded(true);
       router.push("/dashboard");
       return;
@@ -615,7 +617,7 @@ export default function OnboardingPage() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch", background: "#080808" } as React.CSSProperties}>
-    <div className="min-h-screen bg-[#080808] flex flex-col lg:flex-row">
+    <div className="bg-[#080808] lg:flex lg:flex-row lg:min-h-screen">
 
       {/* ── Left panel (desktop only) ── */}
       <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden bg-[#0a0800]">
@@ -689,7 +691,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* ── Right panel: form ── */}
-      <div className="flex-1 lg:max-w-[480px]">
+      <div className="lg:flex-1 lg:max-w-[480px]">
         {/* Mobile background */}
         <div className="absolute inset-0 lg:hidden opacity-[0.03] pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(245,158,11,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,1) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
 

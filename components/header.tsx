@@ -326,7 +326,11 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
               {/* Menu items */}
               <div className="py-1">
                 <button
-                  onClick={() => { router.push("/crew"); setShowUser(false); }}
+                  onClick={() => {
+                    try { sessionStorage.setItem("search_prefill", JSON.stringify({ href: "/crew", label: currentUser.name, ts: Date.now() })); } catch {}
+                    router.push("/crew");
+                    setShowUser(false);
+                  }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/60 hover:text-white hover:bg-white/[0.05] transition-colors text-left"
                 >
                   <User size={14} className="text-white/30" />

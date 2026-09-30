@@ -44,10 +44,6 @@ function fmtDate(d: string) {
   } catch { return d; }
 }
 
-function isOverdue(dueDate: string) {
-  return new Date(dueDate) < new Date() && new Date(dueDate).toDateString() !== new Date().toDateString();
-}
-
 export default function PayPage({ params }: { params: Promise<{ invoiceId: string }> }) {
   const { invoiceId } = use(params);
   const [invoice, setInvoice] = useState<PublicInvoice | null>(null);

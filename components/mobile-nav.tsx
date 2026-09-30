@@ -139,6 +139,7 @@ export function MobileNav() {
               <button
                 key={label}
                 onClick={openSidebar}
+                aria-label="Open menu"
                 className="flex-1 flex flex-col items-center justify-center gap-[5px] transition-opacity duration-100"
                 style={{ color: "rgba(255,255,255,0.28)" }}
               >
