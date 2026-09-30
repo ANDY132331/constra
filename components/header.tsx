@@ -101,7 +101,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const openSearch = () => window.dispatchEvent(new Event("open-search"));
 
   const hasUnread = !readNotifs && (activityFeed.length > 0 || expiryAlerts.length > 0);
-  const unreadCount = expiryAlerts.length + (activityFeed.length > 0 ? 1 : 0);
+  const unreadCount = expiryAlerts.length + activityFeed.length;
 
   const [signingOut, setSigningOut] = useState(false);
   const handleSignOut = async () => {

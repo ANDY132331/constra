@@ -81,7 +81,7 @@ export default function ReportsPage() {
   );
 
   const totalHours = useMemo(
-    () => periodEntries.reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0),
+    () => periodEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0),
     [periodEntries]
   );
 
@@ -95,8 +95,8 @@ export default function ReportsPage() {
       const dayStart = new Date(d); dayStart.setHours(0, 0, 0, 0);
       const dayEnd = new Date(d); dayEnd.setHours(23, 59, 59, 999);
       const h = clockEntries
-        .filter((e) => e.clockOut && e.clockIn >= dayStart && e.clockIn <= dayEnd)
-        .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+        .filter((e) => e.clockOut && new Date(e.clockIn) >= dayStart && new Date(e.clockIn) <= dayEnd)
+        .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
       days.push({
         label: d.toLocaleDateString("en-CA", { weekday: "short" }),
         hours: Math.round(h * 10) / 10,
