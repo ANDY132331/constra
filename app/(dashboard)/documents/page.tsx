@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useState, useRef, useMemo, useEffect } from "react";
 import {
   FolderOpen, Upload, Trash2, FileText, FileImage, File,
-  Download, Search, ChevronDown, History, RefreshCw,
+  Download, Search, History, RefreshCw,
 } from "lucide-react";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
@@ -13,7 +13,7 @@ import type { ProjectDocument, DocumentVersion } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { uploadDocument } from "@/lib/supabase/storage";
-import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type Category = ProjectDocument["category"];
 
@@ -105,15 +105,16 @@ export default function DocumentsPage() {
     setUploading(true);
     try {
       for (const file of Array.from(files)) {
-        const dataUrl = await new Promise<string>((resolve) => {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error("Failed to read file"));
           reader.readAsDataURL(file);
         });
 
-        // Try Supabase Storage first; fall back to base64 in localStorage
         if (SUPABASE_ENABLED && companyId) {
-          const url = await uploadDocument(dataUrl, companyId, file.name);
+          const publicUrl = await uploadDocument(dataUrl, companyId, file.name);
+          if (!publicUrl) throw new Error("Upload failed");
           addDocument({
             projectId: selectedProject,
             name: file.name,
@@ -121,7 +122,7 @@ export default function DocumentsPage() {
             uploadedAt: new Date(),
             uploadedById: currentUser.id,
             sizeBytes: file.size,
-            dataUrl: url ?? dataUrl,
+            publicUrl,
           });
         } else {
           addDocument({
@@ -144,17 +145,38 @@ export default function DocumentsPage() {
     }
   }
 
-  function downloadDoc(doc: ProjectDocument) {
+  async function downloadDoc(doc: ProjectDocument) {
     const url = doc.publicUrl ?? doc.dataUrl;
     if (!url) {
       setDownloadErrorMsg(`"${doc.name}" has no stored file. Upload a real file to enable downloads.`);
       setTimeout(() => setDownloadErrorMsg(""), 4000);
       return;
     }
+    if (url.startsWith("https://")) {
+      // Cross-origin URLs: fetch as blob so the browser downloads rather than navigating
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error();
+        const blob = await resp.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = doc.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+      } catch {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+      return;
+    }
     const a = document.createElement("a");
     a.href = url;
     a.download = doc.name;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   }
 
   async function handleVersionUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -162,13 +184,34 @@ export default function DocumentsPage() {
     if (!file || !previewDoc) return;
     setUploadingVersion(true);
     try {
-      const dataUrl = await new Promise<string>((resolve) => {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read file"));
         reader.readAsDataURL(file);
       });
-      addDocumentVersion(previewDoc.id, dataUrl, file.size, currentUser.id);
-      setPreviewDoc((prev) => prev ? { ...prev, dataUrl, sizeBytes: file.size, uploadedAt: new Date(), versions: [{ versionedAt: prev.uploadedAt, uploadedById: prev.uploadedById, sizeBytes: prev.sizeBytes, dataUrl: prev.dataUrl }, ...(prev.versions ?? [])] } : null);
+
+      let newPublicUrl: string | undefined;
+      let storeDataUrl = dataUrl;
+      if (SUPABASE_ENABLED && companyId) {
+        const uploaded = await uploadDocument(dataUrl, companyId, file.name);
+        if (!uploaded) throw new Error("Upload failed");
+        newPublicUrl = uploaded;
+        storeDataUrl = uploaded; // store URL, not raw base64
+      }
+
+      addDocumentVersion(previewDoc.id, storeDataUrl, file.size, currentUser.id);
+      setPreviewDoc((prev) => prev ? {
+        ...prev,
+        dataUrl: newPublicUrl ? undefined : dataUrl,
+        publicUrl: newPublicUrl ?? prev.publicUrl,
+        sizeBytes: file.size,
+        uploadedAt: new Date(),
+        versions: [
+          { versionedAt: prev.uploadedAt, uploadedById: prev.uploadedById, sizeBytes: prev.sizeBytes ?? 0, dataUrl: prev.publicUrl ?? prev.dataUrl },
+          ...(prev.versions ?? []),
+        ],
+      } : null);
       toast.success("New version uploaded");
       if (versionInputRef.current) versionInputRef.current.value = "";
     } catch {
@@ -202,18 +245,24 @@ export default function DocumentsPage() {
 
         {/* Project + category selectors */}
         <div className="px-5 mb-4 flex gap-2">
-          <CustomSelect
-            value={selectedProject}
-            onChange={(v) => setSelectedProject(v)}
-            options={projects.map((p) => ({ value: p.id, label: p.name }))}
-            className="flex-1 bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white/70 outline-none"
-          />
-          <CustomSelect
-            value={uploadCategory}
-            onChange={(v) => setUploadCategory(v as Category)}
-            options={CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
-            className="flex-1 bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white/70 outline-none"
-          />
+          <div className="flex-1 flex flex-col gap-1">
+            <span className="text-[9px] text-white/25 font-bold uppercase tracking-wider px-1">Project</span>
+            <CustomSelect
+              value={selectedProject}
+              onChange={(v) => setSelectedProject(v)}
+              options={projects.map((p) => ({ value: p.id, label: p.name }))}
+              className="w-full bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white/70 outline-none"
+            />
+          </div>
+          <div className="flex-1 flex flex-col gap-1">
+            <span className="text-[9px] text-white/25 font-bold uppercase tracking-wider px-1">Upload as</span>
+            <CustomSelect
+              value={uploadCategory}
+              onChange={(v) => setUploadCategory(v as Category)}
+              options={CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
+              className="w-full bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white/70 outline-none"
+            />
+          </div>
         </div>
 
         {/* Search */}
@@ -524,7 +573,8 @@ export default function DocumentsPage() {
                         <p className="text-[10px] text-white/25">{formatBytes(v.sizeBytes)}{v.note ? ` · ${v.note}` : ""}</p>
                       </div>
                       {v.dataUrl && (
-                        <button onClick={() => { const a = document.createElement("a"); a.href = v.dataUrl!; a.download = previewDoc.name; a.click(); }}
+                        <button
+                          onClick={() => void downloadDoc({ ...previewDoc, publicUrl: v.dataUrl?.startsWith("https://") ? v.dataUrl : undefined, dataUrl: !v.dataUrl?.startsWith("https://") ? v.dataUrl : undefined } as ProjectDocument)}
                           className="opacity-0 group-hover:opacity-100 text-[10px] text-amber-400 hover:text-amber-300 transition-all flex items-center gap-1">
                           <Download size={10} /> Download
                         </button>
@@ -543,7 +593,7 @@ export default function DocumentsPage() {
         title="Delete Document"
         body="Delete this document and all its versions? This cannot be undone."
         confirmLabel="Delete"
-        onConfirm={() => { if (deleteConfirm) { deleteDocument(deleteConfirm); toast.success("Document deleted"); } setDeleteConfirm(null); }}
+        onConfirm={() => { if (deleteConfirm) { deleteDocument(deleteConfirm); if (previewDoc?.id === deleteConfirm) setPreviewDoc(null); toast.success("Document deleted"); } setDeleteConfirm(null); }}
         onCancel={() => setDeleteConfirm(null)}
       />
     </>

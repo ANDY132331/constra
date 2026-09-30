@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus, Download, ExternalLink } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { getClient } from "@/lib/supabase/client";
+import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { BlueprintViewer } from "@/components/blueprint-viewer";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
@@ -47,7 +47,10 @@ export default function BlueprintsPage() {
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    if (!files.length || !companyId) { if (!companyId) toast.error("Company not loaded — try refreshing"); return; }
+    if (!files.length) return;
+    if (!selectedProjectId) { toast.error("Select a project first"); return; }
+    if (!companyId) { toast.error("Company not loaded — try refreshing"); return; }
+    if (!SUPABASE_ENABLED) { toast.error("Storage is not configured for this environment"); return; }
 
     setUploading(true);
     setUploadError(null);
