@@ -259,12 +259,13 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
         style={{padding:"12px 12px calc(12px + env(safe-area-inset-bottom)) 12px"}}>
         <Link href="/settings" className="w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-white/[0.04] transition-colors">
           <div
-            className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+            className="relative w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
             style={{ backgroundColor: currentUser.color + "33", color: currentUser.color }}
           >
-            {currentUser.photo
-              ? <img src={currentUser.photo} alt={currentUser.name} className="w-full h-full object-cover" />
-              : currentUser.initials}
+            {currentUser.initials}
+            {currentUser.photo && (
+              <img src={currentUser.photo} alt={currentUser.name} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            )}
           </div>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[13px] font-semibold text-white/85 truncate">{currentUser.name}</p>

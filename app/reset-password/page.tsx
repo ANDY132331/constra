@@ -11,6 +11,7 @@ function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
@@ -42,13 +43,13 @@ function ResetPasswordForm() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setSessionReady(true);
     });
-    // If nothing resolves in 8s, treat link as expired
+    // If nothing resolves in 15s, treat link as expired
     const timeout = setTimeout(() => {
       setSessionReady((current) => {
         if (!current) setTokenExpired(true);
         return current;
       });
-    }, 8000);
+    }, 15000);
     return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 
@@ -173,7 +174,7 @@ function ResetPasswordForm() {
               <div>
                 <div className="relative">
                   <input
-                    type={showPw ? "text" : "password"}
+                    type={showConfirm ? "text" : "password"}
                     name="confirm-password"
                     autoComplete="new-password"
                     value={confirm}
@@ -184,11 +185,16 @@ function ResetPasswordForm() {
                     disabled={!sessionReady}
                     className={inp}
                   />
-                  {confirm.length > 0 && (
+                  {confirm.length > 0 ? (
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-bold"
                       style={{ color: confirm === password ? "#10b981" : "#ef4444" }}>
-                      {confirm === password ? "✓ Match" : "✗"}
+                      {confirm === password ? "✓ Match" : "✗ No match"}
                     </span>
+                  ) : (
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   )}
                 </div>
               </div>

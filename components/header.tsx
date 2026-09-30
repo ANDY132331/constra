@@ -293,12 +293,13 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             className="flex items-center gap-2 rounded-xl sm:rounded-lg px-2 py-2 sm:py-1.5 hover:bg-white/[0.05] active:bg-white/[0.08] transition-colors min-h-[40px] sm:min-h-0"
           >
             <div
-              className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+              className="relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold flex-shrink-0"
               style={{ backgroundColor: currentUser.color + "33", color: currentUser.color }}
             >
-              {currentUser.photo
-                ? <img src={currentUser.photo} alt={currentUser.name} className="w-full h-full object-cover" />
-                : currentUser.initials}
+              {currentUser.initials}
+              {currentUser.photo && (
+                <img src={currentUser.photo} alt={currentUser.name} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              )}
             </div>
             <ChevronDown size={11} className={`text-white/30 transition-transform flex-shrink-0 ${showUser ? "rotate-180" : ""}`} />
           </button>

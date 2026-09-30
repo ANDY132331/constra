@@ -109,6 +109,20 @@ export default function OnboardingPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError("");
+    if (next !== "join") {
+      setInviteCode(""); setJoinFirstName(""); setJoinLastName("");
+      setJoinEmail(""); setJoinPassword(""); setShowJoinPw(false);
+    }
+    if (next !== "create") {
+      setStep(1); setCompany(""); setSize(""); setFirstName(""); setLastName("");
+      setEmail(""); setPassword(""); setShowPw(false);
+      setCountrySearch(""); setSelectedCountry(null);
+    }
+  }
+
   const filteredCountries = COUNTRIES.filter(
     (c) =>
       c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
@@ -255,7 +269,7 @@ export default function OnboardingPage() {
           </div>
 
           <button
-            onClick={() => setMode("create")}
+            onClick={() => switchMode("create")}
             className="w-full text-left p-5 rounded-2xl border border-white/[0.08] hover:border-amber-500/30 hover:bg-amber-500/[0.04] transition-all group"
           >
             <div className="flex items-start gap-4">
@@ -271,7 +285,7 @@ export default function OnboardingPage() {
           </button>
 
           <button
-            onClick={() => setMode("join")}
+            onClick={() => switchMode("join")}
             className="w-full text-left p-5 rounded-2xl border border-white/[0.08] hover:border-white/15 hover:bg-white/[0.02] transition-all group"
           >
             <div className="flex items-start gap-4">
@@ -296,7 +310,7 @@ export default function OnboardingPage() {
       <Shell>
         <div className="space-y-4">
           <div className="flex items-center gap-3 mb-2">
-            <button onClick={() => { setMode("choose"); setError(""); }} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
+            <button onClick={() => switchMode("choose")} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
               <ChevronLeft size={16} />
             </button>
             <div>
@@ -409,7 +423,7 @@ export default function OnboardingPage() {
       {step === 1 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <button onClick={() => setMode("choose")} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
+            <button onClick={() => switchMode("choose")} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
               <ChevronLeft size={16} />
             </button>
             <div>
