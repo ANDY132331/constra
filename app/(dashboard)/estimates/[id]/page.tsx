@@ -218,7 +218,7 @@ export default function EstimateDetailPage() {
     navigator.clipboard.writeText(`${window.location.origin}/share/${estimate.id}`).then(() => {
       setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2500);
       toast.success("Link copied to clipboard");
-    });
+    }).catch(() => toast.error("Copy failed — please copy manually"));
   }
 
   return (

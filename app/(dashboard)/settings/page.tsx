@@ -312,14 +312,14 @@ function SettingsInner() {
   const [linkCopied, setLinkCopied] = useState(false);
 
   const copyCode = () => {
-    navigator.clipboard.writeText(displayCode);
+    navigator.clipboard.writeText(displayCode).catch(() => toast.error("Copy failed — please copy manually"));
     setCodeCopied(true);
     setTimeout(() => setCodeCopied(false), 2000);
   };
 
   const copyLink = () => {
     const url = `${window.location.origin}/login?join=${displayCode}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(url).catch(() => toast.error("Copy failed — please copy manually"));
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
@@ -1289,7 +1289,9 @@ function AccessControlTab({
     // PIN verified
     const { workerId, action } = pinModal;
     if (action === "save") {
-      updateWorker(workerId, { grantedPages: getDraft(workers.find((w) => w.id === workerId)!) });
+      const targetWorker = workers.find((w) => w.id === workerId);
+      if (!targetWorker) { toast.error("Worker not found"); setPinModal(null); setPinVerifying(false); return; }
+      updateWorker(workerId, { grantedPages: getDraft(targetWorker) });
       toast.success("Access saved");
     } else {
       updateWorker(workerId, { grantedPages: undefined });

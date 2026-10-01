@@ -239,7 +239,7 @@ export default function CrewPage() {
     const matchSearch =
       w.name.toLowerCase().includes(q) ||
       w.role.toLowerCase().includes(q) ||
-      w.customRole.toLowerCase().includes(q) ||
+      (w.customRole ?? "").toLowerCase().includes(q) ||
       w.email.toLowerCase().includes(q) ||
       w.phone.includes(search);
     const matchRole = filterRole === "all" || w.role === filterRole;
@@ -358,7 +358,7 @@ export default function CrewPage() {
     const text = fullUrl
       ? `${window.location.origin}/login?join=${inviteCode}`
       : inviteCode;
-    navigator.clipboard.writeText(text).then(() => toast.success(fullUrl ? "Invite link copied" : "Invite code copied"));
+    navigator.clipboard.writeText(text).then(() => toast.success(fullUrl ? "Invite link copied" : "Invite code copied")).catch(() => toast.error("Copy failed — please copy manually"));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

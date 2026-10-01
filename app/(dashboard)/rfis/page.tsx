@@ -39,7 +39,7 @@ const blank = (): RFIForm => ({
 });
 
 export default function RFIsPage() {
-  const { rfis, projects, workers, addRFI, updateRFI, deleteRFI, getWorkerById, getProjectById } = useStore();
+  const { rfis, projects, workers, currentUser, addRFI, updateRFI, deleteRFI, getWorkerById, getProjectById } = useStore();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);

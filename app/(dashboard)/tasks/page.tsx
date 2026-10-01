@@ -186,7 +186,7 @@ export default function TasksPage() {
             const mWorker = getWorkerById(task.workerId);
             const cfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG["not-started"];
             const MIcon = cfg.icon;
-            const isOverdueMobile = task.status !== "completed" && isBefore(task.endDate, today);
+            const isOverdueMobile = task.status !== "completed" && !!task.endDate && isBefore(new Date(task.endDate), today);
             const borderAccent = isOverdueMobile ? "#ef4444" : task.status === "delayed" ? "#ef4444" : task.status === "in-progress" ? "#F5C400" : task.status === "completed" ? "#22c55e" : "#3b82f6";
             return (
               <div key={task.id} className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 overflow-hidden relative hover:border-white/[0.12]"
@@ -232,7 +232,7 @@ export default function TasksPage() {
                       }} />
                     </div>
                     <span className="text-[11px] text-white/35 font-medium">{task.progress}%</span>
-                    <span className="text-[11px] text-white/30">{format(task.endDate, "MMM d")}</span>
+                    {task.endDate && <span className="text-[11px] text-white/30">{format(new Date(task.endDate), "MMM d")}</span>}
                   </div>
                 </div>
               </div>
@@ -310,7 +310,7 @@ export default function TasksPage() {
           const worker = getWorkerById(task.workerId);
           const cfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG["not-started"];
           const Icon = cfg.icon;
-          const isOverdue = task.status !== "completed" && isBefore(task.endDate, today);
+          const isOverdue = task.status !== "completed" && !!task.endDate && isBefore(new Date(task.endDate), today);
 
           return (
             <div key={task.id} className="grid grid-cols-[1fr_160px_130px_120px_100px_80px_64px] items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors last:border-0 group">
@@ -336,7 +336,7 @@ export default function TasksPage() {
                   </div>
                 ) : "—"}
               </div>
-              <div className="text-[12px] text-white/40">{format(task.endDate, "MMM d, yyyy")}</div>
+              <div className="text-[12px] text-white/40">{task.endDate ? format(new Date(task.endDate), "MMM d, yyyy") : "—"}</div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{

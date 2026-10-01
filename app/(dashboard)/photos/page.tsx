@@ -473,8 +473,8 @@ export default function PhotosPage() {
                             <div key={dateLabel}>
                               <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">{dateLabel}</p>
                               <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-                                {dayPhotos.map((photo, idx) => {
-                                  const globalIdx = filtered.indexOf(photo);
+                                {dayPhotos.map((photo) => {
+                                  const globalIdx = filtered.findIndex((p) => p.id === photo.id);
                                   return (
                                     <div key={photo.id} onClick={() => setLightboxIdx(globalIdx)} className="aspect-square rounded-lg overflow-hidden cursor-pointer group relative"
                                       style={!photo.url ? { background: photo.gradient } : {}}>
