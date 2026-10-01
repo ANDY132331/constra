@@ -91,7 +91,7 @@ function AudioPlayer({ src, durationSecs, isMe }: { src: string; durationSecs: n
   return (
     <div className="flex items-center gap-2.5 flex-1 min-w-0">
       <audio ref={audioRef} src={src} preload="metadata" />
-      <button type="button" onClick={toggle}
+      <button aria-label={playing ? "Pause voice note" : "Play voice note"} type="button" onClick={toggle}
         className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-transform active:scale-90"
         style={{ background: btnBg }}>
         {playing
@@ -849,7 +849,7 @@ export default function MessagesPage() {
                 </div>
 
                 {showMic ? (
-                  <button
+                  <button aria-label="Record voice note"
                     type="button"
                     onClick={startRecording}
                     className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90"
@@ -858,7 +858,7 @@ export default function MessagesPage() {
                     <Mic size={20} style={{ color: C.activeBorder }} />
                   </button>
                 ) : (
-                  <button
+                  <button aria-label="Send message"
                     type="button"
                     onClick={sendMessage}
                     disabled={!canSend}

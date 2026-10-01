@@ -178,8 +178,6 @@ export default function InvoiceDetailPage() {
     if (!invoice.clientEmail) { toast.error("Add a client email to this invoice first"); return; }
     setSendLoading(true);
     try {
-      const amountStr = formatCurrency(Math.round(total), currency as never);
-      const dueDateStr = new Date(invoice.dueDate).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
       let pdfDataUrl: string | undefined;
       try {
         const { generateInvoicePdfDataUrl } = await import("@/lib/pdf-export");
@@ -189,9 +187,7 @@ export default function InvoiceDetailPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: invoice.clientEmail, invoiceNumber: invoice.number, invoiceId: invoice.id,
-          clientName: invoice.clientName, amount: amountStr, dueDate: dueDateStr,
-          companyName, notes: invoice.notes, pdfDataUrl,
+          invoiceId: invoice.id, notes: invoice.notes, pdfDataUrl,
           isReminder: invoice.status === "overdue",
         }),
       });
@@ -199,8 +195,11 @@ export default function InvoiceDetailPage() {
         if (invoice.status === "draft") updateInvoice(invoice.id, { status: "sent" });
         toast.success(`Invoice sent to ${invoice.clientEmail}`);
       } else {
-        toast.error("Failed to send. Check RESEND_API_KEY in Vercel.");
+        const { error } = await res.json().catch(() => ({ error: "" }));
+        toast.error(error ? `Couldn't send: ${error}` : "Couldn't send the invoice. Try again.");
       }
+    } catch {
+      toast.error("Network error — check your connection and try again.");
     } finally { setSendLoading(false); }
   }
 
@@ -209,7 +208,7 @@ export default function InvoiceDetailPage() {
     navigator.clipboard.writeText(`${window.location.origin}/pay/${invoice.id}`).then(() => {
       setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2500);
       toast.success("Payment link copied");
-    });
+    }).catch(() => toast.error("Copy failed — please copy manually"));
   }
 
   return (
@@ -250,7 +249,7 @@ export default function InvoiceDetailPage() {
           </button>
 
           <div className="relative" ref={menuRef}>
-            <button
+            <button aria-label="More actions"
               onClick={() => setMenuOpen(v => !v)}
               className="w-9 h-9 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
             >
@@ -472,7 +471,7 @@ export default function InvoiceDetailPage() {
                         </td>
                         <td className="py-2.5 px-1 text-center">
                           {draft.items.length > 1 && (
-                            <button
+                            <button aria-label="Remove line item"
                               onClick={() => setDraft((d) => ({ ...d, items: d.items.filter((_, j) => j !== i) }))}
                               className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
                             >

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   ChevronLeft, Send, CheckCircle2, XCircle, Mail,
-  FileDown, Link2, Check, Copy, Trash2, Plus, X, MoreVertical, AlertTriangle, Clock,
+  FileDown, Copy, Trash2, Plus, X, MoreVertical, AlertTriangle, Clock,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/currency";
@@ -104,7 +104,6 @@ export default function EstimateDetailPage() {
 
   const [pdfLoading, setPdfLoading]     = useState(false);
   const [sendLoading, setSendLoading]   = useState(false);
-  const [linkCopied, setLinkCopied]     = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [template, setTemplate] = useTemplateChoice("constra_estimate_template");
   const menuRef = useRef<HTMLDivElement>(null);
@@ -177,14 +176,14 @@ export default function EstimateDetailPage() {
     if (!estimate) return;
     const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const num = `INV-${new Date().getFullYear()}-${String(Math.max(...nums, 0) + 1).padStart(3, "0")}`;
-    addInvoice({
+    const inv = addInvoice({
       number: num, clientName: estimate.clientName, clientEmail: estimate.clientEmail,
       clientAddress: "", status: "draft", issueDate: new Date(), dueDate: new Date(Date.now() + 30 * 86400000),
       items: estimate.items.map(({ description, qty, rate }) => ({ description, qty, rate })),
       taxRate: estimate.taxRate, notes: estimate.notes,
     });
     toast.success(`Converted to invoice ${num}`);
-    router.push("/invoices");
+    router.push(`/invoices/${inv.id}`);
   }
 
   async function handleSend() {
@@ -192,33 +191,25 @@ export default function EstimateDetailPage() {
     if (!estimate.clientEmail) { toast.error("Add a client email first"); return; }
     setSendLoading(true);
     try {
-      const amountStr = formatCurrency(Math.round(total), currency as never);
-      const validStr = new Date(estimate.validUntil).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
+      let pdfDataUrl: string | undefined;
+      try {
+        const { generateEstimatePdfDataUrl } = await import("@/lib/pdf-export");
+        pdfDataUrl = await generateEstimatePdfDataUrl(estimate, currency, companyName, companyAddress, companyLogo, template);
+      } catch { /* send without the attachment */ }
       const res = await fetch("/api/invoice/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: estimate.clientEmail, invoiceNumber: estimate.number,
-          clientName: estimate.clientName, amount: amountStr, dueDate: validStr,
-          companyName, notes: estimate.notes, isReminder: false,
-        }),
+        body: JSON.stringify({ estimateId: estimate.id, notes: estimate.notes, pdfDataUrl }),
       });
       if (res.ok) {
         if (isDraft) updateEstimate(estimate.id, { status: "sent" });
         toast.success(`Estimate sent to ${estimate.clientEmail}`);
       } else {
-        toast.error("Failed to send. Check RESEND_API_KEY in Vercel.");
+        const { error } = await res.json().catch(() => ({ error: "" }));
+        toast.error(error ? `Couldn't send: ${error}` : "Couldn't send the estimate. Try again.");
       }
-    } catch { toast.error("Network error"); }
+    } catch { toast.error("Network error — check your connection and try again."); }
     finally { setSendLoading(false); }
-  }
-
-  function copyLink() {
-    if (!estimate) return;
-    navigator.clipboard.writeText(`${window.location.origin}/share/${estimate.id}`).then(() => {
-      setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2500);
-      toast.success("Link copied to clipboard");
-    }).catch(() => toast.error("Copy failed — please copy manually"));
   }
 
   return (
@@ -261,6 +252,7 @@ export default function EstimateDetailPage() {
 
           <div className="relative" ref={menuRef}>
             <button
+              aria-label="More actions"
               onClick={() => setMenuOpen(v => !v)}
               className="w-9 h-9 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
             >
@@ -294,11 +286,6 @@ export default function EstimateDetailPage() {
                   </button>
                 )}
                 <div className="my-1 border-t border-white/[0.06]" />
-                <button onClick={() => { copyLink(); setMenuOpen(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/70 hover:bg-white/[0.05] hover:text-white transition-colors text-left">
-                  {linkCopied ? <Check size={14} className="text-emerald-400" /> : <Link2 size={14} />}
-                  {linkCopied ? "Copied!" : "Copy Estimate Link"}
-                </button>
                 <button
                   onClick={async () => { setMenuOpen(false); setPdfLoading(true); try { await exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template); toast.success("PDF downloaded"); } catch { toast.error("Failed to export PDF"); } finally { setPdfLoading(false); } }}
                   disabled={pdfLoading}
@@ -506,7 +493,7 @@ export default function EstimateDetailPage() {
                         </td>
                         <td className="py-2.5 px-1 text-center">
                           {draft.items.length > 1 && (
-                            <button
+                            <button aria-label="Remove line item"
                               onClick={() => setDraft((d) => ({ ...d, items: d.items.filter((_, j) => j !== i) }))}
                               className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
                             >

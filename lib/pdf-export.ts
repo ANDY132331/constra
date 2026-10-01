@@ -449,7 +449,8 @@ export async function exportEstimatePdf(
   companyAddress?: string,
   companyLogo?: string,
   template: InvoiceTemplate = "classic",
-) {
+  mode: "save" | "dataurl" = "save",
+): Promise<string | void> {
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
 
@@ -912,7 +913,19 @@ export async function exportEstimatePdf(
     doc.text(`Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, PW - MR, PH - 5, { align: "right" });
   }
 
+  if (mode === "dataurl") return doc.output("datauristring");
   doc.save(`${estimate.number}.pdf`);
+}
+
+export async function generateEstimatePdfDataUrl(
+  estimate: Estimate,
+  currency: string,
+  companyName?: string,
+  companyAddress?: string,
+  companyLogo?: string,
+  template: InvoiceTemplate = "classic",
+): Promise<string> {
+  return exportEstimatePdf(estimate, currency, companyName, companyAddress, companyLogo, template, "dataurl") as Promise<string>;
 }
 
 // ── Invoice PDF ──────────────────────────────────────────────────────────────

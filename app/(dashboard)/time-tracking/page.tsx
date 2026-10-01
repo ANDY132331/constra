@@ -76,7 +76,7 @@ function EditEntryModal({
             <h3 className="text-[15px] font-bold text-white">Edit Time Entry</h3>
             <p className="text-[11px] text-white/35 mt-0.5">{entry.workerName}</p>
           </div>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -147,7 +147,7 @@ function ProjectPickerModal({
             <h3 className="text-[15px] font-bold text-white">Select Project</h3>
             <p className="text-[11px] text-white/35 mt-0.5">Clocking in {worker.name}</p>
           </div>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>

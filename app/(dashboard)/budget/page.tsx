@@ -409,7 +409,7 @@ export default function BudgetPage() {
           <form onSubmit={handleSubmit} className="sheet relative w-full sm:max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06] flex-shrink-0">
               <h2 className="text-[15px] font-semibold text-white/90">{editId ? "Edit Line Item" : "Add Budget Line"}</h2>
-              <button type="button" onClick={closeForm} className="w-10 h-10 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-colors">
+              <button aria-label="Close" type="button" onClick={closeForm} className="w-10 h-10 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-colors">
                 <X size={16} />
               </button>
             </div>

@@ -70,7 +70,7 @@ function InvoiceRow({ invoice, currency, onClick }: {
           </div>
           <p className="text-[13px] font-semibold text-white/90 truncate" title={invoice.clientName}>{invoice.clientName}</p>
           <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/35"}`}>
-            {isOverdue ? "Overdue Â· " : "Due "}
+            {isOverdue ? "Overdue · " : "Due "}
             {new Date(invoice.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
           </p>
         </div>
@@ -279,7 +279,7 @@ export default function InvoicesPage() {
                       </div>
                       <p className="text-[14px] font-semibold text-white/90 truncate">{inv.clientName}</p>
                       <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
-                        {isOverdue ? "âš  Overdue Â· " : "Due "}
+                        {isOverdue ? "⚠ Overdue · " : "Due "}
                         {new Date(inv.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                       </p>
                     </div>

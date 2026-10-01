@@ -16,7 +16,7 @@ import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toLocalDateString } from "@/lib/utils";
 
-// â”€â”€ Status config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   draft:    { label: "Draft",    bg: "bg-zinc-700/60",    text: "text-zinc-300",    dot: "bg-zinc-400"    },
   sent:     { label: "Sent",     bg: "bg-blue-500/15",    text: "text-blue-400",    dot: "bg-blue-400"    },
@@ -49,7 +49,7 @@ function estimateTotal(est: Estimate) {
 }
 
 
-// â”€â”€ Estimate list row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Estimate list row ────────────────────────────────────────────────────────
 
 function EstimateRow({ estimate, currency, selected, onClick }: {
   estimate: Estimate; currency: string; selected: boolean; onClick: () => void;
@@ -86,7 +86,7 @@ function EstimateRow({ estimate, currency, selected, onClick }: {
   );
 }
 
-// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main page ────────────────────────────────────────────────────────────────
 
 export default function EstimatesPage() {
   const { estimates, addEstimate, currency, currentUser, defaultTaxRate } = useStore();
@@ -270,7 +270,7 @@ export default function EstimatesPage() {
       <div className="hidden lg:block h-full">
         <div className="h-full flex flex-col -m-4 md:-m-6">
 
-          {/* â”€â”€ Top stats bar â”€â”€ */}
+          {/* ── Top stats bar ── */}
           <div className="flex items-stretch gap-0 border-b border-white/[0.06] flex-shrink-0 overflow-x-auto">
             <div className="flex items-center gap-3 px-5 py-3.5 border-r border-white/[0.05] min-w-[160px]">
               <div className="flex-1">
@@ -305,7 +305,7 @@ export default function EstimatesPage() {
             </div>
           </div>
 
-          {/* â”€â”€ Master / Detail layout â”€â”€ */}
+          {/* ── Master / Detail layout ── */}
           <div className="flex flex-1 overflow-hidden">
 
             {/* List panel */}
@@ -316,7 +316,7 @@ export default function EstimatesPage() {
                   <Search size={13} className="text-white/30 flex-shrink-0" />
                   <input
                     className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
-                    placeholder="Search project or clientâ€¦"
+                    placeholder="Search project or client…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -370,7 +370,7 @@ export default function EstimatesPage() {
         </div>
       </div>
 
-      {/* â”€â”€ New / Edit Estimate Modal â”€â”€ */}
+      {/* ── New / Edit Estimate Modal ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col shadow-2xl">

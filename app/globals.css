@@ -4,6 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Hover-revealed row actions (edit/delete) must stay visible where there's no hover, and for keyboard users */
+@media (hover: none) {
+  .group-hover\:opacity-100 { opacity: 1; }
+}
+.group:focus-within .group-hover\:opacity-100 { opacity: 1; }
+
 @theme inline {
   /* ── Brand amber override → Constra construction yellow ──────────────────── */
   --color-amber-300: #fada4a;

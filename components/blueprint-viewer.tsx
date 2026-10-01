@@ -170,10 +170,10 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.06] bg-[#0d0d0d] flex-shrink-0">
         {/* Zoom controls */}
-        <button onClick={zoomOut} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomOut size={13} /></button>
+        <button aria-label="Zoom out" title="Zoom out" onClick={zoomOut} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomOut size={13} /></button>
         <span className="text-[11px] text-white/40 w-10 text-center">{Math.round(zoom * 100)}%</span>
-        <button onClick={zoomIn} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomIn size={13} /></button>
-        <button onClick={resetView} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><Maximize2 size={12} /></button>
+        <button aria-label="Zoom in" title="Zoom in" onClick={zoomIn} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><ZoomIn size={13} /></button>
+        <button aria-label="Fit to screen" title="Fit to screen" onClick={resetView} className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center transition-colors"><Maximize2 size={12} /></button>
 
         <div className="w-px h-4 bg-white/10 mx-1" />
 
