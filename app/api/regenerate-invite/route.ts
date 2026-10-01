@@ -7,9 +7,11 @@ import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "CN-";
-  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  // 32-char alphabet, so byte % 32 is unbiased
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  for (let i = 0; i < 4; i++) code += chars[bytes[i] % 32];
   code += "-";
-  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 4; i < 8; i++) code += chars[bytes[i] % 32];
   return code;
 }
 
