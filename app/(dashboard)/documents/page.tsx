@@ -523,7 +523,11 @@ export default function DocumentsPage() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold transition-colors">
                   <Download size={12} /> Download
                 </button>
-                <button onClick={() => { setPreviewDoc(null); setShowVersions(false); }}
+                <button aria-label="Delete document" title="Delete document" onClick={() => setDeleteConfirm(previewDoc.id)}
+                  className="w-9 h-9 flex items-center justify-center rounded-full text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                  <Trash2 size={14} />
+                </button>
+                <button aria-label="Close" onClick={() => { setPreviewDoc(null); setShowVersions(false); }}
                   className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                   ✕
                 </button>

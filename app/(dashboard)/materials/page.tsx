@@ -170,6 +170,19 @@ export default function MaterialsPage() {
 
   const color = (trade: string) => TRADE_COLORS[trade] ?? "#F5C400";
 
+  async function exportPdf() {
+    if (!projectSummary) return;
+    setPdfLoading(true);
+    try {
+      const proj = projects.find((p) => p.id === selectedProject);
+      await exportMaterialsPdf(proj?.name ?? "Project", projectSummary, companyName);
+    } catch {
+      toast.error("Couldn't create the PDF. Try again.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
   return (
     <>
       {/* MOBILE */}
@@ -185,6 +198,14 @@ export default function MaterialsPage() {
             Log
           </button>
         </div>
+        {projectSummary && Object.keys(projectSummary).length > 0 && (
+          <div className="px-5 -mt-2 mb-3">
+            <button onClick={exportPdf} disabled={pdfLoading}
+              className="flex items-center gap-1.5 text-[12px] font-bold text-white/60 bg-white/[0.05] border border-white/[0.07] px-3 py-1.5 rounded-full disabled:opacity-50">
+              <FileText size={13} /> {pdfLoading ? "Generating…" : "Export PDF"}
+            </button>
+          </div>
+        )}
 
         {/* Stats chips */}
         <div className="flex gap-2.5 px-5 mb-4 overflow-x-auto no-scrollbar">
@@ -303,14 +324,7 @@ export default function MaterialsPage() {
             <div className="flex items-center gap-2">
               {projectSummary && Object.keys(projectSummary).length > 0 && (
                 <button
-                  onClick={async () => {
-                    setPdfLoading(true);
-                    try {
-                      const proj = projects.find((p) => p.id === selectedProject);
-                      await exportMaterialsPdf(proj?.name ?? "Project", projectSummary, companyName);
-                    } finally {
-                      setPdfLoading(false); }
-                  }}
+                  onClick={exportPdf}
                   disabled={pdfLoading}
                   className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.07] text-white/60 font-bold text-[13px] px-4 py-2 rounded-full transition-colors disabled:opacity-50"
                 >

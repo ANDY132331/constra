@@ -408,6 +408,12 @@ export default function ProjectsPage() {
                         <Pencil size={12} />
                         Edit
                       </button>
+                      <button aria-label="Copy client share link"
+                        onClick={() => copyShare(p.id)}
+                        className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.05] text-white/50 active:bg-white/[0.1] transition-colors"
+                      >
+                        <Share2 size={12} />
+                      </button>
                       {isAdmin && (
                         <button aria-label="Delete"
                           onClick={() => setDeleteConfirm(p.id)}
