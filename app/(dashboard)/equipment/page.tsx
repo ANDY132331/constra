@@ -62,7 +62,7 @@ export default function EquipmentPage() {
 
   const totalDailyValue = equipment.filter((e) => e.status === "in-use").reduce((s, e) => s + e.dailyRate, 0);
   const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
-  const needsService = equipment.filter((e) => e.nextService <= todayEnd);
+  const needsService = equipment.filter((e) => new Date(e.nextService) <= todayEnd);
 
   function openAdd() {
     setEditId(null);
@@ -213,12 +213,12 @@ export default function EquipmentPage() {
                     <div className="flex items-center gap-1">
                       <span className="text-white/25">Next svc:</span>
                       <span className={serviceOverdue ? "text-red-400 font-semibold" : ""}>
-                        {serviceOverdue ? "OVERDUE" : eq.nextService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                        {serviceOverdue ? "OVERDUE" : new Date(eq.nextService).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                       </span>
                     </div>
                     {eq.certExpiry && (
-                      <div className={eq.certExpiry < new Date() ? "text-red-400" : ""}>
-                        Cert: {eq.certExpiry.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                      <div className={new Date(eq.certExpiry) < new Date() ? "text-red-400" : ""}>
+                        Cert: {new Date(eq.certExpiry).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
                       </div>
                     )}
                   </div>
@@ -315,15 +315,15 @@ export default function EquipmentPage() {
               {filtered.map((eq) => {
                 const project = eq.projectId ? getProjectById(eq.projectId) : null;
                 const cfg = STATUS_CONFIG[eq.status];
-                const serviceOverdue = eq.nextService <= todayEnd;
+                const serviceOverdue = new Date(eq.nextService) <= todayEnd;
                 return (
                   <div key={eq.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
                     style={{ gridTemplateColumns: "2fr 120px 100px 1fr 100px 100px 80px 64px" }}>
                     <div>
                       <p className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">{eq.name}</p>
                       {eq.certExpiry && (
-                        <p className={`text-[10px] mt-0.5 ${eq.certExpiry < new Date() ? "text-red-400" : "text-white/30"}`}>
-                          Cert expires {eq.certExpiry.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                        <p className={`text-[10px] mt-0.5 ${new Date(eq.certExpiry) < new Date() ? "text-red-400" : "text-white/30"}`}>
+                          Cert expires {new Date(eq.certExpiry).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                         </p>
                       )}
                     </div>
@@ -338,10 +338,10 @@ export default function EquipmentPage() {
                       ) : "—"}
                     </span>
                     <span className="text-[12px] text-white/40">
-                      {eq.lastService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      {new Date(eq.lastService).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                     </span>
                     <span className={`text-[12px] font-semibold ${serviceOverdue ? "text-red-400" : "text-white/40"}`}>
-                      {serviceOverdue ? "OVERDUE" : eq.nextService.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      {serviceOverdue ? "OVERDUE" : new Date(eq.nextService).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                     </span>
                     <span className="text-right text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/d</span>
                     <div className="flex items-center justify-end gap-1">

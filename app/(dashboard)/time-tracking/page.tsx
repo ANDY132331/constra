@@ -412,14 +412,14 @@ export default function TimeTrackingPage() {
   [isEmployee, workers, currentUser.id, clockEntries]);
 
   const todayHours = useMemo(() => clockEntries
-    .filter((e) => e.clockOut && e.clockIn >= todayStart)
-    .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0),
+    .filter((e) => e.clockOut && new Date(e.clockIn) >= todayStart)
+    .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0),
   [clockEntries, todayStart]);
 
   // tick drives live-elapsed recomputation every 30s
   const liveHours = useMemo(() => clockedIn.reduce((s, w) => {
     if (!w.clockInTime) return s;
-    return s + (Date.now() - w.clockInTime.getTime()) / 3600000;
+    return s + (Date.now() - new Date(w.clockInTime).getTime()) / 3600000;
   }, 0),
   // eslint-disable-next-line react-hooks/exhaustive-deps
   [clockedIn, tick]);
@@ -505,7 +505,7 @@ export default function TimeTrackingPage() {
     if (entry) {
       const worker = getWorkerById(workerId);
       const project = getProjectById(entry.projectId);
-      const hrs = ((now.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1);
+      const hrs = ((now.getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1);
       try { sendPushEvent({ companyId: companyId ?? undefined, title: `${worker?.name ?? "Worker"} clocked out`, body: `${hrs}h on ${project?.name ?? "project"}`, url: "/time-tracking" }); } catch {}
       toast.success(`${worker?.name ?? "Worker"} clocked out — ${hrs}h logged`);
     }
@@ -532,19 +532,19 @@ export default function TimeTrackingPage() {
     const rows = [
       ["Worker", "Role", "Project", "Date", "Clock In", "Clock Out", "Hours"],
     ];
-    const fmt12 = (d: Date) => d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    const fmt12 = (d: Date | string) => new Date(d).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
     clockEntries
-      .filter((e) => e.clockOut && e.clockOut.getTime() !== 0)
-      .sort((a, b) => b.clockIn.getTime() - a.clockIn.getTime())
+      .filter((e) => e.clockOut && new Date(e.clockOut).getTime() !== 0)
+      .sort((a, b) => new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime())
       .forEach((e) => {
         const w = getWorkerById(e.workerId);
         const p = getProjectById(e.projectId);
-        const hrs = ((e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000).toFixed(2);
+        const hrs = ((new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000).toFixed(2);
         rows.push([
           w?.name ?? e.workerId,
           w?.customRole || w?.role || "",
           p?.name ?? e.projectId,
-          e.clockIn.toLocaleDateString("en-CA"),
+          new Date(e.clockIn).toLocaleDateString("en-CA"),
           fmt12(e.clockIn),
           fmt12(e.clockOut!),
           hrs,
@@ -578,11 +578,11 @@ export default function TimeTrackingPage() {
     }),
     ...clockEntries
       .filter((e) => {
-        if (e.clockOut && e.clockOut.getTime() !== 0) return true;
+        if (e.clockOut && new Date(e.clockOut).getTime() !== 0) return true;
         // Orphaned active entry: no clockOut but worker is no longer clocked in — show in table
         return !clockedIn.some((w) => w.id === e.workerId);
       })
-      .sort((a, b) => b.clockIn.getTime() - a.clockIn.getTime()),
+      .sort((a, b) => new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime()),
   ].filter((e) => {
     const worker = getWorkerById(e.workerId);
     if (!worker) return false;

@@ -128,7 +128,7 @@ export default function DailyReportsPage() {
       if (!proj?.name.toLowerCase().includes(q) && !r.workCompleted.toLowerCase().includes(q) && !r.notes.toLowerCase().includes(q)) return false;
     }
     return true;
-  }).sort((a, b) => b.date.getTime() - a.date.getTime());
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const handleSubmit = useCallback(() => {
     if (!form.projectId || !form.date || !form.workCompleted.trim()) { toast.error("Select a project and fill in work completed"); return; }
@@ -184,7 +184,7 @@ export default function DailyReportsPage() {
                 <X size={18} />
               </button>
               <span className="text-[15px] font-bold text-white/90 flex-1 truncate">
-                {selected.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                {new Date(selected.date).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
               </span>
               <button
                 onClick={() => handleExportPdf(selected)}
@@ -301,7 +301,7 @@ export default function DailyReportsPage() {
                       <div className="flex items-start justify-between gap-2 mb-1.5">
                         <div>
                           <span className="text-[14px] font-bold text-white/90 leading-none">
-                            {report.date.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+                            {new Date(report.date).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
                           </span>
                           <p className="text-[11px] text-white/35 mt-0.5">{proj?.name ?? "Unknown project"}</p>
                         </div>
@@ -442,7 +442,7 @@ export default function DailyReportsPage() {
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
             <div>
               <h2 className="text-[15px] font-bold text-white/90">
-                {selected.date.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                {new Date(selected.date).toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
               </h2>
               <p className="text-[12px] text-white/40 mt-0.5">
                 {projectMap.get(selected.projectId)?.name ?? "Unknown project"} · Submitted by {workerMap.get(selected.submittedById)?.name ?? "Unknown"}

@@ -270,7 +270,7 @@ export default function ChangeOrdersPage() {
               <p className="text-[12px] text-white/40 mt-0.5">
                 {projectMap.get(selected.projectId)?.name ?? "Unknown project"} &bull;{" "}
                 {workerMap.get(selected.submittedById)?.name ?? "Unknown"} &bull;{" "}
-                {selected.submittedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                {new Date(selected.submittedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
             <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 flex items-center justify-between">
@@ -492,7 +492,7 @@ export default function ChangeOrdersPage() {
               <div>
                 <p className="text-[10px] font-bold text-white/25 uppercase tracking-wider mb-2">Approval</p>
                 <p className="text-[13px] text-white/65">
-                  {selected.status === "approved" ? "Approved" : "Reviewed"} by <strong>{selected.approvedBy ?? "Unknown"}</strong> on {selected.approvedAt.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
+                  {selected.status === "approved" ? "Approved" : "Reviewed"} by <strong>{selected.approvedBy ?? "Unknown"}</strong> on {new Date(selected.approvedAt).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
                 </p>
               </div>
             )}

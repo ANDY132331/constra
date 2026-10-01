@@ -72,7 +72,7 @@ export default function PunchListPage() {
 
   const isOverdue = (item: typeof punchItems[0]) => {
     const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
-    return item.dueDate && item.dueDate < todayEnd && item.status !== "resolved";
+    return item.dueDate && new Date(item.dueDate) < todayEnd && item.status !== "resolved";
   };
 
   const openEdit = (item: typeof punchItems[0]) => {
@@ -233,7 +233,7 @@ export default function PunchListPage() {
                   {item.dueDate && (
                     <div className={`flex items-center gap-1 ${overdue ? "text-red-400 font-semibold" : ""}`}>
                       <Calendar size={9} />
-                      <span>Due {item.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                      <span>Due {new Date(item.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
                     </div>
                   )}
                 </div>
@@ -416,7 +416,7 @@ export default function PunchListPage() {
                         {item.dueDate && (
                           <div className={`flex items-center gap-1 ${overdue ? "text-red-400 font-semibold" : ""}`}>
                             <Calendar size={10} />
-                            <span>Due {item.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                            <span>Due {new Date(item.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
                           </div>
                         )}
                       </div>

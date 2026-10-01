@@ -124,7 +124,7 @@ export default function SafetyPage() {
   const daysWithoutInjury = (() => {
     const injuries = safetyIncidents.filter((i) => i.type === "injury").map((i) => i.date);
     if (injuries.length === 0) return null;
-    const last = new Date(Math.max(...injuries.map((d) => d.getTime())));
+    const last = new Date(Math.max(...injuries.map((d) => new Date(d).getTime())));
     // Day-granularity display — no live ticker needed, any later render (data
     // change, navigation) naturally corrects it once the day actually rolls over.
     // eslint-disable-next-line react-hooks/purity
@@ -137,7 +137,7 @@ export default function SafetyPage() {
     const injured = incident.injuredId ? getWorkerById(incident.injuredId) : null;
     const typeCfg = TYPE_CONFIG[incident.type];
     const sevCfg = SEVERITY_CONFIG[incident.severity];
-    const dateStr = incident.date.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
+    const dateStr = new Date(incident.date).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
     const h = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Incident Report — ${dateStr}</title>
 <style>
@@ -323,7 +323,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     {reporter && <span className="truncate">{reporter.name}</span>}
                     {reporter && <span>·</span>}
                     <span className="flex-shrink-0">
-                      {incident.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                      {new Date(incident.date).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
                     </span>
                   </div>
                   {incident.reportedToOSHA && (
@@ -373,7 +373,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
             <div className="flex items-center gap-4 sm:flex-col sm:gap-0 sm:flex-shrink-0">
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-green-500/30 flex items-center justify-center">
                 <span className="text-lg sm:text-xl font-black text-green-400">
-                  {Math.max(0, 100 - safetyIncidents.filter((i) => (i.severity === "critical" || i.severity === "high") && i.date.getFullYear() === new Date().getFullYear()).length * 5)}
+                  {Math.max(0, 100 - safetyIncidents.filter((i) => (i.severity === "critical" || i.severity === "high") && new Date(i.date).getFullYear() === new Date().getFullYear()).length * 5)}
                 </span>
               </div>
               <p className="text-[10px] text-white/30 sm:text-center sm:mt-1.5">Safety Score</p>

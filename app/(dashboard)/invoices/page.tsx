@@ -52,7 +52,7 @@ function InvoiceRow({ invoice, currency, onClick }: {
   invoice: Invoice; currency: string; onClick: () => void;
 }) {
   const total = invoiceTotal(invoice);
-  const isPastDue = invoice.status === "sent" && invoice.dueDate < new Date();
+  const isPastDue = invoice.status === "sent" && new Date(invoice.dueDate) < new Date();
   const cfg = isPastDue ? STATUS_CONFIG.overdue : STATUS_CONFIG[invoice.status];
   const isOverdue = invoice.status === "overdue" || isPastDue;
   const isPaid = invoice.status === "paid";
@@ -71,7 +71,7 @@ function InvoiceRow({ invoice, currency, onClick }: {
           <p className="text-[13px] font-semibold text-white/90 truncate" title={invoice.clientName}>{invoice.clientName}</p>
           <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/35"}`}>
             {isOverdue ? "Overdue Â· " : "Due "}
-            {invoice.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+            {new Date(invoice.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
           </p>
         </div>
         <div className="text-right flex-shrink-0">
@@ -106,7 +106,7 @@ export default function InvoicesPage() {
 
   const filtered = invoices.filter((i) => {
     if (statusFilter !== "all") {
-      const isPastDue = i.status === "sent" && i.dueDate < now;
+      const isPastDue = i.status === "sent" && new Date(i.dueDate) < now;
       const effectiveStatus = isPastDue ? "overdue" : i.status;
       if (effectiveStatus !== statusFilter) return false;
     }
@@ -122,7 +122,7 @@ export default function InvoicesPage() {
     .filter((i) => i.status === "paid")
     .reduce((s, i) => s + invoiceTotal(i), 0);
 
-  const overdueCount = invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && i.dueDate < now)).length;
+  const overdueCount = invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && new Date(i.dueDate) < now)).length;
 
   const calcTotal = useCallback((items: LineItem[], taxRate: string) => {
     const sub = items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0);
@@ -280,7 +280,7 @@ export default function InvoicesPage() {
                       <p className="text-[14px] font-semibold text-white/90 truncate">{inv.clientName}</p>
                       <p className={`text-[11px] mt-0.5 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
                         {isOverdue ? "âš  Overdue Â· " : "Due "}
-                        {inv.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                        {new Date(inv.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                       </p>
                     </div>
                     <p className={`text-[18px] font-black flex-shrink-0 tabular-nums ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
