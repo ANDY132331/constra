@@ -727,7 +727,7 @@ export default function ProjectsPage() {
                     <Map size={20} className="text-white/25" />
                   </div>
                   <p className="text-white/40 text-[14px] font-medium">No GPS locations set</p>
-                  <p className="text-white/20 text-[12px] mt-1">Add latitude & longitude when creating a project to see it here.</p>
+                  <p className="text-white/20 text-[12px] mt-1">Edit a project and search its address under GPS location to pin it here.</p>
                 </div>
               ) : (
                 <>

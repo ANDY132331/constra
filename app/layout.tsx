@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Barlow_Condensed } from "next/font/google";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { StoreProvider } from "@/lib/store";
 import PwaInstall from "@/components/pwa-install";
@@ -83,15 +84,11 @@ export default function RootLayout({
       style={{ height: "100dvh", overflow: "hidden" }}
       suppressHydrationWarning
     >
-      <head>
-        {/* Inline script: apply saved theme before React hydrates to prevent flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('constra_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
-          }}
-        />
-      </head>
       <body className="bg-[#0a0a0a] text-foreground">
+        {/* Apply saved theme before hydration to prevent a flash */}
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(function(){try{var t=localStorage.getItem('constra_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`}
+        </Script>
         <StoreProvider>
           {/* Keeps data-theme in sync with the store everywhere in the app */}
           <ThemeApplier />
