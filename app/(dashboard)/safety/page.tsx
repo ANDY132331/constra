@@ -46,7 +46,8 @@ const blank: IncidentForm = {
 };
 
 export default function SafetyPage() {
-  const { safetyIncidents, projects, workers, currentUser, addSafetyIncident, updateSafetyIncident, deleteSafetyIncident, getWorkerById, getProjectById } = useStore();
+  const { safetyIncidents, projects, workers, currentUser, currency, addSafetyIncident, updateSafetyIncident, deleteSafetyIncident, getWorkerById, getProjectById } = useStore();
+  const regulator = currency === "USD" ? "OSHA" : "Regulator";
   const t = useT();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -207,7 +208,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-sky-400 leading-none">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
-            <p className="text-[11px] text-sky-400/60 font-medium mt-0.5">OSHA</p>
+            <p className="text-[11px] text-sky-400/60 font-medium mt-0.5">{regulator}</p>
           </div>
         </div>
 
@@ -327,7 +328,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     </span>
                   </div>
                   {incident.reportedToOSHA && (
-                    <span className="bg-sky-500/15 text-sky-400 text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">OSHA</span>
+                    <span className="bg-sky-500/15 text-sky-400 text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">{regulator}</span>
                   )}
                 </div>
               </div>
@@ -343,7 +344,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
             <div>
               <h2 className="text-2xl font-bold text-white tracking-tight">Safety Log</h2>
               <p className="text-white/35 text-sm mt-0.5 hidden sm:block">
-                {safetyIncidents.length} incidents logged · OSHA reporting required for injuries
+                {safetyIncidents.length} incidents logged · {currency === "USD" ? "OSHA reporting required for injuries" : "Serious injuries may need to be reported to your safety regulator"}
               </p>
             </div>
             <button onClick={() => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); }}
@@ -386,7 +387,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                   : <p className="text-xl sm:text-2xl font-bold text-green-400">{daysWithoutInjury}</p>}
               </div>
               <div>
-                <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">OSHA YTD</p>
+                <p className="text-[10px] sm:text-[11px] text-white/30 mb-1">{regulator === "OSHA" ? "OSHA YTD" : "Reported YTD"}</p>
                 <p className="text-xl sm:text-2xl font-bold text-white">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
               </div>
               <div>
@@ -452,7 +453,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                           <span className="text-[13px] font-bold text-white/80">{typeCfg.label}</span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
                           {incident.reportedToOSHA && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">OSHA REPORTED</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">{regulator === "OSHA" ? "OSHA REPORTED" : "REPORTED"}</span>
                           )}
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
@@ -603,7 +604,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                   <input type="checkbox" checked={form.reportedToOSHA}
                     onChange={(e) => setForm((f) => ({ ...f, reportedToOSHA: e.target.checked }))}
                     className="w-4 h-4 accent-amber-500" />
-                  <span className="text-[13px] text-white/60">Reported to OSHA</span>
+                  <span className="text-[13px] text-white/60">{regulator === "OSHA" ? "Reported to OSHA" : "Reported to safety regulator"}</span>
                 </label>
                 <p className="text-[11px] text-white/30 pl-7 leading-relaxed">
                   Federally required for work-related fatalities (within 8 hrs) and in-patient hospitalizations, amputations, or loss of an eye (within 24 hrs). Consult your local authority for additional thresholds.

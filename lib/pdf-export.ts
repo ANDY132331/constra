@@ -1444,11 +1444,13 @@ export async function exportDailyReportPdf({
   projectName,
   submitterName,
   companyName,
+  metric = false,
 }: {
   report: DailyReport;
   projectName: string;
   submitterName: string;
   companyName?: string;
+  metric?: boolean;
 }) {
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
@@ -1484,7 +1486,7 @@ export async function exportDailyReportPdf({
     head: [["Field", "Value", "Field", "Value"]],
     body: [
       ["Date", report.date.toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" }), "Project", projectName],
-      ["Weather", report.weather, "Temperature", report.temperatureF > 0 ? `${report.temperatureF}°F` : "—"],
+      ["Weather", report.weather, "Temperature", report.temperatureF !== 0 ? (metric ? `${Math.round(((report.temperatureF - 32) * 5) / 9)}°C` : `${report.temperatureF}°F`) : "—"],
       ["Crew Count", String(report.crewCount), "Submitted By", submitterName],
     ],
     headStyles: { fillColor: AMBER, textColor: [0, 0, 0], fontStyle: "bold", fontSize: 8 },

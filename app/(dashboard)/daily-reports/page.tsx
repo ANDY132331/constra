@@ -50,7 +50,7 @@ const emptyForm = (): ReportForm => ({
   projectId: "",
   date: toLocalDateString(new Date()),
   weather: "Clear",
-  temperatureF: "72",
+  temperatureF: "",
   crewCount: "",
   crewOnSite: "",
   workCompleted: "",
@@ -64,6 +64,10 @@ export default function DailyReportsPage() {
   const router = useRouter();
   const { currentUser, projects, workers, dailyReports, addDailyReport, deleteDailyReport, currency } = useStore();
   const isForeman = isForemanOrAbove(currentUser.role);
+  const metric = currency !== "USD";
+  const unit = metric ? "°C" : "°F";
+  // Stored in °F; 0 means not recorded
+  const showTemp = (f: number) => `${metric ? Math.round(((f - 32) * 5) / 9) : f}${unit}`;
 
   const [search, setSearch] = useState("");
   const [projectFilter, setProjectFilter] = useState("all");
@@ -90,12 +94,10 @@ export default function DailyReportsPage() {
       .then((r) => r.json())
       .then((d) => {
         const cw = d.current_weather;
-        const rawTemp = Math.round(cw.temperature);
-        const displayTemp = useMetric ? String(Math.round((rawTemp * 9) / 5 + 32)) : String(rawTemp);
         setForm((f) => ({
           ...f,
           weather: wmoToWeather(cw.weathercode),
-          temperatureF: displayTemp,
+          temperatureF: String(Math.round(cw.temperature)),
         }));
       })
       .catch(() => { toast.error("Could not fetch weather"); })
@@ -136,7 +138,7 @@ export default function DailyReportsPage() {
       projectId: form.projectId,
       date: new Date(form.date + "T12:00:00"),
       weather: form.weather,
-      temperatureF: Number(form.temperatureF) || 0,
+      temperatureF: form.temperatureF.trim() === "" ? 0 : metric ? Math.round((Number(form.temperatureF) * 9) / 5 + 32) || 0 : Number(form.temperatureF) || 0,
       crewCount: Number(form.crewCount) || 0,
       crewOnSite: form.crewOnSite.split("\n").map((s) => s.trim()).filter(Boolean),
       workCompleted: form.workCompleted.trim(),
@@ -159,7 +161,7 @@ export default function DailyReportsPage() {
       const { exportDailyReportPdf } = await import("@/lib/pdf-export");
       const project = projects.find((p) => p.id === report.projectId);
       const submitter = workers.find((w) => w.id === report.submittedById);
-      await exportDailyReportPdf({ report, projectName: project?.name ?? "Unknown", submitterName: submitter?.name ?? "Unknown" });
+      await exportDailyReportPdf({ report, projectName: project?.name ?? "Unknown", submitterName: submitter?.name ?? "Unknown", metric });
     } catch {
       toast.error("Failed to export PDF");
     } finally {
@@ -209,10 +211,10 @@ export default function DailyReportsPage() {
                   <Cloud size={13} className="text-blue-400" />
                   <span className="text-[12px] text-white/70">{selected.weather}</span>
                 </div>
-                {selected.temperatureF > 0 && (
+                {selected.temperatureF !== 0 && (
                   <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-lg px-3 py-1.5">
                     <Thermometer size={13} className="text-orange-400" />
-                    <span className="text-[12px] text-white/70">{selected.temperatureF}°F</span>
+                    <span className="text-[12px] text-white/70">{showTemp(selected.temperatureF)}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1.5 bg-white/[0.04] rounded-lg px-3 py-1.5">
@@ -320,9 +322,9 @@ export default function DailyReportsPage() {
                         <span className="flex items-center gap-1 text-[10px] text-white/30">
                           <Users size={10} /> {report.crewCount} crew
                         </span>
-                        {report.temperatureF > 0 && (
+                        {report.temperatureF !== 0 && (
                           <span className="flex items-center gap-1 text-[10px] text-white/30">
-                            <Thermometer size={10} /> {report.temperatureF}°F
+                            <Thermometer size={10} /> {showTemp(report.temperatureF)}
                           </span>
                         )}
                       </div>
@@ -423,9 +425,9 @@ export default function DailyReportsPage() {
                     <span className="flex items-center gap-1 text-[10px] text-white/30">
                       <Users size={10} /> {report.crewCount} crew
                     </span>
-                    {report.temperatureF > 0 && (
+                    {report.temperatureF !== 0 && (
                       <span className="flex items-center gap-1 text-[10px] text-white/30">
-                        <Thermometer size={10} /> {report.temperatureF}°F
+                        <Thermometer size={10} /> {showTemp(report.temperatureF)}
                       </span>
                     )}
                   </div>
@@ -477,10 +479,10 @@ export default function DailyReportsPage() {
                 <Cloud size={14} className="text-blue-400" />
                 <span className="text-[13px] text-white/70">{selected.weather}</span>
               </div>
-              {selected.temperatureF > 0 && (
+              {selected.temperatureF !== 0 && (
                 <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
                   <Thermometer size={14} className="text-orange-400" />
-                  <span className="text-[13px] text-white/70">{selected.temperatureF}°F</span>
+                  <span className="text-[13px] text-white/70">{showTemp(selected.temperatureF)}</span>
                 </div>
               )}
               <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
@@ -568,8 +570,8 @@ export default function DailyReportsPage() {
                   />
                 </div>
                 <div>
-                  <label className={lbl}>Temp (°F)</label>
-                  <input className={inp} type="number" placeholder="72" value={form.temperatureF} onChange={(e) => setForm((f) => ({ ...f, temperatureF: e.target.value }))} />
+                  <label className={lbl}>Temp ({unit})</label>
+                  <input className={inp} type="number" placeholder={metric ? "18" : "65"} value={form.temperatureF} onChange={(e) => setForm((f) => ({ ...f, temperatureF: e.target.value }))} />
                 </div>
                 <div>
                   <label className={lbl}>Crew Count</label>
