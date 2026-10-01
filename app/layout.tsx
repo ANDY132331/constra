@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Barlow_Condensed } from "next/font/google";
+import { Geist, Geist_Mono, Barlow_Condensed, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { StoreProvider } from "@/lib/store";
@@ -16,6 +16,20 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 const barlowCondensed = Barlow_Condensed({
@@ -68,7 +82,10 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0a0a0a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#E7E5E0" },
+    { media: "(prefers-color-scheme: dark)", color: "#141516" },
+  ],
   // Tells Android Chrome to resize the visual viewport when the keyboard opens
   // so form inputs scroll into view automatically.
   interactiveWidget: "resizes-visual",
@@ -80,14 +97,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${barlowCondensed.variable} dark antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${plexSans.variable} ${plexMono.variable} ${barlowCondensed.variable} dark antialiased`}
       style={{ height: "100dvh", overflow: "hidden" }}
       suppressHydrationWarning
     >
       <body className="bg-[#0a0a0a] text-foreground">
         {/* Apply saved theme before hydration to prevent a flash */}
         <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('constra_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`}
+          {`(function(){try{var t=localStorage.getItem('constra_theme');if(!t){var s=JSON.parse(localStorage.getItem('constra_v1')||'null');t=(s&&s.theme)||'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`}
         </Script>
         <StoreProvider>
           {/* Keeps data-theme in sync with the store everywhere in the app */}

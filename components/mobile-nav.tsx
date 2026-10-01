@@ -20,7 +20,10 @@ type NavTab = {
 
 export function MobileNav() {
   const pathname = usePathname();
-  const { currentUser } = useStore();
+  const { currentUser, theme } = useStore();
+  const dk = theme !== "light";
+  const idle = dk ? "rgba(236,234,229,0.5)" : "#5B5D60";
+  const activeColor = dk ? "#F5C400" : "#151617";
 
   const isForeman = isForemanOrAbove(currentUser.role);
   const isAdmin = isAdminOrAbove(currentUser.role);
@@ -67,11 +70,10 @@ export function MobileNav() {
     <nav
       className="lg:hidden fixed bottom-0 inset-x-0 z-40"
       style={{
-        background: "rgba(7,7,7,0.96)",
-        backdropFilter: "blur(40px) saturate(200%) brightness(0.92)",
-        WebkitBackdropFilter: "blur(40px) saturate(200%) brightness(0.92)",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 -1px 0 rgba(255,255,255,0.06), 0 -2px 0 rgba(245,196,0,0.04), 0 -24px 72px rgba(0,0,0,0.92)",
+        background: dk ? "rgba(20,21,22,0.97)" : "rgba(245,244,241,0.97)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderTop: dk ? "1px solid rgba(236,234,229,0.08)" : "1px solid rgba(21,22,23,0.14)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
@@ -90,17 +92,6 @@ export function MobileNav() {
                 className="flex-1 flex flex-col items-center justify-center"
                 style={{ marginTop: -18 }}
               >
-                {/* Glow halo */}
-                <div
-                  className="absolute rounded-full blur-xl pointer-events-none"
-                  style={{
-                    width: 64, height: 64,
-                    background: clockedIn
-                      ? "rgba(34,197,94,0.35)"
-                      : "rgba(245,196,0,0.28)",
-                    marginTop: -9,
-                  }}
-                />
                 {/* Pulse ring when clocked in */}
                 {clockedIn && (
                   <div
@@ -110,22 +101,18 @@ export function MobileNav() {
                 )}
                 {/* Button disc */}
                 <div
-                  className="relative flex items-center justify-center rounded-[22px] shadow-2xl"
+                  className="relative flex items-center justify-center rounded-[14px]"
                   style={{
                     width: 54, height: 54,
-                    background: clockedIn
-                      ? "linear-gradient(145deg, #22c55e, #16a34a)"
-                      : "linear-gradient(145deg, #F5C400, #d4a900)",
-                    boxShadow: clockedIn
-                      ? "0 8px 28px rgba(34,197,94,0.5), 0 2px 6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2)"
-                      : "0 8px 28px rgba(245,196,0,0.45), 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3)",
+                    background: clockedIn ? "#22c55e" : "#F5C400",
+                    boxShadow: "inset 0 0 0 1.5px #1A1600, 0 3px 0 #1A1600",
                   }}
                 >
                   <Icon size={22} className="text-black" strokeWidth={2.5} />
                 </div>
                 <span
                   className="text-[9px] font-black uppercase tracking-wider mt-2"
-                  style={{ color: clockedIn ? "#4ade80" : "#F5C400" }}
+                  style={{ color: clockedIn ? "#16a34a" : activeColor }}
                 >
                   {label}
                 </span>
@@ -141,7 +128,7 @@ export function MobileNav() {
                 onClick={openSidebar}
                 aria-label="Open menu"
                 className="flex-1 flex flex-col items-center justify-center gap-[5px] transition-opacity duration-100"
-                style={{ color: "rgba(255,255,255,0.28)" }}
+                style={{ color: idle }}
               >
                 <Icon size={22} strokeWidth={1.6} />
                 <span className="text-[9px] font-semibold uppercase tracking-wider">{label}</span>
@@ -155,7 +142,7 @@ export function MobileNav() {
               key={label}
               href={href!}
               className="flex-1 flex flex-col items-center justify-center gap-[5px] relative transition-all duration-150 active:scale-95 active:opacity-70"
-              style={{ color: active ? "#F5C400" : "rgba(255,255,255,0.28)" }}
+              style={{ color: active ? activeColor : idle }}
             >
               {/* Active indicator — thin line at top */}
               {active && (
@@ -166,8 +153,7 @@ export function MobileNav() {
                     transform: "translateX(-50%)",
                     width: 28,
                     height: 3,
-                    background: "linear-gradient(90deg, #F5C400, #fada4a)",
-                    boxShadow: "0 1px 8px rgba(245,196,0,0.7)",
+                    background: "#F5C400",
                   }}
                 />
               )}

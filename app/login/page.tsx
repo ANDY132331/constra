@@ -261,84 +261,45 @@ function LoginForm() {
   return (
     <div className="min-h-screen bg-[#080808] flex flex-col lg:flex-row">
 
-      {/* ── Left panel (desktop only) ── */}
-      <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden bg-[#0a0800]">
-        {/* Blueprint grid */}
-        <div className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(245,158,11,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,0.6) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }} />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-500/10 blur-[140px] rounded-full pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-amber-600/5 blur-[100px] rounded-full pointer-events-none" />
+      {/* ── Left panel (desktop only) — matches the marketing site's dark band ── */}
+      <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden" style={{ background: "#151617", color: "#ECEAE5" }}>
+        <div aria-hidden className="h-[14px] w-full" style={{ background: "repeating-linear-gradient(135deg, #151617 0 14px, #F5C400 14px 28px)" }} />
+        <div className="relative flex flex-col h-full p-12">
+          <Link href="/" className="flex items-center gap-3 w-fit" style={{ color: "#ECEAE5" }}>
+            <span className="w-9 h-9 rounded-[3px] flex items-center justify-center" style={{ background: "#F5C400" }}>
+              <HardHat size={18} color="#1A1600" strokeWidth={2.5} />
+            </span>
+            <span className="font-[family-name:var(--font-barlow-condensed)] font-extrabold uppercase text-[24px] tracking-[0.02em]">Constra</span>
+          </Link>
 
-        <div className="relative z-10 flex flex-col h-full p-12">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
-              <HardHat size={22} className="text-black" />
-            </div>
-            <span className="text-xl font-black text-white tracking-tight">Constra</span>
-          </div>
-
-          <div className="flex-1 flex flex-col justify-center">
-            {/* Construction silhouette */}
-            <div className="flex items-end gap-3 mb-10 opacity-20">
-              {[40,72,56,32,96,64,48,80,56,112,72,40].map((h, i) => (
-                <div key={i} className={`${i % 3 === 2 ? "w-1 bg-amber-400" : i % 4 === 0 ? "w-3 bg-amber-500" : "w-2 bg-amber-500"} rounded-t`} style={{ height: h }} />
-              ))}
-            </div>
-            <h2 className="text-[38px] font-black text-white leading-[1.05] tracking-tight mb-4">
-              Your crew.<br />
-              Your projects.<br />
-              <span className="text-amber-400">All under control.</span>
+          <div className="flex-1 flex flex-col justify-center max-w-[460px]">
+            <p className="font-mono text-[12px] uppercase tracking-[0.12em] mb-5" style={{ color: "#9A9C9F" }}>For contractors and trade crews</p>
+            <h2 className="font-[family-name:var(--font-barlow-condensed)] font-extrabold uppercase text-[64px] leading-[0.92] mb-6" style={{ color: "#ECEAE5" }}>
+              Run the job.<br />Not the paperwork.
             </h2>
-            <p className="text-white/40 text-[15px] leading-relaxed max-w-xs mb-10">
-              The job site app that actually works — GPS clock-ins, safety logs, AI briefs, and invoices. One login.
-            </p>
-            <div className="space-y-3">
+            <ul className="space-y-0 border-t" style={{ borderColor: "#34373A" }}>
               {[
-                { icon: "📍", text: "GPS-verified clock-ins with live selfie" },
-                { icon: "🛡️", text: "Safety incident logs on the spot" },
-                { icon: "⚡", text: "AI daily brief every morning" },
-                { icon: "📄", text: "Invoices & payroll exports in one tap" },
-              ].map((f) => (
-                <div key={f.text} className="flex items-center gap-3">
-                  <span className="text-[16px]">{f.icon}</span>
-                  <span className="text-[13px] text-white/50">{f.text}</span>
-                </div>
+                ["06:58", "GPS + photo on every clock-in"],
+                ["09:40", "Safety incidents logged on the spot"],
+                ["16:30", "Daily reports compiled for you"],
+                ["17:05", "Invoices out the same day"],
+              ].map(([t, label]) => (
+                <li key={t} className="flex items-center gap-5 py-3.5 border-b" style={{ borderColor: "#34373A" }}>
+                  <span className="font-mono text-[13px]" style={{ color: "#F5C400" }}>{t}</span>
+                  <span className="text-[15px]" style={{ color: "#ECEAE5" }}>{label}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          {/* Security badge */}
-          <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.05] w-fit">
-            <ShieldCheck size={13} className="text-green-400" />
-            <span className="text-[11px] text-white/30 font-medium">256-bit encrypted · SOC 2 ready</span>
-          </div>
-
-          <div className="flex items-center gap-6 pt-6 border-t border-white/[0.06]">
-            {[
-              { v: "18+", l: "Tools built in" },
-              { v: "15",  l: "Languages" },
-              { v: "100%", l: "Features free" },
-            ].map((s) => (
-              <div key={s.l}>
-                <div className="text-[18px] font-black text-amber-400">{s.v}</div>
-                <div className="text-[10px] text-white/25 font-medium">{s.l}</div>
-              </div>
-            ))}
-          </div>
+          <p className="font-mono text-[12px]" style={{ color: "#9A9C9F" }}>
+            Free during launch · Android, iPhone &amp; web · 15 languages
+          </p>
         </div>
       </div>
 
       {/* ── Right panel: form ── */}
       <div className="flex-1 lg:max-w-[440px] flex items-center justify-center p-6 relative">
-        <div className="absolute inset-0 lg:hidden opacity-[0.03]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(245,158,11,1) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,1) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }} />
 
         <div className="w-full max-w-sm relative">
           {/* Logo (mobile only) */}

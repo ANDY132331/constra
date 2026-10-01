@@ -265,28 +265,24 @@ function ShareNudge() {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 mb-4 rounded-2xl border"
-      style={{ background: "rgba(245,196,0,.07)", borderColor: "rgba(245,196,0,.2)" }}
+      className="flex items-center gap-3 px-4 py-3 mb-4 rounded-lg"
+      style={{ background: "#F5C400", color: "#1A1600", boxShadow: "inset 0 0 0 1.5px #1A1600" }}
     >
-      <span className="text-amber-400 flex-shrink-0 text-[18px]">🏗️</span>
-      <p className="text-[12px] text-amber-200/70 flex-1 leading-snug">
-        <strong className="text-amber-300 font-semibold">Know another contractor?</strong>{" "}
-        Constra is 100% free — share it with them.
+      <p className="text-[13px] flex-1 leading-snug" style={{ color: "#1A1600" }}>
+        <strong className="font-semibold">Know another contractor?</strong>{" "}
+        Constra is free during launch — send them the link.
       </p>
       <button
         onClick={copy}
-        className="flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition-colors"
-        style={{
-          background: copied ? "rgba(34,197,94,.15)" : "rgba(245,196,0,.12)",
-          color: copied ? "#22c55e" : "#F5C400",
-          border: `1px solid ${copied ? "rgba(34,197,94,.25)" : "rgba(245,196,0,.25)"}`,
-        }}
+        className="flex-shrink-0 text-[12px] font-semibold px-3 py-1.5 rounded-md"
+        style={{ background: "#151617", color: "#F5C400" }}
       >
-        {copied ? "✓ Copied!" : "Copy Link"}
+        {copied ? "Copied" : "Copy link"}
       </button>
       <button
         onClick={dismiss}
-        className="flex-shrink-0 text-white/20 hover:text-white/50 transition-colors text-[16px] leading-none"
+        className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-md text-[18px] leading-none"
+        style={{ color: "#1A1600" }}
         aria-label="Dismiss"
       >
         ×
@@ -689,62 +685,18 @@ export default function DashboardPage() {
     {/* ── MOBILE DASHBOARD ──────────────────────────────────────────────── */}
     <div className="lg:hidden -mx-5 -mt-5 pb-24">
 
-      {/* Hero panel — edge-to-edge, amber glow, blueprint grid */}
+      {/* Hero panel — flat site-style surface with hazard tape */}
       <div
-        className="relative overflow-hidden px-5 pt-6 pb-7"
+        className="relative overflow-hidden px-5 pt-7 pb-6"
         style={{
-          background: dk
-            ? "linear-gradient(155deg, #3d2200 0%, #1e1000 45%, #0a0600 100%)"
-            : "linear-gradient(155deg, #fffbeb 0%, #fef3c7 60%, #fff7ed 100%)",
-          borderBottom: dk ? "1px solid rgba(245,158,11,0.18)" : "1px solid rgba(245,158,11,0.35)",
-          boxShadow: dk
-            ? "0 8px 32px rgba(0,0,0,0.6), 0 2px 0 rgba(245,158,11,0.08) inset"
-            : "0 8px 24px rgba(0,0,0,0.15), 0 2px 0 rgba(245,158,11,0.12) inset",
+          background: dk ? "#1A1C1E" : "#F5F4F1",
+          borderBottom: dk ? "1px solid rgba(236,234,229,0.08)" : "1px solid rgba(21,22,23,0.14)",
         }}
       >
-        {/* Blueprint grid — clearly visible */}
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: dk
-              ? "repeating-linear-gradient(90deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(0deg, rgba(245,158,11,0.13) 0px, rgba(245,158,11,0.13) 1px, transparent 1px, transparent 48px)"
-              : "repeating-linear-gradient(90deg, rgba(161,98,7,0.10) 0px, rgba(161,98,7,0.10) 1px, transparent 1px, transparent 48px), repeating-linear-gradient(0deg, rgba(161,98,7,0.10) 0px, rgba(161,98,7,0.10) 1px, transparent 1px, transparent 48px)",
-          }}
-        />
-        {/* Diagonal accent cut — bottom-right triangle */}
-        <div
-          className="absolute bottom-0 right-0 pointer-events-none"
-          style={{
-            width: 0,
-            height: 0,
-            borderBottom: `72px solid ${dk ? "rgba(245,158,11,0.07)" : "rgba(161,98,7,0.08)"}`,
-            borderLeft: "220px solid transparent",
-          }}
-        />
-        {/* Amber radial glow — strong, bottom-left */}
-        <div
-          className="absolute -bottom-16 -left-10 w-80 h-80 pointer-events-none"
-          style={{ background: dk
-            ? "radial-gradient(circle, rgba(245,158,11,0.22) 0%, rgba(217,119,6,0.06) 50%, transparent 70%)"
-            : "radial-gradient(circle, rgba(245,158,11,0.12) 0%, rgba(217,119,6,0.03) 50%, transparent 70%)"
-          }}
-        />
-        {/* Secondary glow — top-right accent */}
-        <div
-          className="absolute -top-12 -right-12 w-56 h-56 pointer-events-none"
-          style={{ background: dk
-            ? "radial-gradient(circle, rgba(234,88,12,0.10) 0%, transparent 65%)"
-            : "radial-gradient(circle, rgba(234,88,12,0.05) 0%, transparent 65%)"
-          }}
-        />
-        {/* Top hazard stripe */}
-        <div
-          className="absolute top-0 inset-x-0 h-[3px] pointer-events-none"
-          style={{
-            background: dk
-              ? "repeating-linear-gradient(90deg, #F5C400 0px, #F5C400 14px, rgba(0,0,0,0) 14px, rgba(0,0,0,0) 28px)"
-              : "repeating-linear-gradient(90deg, #d97706 0px, #d97706 14px, rgba(255,255,255,0) 14px, rgba(255,255,255,0) 28px)",
-          }}
+          aria-hidden
+          className="absolute top-0 inset-x-0 h-[8px] pointer-events-none"
+          style={{ background: "repeating-linear-gradient(135deg, #151617 0 8px, #F5C400 8px 16px)" }}
         />
 
         {/* Greeting + live clock */}

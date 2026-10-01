@@ -630,77 +630,43 @@ export default function OnboardingPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch", background: "#080808" } as React.CSSProperties}>
+    <div className="bg-[#080808]" style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
     <div className="bg-[#080808] lg:flex lg:flex-row lg:min-h-screen">
 
-      {/* ── Left panel (desktop only) ── */}
-      <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden bg-[#0a0800]">
-        {/* Blueprint grid */}
-        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(rgba(245,158,11,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,0.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
-        {/* Amber glow */}
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-500/10 blur-[140px] rounded-full pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-amber-600/5 blur-[100px] rounded-full pointer-events-none" />
+      {/* ── Left panel (desktop only) — matches the marketing site's dark band ── */}
+      <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden" style={{ background: "#151617", color: "#ECEAE5" }}>
+        <div aria-hidden className="h-[14px] w-full" style={{ background: "repeating-linear-gradient(135deg, #151617 0 14px, #F5C400 14px 28px)" }} />
+        <div className="relative flex flex-col h-full p-12">
+          <Link href="/" className="flex items-center gap-3 w-fit" style={{ color: "#ECEAE5" }}>
+            <span className="w-9 h-9 rounded-[3px] flex items-center justify-center" style={{ background: "#F5C400" }}>
+              <HardHat size={18} color="#1A1600" strokeWidth={2.5} />
+            </span>
+            <span className="font-[family-name:var(--font-barlow-condensed)] font-extrabold uppercase text-[24px] tracking-[0.02em]">Constra</span>
+          </Link>
 
-        <div className="relative z-10 flex flex-col h-full p-12">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
-              <HardHat size={22} className="text-black" />
-            </div>
-            <span className="text-xl font-black text-white tracking-tight">Constra</span>
-          </div>
-
-          {/* Main copy */}
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="flex items-end gap-3 mb-10 opacity-20">
-              <div className="w-2 bg-amber-500 rounded-t" style={{height:40}} />
-              <div className="w-2 bg-amber-500 rounded-t" style={{height:72}} />
-              <div className="w-2 bg-amber-500 rounded-t" style={{height:56}} />
-              <div className="w-1 bg-amber-400 rounded-t" style={{height:32}} />
-              <div className="w-3 bg-amber-500 rounded-t" style={{height:96}} />
-              <div className="w-2 bg-amber-500 rounded-t" style={{height:64}} />
-              <div className="w-2 bg-amber-500 rounded-t" style={{height:48}} />
-              <div className="w-1 bg-amber-400 rounded-t" style={{height:80}} />
-              <div className="w-2 bg-amber-500 rounded-t" style={{height:56}} />
-              <div className="w-3 bg-amber-500 rounded-t" style={{height:112}} />
-              <div className="w-2 bg-amber-500 rounded-t" style={{height:72}} />
-              <div className="w-1 bg-amber-400 rounded-t" style={{height:40}} />
-            </div>
-
-            <h2 className="text-[38px] font-black text-white leading-[1.05] tracking-tight mb-4">
-              3 steps to running<br />
-              your job site<br />
-              <span className="text-amber-400">the right way.</span>
+          <div className="flex-1 flex flex-col justify-center max-w-[460px]">
+            <p className="font-mono text-[12px] uppercase tracking-[0.12em] mb-5" style={{ color: "#9A9C9F" }}>Set up in about two minutes</p>
+            <h2 className="font-[family-name:var(--font-barlow-condensed)] font-extrabold uppercase text-[60px] leading-[0.92] mb-8" style={{ color: "#ECEAE5" }}>
+              Get your crew<br />on it today.
             </h2>
-            <p className="text-white/40 text-[15px] leading-relaxed max-w-xs mb-10">
-              Set up your company, add your crew, and you&apos;re live. No training, no IT, no onboarding calls.
-            </p>
-
-            {/* Setup steps */}
-            <div className="space-y-5">
+            <ol className="border-t" style={{ borderColor: "#34373A" }}>
               {[
-                { n: "01", title: "Pick your location & industry", sub: "Sets your currency and relevant defaults" },
-                { n: "02", title: "Name your company", sub: "Create your workspace in seconds" },
-                { n: "03", title: "Create your account", sub: "You're the admin — invite crew after" },
-              ].map((s) => (
-                <div key={s.n} className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[11px] font-black text-amber-400">{s.n}</span>
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-bold text-white/80">{s.title}</p>
-                    <p className="text-[11px] text-white/35">{s.sub}</p>
-                  </div>
-                </div>
+                ["01", "Pick your location & trade", "Sets your currency, units and defaults"],
+                ["02", "Name your company", "Your workspace is ready right away"],
+                ["03", "Create your account", "You're the admin — invite crew with a code"],
+              ].map(([n, title, sub]) => (
+                <li key={n} className="flex items-start gap-5 py-4 border-b" style={{ borderColor: "#34373A" }}>
+                  <span className="font-mono text-[13px] mt-0.5" style={{ color: "#F5C400" }}>{n}</span>
+                  <span>
+                    <span className="block text-[15px] font-semibold" style={{ color: "#ECEAE5" }}>{title}</span>
+                    <span className="block text-[13px]" style={{ color: "#9A9C9F" }}>{sub}</span>
+                  </span>
+                </li>
               ))}
-            </div>
+            </ol>
           </div>
 
-          {/* Bottom */}
-          <div className="flex items-center gap-2 pt-6 border-t border-white/[0.06]">
-            <Key size={12} className="text-white/20" />
-            <p className="text-[11px] text-white/25">Your data is encrypted and never shared with third parties.</p>
-          </div>
+          <p className="font-mono text-[12px]" style={{ color: "#9A9C9F" }}>Free during launch · No credit card</p>
         </div>
       </div>
 
