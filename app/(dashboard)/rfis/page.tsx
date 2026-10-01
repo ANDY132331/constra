@@ -113,9 +113,67 @@ export default function RFIsPage() {
   const handleAnswer = (rfiId: string) => {
     if (!answerText.trim()) { toast.error("Enter an answer before submitting"); return; }
     updateRFI(rfiId, { status: "answered", answer: answerText.trim() });
+    toast.success("Answer submitted");
     setAnswerRfiId(null);
     setAnswerText("");
   };
+
+  const rfiActions = (rfi: (typeof rfis)[number]) => (
+    <>
+        {rfi.status === "open" && (
+          answerRfiId === rfi.id ? (
+            <div className="space-y-2">
+              <textarea className={inp + " resize-none"} rows={3} placeholder="Type your response..." maxLength={2000}
+                value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
+              <div className="flex gap-2">
+                <button onClick={() => handleAnswer(rfi.id)}
+                  className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
+                  Submit Answer
+                </button>
+                <button onClick={() => setAnswerRfiId(null)}
+                  className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => { setAnswerRfiId(rfi.id); setAnswerText(""); }}
+                className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
+                Submit Answer
+              </button>
+              <button onClick={() => {
+                if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
+                updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed");
+              }}
+                className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
+                Close RFI
+              </button>
+            </div>
+          )
+        )}
+        {rfi.status === "answered" && (
+          <div className="flex gap-2 pt-1">
+            <button onClick={() => { updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed"); }}
+              className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
+              Close RFI
+            </button>
+            <button onClick={() => { updateRFI(rfi.id, { status: "open", answer: undefined }); toast.success("RFI reopened"); }}
+              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
+              Reopen
+            </button>
+          </div>
+        )}
+        {rfi.status === "closed" && (
+          <div className="flex gap-2 pt-1">
+            <button onClick={() => { updateRFI(rfi.id, { status: "open" }); toast.success("RFI reopened"); }}
+              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
+              Reopen RFI
+            </button>
+          </div>
+        )}
+    </>
+  );
 
   return (
     <>
@@ -187,14 +245,19 @@ export default function RFIsPage() {
               const project = getProjectById(rfi.projectId);
               const statusCfg = STATUS_CONFIG[rfi.status];
               const prioCfg = PRIORITY_CONFIG[rfi.priority];
-              const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
+              const isOverdue = new Date(rfi.dueDate) < new Date() && rfi.status === "open";
               const borderColor = rfi.priority === "critical" ? "#ef4444" : rfi.priority === "urgent" ? "#F5C400" : "#3b82f6";
               return (
-                <button
+                <div
                   key={rfi.id}
-                  onClick={() => { setExpanded(expanded === rfi.id ? null : rfi.id); }}
-                  className={`card-hover w-full text-left bg-[#131110] border rounded-2xl p-4 active:scale-[0.985] active:opacity-90 ${isOverdue ? "border-red-500/25" : "border-white/[0.07] hover:border-white/[0.12]"}`}
+                  className={`card-hover bg-[#131110] border rounded-2xl p-4 ${isOverdue ? "border-red-500/25" : "border-white/[0.07] hover:border-white/[0.12]"}`}
                   style={{ borderLeftColor: borderColor, borderLeftWidth: 3 }}
+                >
+                <button
+                  type="button"
+                  aria-expanded={expanded === rfi.id}
+                  onClick={() => { setExpanded(expanded === rfi.id ? null : rfi.id); }}
+                  className="w-full text-left active:opacity-90"
                 >
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -205,7 +268,7 @@ export default function RFIsPage() {
                     <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
                   </div>
                   <p className="text-[14px] font-bold text-white/85 mb-1.5 text-left">{rfi.subject}</p>
-                  {rfi.question && (
+                  {rfi.question && expanded !== rfi.id && (
                     <p className="text-[12px] text-white/40 mb-2 line-clamp-2 text-left">{rfi.question}</p>
                   )}
                   <div className="flex items-center justify-between text-[11px] text-white/30">
@@ -217,14 +280,30 @@ export default function RFIsPage() {
                     ) : <span />}
                     <span className={isOverdue ? "text-red-400 font-semibold" : ""}>Due {new Date(rfi.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
                   </div>
-                  {/* Expanded answer view on mobile */}
-                  {expanded === rfi.id && rfi.answer && (
-                    <div className="mt-3 bg-green-500/[0.06] border border-green-500/15 rounded-xl px-3 py-2.5 text-left">
-                      <p className="text-[9px] font-bold text-green-400/60 uppercase tracking-wider mb-1">Answer</p>
-                      <p className="text-[12px] text-white/65 leading-relaxed">{rfi.answer}</p>
+                </button>
+                  {expanded === rfi.id && (
+                    <div className="mt-3 space-y-3">
+                      {rfi.question && <p className="text-[12px] text-white/60 leading-relaxed">{rfi.question}</p>}
+                      {rfi.answer && (
+                        <div className="bg-green-500/[0.06] border border-green-500/15 rounded-xl px-3 py-2.5">
+                          <p className="text-[9px] font-bold text-green-400/60 uppercase tracking-wider mb-1">Answer</p>
+                          <p className="text-[12px] text-white/65 leading-relaxed">{rfi.answer}</p>
+                        </div>
+                      )}
+                      {rfiActions(rfi)}
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(rfi)}
+                          className="flex items-center gap-1.5 text-[12px] font-semibold bg-white/5 text-white/50 px-3 py-1.5 rounded-full">
+                          <Pencil size={12} /> Edit
+                        </button>
+                        <button onClick={() => setDeleteConfirm(rfi.id)}
+                          className="flex items-center gap-1.5 text-[12px] font-semibold bg-red-500/10 text-red-400 px-3 py-1.5 rounded-full">
+                          <Trash2 size={12} /> Delete
+                        </button>
+                      </div>
                     </div>
                   )}
-                </button>
+                </div>
               );
             })
           )}
@@ -298,12 +377,13 @@ export default function RFIsPage() {
               const prioCfg = PRIORITY_CONFIG[rfi.priority];
               const StatusIcon = statusCfg.icon;
               const isOpen = expanded === rfi.id;
-              const isOverdue = rfi.dueDate < new Date() && rfi.status === "open";
+              const isOverdue = new Date(rfi.dueDate) < new Date() && rfi.status === "open";
 
               return (
                 <div key={rfi.id} className={`card-hover bg-[#111111] border rounded-2xl overflow-hidden ${isOverdue ? "border-red-500/20 hover:border-red-500/35" : "border-white/[0.06] hover:border-white/[0.12]"}`}
                   style={{ borderLeftColor: rfi.priority === "critical" ? "#ef4444" : rfi.priority === "urgent" ? "#F5C400" : "#3b82f6", borderLeftWidth: 3 }}>
-                  <button className="w-full flex items-center gap-4 px-5 py-4 text-left"
+                  <div className="w-full flex items-center gap-4 px-5 py-4">
+                  <button type="button" aria-expanded={isOpen} className="flex-1 min-w-0 flex items-center gap-4 text-left"
                     onClick={() => setExpanded(isOpen ? null : rfi.id)}>
                     <StatusIcon size={16} className={statusCfg.className.split(" ")[1]} />
                     <div className="flex-1 min-w-0">
@@ -321,6 +401,9 @@ export default function RFIsPage() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
                       {isOpen ? <ChevronDown size={15} className="text-white/30" /> : <ChevronRight size={15} className="text-white/20" />}
+                    </div>
+                  </button>
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       <button aria-label="Edit" onClick={(e) => { e.stopPropagation(); openEdit(rfi); }}
                         className="p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
                         <Pencil size={12} />
@@ -330,7 +413,7 @@ export default function RFIsPage() {
                         <Trash2 size={12} />
                       </button>
                     </div>
-                  </button>
+                  </div>
 
                   {isOpen && (
                     <div className="px-5 pb-5 pt-0 border-t border-white/[0.05]">
@@ -361,58 +444,7 @@ export default function RFIsPage() {
                             </div>
                           )}
                         </div>
-                        {rfi.status === "open" && (
-                          answerRfiId === rfi.id ? (
-                            <div className="space-y-2">
-                              <textarea className={inp + " resize-none"} rows={3} placeholder="Type your response..." maxLength={2000}
-                                value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
-                              <div className="flex gap-2">
-                                <button onClick={() => handleAnswer(rfi.id)}
-                                  className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
-                                  Submit Answer
-                                </button>
-                                <button onClick={() => setAnswerRfiId(null)}
-                                  className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2 pt-1">
-                              <button onClick={() => { setAnswerRfiId(rfi.id); setAnswerText(""); }}
-                                className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
-                                Submit Answer
-                              </button>
-                              <button onClick={() => {
-                                if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
-                                updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed");
-                              }}
-                                className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
-                                Close RFI
-                              </button>
-                            </div>
-                          )
-                        )}
-                        {rfi.status === "answered" && (
-                          <div className="flex gap-2 pt-1">
-                            <button onClick={() => { updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed"); }}
-                              className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
-                              Close RFI
-                            </button>
-                            <button onClick={() => { updateRFI(rfi.id, { status: "open", answer: undefined }); toast.success("RFI reopened"); }}
-                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
-                              Reopen
-                            </button>
-                          </div>
-                        )}
-                        {rfi.status === "closed" && (
-                          <div className="flex gap-2 pt-1">
-                            <button onClick={() => { updateRFI(rfi.id, { status: "open" }); toast.success("RFI reopened"); }}
-                              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
-                              Reopen RFI
-                            </button>
-                          </div>
-                        )}
+                        {rfiActions(rfi)}
                       </div>
                     </div>
                   )}

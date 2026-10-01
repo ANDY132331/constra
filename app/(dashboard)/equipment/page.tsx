@@ -189,7 +189,7 @@ export default function EquipmentPage() {
             filtered.map((eq) => {
               const project = eq.projectId ? getProjectById(eq.projectId) : null;
               const cfg = STATUS_CONFIG[eq.status];
-              const serviceOverdue = eq.nextService <= todayEnd;
+              const serviceOverdue = new Date(eq.nextService) <= todayEnd;
               const statusDot = STATUS_CONFIG[eq.status].dot;
               return (
                 <div key={eq.id}

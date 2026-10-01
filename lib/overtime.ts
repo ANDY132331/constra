@@ -79,7 +79,7 @@ export function computeWorkerOvertime(
   const weeks = new Map<string, Map<string, number>>();
   for (const e of entries) {
     if (!e.clockOut) continue;
-    const hours = (e.clockOut.getTime() - e.clockIn.getTime()) / 3600000;
+    const hours = (new Date(e.clockOut).getTime() - new Date(e.clockIn).getTime()) / 3600000;
     if (hours <= 0) continue;
     const wKey = weekStartOf(e.clockIn).toISOString();
     const dKey = dayKey(e.clockIn);

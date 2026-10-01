@@ -45,17 +45,17 @@ function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
       number: i.number,
       amount: invoiceTotal(i),
       client: i.clientName,
-      daysOverdue: Math.floor((now.getTime() - i.dueDate.getTime()) / 86_400_000),
+      daysOverdue: Math.floor((now.getTime() - new Date(i.dueDate).getTime()) / 86_400_000),
     }));
 
   // ── Labor (this month) ───────────────────────────────────────────────────────
   const monthEntries = clockEntries.filter(
-    (e) => e.clockOut && e.clockIn >= monthStart
+    (e) => e.clockOut && new Date(e.clockIn) >= monthStart
   );
   let totalLaborCostThisMonth = 0;
   let totalHoursThisMonth = 0;
   monthEntries.forEach((e) => {
-    const hours = msToHours(e.clockOut!.getTime() - e.clockIn.getTime());
+    const hours = msToHours(new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime());
     const worker = workers.find((w) => w.id === e.workerId);
     totalHoursThisMonth += hours;
     totalLaborCostThisMonth += hours * (worker?.hourlyRate ?? 0);
@@ -65,7 +65,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
   const laborByProject: Record<string, number> = {};
   clockEntries.forEach((e) => {
     if (!e.clockOut) return;
-    const hours = msToHours(e.clockOut.getTime() - e.clockIn.getTime());
+    const hours = msToHours(new Date(e.clockOut).getTime() - new Date(e.clockIn).getTime());
     const rate = workers.find((w) => w.id === e.workerId)?.hourlyRate ?? 0;
     laborByProject[e.projectId] = (laborByProject[e.projectId] ?? 0) + hours * rate;
   });
@@ -82,7 +82,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
   // ── Project snapshots ────────────────────────────────────────────────────────
   const projectSnaps: ProjectSnap[] = projects.map((p) => {
     const overdueTasks = p.tasks.filter(
-      (t) => t.status !== "completed" && t.endDate < now
+      (t) => t.status !== "completed" && new Date(t.endDate) < now
     ).length;
     return {
       name: p.name,

@@ -30,12 +30,12 @@ export function checkImpossibleTravel(
 
   const last = pastEntries
     .filter((e) => e.workerId === entry.workerId && e.clockOut && e.gps)
-    .sort((a, b) => b.clockIn.getTime() - a.clockIn.getTime())[0];
+    .sort((a, b) => new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime())[0];
 
   if (!last?.clockOut || !last.gps) return null;
 
   const distKm = haversineKm(last.gps, entry.gps);
-  const elapsedH = (entry.clockIn.getTime() - last.clockOut.getTime()) / 3_600_000;
+  const elapsedH = (new Date(entry.clockIn).getTime() - new Date(last.clockOut).getTime()) / 3_600_000;
 
   if (elapsedH <= 0 || distKm < 0.05) return null; // overlapping or same spot
 

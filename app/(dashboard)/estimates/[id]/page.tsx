@@ -123,7 +123,7 @@ export default function EstimateDetailPage() {
   const isSent     = estimate.status === "sent";
   const isAccepted = estimate.status === "accepted";
   const isDeclined = estimate.status === "declined";
-  const isExpired  = estimate.validUntil < new Date() && isSent;
+  const isExpired  = new Date(estimate.validUntil) < new Date() && isSent;
   const ps = paperStyles(template, isAccepted);
 
   const sub    = draft.items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0);

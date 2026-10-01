@@ -28,7 +28,7 @@ export async function exportReportPdf(input: PdfReportInput) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
 
   const periodEntries = clockEntries.filter(
-    (e) => e.clockOut && e.clockIn >= periodStart && e.clockIn <= periodEnd
+    (e) => e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd
   );
 
   const workerMap = new Map(workers.map((w) => [w.id, w]));
@@ -52,14 +52,14 @@ export async function exportReportPdf(input: PdfReportInput) {
 
   // ── Summary stats ─────────────────────────────────────────────────────────────
   const totalHours = periodEntries.reduce(
-    (s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0
+    (s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0
   );
   const activeWorkerIds = new Set(periodEntries.map((e) => e.workerId));
   const payrollByWorker = new Map<string, { name: string; role: string; hours: number; pay: number }>();
   for (const e of periodEntries) {
     const w = workerMap.get(e.workerId);
     if (!w) continue;
-    const hours = (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000;
+    const hours = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
     const existing = payrollByWorker.get(w.id) ?? { name: w.name, role: w.customRole ?? w.role ?? "", hours: 0, pay: 0 };
     existing.hours += hours;
     existing.pay += hours * (w.hourlyRate ?? 0);
@@ -200,15 +200,15 @@ export async function exportReportPdf(input: PdfReportInput) {
     .map((e) => {
       const w = workerMap.get(e.workerId);
       const p = projectMap.get(e.projectId);
-      const hours = (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000;
+      const hours = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
       return {
-        date: e.clockIn.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" }),
+        date: new Date(e.clockIn).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" }),
         worker: w?.name ?? "—",
         project: p?.name ?? "—",
-        clockIn: e.clockIn.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-        clockOut: e.clockOut!.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        clockIn: new Date(e.clockIn).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        clockOut: new Date(e.clockOut!).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
         hours,
-        sortMs: e.clockIn.getTime(),
+        sortMs: new Date(e.clockIn).getTime(),
       };
     })
     .sort((a, b) => a.sortMs - b.sortMs || a.worker.localeCompare(b.worker));
@@ -1609,7 +1609,7 @@ export async function exportChangeOrderPdf({
     body: [
       ["CO Number", changeOrder.number, "Amount", fmtAmt],
       ["Project", projectName, "Status", changeOrder.status.charAt(0).toUpperCase() + changeOrder.status.slice(1)],
-      ["Submitted By", submitterName, "Date", changeOrder.submittedAt.toLocaleDateString("en-CA", { dateStyle: "medium" })],
+      ["Submitted By", submitterName, "Date", new Date(changeOrder.submittedAt).toLocaleDateString("en-CA", { dateStyle: "medium" })],
       ...(changeOrder.approvedAt
         ? [["Approved By", changeOrder.approvedBy ?? "—", "Approved On", changeOrder.approvedAt.toLocaleDateString("en-CA", { dateStyle: "medium" })]]
         : []),

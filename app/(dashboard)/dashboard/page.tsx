@@ -353,7 +353,7 @@ export default function DashboardPage() {
   const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);
   const totalPaid = useMemo(() => invoices.filter((i) => i.status === "paid").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
   const totalOutstanding = useMemo(() => invoices.filter((i) => i.status === "sent" || i.status === "overdue").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
-  const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && i.dueDate < now)), [invoices, now]);
+  const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && new Date(i.dueDate) < now)), [invoices, now]);
   const pendingCOs = useMemo(() => changeOrders.filter((co) => co.status === "pending"), [changeOrders]);
   const overdueTasks = useMemo(() =>
     projects.flatMap((p) =>
@@ -406,7 +406,7 @@ export default function DashboardPage() {
     // Days worked this week (streak)
     const workedDays = new Set(
       myEntries
-        .filter((e) => e.clockOut && e.clockIn >= wkStart)
+        .filter((e) => e.clockOut && new Date(e.clockIn) >= wkStart)
         .map((e) => new Date(e.clockIn).toDateString())
     ).size;
 
@@ -419,7 +419,7 @@ export default function DashboardPage() {
     const myTasks = projects
       .flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.name })))
       .filter((t) => t.workerId === currentUser.id && t.status !== "completed");
-    const urgentTasks = myTasks.filter((t) => t.endDate <= now);
+    const urgentTasks = myTasks.filter((t) => new Date(t.endDate) <= now);
     const todayTasks = myTasks.filter((t) => new Date(t.endDate).toDateString() === now.toDateString() && new Date(t.endDate) > now);
 
     // My punch items (items on my projects)
@@ -1097,7 +1097,7 @@ export default function DashboardPage() {
               p.tasks.filter((t) => t.status !== "completed").map((t) => ({ ...t, projectName: p.name, projectColor: p.color }))
             ).slice(0, 5).map((task) => {
               const worker = getWorkerById(task.workerId);
-              const isLate = task.endDate < now && task.progress < 100;
+              const isLate = new Date(task.endDate) < now && task.progress < 100;
               return (
                 <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-4 active:bg-white/[0.03]">
                   <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: task.projectColor }} />
@@ -1544,7 +1544,7 @@ export default function DashboardPage() {
               p.tasks.filter((t) => t.status !== "completed").map((t) => ({ ...t, projectName: p.name, projectColor: p.color }))
             ).slice(0, 6).map((task) => {
               const worker = getWorkerById(task.workerId);
-              const isLate = task.endDate < now && task.progress < 100;
+              const isLate = new Date(task.endDate) < now && task.progress < 100;
               return (
                 <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-3 hover:bg-white/[0.03] transition-colors group">
                   <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: task.projectColor }} />

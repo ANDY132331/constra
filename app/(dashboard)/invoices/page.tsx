@@ -260,7 +260,7 @@ export default function InvoicesPage() {
           <div className="mx-5 space-y-2.5">
             {filtered.map((inv) => {
               const total = invoiceTotal(inv);
-              const pastDue = inv.status === "sent" && inv.dueDate < new Date();
+              const pastDue = inv.status === "sent" && new Date(inv.dueDate) < new Date();
               const effectiveStatus = pastDue ? "overdue" : inv.status;
               const cfg = STATUS_CONFIG[effectiveStatus];
               const isOverdue = inv.status === "overdue" || pastDue;

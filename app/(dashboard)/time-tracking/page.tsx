@@ -499,7 +499,7 @@ export default function TimeTrackingPage() {
     // Find ALL open entries for this worker and close them all (prevents orphaned running timers)
     const openEntries = clockEntries.filter((e) => e.workerId === workerId && !e.clockOut);
     const entry = openEntries.reduce<typeof openEntries[0] | undefined>((latest, e) =>
-      !latest || e.clockIn > latest.clockIn ? e : latest, undefined);
+      !latest || new Date(e.clockIn) > new Date(latest.clockIn) ? e : latest, undefined);
     // Close every open entry (defensive: should only ever be one)
     openEntries.forEach((e) => updateClockEntry(e.id, { clockOut: now }));
     if (entry) {
@@ -792,7 +792,7 @@ export default function TimeTrackingPage() {
         <div className="flex-shrink-0 bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex items-center gap-2.5">
           <LogIn size={15} className="text-amber-400 flex-shrink-0" />
           <div>
-            <p className="text-[20px] font-bold text-white leading-none">{clockEntries.filter((e) => e.clockIn >= todayStart).length}</p>
+            <p className="text-[20px] font-bold text-white leading-none">{clockEntries.filter((e) => new Date(e.clockIn) >= todayStart).length}</p>
             <p className="text-[11px] text-amber-400 font-semibold mt-0.5">Entries</p>
           </div>
         </div>

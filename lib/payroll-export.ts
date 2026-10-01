@@ -54,20 +54,20 @@ function buildRows(
   const projectMap = new Map(projects.map((p) => [p.id, p]));
 
   return entries
-    .filter((e) => e.clockOut && e.clockIn >= periodStart && e.clockIn <= periodEnd && e.clockOut.getTime() !== 0)
+    .filter((e) => e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd && new Date(e.clockOut).getTime() !== 0)
     .map((e) => {
       const worker = workerMap.get(e.workerId);
       const project = projectMap.get(e.projectId);
-      const hours = ((e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000);
+      const hours = ((new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000);
       const rate = worker?.hourlyRate ?? 0;
       return {
         workerName: worker?.name ?? "Unknown",
         workerEmail: worker?.email ?? "",
         role: worker?.customRole ?? worker?.role ?? "",
         projectName: project?.name ?? "—",
-        date: e.clockIn.toLocaleDateString("en-CA"),
-        clockIn: e.clockIn.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-        clockOut: e.clockOut!.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        date: new Date(e.clockIn).toLocaleDateString("en-CA"),
+        clockIn: new Date(e.clockIn).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        clockOut: new Date(e.clockOut!).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
         hoursWorked: Math.round(hours * 100) / 100,
         hourlyRate: rate,
         grossPay: Math.round(hours * rate * 100) / 100,
@@ -87,7 +87,7 @@ function buildOvertimeSummaries(
   // Group entries by worker within the period
   const byWorker = new Map<string, ClockEntry[]>();
   for (const e of entries) {
-    if (!e.clockOut || e.clockIn < periodStart || e.clockIn > periodEnd || e.clockOut.getTime() === 0) continue;
+    if (!e.clockOut || new Date(e.clockIn) < periodStart || new Date(e.clockIn) > periodEnd || new Date(e.clockOut).getTime() === 0) continue;
     const list = byWorker.get(e.workerId) ?? [];
     list.push(e);
     byWorker.set(e.workerId, list);

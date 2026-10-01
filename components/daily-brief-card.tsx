@@ -72,10 +72,10 @@ export function DailyBriefCard() {
       .filter((p) => p.status === "active")
       .map((p) => {
         const tasksDue = p.tasks.filter(
-          (t) => t.status !== "completed" && t.endDate.toDateString() === now.toDateString()
+          (t) => t.status !== "completed" && new Date(t.endDate).toDateString() === now.toDateString()
         ).length;
         const tasksOverdue = p.tasks.filter(
-          (t) => t.status !== "completed" && t.endDate < now
+          (t) => t.status !== "completed" && new Date(t.endDate) < now
         ).length;
         const budgetPct = p.budget > 0 ? Math.round((p.spent / p.budget) * 100) : null;
         return { name: p.name, progress: p.progress, tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
@@ -84,14 +84,14 @@ export function DailyBriefCard() {
     const tasksDueToday = projects.flatMap((p) =>
       p.tasks
         .filter((t) => t.status !== "completed")
-        .filter((t) => t.endDate.toDateString() === now.toDateString() || t.endDate < now)
+        .filter((t) => new Date(t.endDate).toDateString() === now.toDateString() || new Date(t.endDate) < now)
         .map((t) => {
           const worker = workers.find((w) => w.id === t.workerId);
           return {
             name: t.name,
             project: p.name,
             worker: worker?.name ?? "Unassigned",
-            overdue: t.endDate < now && t.endDate.toDateString() !== now.toDateString(),
+            overdue: new Date(t.endDate) < now && new Date(t.endDate).toDateString() !== now.toDateString(),
           };
         })
     );

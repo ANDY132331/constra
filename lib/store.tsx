@@ -569,7 +569,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               const w = stateRef.current.workers.find(w => w.id === entry.workerId);
               const pr = stateRef.current.projects.find(p => p.id === entry.projectId);
               if (w && pr) {
-                const hrs = ((entry.clockOut.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1) + "h";
+                const hrs = ((new Date(entry.clockOut).getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1) + "h";
                 notifyClockOut(w.name, pr.name, hrs, entry.id);
               }
             }
@@ -1144,7 +1144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const getWorkerTotalHours = useCallback((workerId: string): number => {
     const fromEntries = (state.clockEntries ?? [])
       .filter((e) => e.workerId === workerId && e.clockOut)
-      .reduce((sum, e) => sum + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+      .reduce((sum, e) => sum + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
     const fromAdjustments = (state.hoursAdjustments ?? [])
       .filter((a) => a.workerId === workerId)
       .reduce((sum, a) => sum + a.deltaHours, 0);
