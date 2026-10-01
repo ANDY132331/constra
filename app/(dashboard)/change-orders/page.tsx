@@ -430,7 +430,7 @@ export default function ChangeOrdersPage() {
               <p className="text-[12px] text-white/40 mt-0.5">
                 {projectMap.get(selected.projectId)?.name ?? "Unknown project"}
                 {" · "}Submitted by {workerMap.get(selected.submittedById)?.name ?? "Unknown"}
-                {" · "}{selected.submittedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                {" · "}{new Date(selected.submittedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
             <div className="flex items-center gap-2">

@@ -193,7 +193,7 @@ export default function EstimateDetailPage() {
     setSendLoading(true);
     try {
       const amountStr = formatCurrency(Math.round(total), currency as never);
-      const validStr = estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
+      const validStr = new Date(estimate.validUntil).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
       const res = await fetch("/api/invoice/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -384,7 +384,7 @@ export default function EstimateDetailPage() {
               <div className="mx-6 sm:mx-12 mt-5 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
                 <Clock size={14} className="text-orange-500 flex-shrink-0" />
                 <p className="text-[12px] font-bold text-orange-700">
-                  Expired — was valid until {estimate.validUntil.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
+                  Expired — was valid until {new Date(estimate.validUntil).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
                 </p>
               </div>
             )}

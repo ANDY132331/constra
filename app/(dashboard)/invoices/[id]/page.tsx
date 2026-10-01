@@ -179,7 +179,7 @@ export default function InvoiceDetailPage() {
     setSendLoading(true);
     try {
       const amountStr = formatCurrency(Math.round(total), currency as never);
-      const dueDateStr = invoice.dueDate.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
+      const dueDateStr = new Date(invoice.dueDate).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
       let pdfDataUrl: string | undefined;
       try {
         const { generateInvoicePdfDataUrl } = await import("@/lib/pdf-export");
@@ -357,7 +357,7 @@ export default function InvoiceDetailPage() {
                 <AlertTriangle size={14} className="text-red-500 flex-shrink-0" />
                 <div>
                   <p className="text-[12px] font-bold text-red-600">Payment Overdue</p>
-                  <p className="text-[11px] text-red-400">Was due {invoice.dueDate.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
+                  <p className="text-[11px] text-red-400">Was due {new Date(invoice.dueDate).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
                 </div>
               </div>
             )}

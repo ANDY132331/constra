@@ -122,8 +122,8 @@ const ACTIVITY_ICONS: Record<string, { icon: React.ComponentType<{ size?: number
   "photo-uploaded": { icon: ImageIcon,     color: "#06b6d4", href: "/photos"        },
 };
 
-function timeAgo(date: Date): string {
-  const ms = Date.now() - date.getTime();
+function timeAgo(date: Date | string): string {
+  const ms = Date.now() - new Date(date).getTime();
   const mins = Math.floor(ms / 60000);
   if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
@@ -142,7 +142,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
     const id = setInterval(() => setTick((n) => n + 1), 60000);
     return () => clearInterval(id);
   }, []);
-  const clockIn = worker.clockInTime ?? new Date();
+  const clockIn = worker.clockInTime ? new Date(worker.clockInTime) : new Date();
   const elapsed = Date.now() - clockIn.getTime();
   const hours = Math.floor(elapsed / 3600000);
   const mins = Math.floor((elapsed % 3600000) / 60000);
@@ -335,15 +335,16 @@ export default function DashboardPage() {
   }, [now]);
 
   const weeklyHours = useMemo(() => clockEntries
-    .filter((e) => e.clockOut && e.clockIn >= weekStart)
-    .reduce((sum, e) => sum + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0),
+    .filter((e) => e.clockOut && new Date(e.clockIn) >= weekStart)
+    .reduce((sum, e) => sum + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0),
   [clockEntries, weekStart]);
 
   const todayActiveHours = useMemo(() => {
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     return clockedInWorkers.reduce((sum, w) => {
       if (!w.clockInTime) return sum;
-      const effectiveStart = w.clockInTime < todayStart ? todayStart : w.clockInTime;
+      const cit = new Date(w.clockInTime);
+      const effectiveStart = cit < todayStart ? todayStart : cit;
       return sum + (Date.now() - effectiveStart.getTime()) / 3600000;
     }, 0);
   }, [clockedInWorkers]);
@@ -393,20 +394,20 @@ export default function DashboardPage() {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     const myWeekHours = myEntries
-      .filter((e) => e.clockOut && e.clockIn >= wkStart)
-      .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+      .filter((e) => e.clockOut && new Date(e.clockIn) >= wkStart)
+      .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
     const myTodayHours = myEntries
-      .filter((e) => e.clockOut && e.clockIn >= todayStart)
-      .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+      .filter((e) => e.clockOut && new Date(e.clockIn) >= todayStart)
+      .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
     const liveElapsed = currentUser.clockedIn && currentUser.clockInTime
-      ? (now.getTime() - currentUser.clockInTime.getTime()) / 3600000
+      ? (now.getTime() - new Date(currentUser.clockInTime).getTime()) / 3600000
       : 0;
 
     // Days worked this week (streak)
     const workedDays = new Set(
       myEntries
         .filter((e) => e.clockOut && e.clockIn >= wkStart)
-        .map((e) => e.clockIn.toDateString())
+        .map((e) => new Date(e.clockIn).toDateString())
     ).size;
 
     // My projects
@@ -537,7 +538,7 @@ export default function DashboardPage() {
                   </p>
                   {currentUser.clockInTime && (
                     <p className={`text-[11px] ${dk ? "text-white/35" : "text-gray-500"}`}>
-                      since {currentUser.clockInTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                      since {new Date(currentUser.clockInTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   )}
                 </div>
@@ -949,7 +950,7 @@ export default function DashboardPage() {
         ) : (
           <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             {clockedInWorkers.slice(0, 6).map((w) => {
-              const hoursOn = w.clockInTime ? (Date.now() - w.clockInTime.getTime()) / 3600000 : 0;
+              const hoursOn = w.clockInTime ? (Date.now() - new Date(w.clockInTime).getTime()) / 3600000 : 0;
               return (
                 <Link
                   key={w.id}
@@ -1007,7 +1008,7 @@ export default function DashboardPage() {
               const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
               const budgetPct = p.budget > 0 ? Math.min(100, Math.round((p.spent / p.budget) * 100)) : 0;
               const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
-              const daysLeft = Math.ceil((p.endDate.getTime() - Date.now()) / 86400000);
+              const daysLeft = Math.ceil((new Date(p.endDate).getTime() - Date.now()) / 86400000);
               return (
                 <Link
                   key={p.id}
@@ -1106,7 +1107,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className={`text-[11px] font-semibold ${isLate ? "text-red-400" : "text-white/40"}`}>
-                      {task.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      {new Date(task.endDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                     </p>
                     <p className="text-[10px] text-white/25">{task.progress}%</p>
                   </div>
@@ -1474,7 +1475,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-1 mt-1">
                         <Calendar size={9} className="text-blue-400" />
                         <span className="text-[10px] text-blue-400">
-                          Starts {p.startDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                          Starts {new Date(p.startDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                         </span>
                       </div>
                     </div>
@@ -1553,7 +1554,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className={`text-[11px] font-semibold ${isLate ? "text-red-400" : "text-white/40"}`}>
-                      {task.endDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      {new Date(task.endDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                     </p>
                     <p className="text-[10px] text-white/25">{task.progress}%</p>
                   </div>

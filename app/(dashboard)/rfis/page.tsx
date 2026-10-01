@@ -215,7 +215,7 @@ export default function RFIsPage() {
                         {project.name}
                       </span>
                     ) : <span />}
-                    <span className={isOverdue ? "text-red-400 font-semibold" : ""}>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                    <span className={isOverdue ? "text-red-400 font-semibold" : ""}>Due {new Date(rfi.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
                   </div>
                   {/* Expanded answer view on mobile */}
                   {expanded === rfi.id && rfi.answer && (
@@ -315,7 +315,7 @@ export default function RFIsPage() {
                       <p className="text-[14px] font-bold text-white/85 truncate" title={rfi.subject}>{rfi.subject}</p>
                       <div className="flex items-center gap-3 mt-1 text-[11px] text-white/30">
                         {project && <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} /><span>{project.name}</span></div>}
-                        <span>Due {rfi.dueDate.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
+                        <span>Due {new Date(rfi.dueDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">

@@ -457,7 +457,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <span className="text-[11px] text-white/30">
-                            {incident.date.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                            {new Date(incident.date).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                           </span>
                           <button onClick={() => exportPdf(incident)} title="Export PDF"
                             className="p-1 rounded hover:bg-white/8 text-white/30 hover:text-amber-400 active:text-amber-400 transition-all">

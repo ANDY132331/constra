@@ -128,9 +128,9 @@ export default function MaterialsPage() {
     const q = parseFloat(quantity);
     if (isNaN(q) || q <= 0) { toast.error("Enter a valid quantity greater than 0"); return; }
 
-    // Ensure material type exists in store
+    // Ensure material type exists in store (handles both built-in templates and custom entries)
     let typeId = selectedMaterial.id;
-    if (typeId.startsWith("_builtin_")) {
+    if (typeId.startsWith("_builtin_") || typeId.startsWith("_custom_")) {
       const existing = materialTypes.find(
         (mt) => mt.name === selectedMaterial.name && mt.trade === selectedMaterial.trade
       );

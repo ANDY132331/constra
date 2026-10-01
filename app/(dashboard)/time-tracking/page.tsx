@@ -746,8 +746,8 @@ export default function TimeTrackingPage() {
         const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
         const ot = workers.filter((w) => {
           const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);
-          const todayHrs = wEntries.filter((e) => e.clockIn >= todayStart).reduce((s,e) => s + (e.clockOut!.getTime()-e.clockIn.getTime())/3600000, 0);
-          const weekHrs = wEntries.filter((e) => e.clockIn >= weekStart).reduce((s,e) => s + (e.clockOut!.getTime()-e.clockIn.getTime())/3600000, 0);
+          const todayHrs = wEntries.filter((e) => new Date(e.clockIn) >= todayStart).reduce((s,e) => s + (new Date(e.clockOut!).getTime()-new Date(e.clockIn).getTime())/3600000, 0);
+          const weekHrs = wEntries.filter((e) => new Date(e.clockIn) >= weekStart).reduce((s,e) => s + (new Date(e.clockOut!).getTime()-new Date(e.clockIn).getTime())/3600000, 0);
           return todayHrs > 8 || weekHrs > 44;
         });
         if (ot.length === 0) return null;
@@ -866,13 +866,13 @@ export default function TimeTrackingPage() {
       {allEntries.length > 0 && (() => {
         const completedEntries = allEntries.filter((e) => e.clockOut);
         const totalH = completedEntries.reduce(
-          (s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0
+          (s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0
         );
 
         // Group by date string (allEntries is newest-first, so Map insertion order = newest day first)
         const dayMap = new Map<string, typeof allEntries>();
         for (const entry of allEntries) {
-          const key = entry.clockIn.toLocaleDateString("en-CA");
+          const key = new Date(entry.clockIn).toLocaleDateString("en-CA");
           if (!dayMap.has(key)) dayMap.set(key, []);
           dayMap.get(key)!.push(entry);
         }
@@ -907,12 +907,12 @@ export default function TimeTrackingPage() {
             {[...dayMap.entries()].map(([dateKey, dayEntries]) => {
               const dayCompleted = dayEntries.filter((e) => e.clockOut);
               const dayTotal = dayCompleted.reduce(
-                (s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0
+                (s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0
               );
               const todayKey = new Date().toLocaleDateString("en-CA");
               const dayLabel = dateKey === todayKey
                 ? "Today"
-                : dayEntries[0].clockIn.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" });
+                : new Date(dayEntries[0].clockIn).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" });
 
               return (
                 <div key={dateKey} className="mb-3">
@@ -937,7 +937,7 @@ export default function TimeTrackingPage() {
                       const worstSev = entryFlags.some((f) => f.severity === "high") ? "high" : entryFlags.some((f) => f.severity === "medium") ? "medium" : entryFlags.length > 0 ? "low" : null;
                       const flagCol = worstSev === "high" ? "text-red-400" : worstSev === "medium" ? "text-amber-400" : "text-blue-400/70";
                       const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;
-                      const hrs = entry.clockOut ? ((entry.clockOut.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1) : null;
+                      const hrs = entry.clockOut ? ((new Date(entry.clockOut).getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1) : null;
 
                       return (
                         <div key={entry.id} className={`px-4 py-4 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""} ${worstSev === "high" ? "bg-red-500/[0.03]" : ""}`}>
@@ -1084,7 +1084,7 @@ export default function TimeTrackingPage() {
         {[
           { label: "On Site Now", value: clockedIn.length, sub: "workers live", color: "#22c55e" },
           { label: "Hours Today", value: `${todayTotal}h`, sub: "all workers combined", color: "#3b82f6" },
-          { label: "Total Sessions", value: clockEntries.filter((e) => e.clockOut && e.clockOut.getTime() !== 0).length, sub: "completed all time", color: "#F5C400" },
+          { label: "Total Sessions", value: clockEntries.filter((e) => e.clockOut && new Date(e.clockOut).getTime() !== 0).length, sub: "completed all time", color: "#F5C400" },
           { label: "Active Projects", value: activeProjects.length, sub: "currently running", color: "#8b5cf6" },
         ].map(({ label, value, sub, color }) => (
           <div key={label} className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
@@ -1207,11 +1207,11 @@ export default function TimeTrackingPage() {
         workers.forEach((w) => {
           const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);
           const todayHrs = wEntries
-            .filter((e) => e.clockIn >= todayStart)
-            .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+            .filter((e) => new Date(e.clockIn) >= todayStart)
+            .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
           const weekHrs = wEntries
-            .filter((e) => e.clockIn >= weekStart)
-            .reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+            .filter((e) => new Date(e.clockIn) >= weekStart)
+            .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
           if (todayHrs > 8) overtimeWorkers.push({ name: w.name, reason: `${todayHrs.toFixed(1)}h today` });
           else if (weekHrs > 44) overtimeWorkers.push({ name: w.name, reason: `${weekHrs.toFixed(1)}h this week` });
         });
@@ -1277,7 +1277,7 @@ export default function TimeTrackingPage() {
             const project = getProjectById(entry.projectId);
             if (!worker) return null;
             const hrs = entry.clockOut
-              ? ((entry.clockOut.getTime() - entry.clockIn.getTime()) / 3600000).toFixed(1)
+              ? ((new Date(entry.clockOut).getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1)
               : null;
             const isLive = !!(entry as { live?: boolean }).live;
             const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;
@@ -1321,7 +1321,7 @@ export default function TimeTrackingPage() {
                 </div>
                 <span className="text-[12px] text-white/45 truncate pr-2">{project?.name ?? "—"}</span>
                 <span className="text-[12px] text-white/45">
-                  {entry.clockIn.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                  {new Date(entry.clockIn).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                 </span>
                 <span className="text-[12px] text-green-400 font-semibold">{fmt(entry.clockIn)}</span>
                 <span className={`text-[12px] font-semibold ${entry.clockOut ? "text-white/50" : "text-amber-400"}`}>

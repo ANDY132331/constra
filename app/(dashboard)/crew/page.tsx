@@ -67,7 +67,7 @@ function HoursModal({
 
   const workerAdjustments = adjustments
     .filter((a) => a.workerId === worker.id)
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const handleSubmit = () => {
     const val = parseFloat(amount);
@@ -175,8 +175,8 @@ function HoursModal({
                         {adj.deltaHours > 0 ? "+" : ""}{adj.deltaHours.toFixed(1)}h
                       </span>
                       <span className="text-[10px] text-white/30">
-                        {adj.createdAt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
-                        {" · "}{adj.createdAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(adj.createdAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
+                        {" · "}{new Date(adj.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
                     <p className="text-[12px] text-white/60 leading-snug">{adj.reason}</p>
@@ -716,13 +716,13 @@ export default function CrewPage() {
                   return (
                     <div className="flex flex-wrap gap-1 mt-2.5">
                       {worker.certifications.map((c) => {
-                        const expired = c.expiryDate && c.expiryDate.getTime() < now;
-                        const expiringSoon = !expired && c.expiryDate && (c.expiryDate.getTime() - now) < soon;
+                        const expired = c.expiryDate && new Date(c.expiryDate).getTime() < now;
+                        const expiringSoon = !expired && c.expiryDate && (new Date(c.expiryDate).getTime() - now) < soon;
                         return (
                           <span key={c.id} className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${expired ? "bg-red-500/15 text-red-400" : expiringSoon ? "bg-amber-500/15 text-amber-400" : "bg-white/[0.06] text-white/40"}`}>
                             {(expired || expiringSoon) && <AlertTriangle size={8} />}
                             {c.name}
-                            {c.expiryDate && <span className="opacity-60">· Exp. {c.expiryDate.toLocaleDateString("en-CA", { month: "short", year: "2-digit" })}</span>}
+                            {c.expiryDate && <span className="opacity-60">· Exp. {new Date(c.expiryDate).toLocaleDateString("en-CA", { month: "short", year: "2-digit" })}</span>}
                           </span>
                         );
                       })}

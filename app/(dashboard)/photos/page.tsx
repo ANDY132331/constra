@@ -227,7 +227,7 @@ export default function PhotosPage() {
                   </div>
                   <div className="px-3 py-2">
                     <p className="text-[10px] text-white/35">
-                      {photo.uploadedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      {new Date(photo.uploadedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                     </p>
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export default function PhotosPage() {
                           <span className="text-[10px] text-white/30">{uploader?.name?.split(" ")[0]}</span>
                         </div>
                         <span className="text-[10px] text-white/25">
-                          {photo.uploadedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                          {new Date(photo.uploadedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                         </span>
                       </div>
                       {photo.tags.length > 0 && (
@@ -445,7 +445,7 @@ export default function PhotosPage() {
                   project: p,
                   photos: filtered
                     .filter((ph) => ph.projectId === p.id)
-                    .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime()),
+                    .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()),
                 }))
                 .filter((g) => g.photos.length > 0);
 
@@ -458,7 +458,7 @@ export default function PhotosPage() {
                   {byProject.map(({ project, photos: pPhotos }) => {
                     const byDate: Record<string, typeof pPhotos> = {};
                     pPhotos.forEach((ph) => {
-                      const key = ph.uploadedAt.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
+                      const key = new Date(ph.uploadedAt).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
                       (byDate[key] = byDate[key] ?? []).push(ph);
                     });
                     return (
@@ -554,7 +554,7 @@ export default function PhotosPage() {
                       </div>
                     )}
                     <span className="text-[11px] text-white/30">
-                      {photo.uploadedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                      {new Date(photo.uploadedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                     </span>
                   </div>
                 );
@@ -715,7 +715,7 @@ export default function PhotosPage() {
                 <div className="flex items-center justify-center gap-3 text-[12px] text-white/40">
                   {project && <span style={{ color: project.color }}>{project.name}</span>}
                   {uploader && <span>{uploader.name}</span>}
-                  <span>{p.uploadedAt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}</span>
+                  <span>{new Date(p.uploadedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}</span>
                 </div>
                 {p.tags.length > 0 && (
                   <div className="flex gap-1.5 justify-center flex-wrap">

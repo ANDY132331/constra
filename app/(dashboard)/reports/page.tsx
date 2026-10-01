@@ -371,10 +371,10 @@ export default function ReportsPage() {
         {canSeeFinancials && (() => {
           const projectCosts = projects.map((p) => {
             const pEntries = periodEntries.filter((e) => e.projectId === p.id);
-            const labourHours = pEntries.reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+            const labourHours = pEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
             const labourCost = pEntries.reduce((s, e) => {
               const w = workers.find((w) => w.id === e.workerId);
-              const hrs = (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000;
+              const hrs = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
               return s + hrs * (w?.hourlyRate ?? 0);
             }, 0);
             return { ...p, labourHours, labourCost };
@@ -601,10 +601,10 @@ export default function ReportsPage() {
       {canSeeFinancials && (() => {
         const projectCosts = projects.map((p) => {
           const pEntries = periodEntries.filter((e) => e.projectId === p.id);
-          const labourHours = pEntries.reduce((s, e) => s + (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000, 0);
+          const labourHours = pEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
           const labourCost = pEntries.reduce((s, e) => {
             const w = workers.find((w) => w.id === e.workerId);
-            const hrs = (e.clockOut!.getTime() - e.clockIn.getTime()) / 3600000;
+            const hrs = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
             return s + hrs * (w?.hourlyRate ?? 0);
           }, 0);
           return { ...p, labourHours, labourCost };
