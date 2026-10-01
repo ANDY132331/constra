@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { HardHat, Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
 import { getClient } from "@/lib/supabase/client";
 
 function ResetPasswordForm() {
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -16,13 +14,28 @@ function ResetPasswordForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [sessionReady, setSessionReady] = useState(false);
   const [tokenExpired, setTokenExpired] = useState(false);
+  const tokenHash = useRef<string | null>(null);
 
   useEffect(() => {
     const supabase = getClient();
-
-    // PKCE: Supabase puts ?code= in the URL when redirected directly here.
-    // Exchange it client-side so PASSWORD_RECOVERY event fires properly.
     const url = new URL(window.location.href);
+
+    // Our own reset emails carry ?token_hash=. Verified on submit so link scanners can't consume it.
+    const hash = url.searchParams.get("token_hash");
+    if (hash && url.searchParams.get("type") === "recovery") {
+      tokenHash.current = hash;
+      url.searchParams.delete("token_hash");
+      url.searchParams.delete("type");
+      window.history.replaceState({}, "", url.toString());
+      queueMicrotask(() => setSessionReady(true));
+      return;
+    }
+
+    if (url.searchParams.get("error_description") || window.location.hash.includes("error=")) {
+      queueMicrotask(() => setTokenExpired(true));
+      return;
+    }
+
     const code = url.searchParams.get("code");
     if (code) {
       url.searchParams.delete("code");
@@ -39,17 +52,17 @@ function ResetPasswordForm() {
         setSessionReady(true);
       }
     });
-    // Fallback: if there's already an active session (e.g. server-side exchange)
+    const awaitingHashSession = window.location.hash.includes("access_token");
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setSessionReady(true);
+      else if (!awaitingHashSession) setTokenExpired(true);
     });
-    // If nothing resolves in 15s, treat link as expired
     const timeout = setTimeout(() => {
       setSessionReady((current) => {
         if (!current) setTokenExpired(true);
         return current;
       });
-    }, 15000);
+    }, 10000);
     return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 
@@ -69,13 +82,28 @@ function ResetPasswordForm() {
     setErrorMsg("");
     try {
       const supabase = getClient();
+      if (tokenHash.current) {
+        const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: tokenHash.current, type: "recovery" });
+        if (verifyError) {
+          setStatus("idle");
+          setTokenExpired(true);
+          return;
+        }
+        tokenHash.current = null;
+      }
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
-        setErrorMsg(error.message);
+        setErrorMsg(
+          error.code === "same_password"
+            ? "New password must be different from your current one."
+            : error.code === "weak_password"
+            ? "That password is too weak — try a longer one with numbers or symbols."
+            : error.message,
+        );
         setStatus("error");
       } else {
         setStatus("success");
-        setTimeout(() => router.push("/dashboard"), 2500);
+        setTimeout(() => { window.location.href = "/dashboard"; }, 2000);
       }
     } catch {
       setErrorMsg("Network error — check your connection and try again.");
