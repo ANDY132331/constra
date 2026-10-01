@@ -25,8 +25,8 @@ function elapsed(start: Date, end?: Date): string {
   return `${h}h ${m}m`;
 }
 
-function fmt(date: Date) {
-  return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+function fmt(date: Date | string) {
+  return new Date(date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
 // Edit entry modal

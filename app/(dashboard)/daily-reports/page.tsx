@@ -410,7 +410,7 @@ export default function DailyReportsPage() {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[12px] font-bold text-white/80">
-                      {report.date.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+                      {new Date(report.date).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
                     </span>
                     <ChevronRight size={12} className="text-white/20" />
                   </div>
