@@ -422,7 +422,7 @@ export default function CrewPage() {
           <div className="flex items-center justify-between gap-3">
             <code className="text-[20px] font-black font-mono tracking-[0.15em] text-amber-400">{inviteCode}</code>
             <div className="flex items-center gap-2">
-              <button onClick={() => handleShowQR()} className="p-2 rounded-full bg-white/[0.05] text-white/40 active:text-white/70">
+              <button aria-label="Show invite QR code" onClick={() => handleShowQR()} className="p-2 rounded-full bg-white/[0.05] text-white/40 active:text-white/70">
                 <QrCode size={14} />
               </button>
               <button onClick={() => handleCopy()} className="flex items-center gap-1.5 bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-full px-3 py-1.5 text-[12px] font-bold">
@@ -517,11 +517,11 @@ export default function CrewPage() {
                   )}
                   {canEdit && (
                     <>
-                      <button onClick={() => openEdit(worker)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
+                      <button aria-label="Edit" onClick={() => openEdit(worker)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
                       </button>
                       {worker.id !== currentUser.id && (
-                        <button onClick={() => handleDelete(worker.id)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        <button aria-label="Delete" onClick={() => handleDelete(worker.id)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                           <Trash2 size={13} />
                         </button>
                       )}
@@ -651,13 +651,13 @@ export default function CrewPage() {
                       {roleCfg.label}
                     </span>
                     {canEdit && (
-                      <button onClick={() => openEdit(worker)}
+                      <button aria-label="Edit" onClick={() => openEdit(worker)}
                         className="opacity-0 group-hover:opacity-100 p-1 rounded text-white/30 hover:text-white/70 transition-all">
                         <Pencil size={12} />
                       </button>
                     )}
                     {canEdit && worker.id !== currentUser.id && (
-                      <button onClick={() => handleDelete(worker.id)}
+                      <button aria-label="Delete" onClick={() => handleDelete(worker.id)}
                         className="opacity-0 group-hover:opacity-100 p-1 rounded text-white/30 hover:text-red-400 transition-all">
                         <Trash2 size={12} />
                       </button>
@@ -758,7 +758,7 @@ export default function CrewPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-8 flex flex-col items-center gap-5 w-full sm:w-72">
             <div className="flex items-center justify-between w-full">
               <h3 className="text-[15px] font-bold text-white">Invite Workers</h3>
-              <button onClick={() => setShowQR(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+              <button aria-label="Close" onClick={() => setShowQR(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>
@@ -781,7 +781,7 @@ export default function CrewPage() {
           <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Worker" : "Add Worker"}</h3>
-              <button type="button" onClick={() => setShowModal(false)}
+              <button aria-label="Close" type="button" onClick={() => setShowModal(false)}
                 className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
@@ -891,7 +891,7 @@ export default function CrewPage() {
                             maxLength={100}
                             value={cert.name}
                             onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, name: e.target.value } : c))} />
-                          <button type="button"
+                          <button aria-label="Close" type="button"
                             onClick={() => setCertifications((prev) => prev.filter((_, i) => i !== idx))}
                             className="p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
                             <X size={13} />

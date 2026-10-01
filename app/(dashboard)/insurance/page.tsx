@@ -308,13 +308,13 @@ export default function InsurancePage() {
 
                         {isAdmin && (
                           <div className="flex items-center gap-1">
-                            <button
+                            <button aria-label="Edit"
                               onClick={() => openEdit(policy)}
                               className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
                             >
                               <Pencil size={13} />
                             </button>
-                            <button
+                            <button aria-label="Delete"
                               onClick={() => setDeleteId(policy.id)}
                               className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                             >
@@ -360,7 +360,7 @@ export default function InsurancePage() {
               <h2 className="text-[15px] font-bold text-white/90">
                 {editId ? "Edit Policy" : "Add Insurance Policy"}
               </h2>
-              <button onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
+              <button aria-label="Close" onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
                 <X size={16} />
               </button>
             </div>

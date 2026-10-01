@@ -625,6 +625,7 @@ export default function TimeTrackingPage() {
           {/* Small clock-in button shown only for admin/foreman in top bar */}
           {!isEmployee && !isCurrentUserClockedIn && (
             <button
+              aria-label="Clock in"
               onClick={() => requestClockIn(currentUser)}
               className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-3.5 py-2 rounded-full transition-colors"
             >
@@ -954,7 +955,7 @@ export default function TimeTrackingPage() {
                                 {isLive && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0" />}
                                 <p className="text-[13px] font-bold text-white/85 truncate">{worker.name}</p>
                                 {worstSev && (
-                                  <button onClick={() => setFlagDetailId(flagDetailId === entry.id ? null : entry.id)} className={`flex-shrink-0 ${flagCol}`}>
+                                  <button aria-label="Show verification flags" onClick={() => setFlagDetailId(flagDetailId === entry.id ? null : entry.id)} className={`flex-shrink-0 ${flagCol}`}>
                                     <AlertTriangle size={11} />
                                   </button>
                                 )}
@@ -979,7 +980,7 @@ export default function TimeTrackingPage() {
                                   {hrs ? `${hrs}h` : elapsed(entry.clockIn)}
                                 </span>
                                 {!isLive && (
-                                  <button
+                                  <button aria-label="Edit"
                                     onClick={() => { const w = getWorkerById(entry.workerId); setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: w?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut }); }}
                                     className="text-white/20 active:text-white/60 ml-0.5"
                                   >

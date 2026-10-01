@@ -209,6 +209,8 @@ export function DailyBriefCard() {
             {loading ? "Generating…" : "Regenerate"}
           </button>
           <button
+            aria-label={collapsed ? "Expand" : "Collapse"}
+            aria-expanded={!collapsed}
             onClick={() => setCollapsed((v) => !v)}
             className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-white/50 hover:bg-white/[0.05] transition-colors"
           >

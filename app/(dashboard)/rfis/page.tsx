@@ -321,11 +321,11 @@ export default function RFIsPage() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${statusCfg.className}`}>{statusCfg.label}</span>
                       {isOpen ? <ChevronDown size={15} className="text-white/30" /> : <ChevronRight size={15} className="text-white/20" />}
-                      <button onClick={(e) => { e.stopPropagation(); openEdit(rfi); }}
+                      <button aria-label="Edit" onClick={(e) => { e.stopPropagation(); openEdit(rfi); }}
                         className="p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
                         <Pencil size={12} />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(rfi.id); }}
+                      <button aria-label="Delete" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(rfi.id); }}
                         className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
                         <Trash2 size={12} />
                       </button>
@@ -431,7 +431,7 @@ export default function RFIsPage() {
               <h3 className="text-[15px] font-bold text-white">
                 {editId ? "Edit RFI" : <>New RFI <span className="text-white/30 font-normal text-[13px]">{nextNumber}</span></>}
               </h3>
-              <button type="button" onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button aria-label="Close" type="button" onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>

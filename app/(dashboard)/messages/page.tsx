@@ -415,7 +415,7 @@ export default function MessagesPage() {
                 maxLength={100}
               />
               {sidebarSearch && (
-                <button type="button" onClick={() => setSidebarSearch("")} style={{ color: C.secondaryText }}>
+                <button aria-label="Close" type="button" onClick={() => setSidebarSearch("")} style={{ color: C.secondaryText }}>
                   <X size={12} />
                 </button>
               )}
@@ -509,7 +509,7 @@ export default function MessagesPage() {
             className="flex items-center gap-3 px-3 py-3 flex-shrink-0 border-b"
             style={{ background: C.headerBg, borderColor: C.border, paddingTop: "max(12px, env(safe-area-inset-top))" }}
           >
-            <button
+            <button aria-label="Show conversations"
               type="button"
               onClick={() => setMobileSidebarOpen(true)}
               className="sm:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full"
@@ -771,7 +771,7 @@ export default function MessagesPage() {
                   </div>
                 )}
                 <span className="text-[12px] max-w-[200px] truncate" style={{ color: C.titleColor }}>{pendingAttachment.name}</span>
-                <button type="button" onClick={() => setPendingAttachment(null)} style={{ color: C.secondaryText }} className="hover:opacity-70 ml-1">
+                <button aria-label="Close" type="button" onClick={() => setPendingAttachment(null)} style={{ color: C.secondaryText }} className="hover:opacity-70 ml-1">
                   <X size={14} />
                 </button>
               </div>
@@ -786,7 +786,7 @@ export default function MessagesPage() {
             {recording ? (
               /* ── Recording mode ── */
               <>
-                <button
+                <button aria-label="Close"
                   type="button"
                   onClick={() => stopRecording(false)}
                   className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90"
@@ -804,7 +804,7 @@ export default function MessagesPage() {
                   <span className="text-[12px]" style={{ color: C.secondaryText }}>Recording…</span>
                 </div>
 
-                <button
+                <button aria-label="Send"
                   type="button"
                   onClick={() => stopRecording(true)}
                   className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90"
@@ -816,7 +816,7 @@ export default function MessagesPage() {
             ) : (
               /* ── Normal mode ── */
               <>
-                <button
+                <button aria-label="Attach file"
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90"
@@ -896,14 +896,14 @@ export default function MessagesPage() {
               className="max-w-full max-h-[85dvh] object-contain rounded-2xl"
             />
             <div className="absolute top-3 right-3 flex gap-2">
-              <button
+              <button aria-label="Download"
                 type="button"
                 onClick={() => downloadAttachment(lightboxData.name, lightboxData.data)}
                 className="p-2.5 rounded-full bg-black/55 text-white/75 hover:text-white hover:bg-black/75 transition-all"
               >
                 <Download size={16} />
               </button>
-              <button
+              <button aria-label="Close"
                 type="button"
                 onClick={() => setLightboxData(null)}
                 className="p-2.5 rounded-full bg-black/55 text-white/75 hover:text-white hover:bg-black/75 transition-all"

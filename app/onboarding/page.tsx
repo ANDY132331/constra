@@ -310,7 +310,7 @@ export default function OnboardingPage() {
       <Shell>
         <div className="space-y-4">
           <div className="flex items-center gap-3 mb-2">
-            <button onClick={() => switchMode("choose")} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
+            <button aria-label="Back" onClick={() => switchMode("choose")} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
               <ChevronLeft size={16} />
             </button>
             <div>
@@ -363,7 +363,7 @@ export default function OnboardingPage() {
                 value={joinPassword}
                 onChange={(e) => setJoinPassword(e.target.value)}
               />
-              <button type="button" onClick={() => setShowJoinPw(!showJoinPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+              <button aria-label={showJoinPw ? "Show password" : "Hide password"} type="button" onClick={() => setShowJoinPw(!showJoinPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
                 {showJoinPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
@@ -423,7 +423,7 @@ export default function OnboardingPage() {
       {step === 1 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <button onClick={() => switchMode("choose")} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
+            <button aria-label="Back" onClick={() => switchMode("choose")} className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
               <ChevronLeft size={16} />
             </button>
             <div>
@@ -574,7 +574,7 @@ export default function OnboardingPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+              <button aria-label={showPw ? "Show password" : "Hide password"} type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
                 {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>

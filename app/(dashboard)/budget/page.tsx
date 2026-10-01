@@ -358,13 +358,13 @@ export default function BudgetPage() {
                               {isAdmin && (
                                 <td className="px-3 py-2.5">
                                   <div className="flex items-center justify-end gap-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-                                    <button
+                                    <button aria-label="Edit"
                                       onClick={() => openEdit(b)}
                                       className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors"
                                     >
                                       <Pencil size={13} />
                                     </button>
-                                    <button
+                                    <button aria-label="Delete"
                                       onClick={() => setDeleteId(b.id)}
                                       className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-colors"
                                     >

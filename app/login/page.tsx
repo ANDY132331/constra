@@ -423,7 +423,7 @@ function LoginForm() {
                           onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
                           maxLength={128}
                         />
-                        <button
+                        <button aria-label={showPw ? "Show password" : "Hide password"}
                           type="button"
                           onClick={() => setShowPw(!showPw)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
@@ -521,7 +521,7 @@ function LoginForm() {
                           onKeyDown={(e) => e.key === "Enter" && handleJoin()}
                           maxLength={128}
                         />
-                        <button
+                        <button aria-label={showJoinPw ? "Show password" : "Hide password"}
                           type="button"
                           onClick={() => setShowJoinPw(!showJoinPw)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"

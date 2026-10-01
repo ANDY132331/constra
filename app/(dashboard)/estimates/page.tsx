@@ -379,7 +379,7 @@ export default function EstimatesPage() {
                 <h3 className="text-[15px] font-bold text-white">New Estimate</h3>
                 <p className="text-[11px] text-white/30 mt-0.5 font-mono">{nextNumber}</p>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
+              <button aria-label="Close" onClick={() => setShowModal(false)} className="p-1.5 rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -468,7 +468,7 @@ export default function EstimatesPage() {
                           <input className={inp} type="number" placeholder="0.00" value={item.rate}
                             onChange={(e) => updateItem(idx, "rate", e.target.value)} />
                         </div>
-                        <button onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10">
+                        <button aria-label="Close" onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10">
                           <X size={14} />
                         </button>
                       </div>

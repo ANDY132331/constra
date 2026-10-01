@@ -563,6 +563,9 @@ function SettingsInner() {
                   <p className="text-[11px] text-white/35 mt-0.5">When off, all hours are treated as regular pay.</p>
                 </div>
                 <button
+                  role="switch"
+                  aria-checked={overtimeForm.enabled}
+                  aria-label="Enable overtime tracking"
                   onClick={() => setOvertimeForm((f) => ({ ...f, enabled: !f.enabled }))}
                   className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${overtimeForm.enabled ? "bg-amber-500" : "bg-white/10"}`}
                 >
@@ -824,16 +827,16 @@ function SettingsInner() {
                           maxLength={60}
                           className="flex-1 bg-transparent text-[13px] text-white outline-none border-b border-amber-500/40"
                         />
-                        <button onClick={() => handleSaveEditRole(role)} className="text-amber-400 hover:text-amber-300"><Check size={13} /></button>
-                        <button onClick={() => setEditingRole(null)} className="text-white/30 hover:text-white/60"><X size={13} /></button>
+                        <button aria-label="Save role" onClick={() => handleSaveEditRole(role)} className="text-amber-400 hover:text-amber-300"><Check size={13} /></button>
+                        <button aria-label="Close" onClick={() => setEditingRole(null)} className="text-white/30 hover:text-white/60"><X size={13} /></button>
                       </>
                     ) : (
                       <>
                         <span className="text-[13px] text-white/70 flex-1">{role}</span>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => { setEditingRole(role); setEditRoleValue(role); }}
+                          <button aria-label="Edit" onClick={() => { setEditingRole(role); setEditRoleValue(role); }}
                             className="w-7 h-7 flex items-center justify-center text-white/40 bg-white/[0.04] active:bg-white/10 rounded-full transition-colors"><Edit2 size={10} /></button>
-                          <button onClick={() => setDeleteRoleConfirm(role)}
+                          <button aria-label="Delete" onClick={() => setDeleteRoleConfirm(role)}
                             className="w-7 h-7 flex items-center justify-center text-red-400/50 bg-red-500/[0.06] active:bg-red-500/15 rounded-full transition-colors"><Trash2 size={10} /></button>
                         </div>
                       </>
@@ -1010,7 +1013,7 @@ function SettingsInner() {
                             {pwForm.confirm === pwForm.next ? "✓" : "✗"}
                           </span>
                         )}
-                        <button type="button" onClick={() => setShowPw(!showPw)}
+                        <button aria-label={showPw ? "Show password" : "Hide password"} type="button" onClick={() => setShowPw(!showPw)}
                           className="text-white/30 hover:text-white/60">
                           {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
                         </button>
@@ -1088,7 +1091,7 @@ function SettingsInner() {
                 <>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <h3 className="text-[15px] font-bold text-white leading-snug">Delete your account?</h3>
-                    <button onClick={() => setShowDeleteModal(false)} className="p-0.5 text-white/25 hover:text-white/60 transition-colors flex-shrink-0 mt-0.5">
+                    <button aria-label="Close" onClick={() => setShowDeleteModal(false)} className="p-0.5 text-white/25 hover:text-white/60 transition-colors flex-shrink-0 mt-0.5">
                       <X size={14} />
                     </button>
                   </div>

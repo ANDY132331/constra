@@ -301,7 +301,7 @@ export default function SchedulePage() {
         {/* Location + weather toggle */}
         <div className="flex items-center gap-2 px-5 pb-3">
           <div className="relative">
-            <button
+            <button aria-label="Show on map"
               onClick={() => setShowLocationPicker(!showLocationPicker)}
               className="flex items-center gap-1 text-[11px] text-white/35 hover:text-white/60 transition-colors"
             >
@@ -354,12 +354,12 @@ export default function SchedulePage() {
 
         {/* Month navigation */}
         <div className="flex items-center justify-between px-5 mb-3">
-          <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+          <button aria-label="Previous month" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className="w-9 h-9 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-colors">
             <ChevronLeft size={18} />
           </button>
           <h3 className="text-[15px] font-bold text-white">{format(currentMonth, "MMMM yyyy")}</h3>
-          <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+          <button aria-label="Next month" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
             className="w-9 h-9 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-colors">
             <ChevronRight size={18} />
           </button>
@@ -484,11 +484,11 @@ export default function SchedulePage() {
                       </div>
                       {customEvt && (
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          <button onClick={() => openEditEvent(customEvt)}
+                          <button aria-label="Edit" onClick={() => openEditEvent(customEvt)}
                             className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                             <Pencil size={13} />
                           </button>
-                          <button onClick={() => setDeleteEventConfirm(e.id)}
+                          <button aria-label="Close" onClick={() => setDeleteEventConfirm(e.id)}
                             className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                             <X size={13} />
                           </button>
@@ -515,7 +515,7 @@ export default function SchedulePage() {
             <div className="flex items-center gap-2">
               {/* Weather location */}
               <div className="relative">
-                <button
+                <button aria-label="Show on map"
                   onClick={() => setShowLocationPicker(!showLocationPicker)}
                   className="flex items-center gap-1.5 bg-[#111] hover:bg-white/5 border border-white/[0.07] text-white/50 hover:text-white/80 text-[12px] px-3 py-2 rounded-full transition-colors"
                 >
@@ -643,12 +643,12 @@ export default function SchedulePage() {
           {/* Calendar */}
           <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-x-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-              <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              <button aria-label="Previous month" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
                 className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-full transition-colors">
                 <ChevronLeft size={16} />
               </button>
               <h3 className="text-[15px] font-bold text-white">{format(currentMonth, "MMMM yyyy")}</h3>
-              <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              <button aria-label="Next month" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
                 className="w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/5 rounded-full transition-colors">
                 <ChevronRight size={16} />
               </button>
@@ -764,11 +764,11 @@ export default function SchedulePage() {
                         </div>
                         {customEvt && (
                           <div className="flex items-center gap-1">
-                            <button onClick={() => openEditEvent(customEvt)}
+                            <button aria-label="Edit" onClick={() => openEditEvent(customEvt)}
                               className="p-1 rounded text-white/25 hover:text-white/60 active:text-white/60 transition-colors">
                               <Pencil size={11} />
                             </button>
-                            <button onClick={() => setDeleteEventConfirm(e.id)}
+                            <button aria-label="Close" onClick={() => setDeleteEventConfirm(e.id)}
                               className="p-1 rounded text-white/25 hover:text-red-400 active:text-red-400 transition-colors">
                               <X size={12} />
                             </button>
@@ -790,7 +790,7 @@ export default function SchedulePage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06] flex-shrink-0">
               <h3 className="text-[15px] font-bold text-white">{editEventId ? "Edit Event" : "Add Event"}</h3>
-              <button onClick={() => { setShowAddModal(false); setEditEventId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+              <button aria-label="Close" onClick={() => { setShowAddModal(false); setEditEventId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>

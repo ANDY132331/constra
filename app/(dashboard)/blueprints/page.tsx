@@ -107,7 +107,7 @@ export default function BlueprintsPage() {
           <div className="px-4 mb-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-2xl py-2.5 mx-4">
             <AlertTriangle size={13} className="text-red-400 flex-shrink-0" />
             <p className="text-[12px] text-red-300 flex-1">{uploadError}</p>
-            <button onClick={() => setUploadError(null)} className="text-red-400/50 hover:text-red-400"><X size={12} /></button>
+            <button aria-label="Close" onClick={() => setUploadError(null)} className="text-red-400/50 hover:text-red-400"><X size={12} /></button>
           </div>
         )}
         {/* Blueprint list */}
@@ -254,7 +254,7 @@ export default function BlueprintsPage() {
         <div className="px-6 py-2 bg-red-500/10 border-b border-red-500/20 flex items-center gap-2">
           <AlertTriangle size={13} className="text-red-400 flex-shrink-0" />
           <p className="text-[12px] text-red-300">{uploadError}</p>
-          <button onClick={() => setUploadError(null)} className="ml-auto text-red-400/50 hover:text-red-400 transition-colors"><X size={12} /></button>
+          <button aria-label="Close" onClick={() => setUploadError(null)} className="ml-auto text-red-400/50 hover:text-red-400 transition-colors"><X size={12} /></button>
         </div>
       )}
 
@@ -358,13 +358,13 @@ export default function BlueprintsPage() {
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-[10px] font-bold capitalize" style={{ color: COLOR }}>{pin.type}</span>
                             <div className="flex gap-1">
-                              <button
+                              <button aria-label={pin.resolved ? "Reopen pin" : "Resolve pin"}
                                 onClick={() => { updateBlueprintPin(pin.id, { resolved: !pin.resolved }); toast.success(pin.resolved ? "Pin reopened" : "Pin resolved"); }}
                                 className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${pin.resolved ? "bg-white/[0.05] text-white/30" : "bg-green-500/15 text-green-400 hover:bg-green-500/25"}`}
                               >
                                 <Check size={11} />
                               </button>
-                              <button
+                              <button aria-label="Close"
                                 onClick={() => setDeletePinConfirm(pin.id)}
                                 className="w-7 h-7 rounded bg-white/[0.05] text-white/30 hover:bg-red-500/15 hover:text-red-400 flex items-center justify-center transition-colors"
                               >

@@ -180,7 +180,7 @@ export default function DailyReportsPage() {
           /* Mobile detail view */
           <div>
             <div className="flex items-center gap-2 px-4 pt-4 pb-3 border-b border-white/[0.06]">
-              <button onClick={() => setSelected(null)} className="p-1.5 -ml-1 rounded-full text-white/50 active:bg-white/[0.06]">
+              <button aria-label="Close" onClick={() => setSelected(null)} className="p-1.5 -ml-1 rounded-full text-white/50 active:bg-white/[0.06]">
                 <X size={18} />
               </button>
               <span className="text-[15px] font-bold text-white/90 flex-1 truncate">
@@ -194,7 +194,7 @@ export default function DailyReportsPage() {
                 <Download size={12} /> {pdfLoading ? "…" : "PDF"}
               </button>
               {isAdminOrAbove(currentUser.role) && (
-                <button
+                <button aria-label="Delete"
                   onClick={() => setDeleteConfirm(selected.id)}
                   className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                 >
@@ -457,14 +457,14 @@ export default function DailyReportsPage() {
                 <Download size={13} /> {pdfLoading ? "…" : "PDF"}
               </button>
               {isAdminOrAbove(currentUser.role) && (
-                <button
+                <button aria-label="Delete"
                   onClick={() => setDeleteConfirm(selected.id)}
                   className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
               )}
-              <button onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
+              <button aria-label="Close" onClick={() => setSelected(null)} className="w-8 h-8 flex items-center justify-center rounded-full text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-colors lg:hidden">
                 <X size={14} />
               </button>
             </div>
@@ -525,7 +525,7 @@ export default function DailyReportsPage() {
           <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="sheet bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90dvh] sm:max-h-[85dvh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-[14px] font-bold text-white/90">New Daily Report</h3>
-              <button type="button" onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
+              <button aria-label="Close" type="button" onClick={() => setShowForm(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/60 hover:bg-white/[0.06] active:bg-white/10 transition-colors"><X size={14} /></button>
             </div>
             <div className="overflow-y-scroll overscroll-y-contain flex-1 px-5 py-4 space-y-4" style={{touchAction:"pan-y"}}>
               <div className="grid grid-cols-2 gap-3">

@@ -409,7 +409,7 @@ export default function ProjectsPage() {
                         Edit
                       </button>
                       {isAdmin && (
-                        <button
+                        <button aria-label="Delete"
                           onClick={() => setDeleteConfirm(p.id)}
                           className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.05] text-white/35 active:bg-red-500/15 active:text-red-400 transition-colors"
                         >
@@ -616,7 +616,7 @@ export default function ProjectsPage() {
                         Edit
                       </button>
                       {isAdmin && (
-                        <button
+                        <button aria-label="Delete"
                           onClick={() => setDeleteConfirm(project.id)}
                           className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
                         >
@@ -658,7 +658,7 @@ export default function ProjectsPage() {
                             <Share2 size={13} />
                           </button>
                           {isAdmin && (
-                            <button
+                            <button aria-label="Delete"
                               onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
                               className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
                             >
@@ -757,7 +757,7 @@ export default function ProjectsPage() {
           {/* Header with safe-area-inset-top for notch/Dynamic Island */}
           <div className="flex items-center gap-2 px-4 flex-shrink-0 border-b border-white/[0.07]"
             style={{paddingTop:"calc(env(safe-area-inset-top) + 16px)", paddingBottom:"16px"}}>
-            <button
+            <button aria-label="Back"
               onClick={() => mobileStep > 1 ? setMobileStep(mobileStep - 1) : closeModal()}
               className="p-2 -ml-1 text-white/60 active:text-white transition-colors flex-shrink-0"
             >

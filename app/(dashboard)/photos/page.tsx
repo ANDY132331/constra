@@ -220,7 +220,7 @@ export default function PhotosPage() {
                       </div>
                     )}
                     {/* Always-visible on mobile (no hover), hover-revealed on desktop */}
-                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
+                    <button aria-label="Close" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
                       className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 rounded-full flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                       <X size={11} className="text-white" />
                     </button>
@@ -390,7 +390,7 @@ export default function PhotosPage() {
                           </a>
                         )}
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
+                      <button aria-label="Close" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
                         <X size={11} className="text-white" />
                       </button>
@@ -531,7 +531,7 @@ export default function PhotosPage() {
                           </a>
                         )}
                       </div>
-                      <button onClick={() => setDeleteConfirm(photo.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
+                      <button aria-label="Close" onClick={() => setDeleteConfirm(photo.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
                         <X size={12} />
                       </button>
                     </div>
@@ -593,7 +593,7 @@ export default function PhotosPage() {
                           ? <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
                           : <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-1"><Upload size={16} className="text-amber-400/60" /><p className="text-[8px] text-white/40 text-center truncate w-full">{item.name}</p></div>
                         }
-                        <button onClick={() => setPhotoItems((prev) => prev.filter((_, j) => j !== i))}
+                        <button aria-label="Close" onClick={() => setPhotoItems((prev) => prev.filter((_, j) => j !== i))}
                           className="absolute top-1 right-1 w-5 h-5 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
                           <X size={9} className="text-white" />
                         </button>
@@ -685,18 +685,18 @@ export default function PhotosPage() {
         return (
           <div className="fixed inset-0 z-[60] bg-black/95 flex flex-col items-center justify-center p-4"
             onClick={() => setLightboxIdx(null)}>
-            <button className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
+            <button aria-label="Close" className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
               onClick={() => setLightboxIdx(null)}>
               <X size={18} />
             </button>
             {lightboxIdx > 0 && (
-              <button className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
+              <button aria-label="Previous" className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
                 onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i ?? 1) - 1); }}>
                 <ChevronLeft size={20} />
               </button>
             )}
             {lightboxIdx < filtered.length - 1 && (
-              <button className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
+              <button aria-label="Next" className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
                 onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i ?? 0) + 1); }}>
                 <ChevronRight size={20} />
               </button>
