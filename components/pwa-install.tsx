@@ -1,7 +1,10 @@
 ﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { Download, X, Smartphone } from "lucide-react";
+
+const PUBLIC_PREFIXES = ["/", "/login", "/onboarding", "/reset-password", "/terms", "/privacy", "/support", "/share", "/pay", "/delete-account", "/demo"];
 import { subscribeToPush } from "@/lib/push-client";
 import { useStore } from "@/lib/store";
 
@@ -28,9 +31,8 @@ function CustomTabBanner() {
       const dismissed = localStorage.getItem("constra_ctab_v1") === "1";
 
       if (isMobile && !isStandalone && !dismissed) {
-        setIsAndroid(android);
         // Delay so it doesn't flash during normal page load
-        const t = setTimeout(() => setVisible(true), 1800);
+        const t = setTimeout(() => { setIsAndroid(android); setVisible(true); }, 1800);
         return () => clearTimeout(t);
       }
     } catch {
@@ -60,25 +62,20 @@ function CustomTabBanner() {
             </p>
             <p className="text-[11px] text-white/50 leading-snug mb-3">
               {isAndroid
-                ? "You're in browser mode. Add Constra to your home screen for the real app — no URL bar."
+                ? "Install the Android app for faster clock-ins and notifications."
                 : "Add Constra to your home screen for the best experience."}
             </p>
 
             {isAndroid ? (
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[9px] font-black flex items-center justify-center flex-shrink-0">1</span>
-                  <p className="text-[11px] text-white/70">Open Chrome → visit <span className="font-bold text-amber-400">getconstra.com</span></p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[9px] font-black flex items-center justify-center flex-shrink-0">2</span>
-                  <p className="text-[11px] text-white/70">Tap <span className="font-bold text-white">⋮</span> → <span className="font-bold text-white">Add to Home Screen</span></p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[9px] font-black flex items-center justify-center flex-shrink-0">3</span>
-                  <p className="text-[11px] text-white/70">Tap <span className="font-bold text-white">Add</span> — done!</p>
-                </div>
-              </div>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.getconstra.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={dismiss}
+                className="inline-flex items-center gap-1.5 text-[12px] font-bold text-black bg-amber-500 hover:bg-amber-400 px-3 py-2 rounded-lg transition-colors"
+              >
+                Get it on Google Play
+              </a>
             ) : (
               <p className="text-[11px] text-white/70">
                 Tap <span className="font-bold text-white">Share</span> → <span className="font-bold text-white">Add to Home Screen</span> in Safari
@@ -107,12 +104,17 @@ export default function PwaInstall() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").then((reg) => {
-        if (Notification.permission === "granted" && companyId && currentUser?.id) {
-          subscribeToPush(companyId, currentUser.id).catch(() => {});
-        }
-        void reg;
-      }).catch(() => {});
+      if (process.env.NODE_ENV !== "production") {
+        // Dev chunk URLs aren't content-hashed, so the SW's cache-first rule would serve stale CSS/JS.
+        navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister())).catch(() => {});
+        if ("caches" in window) caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+      } else {
+        navigator.serviceWorker.register("/sw.js").then(() => {
+          if (typeof Notification !== "undefined" && Notification.permission === "granted" && companyId && currentUser?.id) {
+            subscribeToPush(companyId, currentUser.id).catch(() => {});
+          }
+        }).catch(() => {});
+      }
     }
 
     const onBeforeInstall = (e: Event) => {
@@ -130,9 +132,12 @@ export default function PwaInstall() {
     if (outcome === "accepted") setInstallPrompt(null);
   }, [installPrompt]);
 
+  const pathname = usePathname() ?? "/";
+  const inApp = !PUBLIC_PREFIXES.some((p) => (p === "/" ? pathname === "/" : pathname.startsWith(p)));
+  if (!inApp) return null;
+
   return (
     <>
-      {/* Always check for Custom Tab / browser mode */}
       <CustomTabBanner />
 
       {/* Native Chrome install prompt (shown when app not yet installed) */}

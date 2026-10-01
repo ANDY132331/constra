@@ -692,7 +692,7 @@ html[data-theme] footer {
 }
 
 /* Header: crisp top bar in light */
-[data-theme="light"] header {
+[data-theme="light"] header:not(.lp-nav) {
   background: rgba(255,255,255,0.95) !important;
   border-bottom-color: rgba(0,0,0,0.09) !important;
   backdrop-filter: blur(20px);
@@ -759,7 +759,7 @@ html[data-theme] footer {
 }
 
 /* Header: floating feel in dark */
-:root:not([data-theme="light"]) header {
+:root:not([data-theme="light"]) header:not(.lp-nav) {
   background: rgba(13,13,13,0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -1410,7 +1410,7 @@ main.main-scroll {
 }
 
 /* ── Header: glass-like top bar with depth ── */
-:root:not([data-theme="light"]) header {
+:root:not([data-theme="light"]) header:not(.lp-nav) {
   background: rgba(10,10,10,0.88) !important;
   backdrop-filter: blur(24px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(140%) !important;

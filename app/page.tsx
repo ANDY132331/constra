@@ -1,1187 +1,605 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Check, ChevronRight, HardHat } from "lucide-react";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOff } from "lucide-react";
 
-// ── Auth check ────────────────────────────────────────────────────────────────
-function isAlreadyOnboarded(): boolean {
+const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
+const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
+
+function readOnboarded(): boolean {
   try {
     const raw = localStorage.getItem("constra_v1");
-    if (!raw) return false;
-    const data = JSON.parse(raw) as { onboarded?: boolean };
-    return data?.onboarded === true;
+    return raw ? (JSON.parse(raw) as { onboarded?: boolean })?.onboarded === true : false;
   } catch {
     return false;
   }
 }
+const noopSubscribe = () => () => {};
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-const TOOLS = [
-  { title: "GPS Clock-In + Photos",    body: "Workers clock in with a live selfie, GPS-verified to your job site. Off-site check-ins flagged automatically.",     color: "#22c55e" },
-  { title: "Estimates & Invoices",     body: "Build itemised estimates in the field, convert to professional invoices in one tap, export branded PDFs.",           color: "#F5C400" },
-  { title: "Safety Incident Logs",     body: "Log near-misses, injuries, and hazards on the spot with photos. Generate compliance reports instantly.",             color: "#ef4444" },
-  { title: "Project & Task Tracking",  body: "Track every project from start to finish. Assign tasks by trade, set due dates, and monitor progress in real time.", color: "#3b82f6" },
-  { title: "Daily Reports",            body: "Auto-generated daily site reports from clock-in data, weather, and tasks. Share with clients in one tap.",           color: "#8b5cf6" },
-  { title: "Crew Scheduling",          body: "Weather-aware calendar with 7-day forecast. Schedule crew by project and shift. Conflict detection built in.",       color: "#06b6d4" },
-  { title: "Equipment Management",     body: "Track status, assignment, daily rate, and maintenance schedules across all your job sites.",                         color: "#84cc16" },
-  { title: "Material Tracker",         body: "Log deliveries and usage by trade and project. Auto low-stock alerts. Exportable by project or date range.",        color: "#f97316" },
-  { title: "RFIs & Punch Lists",       body: "Create and assign punch items with photos. Track RFIs from submission to close without email chains.",              color: "#a78bfa" },
-  { title: "Budget & Change Orders",   body: "Monitor spend against budget in real time. Issue change orders with one tap and keep clients informed.",             color: "#10b981" },
-  { title: "Blueprints & Documents",   body: "Upload, annotate, and share blueprints directly in the app. Organise all project documents by trade.",             color: "#64748b" },
-  { title: "AI Daily Brief",           body: "AI-generated morning briefing — crew status, overdue tasks, weather risks, and what to tackle first.",             color: "#F5C400" },
-] as const;
-
-const TESTIMONIALS = [
+const DAY = [
   {
-    quote: "Constra replaced three separate apps we were paying for. Clock-ins, invoices, and safety logs all in one place. Our crew picked it up in an afternoon.",
-    name: "James Holloway",
-    company: "Holloway General Contracting",
-    trade: "General Contractor",
+    time: "06:58",
+    title: "Crew clocks in",
+    body: "A selfie and GPS fix are checked against the site's geofence. Punches from the truck stop or the couch get flagged for review.",
+    chip: { icon: "pin", text: "38 m from site · inside 500 m" },
   },
   {
-    quote: "The GPS clock-in stopped the phantom hours overnight. First month we saved over $4,000 in disputed time. I wish we had found this two years ago.",
-    name: "Maria Santos",
-    company: "Santos Electrical",
-    trade: "Electrical Contractor",
+    time: "09:40",
+    title: "Hazard logged",
+    body: "Open trench, no barricade. Photo, severity and location go into the safety log before anyone forgets.",
+    chip: { icon: "alert", text: "Near miss · Medium" },
   },
   {
-    quote: "I send professional invoices from the job site the same day the work is done. Clients pay faster and I stopped chasing cheques. Totally changed how I run my business.",
-    name: "Derek Nguyen",
-    company: "Nguyen Plumbing & HVAC",
-    trade: "Plumbing & HVAC",
+    time: "13:15",
+    title: "Change order raised",
+    body: "The client wants pot lights in the hallway. Price it, send it, and the project budget updates when they approve.",
+    chip: { icon: "plus", text: "CO-07 · +$1,180" },
+  },
+  {
+    time: "16:30",
+    title: "Daily report done",
+    body: "Hours, weather, completed tasks and site photos are already in the report. Review it and share it.",
+    chip: { icon: "check", text: "6 crew · 47.5 h · 12 photos" },
+  },
+  {
+    time: "17:05",
+    title: "Invoice out the door",
+    body: "Turn the estimate into an invoice and email a branded PDF to the client the same day the work was done.",
+    chip: { icon: "check", text: "INV-0142 · $8,420.00 · Sent" },
   },
 ] as const;
 
-const BC = "var(--font-barlow-condensed)";
+const FEATURES: { group: string; items: [string, string][] }[] = [
+  {
+    group: "Crew",
+    items: [
+      ["GPS clock-in", "Selfie + location on every punch, per-site geofence"],
+      ["Scheduling", "Assign crew by project and shift, with the 7-day forecast"],
+      ["Roles", "Separate views for owners, project managers, foremen and crew"],
+      ["Messages", "Project chat with photos and files, no group texts"],
+    ],
+  },
+  {
+    group: "Money",
+    items: [
+      ["Estimates", "Itemised quotes built on site, sent as PDFs"],
+      ["Invoices", "Convert an estimate in one step, track paid and overdue"],
+      ["Change orders", "Priced, approved and tracked against budget"],
+      ["Payroll export", "Timesheets to CSV, QuickBooks (IIF) or Gusto"],
+    ],
+  },
+  {
+    group: "Site",
+    items: [
+      ["Daily reports", "Hours, weather, tasks and photos, compiled for you"],
+      ["Safety log", "Near misses, injuries and hazards with photos"],
+      ["Punch lists & RFIs", "Assigned, photographed, closed out"],
+      ["Equipment & materials", "Service dates, cert expiry, deliveries, low stock"],
+    ],
+  },
+  {
+    group: "Plans & files",
+    items: [
+      ["Blueprints", "Upload drawings and open them on site"],
+      ["Documents", "Contracts, permits and specs, versioned by project"],
+      ["Photos", "Every site photo, sorted by project and day"],
+      ["AI daily brief", "A morning summary of crew, overdue tasks and weather risk"],
+    ],
+  },
+];
 
-// ── YouTube background iframe ─────────────────────────────────────────────────
-function YTBg({ id, opacity = 0.45 }: { id: string; opacity?: number }) {
+const FAQ: [string, string][] = [
+  ["Do my workers each need to sign up?", "They join your company with an invite code from Settings. It takes about a minute and they only see what their role allows."],
+  ["What happens when there's no signal on site?", "Clock-ins and updates are saved on the phone and sync automatically when the connection comes back."],
+  ["Can someone clock in from home?", "Every punch records GPS and a photo. If it's outside the geofence you set for that project, it's flagged so you can review it before payroll."],
+  ["Does it work on iPhone?", "Android has an app on Google Play. On iPhone and computers, Constra runs in the browser and you can add it to your home screen like an app."],
+  ["How do hours get into payroll?", "Export timesheets as CSV, a QuickBooks IIF file or a Gusto-ready CSV, with overtime already split out."],
+  ["What does it cost?", "Constra is free during launch, with every feature included and no credit card required."],
+  ["Can I take my data and leave?", "Yes. Invoices, reports and timesheets export to PDF or CSV, and you can delete your account from Settings at any time."],
+];
+
+function Chip({ icon, text }: { icon: string; text: string }) {
+  const Icon = icon === "pin" ? MapPin : icon === "alert" ? AlertTriangle : icon === "plus" ? Plus : Check;
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", opacity }}>
-      <iframe
-        loading="lazy"
-        src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=0&playsinline=1&fs=0&disablekb=1`}
-        allow="autoplay; encrypted-media"
-        style={{
-          position: "absolute", top: "50%", left: "50%",
-          width: "177.78vh", height: "56.25vw",
-          minWidth: "100%", minHeight: "100%",
-          transform: "translate(-50%,-50%)",
-          border: "none",
-        }}
-      />
+    <span className="lp-chip">
+      <Icon size={12} strokeWidth={2.5} aria-hidden />
+      {text}
+    </span>
+  );
+}
+
+function PhoneMock() {
+  return (
+    <div className="lp-phone" aria-label="Example of the Constra clock-in screen" role="img">
+      <div className="lp-phone-bar">
+        <span>7:02</span>
+        <span className="lp-phone-notch" />
+        <span>5G</span>
+      </div>
+      <div className="lp-phone-body">
+        <p className="lp-mono lp-dim">Tue, Sep 29 · Dundas St. Reno</p>
+        <p className="lp-phone-hello">Morning, Marco</p>
+
+        <div className="lp-clock">
+          <div className="lp-clock-top">
+            <span className="lp-live"><span className="lp-dot" />On site</span>
+            <span className="lp-mono">06:58 in</span>
+          </div>
+          <p className="lp-clock-time">4:12<span>:08</span></p>
+          <div className="lp-clock-rows">
+            <div><MapPin size={13} aria-hidden /><span>38 m from site</span><b>Verified</b></div>
+            <div><Camera size={13} aria-hidden /><span>Photo on punch</span><b>Verified</b></div>
+          </div>
+          <div className="lp-clock-btn">Clock out</div>
+        </div>
+
+        <p className="lp-mono lp-dim lp-phone-label">Today&apos;s crew · 6 on site</p>
+        <div className="lp-crew">
+          {[
+            ["MR", "Marco R.", "Framing", "#1F6F8B"],
+            ["AK", "Aisha K.", "Electrical", "#8B5A1F"],
+            ["DL", "Dev L.", "Labour", "#3D6B2E"],
+          ].map(([i, n, t, c]) => (
+            <div key={n} className="lp-crew-row">
+              <span className="lp-avatar" style={{ background: c }}>{i}</span>
+              <span>{n}</span>
+              <span className="lp-dim">{t}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-// ── 3D tilt card hook ─────────────────────────────────────────────────────────
-function useTilt(strength = 12) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      el.style.transform = `perspective(600px) rotateY(${x * strength}deg) rotateX(${-y * strength}deg) scale3d(1.02,1.02,1.02)`;
-    };
-    const onLeave = () => { el.style.transform = "perspective(600px) rotateY(0deg) rotateX(0deg) scale3d(1,1,1)"; };
-    el.addEventListener("mousemove", onMove);
-    el.addEventListener("mouseleave", onLeave);
-    return () => { el.removeEventListener("mousemove", onMove); el.removeEventListener("mouseleave", onLeave); };
-  }, [strength]);
-  return ref;
-}
-
-// ── Hero parallax ─────────────────────────────────────────────────────────────
-// containerRef: the actual scroll container (page-root div). Falls back to
-// window when not provided, but on this landing page the container is a fixed
-// overflow-y:auto div — window.scrollY is always 0 there.
-function useParallax(containerRef?: React.RefObject<HTMLDivElement | null>) {
-  const ref = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const scroll = () => {
-      if (!ref.current) return;
-      const y = containerRef?.current ? containerRef.current.scrollTop : window.scrollY;
-      const bg = ref.current.querySelector<HTMLElement>(".par-bg");
-      const mid = ref.current.querySelector<HTMLElement>(".par-mid");
-      if (bg) bg.style.transform = `translateY(${y * 0.45}px)`;
-      if (mid) mid.style.transform = `translateY(${y * 0.18}px)`;
-    };
-    const target: EventTarget = containerRef?.current ?? window;
-    target.addEventListener("scroll", scroll, { passive: true });
-    return () => target.removeEventListener("scroll", scroll);
-  }, [containerRef]);
-  return ref;
-}
-
-// ── Tilt card component ───────────────────────────────────────────────────────
-function TiltCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  const ref = useTilt(10);
+function InvoiceSlip() {
   return (
-    <div ref={ref} style={{ transition: "transform 0.12s ease-out", willChange: "transform", ...style }}>
-      {children}
+    <div className="lp-slip" aria-hidden>
+      <div className="lp-slip-head">
+        <span className="lp-mono">INV-0142</span>
+        <span className="lp-paid">Sent</span>
+      </div>
+      <p className="lp-slip-total">$8,420.00</p>
+      <div className="lp-slip-lines">
+        <div><span>Drywall, 2nd floor</span><span>$5,600.00</span></div>
+        <div><span>CO-07 Pot lights</span><span>$1,180.00</span></div>
+        <div><span>HST 13%</span><span>$968.66</span></div>
+      </div>
     </div>
   );
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const [alreadyIn, setAlreadyIn] = useState(false);
-  const [stickyVisible, setStickyVisible] = useState(false);
-  const pageRootRef = useRef<HTMLDivElement>(null);
-  const heroRef = useParallax(pageRootRef);
-  const heroMouseRef = useRef<HTMLElement>(null);
-  const cursorDotRef = useRef<HTMLDivElement>(null);
-  const cursorRingRef = useRef<HTMLDivElement>(null);
+  const alreadyIn = useSyncExternalStore(noopSubscribe, readOnboarded, () => false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  // Detect returning user — show "Go to Dashboard" in nav, but never auto-redirect
-  // so the landing page is always visible to everyone who opens the URL.
   useEffect(() => {
-    setAlreadyIn(isAlreadyOnboarded());
-  }, []);
-
-  // Show sticky bar only after user scrolls past hero (~400px)
-  useEffect(() => {
-    const root = pageRootRef.current;
+    const root = rootRef.current;
     if (!root) return;
-    const onScroll = () => setStickyVisible(root.scrollTop > 400);
-    root.addEventListener("scroll", onScroll, { passive: true });
-    return () => root.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Fix hash navigation — the page scrolls inside the fixed page-root div,
-  // not window, so browser-native href="#id" never reaches the target.
-  // Intercept those clicks and scroll the container manually.
-  useEffect(() => {
-    const root = pageRootRef.current;
-    if (!root) return;
-    const handleHashClick = (e: MouseEvent) => {
-      const anchor = (e.target as HTMLElement).closest('a[href^="#"]') as HTMLAnchorElement | null;
-      if (!anchor) return;
-      const id = anchor.getAttribute("href")?.slice(1);
-      if (!id) return;
-      const target = document.getElementById(id);
+    // The page scrolls inside this fixed container, so in-page anchors need manual scrolling.
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement).closest('a[href^="#"]') as HTMLAnchorElement | null;
+      const id = a?.getAttribute("href")?.slice(1);
+      const target = id ? document.getElementById(id) : null;
       if (!target) return;
       e.preventDefault();
-      const top = target.getBoundingClientRect().top + root.scrollTop - 60;
-      root.scrollTo({ top, behavior: "smooth" });
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      root.scrollTo({ top: target.getBoundingClientRect().top + root.scrollTop - 64, behavior: reduce ? "auto" : "smooth" });
     };
-    root.addEventListener("click", handleHashClick);
-    return () => root.removeEventListener("click", handleHashClick);
+    root.addEventListener("click", onClick);
+    return () => root.removeEventListener("click", onClick);
   }, []);
 
-  // Mouse parallax on hero
-  useEffect(() => {
-    const el = heroMouseRef.current;
-    if (!el) return;
-    const onMove = (e: MouseEvent) => {
-      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-      const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
-      const l1 = el.querySelector<HTMLElement>(".hero-d1");
-      const l2 = el.querySelector<HTMLElement>(".hero-d2");
-      const l3 = el.querySelector<HTMLElement>(".hero-d3");
-      if (l1) l1.style.transform = `translate(${dx * -18}px, ${dy * -12}px)`;
-      if (l2) l2.style.transform = `translate(${dx * 22}px, ${dy * 14}px)`;
-      if (l3) l3.style.transform = `translate(${dx * -8}px, ${dy * 8}px)`;
-    };
-    el.addEventListener("mousemove", onMove);
-    return () => el.removeEventListener("mousemove", onMove);
-  }, []);
-
-  // 3D cursor
-  useEffect(() => {
-    const dot = cursorDotRef.current;
-    const ring = cursorRingRef.current;
-    if (!dot || !ring) return;
-    let tx = -100, ty = -100, rx = -100, ry = -100, rafId = 0;
-    const onMove = (e: MouseEvent) => { tx = e.clientX; ty = e.clientY; };
-    const onEnter = () => ring.classList.add("ring-hover");
-    const onLeave = () => ring.classList.remove("ring-hover");
-    const animate = () => {
-      rx += (tx - rx) * 0.1; ry += (ty - ry) * 0.1;
-      dot.style.transform = `translate(${tx}px, ${ty}px)`;
-      ring.style.transform = `translate(${rx}px, ${ry}px)`;
-      rafId = requestAnimationFrame(animate);
-    };
-    window.addEventListener("mousemove", onMove);
-    document.querySelectorAll("a, button").forEach(el => {
-      el.addEventListener("mouseenter", onEnter);
-      el.addEventListener("mouseleave", onLeave);
-    });
-    rafId = requestAnimationFrame(animate);
-    return () => { window.removeEventListener("mousemove", onMove); cancelAnimationFrame(rafId); };
-  }, []);
-
-  // Scroll reveal + counters
-  useEffect(() => {
-    let cancelled = false;
-    document.body.classList.add("reveal-active");
-    const revObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("revealed"); revObs.unobserve(e.target); } });
-    }, { threshold: 0.06, rootMargin: "0px 0px -30px 0px" });
-    document.querySelectorAll(".reveal").forEach(el => revObs.observe(el));
-
-    const cntObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (!e.isIntersecting) return;
-        const el = e.target as HTMLElement;
-        const target = parseInt(el.dataset.target || "0");
-        const suffix = el.dataset.suffix || "", prefix = el.dataset.prefix || "";
-        const dur = 1600, start = Date.now();
-        const tick = () => {
-          const p = Math.min((Date.now() - start) / dur, 1), eased = 1 - Math.pow(1 - p, 3);
-          el.textContent = prefix + Math.floor(eased * target).toLocaleString() + suffix;
-          if (p < 1 && !cancelled) requestAnimationFrame(tick);
-        };
-        tick(); cntObs.unobserve(el);
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll(".counter").forEach(el => cntObs.observe(el));
-
-    const mq = document.getElementById("mq");
-    if (mq) {
-      let pos = 0;
-      const run = () => { if (cancelled) return; pos -= 0.45; if (pos <= -mq.scrollWidth / 2) pos = 0; mq.style.transform = `translateX(${pos}px)`; requestAnimationFrame(run); };
-      run();
-    }
-
-    return () => { cancelled = true; document.body.classList.remove("reveal-active"); };
-  }, []);
+  const startHref = alreadyIn ? "/dashboard" : "/onboarding";
+  const startLabel = alreadyIn ? "Open dashboard" : "Start free";
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;800;900&display=swap');
-
-        :root { --bc: 'Barlow Condensed', sans-serif; }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        /* Reveal */
-        .reveal-active .reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s cubic-bezier(.2,.8,.3,1), transform .7s cubic-bezier(.2,.8,.3,1); }
-        .reveal-active .reveal.revealed { opacity: 1; transform: translateY(0); }
-        .reveal-active .reveal.stagger-1 { transition-delay: 80ms; }
-        .reveal-active .reveal.stagger-2 { transition-delay: 160ms; }
-        .reveal-active .reveal.stagger-3 { transition-delay: 240ms; }
-        .reveal-active .reveal.stagger-4 { transition-delay: 320ms; }
-
-        /* Floating animation */
-        @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-14px)} }
-        @keyframes float2 { 0%,100%{transform:translateY(0px) rotate(2deg)} 50%{transform:translateY(-10px) rotate(-2deg)} }
-        @keyframes pulse { 0%,100%{opacity:.7} 50%{opacity:1} }
-        @keyframes spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes glowpulse { 0%,100%{box-shadow:0 0 30px rgba(245,196,0,.15)} 50%{box-shadow:0 0 60px rgba(245,196,0,.35)} }
-
-        /* Grid floor */
-        .grid-floor {
-          background-image: linear-gradient(rgba(245,196,0,.06) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(245,196,0,.06) 1px, transparent 1px);
-          background-size: 60px 60px;
-          mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.8) 30%, rgba(0,0,0,.8) 70%, transparent 100%);
-        }
-
-        /* 3D perspective grid */
-        .perspective-grid {
-          perspective: 800px;
-          perspective-origin: 50% 0%;
-        }
-        .perspective-grid-inner {
-          transform: rotateX(65deg);
-          background-image: linear-gradient(rgba(245,196,0,.08) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(245,196,0,.08) 1px, transparent 1px);
-          background-size: 80px 80px;
-          width: 200%;
-          left: -50%;
-          position: absolute;
-          bottom: 0;
-          height: 400px;
-          mask-image: linear-gradient(to top, rgba(0,0,0,.5) 0%, transparent 80%);
-        }
-
-        /* Glass cards */
-        .glass {
-          background: rgba(255,255,255,.04);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255,255,255,.1);
-        }
-        .glass-gold {
-          background: rgba(245,196,0,.06);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(245,196,0,.2);
-        }
-
-        /* Neon glow */
-        .glow-gold { box-shadow: 0 0 40px rgba(245,196,0,.2), 0 0 80px rgba(245,196,0,.08); }
-        .glow-green { box-shadow: 0 0 40px rgba(34,197,94,.2), 0 0 80px rgba(34,197,94,.08); }
-        .text-glow { text-shadow: 0 0 40px rgba(245,196,0,.5); }
-
-        /* Tool card hover */
-        .tool-card {
-          transition: transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .25s ease, background .2s;
-        }
-        .tool-card:hover {
-          transform: perspective(600px) rotateX(-4deg) translateY(-4px) scale(1.01);
-          background: #141414 !important;
-        }
-
-        /* Testimonial card */
-        .test-card {
-          transition: transform .3s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease;
-        }
-        .test-card:hover {
-          transform: perspective(800px) rotateY(-4deg) translateY(-6px);
-          box-shadow: 20px 20px 60px rgba(0,0,0,.6), -2px 0 0 rgba(245,196,0,.4);
-        }
-
-        /* Stat tile */
-        .stat-tile {
-          transition: transform .25s ease, box-shadow .25s ease;
-        }
-        .stat-tile:hover {
-          transform: translateY(-4px) scale(1.02);
-          box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(245,196,0,.2), 0 0 40px rgba(245,196,0,.1);
-        }
-
-        /* CTA button */
-        .btn-3d {
-          position: relative;
-          transition: transform .15s ease, box-shadow .15s ease;
-          transform: perspective(200px) rotateX(0deg);
-        }
-        .btn-3d:hover {
-          transform: perspective(200px) rotateX(4deg) translateY(-2px);
-          box-shadow: 0 16px 40px rgba(245,196,0,.4), 0 4px 0 rgba(180,140,0,1);
-        }
-        .btn-3d:active {
-          transform: perspective(200px) rotateX(4deg) translateY(2px);
-          box-shadow: 0 4px 20px rgba(245,196,0,.2), 0 1px 0 rgba(180,140,0,1);
-        }
-
-        /* Ghost button */
-        .btn-ghost {
-          transition: transform .15s ease, box-shadow .15s ease, background .15s, color .15s;
-        }
-        .btn-ghost:hover {
-          background: rgba(255,255,255,.06) !important;
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,0,0,.3);
-        }
-
-        /* Nav */
-        .nav-link { transition: color .15s; }
-        .nav-link:hover { color: rgba(255,255,255,.85) !important; }
-        .show-mobile-only { display: none !important; }
-
-        /* Depth divider line */
-        .depth-line {
-          height: 1px;
-          background: linear-gradient(to right, transparent, rgba(245,196,0,.3) 30%, rgba(245,196,0,.6) 50%, rgba(245,196,0,.3) 70%, transparent);
-        }
-
-        /* Radial glow blob */
-        .glow-blob {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
-          pointer-events: none;
-        }
-
-        /* Photo section 3D text */
-        .cinematic-text {
-          font-family: var(--bc), 'Barlow Condensed', sans-serif;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: -0.02em;
-          line-height: 0.87;
-        }
-
-        /* Section eyebrow */
-        .eyebrow {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: .2em;
-          text-transform: uppercase;
-        }
-
-        /* Pill badge */
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          border: 1px solid rgba(245,196,0,.3);
-          padding: 6px 14px;
-          background: rgba(245,196,0,.06);
-          border-radius: 2px;
-        }
-
-        /* Horizontal scroll marquee */
-        #mq-wrap { overflow: hidden; position: relative; }
-        #mq-wrap::before, #mq-wrap::after {
-          content: '';
-          position: absolute;
-          top: 0; bottom: 0;
-          width: 120px;
-          z-index: 2;
-          pointer-events: none;
-        }
-        #mq-wrap::before { left: 0; background: linear-gradient(to right, #050505, transparent); }
-        #mq-wrap::after { right: 0; background: linear-gradient(to left, #050505, transparent); }
-
-        /* Mobile overrides */
-        @media (max-width: 768px) {
-          .hide-mobile { display: none !important; }
-          .hero-d1, .hero-d2, .hero-d3 { transition: none !important; }
-          .tool-card:hover { transform: none; }
-          .test-card:hover { transform: translateY(-4px); }
-          .stat-tile:hover { transform: translateY(-2px); }
-          .nav-inner { padding: 0 16px !important; }
-          .nav-links { gap: 12px !important; }
-          .nav-cta { padding: 7px 13px !important; font-size: 11px !important; }
-          .hero-h1 { font-size: clamp(36px, 9.5vw, 152px) !important; }
-          .stats-strip { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 24px 0 !important; }
-          .stat-item { padding-right: 0 !important; margin-right: 0 !important; border-right: none !important; margin-bottom: 0 !important; }
-          .pricing-free-card { padding: 28px 20px !important; }
-          .pricing-free-badge { left: 20px !important; }
-          .photo-row { flex-direction: column !important; }
-          .photo-row > * { flex: 0 0 auto !important; aspect-ratio: 16/9 !important; }
-          .results-stats { gap: 8px !important; }
-          .results-stats > * { flex: 1 1 100% !important; }
-
-          /* Section vertical padding */
-          .section-pad { padding-top: 64px !important; padding-bottom: 64px !important; }
-
-          /* Hero content */
-          .hero-par { padding: 20px 20px 80px !important; }
-          .badge .eyebrow { font-size: 9px !important; letter-spacing: .08em !important; }
-          .hero-cta-row { flex-direction: column !important; gap: 10px !important; }
-          .hero-cta-primary { width: 100% !important; justify-content: center !important; }
-          .hero-cta-ghost { display: none !important; }
-
-          /* Announcement strip */
-          .announce-sep { display: none !important; }
-
-          /* Sticky CTA bar */
-          .mobile-sticky-cta { display: flex !important; }
-          .page-root { padding-bottom: 65px; }
-
-          /* Mobile-only elements (sign-in in nav etc.) */
-          .show-mobile-only { display: inline-flex !important; }
-
-          /* Video reel — stack vertically on mobile */
-          .video-reel { flex-direction: column !important; }
-          .video-reel > * { flex: 0 0 auto !important; width: 100% !important; }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
-
-        .page-root { cursor: none; }
-        .cursor-dot {
-          position: fixed; top: -4px; left: -4px; width: 8px; height: 8px;
-          border-radius: 50%; pointer-events: none; z-index: 99999; will-change: transform;
-          background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.9) 0%, #F5C400 55%, #b8900a 100%);
-          box-shadow: 0 0 8px rgba(245,196,0,.9), 0 0 20px rgba(245,196,0,.4), 0 0 40px rgba(245,196,0,.15);
-        }
-        .cursor-ring {
-          position: fixed; top: -20px; left: -20px; width: 40px; height: 40px;
-          border-radius: 50%; border: 1.5px solid rgba(245,196,0,.5); pointer-events: none;
-          z-index: 99998; will-change: transform; mix-blend-mode: plus-lighter;
-          transition: width .25s ease, height .25s ease, top .25s ease, left .25s ease, border-color .25s ease;
-        }
-        .cursor-ring.ring-hover {
-          top: -28px; left: -28px; width: 56px; height: 56px; border-color: rgba(245,196,0,.9);
-          background: rgba(245,196,0,.04);
-        }
-        @media (hover: none) { .cursor-dot, .cursor-ring { display: none !important; } body { cursor: auto; } }
-
-        /* Video / image background layer */
-        .vid-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-
-        /* Ken Burns slow zoom for cinematic feel on fallback images */
-        @keyframes kb1 { 0%{transform:scale(1) translate(0%,0%)} 100%{transform:scale(1.12) translate(-2%,-1%)} }
-        @keyframes kb2 { 0%{transform:scale(1.1) translate(2%,1%)} 100%{transform:scale(1) translate(-1%,0%)} }
-        @keyframes kb3 { 0%{transform:scale(1) translate(-1%,1%)} 100%{transform:scale(1.08) translate(2%,-1%)} }
-        .kb1 { animation: kb1 18s ease-in-out infinite alternate; }
-        .kb2 { animation: kb2 22s ease-in-out infinite alternate; }
-        .kb3 { animation: kb3 16s ease-in-out infinite alternate; }
-      `}</style>
-
-      {/* 3D cursor elements */}
-      <div ref={cursorDotRef} className="cursor-dot" aria-hidden />
-      <div ref={cursorRingRef} className="cursor-ring" aria-hidden />
-
-      <div ref={pageRootRef} className="page-root" style={{ position: "fixed", inset: 0, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch", background: "#050505", color: "#fff" } as React.CSSProperties}>
-
-        {/* ── NAV ───────────────────────────────────────────────────────────── */}
-        <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, background: "rgba(5,5,5,.88)", borderBottom: "1px solid rgba(255,255,255,.05)", backdropFilter: "blur(24px)" }}>
-          <div className="nav-inner" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 28px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            {/* Logo */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 34, height: 34, background: "#F5C400", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 20px rgba(245,196,0,.3)" }}>
-                <HardHat size={16} color="#000" />
-              </div>
-              <span style={{ fontFamily: BC, fontWeight: 900, fontSize: 22, letterSpacing: "0.04em", textTransform: "uppercase" }}>Constra</span>
-            </div>
-            {/* Nav links */}
-            <div className="nav-links" style={{ display: "flex", alignItems: "center", gap: 32 }}>
-              <a href="#tools" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Tools</a>
-              <a href="#testimonials" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.35)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Reviews</a>
-              {!alreadyIn && (
-                <Link href="/login" className="nav-link hide-mobile" style={{ fontSize: 11, color: "rgba(255,255,255,.3)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase" }}>Sign In</Link>
-              )}
-              {!alreadyIn && (
-                <Link href="/login" className="show-mobile-only" style={{ fontSize: 11, color: "rgba(255,255,255,.4)", textDecoration: "none", fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", alignItems: "center", gap: 3, border: "1px solid rgba(255,255,255,.1)", padding: "7px 11px" }}>Sign In</Link>
-              )}
-              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d nav-cta" style={{ background: "#F5C400", color: "#000", fontWeight: 900, fontFamily: BC, fontSize: 12, padding: "10px 22px", textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", boxShadow: "0 0 20px rgba(245,196,0,.25)" }}>
-                {alreadyIn ? "Dashboard →" : "Get Started →"}
-              </Link>
-            </div>
-          </div>
-        </nav>
-
-        {/* ── HERO ─────────────────────────────────────────────────────────── */}
-        <section
-          ref={(el) => {
-            (heroRef as React.MutableRefObject<HTMLElement | null>).current = el;
-            (heroMouseRef as React.MutableRefObject<HTMLElement | null>).current = el;
-          }}
-          style={{ position: "relative", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", background: "#050505", overflow: "hidden", paddingTop: 60 }}
-        >
-          {/* YouTube video background — Torre Reforma cinematic 4K timelapse */}
-          <YTBg id="LAmkFK5BsAo" opacity={0.32} />
-          {/* Fallback image shown before iframe loads */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="kb1" aria-hidden src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "115%", objectFit: "cover", opacity: 0.32, willChange: "transform", zIndex: -1 }} />
-
-          {/* Perspective grid floor */}
-          <div className="perspective-grid" style={{ position: "absolute", inset: 0 }}>
-            <div className="perspective-grid-inner" />
-          </div>
-
-          {/* Glow blobs */}
-          <div className="glow-blob" style={{ width: 600, height: 600, background: "rgba(245,196,0,.08)", top: "10%", left: "-10%" }} />
-          <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(59,130,246,.05)", top: "20%", right: "-8%" }} />
-
-          {/* Gradient overlays */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(5,5,5,.97) 0%, rgba(5,5,5,.80) 55%, rgba(5,5,5,.40) 100%)" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200, background: "linear-gradient(to top, #050505, transparent)" }} />
-
-          {/* Yellow left accent */}
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #F5C400 20%, #F5C400 80%, transparent)", boxShadow: "0 0 24px rgba(245,196,0,.4)" }} />
-
-          {/* ── 3D floating depth cards (desktop) ─ */}
-          {/* Floating UI mockup card 1 */}
-          <div className="hero-d1 hide-mobile" style={{ position: "absolute", right: "6%", top: "18%", animation: "float 6s ease-in-out infinite", willChange: "transform", zIndex: 3 }}>
-            <TiltCard style={{ width: 200, padding: "16px 18px", borderRadius: 12, background: "rgba(20,20,20,.9)", border: "1px solid rgba(255,255,255,.1)", boxShadow: "0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.05)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px rgba(34,197,94,.6)" }} />
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#22c55e", letterSpacing: ".08em", textTransform: "uppercase" }}>GPS Verified</span>
-              </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,.5)", marginBottom: 8 }}>3 workers clocked in</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                {["Mike T.", "Sarah L.", "Dev K."].map((n, i) => (
-                  <div key={n} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: `hsl(${i * 80 + 200}, 60%, 40%)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#fff" }}>{n[0]}</div>
-                    <span style={{ fontSize: 10, color: "rgba(255,255,255,.6)" }}>{n}</span>
-                    <span style={{ marginLeft: "auto", fontSize: 9, color: "#22c55e", fontWeight: 700 }}>✓ On site</span>
-                  </div>
-                ))}
-              </div>
-            </TiltCard>
-          </div>
-
-          {/* Floating card 2 — invoice */}
-          <div className="hero-d2 hide-mobile" style={{ position: "absolute", right: "18%", bottom: "22%", animation: "float2 7s ease-in-out infinite", willChange: "transform", zIndex: 3 }}>
-            <TiltCard style={{ width: 180, padding: "14px 16px", borderRadius: 10, background: "rgba(20,20,20,.85)", border: "1px solid rgba(245,196,0,.15)", boxShadow: "0 20px 60px rgba(0,0,0,.6), 0 0 20px rgba(245,196,0,.08)" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "#F5C400", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 8 }}>Invoice #2041</div>
-              <div style={{ fontSize: 22, fontFamily: BC, fontWeight: 900, color: "#fff", lineHeight: 1, marginBottom: 4 }}>$4,800</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,.35)", marginBottom: 10 }}>Renovation · Sent today</div>
-              <div style={{ height: 1, background: "rgba(255,255,255,.06)", marginBottom: 10 }} />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,.35)" }}>Status</span>
-                <span style={{ fontSize: 9, fontWeight: 700, color: "#22c55e", background: "rgba(34,197,94,.1)", padding: "2px 6px", borderRadius: 2 }}>PAID</span>
-              </div>
-            </TiltCard>
-          </div>
-
-          {/* Floating card 3 — AI brief */}
-          <div className="hero-d3 hide-mobile" style={{ position: "absolute", right: "3%", bottom: "28%", animation: "float 8s ease-in-out infinite 2s", willChange: "transform", zIndex: 3 }}>
-            <TiltCard style={{ width: 160, padding: "12px 14px", borderRadius: 8, background: "rgba(15,15,15,.9)", border: "1px solid rgba(139,92,246,.2)", boxShadow: "0 16px 40px rgba(0,0,0,.5), 0 0 20px rgba(139,92,246,.08)" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "#8b5cf6", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 6 }}>AI Daily Brief</div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,.55)", lineHeight: 1.5 }}>2 tasks overdue · Rain at 3pm · Crew attendance 94%</div>
-            </TiltCard>
-          </div>
-
-          {/* Hero content - parallax mid */}
-          <div className="par-mid hero-par" style={{ position: "relative", zIndex: 4, maxWidth: 1320, margin: "0 auto", padding: "60px 28px 80px", width: "100%", willChange: "transform" }}>
-
-            {/* Badge */}
-            <div className="badge" style={{ marginBottom: 32, display: "inline-flex" }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F5C400", flexShrink: 0, animation: "pulse 2s ease-in-out infinite" }} />
-              <span className="eyebrow" style={{ color: "#F5C400" }}>100% Free · No Credit Card Required</span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="cinematic-text hero-h1" style={{ fontSize: "clamp(68px, 11vw, 152px)", marginBottom: 28, color: "#fff", maxWidth: 780 }}>
-              CONSTRA<br />
-              <span style={{ color: "#F5C400", textShadow: "0 0 60px rgba(245,196,0,.35)" }}>BUILT FOR</span><br />
-              THE JOB SITE.
-            </h1>
-
-            {/* Depth line */}
-            <div className="depth-line" style={{ width: 280, marginBottom: 28 }} />
-
-            {/* Subhead */}
-            <p style={{ fontSize: "clamp(14px,1.3vw,17px)", lineHeight: 1.8, color: "rgba(255,255,255,.55)", maxWidth: 480, marginBottom: 44 }}>
-              GPS clock-ins with live photos. Professional invoicing. Crew scheduling. Safety logs. Every tool your job site needs — one app, completely free.
-            </p>
-
-            {/* CTAs */}
-            <div className="hero-cta-row" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 64 }}>
-              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d hero-cta-primary" style={{ fontFamily: BC, fontWeight: 900, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", background: "#F5C400", color: "#000", display: "inline-flex", alignItems: "center", gap: 10 }}>
-                {alreadyIn ? "GO TO DASHBOARD →" : "GET STARTED FREE →"}
-              </Link>
-              <a href="#tools" className="btn-ghost hero-cta-ghost" style={{ fontFamily: BC, fontWeight: 800, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "17px 38px", textDecoration: "none", border: "1px solid rgba(255,255,255,.16)", color: "rgba(255,255,255,.6)", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                SEE OUR TOOLS ↓
-              </a>
-            </div>
-
-            {/* Stats strip */}
-            <div className="stats-strip" style={{ display: "flex", gap: 0, flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,.07)", paddingTop: 32 }}>
-              {[
-                { n: "12+", label: "Tools Built In" },
-                { n: "15", label: "Languages" },
-                { n: "$0", label: "To Get Started" },
-                { n: "100%", label: "Offline Capable" },
-              ].map((s, i) => (
-                <div key={i} className="stat-item" style={{ paddingRight: 40, marginRight: 40, borderRight: i < 3 ? "1px solid rgba(255,255,255,.07)" : "none", marginBottom: 16 }}>
-                  <div style={{ fontFamily: BC, fontWeight: 900, fontSize: "clamp(32px,4vw,52px)", color: "#F5C400", lineHeight: 1, letterSpacing: "-0.02em", textShadow: "0 0 30px rgba(245,196,0,.3)" }}>{s.n}</div>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,.35)", letterSpacing: ".1em", textTransform: "uppercase", marginTop: 4 }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Scroll indicator */}
-          <div style={{ position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)", zIndex: 5, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: 0.4 }}>
-            <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, #F5C400, transparent)", animation: "pulse 2s ease-in-out infinite" }} />
-            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: "#F5C400" }}>Scroll</span>
-          </div>
-        </section>
-
-        {/* ── ANNOUNCEMENT STRIP ─────────────────────────────────────────── */}
-        <div style={{ background: "#F5C400", padding: "13px 28px", display: "flex", alignItems: "center", justifyContent: "center", gap: 20, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#000" }}>
-            Now available on Android & iOS — Download free
-          </span>
-          <div className="announce-sep" style={{ width: 1, height: 16, background: "rgba(0,0,0,.2)" }} />
-          <a href="https://play.google.com/store/apps/details?id=com.getconstra.app" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 900, letterSpacing: ".12em", textTransform: "uppercase", color: "#000", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
-            GOOGLE PLAY <ChevronRight size={12} />
-          </a>
-          <a href="/onboarding" style={{ fontSize: 11, fontWeight: 900, letterSpacing: ".12em", textTransform: "uppercase", color: "#000", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
-            IPHONE + WEB <ChevronRight size={12} />
-          </a>
-        </div>
-
-        {/* ── MARQUEE ──────────────────────────────────────────────────────── */}
-        <div id="mq-wrap" style={{ background: "#080808", borderBottom: "1px solid rgba(255,255,255,.04)", padding: "16px 0" }}>
-          <div id="mq" style={{ display: "flex", width: "max-content" }}>
-            {[...Array(2)].map((_, pass) => (
-              <div key={pass} style={{ display: "flex", alignItems: "center" }}>
-                {["GPS Clock-In", "Invoices", "Safety Logs", "Daily Reports", "Crew Scheduling", "Blueprints", "Equipment Tracking", "RFIs", "Budget Management", "AI Daily Brief", "Offline-First", "15 Languages", "Change Orders", "Material Tracker", "Punch Lists"].map((item) => (
-                  <span key={item} style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 32px", fontSize: 10, color: "rgba(255,255,255,.2)", whiteSpace: "nowrap", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase" }}>
-                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#F5C400", flexShrink: 0, boxShadow: "0 0 4px rgba(245,196,0,.6)" }} />
-                    {item}
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── ABOUT SECTION ─────────────────────────────────────────────────── */}
-        <section className="reveal section-pad" style={{ background: "#080808", padding: "110px 28px", position: "relative", overflow: "hidden" }}>
-          <YTBg id="njw5ZgisSBI" opacity={0.28} />
-          {/* Glow blob */}
-          <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.06)", top: "10%", right: "0%" }} />
-
-          <div style={{ maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 80, alignItems: "center", position: "relative", zIndex: 1 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 36 }}>
-                <div style={{ width: 4, background: "#F5C400", alignSelf: "stretch", flexShrink: 0, boxShadow: "0 0 12px rgba(245,196,0,.4)" }} />
-                <div>
-                  <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 10 }}>ABOUT CONSTRA</p>
-                  <h2 className="cinematic-text" style={{ fontSize: "clamp(34px,4vw,62px)", color: "#fff" }}>
-                    CONSTRUCTION<br />MANAGEMENT<br />FOR EVERYONE.
-                  </h2>
-                </div>
-              </div>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: "rgba(255,255,255,.45)", marginBottom: 20 }}>
-                Constra is a full-featured construction management platform built for contractors, foremen, and crews of every size. We give you the same tools that enterprise platforms charge thousands for — completely free.
-              </p>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: "rgba(255,255,255,.45)", marginBottom: 36 }}>
-                From first GPS clock-in to final invoice, Constra keeps your job site organised, your crew accountable, and your clients happy — whether you&apos;re running 3 workers or 300.
-              </p>
-              <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#F5C400", fontWeight: 800, fontSize: 12, textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", borderBottom: "1px solid rgba(245,196,0,.35)", paddingBottom: 4, transition: "gap .2s" }}>
-                LEARN MORE <ChevronRight size={13} />
-              </Link>
-            </div>
-
-            {/* Right column: 3D image + stat tiles */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {/* 3D floating construction photo */}
-            <TiltCard style={{ borderRadius: 1, overflow: "hidden", boxShadow: "0 40px 80px rgba(0,0,0,.85), 0 0 0 1px rgba(245,196,0,.1)", position: "relative", aspectRatio: "16/9", width: "100%" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80" alt="Construction site drone view" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "contrast(1.1) saturate(0.85)" }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 55%)" }} />
-              <div style={{ position: "absolute", top: 12, left: 14, fontSize: 9, fontWeight: 700, color: "#F5C400", letterSpacing: ".1em", textTransform: "uppercase", textShadow: "0 0 8px rgba(245,196,0,.4)" }}>CONSTRA · LIVE JOB SITE</div>
-              <div style={{ position: "absolute", bottom: 14, left: 14, fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.7)", letterSpacing: ".04em", textTransform: "uppercase" }}>STEEL FRAME · PHASE 1</div>
-            </TiltCard>
-            {/* Stat tiles — 3D hover */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
-              {[
-                { target: 12, suffix: "+", label: "Tools in one app", sub: "Time, invoicing, safety & more" },
-                { target: 15, suffix: "", label: "Languages", sub: "Your crew speaks them all" },
-                { target: 0, prefix: "$", suffix: "", label: "To start", sub: "No credit card needed" },
-                { target: 100, suffix: "%", label: "Offline capable", sub: "Works on any job site" },
-              ].map((s, i) => (
-                <div key={i} className="stat-tile" style={{ padding: "32px 24px", background: "#0f0f0f", border: "1px solid rgba(255,255,255,.05)", borderTop: "3px solid #F5C400", cursor: "default" }}>
-                  <div style={{ fontFamily: BC, fontWeight: 900, fontSize: 50, lineHeight: 1, color: "#F5C400", marginBottom: 8, textShadow: "0 0 20px rgba(245,196,0,.3)" }}>
-                    <span className="counter" data-target={s.target} data-suffix={s.suffix} data-prefix={s.prefix || ""}>{s.prefix || ""}{s.target}{s.suffix}</span>
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 4 }}>{s.label}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,.28)" }}>{s.sub}</div>
-                </div>
-              ))}
-            </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── TOOLS ────────────────────────────────────────────────────────── */}
-        <section id="tools" className="section-pad" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
-          <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(59,130,246,.04)", bottom: "0%", left: "-5%" }} />
-
-          <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <div className="reveal" style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 20 }}>
-              <div style={{ width: 4, height: 60, background: "#F5C400", flexShrink: 0, boxShadow: "0 0 16px rgba(245,196,0,.4)" }} />
-              <div>
-                <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 10 }}>WHAT WE OFFER</p>
-                <h2 className="cinematic-text" style={{ fontSize: "clamp(40px,5.5vw,80px)", color: "#fff" }}>OUR TOOLS</h2>
-              </div>
-            </div>
-
-            <p className="reveal" style={{ fontSize: 15, color: "rgba(255,255,255,.4)", maxWidth: 560, marginBottom: 56, lineHeight: 1.8 }}>
-              Constra gives your team a reputation for bringing projects to completion on schedule and on budget — because every tool you need is in one place, from first clock-in to final invoice.
-            </p>
-
-            {/* Tool grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px,1fr))", gap: 3 }}>
-              {TOOLS.map((tool, i) => (
-                <div
-                  key={tool.title}
-                  className={`tool-card reveal stagger-${(i % 4) + 1}`}
-                  style={{ background: "#0a0a0a", borderLeft: `3px solid ${tool.color}`, padding: "26px 22px 24px 20px", cursor: "default", position: "relative", overflow: "hidden" }}
-                >
-                  {/* Subtle colored glow in corner */}
-                  <div style={{ position: "absolute", top: 0, right: 0, width: 80, height: 80, background: `radial-gradient(circle at top right, ${tool.color}18, transparent 70%)`, pointerEvents: "none" }} />
-                  <h3 style={{ fontFamily: BC, fontWeight: 800, fontSize: 17, textTransform: "uppercase", color: "#fff", letterSpacing: "0.01em", marginBottom: 10, lineHeight: 1.1 }}>{tool.title}</h3>
-                  <p style={{ fontSize: 12.5, color: "rgba(255,255,255,.38)", lineHeight: 1.7, marginBottom: 14 }}>{tool.body}</p>
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: tool.color, display: "flex", alignItems: "center", gap: 4 }}>
-                    INCLUDED FREE <ChevronRight size={10} />
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="reveal" style={{ marginTop: 52 }}>
-              <Link href="/onboarding" className="btn-3d" style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 14, letterSpacing: ".06em", textTransform: "uppercase", padding: "16px 38px", textDecoration: "none" }}>
-                GET ALL TOOLS FREE →
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ── VIDEO BREAK: GPS ─────────────────────────────────────────────── */}
-        <section style={{ position: "relative", minHeight: "80vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          <YTBg id="TPyXCFmG2Ws" opacity={0.4} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="kb2" aria-hidden src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.80) 50%, rgba(0,0,0,.45) 100%)" }} />
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #22c55e 20%, #22c55e 80%, transparent)", boxShadow: "0 0 24px rgba(34,197,94,.5)" }} />
-
-          {/* 3D depth text layers */}
-          <div className="reveal" style={{ position: "relative", zIndex: 2, maxWidth: 1320, margin: "0 auto", padding: "80px 28px", width: "100%" }}>
-            <p className="eyebrow" style={{ color: "#22c55e", marginBottom: 20 }}>GPS VERIFICATION</p>
-            <h2 className="cinematic-text" style={{ fontSize: "clamp(48px,9vw,120px)", color: "#fff", marginBottom: 24, textShadow: "0 4px 40px rgba(0,0,0,.8)" }}>
-              GPS-VERIFIED<br />CLOCK-INS.<br /><span style={{ color: "#22c55e", textShadow: "0 0 40px rgba(34,197,94,.4)" }}>EVERY TIME.</span>
-            </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: "rgba(255,255,255,.55)", maxWidth: 440, marginBottom: 36 }}>
-              Workers clock in with a live selfie, GPS-pinned to your exact site. Off-site check-ins and duplicate clock-ins are flagged automatically. No more phantom hours.
-            </p>
-            <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#22c55e", fontWeight: 800, fontSize: 12, textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", borderBottom: "1px solid rgba(34,197,94,.35)", paddingBottom: 4 }}>
-              START FREE TODAY <ChevronRight size={13} />
-            </Link>
-          </div>
-        </section>
-
-        {/* ── SAFETY SECTION ───────────────────────────────────────────────── */}
-        <section className="section-pad" style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
-          <YTBg id="cFlKA0_h51I" opacity={0.22} />
-          <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(239,68,68,.04)", top: "10%", right: "0%" }} />
-
-          <div style={{ maxWidth: 1320, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))", gap: 80, alignItems: "center", position: "relative", zIndex: 1 }}>
-            <div className="reveal">
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 36 }}>
-                <div style={{ width: 4, height: 60, background: "#ef4444", flexShrink: 0, boxShadow: "0 0 16px rgba(239,68,68,.4)" }} />
-                <div>
-                  <p className="eyebrow" style={{ color: "#ef4444", marginBottom: 10 }}>SAFETY FIRST</p>
-                  <h2 className="cinematic-text" style={{ fontSize: "clamp(34px,4vw,62px)", color: "#fff" }}>
-                    BUILT FOR<br />A SAFE SITE.
-                  </h2>
-                </div>
-              </div>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: "rgba(255,255,255,.45)", marginBottom: 20 }}>
-                Constra&apos;s safety tools help you create, administer, and maintain a comprehensive safety program for every job site.
-              </p>
-              <p style={{ fontSize: 15, lineHeight: 1.85, color: "rgba(255,255,255,.45)", marginBottom: 0 }}>
-                Log near-misses, injuries, and hazards with photos the moment they happen. Generate compliance reports in seconds.
-              </p>
-            </div>
-
-            <div className="reveal" style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <TiltCard style={{ borderRadius: 1, overflow: "hidden", boxShadow: "0 40px 80px rgba(0,0,0,.85), 0 0 0 1px rgba(239,68,68,.1)", position: "relative", aspectRatio: "16/9", width: "100%" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=900&q=80" alt="Construction safety crew" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "contrast(1.1) saturate(0.75)" }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.72) 0%, transparent 55%)" }} />
-                <div style={{ position: "absolute", top: 12, left: 14, fontSize: 9, fontWeight: 700, color: "#ef4444", letterSpacing: ".1em", textTransform: "uppercase", textShadow: "0 0 8px rgba(239,68,68,.4)" }}>CONSTRA · SAFETY FIRST</div>
-                <div style={{ position: "absolute", bottom: 14, left: 14, fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.7)", letterSpacing: ".04em", textTransform: "uppercase" }}>ALL HAZARDS LOGGED · 0 INCIDENTS</div>
-              </TiltCard>
-              {[
-                { title: "INCIDENT LOGGING", body: "Log near-misses, injuries, and hazards on the spot with photo evidence.", color: "#ef4444" },
-                { title: "COMPLIANCE REPORTS", body: "Generate safety reports for any date range, job site, or worker in seconds.", color: "#f97316" },
-                { title: "HAZARD TRACKING", body: "Track open hazards by site and status. Close items with a photo and signature.", color: "#F5C400" },
-                { title: "INSURANCE MANAGEMENT", body: "Store and track insurance policies, expiry dates, and certificates per project.", color: "#22c55e" },
-              ].map(item => (
-                <div key={item.title} className="tool-card" style={{ background: "#0f0f0f", borderLeft: `3px solid ${item.color}`, padding: "18px 18px 18px 16px", position: "relative", overflow: "hidden" }}>
-                  <div style={{ position: "absolute", top: 0, right: 0, width: 60, height: 60, background: `radial-gradient(circle at top right, ${item.color}14, transparent 70%)`, pointerEvents: "none" }} />
-                  <p style={{ fontFamily: BC, fontWeight: 800, fontSize: 13, textTransform: "uppercase", color: "#fff", letterSpacing: ".04em", marginBottom: 6 }}>{item.title}</p>
-                  <p style={{ fontSize: 12, color: "rgba(255,255,255,.38)", lineHeight: 1.65 }}>{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── CINEMATIC VIDEO BREAK: BUILT WHERE THE WORK HAPPENS ──────────── */}
-        <section style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          <YTBg id="4BzjUq921Y4" opacity={0.48} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="kb3" aria-hidden src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1920&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(0,0,0,.97) 0%, rgba(0,0,0,.75) 55%, rgba(0,0,0,.25) 100%)" }} />
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 220, background: "linear-gradient(to top, #080808, transparent)" }} />
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 160, background: "linear-gradient(to bottom, #080808, transparent)" }} />
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #F5C400 20%, #F5C400 80%, transparent)", boxShadow: "0 0 24px rgba(245,196,0,.4)" }} />
-          <div className="reveal" style={{ position: "relative", zIndex: 2, maxWidth: 1320, margin: "0 auto", padding: "80px 28px", width: "100%" }}>
-            <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 20 }}>FOR THE FIELD</p>
-            <h2 className="cinematic-text" style={{ fontSize: "clamp(52px,9vw,130px)", color: "#fff", marginBottom: 32 }}>
-              BUILT WHERE<br />THE WORK<br /><span style={{ color: "#F5C400", textShadow: "0 0 60px rgba(245,196,0,.5)" }}>HAPPENS.</span>
-            </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: "rgba(255,255,255,.45)", maxWidth: 440 }}>
-              Designed for job sites, not boardrooms. Works offline, handles rough conditions, and fits in your pocket.
-            </p>
-          </div>
-        </section>
-
-        {/* ── VIDEO BREAK: Invoice ─────────────────────────────────────────── */}
-        <section style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#000" }}>
-          <YTBg id="c-y7qQai14Y" opacity={0.38} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="kb3" aria-hidden src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.82) 50%, rgba(0,0,0,.45) 100%)" }} />
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: "linear-gradient(to bottom, transparent, #F5C400 20%, #F5C400 80%, transparent)", boxShadow: "0 0 24px rgba(245,196,0,.5)" }} />
-
-          <div className="reveal" style={{ position: "relative", zIndex: 2, maxWidth: 1320, margin: "0 auto", padding: "80px 28px", width: "100%" }}>
-            <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 20 }}>INVOICING</p>
-            <h2 className="cinematic-text" style={{ fontSize: "clamp(48px,9vw,116px)", color: "#fff", marginBottom: 24 }}>
-              STOP CHASING<br /><span style={{ color: "#F5C400", textShadow: "0 0 40px rgba(245,196,0,.4)" }}>INVOICES.</span>
-            </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: "rgba(255,255,255,.55)", maxWidth: 440, marginBottom: 36 }}>
-              Build itemised estimates in the field and convert them to professional invoices in one tap. Send branded PDFs directly to your client the same day the work is done.
-            </p>
-            <Link href="/onboarding" style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#F5C400", fontWeight: 800, fontSize: 12, textDecoration: "none", letterSpacing: ".06em", textTransform: "uppercase", borderBottom: "1px solid rgba(245,196,0,.35)", paddingBottom: 4 }}>
-              START INVOICING FREE <ChevronRight size={13} />
-            </Link>
-          </div>
-        </section>
-
-        {/* ── LIVE VIDEO REEL ──────────────────────────────────────────────── */}
-        <section style={{ background: "#030303", padding: 0, overflow: "hidden" }}>
-          <div className="video-reel" style={{ display: "flex", gap: 3 }}>
-            {[
-              { id: "TdZQjSwykV0", fb: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", cls: "kb1", label: "CREW MANAGEMENT", sub: "GPS · CLOCK-IN" },
-              { id: "AdJB6Dt0JQ0", fb: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80", cls: "kb2", label: "PROJECT TRACKING", sub: "REAL-TIME UPDATES" },
-              { id: "0K-0BXrXvuI", fb: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", cls: "kb3", label: "INVOICING", sub: "SENT SAME-DAY" },
-            ].map((v, i) => (
-              <div key={i} style={{ flex: "0 0 33.333%", aspectRatio: "16/9", position: "relative", overflow: "hidden", background: "#111" }}>
-                <YTBg id={v.id} opacity={1} />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={v.fb} alt="" aria-hidden className={v.cls} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "contrast(1.1) saturate(0.8)", zIndex: -1 }} />
-                <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.38)", pointerEvents: "none", zIndex: 2 }} />
-                <div style={{ position: "absolute", bottom: 14, left: 14, zIndex: 3 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#F5C400", boxShadow: "0 0 6px rgba(245,196,0,.9)", animation: "pulse 2s ease-in-out infinite" }} />
-                    <span style={{ fontSize: 8, fontWeight: 700, color: "#F5C400", letterSpacing: ".12em", textTransform: "uppercase" }}>LIVE</span>
-                  </div>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: ".06em", textTransform: "uppercase" }}>{v.label}</div>
-                  <div style={{ fontSize: 9, color: "rgba(255,255,255,.4)", letterSpacing: ".08em", textTransform: "uppercase", marginTop: 2 }}>{v.sub}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── 3D PHOTO ROW ─────────────────────────────────────────────────── */}
-        <section style={{ background: "#030303", padding: "3px 3px 0", overflow: "hidden" }}>
-          <div className="photo-row" style={{ display: "flex", gap: 3 }}>
-            {[
-              { src: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=900&q=80", label: "CONCRETE POUR", sub: "PHASE 2 · ON SCHEDULE" },
-              { src: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80", label: "STEEL ERECTION", sub: "CREW OF 24 · GPS CLOCKED" },
-              { src: "https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=900&q=80", label: "SITE SURVEY", sub: "BLUEPRINTS UPLOADED" },
-              { src: "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=900&q=80", label: "AERIAL VIEW", sub: "DRONE · JOB SITE DOCS" },
-            ].map((p, i) => (
-              <TiltCard key={i} style={{ flex: "0 0 25%", overflow: "hidden", position: "relative", aspectRatio: "3/4" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.src} alt={p.label} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "contrast(1.12) saturate(0.75)" }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.1) 50%, transparent 100%)" }} />
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px 14px" }}>
-                  <div style={{ fontSize: 10, fontWeight: 800, color: "#F5C400", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 3 }}>{p.label}</div>
-                  <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,.45)", letterSpacing: ".07em", textTransform: "uppercase" }}>{p.sub}</div>
-                </div>
-              </TiltCard>
-            ))}
-          </div>
-        </section>
-
-        {/* ── CINEMATIC VIDEO BREAK: ZERO PHANTOM HOURS ────────────────────── */}
-        <section style={{ position: "relative", minHeight: "68vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", background: "#000", textAlign: "center" }}>
-          <YTBg id="W8sOpDb3s5o" opacity={0.38} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="kb1" aria-hidden src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(0,0,0,.94) 85%)" }} />
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#F5C400", boxShadow: "0 0 20px rgba(245,196,0,.5)" }} />
-          <div className="reveal" style={{ position: "relative", zIndex: 2, padding: "80px 28px" }}>
-            <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 20, textAlign: "center" }}>RESULTS</p>
-            <h2 className="cinematic-text" style={{ fontSize: "clamp(44px,8vw,112px)", color: "#fff", textAlign: "center" }}>
-              ZERO PHANTOM HOURS.<br /><span style={{ color: "#F5C400", textShadow: "0 0 50px rgba(245,196,0,.45)" }}>ZERO CHASED INVOICES.</span>
-            </h2>
-            <div className="results-stats" style={{ display: "flex", gap: 1, justifyContent: "center", marginTop: 52, flexWrap: "wrap" }}>
-              {[
-                { n: "$4,000+", label: "Avg. monthly savings", sub: "From stopped phantom hours" },
-                { n: "94%", label: "Fewer time disputes", sub: "GPS verification on every clock-in" },
-                { n: "2× faster", label: "Invoice payments", sub: "Send same day, get paid faster" },
-              ].map((s, i) => (
-                <div key={i} style={{ flex: "0 0 220px", padding: "28px 24px", background: "rgba(0,0,0,.5)", border: "1px solid rgba(245,196,0,.12)", borderTop: "3px solid #F5C400", textAlign: "center", backdropFilter: "blur(12px)" }}>
-                  <div style={{ fontFamily: BC, fontWeight: 900, fontSize: 38, color: "#F5C400", lineHeight: 1, marginBottom: 6, textShadow: "0 0 20px rgba(245,196,0,.3)" }}>{s.n}</div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: ".04em", textTransform: "uppercase", marginBottom: 4 }}>{s.label}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)" }}>{s.sub}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
-        <section id="testimonials" className="section-pad" style={{ background: "#0d0d0d", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
-          <YTBg id="PnDv_iij5Po" opacity={0.20} />
-          <div className="glow-blob" style={{ width: 500, height: 500, background: "rgba(245,196,0,.05)", top: "20%", left: "-10%" }} />
-
-          <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <div className="reveal" style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 56 }}>
-              <div style={{ width: 4, height: 56, background: "#F5C400", flexShrink: 0, boxShadow: "0 0 16px rgba(245,196,0,.4)" }} />
-              <div>
-                <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 10 }}>REVIEWS</p>
-                <h2 className="cinematic-text" style={{ fontSize: "clamp(34px,4.5vw,70px)", color: "#fff" }}>
-                  WHAT CONTRACTORS<br />ARE SAYING
-                </h2>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))", gap: 3 }}>
-              {TESTIMONIALS.map((t, i) => (
-                <div key={i} className={`test-card reveal stagger-${i + 1}`} style={{ background: "#0a0a0a", padding: "36px 30px", borderTop: "3px solid #F5C400", position: "relative", overflow: "hidden" }}>
-                  {/* Quote glow */}
-                  <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: "radial-gradient(circle at top right, rgba(245,196,0,.06), transparent 70%)", pointerEvents: "none" }} />
-                  <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 14 }}>
-                    {[...Array(5)].map((_, si) => (
-                      <svg key={si} width="12" height="12" viewBox="0 0 24 24" fill="#F5C400">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      </svg>
-                    ))}
-                    <span style={{ fontSize: 9, color: "rgba(255,255,255,.25)", marginLeft: 4, fontWeight: 600, letterSpacing: ".04em" }}>VERIFIED CONTRACTOR</span>
-                  </div>
-                  <div style={{ fontFamily: BC, fontWeight: 900, fontSize: 80, color: "#F5C400", lineHeight: 0.7, marginBottom: 18, opacity: 0.5, textShadow: "0 0 20px rgba(245,196,0,.3)" }}>&ldquo;</div>
-                  <p style={{ fontSize: 14, color: "rgba(255,255,255,.6)", lineHeight: 1.85, marginBottom: 28, fontStyle: "italic" }}>
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,.06)", paddingTop: 20 }}>
-                    <p style={{ fontFamily: BC, fontWeight: 800, fontSize: 14, textTransform: "uppercase", color: "#fff", letterSpacing: ".04em" }}>{t.name}</p>
-                    <p style={{ fontSize: 11, color: "rgba(255,255,255,.3)", marginTop: 3 }}>{t.company}</p>
-                    <p style={{ fontSize: 9, color: "#F5C400", marginTop: 2, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>{t.trade}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── PRICING ──────────────────────────────────────────────────────── */}
-        <section id="pricing" className="section-pad" style={{ background: "#080808", padding: "110px 28px", borderTop: "1px solid rgba(255,255,255,.04)", position: "relative", overflow: "hidden" }}>
-          <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(245,196,0,.06)", bottom: "0%", right: "5%" }} />
-
-          <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
-            <div className="reveal" style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 56 }}>
-              <div style={{ width: 4, height: 56, background: "#F5C400", flexShrink: 0, boxShadow: "0 0 16px rgba(245,196,0,.4)" }} />
-              <div>
-                <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 10 }}>PRICING</p>
-                <h2 className="cinematic-text" style={{ fontSize: "clamp(34px,4vw,68px)", color: "#fff" }}>
-                  SIMPLE PRICING.<br />FREE FOREVER.
-                </h2>
-              </div>
-            </div>
-
-            <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))", gap: 3, marginBottom: 36 }}>
-              {[
-                { name: "Enterprise Platforms", price: "$600–$1,200/mo", note: "Per project pricing", dim: true },
-                { name: "Mid-Market Apps", price: "$200–$500/mo", note: "Features behind paywalls", dim: true },
-                { name: "Constra", price: "$0", note: "Every feature, forever", dim: false },
-              ].map(c => (
-                <div key={c.name} style={{ padding: "26px 22px", border: `1px solid ${c.dim ? "rgba(255,255,255,.04)" : "rgba(245,196,0,.25)"}`, borderTop: `3px solid ${c.dim ? "rgba(255,255,255,.06)" : "#F5C400"}`, background: c.dim ? "rgba(255,255,255,.015)" : "rgba(245,196,0,.04)", opacity: c.dim ? 0.38 : 1, textAlign: "center" }}>
-                  <p style={{ fontFamily: BC, fontWeight: 800, fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase", color: c.dim ? "rgba(255,255,255,.25)" : "#F5C400", marginBottom: 8 }}>{c.name}</p>
-                  <p style={{ fontFamily: BC, fontWeight: 900, fontSize: 34, color: c.dim ? "rgba(255,255,255,.25)" : "#fff", marginBottom: 4 }}>{c.price}</p>
-                  <p style={{ fontSize: 10, color: c.dim ? "rgba(255,255,255,.15)" : "rgba(255,255,255,.4)" }}>{c.note}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Free card — 3D glass */}
-            <div className="reveal glass-gold pricing-free-card" style={{ maxWidth: 780, borderTop: "4px solid #F5C400", padding: "48px", position: "relative", animation: "glowpulse 4s ease-in-out infinite" }}>
-              <div className="pricing-free-badge" style={{ position: "absolute", top: -14, left: 48, background: "#F5C400", color: "#000", fontSize: 10, fontWeight: 900, padding: "5px 18px", letterSpacing: ".1em", textTransform: "uppercase" }}>FREE ACCESS</div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24, marginBottom: 36 }}>
-                <div>
-                  <div style={{ fontFamily: BC, fontWeight: 900, fontSize: 76, lineHeight: 1, color: "#fff", textShadow: "0 0 40px rgba(245,196,0,.2)" }}>$0</div>
-                  <p style={{ fontSize: 12, color: "rgba(255,255,255,.3)", marginTop: 4 }}>No credit card · All features included · No limits</p>
-                </div>
-                <Link href="/onboarding" className="btn-3d" style={{ background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 15, letterSpacing: ".06em", textTransform: "uppercase", padding: "16px 36px", textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-                  GET STARTED FREE →
-                </Link>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))", gap: "10px 32px" }}>
-                {["Unlimited crew members", "GPS verification on every clock-in", "Estimates & professional invoices", "Safety incident logging", "AI Daily Brief every morning", "Crew messaging with file sharing", "Weather-aware scheduling", "Equipment management", "RFIs & punch lists", "PDF export — invoices & reports", "15-language support", "Works 100% offline"].map(f => (
-                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12.5, color: "rgba(255,255,255,.45)" }}>
-                    <Check size={10} color="#F5C400" style={{ flexShrink: 0 }} />{f}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
-        <section className="section-pad" style={{ position: "relative", padding: "130px 28px", background: "#000", overflow: "hidden", textAlign: "center" }}>
-          <YTBg id="PHezq3zCgGs" opacity={0.22} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="kb2" aria-hidden src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: -1 }} />
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.82)" }} />
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#F5C400", boxShadow: "0 0 24px rgba(245,196,0,.5)" }} />
-
-          {/* Perspective grid in CTA */}
-          <div className="perspective-grid" style={{ position: "absolute", inset: 0, opacity: 0.6 }}>
-            <div className="perspective-grid-inner" />
-          </div>
-
-          {/* Glow blobs */}
-          <div className="glow-blob" style={{ width: 400, height: 400, background: "rgba(245,196,0,.1)", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
-
-          <div className="reveal" style={{ position: "relative", zIndex: 2, maxWidth: 720, margin: "0 auto" }}>
-            <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 24 }}>GET STARTED TODAY</p>
-            <h2 className="cinematic-text" style={{ fontSize: "clamp(52px,9vw,120px)", color: "#fff", marginBottom: 28, textShadow: "0 4px 60px rgba(0,0,0,.8)" }}>
-              YOUR SITE,<br />
-              <span style={{ color: "#F5C400", textShadow: "0 0 60px rgba(245,196,0,.5)" }}>FINALLY</span><br />
-              UNDER CONTROL.
-            </h2>
-            <div className="depth-line" style={{ width: 200, margin: "0 auto 28px" }} />
-            <p style={{ fontSize: 16, lineHeight: 1.85, color: "rgba(255,255,255,.45)", maxWidth: 440, margin: "0 auto 48px" }}>
-              The only construction app that covers everything — from first clock-in to final invoice. Free, forever.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-              <Link href={alreadyIn ? "/dashboard" : "/onboarding"} className="btn-3d" style={{ background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 16, letterSpacing: ".06em", textTransform: "uppercase", padding: "20px 56px", textDecoration: "none", display: "flex", alignItems: "center", gap: 10, maxWidth: 440, width: "100%", justifyContent: "center" }}>
-                {alreadyIn ? "GO TO DASHBOARD →" : "CREATE FREE ACCOUNT →"}
-              </Link>
-              {!alreadyIn && (
-                <Link href="/login" style={{ fontSize: 11, color: "rgba(255,255,255,.28)", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, letterSpacing: ".04em", textTransform: "uppercase", fontWeight: 600 }}>
-                  Already have an account? Sign In <ChevronRight size={11} />
-                </Link>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-        <footer style={{ background: "#050505", borderTop: "3px solid #F5C400", padding: "52px 28px 36px", boxShadow: "0 -1px 0 rgba(255,255,255,.04)" }}>
-          <div style={{ maxWidth: 1320, margin: "0 auto" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 40, marginBottom: 40 }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 30, height: 30, background: "#F5C400", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 0 16px rgba(245,196,0,.3)" }}>
-                    <HardHat size={14} color="#000" />
-                  </div>
-                  <span style={{ fontFamily: BC, fontWeight: 900, fontSize: 20, letterSpacing: ".04em", textTransform: "uppercase" }}>CONSTRA</span>
-                </div>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,.25)", maxWidth: 220, lineHeight: 1.7 }}>Field Workforce Management for Construction & Trades</p>
-              </div>
-              <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
-                <div>
-                  <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 14 }}>Platform</p>
-                  {[["Sign In", "/login"], ["Get Started", "/onboarding"]].map(([l, h]) => (
-                    <div key={h} style={{ marginBottom: 10 }}><Link href={h} style={{ fontSize: 12, color: "rgba(255,255,255,.25)", textDecoration: "none", fontWeight: 500 }}>{l}</Link></div>
-                  ))}
-                </div>
-                <div>
-                  <p className="eyebrow" style={{ color: "#F5C400", marginBottom: 14 }}>Company</p>
-                  {[["Support", "/support"], ["Terms", "/terms"], ["Privacy", "/privacy"]].map(([l, h]) => (
-                    <div key={h} style={{ marginBottom: 10 }}><Link href={h} style={{ fontSize: 12, color: "rgba(255,255,255,.25)", textDecoration: "none", fontWeight: 500 }}>{l}</Link></div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div style={{ borderTop: "1px solid rgba(255,255,255,.05)", paddingTop: 24, display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,.12)" }}>© {new Date().getFullYear()} Constra. All rights reserved.</p>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,.12)" }}>getconstra.com · Built for the Field</p>
-            </div>
-          </div>
-        </footer>
-
-      </div>
-
-      {/* ── MOBILE STICKY CTA BAR ────────────────────────────────────────── */}
-      <div className="mobile-sticky-cta" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200, padding: "10px 16px calc(14px + env(safe-area-inset-bottom))", background: "rgba(5,5,5,.96)", borderTop: "1px solid rgba(245,196,0,.2)", backdropFilter: "blur(20px)", gap: 10, alignItems: "center", transform: stickyVisible ? "translateY(0)" : "translateY(110%)", transition: "transform 0.35s cubic-bezier(.4,0,.2,1)" }}>
-        <Link href={alreadyIn ? "/dashboard" : "/onboarding"} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#F5C400", color: "#000", fontFamily: BC, fontWeight: 900, fontSize: 13, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 16px", textDecoration: "none", gap: 8 }}>
-          {alreadyIn ? "GO TO DASHBOARD →" : "GET STARTED FREE →"}
-        </Link>
-        {!alreadyIn && (
-          <Link href="/login" style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,.07)", color: "rgba(255,255,255,.6)", fontFamily: BC, fontWeight: 800, fontSize: 12, letterSpacing: ".06em", textTransform: "uppercase", padding: "13px 14px", textDecoration: "none", border: "1px solid rgba(255,255,255,.1)" }}>
-            SIGN IN
+    <div ref={rootRef} className={`lp ${plexSans.variable} ${plexMono.variable}`}>
+      <style>{CSS}</style>
+
+      <a href="#main" className="lp-skip">Skip to content</a>
+
+      <header className="lp-nav">
+        <div className="lp-wrap lp-nav-inner">
+          <Link href="/" className="lp-brand" aria-label="Constra home">
+            <span className="lp-brand-mark"><HardHat size={16} strokeWidth={2.5} aria-hidden /></span>
+            Constra
           </Link>
-        )}
-      </div>
-    </>
+          <nav className="lp-nav-links" aria-label="Main">
+            <a href="#day">How it works</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <div className="lp-nav-cta">
+            {!alreadyIn && <Link href="/login" className="lp-link">Sign in</Link>}
+            <Link href={startHref} className="lp-btn lp-btn-sm">{startLabel}</Link>
+          </div>
+        </div>
+      </header>
+
+      <main id="main">
+        {/* Hero */}
+        <section className="lp-hero">
+          <div className="lp-wrap lp-hero-grid">
+            <div className="lp-hero-copy">
+              <p className="lp-kicker">For contractors and trade crews</p>
+              <h1 className="lp-h1">Run the job.<br />Not the paperwork.</h1>
+              <p className="lp-lede">
+                Constra puts GPS-verified timesheets, daily reports, safety logs, change orders and invoices in one app, on the phones your crew already carries.
+              </p>
+              <div className="lp-hero-ctas">
+                <Link href={startHref} className="lp-btn">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
+                <a href="#day" className="lp-btn lp-btn-ghost">See a day on site</a>
+              </div>
+              <ul className="lp-facts" aria-label="Quick facts">
+                <li>No credit card</li>
+                <li>Android, iPhone &amp; web</li>
+                <li>15 languages</li>
+              </ul>
+            </div>
+            <div className="lp-hero-visual">
+              <PhoneMock />
+              <InvoiceSlip />
+            </div>
+          </div>
+        </section>
+
+        {/* Replaces */}
+        <section className="lp-tape-band" aria-label="What Constra replaces">
+          <div className="lp-tape" aria-hidden />
+          <div className="lp-wrap lp-replaces">
+            <p className="lp-replaces-label">Replaces</p>
+            <ul>
+              <li>Paper timesheets</li>
+              <li>The crew group chat</li>
+              <li>A shoebox of receipts</li>
+              <li>The invoice spreadsheet</li>
+              <li>Three other apps</li>
+            </ul>
+          </div>
+          <div className="lp-tape" aria-hidden />
+        </section>
+
+        {/* A day on site */}
+        <section id="day" className="lp-day">
+          <div className="lp-wrap">
+            <div className="lp-section-head">
+              <p className="lp-kicker lp-kicker-inv">How it works</p>
+              <h2 className="lp-h2">One day on site,<br />start to invoice.</h2>
+            </div>
+            <ol className="lp-timeline">
+              {DAY.map((s) => (
+                <li key={s.time}>
+                  <time className="lp-time">{s.time}</time>
+                  <h3>{s.title}</h3>
+                  <p>{s.body}</p>
+                  <Chip icon={s.chip.icon} text={s.chip.text} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section id="features" className="lp-features">
+          <div className="lp-wrap">
+            <div className="lp-section-head lp-section-head-row">
+              <h2 className="lp-h2">Everything the site needs.<br />Nothing extra to buy.</h2>
+              <p className="lp-section-note">All sixteen tools are included on every account. No add-ons and no per-project fees.</p>
+            </div>
+            <div className="lp-spec">
+              {FEATURES.map((g) => (
+                <div key={g.group} className="lp-spec-col">
+                  <h3 className="lp-spec-group">{g.group}</h3>
+                  <dl>
+                    {g.items.map(([k, v]) => (
+                      <div key={k} className="lp-spec-row">
+                        <dt>{k}</dt>
+                        <dd>{v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Field-ready */}
+        <section className="lp-field">
+          <div className="lp-wrap lp-field-grid">
+            <div>
+              <p className="lp-kicker">Built for the field</p>
+              <h2 className="lp-h2">Made for gloves, glare<br />and one bar of signal.</h2>
+              <p className="lp-section-note">
+                Big tap targets, a high-contrast interface and no training day. If your crew can send a text, they can clock in.
+              </p>
+            </div>
+            <dl className="lp-field-list">
+              <div><dt><WifiOff size={18} aria-hidden /> Offline</dt><dd>Clock-ins and updates queue on the phone and sync when signal returns.</dd></div>
+              <div><dt><MapPin size={18} aria-hidden /> Geofence</dt><dd>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</dd></div>
+              <div><dt><span className="lp-field-num">15</span> Languages</dt><dd>Each person picks their own, from Spanish and Polish to Hindi, Arabic and Chinese.</dd></div>
+              <div><dt><span className="lp-field-num">OT</span> Overtime</dt><dd>Daily and weekly overtime calculated from the punches, ready for payroll.</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section id="pricing" className="lp-pricing">
+          <div className="lp-wrap lp-pricing-grid">
+            <div>
+              <p className="lp-kicker">Pricing</p>
+              <h2 className="lp-h2">Free during launch.</h2>
+              <p className="lp-section-note">Every feature, unlimited crew, no credit card. Sign up, invite your crew and run your next job on it.</p>
+            </div>
+            <div className="lp-price-card">
+              <div className="lp-price-top">
+                <span className="lp-mono">Constra · Launch</span>
+                <span className="lp-price">$0</span>
+              </div>
+              <ul>
+                {["Unlimited crew and projects", "GPS + photo clock-in", "Estimates, invoices and change orders", "Daily reports and safety logs", "Payroll export (CSV, QuickBooks, Gusto)", "AI daily brief"].map((f) => (
+                  <li key={f}><Check size={15} strokeWidth={2.5} aria-hidden />{f}</li>
+                ))}
+              </ul>
+              <Link href={startHref} className="lp-btn lp-btn-block">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="lp-faq">
+          <div className="lp-wrap lp-faq-grid">
+            <h2 className="lp-h2">Questions<br />from the site.</h2>
+            <div className="lp-faq-list">
+              {FAQ.map(([q, a]) => (
+                <details key={q}>
+                  <summary>{q}<Plus size={18} aria-hidden /></summary>
+                  <p>{a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="lp-final">
+          <div className="lp-wrap lp-final-inner">
+            <h2 className="lp-h2">Get your crew on it<br />before Monday.</h2>
+            <div className="lp-final-ctas">
+              <Link href={startHref} className="lp-btn lp-btn-ink">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
+              <a href="https://play.google.com/store/apps/details?id=com.getconstra.app" target="_blank" rel="noopener noreferrer" className="lp-link lp-link-ink">Get the Android app</a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="lp-footer">
+        <div className="lp-wrap lp-footer-inner">
+          <div>
+            <span className="lp-brand"><span className="lp-brand-mark"><HardHat size={14} strokeWidth={2.5} aria-hidden /></span>Constra</span>
+            <p className="lp-dim">Field workforce management for construction and trades.</p>
+          </div>
+          <nav aria-label="Footer" className="lp-footer-links">
+            <Link href="/login">Sign in</Link>
+            <Link href="/onboarding">Create account</Link>
+            <Link href="/support">Support</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+          </nav>
+          <p className="lp-dim lp-mono lp-copy">© {new Date().getFullYear()} Constra · getconstra.com</p>
+        </div>
+      </footer>
+
+    </div>
   );
 }
+
+const CSS = `
+.lp{
+  --ground:#E7E5E0; --paper:#F5F4F1; --ink:#151617; --ink2:#4B4D50; --ink3:#77797C;
+  --rule:#CBC8C1; --hv:#F5C400; --hv-ink:#1A1600; --go:#1E7A45; --stop:#B9382C;
+  --night:#151617; --night2:#202224; --night-rule:#34373A; --night-ink:#ECEAE5; --night-dim:#9A9C9F;
+  --display:var(--font-barlow-condensed),'Arial Narrow',sans-serif;
+  --sans:var(--lp-sans),system-ui,sans-serif; --mono:var(--lp-mono),ui-monospace,monospace;
+  position:fixed; inset:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;
+  background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.lp *{box-sizing:border-box}
+:where(.lp) a{color:inherit}
+.lp :focus-visible{outline:3px solid var(--ink); outline-offset:3px}
+.lp-day :focus-visible,.lp-footer :focus-visible{outline-color:var(--hv)}
+.lp-wrap{max-width:1200px; margin:0 auto; padding-inline:24px}
+.lp-mono{font-family:var(--mono); font-size:12px; letter-spacing:.02em}
+.lp-dim{color:var(--ink3)}
+.lp-skip{position:absolute; left:-9999px; top:8px; z-index:100; background:var(--ink); color:var(--paper); padding:8px 12px}
+.lp-skip:focus{left:8px}
+
+/* Nav */
+.lp-nav{position:sticky; top:0; z-index:40; background:color-mix(in srgb,var(--ground) 92%,transparent); backdrop-filter:saturate(1.2) blur(10px); border-bottom:1px solid var(--rule); padding-top:env(safe-area-inset-top,0px)}
+.lp-nav-inner{height:60px; display:flex; align-items:center; gap:32px}
+.lp-brand{display:inline-flex; align-items:center; gap:10px; font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:.02em; text-transform:uppercase; text-decoration:none}
+.lp-brand-mark{width:30px; height:30px; background:var(--hv); color:var(--hv-ink); display:grid; place-items:center; border-radius:3px}
+.lp-nav-links{display:flex; gap:28px; margin-right:auto}
+.lp-nav-links a{text-decoration:none; font-size:14px; font-weight:500; color:var(--ink2)}
+.lp-nav-links a:hover{color:var(--ink)}
+.lp-nav-cta{display:flex; align-items:center; gap:18px}
+.lp-link{font-size:14px; font-weight:500; text-decoration:underline; text-underline-offset:4px; text-decoration-color:var(--rule)}
+.lp-link:hover{text-decoration-color:currentColor}
+
+/* Buttons */
+.lp-btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:0 22px; background:var(--hv); color:var(--hv-ink); font-weight:600; font-size:15px; text-decoration:none; border:1.5px solid var(--hv-ink); border-radius:3px; box-shadow:0 3px 0 var(--hv-ink); transition:transform .12s, box-shadow .12s}
+.lp-btn:hover{transform:translateY(-1px); box-shadow:0 4px 0 var(--hv-ink)}
+.lp-btn:active{transform:translateY(3px); box-shadow:0 0 0 var(--hv-ink)}
+.lp-btn-sm{min-height:38px; padding:0 14px; font-size:14px; box-shadow:0 2px 0 var(--hv-ink)}
+.lp-btn-ghost{background:transparent; color:var(--ink); border-color:var(--ink); box-shadow:none}
+.lp-btn-ghost:hover{background:var(--paper); box-shadow:none}
+.lp-btn-ink{background:var(--ink); color:var(--hv); border-color:var(--ink); box-shadow:0 3px 0 #000}
+.lp-btn-block{width:100%}
+
+/* Type */
+.lp-kicker{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink2); margin:0 0 16px; display:flex; align-items:center; gap:10px}
+.lp-kicker::before{content:""; width:18px; height:8px; background:repeating-linear-gradient(135deg,var(--ink) 0 4px,var(--hv) 4px 8px)}
+.lp-kicker-inv{color:var(--night-dim)}
+.lp-kicker-inv::before{background:repeating-linear-gradient(135deg,var(--hv) 0 4px,var(--night) 4px 8px)}
+.lp-h1,.lp-h2{font-family:var(--display); font-weight:800; text-transform:uppercase; line-height:.92; letter-spacing:-.005em; margin:0; text-wrap:balance}
+.lp-h1{font-size:clamp(52px,8.4vw,112px)}
+.lp-h2{font-size:clamp(38px,5.2vw,68px)}
+.lp-lede{font-size:clamp(17px,1.5vw,19px); color:var(--ink2); max-width:52ch; margin:24px 0 32px}
+.lp-section-head{margin-bottom:48px}
+.lp-section-head-row{display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap}
+.lp-section-note{color:var(--ink2); max-width:44ch; margin:20px 0 0}
+.lp-section-head-row .lp-section-note{margin:0}
+
+/* Hero */
+.lp-hero{padding-block:72px 88px}
+.lp-hero-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:48px; align-items:center}
+.lp-hero-ctas{display:flex; gap:12px; flex-wrap:wrap}
+.lp-facts{list-style:none; padding:0; margin:28px 0 0; display:flex; flex-wrap:wrap; gap:8px 22px; font-family:var(--mono); font-size:12.5px; color:var(--ink2)}
+.lp-facts li{display:flex; align-items:center; gap:8px}
+.lp-facts li::before{content:""; width:6px; height:6px; background:var(--go); border-radius:50%}
+.lp-hero-visual{position:relative; display:flex; justify-content:center; padding-bottom:40px}
+
+.lp-phone{width:300px; max-width:100%; background:var(--night); border-radius:34px; padding:10px; border:1px solid #000; box-shadow:0 30px 60px -20px rgba(20,22,23,.45), 0 0 0 6px #2A2C2E inset}
+.lp-phone-bar{display:flex; justify-content:space-between; align-items:center; color:var(--night-ink); font-family:var(--mono); font-size:11px; padding:6px 16px 8px}
+.lp-phone-notch{width:72px; height:18px; background:#000; border-radius:10px}
+.lp-phone-body{background:#101112; border-radius:24px; padding:18px 16px 20px; color:var(--night-ink)}
+.lp-phone-body .lp-dim{color:var(--night-dim)}
+.lp-phone-hello{font-family:var(--display); font-weight:800; font-size:26px; text-transform:uppercase; margin:4px 0 14px; line-height:1}
+.lp-clock{background:var(--night2); border:1px solid var(--night-rule); border-radius:14px; padding:14px}
+.lp-clock-top{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--night-dim)}
+.lp-live{display:inline-flex; align-items:center; gap:6px; color:#5BD08A; font-weight:600}
+.lp-dot{width:7px; height:7px; border-radius:50%; background:#5BD08A}
+.lp-clock-time{font-family:var(--display); font-weight:800; font-size:54px; line-height:1; margin:8px 0 12px; font-variant-numeric:tabular-nums}
+.lp-clock-time span{color:var(--night-dim); font-size:30px}
+.lp-clock-rows{display:grid; gap:6px; font-size:12px}
+.lp-clock-rows div{display:grid; grid-template-columns:16px 1fr auto; gap:8px; align-items:center; color:var(--night-dim)}
+.lp-clock-rows b{color:#5BD08A; font-weight:600; font-size:11px}
+.lp-clock-btn{margin-top:14px; background:var(--hv); color:var(--hv-ink); text-align:center; font-weight:600; font-size:14px; border-radius:10px; padding:11px}
+.lp-phone-label{margin:16px 0 8px}
+.lp-crew{display:grid; gap:8px}
+.lp-crew-row{display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:center; font-size:13px}
+.lp-avatar{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:10px; font-weight:600; color:#fff}
+
+.lp-slip{position:absolute; left:-8px; bottom:-12px; width:228px; background:var(--paper); border:1px solid var(--rule); border-top:4px solid var(--ink); padding:14px 16px; box-shadow:0 18px 40px -18px rgba(20,22,23,.4); transform:rotate(-2.5deg)}
+.lp-slip-head{display:flex; justify-content:space-between; align-items:center}
+.lp-paid{font-size:11px; font-weight:600; color:var(--go); border:1px solid currentColor; padding:1px 6px; border-radius:2px}
+.lp-slip-total{font-family:var(--display); font-weight:800; font-size:34px; margin:6px 0 8px; font-variant-numeric:tabular-nums}
+.lp-slip-lines{display:grid; gap:4px; font-size:12px; color:var(--ink2); border-top:1px dashed var(--rule); padding-top:8px}
+.lp-slip-lines div{display:flex; justify-content:space-between; gap:12px; font-variant-numeric:tabular-nums}
+
+/* Tape band */
+.lp-tape{height:14px; background:repeating-linear-gradient(135deg,var(--ink) 0 14px,var(--hv) 14px 28px)}
+.lp-tape-band{background:var(--hv)}
+.lp-replaces{display:flex; align-items:center; gap:24px; padding-block:20px; flex-wrap:wrap}
+.lp-replaces-label{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin:0; color:var(--hv-ink)}
+.lp-replaces ul{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:6px 0}
+.lp-replaces li{font-family:var(--display); font-weight:700; font-size:22px; text-transform:uppercase; color:var(--hv-ink); text-decoration:line-through; text-decoration-thickness:2px}
+.lp-replaces li+li::before{content:"/"; text-decoration:none; display:inline-block; margin:0 14px; opacity:.4}
+
+/* Day */
+.lp-day{background:var(--night); color:var(--night-ink); padding-block:96px}
+.lp-timeline{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--night-rule)}
+.lp-timeline li{padding:24px 20px 8px 0; position:relative; display:flex; flex-direction:column; gap:10px}
+.lp-timeline li::before{content:""; position:absolute; top:-5px; left:0; width:9px; height:9px; background:var(--hv)}
+.lp-time{font-family:var(--mono); font-size:13px; color:var(--hv)}
+.lp-timeline h3{font-family:var(--display); font-weight:700; font-size:26px; text-transform:uppercase; line-height:1; margin:0}
+.lp-timeline p{margin:0; color:var(--night-dim); font-size:14.5px}
+.lp-chip{margin-top:auto; align-self:flex-start; display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11.5px; color:var(--night-ink); background:var(--night2); border:1px solid var(--night-rule); padding:5px 8px; border-radius:2px}
+
+/* Features */
+.lp-features{padding-block:96px}
+.lp-spec{display:grid; grid-template-columns:repeat(4,1fr); border-top:2px solid var(--ink)}
+.lp-spec-col{padding:20px 20px 0 0}
+.lp-spec-col+.lp-spec-col{padding-left:20px; border-left:1px solid var(--rule)}
+.lp-spec-group{font-family:var(--mono); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin:0 0 8px; color:var(--ink2)}
+.lp-spec dl{margin:0}
+.lp-spec-row{padding:14px 0; border-bottom:1px solid var(--rule)}
+.lp-spec-row dt{font-weight:600; font-size:16px}
+.lp-spec-row dd{margin:4px 0 0; font-size:14px; color:var(--ink2)}
+
+/* Field */
+.lp-field{padding-block:96px; background:var(--paper); border-block:1px solid var(--rule)}
+.lp-field-grid{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start}
+.lp-field-list{margin:0; display:grid; gap:0}
+.lp-field-list div{display:grid; grid-template-columns:150px 1fr; gap:20px; padding:20px 0; border-bottom:1px solid var(--rule)}
+.lp-field-list div:first-child{border-top:1px solid var(--rule)}
+.lp-field-list dt{font-weight:600; display:flex; align-items:center; gap:10px}
+.lp-field-list dd{margin:0; color:var(--ink2); font-size:15px}
+.lp-field-num{font-family:var(--display); font-weight:800; font-size:22px; line-height:1; background:var(--hv); color:var(--hv-ink); padding:2px 5px; border-radius:2px}
+
+/* Pricing */
+.lp-pricing{padding-block:96px}
+.lp-pricing-grid{display:grid; grid-template-columns:1fr minmax(0,440px); gap:64px; align-items:center}
+.lp-price-card{background:var(--paper); border:1.5px solid var(--ink); border-radius:4px; padding:28px; box-shadow:6px 6px 0 var(--ink)}
+.lp-price-top{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:16px; margin-bottom:16px}
+.lp-price{font-family:var(--display); font-weight:800; font-size:64px; line-height:1}
+.lp-price-card ul{list-style:none; padding:0; margin:0 0 24px; display:grid; gap:10px; font-size:15px}
+.lp-price-card li{display:flex; gap:10px; align-items:flex-start}
+.lp-price-card li svg{color:var(--go); flex-shrink:0; margin-top:3px}
+
+/* FAQ */
+.lp-faq{padding-block:96px; border-top:1px solid var(--rule)}
+.lp-faq-grid{display:grid; grid-template-columns:1fr 1.6fr; gap:64px; align-items:start}
+.lp-faq-list{border-top:2px solid var(--ink)}
+.lp-faq details{border-bottom:1px solid var(--rule)}
+.lp-faq summary{list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 0; font-weight:600; font-size:17px}
+.lp-faq summary::-webkit-details-marker{display:none}
+.lp-faq summary svg{flex-shrink:0; transition:transform .2s}
+.lp-faq details[open] summary svg{transform:rotate(45deg)}
+.lp-faq details p{margin:-6px 0 20px; color:var(--ink2); max-width:62ch}
+
+/* Final */
+.lp-final{background:var(--hv); color:var(--hv-ink); border-top:14px solid transparent; border-image:repeating-linear-gradient(135deg,var(--ink) 0 14px,var(--hv) 14px 28px) 14}
+.lp-final-inner{padding-block:80px; display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap}
+.lp-final-ctas{display:flex; align-items:center; gap:24px; flex-wrap:wrap}
+.lp-link-ink{color:var(--hv-ink); text-decoration-color:rgba(26,22,0,.4)}
+
+/* Footer */
+.lp-footer{background:var(--night); color:var(--night-ink); padding-block:48px calc(48px + env(safe-area-inset-bottom,0px))}
+.lp-footer .lp-dim{color:var(--night-dim); font-size:14px; margin:10px 0 0}
+.lp-footer-inner{display:grid; grid-template-columns:1fr auto; gap:32px 48px}
+.lp-footer-links{display:flex; flex-wrap:wrap; gap:12px 28px; align-items:flex-start}
+.lp-footer-links a{text-decoration:none; font-size:14px; color:var(--night-ink)}
+.lp-footer-links a:hover{color:var(--hv)}
+.lp-copy{grid-column:1/-1; border-top:1px solid var(--night-rule); padding-top:20px; margin:0 !important; font-size:12px !important}
+
+@media (max-width:1000px){
+  .lp-timeline{grid-template-columns:1fr; border-top:0; border-left:1px solid var(--night-rule); margin-left:4px}
+  .lp-timeline li{padding:0 0 32px 24px}
+  .lp-timeline li::before{top:4px; left:-5px}
+  .lp-spec{grid-template-columns:1fr 1fr}
+  .lp-spec-col:nth-child(3){padding-left:0; border-left:0}
+  .lp-spec-col:nth-child(n+3){padding-top:32px}
+}
+@media (max-width:860px){
+  .lp-nav-links{display:none}
+  .lp-nav-cta{margin-left:auto}
+  .lp-hero{padding-block:40px 56px}
+  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid{grid-template-columns:1fr; gap:40px}
+  .lp-hero-visual{padding-bottom:56px}
+  .lp-slip{left:auto; right:50%; margin-right:40px; width:210px}
+  .lp-day,.lp-features,.lp-field,.lp-pricing,.lp-faq{padding-block:64px}
+  .lp-footer-inner{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .lp-wrap{padding-inline:16px}
+  .lp-nav-cta{gap:14px}
+  .lp-brand{font-size:20px}
+  .lp-spec{grid-template-columns:1fr}
+  .lp-spec-col,.lp-spec-col+.lp-spec-col{padding:24px 0 0; border-left:0}
+  .lp-field-list div{grid-template-columns:1fr; gap:6px}
+  .lp-slip{right:auto; left:0; margin:0; width:200px; transform:rotate(-2deg)}
+  .lp-hero-visual{justify-content:flex-end}
+  .lp-phone{width:260px}
+  .lp-replaces li{font-size:18px}
+  .lp-price-card{box-shadow:4px 4px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){
+  .lp *{transition:none !important}
+}
+`;
