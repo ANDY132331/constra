@@ -5,6 +5,10 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 
+function esc(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 // POST /api/create-worker
 // Creates a real auth user + profile for a new crew member.
 // Requires the caller to be an Admin in the same company.
@@ -36,6 +40,9 @@ export async function POST(request: NextRequest) {
 
   const VALID_ROLES = ["Admin", "Project Manager", "Worker", "Foreman", "Subcontractor", "Estimator", "Safety Officer"];
   const safeRole = VALID_ROLES.includes(role) ? role : "Worker";
+  if (safeRole === "Admin" && callerProfile.role !== "Admin") {
+    return NextResponse.json({ error: "Only an Admin can add another Admin" }, { status: 403 });
+  }
 
   const workerEmail = email?.trim() || null;
   if (workerEmail && !workerEmail.includes("@")) {
@@ -93,25 +100,26 @@ export async function POST(request: NextRequest) {
   // 3. Send a welcome email with a password-setup link (only if they have a real email)
   if (workerEmail && process.env.RESEND_API_KEY) {
     try {
-      const { data: linkData } = await service.auth.admin.generateLink({
-        type: "recovery",
-        email: workerEmail,
-        options: { redirectTo: `${APP_URL}/reset-password` },
-      });
-      const setupUrl = linkData?.properties?.action_link;
-      if (setupUrl) {
+      const { data: linkData } = await service.auth.admin.generateLink({ type: "recovery", email: workerEmail });
+      // Same link format as password reset: the page verifies the hashed token itself
+      const tokenHash = linkData?.properties?.hashed_token;
+      if (tokenHash) {
+        const setupUrl = `${APP_URL}/reset-password?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`;
+        const { data: company } = await service.from("companies").select("name").eq("id", companyId).single();
+        const companyName = esc((company as { name?: string } | null)?.name ?? "your company");
         const html = emailShell({
           company: "Constra",
-          preheader: "You've been added to a Constra workspace",
+          preheader: `${companyName} added you to Constra`,
           body: `
             <h2>Welcome to Constra</h2>
-            <p>You've been added to a workspace on Constra — the field workforce management app.</p>
-            <p>Click the button below to set your password and get started.</p>
-            <a class="cta" href="${setupUrl}">Set Your Password →</a>
+            <p>Hi ${esc(trimmedName)}, <strong>${companyName}</strong> added you to their Constra workspace, where you'll clock in, see your tasks and message your crew.</p>
+            <p>Set a password to get started. This link expires in <strong>1 hour</strong>; if it does, use "Forgot password?" on the sign-in page.</p>
+            <a class="cta" href="${setupUrl}">Set your password →</a>
             <p style="color:#aaa;font-size:12px;margin-top:20px">If you weren't expecting this, you can safely ignore this email.</p>
           `,
         });
-        await sendEmail({ to: workerEmail, subject: "You've been added to Constra — set your password", html });
+        const { error: sendError } = await sendEmail({ to: workerEmail, subject: `${(company as { name?: string } | null)?.name ?? "Your team"} added you to Constra — set your password`, html });
+        if (sendError) console.error("[/api/create-worker] welcome email failed:", sendError.message);
       }
     } catch (e) {
       console.error("[/api/create-worker] welcome email failed:", e);

@@ -909,7 +909,7 @@ export default function ProjectsPage() {
                   <label className={mLbl}>Project Color</label>
                   <div className="flex gap-3 flex-wrap">
                     {COLORS.map((c) => (
-                      <button type="button" key={c} onClick={() => setForm((f) => ({ ...f, color: c }))}
+                      <button type="button" key={c} aria-label={`Colour ${c}`} aria-pressed={form.color === c} onClick={() => setForm((f) => ({ ...f, color: c }))}
                         className="w-10 h-10 rounded-2xl active:scale-90 transition-transform"
                         style={{ backgroundColor: c, outline: form.color === c ? `3px solid ${c}` : "none", outlineOffset: "3px" }} />
                     ))}
@@ -1107,7 +1107,7 @@ export default function ProjectsPage() {
                 <label className={lbl}>Project Color</label>
                 <div className="flex gap-2">
                   {COLORS.map((c) => (
-                    <button type="button" key={c} onClick={() => setForm((f) => ({ ...f, color: c }))}
+                    <button type="button" key={c} aria-label={`Colour ${c}`} aria-pressed={form.color === c} onClick={() => setForm((f) => ({ ...f, color: c }))}
                       className="w-7 h-7 rounded-lg transition-transform hover:scale-110"
                       style={{ backgroundColor: c, outline: form.color === c ? `2px solid ${c}` : "none", outlineOffset: "2px" }} />
                   ))}

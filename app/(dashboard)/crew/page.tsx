@@ -861,7 +861,7 @@ export default function CrewPage() {
                 <label className={lbl}>Accent Color</label>
                 <div className="flex gap-2 flex-wrap">
                   {COLORS.map((c) => (
-                    <button type="button" key={c} onClick={() => setForm((f) => ({ ...f, color: c }))}
+                    <button type="button" key={c} aria-label={`Colour ${c}`} aria-pressed={form.color === c} onClick={() => setForm((f) => ({ ...f, color: c }))}
                       className="w-7 h-7 rounded-lg transition-transform hover:scale-110"
                       style={{ backgroundColor: c, outline: form.color === c ? `2px solid ${c}` : "none", outlineOffset: "2px" }} />
                   ))}
