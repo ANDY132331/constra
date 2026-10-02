@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { toast } from "sonner";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation, Download, BarChart3 } from "lucide-react";
@@ -469,6 +469,8 @@ export default function TimeTrackingPage() {
     setCameraTarget({ worker, projectId });
   }, [getProjectById]);
 
+  const clockingInRef = useRef(false);
+
   const requestClockIn = useCallback((worker: Worker) => {
     if (activeProjects.length === 1) {
       proceedToCamera(worker, activeProjects[0].id);
@@ -485,8 +487,16 @@ export default function TimeTrackingPage() {
   }, [projectPickerTarget, proceedToCamera]);
 
   const handlePhotoConfirmed = useCallback(async (dataUrl: string, gps?: GpsLocation) => {
-    if (!cameraTarget) return;
+    if (!cameraTarget || clockingInRef.current) return;
     const { worker, projectId } = cameraTarget;
+    // A second open shift would be paid twice once both are closed
+    if (clockEntries.some((e) => e.workerId === worker.id && !e.clockOut)) {
+      setCameraTarget(null);
+      toast.error(`${worker.name} is already clocked in`);
+      return;
+    }
+    clockingInRef.current = true;
+    try {
     const now = new Date();
     const deviceInfo = navigator.userAgent.slice(0, 200);
 
@@ -528,6 +538,9 @@ export default function TimeTrackingPage() {
       }
     } catch (e) {
       console.error("[time-tracking] runVerification failed:", e);
+    }
+    } finally {
+      clockingInRef.current = false;
     }
   }, [cameraTarget, clockEntries, addClockEntry, updateClockEntry, updateWorker, getProjectById, companyId]);
 

@@ -306,3 +306,18 @@ begin
 end;
 $$;
 revoke all on function public.hit_rate_limit(text, int, int) from public, anon, authenticated;
+
+-- ── One open shift per worker ─────────────────────────────────────────────────
+-- Two open clock entries for the same person would both be closed at clock-out and paid twice.
+-- Skipped (with a notice) if existing data already has duplicates, so this file still runs cleanly.
+do $$
+begin
+  if exists (
+    select 1 from clock_entries where clock_out is null group by worker_id having count(*) > 1
+  ) then
+    raise notice 'clock_entries has workers with several open shifts; close them, then re-run this file to add the guard';
+  else
+    create unique index if not exists clock_entries_one_open_shift
+      on clock_entries (worker_id) where clock_out is null;
+  end if;
+end $$;
