@@ -590,7 +590,7 @@ export default function TimeTrackingPage() {
       });
     // Leading ' stops spreadsheets running cell text as a formula; BOM makes Excel read UTF-8 names
     const cell = (c: unknown) => { const s = String(c); return `"${(/^[=+\-@\t\r]/.test(s) ? `'${s}` : s).replace(/"/g, '""')}"`; };
-    const csv = "﻿" + rows.map((r) => r.map(cell).join(",")).join("\n");
+    const csv = "\uFEFF" + rows.map((r) => r.map(cell).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -243,7 +243,7 @@ export function exportPayroll(
 
   const content = adapter.serialize(rows, periodLabel, overtimeSummaries, overtimeSettings?.multiplier);
   // BOM so Excel reads names with accents correctly (not for QuickBooks IIF)
-  const blob = new Blob([adapter.fileExtension === "csv" ? "﻿" + content : content], { type: adapter.mimeType });
+  const blob = new Blob([adapter.fileExtension === "csv" ? "\uFEFF" + content : content], { type: adapter.mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
