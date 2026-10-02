@@ -1601,3 +1601,25 @@ html[data-theme="light"] .card-hover:hover { border-color: rgba(21,22,23,0.32) !
 html[data-theme="light"] header:not(.lp-nav),
 html:not([data-theme="light"]) header:not(.lp-nav) { backdrop-filter: blur(12px) !important; }
 html[data-theme="light"] header:not(.lp-nav) { box-shadow: 0 1px 0 var(--c-rule) !important; }
+
+/* ── Readability floor ─────────────────────────────────────────────────────────
+   The theme maps faint white text to equally faint black, which leaves 10–35% text
+   unreadable on paper. Muted text keeps its place in the hierarchy but never drops
+   below ~4.5:1. Yellow text is for dark grounds; on light ones it becomes dark gold. */
+[data-theme="light"] .text-white\/10, [data-theme="light"] .text-white\/15,
+[data-theme="light"] .text-white\/20, [data-theme="light"] .text-white\/25 { color: rgba(0,0,0,0.55) !important; }
+[data-theme="light"] .text-white\/30, [data-theme="light"] .text-white\/35 { color: rgba(0,0,0,0.58) !important; }
+[data-theme="light"] .text-white\/40, [data-theme="light"] .text-white\/45 { color: rgba(0,0,0,0.62) !important; }
+[data-theme="light"] [class*="placeholder:text-white"]::placeholder,
+[data-theme="light"] [class*="placeholder-white"]::placeholder { color: rgba(0,0,0,0.42) !important; }
+[data-theme="light"] .text-amber-300, [data-theme="light"] .text-amber-400, [data-theme="light"] .text-amber-500,
+[data-theme="light"] [class*="text-amber-400/"], [data-theme="light"] [class*="text-amber-300/"],
+[data-theme="light"] [class*="text-amber-500/"] { color: #7A5C00 !important; }
+[data-theme="light"] .hover\:text-amber-400:hover, [data-theme="light"] .hover\:text-amber-300:hover { color: #5C4500 !important; }
+/* Yellow text that sits on a solid yellow fill stays dark */
+[data-theme="light"] .bg-amber-500 .text-amber-400, [data-theme="light"] .bg-amber-400 .text-amber-400 { color: #1A1600 !important; }
+
+[data-theme="dark"] .text-white\/10, [data-theme="dark"] .text-white\/15,
+[data-theme="dark"] .text-white\/20 { color: rgba(255,255,255,0.4) !important; }
+[data-theme="dark"] .text-white\/25, [data-theme="dark"] .text-white\/30 { color: rgba(255,255,255,0.46) !important; }
+[data-theme="dark"] [class*="placeholder:text-white"]::placeholder { color: rgba(255,255,255,0.34) !important; }
