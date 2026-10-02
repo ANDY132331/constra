@@ -65,23 +65,15 @@ export async function unsubscribeFromPush(): Promise<void> {
   localStorage.removeItem(PUSH_SUB_KEY);
 }
 
-export async function sendPushEvent(payload: {
-  companyId?: string;
-  title: string;
-  body: string;
-  url?: string;
+export async function sendPushEvent(event: {
+  event: "clock-in" | "clock-out";
+  workerId: string;
+  projectId?: string;
+  hours?: number;
 }): Promise<void> {
-  // Get local subscription for self-push (works even without Supabase storing it)
-  let subscription: object | null = null;
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) subscription = sub.toJSON();
-  } catch {}
-
   fetch("/api/push/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...payload, subscription }),
+    body: JSON.stringify(event),
   }).catch(() => {});
 }

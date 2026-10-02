@@ -29,52 +29,46 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const raw = await req.json();
-    const companyId = typeof raw.companyId === "string" ? raw.companyId : undefined;
-    const title = typeof raw.title === "string" ? raw.title.slice(0, 100) : "";
-    const body = typeof raw.body === "string" ? raw.body.slice(0, 500) : "";
-    // Only allow same-origin relative URLs for the notification action
-    const rawUrl = typeof raw.url === "string" ? raw.url : "/dashboard";
-    const url = rawUrl.startsWith("/") && !rawUrl.startsWith("//") ? rawUrl.slice(0, 200) : "/dashboard";
-    const directSub = raw.subscription;
+    // The server writes the notification from a known event, so callers can't push
+    // arbitrary text to everyone's phone. Only managers are notified, never the actor.
+    const raw = await req.json().catch(() => ({}));
+    const event = raw.event === "clock-in" || raw.event === "clock-out" ? raw.event : null;
+    const workerId = typeof raw.workerId === "string" ? raw.workerId : "";
+    const projectId = typeof raw.projectId === "string" ? raw.projectId : "";
+    const hours = typeof raw.hours === "number" && isFinite(raw.hours) ? Math.max(0, Math.min(raw.hours, 48)) : null;
+    if (!event || !workerId) return NextResponse.json({ error: "Unknown event" }, { status: 400 });
 
-    const payload = JSON.stringify({ title, body, url });
+    const { data: me } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
+    if (!me?.company_id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const companyId = me.company_id as string;
 
-    // When targeting a company, verify the caller belongs to it
-    if (companyId) {
-      const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
-      if (!profile || profile.company_id !== companyId) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
-    }
+    const { data: worker } = await serviceSupabase.from("profiles").select("name, company_id").eq("id", workerId).single();
+    if (!worker || worker.company_id !== companyId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { data: project } = projectId
+      ? await serviceSupabase.from("projects").select("name, company_id").eq("id", projectId).single()
+      : { data: null };
+    const projectName = project && project.company_id === companyId ? project.name : "a project";
 
-    if (directSub) {
-      // Verify this subscription belongs to the authenticated user
-      const { data: ownSub } = await serviceSupabase
-        .from("push_subscriptions")
-        .select("user_id")
-        .eq("endpoint", directSub.endpoint)
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (!ownSub) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
-      try {
-        await webPush.sendNotification(directSub, payload);
-      } catch (e: unknown) {
-        if ((e as { statusCode?: number }).statusCode === 410) {
-          await serviceSupabase.from("push_subscriptions").delete().eq("endpoint", directSub.endpoint);
-        }
-      }
-      return NextResponse.json({ ok: true, sent: 1 });
-    }
+    const title = event === "clock-in" ? `${worker.name} clocked in` : `${worker.name} clocked out`;
+    const text = event === "clock-in"
+      ? `Working on ${projectName}`
+      : `${hours != null ? hours.toFixed(1) + "h on " : ""}${projectName}`;
+    const payload = JSON.stringify({ title, body: text, url: "/time-tracking" });
 
-    if (!companyId) return NextResponse.json({ error: "Missing companyId" }, { status: 400 });
+    const { data: managers } = await serviceSupabase
+      .from("profiles")
+      .select("id")
+      .eq("company_id", companyId)
+      .in("role", ["Admin", "Project Manager", "Foreman"])
+      .neq("id", user.id);
+    const managerIds = (managers ?? []).map((m) => m.id as string);
+    if (!managerIds.length) return NextResponse.json({ ok: true, sent: 0 });
 
     const { data: rows } = await serviceSupabase
       .from("push_subscriptions")
       .select("subscription, endpoint")
-      .eq("company_id", companyId);
+      .eq("company_id", companyId)
+      .in("user_id", managerIds);
 
     if (!rows?.length) return NextResponse.json({ ok: true, sent: 0 });
 

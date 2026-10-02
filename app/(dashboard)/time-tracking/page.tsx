@@ -505,8 +505,7 @@ export default function TimeTrackingPage() {
     updateWorker(worker.id, { clockedIn: true, clockInTime: now, photo: avatar, clockInGps: gps });
 
     // Fire push notification to all subscribed devices
-    const proj = getProjectById(projectId);
-    try { sendPushEvent({ companyId: companyId ?? undefined, title: `${worker.name} clocked in`, body: `Working on ${proj?.name ?? "a project"}`, url: "/time-tracking" }); } catch {}
+    void sendPushEvent({ event: "clock-in", workerId: worker.id, projectId });
 
     // Update device history
     const existing = worker.deviceHistory ?? [];
@@ -542,9 +541,8 @@ export default function TimeTrackingPage() {
     openEntries.forEach((e) => updateClockEntry(e.id, { clockOut: now }));
     if (entry) {
       const worker = getWorkerById(workerId);
-      const project = getProjectById(entry.projectId);
       const hrs = ((now.getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1);
-      try { sendPushEvent({ companyId: companyId ?? undefined, title: `${worker?.name ?? "Worker"} clocked out`, body: `${hrs}h on ${project?.name ?? "project"}`, url: "/time-tracking" }); } catch {}
+      void sendPushEvent({ event: "clock-out", workerId: entry.workerId, projectId: entry.projectId, hours: Number(hrs) });
       toast.success(`${worker?.name ?? "Worker"} clocked out — ${hrs}h logged`);
     }
     // Always clear the worker's live status, even if no open entry was found (fixes stale Supabase state)
