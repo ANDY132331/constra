@@ -188,7 +188,7 @@ export default function OnboardingPage() {
 
       // Sign in immediately after account creation
       const supabase = getClient();
-      const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
       setLoading(false);
       if (signInErr) { setError(signInErr.message); return; }
 
@@ -220,7 +220,7 @@ export default function OnboardingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           inviteCode: inviteCode.trim().toUpperCase(),
-          email: joinEmail,
+          email: joinEmail.trim().toLowerCase(),
           password: joinPassword,
           firstName: joinFirstName,
           lastName: joinLastName,
@@ -236,7 +236,7 @@ export default function OnboardingPage() {
 
       const supabase = getClient();
       const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: joinEmail,
+        email: joinEmail.trim().toLowerCase(),
         password: joinPassword,
       });
       setLoading(false);

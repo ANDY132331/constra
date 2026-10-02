@@ -235,7 +235,7 @@ function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           inviteCode: joinCode,
-          email: joinEmail,
+          email: joinEmail.trim().toLowerCase(),
           password: joinPassword,
           firstName: joinFirstName,
           lastName: joinLastName,
@@ -246,7 +246,7 @@ function LoginForm() {
 
       const supabase = getClient();
       const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: joinEmail,
+        email: joinEmail.trim().toLowerCase(),
         password: joinPassword,
       });
       setLoading(false);
