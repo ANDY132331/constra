@@ -402,6 +402,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Reload everything from the database (after a rejected write, a realtime gap, or a long background)
+  const resyncRef = useRef<(() => Promise<void>) | null>(null);
+  const resyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleResync = useCallback(() => {
+    if (resyncTimerRef.current) clearTimeout(resyncTimerRef.current);
+    resyncTimerRef.current = setTimeout(function run() {
+      // Don't overwrite optimistic changes that are still being written
+      if (savingCountRef.current > 0) { resyncTimerRef.current = setTimeout(run, 1500); return; }
+      resyncTimerRef.current = null;
+      if (navigator.onLine) void resyncRef.current?.().catch(() => {});
+    }, 1200);
+  }, []);
+
   // ── Supabase boot ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!SUPABASE_ENABLED) return;
@@ -528,6 +541,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
+    let realtimeDropped = false;
 
     function setupRealtime(companyId: string) {
       if (realtimeChannel) supabase.removeChannel(realtimeChannel);
@@ -707,6 +721,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
         .subscribe((status) => {
           setTransient((t) => ({ ...t, isRealtimeConnected: status === "SUBSCRIBED" }));
+          // Changes made while the channel was down never arrive, so catch up on reconnect
+          if (status === "SUBSCRIBED" && realtimeDropped) { realtimeDropped = false; scheduleResync(); }
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") realtimeDropped = true;
         });
     }
 
@@ -738,6 +755,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             }
             const companyId = profile.company_id as string;
             await loadAllData(companyId, user.id);
+            resyncRef.current = () => loadAllData(companyId, user.id);
             setupRealtime(companyId);
           })(),
           timeout,
@@ -749,15 +767,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     boot();
 
+    // A phone app can sit in the background for hours; reload when it comes back
+    let hiddenAt = 0;
+    const onVisibility = () => {
+      if (document.hidden) { hiddenAt = Date.now(); return; }
+      if (hiddenAt && Date.now() - hiddenAt > 5 * 60_000) scheduleResync();
+      hiddenAt = 0;
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user) boot();
       if (event === "SIGNED_OUT") {
+        resyncRef.current = null;
         if (realtimeChannel) supabase.removeChannel(realtimeChannel);
         setState({ ...defaultState(), isLoading: false });
       }
     });
 
     return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
       subscription.unsubscribe();
       if (realtimeChannel) supabase.removeChannel(realtimeChannel);
     };
@@ -790,6 +819,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.error(`[store:${label}]`, err);
       // Supabase reports a dropped connection as an error without a Postgres code
       if (!err.code && /fetch|network|load failed/i.test(err.message ?? "")) { queueOrWarn(); return; }
+      // The change is already on screen; reload so it doesn't look saved when it wasn't
+      scheduleResync();
       if (err.code === "42501") { toast.error(err.message || "You don't have permission to make that change"); return; }
       toast.error("Save failed — check your connection and try again");
     }, (e: unknown) => {

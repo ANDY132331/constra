@@ -153,7 +153,7 @@ export default function DailyReportsPage() {
     setForm({ ...emptyForm(), projectId: form.projectId, weather: form.weather, temperatureF: form.temperatureF, date: toLocalDateString(nextDay) });
     setShowForm(false);
     toast.success("Daily report created");
-  }, [form, addDailyReport, currentUser.id]);
+  }, [form, addDailyReport, currentUser.id, metric]);
 
   const handleExportPdf = useCallback(async (report: DailyReport) => {
     setPdfLoading(true);
@@ -167,7 +167,7 @@ export default function DailyReportsPage() {
     } finally {
       setPdfLoading(false);
     }
-  }, [projects, workers]);
+  }, [projects, workers, metric]);
 
   const projectMap = new Map(projects.map((p) => [p.id, p]));
   const workerMap = new Map(workers.map((w) => [w.id, w]));
