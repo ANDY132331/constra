@@ -49,7 +49,7 @@ begin
      or (TG_ARGV[1] <> '' and public.caller_has_page(TG_ARGV[1])) then
     return coalesce(new, old);
   end if;
-  raise exception 'You don''t have permission to change % records', replace(TG_TABLE_NAME, '_', ' ')
+  raise exception 'You don''t have permission to change %', replace(TG_TABLE_NAME, '_', ' ')
     using errcode = '42501';
 end;
 $$;
