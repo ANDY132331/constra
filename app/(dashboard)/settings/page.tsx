@@ -667,7 +667,7 @@ function SettingsInner() {
                 <Globe size={16} className="text-amber-400" />
                 <div>
                   <h4 className="text-[14px] font-bold text-white">Language</h4>
-                  <p className="text-[11px] text-white/35">Display language for the entire app.</p>
+                  <p className="text-[11px] text-white/35">Your language on this device. Everyone on your crew can pick their own.</p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -681,6 +681,7 @@ function SettingsInner() {
               </div>
             </div>
 
+            {isAdmin && (<>
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-4">
                 <DollarSign size={16} className="text-amber-400" />
@@ -721,6 +722,7 @@ function SettingsInner() {
                 ))}
               </div>
             </div>
+            </>)}
           </div>
         )}
 

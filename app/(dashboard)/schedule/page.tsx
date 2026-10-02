@@ -491,7 +491,7 @@ export default function SchedulePage() {
                             className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                             <Pencil size={13} />
                           </button>
-                          <button aria-label="Close" onClick={() => setDeleteEventConfirm(e.id)}
+                          <button aria-label="Delete event" onClick={() => setDeleteEventConfirm(e.id)}
                             className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                             <X size={13} />
                           </button>
@@ -771,7 +771,7 @@ export default function SchedulePage() {
                               className="p-1 rounded text-white/25 hover:text-white/60 active:text-white/60 transition-colors">
                               <Pencil size={11} />
                             </button>
-                            <button aria-label="Close" onClick={() => setDeleteEventConfirm(e.id)}
+                            <button aria-label="Delete event" onClick={() => setDeleteEventConfirm(e.id)}
                               className="p-1 rounded text-white/25 hover:text-red-400 active:text-red-400 transition-colors">
                               <X size={12} />
                             </button>

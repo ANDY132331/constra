@@ -891,7 +891,7 @@ export default function CrewPage() {
                             maxLength={100}
                             value={cert.name}
                             onChange={(e) => setCertifications((prev) => prev.map((c, i) => i === idx ? { ...c, name: e.target.value } : c))} />
-                          <button aria-label="Close" type="button"
+                          <button aria-label="Remove certification" type="button"
                             onClick={() => setCertifications((prev) => prev.filter((_, i) => i !== idx))}
                             className="p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
                             <X size={13} />

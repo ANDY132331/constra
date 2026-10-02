@@ -372,7 +372,7 @@ export default function BlueprintsPage() {
                               >
                                 <Check size={11} />
                               </button>
-                              <button aria-label="Close"
+                              <button aria-label="Delete pin"
                                 onClick={() => setDeletePinConfirm(pin.id)}
                                 className="w-7 h-7 rounded bg-white/[0.05] text-white/30 hover:bg-red-500/15 hover:text-red-400 flex items-center justify-center transition-colors"
                               >

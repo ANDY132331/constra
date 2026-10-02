@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { ShieldAlert, Plus, Search, AlertTriangle, Info, Zap, User, Building2, X, Trash2, Pencil, FileText } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { isForemanOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
@@ -48,6 +49,8 @@ const blank: IncidentForm = {
 export default function SafetyPage() {
   const { safetyIncidents, projects, workers, currentUser, currency, addSafetyIncident, updateSafetyIncident, deleteSafetyIncident, getWorkerById, getProjectById } = useStore();
   const regulator = currency === "USD" ? "OSHA" : "Regulator";
+  // Anyone can report; only foreman+ can change or remove a report (enforced in the database too)
+  const canManage = isForemanOrAbove(currentUser.role);
   const t = useT();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -296,6 +299,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     >
                       <FileText size={13} />
                     </button>
+                    {canManage && (<>
                     <button aria-label="Edit"
                       onClick={() => openEdit(incident)}
                       className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
@@ -308,6 +312,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     >
                       <Trash2 size={13} />
                     </button>
+                    </>)}
                   </div>
                 </div>
                 {project && (
@@ -464,6 +469,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                             className="p-1 rounded hover:bg-white/8 text-white/30 hover:text-amber-400 active:text-amber-400 transition-all">
                             <FileText size={12} />
                           </button>
+                          {canManage && (<>
                           <button aria-label="Edit" onClick={() => openEdit(incident)}
                             className="p-1 rounded hover:bg-white/8 text-white/30 hover:text-white/60 active:text-white/60 transition-all">
                             <Pencil size={12} />
@@ -472,6 +478,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                             className="p-1 rounded hover:bg-red-500/15 text-white/30 hover:text-red-400 active:text-red-400 transition-all">
                             <Trash2 size={12} />
                           </button>
+                          </>)}
                         </div>
                       </div>
                       <p className="text-[13px] text-white/70 mb-3 leading-relaxed">{incident.description}</p>

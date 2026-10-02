@@ -487,7 +487,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         onboarded: true,
         companyName: co?.name ?? s.companyName,
         isPro,
-        language: (co?.language ?? s.language) as Locale,
+        language: ((() => { try { return localStorage.getItem("constra_language"); } catch { return null; } })() ?? co?.language ?? s.language) as Locale,
         currency: (co?.currency ?? s.currency) as CurrencyCode,
         industry: co?.industry ?? s.industry,
         workers: (profilesData ?? []).map(dbToWorker),
@@ -790,6 +790,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.error(`[store:${label}]`, err);
       // Supabase reports a dropped connection as an error without a Postgres code
       if (!err.code && /fetch|network|load failed/i.test(err.message ?? "")) { queueOrWarn(); return; }
+      if (err.code === "42501") { toast.error(err.message || "You don't have permission to make that change"); return; }
       toast.error("Save failed — check your connection and try again");
     }, (e: unknown) => {
       console.error(`[store:${label}]`, e);
@@ -1482,8 +1483,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [up]);
 
   const setLanguage = useCallback((l: Locale) => {
+    // Per person, not per company: each crew member reads the app in their own language
     up((s) => ({ ...s, language: l }));
-    bg(() => getClient().from("companies").update({ language: l }).eq("id", companyIdRef.current!), "setLanguage");
+    try { localStorage.setItem("constra_language", l); } catch { /* storage unavailable */ }
   }, [up]);
 
   const setCurrency = useCallback((c: CurrencyCode) => {
@@ -1499,7 +1501,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setTheme = useCallback((t: "dark" | "light") => {
     up((s) => ({ ...s, theme: t }));
     if (typeof window !== "undefined") localStorage.setItem("constra_theme", t);
-    bg(() => getClient().from("companies").update({ theme: t }).eq("id", companyIdRef.current!), "setTheme");
   }, [up]);
 
   const setOnboarded = useCallback((v: boolean) =>

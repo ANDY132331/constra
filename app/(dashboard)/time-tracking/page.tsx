@@ -1032,7 +1032,7 @@ export default function TimeTrackingPage() {
                                 <span className={`text-[13px] font-black tabular-nums ${hrs ? "text-white" : "text-amber-400"}`}>
                                   {hrs ? `${hrs}h` : elapsed(entry.clockIn)}
                                 </span>
-                                {!isLive && (
+                                {!isLive && !isEmployee && (
                                   <button aria-label="Edit"
                                     onClick={() => { const w = getWorkerById(entry.workerId); setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: w?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut }); }}
                                     className="text-white/20 active:text-white/60 ml-0.5"
@@ -1395,7 +1395,7 @@ export default function TimeTrackingPage() {
                       {flags.length > 1 && <span className="text-[9px] font-bold">{flags.length}</span>}
                     </button>
                   )}
-                  {!isLive && (
+                  {!isLive && !isEmployee && (
                     <button
                       onClick={() => {
                         const w = getWorkerById(entry.workerId);

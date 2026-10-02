@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, ChevronRight, Layers, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { isAdminOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
@@ -18,6 +19,7 @@ type PhotoForm = { caption: string; projectId: string; uploadedById: string; tag
 
 export default function PhotosPage() {
   const { photos, projects, workers, addPhoto, deletePhoto, getWorkerById, getProjectById, currentUser, companyId } = useStore();
+  const canDelete = (p: { uploadedById?: string }) => p.uploadedById === currentUser.id || isAdminOrAbove(currentUser.role);
   const [view, setView] = useState<View>("grid");
   const [search, setSearch] = useState("");
   const [tagFilter, setTagFilter] = useState("");
@@ -220,10 +222,10 @@ export default function PhotosPage() {
                       </div>
                     )}
                     {/* Always-visible on mobile (no hover), hover-revealed on desktop */}
-                    <button aria-label="Close" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
+                    {canDelete(photo) && <button aria-label="Delete photo" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
                       className="absolute top-2 right-2 w-6 h-6 bg-red-500/80 rounded-full flex items-center justify-center lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                       <X size={11} className="text-white" />
-                    </button>
+                    </button>}
                   </div>
                   <div className="px-3 py-2">
                     <p className="text-[10px] text-white/35">
@@ -390,10 +392,10 @@ export default function PhotosPage() {
                           </a>
                         )}
                       </div>
-                      <button aria-label="Close" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
+                      {canDelete(photo) && <button aria-label="Delete photo" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(photo.id); }}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
                         <X size={11} className="text-white" />
-                      </button>
+                      </button>}
                     </div>
                     <div className="p-3">
                       <div className="flex items-center gap-2 mb-2">
@@ -531,9 +533,9 @@ export default function PhotosPage() {
                           </a>
                         )}
                       </div>
-                      <button aria-label="Close" onClick={() => setDeleteConfirm(photo.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
+                      {canDelete(photo) && <button aria-label="Delete photo" onClick={() => setDeleteConfirm(photo.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all flex-shrink-0">
                         <X size={12} />
-                      </button>
+                      </button>}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project?.color ?? "#555" }} />
@@ -593,7 +595,7 @@ export default function PhotosPage() {
                           ? <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
                           : <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-1"><Upload size={16} className="text-amber-400/60" /><p className="text-[8px] text-white/40 text-center truncate w-full">{item.name}</p></div>
                         }
-                        <button aria-label="Close" onClick={() => setPhotoItems((prev) => prev.filter((_, j) => j !== i))}
+                        <button aria-label="Remove photo" onClick={() => setPhotoItems((prev) => prev.filter((_, j) => j !== i))}
                           className="absolute top-1 right-1 w-5 h-5 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
                           <X size={9} className="text-white" />
                         </button>

@@ -468,7 +468,7 @@ export default function EstimatesPage() {
                           <input className={inp} type="number" placeholder="0.00" value={item.rate}
                             onChange={(e) => updateItem(idx, "rate", e.target.value)} />
                         </div>
-                        <button aria-label="Close" onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10">
+                        <button aria-label="Remove line item" onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10">
                           <X size={14} />
                         </button>
                       </div>
