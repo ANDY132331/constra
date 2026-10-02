@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, GitPullRequest, DollarSign, Trash2, X,
-  ChevronRight, ChevronLeft, Download, CheckCircle2, Clock, XCircle, Ban, Pencil,
+  ChevronRight, ChevronLeft, Download, CheckCircle2, Clock, XCircle, Ban, Pencil, Send,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
@@ -47,7 +47,7 @@ const emptyForm = (nextNumber?: string): COForm => ({
 
 export default function ChangeOrdersPage() {
   const router = useRouter();
-  const { currentUser, projects, workers, currency, changeOrders, addChangeOrder, updateChangeOrder, deleteChangeOrder } = useStore();
+  const { currentUser, projects, workers, currency, companyName, changeOrders, addChangeOrder, updateChangeOrder, deleteChangeOrder } = useStore();
   const isAdmin = isAdminOrAbove(currentUser.role);
 
   const [search, setSearch] = useState("");
@@ -85,6 +85,19 @@ export default function ChangeOrdersPage() {
     pending: changeOrders.filter((c) => c.status === "pending").reduce((s, c) => s + c.amount, 0),
     approved: changeOrders.filter((c) => c.status === "approved").reduce((s, c) => s + c.amount, 0),
     all: changeOrders.reduce((s, c) => s + c.amount, 0),
+  };
+
+  // Clients approve or decline on a public page; the change order's id is the link token
+  const sendForApproval = async (co: ChangeOrder) => {
+    const url = `${window.location.origin}/co/${co.id}`;
+    const text = `${companyName || "Your contractor"} sent change order ${co.number} (${co.title}) for your approval.`;
+    if (navigator.share) {
+      try { await navigator.share({ title: `Change order ${co.number}`, text, url }); return; }
+      catch (e) { if ((e as Error).name === "AbortError") return; }
+    }
+    navigator.clipboard.writeText(url)
+      .then(() => toast.success("Approval link copied", { description: "Send it to your client by text or email." }))
+      .catch(() => toast.error("Couldn't copy — " + url));
   };
 
   const openNew = () => {
@@ -286,6 +299,11 @@ export default function ChangeOrdersPage() {
               {selected.status === "pending" && (
                 <div className="flex flex-col gap-2">
                   <button
+                    onClick={() => sendForApproval(selected)}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-black bg-amber-500 hover:bg-amber-400 px-3 py-1.5 rounded-full transition-colors">
+                    <Send size={12} /> Send to client
+                  </button>
+                  <button
                     onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); toast.success("Change order approved"); }}
                     className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors">
                     <CheckCircle2 size={12} /> Approve
@@ -475,6 +493,11 @@ export default function ChangeOrdersPage() {
               </div>
               {selected.status === "pending" && (
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => sendForApproval(selected)}
+                    className="flex items-center gap-1.5 text-[12px] font-semibold text-black bg-amber-500 hover:bg-amber-400 px-3 py-1.5 rounded-full transition-colors">
+                    <Send size={13} /> Send to client
+                  </button>
                   <button
                     onClick={() => { updateChangeOrder(selected.id, { status: "approved", approvedAt: new Date(), approvedBy: currentUser.name }); setSelected((p) => p ? { ...p, status: "approved", approvedAt: new Date(), approvedBy: currentUser.name } : null); toast.success("Change order approved"); }}
                     className="flex items-center gap-1.5 text-[12px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors"

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/demo", "/login", "/onboarding", "/auth", "/api/join", "/api/create-company", "/terms", "/privacy", "/reset-password", "/api/auth/", "/share/", "/api/share/", "/.well-known/", "/delete-account", "/api/restore-account"];
+const PUBLIC_PATHS = ["/demo", "/login", "/onboarding", "/auth", "/terms", "/privacy", "/support", "/reset-password", "/share/", "/pay/", "/co/", "/delete-account", "/.well-known/", "/opengraph-image", "/sitemap", "/robots"];
 
 export async function proxy(request: NextRequest) {
   // Allow through if Supabase isn't configured (local dev without env vars).
@@ -40,7 +40,9 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
+  // API routes check auth themselves (and webhooks/cron/public pay must stay reachable);
+  // "/" is the landing page only — a prefix match on it would make every path public.
+  const isPublic = path === "/" || path.startsWith("/api/") || PUBLIC_PATHS.some((p) => path.startsWith(p));
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

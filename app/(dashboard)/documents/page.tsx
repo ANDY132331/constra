@@ -13,6 +13,7 @@ import type { ProjectDocument, DocumentVersion } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { uploadDocument } from "@/lib/supabase/storage";
+import { compressImage } from "@/lib/compress-image";
 import { useFileUrl, resolveFileUrl } from "@/lib/supabase/signed-url";
 import { CustomSelect } from "@/components/ui/custom-select";
 
@@ -106,7 +107,8 @@ export default function DocumentsPage() {
     if (!files || !selectedProject) { if (!selectedProject) toast.error("Select a project first"); return; }
     setUploading(true);
     try {
-      for (const file of Array.from(files)) {
+      for (const original of Array.from(files)) {
+        const file = await compressImage(original);
         const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -191,7 +193,8 @@ export default function DocumentsPage() {
   }
 
   async function handleVersionUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+    const picked = e.target.files?.[0];
+    const file = picked ? await compressImage(picked) : undefined;
     if (!file || !previewDoc) return;
     setUploadingVersion(true);
     try {

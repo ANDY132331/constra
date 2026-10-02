@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { Download, X, Smartphone } from "lucide-react";
 
-const PUBLIC_PREFIXES = ["/", "/login", "/onboarding", "/reset-password", "/terms", "/privacy", "/support", "/share", "/pay", "/delete-account", "/demo"];
+const PUBLIC_PREFIXES = ["/", "/login", "/onboarding", "/reset-password", "/terms", "/privacy", "/support", "/share", "/pay", "/delete-account", "/demo", "/co/"];
 import { subscribeToPush } from "@/lib/push-client";
 import { useStore } from "@/lib/store";
 
