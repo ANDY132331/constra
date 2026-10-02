@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Upload, Search, Grid3X3, List, FolderOpen, X, MapPin, ChevronLeft, ChevronRight, Layers, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { compressImage } from "@/lib/compress-image";
 import { isAdminOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
@@ -76,7 +77,8 @@ export default function PhotosPage() {
     if (SUPABASE_ENABLED) {
       setUploading(true);
       try {
-        const results = await Promise.all(files.map(async (file) => {
+        const results = await Promise.all(files.map(async (original) => {
+          const file = await compressImage(original);
           const ext = file.name.split(".").pop() ?? "bin";
           const prefix = companyId ?? "shared";
           const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
