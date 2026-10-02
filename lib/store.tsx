@@ -357,6 +357,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           photos: state.photos.map((ph) => ph.url?.startsWith("data:") ? { ...ph, url: undefined } : ph),
           workers: state.workers.map((w) => w.photo?.startsWith("data:") ? { ...w, photo: undefined } : w),
           messages: state.messages.map((m) => m.attachmentData ? { ...m, attachmentData: undefined } : m),
+          // Inline images would blow the ~5 MB localStorage quota; the server copy is reloaded on start
+          clockEntries: state.clockEntries.map((e) => e.clockInPhoto?.startsWith("data:") ? { ...e, clockInPhoto: undefined } : e),
+          documents: state.documents.map((d) => ({
+            ...d,
+            dataUrl: d.dataUrl?.startsWith("data:") ? undefined : d.dataUrl,
+            versions: d.versions?.map((v) => (v.dataUrl?.startsWith("data:") ? { ...v, dataUrl: undefined } : v)),
+          })),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
       } catch {}

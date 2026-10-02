@@ -14,6 +14,33 @@ const CameraCapture = dynamic(
 );
 import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
 import { runVerification } from "@/lib/verification";
+import { uploadPhoto } from "@/lib/supabase/storage";
+import { SUPABASE_ENABLED } from "@/lib/supabase/client";
+import { useFileUrl } from "@/lib/supabase/signed-url";
+
+// Small inline thumbnail for the worker avatar (a few KB instead of the full selfie)
+function thumbnail(dataUrl: string, size = 96): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = size / Math.max(img.width, img.height);
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.7));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+function ClockPhoto({ src, className }: { src: string; className?: string }) {
+  const { url } = useFileUrl(src);
+  if (!url) return <div className={className} />;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={url} alt="" className={className} />;
+}
 import { sendPushEvent } from "@/lib/push-client";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { isForemanOrAbove } from "@/lib/permissions";
@@ -373,6 +400,7 @@ export default function TimeTrackingPage() {
 
   // Flag detail expansion (for touch/mobile accessibility)
   const [flagDetailId, setFlagDetailId] = useState<string | null>(null);
+  const [photoView, setPhotoView] = useState<{ src: string; caption: string } | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 30000);
@@ -462,9 +490,19 @@ export default function TimeTrackingPage() {
     const now = new Date();
     const deviceInfo = navigator.userAgent.slice(0, 200);
 
-    const newEntry = { workerId: worker.id, projectId, clockIn: now, clockInPhoto: dataUrl, gps, deviceInfo };
+    // Store the selfie in the private bucket and keep only its link on the entry; fall back to
+    // the inline image when offline so the clock-in still records a photo.
+    const storedUrl = SUPABASE_ENABLED && companyId && navigator.onLine
+      ? await Promise.race([
+          uploadPhoto(dataUrl, "clock-photos", companyId, `${worker.id}/${now.getTime()}.jpg`),
+          new Promise<null>((r) => setTimeout(() => r(null), 8000)),
+        ])
+      : null;
+    const avatar = await thumbnail(dataUrl);
+
+    const newEntry = { workerId: worker.id, projectId, clockIn: now, clockInPhoto: storedUrl ?? dataUrl, gps, deviceInfo };
     const entryId = addClockEntry(newEntry);
-    updateWorker(worker.id, { clockedIn: true, clockInTime: now, photo: dataUrl, clockInGps: gps });
+    updateWorker(worker.id, { clockedIn: true, clockInTime: now, photo: avatar, clockInGps: gps });
 
     // Fire push notification to all subscribed devices
     const proj = getProjectById(projectId);
@@ -485,7 +523,7 @@ export default function TimeTrackingPage() {
     // Run background verification silently after UI is updated
     const project = getProjectById(projectId);
     try {
-      const flags = await runVerification({ entry: newEntry, worker, project, pastEntries: clockEntries });
+      const flags = await runVerification({ entry: { ...newEntry, clockInPhoto: dataUrl }, worker, project, pastEntries: clockEntries });
       if (flags.length > 0) {
         updateClockEntry(entryId, { verificationFlags: flags });
       }
@@ -574,6 +612,7 @@ export default function TimeTrackingPage() {
         clockOut: undefined as Date | undefined,
         live: true,
         verificationFlags: activeEntry?.verificationFlags,
+        clockInPhoto: activeEntry?.clockInPhoto,
       };
     }),
     ...clockEntries
@@ -944,10 +983,24 @@ export default function TimeTrackingPage() {
                         <div key={entry.id} className={`px-4 py-4 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""} ${worstSev === "high" ? "bg-red-500/[0.03]" : ""}`}>
                           <div className="flex items-center gap-3">
                             {/* Avatar — square */}
-                            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-black"
-                              style={{ backgroundColor: worker.color + "22", color: worker.color }}>
-                              {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
-                            </div>
+                            {entry.clockInPhoto && !isEmployee ? (
+                              <button
+                                type="button"
+                                aria-label={`View ${worker.name}'s clock-in photo`}
+                                onClick={() => setPhotoView({
+                                  src: entry.clockInPhoto!,
+                                  caption: `${worker.name} · clocked in ${fmt(entry.clockIn)}${project ? ` · ${project.name}` : ""}`,
+                                })}
+                                className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-green-500/40"
+                              >
+                                <ClockPhoto src={entry.clockInPhoto} className="w-full h-full object-cover" />
+                              </button>
+                            ) : (
+                              <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-black"
+                                style={{ backgroundColor: worker.color + "22", color: worker.color }}>
+                                {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
+                              </div>
+                            )}
 
                             {/* Name + project */}
                             <div className="flex-1 min-w-0">
@@ -1428,6 +1481,17 @@ export default function TimeTrackingPage() {
       />
     )}
 
+    {photoView && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85" onClick={() => setPhotoView(null)} role="dialog" aria-label="Clock-in photo">
+        <div className="max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+          <ClockPhoto src={photoView.src} className="w-full rounded-lg min-h-[200px] bg-white/5" />
+          <div className="flex items-center justify-between gap-3 mt-3">
+            <p className="text-[13px] text-white/80">{photoView.caption}</p>
+            <button onClick={() => setPhotoView(null)} className="text-[13px] font-semibold text-white px-3 py-1.5 rounded-md bg-white/10">Close</button>
+          </div>
+        </div>
+      </div>
+    )}
     {editEntry && (
       <EditEntryModal
         entry={editEntry}

@@ -2,6 +2,7 @@
 // All functions return null when the check passes or cannot be evaluated.
 
 import type { ClockEntry, Worker, Project, GpsLocation, VerificationFlag } from "./mock-data";
+import { resolveFileUrl } from "./supabase/signed-url";
 
 // ── Geometry ──────────────────────────────────────────────────────────────────
 
@@ -88,10 +89,19 @@ export function checkOffSite(
 // (pHash). Two hashes with Hamming distance ≤ threshold are considered the
 // same scene. Runs only in the browser (canvas API).
 
-async function pHash(dataUrl: string): Promise<string> {
+async function pHash(src: string): Promise<string> {
   if (typeof document === "undefined") return "";
+  let dataUrl = src;
+  if (!src.startsWith("data:")) {
+    try {
+      dataUrl = (await resolveFileUrl(src)) ?? "";
+    } catch {
+      return "";
+    }
+  }
   return new Promise((resolve) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       try {
         const canvas = document.createElement("canvas");
@@ -134,7 +144,11 @@ export async function checkDuplicateImage(
   const newHash = await pHash(photoDataUrl);
   if (!newHash) return null;
 
-  const candidates = pastEntries.filter((e) => e.clockInPhoto);
+  // Most recent first; checking every historical photo would download hundreds of images per clock-in
+  const candidates = pastEntries
+    .filter((e) => e.clockInPhoto)
+    .sort((a, b) => new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime())
+    .slice(0, 40);
 
   for (const entry of candidates) {
     const existingHash = await pHash(entry.clockInPhoto!);
