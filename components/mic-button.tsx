@@ -1,6 +1,7 @@
 "use client";
 
 import { Mic, Square, X, Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { useAudioRecorder } from "@/lib/use-audio-recorder";
 import { useSpeech } from "@/lib/use-speech";
 
@@ -55,7 +56,7 @@ function AudioMicButton({
               if (navigator.permissions) {
                 navigator.permissions.query({ name: "microphone" as PermissionName }).then((s) => {
                   if (s.state === "denied") {
-                    alert("Microphone is blocked. Go to your browser Settings → Site Permissions → Microphone and allow access, then retry.");
+                    toast.error("Microphone is blocked", { description: "Allow microphone access for this site in your browser settings, then try again." });
                   } else {
                     clearError();
                     start();

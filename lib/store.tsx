@@ -379,7 +379,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (SUPABASE_ENABLED) {
         const synced = await flushQueue(getClient());
         if (synced > 0) {
-          setTransient((t) => ({ ...t, pendingSync: 0 }));
+          setTransient((t) => ({ ...t, pendingSync: queueLength() }));
           toast.success(`${synced} offline change${synced > 1 ? "s" : ""} synced`);
         }
       }
@@ -387,9 +387,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const goOffline = () => { isOnlineRef.current = false; setTransient((t) => ({ ...t, isOnline: false })); };
     window.addEventListener("online", goOnline);
     window.addEventListener("offline", goOffline);
+    // Changes queued in an earlier session (app closed while offline) never get an
+    // "online" event, so also flush on start and retry while anything is pending.
+    const retry = () => {
+      if (SUPABASE_ENABLED && navigator.onLine && queueLength() > 0) void goOnline();
+    };
+    const startTimer = setTimeout(retry, 3000);
+    const interval = setInterval(retry, 60_000);
     return () => {
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
+      clearTimeout(startTimer);
+      clearInterval(interval);
     };
   }, []);
 
@@ -763,21 +772,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function bg(fn: () => any, label: string, queuedOp?: Omit<QueuedOp, "id" | "timestamp">) {
     if (!SUPABASE_ENABLED || !companyIdRef.current) return;
-    if (!isOnlineRef.current) {
+    const queueOrWarn = () => {
       if (queuedOp) {
         enqueue(queuedOp);
         setTransient((t) => ({ ...t, pendingSync: queueLength() }));
+      } else {
+        toast.error("You're offline — that change wasn't saved", { id: "offline-unsaved", description: "Try again once you have signal." });
       }
-      return;
-    }
+    };
+    if (!isOnlineRef.current) { queueOrWarn(); return; }
     savingCountRef.current++;
     setTransient((t) => ({ ...t, isSaving: true, savedRecently: false }));
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
     Promise.resolve(fn()).then((result: { error: unknown } | null) => {
-      if (result?.error) {
-        console.error(`[store:${label}]`, result.error);
-        toast.error("Save failed — check your connection and try again");
-      }
+      const err = result?.error as { message?: string; code?: string } | undefined;
+      if (!err) return;
+      console.error(`[store:${label}]`, err);
+      // Supabase reports a dropped connection as an error without a Postgres code
+      if (!err.code && /fetch|network|load failed/i.test(err.message ?? "")) { queueOrWarn(); return; }
+      toast.error("Save failed — check your connection and try again");
+    }, (e: unknown) => {
+      console.error(`[store:${label}]`, e);
+      queueOrWarn();
     }).finally(() => {
       savingCountRef.current = Math.max(0, savingCountRef.current - 1);
       if (savingCountRef.current === 0) {
@@ -807,7 +823,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const merged = stateRef.current.workers.find((w) => w.id === id);
       if (!merged) return Promise.resolve({ error: null });
       return getClient().from("profiles").update(workerToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
-    }, "updateWorker");
+    }, "updateWorker", (() => {
+      // Queueable so an offline clock-in/out keeps the worker's on-site status in sync
+      const merged = stateRef.current.workers.find((w) => w.id === id);
+      if (!merged || !companyIdRef.current) return undefined;
+      return { table: "profiles", op: "update" as const, data: workerToDb({ ...merged, ...u }, companyIdRef.current) as Record<string, unknown>, eqId: id };
+    })());
   }, [up]);
 
   const deleteWorker = useCallback((id: string) => {
