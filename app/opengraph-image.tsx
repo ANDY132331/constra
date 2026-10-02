@@ -1,277 +1,101 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
-export const alt = "Constra — Field Workforce Management for Construction & Trades";
+export const alt = "Constra: run the job, not the paperwork. Field workforce management for construction and trades.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const FEATURES = [
-  "Time Tracking",
-  "GPS Verification",
-  "Invoicing",
-  "Safety Logs",
-  "Crew Management",
-  "Morning Brief",
-];
+const INK = "#151617";
+const GROUND = "#E7E5E0";
+const PAPER = "#F5F4F1";
+const HV = "#F5C400";
 
-export default function OGImage() {
+// Satori needs TTF/OTF; Google Fonts serves TTF to clients that don't advertise woff2 support.
+async function loadFont(family: string, weight: number): Promise<ArrayBuffer | null> {
+  try {
+    const css = await (await fetch(`https://fonts.googleapis.com/css2?family=${family}:wght@${weight}`)).text();
+    const url = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1];
+    return url ? await (await fetch(url)).arrayBuffer() : null;
+  } catch {
+    return null;
+  }
+}
+
+function Tape() {
+  return (
+    <div style={{ display: "flex", width: "100%", height: 22, overflow: "hidden", background: HV }}>
+      {Array.from({ length: 40 }, (_, i) => (
+        <div key={i} style={{ width: 22, height: 44, marginLeft: i === 0 ? -12 : 22, marginTop: -11, background: INK, transform: "skewX(-45deg)" }} />
+      ))}
+    </div>
+  );
+}
+
+export default async function OGImage() {
+  const [display, mono] = await Promise.all([loadFont("Barlow+Condensed", 800), loadFont("IBM+Plex+Mono", 500)]);
+  const fonts = [
+    ...(display ? [{ name: "Display", data: display, weight: 800 as const, style: "normal" as const }] : []),
+    ...(mono ? [{ name: "Mono", data: mono, weight: 500 as const, style: "normal" as const }] : []),
+  ];
+  const D = display ? "Display" : "sans-serif";
+  const M = mono ? "Mono" : "monospace";
+
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          background: "#0a0a0a",
-          padding: "64px 72px",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        {/* Amber glow top-left */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-200px",
-            left: "-100px",
-            width: "700px",
-            height: "700px",
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle at center, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.04) 45%, transparent 70%)",
-            display: "flex",
-          }}
-        />
-
-        {/* Top accent line */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: "15%",
-            width: "70%",
-            height: "2px",
-            background:
-              "linear-gradient(90deg, transparent 0%, rgba(245,158,11,0.8) 50%, transparent 100%)",
-            display: "flex",
-          }}
-        />
-
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              background: "#F5C400",
-              borderRadius: "14px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "26px",
-              fontWeight: "900",
-              color: "#000",
-              fontFamily: "system-ui, sans-serif",
-            }}
-          >
-            C
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-            <span
-              style={{
-                fontSize: "28px",
-                fontWeight: "900",
-                color: "#ffffff",
-                letterSpacing: "-0.5px",
-                lineHeight: "1",
-                display: "flex",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              Constra
-            </span>
-            <span
-              style={{
-                fontSize: "11px",
-                color: "rgba(255,255,255,0.25)",
-                fontWeight: "700",
-                letterSpacing: "3.5px",
-                display: "flex",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              WORKFORCE OS
-            </span>
-          </div>
-        </div>
-
-        {/* Headline */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            marginTop: "52px",
-            gap: "0px",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "64px",
-              fontWeight: "900",
-              color: "#ffffff",
-              lineHeight: "1.08",
-              letterSpacing: "-2px",
-              display: "flex",
-              fontFamily: "system-ui, sans-serif",
-            }}
-          >
-            The first app that runs
-          </span>
-          <div style={{ display: "flex", gap: "18px", alignItems: "baseline" }}>
-            <span
-              style={{
-                fontSize: "64px",
-                fontWeight: "900",
-                color: "#ffffff",
-                lineHeight: "1.08",
-                letterSpacing: "-2px",
-                display: "flex",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              your
-            </span>
-            <span
-              style={{
-                fontSize: "64px",
-                fontWeight: "900",
-                color: "#F5C400",
-                lineHeight: "1.08",
-                letterSpacing: "-2px",
-                display: "flex",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              entire
-            </span>
-            <span
-              style={{
-                fontSize: "64px",
-                fontWeight: "900",
-                color: "#ffffff",
-                lineHeight: "1.08",
-                letterSpacing: "-2px",
-                display: "flex",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              job site
-            </span>
-          </div>
-        </div>
-
-        {/* Subtext */}
-        <div
-          style={{
-            marginTop: "20px",
-            fontSize: "21px",
-            color: "rgba(255,255,255,0.40)",
-            lineHeight: "1.4",
-            display: "flex",
-            fontFamily: "system-ui, sans-serif",
-          }}
-        >
-          Time tracking, invoicing, crew management, safety logs — built for construction.
-        </div>
-
-        {/* Feature pills */}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginTop: "32px",
-            flexWrap: "wrap",
-          }}
-        >
-          {FEATURES.map((label) => (
-            <div
-              key={label}
-              style={{
-                background: "rgba(255,255,255,0.055)",
-                border: "1px solid rgba(255,255,255,0.09)",
-                borderRadius: "100px",
-                padding: "10px 22px",
-                fontSize: "15px",
-                color: "rgba(255,255,255,0.50)",
-                fontWeight: "600",
-                display: "flex",
-                alignItems: "center",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              {label}
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: GROUND, color: INK }}>
+        <Tape />
+        <div style={{ flex: 1, display: "flex", padding: "54px 72px 0", gap: 56 }}>
+          {/* Copy */}
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, fontFamily: M, fontSize: 20, letterSpacing: 3, color: "#4B4D50" }}>
+              <div style={{ width: 30, height: 12, background: INK }} />
+              FOR CONTRACTORS AND TRADE CREWS
             </div>
-          ))}
+            <div style={{ display: "flex", flexDirection: "column", fontFamily: D, fontWeight: 800, fontSize: 132, lineHeight: 0.9, marginTop: 26, letterSpacing: -1 }}>
+              <span>RUN THE JOB.</span>
+              <span>NOT THE</span>
+              <span>PAPERWORK.</span>
+            </div>
+          </div>
+
+          {/* Clock-in card */}
+          <div style={{ width: 330, display: "flex", flexDirection: "column", alignSelf: "flex-start", marginTop: 8, background: INK, color: "#ECEAE5", borderRadius: 30, padding: 14, boxShadow: "14px 14px 0 #F5C400" }}>
+            <div style={{ display: "flex", flexDirection: "column", background: "#101112", borderRadius: 20, padding: "22px 22px 24px" }}>
+              <div style={{ display: "flex", fontFamily: M, fontSize: 15, color: "#9A9C9F" }}>Dundas St. Reno</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 18, fontSize: 18, color: "#5BD08A" }}>
+                <div style={{ width: 11, height: 11, borderRadius: 11, background: "#5BD08A" }} />
+                On site · 06:58 in
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", fontFamily: D, fontWeight: 800, fontSize: 84, lineHeight: 1, marginTop: 10 }}>
+                4:12<span style={{ fontSize: 46, color: "#9A9C9F" }}>:08</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16, fontSize: 17, color: "#9A9C9F" }}>
+                <span>38 m from site</span><span style={{ color: "#5BD08A" }}>Verified</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 17, color: "#9A9C9F" }}>
+                <span>Photo on punch</span><span style={{ color: "#5BD08A" }}>Verified</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 20, background: HV, color: "#1A1600", borderRadius: 12, padding: "13px 0", fontSize: 20, fontWeight: 700 }}>
+                Clock out
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Bottom bar */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderTop: "1px solid rgba(255,255,255,0.07)",
-            paddingTop: "28px",
-            marginTop: "auto",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "17px",
-              color: "rgba(255,255,255,0.25)",
-              fontWeight: "700",
-              display: "flex",
-              fontFamily: "system-ui, sans-serif",
-            }}
-          >
-            getconstra.com
-          </span>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              background: "rgba(245,158,11,0.10)",
-              border: "1px solid rgba(245,158,11,0.22)",
-              borderRadius: "100px",
-              padding: "10px 24px",
-            }}
-          >
-            <div
-              style={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: "#F5C400",
-                display: "flex",
-              }}
-            />
-            <span
-              style={{
-                fontSize: "15px",
-                color: "#F5C400",
-                fontWeight: "700",
-                display: "flex",
-                fontFamily: "system-ui, sans-serif",
-              }}
-            >
-              Free beta · All features included · No credit card
-            </span>
+        {/* Footer bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: PAPER, borderTop: `2px solid ${INK}`, padding: "22px 72px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 42, height: 42, background: HV, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: D, fontWeight: 800, fontSize: 28 }}>C</div>
+            <span style={{ fontFamily: D, fontWeight: 800, fontSize: 34, letterSpacing: 1 }}>CONSTRA</span>
+          </div>
+          <div style={{ display: "flex", gap: 28, fontFamily: M, fontSize: 19, color: "#4B4D50" }}>
+            <span>GPS timesheets</span>
+            <span>Daily reports</span>
+            <span>Invoices</span>
+            <span style={{ color: INK }}>getconstra.com</span>
           </div>
         </div>
       </div>
     ),
-    { width: 1200, height: 630 },
+    { ...size, fonts },
   );
 }
