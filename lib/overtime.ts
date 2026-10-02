@@ -29,8 +29,8 @@ export function weekStartOf(d: Date): Date {
   return s;
 }
 
-function dayKey(d: Date): string {
-  return d.toDateString();
+function dayKey(d: Date | string): string {
+  return new Date(d).toDateString();
 }
 
 /**

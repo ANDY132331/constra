@@ -112,7 +112,9 @@ function buildOvertimeSummaries(
 }
 
 function escapeCsv(val: string | number): string {
-  const s = String(val);
+  let s = String(val);
+  // Spreadsheet apps run text starting with = + - @ as a formula (CSV injection)
+  if (typeof val === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
@@ -240,7 +242,8 @@ export function exportPayroll(
       : undefined;
 
   const content = adapter.serialize(rows, periodLabel, overtimeSummaries, overtimeSettings?.multiplier);
-  const blob = new Blob([content], { type: adapter.mimeType });
+  // BOM so Excel reads names with accents correctly (not for QuickBooks IIF)
+  const blob = new Blob([adapter.fileExtension === "csv" ? "FEFF" + content : content], { type: adapter.mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
