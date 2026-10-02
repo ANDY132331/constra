@@ -4,6 +4,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOff } from "lucide-react";
+import LiveSite from "@/components/landing/live-site";
 
 const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
@@ -171,9 +172,48 @@ function InvoiceSlip() {
   );
 }
 
+function PayrollCard() {
+  const bars = [0, 27, 35, 31.5, 27, 27, 5];
+  return (
+    <div className="lp-float" aria-hidden>
+      <div className="lp-float-top">
+        <span className="lp-mono">Payroll · this week</span>
+        <span className="lp-ready">Ready</span>
+      </div>
+      <p className="lp-float-total">$5,506.88</p>
+      <div className="lp-float-bars">
+        {bars.map((h, i) => <span key={i} style={{ height: `${(h / 35) * 100}%` }} />)}
+      </div>
+      <p className="lp-mono lp-float-meta">152.5 h · 20 h overtime</p>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const alreadyIn = useSyncExternalStore(noopSubscribe, readOnboarded, () => false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
+
+  // Hero mockups lean toward the pointer
+  useEffect(() => {
+    const tilt = tiltRef.current;
+    const hero = tilt?.closest(".lp-hero") as HTMLElement | null;
+    if (!tilt || !hero || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = hero.getBoundingClientRect();
+        tilt.style.setProperty("--tx", (((e.clientX - r.left) / r.width - 0.5) * 2).toFixed(3));
+        tilt.style.setProperty("--ty", (((e.clientY - r.top) / r.height - 0.5) * 2).toFixed(3));
+      });
+    };
+    const onLeave = () => { tilt.style.setProperty("--tx", "0"); tilt.style.setProperty("--ty", "0"); };
+    hero.addEventListener("pointermove", onMove);
+    hero.addEventListener("pointerleave", onLeave);
+    return () => { cancelAnimationFrame(raf); hero.removeEventListener("pointermove", onMove); hero.removeEventListener("pointerleave", onLeave); };
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -241,8 +281,12 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className="lp-hero-visual">
-              <PhoneMock />
-              <InvoiceSlip />
+              <div className="lp-tilt" ref={tiltRef}>
+                <PhoneMock />
+                <InvoiceSlip />
+                <PayrollCard />
+              </div>
+              <div className="lp-hero-shadow" aria-hidden />
             </div>
           </div>
         </section>
@@ -307,6 +351,8 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        <LiveSite />
 
         {/* Field-ready */}
         <section className="lp-field">
@@ -559,6 +605,59 @@ const CSS = `
 .lp-final-ctas{display:flex; align-items:center; gap:24px; flex-wrap:wrap}
 .lp-link-ink{color:var(--hv-ink); text-decoration-color:rgba(26,22,0,.4)}
 
+/* Hero 3D */
+.lp-hero-visual{perspective:1600px; perspective-origin:50% 40%}
+.lp-tilt{position:relative; transform-style:preserve-3d; transform:rotateY(calc(-14deg + var(--tx,0) * 8deg)) rotateX(calc(6deg - var(--ty,0) * 6deg)); transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.lp-tilt .lp-phone{position:relative; transform:translateZ(0)}
+.lp-tilt .lp-slip{left:-84px; bottom:-14px; transform:translateZ(70px) rotate(-2.5deg)}
+.lp-float{position:absolute; right:-78px; top:-30px; width:200px; background:var(--ink); color:var(--night-ink); border:1px solid #000; border-top:4px solid var(--hv); padding:12px 14px 12px; transform:translateZ(120px) rotate(1.5deg); box-shadow:0 26px 44px -18px rgba(0,0,0,.55); animation:lp-bob 7s ease-in-out infinite}
+@keyframes lp-bob{50%{translate:0 -9px}}
+.lp-float-top{display:flex; justify-content:space-between; align-items:center; color:var(--night-dim)}
+.lp-float-top .lp-mono{font-size:10.5px}
+.lp-ready{font-size:10.5px; font-weight:600; color:#7BD69E; border:1px solid #2F5E40; padding:1px 6px; border-radius:2px}
+.lp-float-total{font-family:var(--display); font-weight:800; font-size:30px; line-height:1; margin:10px 0 10px; letter-spacing:.01em}
+.lp-float-bars{display:flex; align-items:flex-end; gap:4px; height:34px; border-bottom:1px solid var(--night-rule)}
+.lp-float-bars span{flex:1; background:var(--hv); min-height:2px}
+.lp-float-meta{margin:8px 0 0; color:var(--night-dim); font-size:10.5px !important}
+.lp-hero-shadow{position:absolute; left:18%; right:18%; bottom:4px; height:28px; background:radial-gradient(closest-side,rgba(20,22,23,.3),transparent); pointer-events:none}
+
+/* Live site (3D) */
+.lp-sitecam{background:var(--night); color:var(--night-ink); padding-block:96px 104px}
+.lp-sitecam .lp-section-note{color:var(--night-dim)}
+.lp-live-head{display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap; margin-bottom:40px}
+.lp-stage3d{position:relative; height:clamp(440px,52vw,620px); border:1px solid var(--night-rule); background:#1B1A22; overflow:hidden; isolation:isolate}
+.lp-stage3d::before{content:""; position:absolute; inset:0 0 auto; height:6px; z-index:2; background:repeating-linear-gradient(135deg,var(--hv) 0 10px,var(--night) 10px 20px)}
+.lp-stage3d-flat{height:auto; min-height:0; padding:64px 20px 20px; background:var(--night2)}
+.lp-scene{position:absolute; inset:0}
+.lp-scene canvas{display:block; width:100% !important; height:100% !important; cursor:grab}
+.lp-hud{position:absolute; z-index:3; display:flex; align-items:center; gap:10px; background:rgba(21,22,23,.82); backdrop-filter:blur(8px); border:1px solid var(--night-rule); padding:8px 12px}
+.lp-hud-clock{top:22px; left:20px}
+.lp-hud-clock .lp-mono{color:var(--night-dim)}
+.lp-hud-clock b{font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:.02em; min-width:86px; font-variant-numeric:tabular-nums}
+.lp-live-dot{width:8px; height:8px; border-radius:50%; background:var(--night-rule)}
+.lp-live-dot[data-on="true"]{background:#2EAA62; box-shadow:0 0 0 4px rgba(46,170,98,.2)}
+.lp-hud-ctrl{left:20px; right:20px; bottom:20px; max-width:440px; display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; gap:4px 12px}
+.lp-play{grid-row:1/3; width:38px; height:38px; display:grid; place-items:center; background:var(--hv); color:var(--hv-ink); border:0; border-radius:2px; cursor:pointer}
+.lp-play:focus-visible{outline:3px solid var(--night-ink); outline-offset:2px}
+.lp-scrub{grid-column:2; align-self:end; height:4px; background:var(--night-rule); overflow:hidden}
+.lp-scrub span{display:block; height:100%; background:var(--hv); transform-origin:left}
+.lp-scrub-l,.lp-scrub-r{grid-row:2; font-size:10.5px !important; color:var(--night-dim)}
+.lp-scrub-l{grid-column:2; justify-self:start}
+.lp-scrub-r{grid-column:2; justify-self:end}
+.lp-feed{position:absolute; z-index:3; top:22px; right:20px; width:min(340px,40%); list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+.lp-feed-item{display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:center; background:rgba(21,22,23,.86); backdrop-filter:blur(8px); border:1px solid var(--night-rule); padding:8px 10px; opacity:0; transform:translateX(16px); transition:opacity .35s, transform .35s, border-color .35s}
+.lp-feed-item.is-on{opacity:1; transform:none}
+.lp-feed-item.is-new{border-color:var(--hv)}
+.lp-feed-icon{width:28px; height:28px; display:grid; place-items:center; background:var(--night2); color:var(--hv); border-radius:2px}
+.lp-feed-item[data-tone="go"] .lp-feed-icon{color:#7BD69E}
+.lp-feed-item[data-tone="warn"] .lp-feed-icon{color:#FF8A70}
+.lp-feed-text{display:flex; flex-direction:column; min-width:0}
+.lp-feed-text b{font-size:13px; font-weight:600; line-height:1.3}
+.lp-feed-text span{font-size:12px; color:var(--night-dim); line-height:1.35}
+.lp-feed-item time{font-size:10.5px !important; color:var(--night-dim); align-self:start; padding-top:2px}
+.lp-stage3d-flat .lp-feed{position:static; width:auto}
+.lp-stage3d-flat .lp-hud-clock{top:20px}
+
 /* Footer */
 .lp-footer{background:var(--night); color:var(--night-ink); padding-block:48px calc(48px + env(safe-area-inset-bottom,0px))}
 .lp-footer .lp-dim{color:var(--night-dim); font-size:14px; margin:10px 0 0}
@@ -599,7 +698,34 @@ const CSS = `
   .lp-replaces li{font-size:18px}
   .lp-price-card{box-shadow:4px 4px 0 var(--ink)}
 }
+@media (max-width:860px){
+  .lp-tilt .lp-slip{left:-70px; right:auto; margin:0}
+  .lp-float{right:-40px}
+  .lp-sitecam{padding-block:64px 72px}
+  .lp-stage3d{height:auto; display:flex; flex-direction:column}
+  .lp-scene{position:relative; inset:auto; height:min(440px,100vw)}
+  .lp-feed{position:relative; top:auto; right:auto; width:auto; padding:12px; gap:6px; flex-direction:column-reverse}
+  .lp-feed-item:not(.is-on){display:none}
+  .lp-feed-item.is-on:not(.is-new){opacity:.62}
+  .lp-hud-ctrl{position:relative; order:2; inset:auto; max-width:none; margin:0 12px; border-width:1px 0 0; background:transparent; backdrop-filter:none; padding:12px 0 4px}
+  .lp-feed{order:3; min-height:236px; justify-content:flex-end}
+  .lp-feed-item.is-old{display:none}
+  .lp-hud-clock{top:18px; left:12px; padding:6px 10px}
+  .lp-hud-clock b{font-size:18px; min-width:72px}
+}
+@media (max-width:600px){
+  .lp-tilt{transform:rotateY(-8deg) rotateX(4deg)}
+  .lp-tilt .lp-slip{left:-78px; width:190px}
+  .lp-hero-visual{margin-top:12px}
+  .lp-float{right:-4px; top:-6px; width:142px; padding:9px 10px; transform:translateZ(110px) rotate(1.5deg)}
+  .lp-float-top .lp-mono{font-size:9.5px}
+  .lp-ready{display:none}
+  .lp-float-meta{display:none}
+  .lp-float-total{font-size:24px; margin:6px 0 8px}
+  .lp-float-bars{height:24px}
+}
 @media (prefers-reduced-motion:reduce){
   .lp *{transition:none !important}
+  .lp-float{animation:none}
 }
 `;
