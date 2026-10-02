@@ -13,6 +13,7 @@ import type { ProjectDocument, DocumentVersion } from "@/lib/mock-data";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { uploadDocument } from "@/lib/supabase/storage";
+import { useFileUrl, resolveFileUrl } from "@/lib/supabase/signed-url";
 import { CustomSelect } from "@/components/ui/custom-select";
 
 type Category = ProjectDocument["category"];
@@ -62,6 +63,7 @@ export default function DocumentsPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const versionInputRef = useRef<HTMLInputElement>(null);
+  const { url: previewUrl, error: previewError } = useFileUrl(previewDoc?.publicUrl ?? previewDoc?.dataUrl);
   const pdfBlobRef = useRef<string | null>(null);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const isIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
@@ -146,7 +148,16 @@ export default function DocumentsPage() {
   }
 
   async function downloadDoc(doc: ProjectDocument) {
-    const url = doc.publicUrl ?? doc.dataUrl;
+    let url = doc.publicUrl ?? doc.dataUrl;
+    if (url) {
+      try {
+        url = await resolveFileUrl(url);
+      } catch (e) {
+        setDownloadErrorMsg(e instanceof Error ? e.message : "Couldn't open this file.");
+        setTimeout(() => setDownloadErrorMsg(""), 4000);
+        return;
+      }
+    }
     if (!url) {
       setDownloadErrorMsg(`"${doc.name}" has no stored file. Upload a real file to enable downloads.`);
       setTimeout(() => setDownloadErrorMsg(""), 4000);
@@ -448,7 +459,7 @@ export default function DocumentsPage() {
                 {/* Preview area */}
                 <div className="aspect-[4/3] bg-[#0d0d0d] flex items-center justify-center overflow-hidden relative">
                   {isImage ? (
-                    <img src={doc.publicUrl ?? doc.dataUrl} alt={doc.name} className="w-full h-full object-cover" />
+                    <DocThumb src={doc.publicUrl ?? doc.dataUrl} alt={doc.name} />
                   ) : (
                     <div className="flex flex-col items-center gap-2">
                       <Icon size={32} style={{ color: cat.color + "90" }} />
@@ -535,7 +546,9 @@ export default function DocumentsPage() {
             </div>
             <div className="flex-1 overflow-auto p-5 flex items-center justify-center bg-[#0d0d0d]">
               {(() => {
-                const url = previewDoc.publicUrl ?? previewDoc.dataUrl;
+                const url = previewUrl;
+                if (previewError) return <p className="text-[13px] text-red-400">{previewError}</p>;
+                if (!url && (previewDoc.publicUrl ?? previewDoc.dataUrl)) return <div className="text-white/30 text-[13px]">Loading…</div>;
                 const isImg = url?.startsWith("data:image") || (url?.startsWith("https://") && /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url));
                 const isDataPdf = url?.startsWith("data:application/pdf");
                 const isHttpsPdf = url?.startsWith("https://") && /\.pdf(\?|$)/i.test(url);
@@ -604,7 +617,9 @@ export default function DocumentsPage() {
   );
 }
 
-
-
-
-
+function DocThumb({ src, alt }: { src?: string; alt: string }) {
+  const { url } = useFileUrl(src);
+  if (!url) return <div className="w-full h-full" />;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={url} alt={alt} className="w-full h-full object-cover" />;
+}

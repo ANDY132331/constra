@@ -6,6 +6,7 @@ import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus, Download,
 import { useStore } from "@/lib/store";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { BlueprintViewer } from "@/components/blueprint-viewer";
+import { useFileUrl } from "@/lib/supabase/signed-url";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
@@ -34,6 +35,7 @@ export default function BlueprintsPage() {
   );
 
   const selectedDoc = projectBlueprints.find((d) => d.id === selectedDocId) ?? projectBlueprints[0] ?? null;
+  const { url: selectedUrl, error: selectedUrlError } = useFileUrl(selectedDoc?.publicUrl ?? selectedDoc?.dataUrl);
 
   const docPins = blueprintPins.filter((p) => {
     if (p.documentId !== selectedDoc?.id) return false;
@@ -158,7 +160,7 @@ export default function BlueprintsPage() {
             <div className="flex gap-2 mt-2">
               {(selectedDoc.publicUrl ?? selectedDoc.dataUrl) && (
                 <a
-                  href={selectedDoc.publicUrl ?? selectedDoc.dataUrl}
+                  href={selectedUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-400 text-[13px] font-bold active:scale-95 transition-transform"
@@ -168,7 +170,7 @@ export default function BlueprintsPage() {
               )}
               {(selectedDoc.publicUrl ?? selectedDoc.dataUrl) && (
                 <a
-                  href={selectedDoc.publicUrl ?? selectedDoc.dataUrl}
+                  href={selectedUrl}
                   download={selectedDoc.name}
                   className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/[0.05] border border-white/[0.07] rounded-2xl text-white/60 text-[13px] font-bold active:scale-95 transition-transform"
                 >
@@ -322,9 +324,14 @@ export default function BlueprintsPage() {
             <div className="flex flex-1 min-h-0 gap-0">
               {/* Viewer */}
               <div className="flex-1 p-4 min-h-0">
+                {selectedUrlError ? (
+                  <p className="text-[13px] text-red-400">{selectedUrlError}</p>
+                ) : !selectedUrl ? (
+                  <div className="text-white/30 text-[13px]">Loading drawing…</div>
+                ) : (
                 <BlueprintViewer
                   key={selectedDoc.id}
-                  fileUrl={selectedDoc.publicUrl ?? selectedDoc.dataUrl ?? ""}
+                  fileUrl={selectedUrl}
                   fileType={fileType(selectedDoc.publicUrl ?? selectedDoc.dataUrl)}
                   documentId={selectedDoc.id}
                   pins={docPins}
@@ -332,6 +339,7 @@ export default function BlueprintsPage() {
                   onUpdatePin={updateBlueprintPin}
                   onDeletePin={deleteBlueprintPin}
                 />
+                )}
               </div>
 
               {/* Pin list sidebar */}

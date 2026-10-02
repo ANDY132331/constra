@@ -9,7 +9,10 @@ function getResend() {
 const _from = process.env.EMAIL_FROM;
 export const FROM = (!_from || _from.includes("getconstra.com")) ? "Constra <notifications@getconstra.com>" : _from;
 const _appUrl = process.env.NEXT_PUBLIC_APP_URL;
-export const APP_URL = (!_appUrl || _appUrl.includes("localhost")) ? "https://getconstra.com" : _appUrl;
+// www.getconstra.com has no TLS certificate, so links there show a browser security warning.
+export const APP_URL = (!_appUrl || _appUrl.includes("localhost"))
+  ? "https://getconstra.com"
+  : _appUrl.replace(/\/+$/, "").replace("://www.getconstra.com", "://getconstra.com");
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
