@@ -7,6 +7,7 @@ import {
   Truck, FileText, ShieldAlert, Clock, Hash,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 
 type Result = {
   id: string;
@@ -19,7 +20,11 @@ type Result = {
 
 export function SearchModal() {
   const router = useRouter();
-  const { workers, projects, punchItems, equipment, invoices, safetyIncidents } = useStore();
+  const { workers, projects, punchItems, equipment, invoices, estimates, safetyIncidents, currentUser } = useStore();
+  const isAdmin = isAdminOrAbove(currentUser.role);
+  const isForeman = isForemanOrAbove(currentUser.role);
+  // Fields can be null in the database; never call string methods on them directly
+  const has = (v: string | null | undefined) => (v ?? "").toLowerCase().includes(q);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -75,28 +80,28 @@ export function SearchModal() {
   };
 
   const results: Result[] = q.length < 1 ? [] : [
-    ...workers
-      .filter((w) => w.name.toLowerCase().includes(q) || w.customRole.toLowerCase().includes(q) || w.email.toLowerCase().includes(q))
+    ...(isAdmin ? workers : [])
+      .filter((w) => has(w.name) || has(w.customRole) || has(w.email))
       .map((w) => ({
         id: "w-" + w.id,
         label: w.name,
-        sub: w.customRole + (w.email ? " · " + w.email : ""),
+        sub: (w.customRole || w.role) + (w.email ? " · " + w.email : ""),
         href: "/crew",
         icon: Users,
         color: "#22c55e",
       })),
     ...projects
-      .filter((p) => p.name.toLowerCase().includes(q) || p.client.toLowerCase().includes(q) || p.address.toLowerCase().includes(q))
+      .filter((p) => has(p.name) || has(p.client) || has(p.address))
       .map((p) => ({
         id: "p-" + p.id,
         label: p.name,
-        sub: p.client + " · " + p.status,
+        sub: (p.client ? p.client + " · " : "") + p.status,
         href: "/projects",
         icon: FolderKanban,
         color: "#F5C400",
       })),
     ...projects
-      .flatMap((p) => p.tasks.filter((t) => t.name.toLowerCase().includes(q)).map((t) => ({
+      .flatMap((p) => (isForeman ? p.tasks : []).filter((t) => has(t.name)).map((t) => ({
         id: "t-" + t.id,
         label: t.name,
         sub: "Task · " + p.name,
@@ -105,7 +110,7 @@ export function SearchModal() {
         color: "#8b5cf6",
       }))),
     ...punchItems
-      .filter((i) => i.title.toLowerCase().includes(q) || i.description.toLowerCase().includes(q))
+      .filter((i) => has(i.title) || has(i.description))
       .map((i) => ({
         id: "pi-" + i.id,
         label: i.title,
@@ -114,8 +119,8 @@ export function SearchModal() {
         icon: ClipboardList,
         color: "#ef4444",
       })),
-    ...equipment
-      .filter((e) => e.name.toLowerCase().includes(q) || e.type.toLowerCase().includes(q))
+    ...(isForeman ? equipment : [])
+      .filter((e) => has(e.name) || has(e.type))
       .map((e) => ({
         id: "eq-" + e.id,
         label: e.name,
@@ -124,18 +129,28 @@ export function SearchModal() {
         icon: Truck,
         color: "#06b6d4",
       })),
-    ...invoices
-      .filter((i) => i.number.toLowerCase().includes(q) || i.clientName.toLowerCase().includes(q))
+    ...(isAdmin ? invoices : [])
+      .filter((i) => has(i.number) || has(i.clientName))
       .map((i) => ({
         id: "inv-" + i.id,
         label: i.number + " — " + i.clientName,
         sub: "Invoice · " + i.status,
-        href: "/invoices",
+        href: `/invoices/${i.id}`,
         icon: FileText,
         color: "#F5C400",
       })),
+    ...(isAdmin ? estimates : [])
+      .filter((e) => has(e.number) || has(e.clientName) || has(e.projectName))
+      .map((e) => ({
+        id: "est-" + e.id,
+        label: e.number + " — " + e.clientName,
+        sub: "Estimate · " + e.status,
+        href: `/estimates/${e.id}`,
+        icon: FileText,
+        color: "#0ea5e9",
+      })),
     ...safetyIncidents
-      .filter((s) => s.description.toLowerCase().includes(q) || s.type.toLowerCase().includes(q))
+      .filter((s) => has(s.description) || has(s.type))
       .map((s) => ({
         id: "si-" + s.id,
         label: s.type.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -149,9 +164,9 @@ export function SearchModal() {
   const SHORTCUTS = [
     { label: "Dashboard", href: "/dashboard", icon: Clock, color: "#3b82f6" },
     { label: "Projects", href: "/projects", icon: FolderKanban, color: "#F5C400" },
-    { label: "Crew", href: "/crew", icon: Users, color: "#22c55e" },
+    ...(isAdmin ? [{ label: "Crew", href: "/crew", icon: Users, color: "#22c55e" }] : []),
     { label: "Punch List", href: "/punch-list", icon: ClipboardList, color: "#ef4444" },
-    { label: "Invoices", href: "/invoices", icon: FileText, color: "#8b5cf6" },
+    ...(isAdmin ? [{ label: "Invoices", href: "/invoices", icon: FileText, color: "#8b5cf6" }] : []),
     { label: "Safety", href: "/safety", icon: ShieldAlert, color: "#ef4444" },
   ];
 
