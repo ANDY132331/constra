@@ -172,7 +172,7 @@ export default function SupportPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-1">Email us</p>
-                <p className="text-[15px] font-black text-white tracking-tight leading-none truncate">support@getconstra.com</p>
+                <p className="text-[15px] font-black text-white tracking-tight leading-tight break-all">support@getconstra.com</p>
                 <p className="text-[11px] text-white/35 mt-1">Leave a message if the line is busy</p>
               </div>
               <ArrowRight size={16} className="text-white/20 group-hover:text-amber-400 transition-colors flex-shrink-0" />
