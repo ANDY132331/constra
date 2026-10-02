@@ -13,13 +13,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://meet.jit.si https://va.vercel-scripts.com`,
-      "img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://images.pexels.com https://server.arcgisonline.com https://*.jit.si",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://geocoding-api.open-meteo.com https://vitals.vercel-insights.com https://nominatim.openstreetmap.org https://api.groq.com https://*.jit.si wss://*.jit.si https://*.8x8.vc wss://*.8x8.vc",
-      "frame-src 'self' blob: https://meet.jit.si https://*.8x8.vc https://*.supabase.co https://www.youtube-nocookie.com",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://va.vercel-scripts.com`,
+      "img-src 'self' data: blob: https://*.supabase.co https://server.arcgisonline.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://geocoding-api.open-meteo.com https://vitals.vercel-insights.com https://nominatim.openstreetmap.org",
+      "frame-src 'self' blob: https://*.supabase.co",
       "font-src 'self' https://fonts.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "media-src 'self' blob: https://videos.pexels.com",
+      "media-src 'self' data: blob: https://*.supabase.co",
       "worker-src 'self' blob:",
       "object-src 'none'",
       "base-uri 'self'",
@@ -44,7 +44,6 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
-      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
   async headers() {
