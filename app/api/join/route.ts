@@ -17,7 +17,13 @@ export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
   if (!rateLimit(`join:${ip}`, 10, 3_600_000)) return rateLimitResponse();
 
-  const { inviteCode, email, password, firstName, lastName } = await request.json();
+  const raw = await request.json().catch(() => ({}));
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  const inviteCode = str(raw.inviteCode);
+  const email = str(raw.email).toLowerCase();
+  const password = typeof raw.password === "string" ? raw.password : "";
+  const firstName = str(raw.firstName);
+  const lastName = str(raw.lastName);
 
   if (!inviteCode || !email || !password || !firstName) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
@@ -60,7 +66,9 @@ export async function POST(request: NextRequest) {
   });
 
   if (signUpErr || !authData.user) {
-    const msg = signUpErr?.message ?? "Sign-up failed.";
+    const msg = /already (been )?registered|already exists/i.test(signUpErr?.message ?? "")
+      ? "An account with this email already exists. Sign in instead, or use a different email."
+      : signUpErr?.message ?? "Sign-up failed.";
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 

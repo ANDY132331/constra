@@ -176,7 +176,7 @@ function LoginForm() {
 
     try {
       const supabase = getClient();
-      const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
       if (err) {
         setLoading(false);
         failCount.current += 1;

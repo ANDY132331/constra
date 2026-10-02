@@ -24,8 +24,14 @@ export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
   if (!rateLimit(`create-company:${ip}`, 5, 3_600_000)) return rateLimitResponse();
 
-  const body = await request.json();
-  const { email, password, firstName, lastName, companyName, currency, language, industry } = body;
+  const body = await request.json().catch(() => ({}));
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  const email = str(body.email).toLowerCase();
+  const password = typeof body.password === "string" ? body.password : "";
+  const firstName = str(body.firstName);
+  const lastName = str(body.lastName);
+  const companyName = str(body.companyName);
+  const { currency, language, industry } = body;
 
   if (!email || !password || !firstName || !companyName) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
@@ -54,7 +60,10 @@ export async function POST(request: NextRequest) {
   });
 
   if (signUpErr || !authData.user) {
-    return NextResponse.json({ error: signUpErr?.message ?? "Sign-up failed." }, { status: 400 });
+    const msg = /already (been )?registered|already exists/i.test(signUpErr?.message ?? "")
+      ? "An account with this email already exists. Sign in instead, or use a different email."
+      : signUpErr?.message ?? "Sign-up failed.";
+    return NextResponse.json({ error: msg }, { status: 400 });
   }
 
   const userId = authData.user.id;
