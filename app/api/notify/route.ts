@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   // Verify the caller belongs to the company they're notifying
   const { data: profile } = await authClient
     .from("profiles")
-    .select("company_id")
+    .select("company_id, name")
     .eq("id", user.id)
     .single();
   if (!profile || profile.company_id !== body.companyId) {
@@ -85,6 +85,14 @@ export async function POST(request: Request) {
     data.workerName   = trunc(data.workerName,   100);
     data.time         = trunc(data.time,         50);
     data.dueDate      = trunc(data.dueDate,      50);
+    // Who sent/reported it comes from the session, never from the request,
+    // so nobody can send emails that appear to come from someone else
+    const me = (profile as { name?: string }).name || "A crew member";
+    data.senderName = me;
+    data.reporterName = me;
+    data.assignerName = me;
+    data.senderUserId = user.id;
+    data.reporterUserId = user.id;
   }
 
   const [workers, company] = await Promise.all([

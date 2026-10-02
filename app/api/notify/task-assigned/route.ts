@@ -17,10 +17,9 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
-  const { to, taskName, projectName, assigneeName, assignerName, dueDate, companyName } = body as {
+  const { to, taskName, projectName, assigneeName, dueDate } = body as {
     to: string; taskName: string; projectName: string;
-    assigneeName: string; assignerName: string;
-    dueDate?: string; companyName?: string;
+    assigneeName: string; dueDate?: string;
   };
 
   if (!to || !taskName || !projectName) {
@@ -30,10 +29,11 @@ export async function POST(request: Request) {
   // Verify `to` belongs to the caller's company (prevents using this as an open relay)
   const { data: callerProfile } = await authClient
     .from("profiles")
-    .select("company_id")
+    .select("company_id, name, role")
     .eq("id", user.id)
     .single();
-  if (!callerProfile) {
+  // Only people who can assign tasks (foreman and up) can send assignment emails
+  if (!callerProfile || !["Admin", "Project Manager", "Foreman"].includes(callerProfile.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const { data: targetProfile } = await authClient
@@ -47,14 +47,15 @@ export async function POST(request: Request) {
   }
 
   const safeName = (s: unknown, max = 100) => String(s ?? "").slice(0, max).replace(/[<>"'&]/g, "");
+  const { data: company } = await authClient.from("companies").select("name").eq("id", callerProfile.company_id).single();
   try {
     await sendEmail({
       to,
       subject: `You've been assigned: "${safeName(taskName)}" — ${safeName(projectName)}`,
       html: taskAssignedEmail({
-        company: safeName(companyName ?? "Constra"),
+        company: safeName(company?.name ?? "Constra"),
         assigneeName: safeName(assigneeName ?? "there"),
-        assignerName: safeName(assignerName ?? "Your manager"),
+        assignerName: safeName(callerProfile.name || "Your manager"),
         taskName: safeName(taskName),
         projectName: safeName(projectName),
         dueDate: dueDate ? safeName(dueDate, 50) : undefined,
