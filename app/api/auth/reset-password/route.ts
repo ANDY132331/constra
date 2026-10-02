@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse, type NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitShared } from "@/lib/rate-limit";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? req.headers.get("x-real-ip") ?? "unknown";
     // Silently drop over-limit requests so this can't be used to probe accounts or spam inboxes
-    if (!rateLimit(`reset-pw:ip:${ip}`, 10, 3_600_000) || !rateLimit(`reset-pw:email:${email}`, 3, 3_600_000)) {
+    if (!(await rateLimitShared(`reset-pw:ip:${ip}`, 10, 3_600_000)) || !(await rateLimitShared(`reset-pw:email:${email}`, 3, 3_600_000))) {
       return NextResponse.json({ ok: true });
     }
 

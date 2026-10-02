@@ -273,3 +273,36 @@ begin
     end if;
   end loop;
 end $$;
+
+-- ── Shared rate limiter ──────────────────────────────────────────────────────
+-- Serverless instances don't share memory, so in-process limits are easy to get around.
+-- Only the service role (server routes) can call this.
+create table if not exists public.rate_limits (
+  key      text primary key,
+  count    int not null,
+  reset_at timestamptz not null
+);
+alter table public.rate_limits enable row level security;  -- no policies: invisible to app users
+
+create or replace function public.hit_rate_limit(p_key text, p_max int, p_window_seconds int)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  c int;
+begin
+  insert into rate_limits as r (key, count, reset_at)
+  values (p_key, 1, now() + make_interval(secs => p_window_seconds))
+  on conflict (key) do update
+    set count    = case when r.reset_at < now() then 1 else r.count + 1 end,
+        reset_at = case when r.reset_at < now() then now() + make_interval(secs => p_window_seconds) else r.reset_at end
+  returning count into c;
+  if random() < 0.01 then
+    delete from rate_limits where reset_at < now() - interval '1 day';
+  end if;
+  return c <= p_max;
+end;
+$$;
+revoke all on function public.hit_rate_limit(text, int, int) from public, anon, authenticated;

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { sendEmail, welcomeEmail } from "@/lib/email";
-import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { rateLimitResponse, rateLimitShared } from "@/lib/rate-limit";
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // omits confusable chars
@@ -22,7 +22,7 @@ function generateInviteCode(): string {
 export async function POST(request: NextRequest) {
   // 5 account creations per IP per hour
   const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
-  if (!rateLimit(`create-company:${ip}`, 5, 3_600_000)) return rateLimitResponse();
+  if (!(await rateLimitShared(`create-company:${ip}`, 5, 3_600_000))) return rateLimitResponse();
 
   const body = await request.json().catch(() => ({}));
   const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");

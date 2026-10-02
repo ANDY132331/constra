@@ -7,7 +7,7 @@ import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
-import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { rateLimitResponse, rateLimitShared } from "@/lib/rate-limit";
 
 // POST /api/join
 // Looks up a company by invite code (service-role bypass), signs up the user,
@@ -15,7 +15,7 @@ import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 export async function POST(request: NextRequest) {
   // 10 join attempts per IP per hour
   const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
-  if (!rateLimit(`join:${ip}`, 10, 3_600_000)) return rateLimitResponse();
+  if (!(await rateLimitShared(`join:${ip}`, 10, 3_600_000))) return rateLimitResponse();
 
   const raw = await request.json().catch(() => ({}));
   const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");

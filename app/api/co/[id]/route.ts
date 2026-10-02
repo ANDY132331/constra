@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { rateLimit, rateLimitResponse, rateLimitShared } from "@/lib/rate-limit";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 
 // Public client-approval endpoint for change orders. The change order's random UUID is the
@@ -64,7 +64,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!rateLimit(`co-decide:${ipOf(req)}`, 10, 3_600_000)) return rateLimitResponse();
+  if (!(await rateLimitShared(`co-decide:${ipOf(req)}`, 10, 3_600_000))) return rateLimitResponse();
   const { id } = await params;
   if (!UUID.test(id) || !process.env.SUPABASE_SERVICE_ROLE_KEY) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

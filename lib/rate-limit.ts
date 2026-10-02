@@ -39,3 +39,29 @@ export function rateLimitResponse() {
     headers: { "Content-Type": "application/json", "Retry-After": "60" },
   });
 }
+
+/**
+ * Rate limit shared across all server instances (Postgres-backed, migration 013).
+ * Falls back to the in-memory limiter if the database function isn't available.
+ */
+export async function rateLimitShared(key: string, max: number, windowMs: number): Promise<boolean> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return rateLimit(key, max, windowMs);
+  }
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/hit_rate_limit`, {
+      method: "POST",
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ p_key: key, p_max: max, p_window_seconds: Math.ceil(windowMs / 1000) }),
+      cache: "no-store",
+    });
+    if (!res.ok) return rateLimit(key, max, windowMs);
+    return (await res.json()) === true;
+  } catch {
+    return rateLimit(key, max, windowMs);
+  }
+}
