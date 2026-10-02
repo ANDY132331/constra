@@ -206,7 +206,7 @@ export default function ReportsPage() {
               <button
                 onClick={async () => {
                   setPdfLoading(true);
-                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName }); toast.success("PDF downloaded"); }
+                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } }); toast.success("PDF downloaded"); }
                   catch { toast.error("Failed to export PDF"); }
                   finally { setPdfLoading(false); }
                 }}
@@ -445,7 +445,7 @@ export default function ReportsPage() {
                 onClick={async () => {
                   setPdfLoading(true);
                   try {
-                    await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName });
+                    await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } });
                     toast.success("PDF downloaded");
                   } catch {
                     toast.error("Failed to export PDF");

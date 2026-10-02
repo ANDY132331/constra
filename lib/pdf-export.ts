@@ -9,6 +9,7 @@ type PdfReportInput = {
   periodLabel: string;
   currency: string;
   companyName?: string;
+  overtime?: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number };
 };
 
 function fmt(n: number, currency: string) {
@@ -22,303 +23,344 @@ function fmtHours(n: number) {
 export async function exportReportPdf(input: PdfReportInput) {
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
+  const { computeWorkerOvertime } = await import("./overtime");
 
-  const { workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName } = input;
+  const { workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime } = input;
+  const company = companyName || "Constra";
+  const otSettings = overtime ?? { enabled: false, dailyThreshold: null, weeklyThreshold: null, multiplier: 1.5 };
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const M = 16;
+  const CW = W - M * 2;
 
-  const periodEntries = clockEntries.filter(
-    (e) => e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd
+  // Site palette: ink, concrete, paper, hi-vis
+  const INK: [number, number, number] = [21, 22, 23];
+  const INK2: [number, number, number] = [75, 77, 80];
+  const INK3: [number, number, number] = [130, 132, 135];
+  const RULE: [number, number, number] = [214, 211, 205];
+  const PAPER: [number, number, number] = [245, 244, 241];
+  const HV: [number, number, number] = [245, 196, 0];
+  const GO: [number, number, number] = [30, 122, 69];
+
+  const hrs = (e: ClockEntry) => (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
+  const entries = clockEntries.filter(
+    (e) => e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd && hrs(e) > 0,
   );
-
   const workerMap = new Map(workers.map((w) => [w.id, w]));
   const projectMap = new Map(projects.map((p) => [p.id, p]));
+  const money = (n: number) => fmt(n, currency);
+  const h2 = (n: number) => n.toFixed(2);
 
-  // ── Color tokens ─────────────────────────────────────────────────────────────
-  const AMBER  = [245, 158, 11]  as [number, number, number];
-  const AMBER_L= [254, 243, 199] as [number, number, number];  // amber-100
-  const DARK   = [15,  15,  15]  as [number, number, number];
-  const DARK2  = [28,  28,  28]  as [number, number, number];
-  const MID    = [90,  90,  90]  as [number, number, number];
-  const WHITE  = [255, 255, 255] as [number, number, number];
-  const GREEN  = [34,  197, 94]  as [number, number, number];
-  const RED    = [239, 68,  68]  as [number, number, number];
-
-  const PAGE_W  = doc.internal.pageSize.getWidth();
-  const PAGE_H  = doc.internal.pageSize.getHeight();
-  const MARGIN  = 16;
-  const CW      = PAGE_W - MARGIN * 2;
-  const genDate = new Date().toLocaleDateString("en-CA", { dateStyle: "long" });
-
-  // ── Summary stats ─────────────────────────────────────────────────────────────
-  const totalHours = periodEntries.reduce(
-    (s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0
-  );
-  const activeWorkerIds = new Set(periodEntries.map((e) => e.workerId));
-  const payrollByWorker = new Map<string, { name: string; role: string; hours: number; pay: number }>();
-  for (const e of periodEntries) {
-    const w = workerMap.get(e.workerId);
-    if (!w) continue;
-    const hours = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
-    const existing = payrollByWorker.get(w.id) ?? { name: w.name, role: w.customRole ?? w.role ?? "", hours: 0, pay: 0 };
-    existing.hours += hours;
-    existing.pay += hours * (w.hourlyRate ?? 0);
-    payrollByWorker.set(w.id, existing);
+  // ── Payroll per worker (overtime-aware) ────────────────────────────────────
+  type Row = { id: string; name: string; role: string; rate: number; reg: number; ot: number; regPay: number; otPay: number; gross: number };
+  const rows: Row[] = [];
+  for (const w of workers) {
+    const mine = entries.filter((e) => e.workerId === w.id);
+    if (!mine.length) continue;
+    const rate = w.hourlyRate ?? 0;
+    const b = computeWorkerOvertime(mine, rate, otSettings);
+    rows.push({
+      id: w.id, name: w.name, role: w.customRole || w.role || "", rate,
+      reg: b.regularHours, ot: b.overtimeHours, regPay: b.regularPay, otPay: b.overtimePay, gross: b.totalPay,
+    });
   }
-  const totalPay = [...payrollByWorker.values()].reduce((s, r) => s + r.pay, 0);
-  const budgetProjects = projects.filter((p) => p.budget > 0);
-  const totalBudget = budgetProjects.reduce((s, p) => s + p.budget, 0);
-  const totalSpent  = budgetProjects.reduce((s, p) => s + p.spent, 0);
+  rows.sort((a, b) => a.name.localeCompare(b.name));
+  const T = rows.reduce(
+    (t, r) => ({ reg: t.reg + r.reg, ot: t.ot + r.ot, regPay: t.regPay + r.regPay, otPay: t.otPay + r.otPay, gross: t.gross + r.gross }),
+    { reg: 0, ot: 0, regPay: 0, otPay: 0, gross: 0 },
+  );
+  const missingRates = rows.filter((r) => r.rate <= 0).map((r) => r.name);
 
-  // ── Header block (dark, 48mm tall) ────────────────────────────────────────────
-  doc.setFillColor(...DARK);
-  doc.rect(0, 0, PAGE_W, 48, "F");
-
-  // Left amber accent bar
-  doc.setFillColor(...AMBER);
-  doc.rect(0, 0, 5, 48, "F");
-
-  // Company name
-  doc.setTextColor(...AMBER);
-  doc.setFontSize(21);
-  doc.setFont("helvetica", "bold");
-  doc.text(companyName ?? "Constra", MARGIN + 4, 17);
-
-  // Report label
-  doc.setTextColor(...WHITE);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text("PAYROLL & TIME REPORT", MARGIN + 4, 27);
-
-  // Period + generated
-  doc.setTextColor(160, 160, 160);
-  doc.setFontSize(7.5);
-  doc.text(`Period: ${periodLabel}`, MARGIN + 4, 35);
-  doc.text(`Generated: ${genDate}`, MARGIN + 4, 42);
-
-  // Right-side: confidential badge
-  doc.setFillColor(40, 40, 40);
-  doc.roundedRect(PAGE_W - MARGIN - 30, 10, 30, 8, 1.5, 1.5, "F");
-  doc.setTextColor(120, 120, 120);
-  doc.setFontSize(6.5);
-  doc.setFont("helvetica", "bold");
-  doc.text("CONFIDENTIAL", PAGE_W - MARGIN - 15, 15.2, { align: "center" });
-
-  // ── KPI summary row (4 cards side by side) ────────────────────────────────────
-  const cardY = 55;
-  const cardH = 24;
-  const cardW = (CW - 9) / 4;  // 3 gaps of 3mm between 4 cards
-
-  const kpis = [
-    { label: "Total Hours", value: totalHours > 0 ? fmtHours(totalHours) : "0h", sub: `${periodEntries.length} sessions` },
-    { label: "Crew Active", value: activeWorkerIds.size.toString(), sub: `of ${workers.length} workers` },
-    { label: "Gross Pay", value: fmt(totalPay, currency), sub: totalPay > 0 ? "estimated" : "no rate data" },
-    { label: "Budget Used", value: totalBudget > 0 ? `${((totalSpent / totalBudget) * 100).toFixed(0)}%` : "—", sub: totalBudget > 0 ? fmt(totalSpent, currency) + " spent" : "no budgets set" },
-  ];
-
-  kpis.forEach((kpi, i) => {
-    const cx = MARGIN + i * (cardW + 3);
-    doc.setFillColor(26, 26, 26);
-    doc.roundedRect(cx, cardY, cardW, cardH, 2, 2, "F");
-    // Amber top border accent
-    doc.setFillColor(...AMBER);
-    doc.rect(cx, cardY, cardW, 1.5, "F");
-
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const tape = (y: number, h: number) => {
+    doc.setFillColor(...HV);
+    doc.rect(0, y, W, h, "F");
+    doc.setFillColor(...INK);
+    // Diagonal stripes: parallelograms of width h, every 2h
+    for (let x = -h * 2; x < W + h; x += h * 2) {
+      doc.triangle(x, y + h, x + h, y + h, x + h * 2, y, "F");
+      doc.triangle(x, y + h, x + h * 2, y, x + h, y, "F");
+    }
+  };
+  let y = 0;
+  const ensure = (needed: number) => {
+    if (y + needed > H - 22) { doc.addPage(); y = 20; }
+  };
+  const heading = (label: string, note?: string) => {
+    ensure(18);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(...WHITE);
-    doc.text(kpi.value, cx + cardW / 2, cardY + 13, { align: "center" });
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6);
-    doc.setTextColor(...AMBER);
-    doc.text(kpi.label.toUpperCase(), cx + cardW / 2, cardY + 7, { align: "center" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.5);
-    doc.setTextColor(110, 110, 110);
-    doc.text(kpi.sub, cx + cardW / 2, cardY + 20, { align: "center" });
-  });
-
-  // ── Section helper ─────────────────────────────────────────────────────────────
-  let y = cardY + cardH + 12;
-
-  const section = (title: string, icon?: string) => {
-    if (y > PAGE_H - 30) { doc.addPage(); y = 20; }
-    // Section heading row
-    doc.setFillColor(...DARK2);
-    doc.rect(MARGIN, y, CW, 8, "F");
-    // Left accent bar
-    doc.setFillColor(...AMBER);
-    doc.rect(MARGIN, y, 3, 8, "F");
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(...WHITE);
-    doc.text((icon ? icon + "  " : "") + title.toUpperCase(), MARGIN + 7, y + 5.5);
-    y += 11;
+    doc.setFontSize(11);
+    doc.setTextColor(...INK);
+    doc.text(label.toUpperCase(), M, y);
+    if (note) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...INK3);
+      doc.text(note, W - M, y, { align: "right" });
+    }
+    doc.setDrawColor(...INK);
+    doc.setLineWidth(0.6);
+    doc.line(M, y + 2, W - M, y + 2);
+    y += 7;
+  };
+  const tableBase = {
+    margin: { left: M, right: M },
+    theme: "plain" as const,
+    styles: { font: "helvetica", fontSize: 8, textColor: INK2, cellPadding: { top: 2.6, bottom: 2.6, left: 2.5, right: 2.5 }, lineColor: RULE, lineWidth: { bottom: 0.2 } },
+    headStyles: { fontStyle: "bold" as const, fontSize: 7, textColor: INK3, fillColor: [255, 255, 255] as [number, number, number], lineWidth: { bottom: 0.4 }, lineColor: INK },
+    footStyles: { fontStyle: "bold" as const, fontSize: 8.5, textColor: INK, fillColor: PAPER, lineWidth: { top: 0.4 }, lineColor: INK },
   };
 
-  // ── 1. Payroll Summary ─────────────────────────────────────────────────────────
-  section("Payroll Summary");
+  // ── Cover band ─────────────────────────────────────────────────────────────
+  tape(0, 5);
+  doc.setFillColor(...INK);
+  doc.rect(0, 5, W, 38, "F");
+  doc.setFillColor(...HV);
+  doc.rect(M, 14, 9, 9, "F");
+  doc.setTextColor(...INK);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text(company.charAt(0).toUpperCase(), M + 4.5, 20.3, { align: "center" });
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(17);
+  doc.text(company.toUpperCase(), M + 13, 21);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(200, 200, 196);
+  doc.text("PAYROLL REGISTER", M, 34);
+  doc.setTextColor(...HV);
+  doc.setFont("helvetica", "bold");
+  doc.text(periodLabel.toUpperCase(), M + 34, 34);
 
-  const payrollRows = [...payrollByWorker.values()]
-    .sort((a, b) => b.hours - a.hours)
-    .map((r) => [r.name, r.role, fmtHours(r.hours), fmt(r.pay, currency)]);
+  const fmtDay = (d: Date) => d.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(200, 200, 196);
+  doc.text(`${fmtDay(periodStart)} – ${fmtDay(periodEnd)}`, W - M, 18, { align: "right" });
+  doc.text(`Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, W - M, 24, { align: "right" });
+  doc.text(otSettings.enabled ? `Overtime at ${otSettings.multiplier}× pay` : "Overtime not applied", W - M, 30, { align: "right" });
+  doc.setTextColor(...HV);
+  doc.text("CONFIDENTIAL", W - M, 36, { align: "right" });
 
-  const totalPayHours = [...payrollByWorker.values()].reduce((s, r) => s + r.hours, 0);
-
-  if (payrollRows.length === 0) {
-    doc.setTextColor(140, 140, 140);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
-    doc.text("No hours recorded in this period.", MARGIN + 6, y + 5);
-    y += 14;
-  } else {
-    autoTable(doc, {
-      startY: y,
-      margin: { left: MARGIN, right: MARGIN },
-      head: [["Worker", "Role", "Total Hours", "Gross Pay"]],
-      body: payrollRows,
-      foot: [["", "TOTALS", fmtHours(totalPayHours), fmt(totalPay, currency)]],
-      headStyles: { fillColor: DARK, textColor: WHITE, fontSize: 8, fontStyle: "bold", cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 } },
-      footStyles: { fillColor: AMBER_L, textColor: [80, 50, 0], fontSize: 8, fontStyle: "bold", cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
-      bodyStyles: { fontSize: 8, textColor: MID, cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 } },
-      alternateRowStyles: { fillColor: [250, 250, 250] },
-      columnStyles: { 2: { halign: "right" }, 3: { halign: "right", fontStyle: "bold", textColor: DARK } },
-      styles: { lineColor: [232, 232, 232], lineWidth: 0.15 },
-      theme: "grid",
-    });
-    y = (doc as any).lastAutoTable.finalY + 12;
-  }
-
-  // ── 2. Timesheet Detail ────────────────────────────────────────────────────────
-  if (y > PAGE_H - 50) { doc.addPage(); y = 20; }
-  section("Timesheet Detail");
-
-  const timesheetRows = periodEntries
-    .map((e) => {
-      const w = workerMap.get(e.workerId);
-      const p = projectMap.get(e.projectId);
-      const hours = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
-      return {
-        date: new Date(e.clockIn).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" }),
-        worker: w?.name ?? "—",
-        project: p?.name ?? "—",
-        clockIn: new Date(e.clockIn).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-        clockOut: new Date(e.clockOut!).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-        hours,
-        sortMs: new Date(e.clockIn).getTime(),
-      };
-    })
-    .sort((a, b) => a.sortMs - b.sortMs || a.worker.localeCompare(b.worker));
-
-  if (timesheetRows.length === 0) {
-    doc.setTextColor(140, 140, 140);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
-    doc.text("No timesheet entries in this period.", MARGIN + 6, y + 5);
-    y += 14;
-  } else {
-    autoTable(doc, {
-      startY: y,
-      margin: { left: MARGIN, right: MARGIN },
-      head: [["Date", "Worker", "Project", "In", "Out", "Hours"]],
-      body: timesheetRows.map((r) => [r.date, r.worker, r.project, r.clockIn, r.clockOut, fmtHours(r.hours)]),
-      headStyles: { fillColor: DARK, textColor: WHITE, fontSize: 8, fontStyle: "bold", cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 } },
-      bodyStyles: { fontSize: 7.5, textColor: MID, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
-      alternateRowStyles: { fillColor: [250, 250, 250] },
-      columnStyles: {
-        0: { cellWidth: 28 },
-        3: { halign: "center", cellWidth: 18 },
-        4: { halign: "center", cellWidth: 18 },
-        5: { halign: "right", fontStyle: "bold", textColor: DARK, cellWidth: 16 },
-      },
-      styles: { lineColor: [232, 232, 232], lineWidth: 0.15 },
-      theme: "grid",
-    });
-    y = (doc as any).lastAutoTable.finalY + 12;
-  }
-
-  // ── 3. Project Cost Report ─────────────────────────────────────────────────────
-  if (y > PAGE_H - 50) { doc.addPage(); y = 20; }
-  section("Project Budget Report");
-
-  const budgetRows = projects
-    .filter((p) => p.budget > 0 || p.spent > 0)
-    .map((p) => {
-      const pct = p.budget > 0 ? ((p.spent / p.budget) * 100).toFixed(0) + "%" : "—";
-      const remaining = p.budget > 0 ? p.budget - p.spent : 0;
-      const health = p.budget > 0 && p.spent > p.budget ? "Over Budget"
-        : p.budget > 0 && p.spent / p.budget > 0.9 ? "At Risk"
-        : "On Track";
-      return [p.name, p.status, fmt(p.budget, currency), fmt(p.spent, currency), fmt(remaining, currency), pct, health];
-    });
-
-  if (budgetRows.length === 0) {
-    doc.setTextColor(140, 140, 140);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
-    doc.text("No projects with budget data.", MARGIN + 6, y + 5);
-    y += 14;
-  } else {
-    autoTable(doc, {
-      startY: y,
-      margin: { left: MARGIN, right: MARGIN },
-      head: [["Project", "Status", "Budget", "Spent", "Remaining", "Used %", "Health"]],
-      body: budgetRows,
-      headStyles: { fillColor: DARK, textColor: WHITE, fontSize: 8, fontStyle: "bold", cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 } },
-      bodyStyles: { fontSize: 7.5, textColor: MID, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
-      alternateRowStyles: { fillColor: [250, 250, 250] },
-      columnStyles: {
-        2: { halign: "right" },
-        3: { halign: "right", fontStyle: "bold" },
-        4: { halign: "right" },
-        5: { halign: "right" },
-        6: { halign: "center", fontStyle: "bold" },
-      },
-      didParseCell(data) {
-        if (data.column.index === 6 && data.section === "body") {
-          const val = String(data.cell.raw);
-          data.cell.styles.textColor = val === "Over Budget" ? RED : val === "At Risk" ? AMBER : GREEN;
-        }
-        if (data.column.index === 3 && data.section === "body") {
-          // Highlight "Spent" red if over budget
-          const row = budgetRows[data.row.index];
-          if (row) {
-            const proj = projects.find((p) => p.name === row[0]);
-            if (proj && proj.budget > 0 && proj.spent > proj.budget) {
-              data.cell.styles.textColor = RED;
-            }
-          }
-        }
-      },
-      styles: { lineColor: [232, 232, 232], lineWidth: 0.15 },
-      theme: "grid",
-    });
-    y = (doc as any).lastAutoTable.finalY + 12;
-  }
-
-  // ── Footer on every page ───────────────────────────────────────────────────────
-  const pageCount = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    // Dark footer strip
-    doc.setFillColor(...DARK);
-    doc.rect(0, PAGE_H - 10, PAGE_W, 10, "F");
-    // Amber left border on footer
-    doc.setFillColor(...AMBER);
-    doc.rect(0, PAGE_H - 10, 5, 10, "F");
-
-    doc.setTextColor(120, 120, 120);
-    doc.setFontSize(7);
+  // ── Summary figures ────────────────────────────────────────────────────────
+  y = 52;
+  const stats = [
+    { label: "Gross pay", value: money(T.gross), strong: true },
+    { label: "Total hours", value: h2(T.reg + T.ot) },
+    { label: "Regular hours", value: h2(T.reg) },
+    { label: "Overtime hours", value: h2(T.ot) },
+    { label: "Crew paid", value: String(rows.length) },
+  ];
+  const sw = CW / stats.length;
+  stats.forEach((s, i) => {
+    const x = M + i * sw;
+    if (i > 0) { doc.setDrawColor(...RULE); doc.setLineWidth(0.2); doc.line(x, y - 1, x, y + 15); }
     doc.setFont("helvetica", "normal");
-    doc.text(`${companyName ?? "Constra"} · Payroll & Time Report · ${periodLabel}`, MARGIN, PAGE_H - 4);
-    doc.text(`Page ${i} of ${pageCount}`, PAGE_W - MARGIN, PAGE_H - 4, { align: "right" });
+    doc.setFontSize(6.8);
+    doc.setTextColor(...INK3);
+    doc.text(s.label.toUpperCase(), x + (i ? 4 : 0), y + 2);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(s.strong ? 15 : 13);
+    doc.setTextColor(...INK);
+    doc.text(s.value, x + (i ? 4 : 0), y + 11);
+    if (s.strong) { doc.setFillColor(...HV); doc.rect(x, y + 13.5, 26, 1.4, "F"); }
+  });
+  y += 24;
+
+  if (missingRates.length) {
+    doc.setFillColor(255, 247, 214);
+    doc.rect(M, y, CW, 9, "F");
+    doc.setFillColor(...HV);
+    doc.rect(M, y, 1.5, 9, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...INK2);
+    const msg = `No hourly rate set for ${missingRates.slice(0, 4).join(", ")}${missingRates.length > 4 ? ` and ${missingRates.length - 4} more` : ""} — their pay shows as $0. Set rates under Crew.`;
+    doc.text(msg, M + 4, y + 5.7);
+    y += 17;
   }
 
-  const filename = `report-${periodLabel.replace(/\s/g, "-").toLowerCase()}.pdf`;
-  doc.save(filename);
+  // ── Payroll ────────────────────────────────────────────────────────────────
+  heading("Payroll", `${rows.length} ${rows.length === 1 ? "person" : "people"}`);
+  if (!rows.length) {
+    doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...INK3);
+    doc.text("No completed time entries in this period.", M, y + 4);
+    y += 12;
+  } else {
+    autoTable(doc, {
+      ...tableBase,
+      startY: y,
+      head: [["WORKER", "ROLE", "RATE", "REG H", "OT H", "REGULAR PAY", "OT PAY", "GROSS"]],
+      body: rows.map((r) => [r.name, r.role, r.rate > 0 ? money(r.rate) : "—", h2(r.reg), r.ot > 0 ? h2(r.ot) : "—", money(r.regPay), r.otPay > 0 ? money(r.otPay) : "—", money(r.gross)]),
+      foot: [["Total", "", "", h2(T.reg), h2(T.ot), money(T.regPay), money(T.otPay), money(T.gross)]],
+      columnStyles: {
+        0: { textColor: INK, fontStyle: "bold" },
+        2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" },
+        5: { halign: "right" }, 6: { halign: "right" }, 7: { halign: "right", textColor: INK, fontStyle: "bold" },
+      },
+      didParseCell(d) {
+        if (d.section === "head" && d.column.index >= 2) d.cell.styles.halign = "right";
+        if (d.section === "foot" && d.column.index >= 3) d.cell.styles.halign = "right";
+        if (d.section === "body" && d.column.index === 4 && d.cell.raw !== "—") d.cell.styles.textColor = [168, 100, 0];
+      },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 12;
+  }
+
+  // ── Hours per day chart ────────────────────────────────────────────────────
+  const days: { key: string; label: string; date: Date; hours: number }[] = [];
+  const dayStart = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const spanDays = Math.round((dayStart(periodEnd) - dayStart(periodStart)) / 86400000) + 1;
+  if (entries.length && spanDays <= 35) {
+    for (let i = 0; i < spanDays; i++) {
+      const d = new Date(periodStart);
+      d.setDate(d.getDate() + i);
+      days.push({ key: d.toDateString(), label: spanDays <= 7 ? d.toLocaleDateString("en-CA", { weekday: "short" }) : String(d.getDate()), date: d, hours: 0 });
+    }
+    for (const e of entries) {
+      const day = days.find((d) => d.key === new Date(e.clockIn).toDateString());
+      if (day) day.hours += hrs(e);
+    }
+    const chartH = 34;
+    ensure(chartH + 22);
+    heading("Hours per day");
+    const maxH = Math.max(8, ...days.map((d) => d.hours));
+    const step = maxH <= 16 ? 4 : maxH <= 40 ? 10 : 20;
+    const top = Math.ceil(maxH / step) * step;
+    const baseY = y + chartH;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    for (let v = 0; v <= top; v += step) {
+      const gy = baseY - (v / top) * chartH;
+      doc.setDrawColor(...RULE); doc.setLineWidth(0.15);
+      doc.line(M + 8, gy, W - M, gy);
+      doc.setTextColor(...INK3);
+      doc.text(String(v), M + 6, gy + 1, { align: "right" });
+    }
+    const slot = (CW - 10) / days.length;
+    const bw = Math.min(10, slot * 0.62);
+    days.forEach((d, i) => {
+      const cx = M + 10 + slot * i + slot / 2;
+      const bh = (d.hours / top) * chartH;
+      if (bh > 0) {
+        const weekend = d.date.getDay() === 0 || d.date.getDay() === 6;
+        doc.setFillColor(...(weekend ? INK2 : INK));
+        doc.rect(cx - bw / 2, baseY - bh, bw, bh, "F");
+        if (spanDays <= 14) {
+          doc.setTextColor(...INK); doc.setFont("helvetica", "bold"); doc.setFontSize(6.5);
+          doc.text(d.hours.toFixed(1), cx, baseY - bh - 1.5, { align: "center" });
+          doc.setFont("helvetica", "normal");
+        }
+      }
+      if (spanDays <= 14 || i % 2 === 0) {
+        doc.setTextColor(...INK3); doc.setFontSize(6.5);
+        doc.text(d.label, cx, baseY + 4.5, { align: "center" });
+      }
+    });
+    doc.setDrawColor(...INK); doc.setLineWidth(0.4);
+    doc.line(M + 8, baseY, W - M, baseY);
+    y = baseY + 14;
+  }
+
+  // ── Labour cost by project ─────────────────────────────────────────────────
+  const byProject = new Map<string, { hours: number; cost: number }>();
+  for (const e of entries) {
+    const rate = workerMap.get(e.workerId)?.hourlyRate ?? 0;
+    const cur = byProject.get(e.projectId) ?? { hours: 0, cost: 0 };
+    cur.hours += hrs(e);
+    cur.cost += hrs(e) * rate;
+    byProject.set(e.projectId, cur);
+  }
+  if (byProject.size) {
+    ensure(30);
+    heading("Labour by project", "Straight-time cost, before overtime premium");
+    const prow = [...byProject.entries()]
+      .map(([id, v]) => ({ name: projectMap.get(id)?.name ?? "Unassigned", ...v, budget: projectMap.get(id)?.budget ?? 0 }))
+      .sort((a, b) => b.cost - a.cost);
+    autoTable(doc, {
+      ...tableBase,
+      startY: y,
+      head: [["PROJECT", "HOURS", "LABOUR COST", "SHARE", "PROJECT BUDGET"]],
+      body: prow.map((p) => [p.name, h2(p.hours), money(p.cost), T.regPay + T.otPay > 0 || p.cost > 0 ? `${Math.round((p.hours / (T.reg + T.ot || 1)) * 100)}%` : "—", p.budget > 0 ? money(p.budget) : "—"]),
+      columnStyles: { 0: { textColor: INK, fontStyle: "bold" }, 1: { halign: "right" }, 2: { halign: "right", textColor: INK }, 3: { halign: "right" }, 4: { halign: "right" } },
+      didParseCell(d) { if (d.section === "head" && d.column.index >= 1) d.cell.styles.halign = "right"; },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 12;
+  }
+
+  // ── Timesheets by worker ───────────────────────────────────────────────────
+  if (rows.length) {
+    ensure(30);
+    heading("Timesheets", `${entries.length} shifts`);
+    for (const r of rows) {
+      const mine = entries
+        .filter((e) => e.workerId === r.id)
+        .sort((a, b) => new Date(a.clockIn).getTime() - new Date(b.clockIn).getTime());
+      ensure(24);
+      doc.setFillColor(...PAPER);
+      doc.rect(M, y, CW, 7, "F");
+      doc.setFillColor(...HV);
+      doc.rect(M, y, 1.5, 7, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...INK);
+      doc.text(r.name, M + 4, y + 4.8);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...INK3);
+      doc.text(`${h2(r.reg + r.ot)} h · ${money(r.gross)}`, W - M - 2, y + 4.8, { align: "right" });
+      y += 8;
+      autoTable(doc, {
+        ...tableBase,
+        startY: y,
+        showHead: "firstPage",
+        head: [["DATE", "PROJECT", "IN", "OUT", "HOURS"]],
+        body: mine.map((e) => [
+          new Date(e.clockIn).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" }),
+          projectMap.get(e.projectId)?.name ?? "—",
+          new Date(e.clockIn).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+          new Date(e.clockOut!).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+          h2(hrs(e)),
+        ]),
+        columnStyles: { 0: { cellWidth: 30 }, 2: { halign: "right", cellWidth: 22 }, 3: { halign: "right", cellWidth: 22 }, 4: { halign: "right", cellWidth: 18, textColor: INK, fontStyle: "bold" } },
+        didParseCell(d) { if (d.section === "head" && d.column.index >= 2) d.cell.styles.halign = "right"; },
+        styles: { ...tableBase.styles, fontSize: 7.5, cellPadding: { top: 1.8, bottom: 1.8, left: 2.5, right: 2.5 } },
+      });
+      y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 7;
+    }
+  }
+
+  // ── Sign-off ───────────────────────────────────────────────────────────────
+  // The block is ~29mm tall; keep it on the current page whenever it clears the footer rule
+  if (y + 31 > H - 15) { doc.addPage(); y = 20; }
+  y += 4;
+  heading("Approval");
+  doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...INK2);
+  doc.text("I have reviewed the hours and pay above and approve this payroll for processing.", M, y + 2);
+  y += 13;
+  const half = (CW - 12) / 2;
+  [["Prepared by", M], ["Approved by", M + half + 12]].forEach(([label, x]) => {
+    doc.setDrawColor(...INK); doc.setLineWidth(0.3);
+    doc.line(x as number, y, (x as number) + half * 0.62, y);
+    doc.line((x as number) + half * 0.7, y, (x as number) + half, y);
+    doc.setFontSize(6.8); doc.setTextColor(...INK3);
+    doc.text(`${label} — name & signature`, x as number, y + 4);
+    doc.text("Date", (x as number) + half * 0.7, y + 4);
+  });
+
+  // ── Footer on every page ───────────────────────────────────────────────────
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    if (i > 1) tape(0, 3);
+    doc.setDrawColor(...RULE); doc.setLineWidth(0.2);
+    doc.line(M, H - 13, W - M, H - 13);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...INK3);
+    doc.text(`${company} · Payroll register · ${periodLabel} · Confidential`, M, H - 8);
+    doc.text(`Page ${i} of ${pages}`, W - M, H - 8, { align: "right" });
+    doc.setTextColor(...GO);
+    doc.text("Made with Constra", W / 2, H - 8, { align: "center" });
+  }
+
+  doc.save(`payroll-${company.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${periodLabel.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`);
 }
 
 // ── Materials Summary PDF ────────────────────────────────────────────────────
