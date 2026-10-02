@@ -243,3 +243,33 @@ begin
     alter publication supabase_realtime add table public.schedule_events;
   end if;
 end $$;
+
+-- ── Size limits (stop anyone bloating the database by calling the API directly) ──
+-- NOT VALID: existing rows aren't checked, only new writes.
+do $$
+declare
+  r record;
+begin
+  for r in
+    select * from (values
+      ('crew_messages',  'attachment_data',    12000000),
+      ('crew_messages',  'text',                  10000),
+      ('clock_entries',  'clock_in_photo_url',  3000000),
+      ('profiles',       'photo_url',           1500000),
+      ('companies',      'logo',                1500000),
+      ('safety_incidents','description',         20000),
+      ('rfis',           'question',              20000),
+      ('daily_reports',  'notes',                 20000),
+      ('projects',       'name',                    300)
+    ) as t(tbl, col, max_len)
+  loop
+    if exists (
+      select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = r.tbl and column_name = r.col
+    ) then
+      execute format('alter table public.%I drop constraint if exists %I', r.tbl, r.tbl || '_' || r.col || '_size');
+      execute format('alter table public.%I add constraint %I check (char_length(%I) <= %s) not valid',
+        r.tbl, r.tbl || '_' || r.col || '_size', r.col, r.max_len);
+    end if;
+  end loop;
+end $$;

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
+import { compressImage } from "@/lib/compress-image";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/confirm-modal";
 
@@ -306,7 +307,13 @@ export default function MessagesPage() {
   }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
+    // Attachments are stored inline in the message row, so keep them small
+    const MAX_BYTES = 8 * 1024 * 1024;
+    const picked = await Promise.all(Array.from(e.target.files ?? []).map((f) => compressImage(f)));
+    const tooBig = picked.filter((f) => f.size > MAX_BYTES);
+    if (tooBig.length) toast.error(`${tooBig.map((f) => f.name).join(", ")} ${tooBig.length > 1 ? "are" : "is"} over 8 MB`, { description: "Upload large files under Documents and share them from there." });
+    const files = picked.filter((f) => f.size <= MAX_BYTES);
+    if (fileRef.current) fileRef.current.value = "";
     if (!files.length) return;
     const readFile = (file: File) => new Promise<string | null>((res) => {
       const reader = new FileReader();
