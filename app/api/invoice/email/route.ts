@@ -63,9 +63,15 @@ export async function POST(request: NextRequest) {
 
   if (rowErr || !row) return NextResponse.json({ error: `${kind === "invoice" ? "Invoice" : "Estimate"} not found` }, { status: 404 });
 
-  const { data: profile } = await authClient.from("profiles").select("company_id").eq("id", user.id).single();
+  const { data: profile } = await authClient.from("profiles").select("company_id, role, granted_pages").eq("id", user.id).single();
   if (!profile || profile.company_id !== row.company_id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  // Only people who manage billing (or were granted the page) send documents to clients
+  const page = kind === "invoice" ? "/invoices" : "/estimates";
+  const granted = Array.isArray(profile.granted_pages) && (profile.granted_pages as string[]).includes(page);
+  if (!["Admin", "Project Manager"].includes(profile.role as string) && !granted) {
+    return NextResponse.json({ error: "Only admins and project managers can send this" }, { status: 403 });
   }
 
   const { data: company } = await authClient.from("companies").select("name, currency").eq("id", row.company_id).single();

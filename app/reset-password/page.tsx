@@ -142,10 +142,10 @@ function ResetPasswordForm() {
               <AlertCircle size={36} className="text-red-400" />
               <div>
                 <p className="text-[14px] font-semibold text-white mb-1">Link expired or invalid</p>
-                <p className="text-[12px] text-white/40">Password reset links expire after 1 hour. Request a new one.</p>
+                <p className="text-[12px] text-white/40">Reset links work once and expire after 1 hour. On the sign-in page, enter your email and tap “Forgot password?” to get a fresh link.</p>
               </div>
               <Link href="/login" className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[14px] rounded-xl transition-colors text-center block">
-                Back to Sign In
+                Get a new link
               </Link>
             </div>
           ) : (
