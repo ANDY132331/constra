@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, GitPullRequest, DollarSign, Trash2, X,
@@ -92,6 +92,11 @@ export default function ChangeOrdersPage() {
     setForm(emptyForm(nextNumber));
     setShowForm(true);
   };
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("new") === "1" && isAdmin) { setEditing(null); setForm(emptyForm(nextNumber)); setShowForm(true); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const openEdit = (co: ChangeOrder) => {
     setEditing(co);

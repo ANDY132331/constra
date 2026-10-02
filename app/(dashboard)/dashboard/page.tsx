@@ -838,10 +838,10 @@ export default function DashboardPage() {
       <div className="px-5 pt-6">
         <div className="grid grid-cols-2 gap-2.5">
           {[
-            { label: "Daily Report",  icon: FileText,      href: "/daily-reports",  color: "#22c55e" },
-            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders", color: dk ? "#F5C400" : "#d97706" },
-            { label: "Invoice",       icon: ReceiptText,   href: "/invoices",       color: "#0ea5e9" },
-            { label: "Punch Item",    icon: AlertTriangle, href: "/punch-list",     color: "#ef4444" },
+            { label: "Daily Report",  icon: FileText,      href: "/daily-reports?new=1",  color: "#22c55e" },
+            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders?new=1", color: dk ? "#F5C400" : "#d97706" },
+            { label: "Invoice",       icon: ReceiptText,   href: "/invoices?new=1",       color: "#0ea5e9" },
+            { label: "Punch Item",    icon: AlertTriangle, href: "/punch-list?new=1",     color: "#ef4444" },
           ].map(({ label, icon: Icon, href, color }) => (
             <Link
               key={label}
@@ -1260,10 +1260,10 @@ export default function DashboardPage() {
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[11px] text-white/25 font-semibold uppercase tracking-widest mr-1">Quick add</span>
         {[
-          { label: "Daily Report", icon: FileText, href: "/daily-reports", color: "#22c55e" },
-          { label: "Change Order", icon: GitPullRequest, href: "/change-orders", color: "#F5C400" },
-          { label: "Invoice", icon: ReceiptText, href: "/invoices", color: "#3b82f6" },
-          { label: "Punch Item", icon: AlertTriangle, href: "/punch-list", color: "#ef4444" },
+          { label: "Daily Report", icon: FileText, href: "/daily-reports?new=1", color: "#22c55e" },
+          { label: "Change Order", icon: GitPullRequest, href: "/change-orders?new=1", color: "#F5C400" },
+          { label: "Invoice", icon: ReceiptText, href: "/invoices?new=1", color: "#3b82f6" },
+          { label: "Punch Item", icon: AlertTriangle, href: "/punch-list?new=1", color: "#ef4444" },
         ].map(({ label, icon: Icon, href, color }) => (
           <Link
             key={label}
