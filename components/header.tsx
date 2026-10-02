@@ -88,7 +88,15 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const [showNew,   setShowNew]   = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [showUser,  setShowUser]  = useState(false);
-  const [readNotifs, setReadNotifs] = useState(false);
+  // When the bell was last opened on this device; only newer events count as unread
+  const [lastSeen, setLastSeen] = useState<number>(() => {
+    try { return Number(localStorage.getItem("constra_notif_seen") ?? 0) || 0; } catch { return 0; }
+  });
+  const markSeen = () => {
+    const t = Date.now();
+    setLastSeen(t);
+    try { localStorage.setItem("constra_notif_seen", String(t)); } catch { /* storage unavailable */ }
+  };
 
   const newRef   = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -100,8 +108,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
   const openSearch = () => window.dispatchEvent(new Event("open-search"));
 
-  const hasUnread = !readNotifs && (activityFeed.length > 0 || expiryAlerts.length > 0);
-  const unreadCount = expiryAlerts.length + activityFeed.length;
+  const unreadEvents = activityFeed.filter((e) => new Date(e.timestamp).getTime() > lastSeen).length;
+  const unreadCount = unreadEvents + (lastSeen < now.getTime() - 86_400_000 ? expiryAlerts.length : 0);
+  const hasUnread = unreadCount > 0;
 
   const [signingOut, setSigningOut] = useState(false);
   const handleSignOut = async () => {
@@ -193,7 +202,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         {/* Notifications */}
         <div ref={notifRef} className="relative">
           <button
-            onClick={() => { setShowNotif((v) => !v); setShowNew(false); setShowUser(false); if (!readNotifs) setReadNotifs(true); }}
+            onClick={() => { setShowNotif((v) => !v); setShowNew(false); setShowUser(false); if (!showNotif) markSeen(); }}
             aria-label={hasUnread ? `Notifications — ${unreadCount} unread` : "Notifications"}
             aria-expanded={showNotif}
             aria-haspopup="true"
@@ -254,8 +263,8 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                       <div className="flex-1 min-w-0">
                         <p className="text-[12px] text-white/70 leading-snug">{event.description}</p>
                         <p className="text-[10px] text-white/30 mt-0.5">
-                          {event.timestamp.toLocaleDateString("en-CA", { month: "short", day: "numeric" })} ·{" "}
-                          {event.timestamp.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(event.timestamp).toLocaleDateString("en-CA", { month: "short", day: "numeric" })} ·{" "}
+                          {new Date(event.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                         </p>
                       </div>
                     </div>
