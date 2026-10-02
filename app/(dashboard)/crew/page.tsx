@@ -853,7 +853,7 @@ export default function CrewPage() {
 
               <div>
                 <label className={lbl}>Hourly Rate ({getCurrencySymbol(currency)})</label>
-                <input className={inp} type="number" placeholder="0"
+                <input className={inp} type="number" min="0" placeholder="0"
                   value={form.hourlyRate} onChange={(e) => setForm((f) => ({ ...f, hourlyRate: e.target.value }))} />
               </div>
 

@@ -575,7 +575,7 @@ export default function DailyReportsPage() {
                 </div>
                 <div>
                   <label className={lbl}>Crew Count</label>
-                  <input className={inp} type="number" placeholder="0" value={form.crewCount} onChange={(e) => setForm((f) => ({ ...f, crewCount: e.target.value }))} />
+                  <input className={inp} type="number" min="0" placeholder="0" value={form.crewCount} onChange={(e) => setForm((f) => ({ ...f, crewCount: e.target.value }))} />
                 </div>
               </div>
               <div>

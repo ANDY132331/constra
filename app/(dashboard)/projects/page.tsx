@@ -898,7 +898,7 @@ export default function ProjectsPage() {
                 </div>
                 <div>
                   <label className={mLbl}>Budget ({currency})</label>
-                  <input className={mInp} type="number" placeholder="0"
+                  <input className={mInp} type="number" min="0" placeholder="0"
                     value={form.budget} onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
                 </div>
                 <div>
@@ -1093,7 +1093,7 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Budget ({currency})</label>
-                  <input className={inp} type="number" placeholder="0"
+                  <input className={inp} type="number" min="0" placeholder="0"
                     value={form.budget} onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
                 </div>
                 <div>

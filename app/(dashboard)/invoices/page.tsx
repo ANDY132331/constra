@@ -474,7 +474,7 @@ export default function InvoicesPage() {
                       <div className="flex gap-2 sm:contents">
                         <div className="flex-1">
                           <p className="text-[9px] font-bold text-white/25 uppercase tracking-wider mb-1 sm:hidden">Qty</p>
-                          <input className={inp} type="number" placeholder="1" value={item.qty}
+                          <input className={inp} type="number" min="0" placeholder="1" value={item.qty}
                             onChange={(e) => updateItem(idx, "qty", e.target.value)} />
                         </div>
                         <div className="flex-1">
