@@ -5,6 +5,7 @@ import Link from "next/link";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOff } from "lucide-react";
 import LiveSite from "@/components/landing/live-site";
+import SavingsCalc from "@/components/landing/savings-calc";
 
 const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
@@ -238,6 +239,7 @@ export default function LandingPage() {
   return (
     <div ref={rootRef} className={`lp ${plexSans.variable} ${plexMono.variable}`}>
       <style>{CSS}</style>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON_LD }} />
 
       <a href="#main" className="lp-skip">Skip to content</a>
 
@@ -373,6 +375,8 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <SavingsCalc />
+
         {/* Pricing */}
         <section id="pricing" className="lp-pricing">
           <div className="lp-wrap lp-pricing-grid">
@@ -443,6 +447,24 @@ export default function LandingPage() {
     </div>
   );
 }
+
+const JSON_LD = JSON.stringify([
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Constra",
+    url: "https://getconstra.com",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Android, iOS, Web",
+    description: "Field workforce management for construction and trades: GPS-verified timesheets, daily reports, safety logs, change orders and invoices.",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "CAD" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+  },
+]).replace(/</g, "\\u003c");
 
 const CSS = `
 .lp{
@@ -658,6 +680,24 @@ const CSS = `
 .lp-stage3d-flat .lp-feed{position:static; width:auto}
 .lp-stage3d-flat .lp-hud-clock{top:20px}
 
+/* Savings calculator */
+.lp-calc{padding-block:96px; border-top:1px solid var(--rule)}
+.lp-calc-grid{display:grid; grid-template-columns:.9fr 1.1fr; gap:56px; align-items:center}
+.lp-calc-card{background:var(--ink); color:var(--night-ink); border:1px solid #000; padding:28px 28px 22px; box-shadow:8px 8px 0 var(--hv); display:grid; gap:22px}
+.lp-calc-label{display:flex; justify-content:space-between; align-items:baseline; gap:16px; margin-bottom:10px; font-size:14px}
+.lp-calc-label label{color:var(--night-dim)}
+.lp-calc-label output{font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:.02em; font-variant-numeric:tabular-nums}
+.lp-calc input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:0; cursor:pointer; background:linear-gradient(90deg,var(--hv) var(--pct),var(--night-rule) var(--pct)); margin:0}
+.lp-calc input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:24px; height:24px; background:var(--paper); border:3px solid var(--hv); border-radius:2px; box-shadow:0 2px 0 #000}
+.lp-calc input[type=range]::-moz-range-thumb{width:20px; height:20px; background:var(--paper); border:3px solid var(--hv); border-radius:2px}
+.lp-calc input[type=range]:focus-visible{outline:3px solid var(--hv); outline-offset:6px}
+.lp-calc-out{display:grid; grid-template-columns:1fr 1.4fr; gap:1px; background:var(--night-rule); border:1px solid var(--night-rule); margin-top:4px}
+.lp-calc-out div{background:var(--night2); padding:14px 16px; display:flex; flex-direction:column; gap:4px}
+.lp-calc-out .lp-mono{color:var(--night-dim); font-size:11px; text-transform:uppercase; letter-spacing:.08em}
+.lp-calc-out b{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,40px); line-height:1; font-variant-numeric:tabular-nums}
+.lp-calc-big b{color:var(--hv)}
+.lp-calc-foot{margin:0; color:var(--night-dim); font-size:11.5px !important; line-height:1.5}
+
 /* Footer */
 .lp-footer{background:var(--night); color:var(--night-ink); padding-block:48px calc(48px + env(safe-area-inset-bottom,0px))}
 .lp-footer .lp-dim{color:var(--night-dim); font-size:14px; margin:10px 0 0}
@@ -679,7 +719,8 @@ const CSS = `
   .lp-nav-links{display:none}
   .lp-nav-cta{margin-left:auto}
   .lp-hero{padding-block:40px 56px}
-  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid{grid-template-columns:1fr; gap:40px}
+  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid,.lp-calc-grid{grid-template-columns:1fr; gap:40px}
+  .lp-calc{padding-block:64px}
   .lp-hero-visual{padding-bottom:56px}
   .lp-slip{left:auto; right:50%; margin-right:40px; width:210px}
   .lp-day,.lp-features,.lp-field,.lp-pricing,.lp-faq{padding-block:64px}
@@ -697,6 +738,8 @@ const CSS = `
   .lp-phone{width:260px}
   .lp-replaces li{font-size:18px}
   .lp-price-card{box-shadow:4px 4px 0 var(--ink)}
+  .lp-calc-card{padding:22px 18px 18px; box-shadow:5px 5px 0 var(--hv)}
+  .lp-calc-out{grid-template-columns:1fr}
 }
 @media (max-width:860px){
   .lp-tilt .lp-slip{left:-70px; right:auto; margin:0}
