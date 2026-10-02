@@ -501,7 +501,7 @@ export default function InvoicesPage() {
                   {previewTotal > 0 && (
                     <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2.5">
                       <p className="text-[9px] text-amber-400/60 uppercase tracking-widest font-bold">Total</p>
-                      <p className="text-[20px] font-black text-amber-400 leading-tight">{formatCurrency(Math.round(previewTotal), currency as never)}</p>
+                      <p className="text-[20px] font-black text-amber-400 leading-tight">{formatCurrency(Math.round(previewTotal * 100) / 100, currency as never)}</p>
                     </div>
                   )}
                 </div>

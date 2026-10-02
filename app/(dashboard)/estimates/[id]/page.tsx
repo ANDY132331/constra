@@ -347,7 +347,7 @@ export default function EstimateDetailPage() {
                   <div className="mt-3">
                     <p className={`text-[9px] uppercase tracking-wider font-bold ${ps.totalLabelColor}`}>Total Amount</p>
                     <p className={`text-[20px] sm:text-[26px] font-black leading-tight ${ps.totalAmtColor}`}>
-                      {formatCurrency(Math.round(total), currency as never)}
+                      {formatCurrency(Math.round(total * 100) / 100, currency as never)}
                     </p>
                   </div>
                 </div>
@@ -537,12 +537,12 @@ export default function EstimateDetailPage() {
                 </div>
                 <div className="flex justify-between py-2 text-[13px] border-b border-gray-200">
                   <span className="text-gray-700 font-bold">Total</span>
-                  <span className="text-gray-900 font-bold">{formatCurrency(Math.round(total), currency as never)}</span>
+                  <span className="text-gray-900 font-bold">{formatCurrency(Math.round(total * 100) / 100, currency as never)}</span>
                 </div>
                 <div className={`flex justify-between items-center px-5 py-3.5 mt-3 rounded-2xl ${ps.totalBg}`}>
                   <span className="text-[13px] font-black text-white">Estimate Total</span>
                   <span className="text-[20px] font-black text-white">
-                    {formatCurrency(Math.round(total), currency as never)}
+                    {formatCurrency(Math.round(total * 100) / 100, currency as never)}
                   </span>
                 </div>
               </div>
