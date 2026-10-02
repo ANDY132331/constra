@@ -87,6 +87,10 @@ export default function EquipmentPage() {
 
   const handleSave = () => {
     if (!form.name.trim()) { toast.error("Name is required"); return; }
+    if (form.lastService && form.nextService && form.nextService < form.lastService) {
+      toast.error("Next service can't be before the last service");
+      return;
+    }
     const payload = {
       name: form.name.trim(),
       type: form.type.trim(),

@@ -177,7 +177,10 @@ export default function SchedulePage() {
   useEffect(() => {
     const fallbackFn = () => {
       const saved = loadSavedLocation();
-      const loc = saved ?? { lat: DEFAULT_LAT, lon: DEFAULT_LON, name: DEFAULT_LOCATION_NAME };
+      const site = projects.find((p) => p.status === "active" && p.gps) ?? projects.find((p) => p.gps);
+      const loc = saved
+        ?? (site?.gps ? { lat: site.gps.lat, lon: site.gps.lng, name: site.name } : null)
+        ?? { lat: DEFAULT_LAT, lon: DEFAULT_LON, name: DEFAULT_LOCATION_NAME };
       setLat(loc.lat); setLon(loc.lon); setLocationName(loc.name);
       fetchWeather(loc.lat, loc.lon, loc.name);
     };
