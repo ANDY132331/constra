@@ -190,7 +190,7 @@ export function DailyBriefCard() {
             <Sparkles size={13} className="text-amber-400" />
           </div>
           <div>
-            <p className="text-[13px] font-bold text-white">AI Daily Brief</p>
+            <p className="text-[13px] font-bold text-white">Morning Brief</p>
             {generatedAt && !loading && (
               <p className="text-[10px] text-white/25 flex items-center gap-1">
                 <Clock size={9} />

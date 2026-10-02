@@ -100,10 +100,12 @@ export async function POST(request: Request) {
 
   // Rate limit: 20 queries per user per minute
   if (!rateLimit(`ask-constra:${user.id}`, 20, 60_000)) return rateLimitResponse();
+  if (!rateLimit(`ask-constra-day:${user.id}`, 300, 86_400_000)) return rateLimitResponse();
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return new Response("GROQ_API_KEY not set in Vercel environment", { status: 503 });
+    console.error("[ask-constra] GROQ_API_KEY missing");
+    return new Response("The assistant is unavailable right now.", { status: 503 });
   }
 
   let body: { messages: Array<{ role: string; content: string }>; companyData: CompanySnap };
@@ -123,7 +125,8 @@ export async function POST(request: Request) {
 
   let context: string;
   try {
-    context = buildContext(companyData);
+    // Cap the client-supplied snapshot so one request can't send an enormous prompt
+    context = buildContext(companyData).slice(0, 24_000);
   } catch {
     context = "";
   }

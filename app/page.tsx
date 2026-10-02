@@ -85,7 +85,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
       ["Blueprints", "Upload drawings and open them on site"],
       ["Documents", "Contracts, permits and specs, versioned by project"],
       ["Photos", "Every site photo, sorted by project and day"],
-      ["AI daily brief", "A morning summary of crew, overdue tasks and weather risk"],
+      ["Morning brief", "A morning summary of crew, overdue tasks and weather risk"],
     ],
   },
 ];
@@ -341,7 +341,7 @@ export default function LandingPage() {
                 <span className="lp-price">$0</span>
               </div>
               <ul>
-                {["Unlimited crew and projects", "GPS + photo clock-in", "Estimates, invoices and change orders", "Daily reports and safety logs", "Payroll export (CSV, QuickBooks, Gusto)", "AI daily brief"].map((f) => (
+                {["Unlimited crew and projects", "GPS + photo clock-in", "Estimates, invoices and change orders", "Daily reports and safety logs", "Payroll export (CSV, QuickBooks, Gusto)", "Morning brief and AI assistant"].map((f) => (
                   <li key={f}><Check size={15} strokeWidth={2.5} aria-hidden />{f}</li>
                 ))}
               </ul>

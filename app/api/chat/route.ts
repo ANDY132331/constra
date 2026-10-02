@@ -152,10 +152,12 @@ export async function POST(request: Request) {
 
   // Rate limit: 30 messages per user per minute
   if (!rateLimit(`chat:${user.id}`, 30, 60_000)) return rateLimitResponse();
+  if (!rateLimit(`chat-day:${user.id}`, 300, 86_400_000)) return rateLimitResponse();
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return new Response("AI not configured — add GROQ_API_KEY in Vercel", { status: 503 });
+    console.error("[chat] GROQ_API_KEY missing");
+    return new Response("Support chat is unavailable right now.", { status: 503 });
   }
 
   let body: { messages?: { role: string; content: string }[] };

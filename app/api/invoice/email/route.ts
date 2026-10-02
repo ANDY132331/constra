@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   if (!rateLimit(`invoice:email:${user.id}:${ip}`, 20, 3_600_000)) return rateLimitResponse();
 
   if (!process.env.RESEND_API_KEY) {
-    return NextResponse.json({ error: "Email isn't configured (RESEND_API_KEY missing)" }, { status: 503 });
+    return NextResponse.json({ error: "Email sending isn't set up yet" }, { status: 503 });
   }
 
   const body = await request.json().catch(() => null);

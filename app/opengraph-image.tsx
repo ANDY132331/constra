@@ -11,7 +11,7 @@ const FEATURES = [
   "Invoicing",
   "Safety Logs",
   "Crew Management",
-  "AI Daily Brief",
+  "Morning Brief",
 ];
 
 export default function OGImage() {

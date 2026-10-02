@@ -1281,7 +1281,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <ErrorBoundary fallback={
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl px-5 py-4 text-[12px] text-white/30">
-            AI Daily Brief unavailable — <button onClick={() => window.location.reload()} className="text-amber-400 hover:text-amber-300 underline">reload to retry</button>
+            Morning brief unavailable — <button onClick={() => window.location.reload()} className="text-amber-400 hover:text-amber-300 underline">reload to retry</button>
           </div>
         }>
           <DailyBriefCard />
