@@ -5,6 +5,7 @@ import Stripe from "stripe";
 import { APP_URL } from "@/lib/email";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { onlinePaymentsEnabled } from "@/lib/payments";
 
 // Stripe zero-decimal currencies (no cents — amount is already the smallest unit)
 const ZERO_DECIMAL = new Set([
@@ -20,8 +21,8 @@ function getAdmin() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
+  if (!onlinePaymentsEnabled()) {
+    return NextResponse.json({ error: "Online card payments aren't available yet" }, { status: 503 });
   }
 
   // Rate limit by IP — no auth required (this is a public client-facing endpoint)

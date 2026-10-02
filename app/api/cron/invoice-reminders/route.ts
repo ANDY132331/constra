@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
+import { onlinePaymentsEnabled } from "@/lib/payments";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -100,7 +101,7 @@ export async function GET(request: Request) {
           </tr>
         </table>
         <p style="color:#888;font-size:12px">If you have already sent payment, please disregard this notice.</p>
-        <a class="cta" style="background:#ef4444" href="${APP_URL}/pay/${inv.id}">View &amp; Pay Invoice →</a>
+        <a class="cta" style="background:#ef4444" href="${APP_URL}/pay/${inv.id}">${onlinePaymentsEnabled() ? "View &amp; pay invoice" : "View invoice"} →</a>
       `,
     });
 

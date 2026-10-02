@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { onlinePaymentsEnabled } from "@/lib/payments";
 
 function getAdmin() {
   return createClient(
@@ -63,5 +64,6 @@ export async function GET(
     total,
     companyName: company?.name ?? "Your Contractor",
     currency: (company?.currency ?? "CAD") as string,
+    onlinePayments: onlinePaymentsEnabled(),
   });
 }

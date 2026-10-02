@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { onlinePaymentsEnabled } from "@/lib/payments";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -116,6 +117,7 @@ export async function POST(request: NextRequest) {
   } else {
     const due = fmtDate(row.due_date);
     const payLink = `${APP_URL}/pay/${invoiceId}`;
+    const payLabel = onlinePaymentsEnabled() ? "View &amp; pay invoice" : "View invoice";
     subject = isReminder
       ? `Payment reminder: Invoice ${number} from ${companyName} — ${amount} overdue`
       : `Invoice ${number} from ${companyName} — ${amount}${due ? ` due ${due}` : ""}`;
@@ -134,7 +136,7 @@ export async function POST(request: NextRequest) {
             </table>
             ${nt ? `<div class="quote">${nt}</div>` : ""}
             <p style="color:#888;font-size:12px">If you've already sent payment, please disregard this notice.</p>
-            <a class="cta" style="background:#ef4444" href="${payLink}">View &amp; pay invoice →</a>
+            <a class="cta" style="background:#ef4444" href="${payLink}">${payLabel} →</a>
           `,
         })
       : emailShell({
@@ -151,7 +153,7 @@ export async function POST(request: NextRequest) {
             </table>
             ${nt ? `<div class="quote">${nt}</div>` : ""}
             <p style="color:#888;font-size:12px">If you have any questions about this invoice, just reply to this email.</p>
-            <a class="cta" href="${payLink}">View &amp; pay invoice →</a>
+            <a class="cta" href="${payLink}">${payLabel} →</a>
           `,
         });
   }

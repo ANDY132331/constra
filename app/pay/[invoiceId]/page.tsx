@@ -23,6 +23,7 @@ type PublicInvoice = {
   total: number;
   companyName: string;
   currency: string;
+  onlinePayments?: boolean;
 };
 
 function fmt(amount: number, currency: string) {
@@ -302,8 +303,14 @@ export default function PayPage({ params }: { params: Promise<{ invoiceId: strin
           )}
         </div>
 
+        {!paid && !invoice.onlinePayments && (
+          <div className="rounded-2xl px-5 py-4 text-[13px] leading-relaxed" style={{ background: "var(--app-surface, rgba(0,0,0,0.03))", border: "1px solid var(--app-border, rgba(0,0,0,0.08))", color: "var(--app-text-2, #555)" }}>
+            To pay this invoice, contact <strong style={{ color: "var(--app-text, #111)" }}>{invoice.companyName}</strong> for e-transfer, cheque or other payment options. Please include invoice <strong style={{ color: "var(--app-text, #111)" }}>{invoice.number}</strong> with your payment.
+          </div>
+        )}
+
         {/* ── Pay button ── */}
-        {!paid && (
+        {!paid && invoice.onlinePayments && (
           <div className="space-y-3">
             {payError && (
               <div className="flex items-center gap-2 text-[12px] text-red-600 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
