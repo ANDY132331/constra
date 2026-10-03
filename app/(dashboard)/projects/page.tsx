@@ -168,6 +168,8 @@ export default function ProjectsPage() {
       name: p.name,
       clientName: p.client,
       accentColor: p.color,
+      startDate: p.startDate ? new Date(p.startDate) : undefined,
+      endDate: p.endDate ? new Date(p.endDate) : undefined,
       tasks: p.tasks.map((t) => {
         const worker = getWorkerById(t.workerId);
         return {

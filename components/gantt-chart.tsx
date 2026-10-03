@@ -37,6 +37,9 @@ export type GanttProject = {
   name: string;
   clientName: string;
   accentColor: string;
+  /** Overall project dates, drawn as a band on the project's header row */
+  startDate?: Date;
+  endDate?: Date;
   tasks: GanttTask[];
 };
 
@@ -248,9 +251,9 @@ export function GanttChart({
             alignItems: "center",
           }}
         >
-          <span>Event Name</span>
+          <span>Task</span>
           <span className="text-center">%</span>
-          <span>Worker</span>
+          <span>Assignee</span>
           <span>Start</span>
           <span>End</span>
           <span>Days</span>
@@ -443,9 +446,23 @@ export function GanttChart({
             <div key={project.id}>
               {/* Project header spacer */}
               <div
-                className="border-b border-white/[0.05] bg-white/[0.01]"
+                className="relative border-b border-white/[0.05] bg-white/[0.01]"
                 style={{ height: 44 }}
-              />
+              >
+                {project.startDate && project.endDate && (() => {
+                  const s0 = differenceInDays(startOfDay(project.startDate), viewStart);
+                  const s1 = differenceInDays(startOfDay(project.endDate), viewStart);
+                  const from = Math.max(0, s0), to = Math.min(TOTAL_DAYS - 1, s1);
+                  if (to < from) return null;
+                  return (
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 h-[10px] rounded-full"
+                      style={{ left: from * DAY_WIDTH + 2, width: (to - from + 1) * DAY_WIDTH - 4, background: project.accentColor + "55", border: `1px solid ${project.accentColor}` }}
+                      title={`${project.name}: ${project.startDate.toLocaleDateString()} – ${project.endDate.toLocaleDateString()}`}
+                    />
+                  );
+                })()}
+              </div>
 
               {project.tasks.map((task) => {
                 const isDragging = dragState?.taskId === task.id;

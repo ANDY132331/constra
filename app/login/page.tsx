@@ -354,8 +354,8 @@ function LoginForm() {
                 {mode === "login" ? (
                   <div className="space-y-4">
                     <div>
-                      <label className={lbl}>Email</label>
-                      <input
+                      <label htmlFor="li-email-357" className={lbl}>Email</label>
+                      <input id="li-email-357"
                         type="email"
                         name="email"
                         autoComplete="email"
@@ -371,9 +371,9 @@ function LoginForm() {
                       />
                     </div>
                     <div>
-                      <label className={lbl}>Password</label>
+                      <label htmlFor="li-password-374" className={lbl}>Password</label>
                       <div className="relative">
-                        <input
+                        <input id="li-password-374"
                           type={showPw ? "text" : "password"}
                           name="password"
                           autoComplete="current-password"
@@ -384,7 +384,7 @@ function LoginForm() {
                           onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
                           maxLength={128}
                         />
-                        <button aria-label={showPw ? "Show password" : "Hide password"}
+                        <button aria-label={showPw ? "Hide password" : "Show password"}
                           type="button"
                           onClick={() => setShowPw(!showPw)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
@@ -414,8 +414,8 @@ function LoginForm() {
                 ) : (
                   <div className="space-y-3">
                     <div>
-                      <label className={lbl}>Company Invite Code</label>
-                      <input
+                      <label htmlFor="li-company-invite-code-417" className={lbl}>Company Invite Code</label>
+                      <input id="li-company-invite-code-417"
                         className={`${inp} font-mono tracking-widest text-center text-amber-400 placeholder:font-sans placeholder:tracking-normal placeholder:text-white/20`}
                         placeholder="CN-XXXX-XXXX"
                         value={joinCode}
@@ -425,8 +425,8 @@ function LoginForm() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className={lbl}>First Name</label>
-                        <input
+                        <label htmlFor="li-first-name-428" className={lbl}>First Name</label>
+                        <input id="li-first-name-428"
                           name="given-name"
                           autoComplete="given-name"
                           className={inp}
@@ -438,8 +438,8 @@ function LoginForm() {
                         />
                       </div>
                       <div>
-                        <label className={lbl}>Last Name</label>
-                        <input
+                        <label htmlFor="li-last-name-441" className={lbl}>Last Name</label>
+                        <input id="li-last-name-441"
                           name="family-name"
                           autoComplete="family-name"
                           className={inp}
@@ -452,8 +452,8 @@ function LoginForm() {
                       </div>
                     </div>
                     <div>
-                      <label className={lbl}>Work Email</label>
-                      <input
+                      <label htmlFor="li-work-email-455" className={lbl}>Work Email</label>
+                      <input id="li-work-email-455"
                         type="email"
                         name="email"
                         autoComplete="email"
@@ -469,9 +469,9 @@ function LoginForm() {
                       />
                     </div>
                     <div>
-                      <label className={lbl}>Password</label>
+                      <label htmlFor="li-password-472" className={lbl}>Password</label>
                       <div className="relative">
-                        <input
+                        <input id="li-password-472"
                           type={showJoinPw ? "text" : "password"}
                           name="new-password"
                           autoComplete="new-password"
@@ -482,7 +482,7 @@ function LoginForm() {
                           onKeyDown={(e) => e.key === "Enter" && handleJoin()}
                           maxLength={128}
                         />
-                        <button aria-label={showJoinPw ? "Show password" : "Hide password"}
+                        <button aria-label={showJoinPw ? "Hide password" : "Show password"}
                           type="button"
                           onClick={() => setShowJoinPw(!showJoinPw)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"

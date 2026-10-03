@@ -1015,7 +1015,7 @@ function SettingsInner() {
                             {pwForm.confirm === pwForm.next ? "✓" : "✗"}
                           </span>
                         )}
-                        <button aria-label={showPw ? "Show password" : "Hide password"} type="button" onClick={() => setShowPw(!showPw)}
+                        <button aria-label={showPw ? "Hide password" : "Show password"} type="button" onClick={() => setShowPw(!showPw)}
                           className="text-white/30 hover:text-white/60">
                           {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
                         </button>

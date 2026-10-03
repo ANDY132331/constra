@@ -76,7 +76,7 @@ type Mode = "choose" | "create" | "join";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { setCompanyName, setCurrency, setIndustry, setOnboarded, updateWorker, workers } = useStore();
+  const { setCompanyName, setCurrency, setIndustry, setOnboarded, updateWorker, addWorker, workers } = useStore();
 
   const [mode, setMode] = useState<Mode>("choose");
   const [step, setStep] = useState(1);
@@ -138,13 +138,15 @@ export default function OnboardingPage() {
     if (company) setCompanyName(company);
     if (selectedCountry) setCurrency(selectedCountry.currency as CurrencyCode);
     setIndustry(industry);
-    if (firstName && workers[0]) {
+    if (firstName) {
       const full = [firstName, lastName].filter(Boolean).join(" ");
-      updateWorker(workers[0].id, {
-        name: full,
-        initials: [firstName[0], lastName[0]].filter(Boolean).join("").toUpperCase(),
-        email,
-      });
+      const initials = [firstName[0], lastName[0]].filter(Boolean).join("").toUpperCase();
+      if (workers[0]) {
+        updateWorker(workers[0].id, { name: full, initials, email });
+      } else {
+        // Local mode starts with no crew, so the owner becomes the first person on it
+        addWorker({ name: full, initials, email, phone: "", role: "Admin", customRole: "Admin / Owner", color: "#F5C400", projectIds: [], clockedIn: false, hourlyRate: 0 });
+      }
     }
     setOnboarded(true);
     router.push("/dashboard");
@@ -326,8 +328,8 @@ export default function OnboardingPage() {
           )}
 
           <div>
-            <label className={lbl}>Invite Code</label>
-            <input
+            <label htmlFor="ob-invite-code-331" className={lbl}>Invite Code</label>
+            <input id="ob-invite-code-331"
               className={`${inp} font-mono tracking-widest text-center text-amber-400 placeholder:font-sans placeholder:tracking-normal placeholder:text-white/20`}
               placeholder="CN-XXXX-XXXX"
               value={inviteCode}
@@ -338,24 +340,24 @@ export default function OnboardingPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={lbl}>First Name *</label>
-              <input className={inp} placeholder="Jane" maxLength={50} value={joinFirstName} onChange={(e) => setJoinFirstName(e.target.value)} />
+              <label htmlFor="ob-first-name-343" className={lbl}>First Name *</label>
+              <input id="ob-first-name-343" className={inp} placeholder="Jane" maxLength={50} value={joinFirstName} onChange={(e) => setJoinFirstName(e.target.value)} />
             </div>
             <div>
-              <label className={lbl}>Last Name</label>
-              <input className={inp} placeholder="Smith" maxLength={50} value={joinLastName} onChange={(e) => setJoinLastName(e.target.value)} />
+              <label htmlFor="ob-last-name-347" className={lbl}>Last Name</label>
+              <input id="ob-last-name-347" className={inp} placeholder="Smith" maxLength={50} value={joinLastName} onChange={(e) => setJoinLastName(e.target.value)} />
             </div>
           </div>
 
           <div>
-            <label className={lbl}>Work Email *</label>
-            <input type="email" className={inp} placeholder="you@company.com" maxLength={254} value={joinEmail} onChange={(e) => setJoinEmail(e.target.value)} />
+            <label htmlFor="ob-work-email-353" className={lbl}>Work Email *</label>
+            <input id="ob-work-email-353" type="email" className={inp} placeholder="you@company.com" maxLength={254} value={joinEmail} onChange={(e) => setJoinEmail(e.target.value)} />
           </div>
 
           <div>
-            <label className={lbl}>Password *</label>
+            <label htmlFor="ob-password-358" className={lbl}>Password *</label>
             <div className="relative">
-              <input
+              <input id="ob-password-358"
                 type={showJoinPw ? "text" : "password"}
                 className={`${inp} pr-10`}
                 placeholder="At least 8 characters"
@@ -363,7 +365,7 @@ export default function OnboardingPage() {
                 value={joinPassword}
                 onChange={(e) => setJoinPassword(e.target.value)}
               />
-              <button aria-label={showJoinPw ? "Show password" : "Hide password"} type="button" onClick={() => setShowJoinPw(!showJoinPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+              <button aria-label={showJoinPw ? "Hide password" : "Show password"} type="button" onClick={() => setShowJoinPw(!showJoinPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
                 {showJoinPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
@@ -477,15 +479,15 @@ export default function OnboardingPage() {
           </div>
 
           <div>
-            <label className={lbl}>Company Name *</label>
-            <input className={inp} placeholder="Acme Services Ltd." maxLength={100} value={company} onChange={(e) => setCompany(e.target.value)} />
+            <label htmlFor="ob-company-name-482" className={lbl}>Company Name *</label>
+            <input id="ob-company-name-482" className={inp} placeholder="Acme Services Ltd." maxLength={100} value={company} onChange={(e) => setCompany(e.target.value)} />
           </div>
 
           <div>
-            <label className={lbl}>Industry</label>
+            <label htmlFor="ob-industry-487" className={lbl}>Industry</label>
             <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 mb-2">
               <Briefcase size={13} className="text-white/30" />
-              <input
+              <input id="ob-industry-487"
                 className="bg-transparent text-[12px] text-white placeholder:text-white/20 outline-none flex-1"
                 placeholder="Search industries…"
                 value={industrySearch}
@@ -549,24 +551,24 @@ export default function OnboardingPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={lbl}>First Name *</label>
-              <input className={inp} placeholder="Jane" maxLength={50} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              <label htmlFor="ob-first-name-554" className={lbl}>First Name *</label>
+              <input id="ob-first-name-554" className={inp} placeholder="Jane" maxLength={50} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
             </div>
             <div>
-              <label className={lbl}>Last Name</label>
-              <input className={inp} placeholder="Smith" maxLength={50} value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <label htmlFor="ob-last-name-558" className={lbl}>Last Name</label>
+              <input id="ob-last-name-558" className={inp} placeholder="Smith" maxLength={50} value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
           </div>
 
           <div>
-            <label className={lbl}>Work Email *</label>
-            <input type="email" className={inp} placeholder="jane@company.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
+            <label htmlFor="ob-work-email-564" className={lbl}>Work Email *</label>
+            <input id="ob-work-email-564" type="email" className={inp} placeholder="jane@company.com" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
           <div>
-            <label className={lbl}>Password *</label>
+            <label htmlFor="ob-password-569" className={lbl}>Password *</label>
             <div className="relative">
-              <input
+              <input id="ob-password-569"
                 type={showPw ? "text" : "password"}
                 className={`${inp} pr-10`}
                 placeholder="At least 8 characters"
@@ -574,7 +576,7 @@ export default function OnboardingPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <button aria-label={showPw ? "Show password" : "Hide password"} type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+              <button aria-label={showPw ? "Hide password" : "Show password"} type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
                 {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>

@@ -1680,3 +1680,7 @@ html[data-theme="light"] header:not(.lp-nav) { box-shadow: 0 1px 0 var(--c-rule)
 [data-theme="light"] .text-white\/0 { color: rgba(0,0,0,0) !important; }
 [data-theme="light"] .text-white\/75 { color: rgba(0,0,0,0.75) !important; }
 [data-theme="light"] .text-white\/\[0\.12\] { color: rgba(0,0,0,0.55) !important; }
+
+/* The AI chat button floats over everything; keep it out of the way while a full-screen form or sheet is open */
+body:has(.fixed.inset-0.z-50:not(.mobile-overlay)) .cc-fab,
+body:has([role="dialog"][aria-modal="true"]) .cc-fab { display: none !important; }

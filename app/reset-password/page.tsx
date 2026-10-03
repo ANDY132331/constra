@@ -171,7 +171,7 @@ function ResetPasswordForm() {
                     disabled={!sessionReady}
                     className={inp}
                   />
-                  <button aria-label={showPw ? "Show password" : "Hide password"} type="button" onClick={() => setShowPw(!showPw)}
+                  <button aria-label={showPw ? "Hide password" : "Show password"} type="button" onClick={() => setShowPw(!showPw)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
                     {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -219,7 +219,7 @@ function ResetPasswordForm() {
                       {confirm === password ? "✓ Match" : "✗ No match"}
                     </span>
                   ) : (
-                    <button aria-label={showConfirm ? "Show password" : "Hide password"} type="button" onClick={() => setShowConfirm(!showConfirm)}
+                    <button aria-label={showConfirm ? "Hide password" : "Show password"} type="button" onClick={() => setShowConfirm(!showConfirm)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
                       {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
