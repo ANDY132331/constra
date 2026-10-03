@@ -52,6 +52,23 @@ function AIChatWidgetInner() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  // The button floats over the page, so get it out of the way while the user is reading down a list
+  useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    let last = main.scrollTop;
+    const onScroll = () => {
+      const y = main.scrollTop;
+      if (Math.abs(y - last) > 12) {
+        setHidden(y > last && y > 120);
+        last = y;
+      }
+    };
+    main.addEventListener("scroll", onScroll, { passive: true });
+    return () => main.removeEventListener("scroll", onScroll);
+  }, []);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -146,6 +163,11 @@ function AIChatWidgetInner() {
           Mobile  : full-width sheet that sits above the mobile nav bar
           Desktop : 380 px floating card, bottom-right corner          */}
       <style>{`
+        .cc-fab-hidden {
+          transform: translateY(140%);
+          opacity: 0;
+          pointer-events: none;
+        }
         .cc-fab {
           position: fixed;
           z-index: 50;
@@ -191,7 +213,7 @@ function AIChatWidgetInner() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Open AI support chat"
-          className="cc-fab flex items-center justify-center bg-amber-500 hover:bg-amber-400 active:scale-95 text-black font-bold rounded-full shadow-xl shadow-amber-500/25 transition-all select-none"
+          className={`cc-fab${hidden ? " cc-fab-hidden" : ""} flex items-center justify-center bg-amber-500 hover:bg-amber-400 active:scale-95 text-black font-bold rounded-full shadow-xl shadow-amber-500/25 transition-all select-none`}
         >
           {/* Desktop pill */}
           <span className="hidden lg:flex items-center gap-2 px-4 py-2.5">

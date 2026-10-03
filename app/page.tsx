@@ -6,6 +6,7 @@ import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOff } from "lucide-react";
 import LiveSite from "@/components/landing/live-site";
 import SavingsCalc from "@/components/landing/savings-calc";
+import AppTour from "@/components/landing/app-tour";
 
 const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
@@ -344,6 +345,8 @@ export default function LandingPage() {
             </ol>
           </div>
         </section>
+
+        <AppTour />
 
         {/* Features */}
         <section id="features" className="lp-features">
@@ -705,6 +708,22 @@ const CSS = `
 .lp-scene-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#1B1A22; display:block}
 .lp-stage3d-flat .lp-scene-video{position:relative; inset:auto; height:auto; aspect-ratio:1200/740}
 
+/* The actual app: screen recording + real screens */
+.lp-tour{padding-block:96px; background:var(--paper); border-block:1px solid var(--rule)}
+.lp-tour-grid{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center}
+.lp-tour-tabs{display:flex; flex-wrap:wrap; gap:8px; margin-top:28px}
+.lp-tour-tabs button{font:inherit; font-size:13px; font-weight:600; padding:9px 15px; min-height:40px; background:transparent; color:var(--ink2); border:1.5px solid var(--rule); border-radius:999px; cursor:pointer; transition:background .15s, border-color .15s, color .15s}
+.lp-tour-tabs button:hover{border-color:var(--ink3); color:var(--ink)}
+.lp-tour-tabs button.is-on{background:var(--ink); border-color:var(--ink); color:var(--hv)}
+.lp-tour-caption{margin:16px 0 0; color:var(--ink2); font-size:14px; min-height:2.6em; max-width:40ch}
+.lp-tour-devices{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start}
+.lp-device{margin:0; display:flex; flex-direction:column; gap:10px}
+.lp-device-screen{background:var(--night); border:1px solid #000; border-radius:26px; padding:7px; box-shadow:0 26px 54px -24px rgba(20,22,23,.5), 0 0 0 5px #2A2C2E inset; overflow:hidden}
+.lp-device-screen video,.lp-device-screen img{display:block; width:100%; height:auto; aspect-ratio:390/844; object-fit:cover; border-radius:20px; background:#0a0a0a}
+.lp-device figcaption{font-size:11px; color:var(--ink3); text-align:center; letter-spacing:.04em}
+.lp-device-video{transform:translateY(-10px)}
+.lp-device-shot{transform:translateY(16px)}
+
 /* Savings calculator */
 .lp-calc{padding-block:96px; border-top:1px solid var(--rule)}
 .lp-calc-grid{display:grid; grid-template-columns:.9fr 1.1fr; gap:56px; align-items:center}
@@ -744,7 +763,9 @@ const CSS = `
   .lp-nav-links{display:none}
   .lp-nav-cta{margin-left:auto}
   .lp-hero{padding-block:40px 56px}
-  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid,.lp-calc-grid{grid-template-columns:1fr; gap:40px}
+  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid,.lp-calc-grid,.lp-tour-grid{grid-template-columns:1fr; gap:40px}
+  .lp-tour{padding-block:64px}
+  .lp-device-video,.lp-device-shot{transform:none}
   .lp-calc{padding-block:64px}
   .lp-hero-visual{padding-bottom:56px}
   .lp-slip{left:auto; right:50%; margin-right:40px; width:210px}
@@ -765,6 +786,9 @@ const CSS = `
   .lp-phone{width:260px}
   .lp-replaces li{font-size:18px}
   .lp-price-card{box-shadow:4px 4px 0 var(--ink)}
+  .lp-tour-devices{gap:12px}
+  .lp-device-screen{border-radius:20px; padding:5px}
+  .lp-device-screen video,.lp-device-screen img{border-radius:16px}
   .lp-calc-card{padding:22px 18px 18px; box-shadow:5px 5px 0 var(--hv)}
   .lp-calc-out{grid-template-columns:1fr}
 }
