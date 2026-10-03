@@ -13,6 +13,7 @@ import { exportEstimatePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 import type { InvoiceTemplate } from "@/lib/pdf-export";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 // ── Paper styles ─────────────────────────────────────────────────────────────
 function paperStyles(t: InvoiceTemplate, isAccepted: boolean) {
@@ -126,10 +127,8 @@ export default function EstimateDetailPage() {
   const isExpired  = new Date(estimate.validUntil) < new Date() && isSent;
   const ps = paperStyles(template, isAccepted);
 
-  const sub    = draft.items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0);
   const taxPct = parseFloat(draft.taxRate) || 0;
-  const tax    = sub * (taxPct / 100);
-  const total  = sub + tax;
+  const { subtotal: sub, tax, total } = moneyTotals(draft.items, draft.taxRate);
 
   const updItem = (idx: number, field: keyof DraftItem, val: string) =>
     setDraft((d) => ({ ...d, items: d.items.map((it, i) => i === idx ? { ...it, [field]: val } : it) }));
@@ -489,7 +488,7 @@ export default function EstimateDetailPage() {
                           />
                         </td>
                         <td className="py-2.5 px-3 text-right text-gray-800 font-bold text-[13px] w-28">
-                          {formatCurrency((parseFloat(item.qty) || 0) * (parseFloat(item.rate) || 0), currency as never)}
+                          {formatCurrency(lineAmount(item.qty, item.rate), currency as never)}
                         </td>
                         <td className="py-2.5 px-1 text-center">
                           {draft.items.length > 1 && (

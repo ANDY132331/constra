@@ -19,6 +19,7 @@ import { DailyBriefCard } from "@/components/daily-brief-card";
 import { AskConstra } from "@/components/ask-constra";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { isForemanOrAbove } from "@/lib/permissions";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -69,8 +70,7 @@ function useWeather(useFahrenheit: boolean): WeatherData {
 // ── Invoice helper ─────────────────────────────────────────────────────────────
 
 function invoiceTotal(inv: Invoice): number {
-  const sub = inv.items.reduce((s, i) => s + i.qty * i.rate, 0);
-  return sub * (1 + inv.taxRate / 100);
+  return moneyTotals(inv.items, inv.taxRate).total;
 }
 
 // ── Stat card ─────────────────────────────────────────────────────────────────

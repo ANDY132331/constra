@@ -5,6 +5,7 @@ import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { onlinePaymentsEnabled } from "@/lib/payments";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -83,8 +84,7 @@ export async function POST(request: NextRequest) {
   if (!to || !number) return NextResponse.json({ error: "Missing client email or number" }, { status: 400 });
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
 
-  const subtotal = (row.items ?? []).reduce((s, item) => s + item.qty * item.rate, 0);
-  const total = subtotal * (1 + (row.tax_rate ?? 0) / 100);
+  const { total } = moneyTotals(row.items, row.tax_rate);
   let amount: string;
   try {
     amount = new Intl.NumberFormat("en-CA", { style: "currency", currency, maximumFractionDigits: 2 }).format(total);

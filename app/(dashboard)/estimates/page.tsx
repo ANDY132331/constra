@@ -15,6 +15,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toLocalDateString } from "@/lib/utils";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -44,8 +45,7 @@ const blank: EstForm = {
 };
 
 function estimateTotal(est: Estimate) {
-  const sub = est.items.reduce((s, i) => s + i.qty * i.rate, 0);
-  return sub * (1 + est.taxRate / 100);
+  return moneyTotals(est.items, est.taxRate).total;
 }
 
 
@@ -77,7 +77,7 @@ function EstimateRow({ estimate, currency, selected, onClick }: {
         </div>
         <div className="text-right flex-shrink-0">
           <p className={`text-[14px] font-black ${isAccepted ? "text-emerald-400" : isDeclined ? "text-red-400" : "text-white"}`}>
-            {formatCurrencyCompact(Math.round(total), currency as never)}
+            {formatCurrency(total, currency as never)}
           </p>
           <ChevronRight size={13} className="text-white/20 group-hover:text-white/40 transition-colors ml-auto mt-0.5" />
         </div>
@@ -152,7 +152,7 @@ export default function EstimatesPage() {
     toast.success("Estimate created");
   };
 
-  const previewTotal = form.items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0) * (1 + (parseFloat(form.taxRate) || 0) / 100);
+  const previewTotal = moneyTotals(form.items, form.taxRate).total;
 
   const TABS: Array<{ key: "all" | Estimate["status"]; label: string; count: number }> = [
     { key: "all",      label: "All",      count: estimates.length },
@@ -256,7 +256,7 @@ export default function EstimatesPage() {
                       <p className="text-[11px] mt-0.5 text-white/35">{est.clientName}</p>
                     </div>
                     <p className={`text-[18px] font-black flex-shrink-0 tabular-nums ${isAccepted ? "text-emerald-400" : isDeclined ? "text-red-400" : "text-white"}`}>
-                      {formatCurrencyCompact(Math.round(total), currency as never)}
+                      {formatCurrency(total, currency as never)}
                     </p>
                   </div>
                 </button>

@@ -10,11 +10,11 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Sparkles, Send, Loader2, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { CompanySnap, ProjectSnap } from "@/lib/ask-constra-types";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 // ── Helper: compute an invoice's subtotal ──────────────────────────────────────
 function invoiceTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
-  const sub = inv.items.reduce((s, it) => s + it.qty * it.rate, 0);
-  return sub * (1 + inv.taxRate / 100);
+  return moneyTotals(inv.items, inv.taxRate).total;
 }
 
 // ── Helper: ms → hours ────────────────────────────────────────────────────────

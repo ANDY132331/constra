@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState, useCallback } from "react";
+import { moneyTotals, lineAmount } from "@/lib/money";
 import {
   HardHat, Loader2, CheckCircle2, AlertTriangle, CreditCard,
   Calendar, FileText, Lock, ChevronRight,
@@ -259,7 +260,7 @@ export default function PayPage({ params }: { params: Promise<{ invoiceId: strin
                       {fmt(item.rate, invoice.currency)}
                     </td>
                     <td className="py-2.5 text-right font-semibold" style={{ color: "var(--app-text, #111)" }}>
-                      {fmt(item.qty * item.rate, invoice.currency)}
+                      {fmt(lineAmount(item.qty, item.rate), invoice.currency)}
                     </td>
                   </tr>
                 ))}

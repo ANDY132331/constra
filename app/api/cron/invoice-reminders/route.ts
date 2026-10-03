@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 import { onlinePaymentsEnabled } from "@/lib/payments";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -17,8 +18,7 @@ function getAdmin() {
 }
 
 function invoiceTotal(items: { qty: number; rate: number }[], taxRate: number) {
-  const sub = items.reduce((s, i) => s + i.qty * i.rate, 0);
-  return sub * (1 + taxRate / 100);
+  return moneyTotals(items, taxRate).total;
 }
 
 function fmt(n: number, currency = "USD") {

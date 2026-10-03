@@ -14,6 +14,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toLocalDateString } from "@/lib/utils";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 const STATUS_CONFIG = {
   draft:   { label: "Draft",   bg: "bg-zinc-700/60",       text: "text-zinc-300",   dot: "bg-zinc-400",   bar: "bg-zinc-600" },
@@ -42,8 +43,7 @@ const blank: InvForm = {
 };
 
 function invoiceTotal(inv: Invoice) {
-  const sub = inv.items.reduce((s, i) => s + i.qty * i.rate, 0);
-  return sub * (1 + inv.taxRate / 100);
+  return moneyTotals(inv.items, inv.taxRate).total;
 }
 
 // â"€â"€ Invoice list row â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
@@ -76,7 +76,7 @@ function InvoiceRow({ invoice, currency, onClick }: {
         </div>
         <div className="text-right flex-shrink-0">
           <p className={`text-[14px] font-black ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
-            {formatCurrencyCompact(Math.round(total), currency as never)}
+            {formatCurrency(total, currency as never)}
           </p>
           <ChevronRight size={13} className="text-white/20 group-hover:text-white/40 transition-colors ml-auto mt-0.5" />
         </div>
@@ -125,8 +125,7 @@ export default function InvoicesPage() {
   const overdueCount = invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && new Date(i.dueDate) < now)).length;
 
   const calcTotal = useCallback((items: LineItem[], taxRate: string) => {
-    const sub = items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0);
-    return sub * (1 + (parseFloat(taxRate) || 0) / 100);
+    return moneyTotals(items, taxRate).total;
   }, []);
 
   const nextNumber = (() => {
@@ -284,7 +283,7 @@ export default function InvoicesPage() {
                       </p>
                     </div>
                     <p className={`text-[18px] font-black flex-shrink-0 tabular-nums ${isPaid ? "text-emerald-400" : isOverdue ? "text-red-400" : "text-white"}`}>
-                      {formatCurrencyCompact(Math.round(total), currency as never)}
+                      {formatCurrency(total, currency as never)}
                     </p>
                   </div>
                 </button>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Sparkles, RefreshCw, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 function parseBold(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -42,8 +43,7 @@ function BriefLine({ line }: { line: string }) {
 }
 
 function invTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
-  const sub = inv.items.reduce((s, it) => s + it.qty * it.rate, 0);
-  return sub * (1 + inv.taxRate / 100);
+  return moneyTotals(inv.items, inv.taxRate).total;
 }
 
 export function DailyBriefCard() {

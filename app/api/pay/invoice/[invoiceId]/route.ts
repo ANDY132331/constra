@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { onlinePaymentsEnabled } from "@/lib/payments";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 function getAdmin() {
   return createClient(
@@ -43,8 +44,7 @@ export async function GET(
 
   type DbItem = { description: string; qty: number; rate: number };
   const items = (invoice.items as DbItem[]) ?? [];
-  const sub = items.reduce((s: number, i: DbItem) => s + i.qty * i.rate, 0);
-  const total = sub * (1 + Number(invoice.tax_rate) / 100);
+  const { subtotal: sub, tax, total } = moneyTotals(items, invoice.tax_rate);
   const companiesRaw = invoice.companies as unknown;
   const company = (Array.isArray(companiesRaw) ? companiesRaw[0] : companiesRaw) as { name: string; currency: string } | null;
 
@@ -61,6 +61,7 @@ export async function GET(
     taxRate: Number(invoice.tax_rate),
     notes: invoice.notes ?? null,
     subtotal: sub,
+    tax,
     total,
     companyName: company?.name ?? "Your Contractor",
     currency: (company?.currency ?? "CAD") as string,

@@ -6,6 +6,7 @@ import { APP_URL } from "@/lib/email";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { onlinePaymentsEnabled } from "@/lib/payments";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 // Stripe zero-decimal currencies (no cents — amount is already the smallest unit)
 const ZERO_DECIMAL = new Set([
@@ -61,8 +62,7 @@ export async function POST(req: NextRequest) {
   }
 
   type DbItem = { qty: number; rate: number };
-  const subtotal = (invoice.items as DbItem[] ?? []).reduce((s: number, i: DbItem) => s + i.qty * i.rate, 0);
-  const amount: number = subtotal * (1 + Number(invoice.tax_rate ?? 0) / 100);
+  const amount: number = moneyTotals(invoice.items as DbItem[], invoice.tax_rate).total;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-06-24.dahlia" as any });

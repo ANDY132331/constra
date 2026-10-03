@@ -1,4 +1,5 @@
 import type { ClockEntry, Worker, Project, Estimate, Invoice, DailyReport, ChangeOrder } from "./mock-data";
+import { moneyTotals, lineAmount } from "@/lib/money";
 
 type PdfReportInput = {
   workers: Worker[];
@@ -511,9 +512,7 @@ export async function exportEstimatePdf(
   const currFmt = (n: number) =>
     new Intl.NumberFormat("en-CA", { style: "currency", currency: currency || "CAD" }).format(n);
 
-  const subtotal = estimate.items.reduce((s, i) => s + i.qty * i.rate, 0);
-  const tax      = subtotal * (estimate.taxRate / 100);
-  const total    = subtotal + tax;
+  const { subtotal, tax, total } = moneyTotals(estimate.items, estimate.taxRate);
 
   const fmtDate = (d: Date) => d.toLocaleDateString("en-CA", { dateStyle: "medium" });
 
@@ -600,7 +599,7 @@ export async function exportEstimatePdf(
         item.category || "—",
         item.qty.toString(),
         currFmt(item.rate),
-        currFmt(item.qty * item.rate),
+        currFmt(lineAmount(item.qty, item.rate)),
       ]),
       headStyles: { fillColor: headFill, textColor: headText, fontSize: 8, fontStyle: "bold", cellPadding: { top: 4, bottom: 4, left: 3, right: 3 } },
       bodyStyles: { fontSize: 8.5, textColor: DARK, cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 }, lineColor: [235, 235, 235], lineWidth: 0.1 },
@@ -896,7 +895,7 @@ export async function exportEstimatePdf(
         item.category || "—",
         item.qty.toString(),
         currFmt(item.rate),
-        currFmt(item.qty * item.rate),
+        currFmt(lineAmount(item.qty, item.rate)),
       ]),
       headStyles: { fillColor: [245, 245, 245] as [number,number,number], textColor: MID, fontSize: 7.5, fontStyle: "bold", cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 } },
       bodyStyles: { fontSize: 8.5, textColor: DARK, cellPadding: { top: 4, bottom: 4, left: 3, right: 3 }, lineColor: [235, 235, 235], lineWidth: 0.15 },
@@ -1030,9 +1029,7 @@ export async function exportInvoicePdf(
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("en-CA", { day: "numeric", month: "long", year: "numeric" });
 
-  const sub   = invoice.items.reduce((s, i) => s + i.qty * i.rate, 0);
-  const tax   = sub * (invoice.taxRate / 100);
-  const total = sub + tax;
+  const { subtotal: sub, tax, total } = moneyTotals(invoice.items, invoice.taxRate);
   const balanceAmt = invoice.status === "paid" ? 0 : total;
 
   // ── SHARED: draw logo / initial mark ──────────────────────────────────────
@@ -1065,7 +1062,7 @@ export async function exportInvoicePdf(
         item.description,
         item.qty.toString(),
         currFmt(item.rate),
-        currFmt(item.qty * item.rate),
+        currFmt(lineAmount(item.qty, item.rate)),
       ]),
       headStyles: {
         fillColor: headFill, textColor: headText, fontStyle: "bold",
