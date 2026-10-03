@@ -73,7 +73,12 @@ export async function exportReportPdf(input: PdfReportInput) {
     (t, r) => ({ reg: t.reg + r.reg, ot: t.ot + r.ot, regPay: t.regPay + r.regPay, otPay: t.otPay + r.otPay, gross: t.gross + r.gross }),
     { reg: 0, ot: 0, regPay: 0, otPay: 0, gross: 0 },
   );
-  const missingRates = rows.filter((r) => r.rate <= 0).map((r) => r.name);
+  const missingRates = rows.filter((r) => !(r.rate > 0)).map((r) => r.name);
+  // A shift nobody closed keeps counting, so call it out rather than quietly paying it
+  const LONG_SHIFT_HOURS = 16;
+  const longShifts = entries
+    .filter((e) => hrs(e) >= LONG_SHIFT_HOURS)
+    .map((e) => ({ name: workerMap.get(e.workerId)?.name ?? "Unknown", hours: hrs(e) }));
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const tape = (y: number, h: number) => {
@@ -181,6 +186,20 @@ export async function exportReportPdf(input: PdfReportInput) {
     doc.setTextColor(...INK2);
     const msg = `No hourly rate set for ${missingRates.slice(0, 4).join(", ")}${missingRates.length > 4 ? ` and ${missingRates.length - 4} more` : ""} — their pay shows as $0. Set rates under Crew.`;
     doc.text(msg, M + 4, y + 5.7);
+    y += 17;
+  }
+
+  if (longShifts.length) {
+    doc.setFillColor(253, 232, 228);
+    doc.rect(M, y, CW, 9, "F");
+    doc.setFillColor(185, 56, 44);
+    doc.rect(M, y, 1.5, 9, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...INK2);
+    const names = longShifts.slice(0, 3).map((l) => `${l.name} (${l.hours.toFixed(1)}h)`).join(", ");
+    const more = longShifts.length > 3 ? ` and ${longShifts.length - 3} more` : "";
+    doc.text(`Shift over 16 hours — check for a missed clock-out before paying: ${names}${more}.`, M + 4, y + 5.7);
     y += 17;
   }
 

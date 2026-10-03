@@ -97,8 +97,13 @@ export function computeWorkerOvertime(
     overtimeHours += o;
   }
 
-  const regularPay = regularHours * hourlyRate;
-  const overtimePay = overtimeHours * hourlyRate * settings.multiplier;
+  // A rate or multiplier that never got set must not turn into NaN pay or unpaid overtime.
+  // Overtime is premium time, so a multiplier below 1 is always a misconfiguration.
+  const rate = Number.isFinite(hourlyRate) && hourlyRate > 0 ? hourlyRate : 0;
+  const multiplier = Number.isFinite(settings.multiplier) && settings.multiplier >= 1 ? settings.multiplier : 1.5;
+
+  const regularPay = regularHours * rate;
+  const overtimePay = overtimeHours * rate * multiplier;
 
   return {
     regularHours: Math.round(regularHours * 100) / 100,

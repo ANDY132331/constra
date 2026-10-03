@@ -49,6 +49,9 @@ import { hoursBetween, elapsedLabel } from "@/lib/hours";
 
 const elapsed = (start: Date, end?: Date): string => elapsedLabel(start, end);
 
+/** Past this many hours an open shift is almost certainly a forgotten clock-out. */
+const LONG_SHIFT_HOURS = 16;
+
 function fmt(date: Date | string) {
   return new Date(date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
@@ -839,6 +842,44 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Overtime alert — foreman/admin only */}
+      {/* Shifts left running — a forgotten clock-out otherwise gets paid in full */}
+      {!isEmployee && (() => {
+        const stale = clockEntries
+          .filter((e) => !e.clockOut && hoursBetween(e.clockIn) >= LONG_SHIFT_HOURS)
+          .map((e) => ({ entry: e, worker: getWorkerById(e.workerId), hours: hoursBetween(e.clockIn) }))
+          .sort((a, b) => b.hours - a.hours);
+        if (stale.length === 0) return null;
+        return (
+          <div className="mx-4 mb-3 rounded-xl border border-red-500/30 bg-red-500/[0.07] px-4 py-3 text-[12px] text-red-300">
+            <div className="flex items-center gap-2 font-bold">
+              <AlertTriangle size={13} className="flex-shrink-0 text-red-400" />
+              {stale.length === 1 ? "A shift is still running" : `${stale.length} shifts are still running`}
+            </div>
+            <p className="text-red-300/70 mt-1 leading-snug">Check before payroll — these keep adding hours until someone clocks out.</p>
+            <div className="mt-2 flex flex-col gap-2">
+              {stale.slice(0, 3).map(({ entry, worker, hours }) => (
+                <div key={entry.id} className="flex items-center justify-between gap-2">
+                  <span className="min-w-0 truncate">
+                    <span className="font-semibold text-red-200">{worker?.name ?? "Unknown"}</span>
+                    <span className="text-red-300/70"> · {hours.toFixed(1)}h</span>
+                  </span>
+                  {isForemanOrAbove(currentUser.role) && (
+                    <button
+                      type="button"
+                      onClick={() => setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: worker?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut })}
+                      className="flex-shrink-0 px-3 py-1.5 rounded-full bg-red-500/15 hover:bg-red-500/25 active:bg-red-500/30 text-red-200 font-semibold"
+                    >
+                      Fix times
+                    </button>
+                  )}
+                </div>
+              ))}
+              {stale.length > 3 && <span className="text-red-300/60">and {stale.length - 3} more</span>}
+            </div>
+          </div>
+        );
+      })()}
+
       {!isEmployee && (() => {
         const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
         const ot = workers.filter((w) => {
@@ -1308,6 +1349,46 @@ export default function TimeTrackingPage() {
           ]}
         />
       </div>
+
+      {/* Shifts left running — a forgotten clock-out otherwise gets paid in full */}
+      {(() => {
+        const stale = clockEntries
+          .filter((e) => !e.clockOut && hoursBetween(e.clockIn) >= LONG_SHIFT_HOURS)
+          .map((e) => ({ entry: e, worker: getWorkerById(e.workerId), hours: hoursBetween(e.clockIn) }))
+          .sort((a, b) => b.hours - a.hours);
+        if (stale.length === 0) return null;
+        return (
+          <div className="flex items-start gap-3 px-4 py-3 mb-3 rounded-xl border border-red-500/30 bg-red-500/8 text-[12px] text-red-300">
+            <AlertTriangle size={14} className="flex-shrink-0 mt-0.5 text-red-400" />
+            <div className="min-w-0 flex-1">
+              <span className="font-bold">
+                {stale.length === 1 ? "A shift is still running" : `${stale.length} shifts are still running`}
+              </span>
+              <span className="text-red-300/70 ml-2">
+                Check before payroll — these keep adding hours until someone clocks out.
+              </span>
+              <div className="mt-2 flex flex-col gap-1.5">
+                {stale.slice(0, 4).map(({ entry, worker, hours }) => (
+                  <div key={entry.id} className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-red-200">{worker?.name ?? "Unknown"}</span>
+                    <span className="text-red-300/70">{hours.toFixed(1)}h since {fmt(entry.clockIn)}</span>
+                    {isForemanOrAbove(currentUser.role) && (
+                      <button
+                        type="button"
+                        onClick={() => setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: worker?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut })}
+                        className="px-2.5 py-1 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-200 font-semibold"
+                      >
+                        Fix times
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {stale.length > 4 && <span className="text-red-300/60">and {stale.length - 4} more</span>}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Overtime alerts */}
       {(() => {
