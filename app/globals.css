@@ -1246,16 +1246,21 @@ button, a, [role="button"] {
    ══════════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
   /* Drag handle pill — only on the first child (header) so it appears at the top of the sheet */
+  /* Positioned, not in the flow: as a flex item it pushed row headers' titles sideways */
+  .sheet { position: relative; }
   .sheet > div:first-child::before {
     content: '';
-    display: block;
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 36px;
     height: 4px;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.18);
     border-radius: 9999px;
-    margin: 10px auto 0;
-    flex-shrink: 0;
+    pointer-events: none;
   }
+  [data-theme="light"] .sheet > div:first-child::before { background: rgba(0,0,0,0.16); }
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -1683,4 +1688,6 @@ html[data-theme="light"] header:not(.lp-nav) { box-shadow: 0 1px 0 var(--c-rule)
 
 /* The AI chat button floats over everything; keep it out of the way while a full-screen form or sheet is open */
 body:has(.fixed.inset-0.z-50:not(.mobile-overlay)) .cc-fab,
-body:has([role="dialog"][aria-modal="true"]) .cc-fab { display: none !important; }
+body:has([role="dialog"][aria-modal="true"]) .cc-fab,
+body:has(.fixed.inset-0.z-50:not(.mobile-overlay)) .pwa-banner,
+body:has([role="dialog"][aria-modal="true"]) .pwa-banner { display: none !important; }

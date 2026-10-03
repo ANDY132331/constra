@@ -48,7 +48,7 @@ function CustomTabBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-24 lg:bottom-6 left-4 right-4 z-[60] mx-auto max-w-sm">
+    <div className="pwa-banner fixed bottom-24 lg:bottom-6 left-4 right-4 z-[60] mx-auto max-w-sm">
       <div className="bg-[#1c1a18] border border-amber-500/25 rounded-2xl px-4 py-4 shadow-2xl shadow-black/60">
         <div className="flex items-start gap-3">
           {/* Icon */}

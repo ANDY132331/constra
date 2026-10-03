@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, WifiOff, ChevronRight, Loader2, ShieldAlert, Navigation, Download, BarChart3 } from "lucide-react";
 import { ConfirmModal } from "@/components/confirm-modal";
@@ -156,65 +157,112 @@ function EditEntryModal({
 function ProjectPickerModal({
   worker,
   projects,
+  recentProjectId,
   onSelect,
   onClose,
 }: {
   worker: Worker;
-  projects: { id: string; name: string; color: string }[];
+  projects: { id: string; name: string; color: string; client?: string }[];
+  recentProjectId?: string;
   onSelect: (projectId: string) => void;
   onClose: () => void;
 }) {
-  const [selected, setSelected] = useState(projects[0]?.id ?? "");
+  const [query, setQuery] = useState("");
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
-      <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-sm">
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/[0.06]">
-          <div>
-            <h3 className="text-[15px] font-bold text-white">Select Project</h3>
-            <p className="text-[11px] text-white/35 mt-0.5">Clocking in {worker.name}</p>
+  // Escape closes; the page behind doesn't scroll while the sheet is up
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    const main = document.querySelector<HTMLElement>("main");
+    const prev = main?.style.overflow ?? "";
+    if (main) main.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); if (main) main.style.overflow = prev; };
+  }, [onClose]);
+
+  // Last-used site first, then the worker's assigned projects, then everything else
+  const ordered = useMemo(() => {
+    const assigned = new Set(worker.projectIds ?? []);
+    const rank = (id: string) => (id === recentProjectId ? 0 : assigned.has(id) ? 1 : 2);
+    return [...projects].sort((a, b) => rank(a.id) - rank(b.id) || a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+  }, [projects, worker.projectIds, recentProjectId]);
+
+  const q = query.trim().toLowerCase();
+  const shown = q ? ordered.filter((p) => p.name.toLowerCase().includes(q) || (p.client ?? "").toLowerCase().includes(q)) : ordered;
+
+  const sheet = (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pick-project-title"
+        className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-sm flex flex-col max-h-[85dvh] sm:max-h-[80vh] overflow-hidden"
+      >
+        <div className="flex items-center justify-between gap-3 px-5 pt-6 pb-4 border-b border-white/[0.06] flex-shrink-0">
+          <div className="min-w-0">
+            <h3 id="pick-project-title" className="text-[16px] font-bold text-white">Which site?</h3>
+            <p className="text-[12px] text-white/40 mt-0.5 truncate">Clocking in {worker.name}</p>
           </div>
-          <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
-            <X size={16} />
+          <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+            <X size={18} />
           </button>
         </div>
-        <div className="p-5 space-y-2">
+
+        {projects.length > 6 && (
+          <div className="px-5 pt-3 flex-shrink-0">
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" aria-hidden />
+              <input
+                id="pick-project-search"
+                aria-label="Search projects"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search projects"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-9 pr-3 py-2.5 text-[14px] text-white placeholder:text-white/30 outline-none focus:border-amber-500/50"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-3 space-y-2">
           {projects.length === 0 ? (
-            <p className="text-[13px] text-white/35 text-center py-4">No active projects. Add a project first.</p>
+            <p className="text-[13px] text-white/40 text-center py-6">No active projects. Add a project first.</p>
+          ) : shown.length === 0 ? (
+            <p className="text-[13px] text-white/40 text-center py-6">No projects match “{query}”.</p>
           ) : (
-            projects.map((p) => (
+            shown.map((p) => (
               <button
                 key={p.id}
-                onClick={() => setSelected(p.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${
-                  selected === p.id
-                    ? "border-amber-500/50 bg-amber-500/[0.06]"
-                    : "border-white/[0.07] hover:border-white/[0.12] hover:bg-white/[0.03]"
-                }`}
+                onClick={() => onSelect(p.id)}
+                className="w-full min-h-[56px] flex items-center gap-3 px-4 py-3 rounded-xl border border-white/[0.08] hover:border-amber-500/40 hover:bg-amber-500/[0.05] active:bg-amber-500/10 transition-all text-left"
               >
-                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-                <span className="text-[13px] font-semibold text-white/80 flex-1">{p.name}</span>
-                {selected === p.id && <ChevronRight size={13} className="text-amber-400 flex-shrink-0" />}
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[14px] font-semibold text-white/85 truncate">{p.name}</span>
+                  {(p.id === recentProjectId || p.client) && (
+                    <span className="block text-[11.5px] text-white/40 truncate">
+                      {p.id === recentProjectId ? "Last site" : p.client}
+                    </span>
+                  )}
+                </span>
+                <ChevronRight size={16} className="text-white/30 flex-shrink-0" />
               </button>
             ))
           )}
         </div>
-        <div className="flex gap-3 px-5 pb-5">
-          <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-white/40 bg-white/5 hover:bg-white/8 transition-colors">
-            Cancel
-          </button>
-          <button
-            onClick={() => selected && onSelect(selected)}
-            disabled={!selected || projects.length === 0}
-            className="flex-1 py-2.5 rounded-full text-[13px] font-bold text-black bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            Continue to Photo
-          </button>
+
+        <div className="px-5 pt-2 pb-4 flex-shrink-0 border-t border-white/[0.06]">
+          <p className="text-[11.5px] text-white/40 text-center py-2">Tap a site to take your clock-in photo</p>
         </div>
       </div>
     </div>
   );
+
+  return mounted ? createPortal(sheet, document.body) : null;
 }
 
 function haversineM(a: GpsLocation, b: GpsLocation): number {
@@ -1452,6 +1500,12 @@ export default function TimeTrackingPage() {
       <ProjectPickerModal
         worker={projectPickerTarget}
         projects={activeProjects}
+        recentProjectId={clockEntries
+          .filter((e) => e.workerId === projectPickerTarget.id)
+          .reduce<{ at: number; id?: string }>((best, e) => {
+            const at = new Date(e.clockIn).getTime();
+            return at > best.at ? { at, id: e.projectId } : best;
+          }, { at: 0 }).id}
         onSelect={handleProjectSelected}
         onClose={() => setProjectPickerTarget(null)}
       />
