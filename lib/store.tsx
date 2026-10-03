@@ -378,10 +378,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       isOnlineRef.current = true;
       setTransient((t) => ({ ...t, isOnline: true, pendingSync: queueLength() }));
       if (SUPABASE_ENABLED) {
-        const synced = await flushQueue(getClient());
-        if (synced > 0) {
+        const { synced, dropped } = await flushQueue(getClient());
+        if (synced > 0 || dropped.length > 0) {
           setTransient((t) => ({ ...t, pendingSync: queueLength() }));
+        }
+        if (synced > 0) {
           toast.success(`${synced} offline change${synced > 1 ? "s" : ""} synced`);
+        }
+        if (dropped.length > 0) {
+          // Never let a change disappear quietly — the person believed it was saved
+          toast.error(
+            `${dropped.length} offline change${dropped.length > 1 ? "s" : ""} couldn't be saved`,
+            { duration: 12000, description: `The server refused ${dropped.length > 1 ? "them" : "it"} (${dropped[0].reason}). Check ${[...new Set(dropped.map((d) => d.table.replace(/_/g, " ")))].join(", ")} and re-enter if needed.` },
+          );
+          scheduleResync();
         }
       }
     };
@@ -804,7 +814,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!SUPABASE_ENABLED || !companyIdRef.current) return;
     const queueOrWarn = () => {
       if (queuedOp) {
-        enqueue(queuedOp);
+        if (!enqueue(queuedOp)) {
+          toast.error("That change wasn't saved", { id: "queue-full", description: "This device is out of storage for offline changes. Free up space, then try again." });
+          return;
+        }
         setTransient((t) => ({ ...t, pendingSync: queueLength() }));
       } else {
         toast.error("You're offline — that change wasn't saved", { id: "offline-unsaved", description: "Try again once you have signal." });

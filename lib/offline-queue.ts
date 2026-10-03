@@ -21,12 +21,17 @@ export function getQueue(): QueuedOp[] {
   }
 }
 
-export function enqueue(op: Omit<QueuedOp, "id" | "timestamp">): void {
+/** Returns false when the change could not be stored — the caller must tell the user. */
+export function enqueue(op: Omit<QueuedOp, "id" | "timestamp">): boolean {
   try {
     const queue = getQueue();
     queue.push({ ...op, id: crypto.randomUUID(), timestamp: Date.now() });
     localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-  } catch { /* silently drop if storage is unavailable */ }
+    return true;
+  } catch {
+    // Out of storage or storage blocked. The change is only on screen, so it is gone.
+    return false;
+  }
 }
 
 export function queueLength(): number {
@@ -34,23 +39,33 @@ export function queueLength(): number {
 }
 
 const MAX_ATTEMPTS = 5;
-let flushing: Promise<number> | null = null;
+let flushing: Promise<FlushResult> | null = null;
+
+export type FlushResult = {
+  synced: number;
+  /** Changes the database refused for good. These are lost, so the user has to be told. */
+  dropped: { table: string; op: QueuedOp["op"]; reason: string }[];
+};
 
 // Only one flush at a time — overlapping flushes would replay the same inserts.
-export function flushQueue(client: SupabaseClient): Promise<number> {
+export function flushQueue(client: SupabaseClient): Promise<FlushResult> {
   if (!flushing) flushing = runFlush(client).finally(() => { flushing = null; });
   return flushing;
 }
 
-async function runFlush(client: SupabaseClient): Promise<number> {
+async function runFlush(client: SupabaseClient): Promise<FlushResult> {
   const queue = getQueue();
-  if (queue.length === 0) return 0;
+  if (queue.length === 0) return { synced: 0, dropped: [] };
 
   const remaining: QueuedOp[] = [];
+  const dropped: FlushResult["dropped"] = [];
   let synced = 0;
 
   for (const entry of queue) {
-    if ((entry.op === "update" || entry.op === "delete") && !entry.eqId) continue; // malformed, can never apply
+    if ((entry.op === "update" || entry.op === "delete") && !entry.eqId) {
+      dropped.push({ table: entry.table, op: entry.op, reason: "missing row id" });
+      continue; // malformed, can never apply
+    }
     try {
       let error: { code?: string; message?: string } | null = null;
       if (entry.op === "insert") {
@@ -67,6 +82,7 @@ async function runFlush(client: SupabaseClient): Promise<number> {
       const attempts = (entry.attempts ?? 0) + (/^\d{5}$/.test(error.code ?? "") ? 1 : 0);
       if (attempts >= MAX_ATTEMPTS) {
         console.error("[offline-queue] dropping op after repeated rejections:", entry.table, entry.op, error);
+        dropped.push({ table: entry.table, op: entry.op, reason: error.message ?? "rejected" });
         continue;
       }
       remaining.push({ ...entry, attempts });
@@ -76,5 +92,5 @@ async function runFlush(client: SupabaseClient): Promise<number> {
   }
 
   try { localStorage.setItem(QUEUE_KEY, JSON.stringify(remaining)); } catch { /* storage unavailable */ }
-  return synced;
+  return { synced, dropped };
 }
