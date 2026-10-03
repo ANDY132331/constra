@@ -44,6 +44,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const isDocDetail = /^\/(invoices|estimates)\/[^/]+$/.test(pathname);
+  const isChat = pathname === "/messages";
 
   // Allow MobileNav "More" tab to open sidebar via custom event
   useEffect(() => {
@@ -117,15 +118,8 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       {/* ── App shell — only mount after auth resolves ── */}
       {!isLoading && onboarded && (
         <I18nProvider locale={language}>
-          {pathname === "/messages" ? (
-            /* ── Full-screen standalone messaging shell ── */
-            <div className="h-[100dvh] w-screen overflow-hidden" style={{ background: "#070c18" }}>
-              <ErrorBoundary>{children}</ErrorBoundary>
-              <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>
-              <ErrorBoundary fallback={null}><NotifPermissionPrompt /></ErrorBoundary>
-            </div>
-          ) : (
-            /* ── Standard dashboard shell ── */
+          {(
+            /* ── Dashboard shell (messages fills it edge to edge) ── */
             <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#0a0a0a]">
               {sidebarOpen && (
                 <div
@@ -138,7 +132,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
                 {!isDocDetail && <ErrorBoundary fallback={null}><Header onMenuClick={() => setSidebarOpen((v) => !v)} /></ErrorBoundary>}
                 <main
                   ref={mainRef}
-                  className={`flex-1 min-h-0 overflow-y-scroll ${isDocDetail ? "p-0 bg-[#080808]" : "bg-[#0a0a0a] p-5 md:p-6 mobile-main-padding main-scroll"}`}
+                  className={`flex-1 min-h-0 overflow-y-scroll ${isChat ? "messages-main p-0 bg-[#0a0a0a]" : isDocDetail ? "p-0 bg-[#080808]" : "bg-[#0a0a0a] p-5 md:p-6 mobile-main-padding main-scroll"}`}
                   style={isDocDetail ? { touchAction: "pan-y pinch-zoom", WebkitOverflowScrolling: "touch" as never, overscrollBehaviorY: "contain" } : undefined}
                 >
                   {!isDocDetail && (pullY > 8 || refreshing) && (

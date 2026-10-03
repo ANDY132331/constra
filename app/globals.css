@@ -587,15 +587,25 @@ button, a, [role="button"], input, select, textarea {
    and overflow so the chat container can fill from header to mobile-nav.
    On desktop (≥1024 px) we restore normal scroll + padding for the
    rounded-card look.                                                       */
+.messages-main {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+/* The page-enter wrapper has to stretch so the chat can fill from header to nav.
+   Flex rather than a percentage height: the chat root then fills whatever is left. */
+.messages-main > div {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.messages-main > div > div {
+  flex: 1 1 auto;
+  min-height: 0;
+}
 @media (max-width: 1023px) {
   .messages-main {
-    overflow: hidden !important;
-    padding: 0 !important;
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
-  }
-  /* The page-enter wrapper must stretch to fill the whole main on mobile */
-  .messages-main > div {
-    height: 100%;
   }
 }
 

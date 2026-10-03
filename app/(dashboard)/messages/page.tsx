@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import {
   Send, Paperclip, X, Download, Trash2, MessagesSquare,
-  Search, ChevronLeft, Mic, ArrowLeft, Play, Pause, ChevronDown,
+  Search, ChevronLeft, Mic, Play, Pause, ChevronDown,
 } from "lucide-react";
 import { format, isToday, isYesterday, isSameDay } from "date-fns";
 import { useStore } from "@/lib/store";
@@ -12,25 +12,51 @@ import { compressImage } from "@/lib/compress-image";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/confirm-modal";
 
-const C = {
-  sidebarBg:     "#0d1117",
-  activeRow:     "rgba(59,130,246,0.12)",
-  activeBorder:  "#3b82f6",
-  chatBg:        "#070c18",
-  sentGrad:      "linear-gradient(135deg,#2563eb,#1e40af)",
-  sentText:      "#ffffff",
-  recvBg:        "#131c2e",
-  recvText:      "#e2e8f0",
-  headerBg:      "#0d1117",
-  inputBg:       "#131c2e",
-  barBg:         "#0d1117",
-  secondaryText: "#4b6a9b",
-  border:        "rgba(96,165,250,0.07)",
-  datePill:      "rgba(96,165,250,0.10)",
-  titleColor:    "#e2e8f0",
-  activeTitle:   "#60a5fa",
-  inputBorder:   "rgba(96,165,250,0.18)",
-};
+// Chat colours come from the same ink/hi-vis set as the rest of the app and follow
+// the light/dark setting, so this page never looks like a different product.
+type Palette = ReturnType<typeof palette>;
+
+function palette(dark: boolean) {
+  return dark
+    ? {
+        sidebarBg: "#111111",
+        activeRow: "rgba(245,196,0,0.10)",
+        activeBorder: "#F5C400",
+        chatBg: "#0a0a0a",
+        sentBg: "#F5C400",
+        sentText: "#1A1600",
+        recvBg: "#1a1a1a",
+        recvText: "#ECEAE5",
+        headerBg: "#111111",
+        inputBg: "#1a1a1a",
+        barBg: "#111111",
+        secondaryText: "rgba(255,255,255,0.45)",
+        border: "rgba(255,255,255,0.08)",
+        datePill: "rgba(255,255,255,0.07)",
+        titleColor: "#ECEAE5",
+        activeTitle: "#F5C400",
+        inputBorder: "rgba(255,255,255,0.12)",
+      }
+    : {
+        sidebarBg: "#F5F4F1",
+        activeRow: "rgba(245,196,0,0.18)",
+        activeBorder: "#B88F00",
+        chatBg: "#E7E5E0",
+        sentBg: "#F5C400",
+        sentText: "#1A1600",
+        recvBg: "#FFFFFF",
+        recvText: "#151617",
+        headerBg: "#F5F4F1",
+        inputBg: "#FFFFFF",
+        barBg: "#F5F4F1",
+        secondaryText: "rgba(0,0,0,0.58)",
+        border: "rgba(21,22,23,0.12)",
+        datePill: "rgba(21,22,23,0.07)",
+        titleColor: "#151617",
+        activeTitle: "#6B5200",
+        inputBorder: "rgba(21,22,23,0.18)",
+      };
+}
 
 function fmtTime(d: Date) { return format(d, "h:mm a"); }
 function fmtDur(s: number) {
@@ -38,7 +64,7 @@ function fmtDur(s: number) {
   return m > 0 ? `${m}:${String(s % 60).padStart(2, "0")}` : `0:${String(s % 60).padStart(2, "0")}`;
 }
 
-function DateSep({ date }: { date: Date }) {
+function DateSep({ date, C }: { date: Date; C: Palette }) {
   const label = isToday(date) ? "Today" : isYesterday(date) ? "Yesterday" : format(date, "MMMM d, yyyy");
   return (
     <div className="flex items-center justify-center my-5">
@@ -49,7 +75,7 @@ function DateSep({ date }: { date: Date }) {
   );
 }
 
-function AudioPlayer({ src, durationSecs, isMe }: { src: string; durationSecs: number; isMe: boolean }) {
+function AudioPlayer({ src, durationSecs, isMe, C }: { src: string; durationSecs: number; isMe: boolean; C: Palette }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -83,11 +109,11 @@ function AudioPlayer({ src, durationSecs, isMe }: { src: string; durationSecs: n
     audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
   }
 
-  const barFg  = isMe ? "rgba(255,255,255,0.85)" : "#60a5fa";
-  const barBg  = isMe ? "rgba(255,255,255,0.18)" : "rgba(96,165,250,0.18)";
-  const textClr = isMe ? "rgba(255,255,255,0.65)" : C.secondaryText;
-  const btnBg  = isMe ? "rgba(255,255,255,0.18)" : "rgba(59,130,246,0.15)";
-  const iconClr = isMe ? "#fff" : "#60a5fa";
+  const barFg  = isMe ? "rgba(26,22,0,0.75)" : C.activeBorder;
+  const barBg  = isMe ? "rgba(26,22,0,0.22)" : C.datePill;
+  const textClr = isMe ? "rgba(26,22,0,0.65)" : C.secondaryText;
+  const btnBg  = isMe ? "rgba(26,22,0,0.15)" : C.datePill;
+  const iconClr = isMe ? C.sentText : C.activeBorder;
 
   return (
     <div className="flex items-center gap-2.5 flex-1 min-w-0">
@@ -113,7 +139,8 @@ function AudioPlayer({ src, durationSecs, isMe }: { src: string; durationSecs: n
 
 export default function MessagesPage() {
   const router = useRouter();
-  const { projects, messages, workers, addMessage, deleteMessage, currentUser } = useStore();
+  const { projects, messages, workers, addMessage, deleteMessage, currentUser, theme } = useStore();
+  const C = useMemo(() => palette(theme !== "light"), [theme]);
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projects[0]?.id ?? "");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
@@ -395,28 +422,15 @@ export default function MessagesPage() {
         >
           {/* Header */}
           <div className="px-5 pb-3 border-b flex-shrink-0" style={{ borderColor: C.border, paddingTop: "max(20px, env(safe-area-inset-top))" }}>
-            <button
-              type="button"
-              onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-1.5 mb-3 -ml-1 px-2 py-1 rounded-full transition-colors active:scale-95"
-              style={{ color: C.activeTitle }}
-            >
-              <ArrowLeft size={16} />
-              <span className="text-[13px] font-semibold">Dashboard</span>
-            </button>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[22px] font-bold" style={{ color: C.titleColor }}>Messages</h2>
-              <div className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold"
-                style={{ background: currentUser.color + "30", color: currentUser.color }}>
-                {currentUser.initials}
-              </div>
-            </div>
-            <div className="flex items-center gap-2 rounded-full px-3 py-2.5" style={{ background: "#0a0f1a" }}>
+            <p className="text-[11px] font-bold uppercase tracking-[0.12em] mb-2.5" style={{ color: C.secondaryText }}>
+              Project chats
+            </p>
+            <div className="flex items-center gap-2 rounded-full px-3 py-2.5" style={{ background: C.inputBg, border: `1px solid ${C.border}` }}>
               <Search size={14} style={{ color: C.secondaryText }} />
               <input
                 value={sidebarSearch}
                 onChange={(e) => setSidebarSearch(e.target.value)}
-                placeholder="Search projects…"
+                placeholder="Search a job…"
                 className="flex-1 bg-transparent text-[13px] outline-none"
                 style={{ color: C.titleColor }}
                 maxLength={100}
@@ -583,7 +597,7 @@ export default function MessagesPage() {
             {projectMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-6">
                 <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.08)" }}>
-                  <MessagesSquare size={32} style={{ color: "#3b82f6" }} />
+                  <MessagesSquare size={32} style={{ color: C.activeBorder }} />
                 </div>
                 <div>
                   <p className="text-[15px] font-bold" style={{ color: C.titleColor }}>
@@ -617,7 +631,7 @@ export default function MessagesPage() {
                     ? `18px 18px ${isGroupEnd ? "5px" : "18px"} 18px`
                     : `18px 18px 18px ${isGroupEnd ? "5px" : "18px"}`;
                   const bubbleStyle = {
-                    background: isMe ? C.sentGrad : C.recvBg,
+                    background: isMe ? C.sentBg : C.recvBg,
                     color: isMe ? C.sentText : C.recvText,
                     borderRadius: bubbleRadius,
                     boxShadow: isMe ? "0 2px 12px rgba(59,130,246,0.25)" : "0 1px 3px rgba(0,0,0,0.12)",
@@ -625,7 +639,7 @@ export default function MessagesPage() {
 
                   return (
                     <div key={msg.id}>
-                      {showDate && <DateSep date={ts} />}
+                      {showDate && <DateSep date={ts} C={C} />}
                       <div className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""} ${showSender && !showDate ? "mt-3" : "mt-[3px]"}`}>
                         {/* Avatar */}
                         <div className={`w-7 flex-shrink-0 ${isMe ? "hidden" : "flex items-end"}`}>
@@ -669,10 +683,10 @@ export default function MessagesPage() {
                             <div className="px-3.5 py-3 flex items-center gap-3" style={{ ...bubbleStyle, minWidth: 220 }}>
                               <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                                 style={{ background: isMe ? "rgba(255,255,255,0.18)" : "rgba(59,130,246,0.12)" }}>
-                                <Mic size={15} style={{ color: isMe ? "#fff" : "#3b82f6" }} />
+                                <Mic size={15} style={{ color: isMe ? C.sentText : C.activeBorder }} />
                               </div>
                               {attData ? (
-                                <AudioPlayer src={attData} durationSecs={audioDur} isMe={isMe} />
+                                <AudioPlayer src={attData} durationSecs={audioDur} isMe={isMe} C={C} />
                               ) : (
                                 <div className="flex-1">
                                   <p className="text-[12px]" style={{ color: isMe ? "rgba(255,255,255,0.6)" : C.secondaryText }}>
@@ -715,7 +729,7 @@ export default function MessagesPage() {
                             >
                               <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                                 style={{ background: isMe ? "rgba(255,255,255,0.18)" : "rgba(59,130,246,0.12)" }}>
-                                <Download size={14} style={{ color: isMe ? "#fff" : "#3b82f6" }} />
+                                <Download size={14} style={{ color: isMe ? C.sentText : C.activeBorder }} />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="text-[12px] font-semibold truncate" style={{ color: isMe ? "#fff" : C.titleColor }}>{attName}</p>
@@ -774,7 +788,7 @@ export default function MessagesPage() {
                   <img src={pendingAttachment.data} alt="" className="w-10 h-10 rounded-lg object-cover" />
                 ) : (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.10)" }}>
-                    <Paperclip size={13} style={{ color: "#3b82f6" }} />
+                    <Paperclip size={13} style={{ color: C.activeBorder }} />
                   </div>
                 )}
                 <span className="text-[12px] max-w-[200px] truncate" style={{ color: C.titleColor }}>{pendingAttachment.name}</span>
@@ -815,7 +829,7 @@ export default function MessagesPage() {
                   type="button"
                   onClick={() => stopRecording(true)}
                   className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90"
-                  style={{ background: C.sentGrad }}
+                  style={{ background: C.sentBg }}
                 >
                   <Send size={18} className="text-white" style={{ marginLeft: 2 }} />
                 </button>
@@ -870,7 +884,7 @@ export default function MessagesPage() {
                     onClick={sendMessage}
                     disabled={!canSend}
                     className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90 disabled:opacity-35"
-                    style={{ background: C.sentGrad }}
+                    style={{ background: C.sentBg }}
                   >
                     <Send size={18} className="text-white" style={{ marginLeft: 2 }} />
                   </button>
