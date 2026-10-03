@@ -1558,6 +1558,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (SUPABASE_ENABLED) await getClient().auth.signOut();
     setState({ ...defaultState(), isLoading: false });
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    // Drop any app pages the service worker cached for this session
+    try { navigator.serviceWorker?.controller?.postMessage({ type: "clear-page-cache" }); } catch {}
   }, []);
 
   const currentUser: Worker =

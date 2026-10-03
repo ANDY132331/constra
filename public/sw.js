@@ -1,12 +1,24 @@
-const CACHE = "constra-v7";
+const CACHE = "constra-v8";
 
 const PRECACHE = ["/", "/dashboard", "/time-tracking", "/schedule", "/crew"];
+
+// A signed-out request for an app page redirects to /login. Storing that as the app shell
+// would show a login screen to someone who is signed in but offline, so redirects are skipped.
+async function cachePage(cache, request, response) {
+  if (!response || !response.ok || response.redirected || response.type === "opaqueredirect") return;
+  try { await cache.put(request, response); } catch { /* quota */ }
+}
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then((c) =>
-      Promise.allSettled(PRECACHE.map((url) => c.add(url)))
+      Promise.allSettled(
+        PRECACHE.map(async (url) => {
+          const res = await fetch(url, { credentials: "same-origin", redirect: "follow" });
+          await cachePage(c, url, res);
+        })
+      )
     )
   );
 });
@@ -54,10 +66,8 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(
     fetch(e.request)
       .then((res) => {
-        if (res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, clone));
-        }
+        const clone = res.clone();
+        caches.open(CACHE).then((c) => cachePage(c, e.request, clone));
         return res;
       })
       .catch(async () => {
@@ -70,6 +80,18 @@ self.addEventListener("fetch", (e) => {
         }
         return new Response("Offline", { status: 503, statusText: "Service Unavailable" });
       })
+  );
+});
+
+// Sign-out clears cached app pages so the next person on this device starts clean.
+self.addEventListener("message", (e) => {
+  if (e.data?.type !== "clear-page-cache") return;
+  e.waitUntil(
+    caches.open(CACHE).then(async (c) => {
+      for (const req of await c.keys()) {
+        if (!new URL(req.url).pathname.startsWith("/_next/static/")) await c.delete(req);
+      }
+    })
   );
 });
 
