@@ -7,6 +7,7 @@ import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOf
 import LiveSite from "@/components/landing/live-site";
 import SavingsCalc from "@/components/landing/savings-calc";
 import AppTour from "@/components/landing/app-tour";
+import RealPhotos from "@/components/landing/real-photos";
 
 const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
@@ -394,6 +395,8 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <RealPhotos />
+
         <SavingsCalc />
 
         {/* Pricing */}
@@ -723,6 +726,13 @@ const CSS = `
 .lp-device figcaption{font-size:11px; color:var(--ink3); text-align:center; letter-spacing:.04em}
 .lp-device-video{transform:translateY(-10px)}
 .lp-device-shot{transform:translateY(16px)}
+
+/* Photos from real sites (hidden until lib/site-photos.ts lists some) */
+.lp-real{padding-block:96px; border-top:1px solid var(--rule)}
+.lp-real-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px}
+.lp-real figure{margin:0; border:1px solid var(--rule); background:var(--paper)}
+.lp-real img{display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover}
+.lp-real figcaption{padding:12px 14px; font-size:13px; color:var(--ink2); border-top:1px solid var(--rule)}
 
 /* Savings calculator */
 .lp-calc{padding-block:96px; border-top:1px solid var(--rule)}
