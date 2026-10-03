@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pause, Play, MapPin, Camera, HardHat, FileText, AlertTriangle, Receipt, Users } from "lucide-react";
 import SiteScene from "./site-scene";
 
@@ -31,6 +31,11 @@ export default function LiveSite() {
   const [playing, setPlaying] = useState(true);
   const [p, setP] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // A still of the scene covers the WebGL load (16KB). The clip is a full stand-in and only
+  // downloads when WebGL can't run at all, so nobody pays 1.7MB for a fallback they don't need.
+  const showPoster = !sceneReady && !failed;
 
   // Read the motion preference after hydration; reduced motion starts paused late in the day
   useEffect(() => {
@@ -43,10 +48,17 @@ export default function LiveSite() {
 
   // Throttle React updates to visible changes (5-minute clock steps)
   const onProgress = useCallback((v: number) => setP((prev) => (Math.abs(prev - v) >= 0.004 || v === 0 || v === 1 ? v : prev)), []);
-  const onReady = useCallback((ok: boolean) => { if (!ok) setFailed(true); }, []);
+  const onReady = useCallback((ok: boolean) => (ok ? setSceneReady(true) : setFailed(true)), []);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (failed) setP(1); }, [failed]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (playing && !reduce) void v.play().catch(() => {});
+    else v.pause();
+  }, [playing, reduce, failed]);
 
   const shown = EVENTS.filter((e) => p >= e.at);
   const latest = shown.length - 1;
@@ -66,6 +78,29 @@ export default function LiveSite() {
       <div className="lp-wrap">
         <div className={`lp-stage3d${failed ? " lp-stage3d-flat" : ""}`}>
           {!failed && mounted && <SiteScene playing={playing} initialProgress={reduce ? REDUCED_AT : 0} onProgress={onProgress} onReady={onReady} />}
+          {showPoster && (
+            <img className="lp-scene-video" src="/site/site-tour-poster.webp" alt="" aria-hidden width={960} height={592} />
+          )}
+          {failed && (
+            /* Recorded from this same scene, so machines without WebGL still see the day */
+            <video
+              preload="none"
+              ref={videoRef}
+              className="lp-scene-video"
+              src="/site/site-tour.webm"
+              poster="/site/site-tour-poster.webp"
+              autoPlay={!reduce}
+              loop
+              muted
+              playsInline
+              controls={reduce}
+              onTimeUpdate={(e) => {
+                const v = e.currentTarget;
+                if (v.duration) onProgress(Math.min(1, v.currentTime / v.duration));
+              }}
+              aria-label="A day on a Constra job site, from the first clock-in to the daily report"
+            />
+          )}
 
           <div className="lp-hud lp-hud-clock" aria-hidden>
             <span className="lp-live-dot" data-on={p > 0.03 && p < 0.95} />

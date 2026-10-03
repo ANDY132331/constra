@@ -45,13 +45,9 @@ function ClockPhoto({ src, className }: { src: string; className?: string }) {
 import { sendPushEvent } from "@/lib/push-client";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { isForemanOrAbove } from "@/lib/permissions";
+import { hoursBetween, elapsedLabel } from "@/lib/hours";
 
-function elapsed(start: Date, end?: Date): string {
-  const ms = (end ?? new Date()).getTime() - start.getTime();
-  const h = Math.floor(ms / 3600000);
-  const m = Math.floor((ms % 3600000) / 60000);
-  return `${h}h ${m}m`;
-}
+const elapsed = (start: Date, end?: Date): string => elapsedLabel(start, end);
 
 function fmt(date: Date | string) {
   return new Date(date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
@@ -489,13 +485,13 @@ export default function TimeTrackingPage() {
 
   const todayHours = useMemo(() => clockEntries
     .filter((e) => e.clockOut && new Date(e.clockIn) >= todayStart)
-    .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0),
+    .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0),
   [clockEntries, todayStart]);
 
   // tick drives live-elapsed recomputation every 30s
   const liveHours = useMemo(() => clockedIn.reduce((s, w) => {
     if (!w.clockInTime) return s;
-    return s + (Date.now() - new Date(w.clockInTime).getTime()) / 3600000;
+    return s + hoursBetween(w.clockInTime);
   }, 0),
   // eslint-disable-next-line react-hooks/exhaustive-deps
   [clockedIn, tick]);
@@ -602,7 +598,7 @@ export default function TimeTrackingPage() {
     openEntries.forEach((e) => updateClockEntry(e.id, { clockOut: now }));
     if (entry) {
       const worker = getWorkerById(workerId);
-      const hrs = ((now.getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1);
+      const hrs = hoursBetween(entry.clockIn, now).toFixed(1);
       void sendPushEvent({ event: "clock-out", workerId: entry.workerId, projectId: entry.projectId, hours: Number(hrs) });
       toast.success(`${worker?.name ?? "Worker"} clocked out — ${hrs}h logged`);
     }
@@ -636,7 +632,7 @@ export default function TimeTrackingPage() {
       .forEach((e) => {
         const w = getWorkerById(e.workerId);
         const p = getProjectById(e.projectId);
-        const hrs = ((new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000).toFixed(2);
+        const hrs = (hoursBetween(e.clockIn, e.clockOut!)).toFixed(2);
         rows.push([
           w?.name ?? e.workerId,
           w?.customRole || w?.role || "",
@@ -847,8 +843,8 @@ export default function TimeTrackingPage() {
         const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
         const ot = workers.filter((w) => {
           const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);
-          const todayHrs = wEntries.filter((e) => new Date(e.clockIn) >= todayStart).reduce((s,e) => s + (new Date(e.clockOut!).getTime()-new Date(e.clockIn).getTime())/3600000, 0);
-          const weekHrs = wEntries.filter((e) => new Date(e.clockIn) >= weekStart).reduce((s,e) => s + (new Date(e.clockOut!).getTime()-new Date(e.clockIn).getTime())/3600000, 0);
+          const todayHrs = wEntries.filter((e) => new Date(e.clockIn) >= todayStart).reduce((s,e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
+          const weekHrs = wEntries.filter((e) => new Date(e.clockIn) >= weekStart).reduce((s,e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
           return todayHrs > 8 || weekHrs > 44;
         });
         if (ot.length === 0) return null;
@@ -967,7 +963,7 @@ export default function TimeTrackingPage() {
       {allEntries.length > 0 && (() => {
         const completedEntries = allEntries.filter((e) => e.clockOut);
         const totalH = completedEntries.reduce(
-          (s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0
+          (s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0
         );
 
         // Group by date string (allEntries is newest-first, so Map insertion order = newest day first)
@@ -1008,7 +1004,7 @@ export default function TimeTrackingPage() {
             {[...dayMap.entries()].map(([dateKey, dayEntries]) => {
               const dayCompleted = dayEntries.filter((e) => e.clockOut);
               const dayTotal = dayCompleted.reduce(
-                (s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0
+                (s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0
               );
               const todayKey = new Date().toLocaleDateString("en-CA");
               const dayLabel = dateKey === todayKey
@@ -1038,7 +1034,7 @@ export default function TimeTrackingPage() {
                       const worstSev = entryFlags.some((f) => f.severity === "high") ? "high" : entryFlags.some((f) => f.severity === "medium") ? "medium" : entryFlags.length > 0 ? "low" : null;
                       const flagCol = worstSev === "high" ? "text-red-400" : worstSev === "medium" ? "text-amber-400" : "text-blue-400/70";
                       const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;
-                      const hrs = entry.clockOut ? ((new Date(entry.clockOut).getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1) : null;
+                      const hrs = entry.clockOut ? (hoursBetween(entry.clockIn, entry.clockOut)).toFixed(1) : null;
 
                       return (
                         <div key={entry.id} className={`px-4 py-4 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""} ${worstSev === "high" ? "bg-red-500/[0.03]" : ""}`}>
@@ -1323,10 +1319,10 @@ export default function TimeTrackingPage() {
           const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);
           const todayHrs = wEntries
             .filter((e) => new Date(e.clockIn) >= todayStart)
-            .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+            .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
           const weekHrs = wEntries
             .filter((e) => new Date(e.clockIn) >= weekStart)
-            .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+            .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
           if (todayHrs > 8) overtimeWorkers.push({ name: w.name, reason: `${todayHrs.toFixed(1)}h today` });
           else if (weekHrs > 44) overtimeWorkers.push({ name: w.name, reason: `${weekHrs.toFixed(1)}h this week` });
         });
@@ -1392,7 +1388,7 @@ export default function TimeTrackingPage() {
             const project = getProjectById(entry.projectId);
             if (!worker) return null;
             const hrs = entry.clockOut
-              ? ((new Date(entry.clockOut).getTime() - new Date(entry.clockIn).getTime()) / 3600000).toFixed(1)
+              ? (hoursBetween(entry.clockIn, entry.clockOut)).toFixed(1)
               : null;
             const isLive = !!(entry as { live?: boolean }).live;
             const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;

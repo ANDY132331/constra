@@ -11,6 +11,7 @@ import { useT } from "@/lib/i18n";
 import { PAYROLL_ADAPTERS, exportPayroll } from "@/lib/payroll-export";
 import { exportReportPdf } from "@/lib/pdf-export";
 import { computeWorkerOvertime } from "@/lib/overtime";
+import { hoursBetween } from "@/lib/hours";
 
 function periodBounds(period: "week" | "month" | "quarter"): { start: Date; end: Date; label: string } {
   const now = new Date();
@@ -81,7 +82,7 @@ export default function ReportsPage() {
   );
 
   const totalHours = useMemo(
-    () => periodEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0),
+    () => periodEntries.reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0),
     [periodEntries]
   );
 
@@ -96,7 +97,7 @@ export default function ReportsPage() {
       const dayEnd = new Date(d); dayEnd.setHours(23, 59, 59, 999);
       const h = clockEntries
         .filter((e) => e.clockOut && new Date(e.clockIn) >= dayStart && new Date(e.clockIn) <= dayEnd)
-        .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+        .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
       days.push({
         label: d.toLocaleDateString("en-CA", { weekday: "short" }),
         hours: Math.round(h * 10) / 10,
@@ -145,7 +146,7 @@ export default function ReportsPage() {
     return workers
       .map((w) => {
         const workerEntries = periodEntries.filter((e) => e.workerId === w.id);
-        const h = workerEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+        const h = workerEntries.reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
         const projectCount = new Set(workerEntries.map((e) => e.projectId)).size;
         const ot = overtimeEnabled
           ? computeWorkerOvertime(workerEntries, w.hourlyRate ?? 0, {
@@ -371,10 +372,10 @@ export default function ReportsPage() {
         {canSeeFinancials && (() => {
           const projectCosts = projects.map((p) => {
             const pEntries = periodEntries.filter((e) => e.projectId === p.id);
-            const labourHours = pEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+            const labourHours = pEntries.reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
             const labourCost = pEntries.reduce((s, e) => {
               const w = workers.find((w) => w.id === e.workerId);
-              const hrs = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
+              const hrs = hoursBetween(e.clockIn, e.clockOut!);
               return s + hrs * (w?.hourlyRate ?? 0);
             }, 0);
             return { ...p, labourHours, labourCost };
@@ -601,10 +602,10 @@ export default function ReportsPage() {
       {canSeeFinancials && (() => {
         const projectCosts = projects.map((p) => {
           const pEntries = periodEntries.filter((e) => e.projectId === p.id);
-          const labourHours = pEntries.reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+          const labourHours = pEntries.reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
           const labourCost = pEntries.reduce((s, e) => {
             const w = workers.find((w) => w.id === e.workerId);
-            const hrs = (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
+            const hrs = hoursBetween(e.clockIn, e.clockOut!);
             return s + hrs * (w?.hourlyRate ?? 0);
           }, 0);
           return { ...p, labourHours, labourCost };

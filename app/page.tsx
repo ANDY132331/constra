@@ -316,6 +316,22 @@ export default function LandingPage() {
               <p className="lp-kicker lp-kicker-inv">How it works</p>
               <h2 className="lp-h2">One day on site,<br />start to invoice.</h2>
             </div>
+            <div className="lp-day-shots">
+              {[
+                ["morning", "6:58 AM", "Crew clocks in inside the fence"],
+                ["midday", "12:00 PM", "Level 4 steel going up"],
+                ["afternoon", "4:00 PM", "Deck poured, report sent"],
+              ].map(([slug, time, caption]) => (
+                <figure key={slug}>
+                  <img src={`/site/site-${slug}.webp`} width={1400} height={864} decoding="async" alt={`The same job site at ${time}: ${caption.toLowerCase()}`} />
+                  <figcaption>
+                    <span className="lp-mono">{time}</span>
+                    {caption}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+
             <ol className="lp-timeline">
               {DAY.map((s) => (
                 <li key={s.time}>
@@ -680,6 +696,15 @@ const CSS = `
 .lp-stage3d-flat .lp-feed{position:static; width:auto}
 .lp-stage3d-flat .lp-hud-clock{top:20px}
 
+/* A day on site: real renders of the same job site */
+.lp-day-shots{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:48px}
+.lp-day-shots figure{margin:0; border:1px solid var(--night-rule); background:#1B1A22; overflow:hidden}
+.lp-day-shots img{display:block; width:100%; height:auto; aspect-ratio:1400/864; object-fit:cover}
+.lp-day-shots figcaption{display:flex; flex-direction:column; gap:3px; padding:12px 14px 14px; font-size:13px; color:var(--night-ink); border-top:1px solid var(--night-rule)}
+.lp-day-shots figcaption .lp-mono{color:var(--hv); font-size:11px; letter-spacing:.08em}
+.lp-scene-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#1B1A22; display:block}
+.lp-stage3d-flat .lp-scene-video{position:relative; inset:auto; height:auto; aspect-ratio:1200/740}
+
 /* Savings calculator */
 .lp-calc{padding-block:96px; border-top:1px solid var(--rule)}
 .lp-calc-grid{display:grid; grid-template-columns:.9fr 1.1fr; gap:56px; align-items:center}
@@ -724,6 +749,8 @@ const CSS = `
   .lp-hero-visual{padding-bottom:56px}
   .lp-slip{left:auto; right:50%; margin-right:40px; width:210px}
   .lp-day,.lp-features,.lp-field,.lp-pricing,.lp-faq{padding-block:64px}
+  .lp-day-shots{grid-template-columns:1fr; gap:12px; margin-bottom:36px}
+  .lp-day-shots figure:nth-child(n+3){display:none}
   .lp-footer-inner{grid-template-columns:1fr}
 }
 @media (max-width:600px){
@@ -747,6 +774,7 @@ const CSS = `
   .lp-sitecam{padding-block:64px 72px}
   .lp-stage3d{height:auto; display:flex; flex-direction:column}
   .lp-scene{position:relative; inset:auto; height:min(440px,100vw)}
+  .lp-scene-video{position:relative; inset:auto; height:min(440px,100vw); order:0}
   .lp-feed{position:relative; top:auto; right:auto; width:auto; padding:12px; gap:6px; flex-direction:column-reverse}
   .lp-feed-item:not(.is-on){display:none}
   .lp-feed-item.is-on:not(.is-new){opacity:.62}

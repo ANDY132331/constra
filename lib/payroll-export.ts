@@ -5,6 +5,7 @@
 import type { ClockEntry, Worker, Project } from "./mock-data";
 import type { OvertimeSettings } from "./overtime";
 import { computeWorkerOvertime } from "./overtime";
+import { hoursBetween } from "./hours";
 
 export type PayrollRow = {
   workerName: string;
@@ -58,7 +59,7 @@ function buildRows(
     .map((e) => {
       const worker = workerMap.get(e.workerId);
       const project = projectMap.get(e.projectId);
-      const hours = ((new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000);
+      const hours = (hoursBetween(e.clockIn, e.clockOut!));
       const rate = worker?.hourlyRate ?? 0;
       return {
         workerName: worker?.name ?? "Unknown",

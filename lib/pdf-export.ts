@@ -1,5 +1,6 @@
 import type { ClockEntry, Worker, Project, Estimate, Invoice, DailyReport, ChangeOrder } from "./mock-data";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { hoursBetween } from "./hours";
 
 type PdfReportInput = {
   workers: Worker[];
@@ -45,7 +46,7 @@ export async function exportReportPdf(input: PdfReportInput) {
   const HV: [number, number, number] = [245, 196, 0];
   const GO: [number, number, number] = [30, 122, 69];
 
-  const hrs = (e: ClockEntry) => (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000;
+  const hrs = (e: ClockEntry) => hoursBetween(e.clockIn, e.clockOut!);
   const entries = clockEntries.filter(
     (e) => e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd && hrs(e) > 0,
   );

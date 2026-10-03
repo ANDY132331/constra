@@ -8,6 +8,7 @@
 // double-counting the same hours as both daily and weekly overtime.
 
 import type { ClockEntry } from "./mock-data";
+import { hoursBetween } from "./hours";
 
 export type OvertimeSettings = {
   enabled: boolean;
@@ -79,7 +80,7 @@ export function computeWorkerOvertime(
   const weeks = new Map<string, Map<string, number>>();
   for (const e of entries) {
     if (!e.clockOut) continue;
-    const hours = (new Date(e.clockOut).getTime() - new Date(e.clockIn).getTime()) / 3600000;
+    const hours = hoursBetween(e.clockIn, e.clockOut);
     if (hours <= 0) continue;
     const wKey = weekStartOf(e.clockIn).toISOString();
     const dKey = dayKey(e.clockIn);

@@ -37,7 +37,19 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
     const host = hostRef.current;
     if (!host) return;
     let disposed = false;
+    let settled = false;
     let cleanup = () => {};
+    // A chunk that never arrives (flaky connection, blocked CDN) leaves the import pending
+    // forever, so give up after a while and let the caller show its fallback.
+    const giveUp = setTimeout(() => {
+      if (!settled && !disposed) { settled = true; readyCb.current?.(false); }
+    }, 12000);
+    const settle = (ok: boolean) => {
+      if (settled || disposed) return;
+      settled = true;
+      clearTimeout(giveUp);
+      readyCb.current?.(ok);
+    };
 
     // Only pull in three.js once the section is close to the viewport
     const io = new IntersectionObserver((entries) => {
@@ -47,11 +59,11 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
         if (disposed) return;
         try {
           cleanup = build(THREE, host);
-          readyCb.current?.(true);
+          settle(true);
         } catch {
-          readyCb.current?.(false);
+          settle(false);
         }
-      }).catch(() => readyCb.current?.(false));
+      }).catch(() => settle(false));
     }, { rootMargin: "300px" });
     io.observe(host);
 
@@ -398,6 +410,7 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
 
     return () => {
       disposed = true;
+      clearTimeout(giveUp);
       io.disconnect();
       cleanup();
     };

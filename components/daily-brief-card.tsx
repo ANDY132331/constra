@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Sparkles, RefreshCw, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { hoursBetween } from "@/lib/hours";
 
 function parseBold(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -63,7 +64,7 @@ export function DailyBriefCard() {
     const clockedInWorkers = clockedIn.map((w) => {
       const project = projects.find((p) => p.id === w.projectIds[0]);
       const hoursIn = w.clockInTime
-        ? (now.getTime() - w.clockInTime.getTime()) / 3600000
+        ? hoursBetween(w.clockInTime, now)
         : 0;
       return { name: w.name, role: w.customRole, project: project?.name ?? "Unknown", hoursIn };
     });

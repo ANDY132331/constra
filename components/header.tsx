@@ -144,7 +144,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         paddingTop: "env(safe-area-inset-top)",
       }}
     >
-    <div className="h-14 flex items-center px-4 md:px-6 gap-3">
+    <div className="h-14 flex items-center px-3 md:px-6 gap-2 sm:gap-3">
       {/* Mobile hamburger */}
       <button
         onClick={onMenuClick}
@@ -159,7 +159,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <p className="text-[11px] text-white/30 mt-0.5 hidden sm:block">{dateStr}</p>
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-0.5 sm:gap-1.5">
         {/* Quick Add */}
         <div ref={newRef} className="relative">
           <button
@@ -172,7 +172,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             <Plus size={15} className="sm:hidden" />
             <Plus size={13} className="hidden sm:block" />
             <span className="hidden sm:inline">New</span>
-            <ChevronDown size={11} className={`transition-transform ${showNew ? "rotate-180" : ""}`} />
+            <ChevronDown size={11} className={`hidden sm:block transition-transform ${showNew ? "rotate-180" : ""}`} />
           </button>
 
           {showNew && (
@@ -324,7 +324,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                 <img src={currentUser.photo} alt={currentUser.name} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
               )}
             </div>
-            <ChevronDown size={11} className={`text-white/30 transition-transform flex-shrink-0 ${showUser ? "rotate-180" : ""}`} />
+            <ChevronDown size={11} className={`hidden sm:block text-white/30 transition-transform flex-shrink-0 ${showUser ? "rotate-180" : ""}`} />
           </button>
 
           {showUser && (

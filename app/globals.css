@@ -1696,3 +1696,15 @@ body:has([role="dialog"][aria-modal="true"]) .pwa-banner { display: none !import
    no inner well or border, and the wrapper shows the focus ring instead */
 input.bg-transparent, textarea.bg-transparent { box-shadow: none !important; border-color: transparent !important; background: transparent !important; }
 *:has(> input.bg-transparent:focus-visible) { box-shadow: 0 0 0 2px rgba(245,196,0,0.4) !important; }
+
+/* Horizontal chip rows: fade the right edge so it reads as scrollable rather than cut off */
+.scroll-hint-x { scroll-snap-type: x proximity; }
+.scroll-hint-x > * { scroll-snap-align: start; }
+@media (max-width: 640px) {
+  .scroll-hint-x {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+  }
+  /* Once scrolled to the end there is nothing more to hint at */
+  .scroll-hint-x:has(> *:last-child:nth-child(-n + 3)) { -webkit-mask-image: none; mask-image: none; }
+}

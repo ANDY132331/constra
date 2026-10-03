@@ -3,24 +3,35 @@
 import { useState, useEffect } from "react";
 import { Bell, X, BellOff } from "lucide-react";
 import { getPermission, requestPermission } from "@/lib/notifications";
+import { useStore } from "@/lib/store";
 
 const DISMISSED_KEY = "constra_notif_prompt_dismissed";
+const VISITS_KEY = "constra_visits";
+const INSTALL_DISMISSED_KEY = "constra_ctab_v1";
 
 export function NotifPermissionPrompt() {
   const [show, setShow] = useState(false);
   const [requesting, setRequesting] = useState(false);
+  const { projects, workers } = useStore();
+  // Asking before there is anything to be notified about just gets declined, and a declined
+  // permission can't be asked for again — so wait until the workspace is actually set up.
+  const inUse = projects.length > 0 && workers.length > 1;
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    // Only show if browser supports it, permission not yet decided, and user hasn't dismissed
-    const perm = getPermission();
-    const dismissed = localStorage.getItem(DISMISSED_KEY);
-    if (perm === "default" && !dismissed) {
-      // Delay 4 s so it doesn't appear the instant the page loads
-      const t = setTimeout(() => setShow(true), 4000);
-      return () => clearTimeout(t);
-    }
-  }, []);
+    if (typeof window === "undefined" || !inUse) return;
+    if (getPermission() !== "default") return;
+    let visits = 0;
+    try {
+      if (localStorage.getItem(DISMISSED_KEY)) return;
+      // One promo at a time: let the install banner have its turn first
+      if (!localStorage.getItem(INSTALL_DISMISSED_KEY)) return;
+      visits = Number(localStorage.getItem(VISITS_KEY) ?? "0") + 1;
+      localStorage.setItem(VISITS_KEY, String(visits));
+    } catch { return; }
+    if (visits < 3) return;
+    const t = setTimeout(() => setShow(true), 8000);
+    return () => clearTimeout(t);
+  }, [inUse]);
 
   if (!show) return null;
 

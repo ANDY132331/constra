@@ -20,6 +20,7 @@ import { AskConstra } from "@/components/ask-constra";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { hoursBetween } from "@/lib/hours";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -143,9 +144,9 @@ function WorkerCard({ worker }: { worker: Worker }) {
     return () => clearInterval(id);
   }, []);
   const clockIn = worker.clockInTime ? new Date(worker.clockInTime) : new Date();
-  const elapsed = Date.now() - clockIn.getTime();
-  const hours = Math.floor(elapsed / 3600000);
-  const mins = Math.floor((elapsed % 3600000) / 60000);
+  const totalMins = Math.round(hoursBetween(clockIn) * 60);
+  const hours = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
 
   return (
     <Link href="/crew" className="card-hover block bg-[#111111] border border-white/[0.06] rounded-2xl p-4 hover:border-amber-500/25 group" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)" }}>
@@ -332,7 +333,7 @@ export default function DashboardPage() {
 
   const weeklyHours = useMemo(() => clockEntries
     .filter((e) => e.clockOut && new Date(e.clockIn) >= weekStart)
-    .reduce((sum, e) => sum + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0),
+    .reduce((sum, e) => sum + hoursBetween(e.clockIn, e.clockOut!), 0),
   [clockEntries, weekStart]);
 
   const todayActiveHours = useMemo(() => {
@@ -341,7 +342,7 @@ export default function DashboardPage() {
       if (!w.clockInTime) return sum;
       const cit = new Date(w.clockInTime);
       const effectiveStart = cit < todayStart ? todayStart : cit;
-      return sum + (Date.now() - effectiveStart.getTime()) / 3600000;
+      return sum + hoursBetween(effectiveStart);
     }, 0);
   }, [clockedInWorkers]);
 
@@ -391,12 +392,12 @@ export default function DashboardPage() {
 
     const myWeekHours = myEntries
       .filter((e) => e.clockOut && new Date(e.clockIn) >= wkStart)
-      .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+      .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
     const myTodayHours = myEntries
       .filter((e) => e.clockOut && new Date(e.clockIn) >= todayStart)
-      .reduce((s, e) => s + (new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime()) / 3600000, 0);
+      .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
     const liveElapsed = currentUser.clockedIn && currentUser.clockInTime
-      ? (now.getTime() - new Date(currentUser.clockInTime).getTime()) / 3600000
+      ? hoursBetween(currentUser.clockInTime, now)
       : 0;
 
     // Days worked this week (streak)
@@ -792,7 +793,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2 px-4 pt-3.5 pb-2.5 border-b border-red-500/10">
               <AlertTriangle size={13} className="text-red-400 flex-shrink-0" />
               <p className="text-[12px] font-black text-red-400 uppercase tracking-wider">
-                {urgentItems.length} Item{urgentItems.length !== 1 ? "s" : ""} Need Attention
+                {urgentItems.length} Item{urgentItems.length !== 1 ? "s" : ""} Need{urgentItems.length === 1 ? "s" : ""} Attention
               </p>
             </div>
             <div className="divide-y divide-red-500/[0.07]">
@@ -810,7 +811,7 @@ export default function DashboardPage() {
 
       {/* Stat chips — horizontal scroll */}
       <div className="px-5 pt-6">
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar scroll-hint-x">
           {(([
             { label: "Hrs/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9",                    href: "/time-tracking" },
             { label: "Open Issues", value: openPunchItems.length,                              color: dk ? "#F5C400" : "#d97706",   href: "/punch-list"    },
@@ -902,7 +903,7 @@ export default function DashboardPage() {
         ) : (
           <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             {clockedInWorkers.slice(0, 6).map((w) => {
-              const hoursOn = w.clockInTime ? (Date.now() - new Date(w.clockInTime).getTime()) / 3600000 : 0;
+              const hoursOn = w.clockInTime ? hoursBetween(w.clockInTime) : 0;
               return (
                 <Link
                   key={w.id}
