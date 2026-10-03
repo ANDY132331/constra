@@ -534,7 +534,7 @@ export default function MessagesPage() {
               type="button"
               onClick={() => setMobileSidebarOpen(true)}
               className="sm:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full"
-              style={{ background: "rgba(59,130,246,0.08)" }}
+              style={{ background: C.datePill }}
             >
               <ChevronLeft size={20} style={{ color: C.activeBorder }} />
             </button>
@@ -596,7 +596,7 @@ export default function MessagesPage() {
             >
             {projectMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-6">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.08)" }}>
+                <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: C.datePill }}>
                   <MessagesSquare size={32} style={{ color: C.activeBorder }} />
                 </div>
                 <div>
@@ -634,7 +634,7 @@ export default function MessagesPage() {
                     background: isMe ? C.sentBg : C.recvBg,
                     color: isMe ? C.sentText : C.recvText,
                     borderRadius: bubbleRadius,
-                    boxShadow: isMe ? "0 2px 12px rgba(59,130,246,0.25)" : "0 1px 3px rgba(0,0,0,0.12)",
+                    boxShadow: isMe ? "0 2px 12px rgba(245,196,0,0.22)" : "0 1px 3px rgba(0,0,0,0.12)",
                   };
 
                   return (
@@ -682,7 +682,7 @@ export default function MessagesPage() {
                           {hasAudio && (
                             <div className="px-3.5 py-3 flex items-center gap-3" style={{ ...bubbleStyle, minWidth: 220 }}>
                               <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                                style={{ background: isMe ? "rgba(255,255,255,0.18)" : "rgba(59,130,246,0.12)" }}>
+                                style={{ background: isMe ? "rgba(26,22,0,0.15)" : C.datePill }}>
                                 <Mic size={15} style={{ color: isMe ? C.sentText : C.activeBorder }} />
                               </div>
                               {attData ? (
@@ -728,7 +728,7 @@ export default function MessagesPage() {
                               style={{ ...bubbleStyle, minWidth: 200, maxWidth: 260 }}
                             >
                               <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                                style={{ background: isMe ? "rgba(255,255,255,0.18)" : "rgba(59,130,246,0.12)" }}>
+                                style={{ background: isMe ? "rgba(26,22,0,0.15)" : C.datePill }}>
                                 <Download size={14} style={{ color: isMe ? C.sentText : C.activeBorder }} />
                               </div>
                               <div className="min-w-0 flex-1">
@@ -787,7 +787,7 @@ export default function MessagesPage() {
                 {isImage(pendingAttachment.data) ? (
                   <img src={pendingAttachment.data} alt="" className="w-10 h-10 rounded-lg object-cover" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.10)" }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: C.datePill }}>
                     <Paperclip size={13} style={{ color: C.activeBorder }} />
                   </div>
                 )}
@@ -874,7 +874,7 @@ export default function MessagesPage() {
                     type="button"
                     onClick={startRecording}
                     className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-90"
-                    style={{ background: "rgba(59,130,246,0.15)" }}
+                    style={{ background: C.datePill }}
                   >
                     <Mic size={20} style={{ color: C.activeBorder }} />
                   </button>
