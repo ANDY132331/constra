@@ -37,6 +37,19 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings": "Settings",
 };
 
+// Phone header has room for about nine capital letters next to the action buttons
+const SHORT_TITLES: Record<string, string> = {
+  "/time-tracking": "Time",
+  "/tasks": "Tasks",
+  "/punch-list": "Punch List",
+  "/photos": "Photos",
+  "/safety": "Safety",
+  "/crew": "Crew",
+  "/daily-reports": "Reports",
+  "/change-orders": "Changes",
+  "/insurance": "Insurance",
+};
+
 const ALL_QUICK_ADD = [
   { label: "Log Incident",  icon: ShieldAlert,  href: "/safety?new=1",     minLevel: "all" as const },
   { label: "New Project",   icon: FolderKanban, href: "/projects?new=1",   minLevel: "foreman" as const },
@@ -79,6 +92,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
   const base = "/" + pathname.split("/")[1];
   const title = PAGE_TITLES[base] ?? "Constra";
+  const shortTitle = SHORT_TITLES[base] ?? title;
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-CA", {
@@ -141,7 +155,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
       </button>
 
       <div className="flex-1 min-w-0">
-        <h1 className="text-[16px] font-bold text-white/90 leading-none truncate tracking-tight">{title}</h1>
+        <h1 className="text-[16px] font-bold text-white/90 leading-none truncate tracking-tight"><span className="sm:hidden">{shortTitle}</span><span className="hidden sm:inline">{title}</span></h1>
         <p className="text-[11px] text-white/30 mt-0.5 hidden sm:block">{dateStr}</p>
       </div>
 

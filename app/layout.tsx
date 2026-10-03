@@ -98,6 +98,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${plexSans.variable} ${plexMono.variable} ${barlowCondensed.variable} dark antialiased`}
+      data-theme="light"
       style={{ height: "100dvh", overflow: "hidden" }}
       suppressHydrationWarning
     >

@@ -563,7 +563,7 @@ button, a, [role="button"], input, select, textarea {
 /* Nav is 62px + safe-area-inset-bottom. Add generous breathing room.        */
 @media (max-width: 1023px) {
   .mobile-main-padding {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(8.75rem + env(safe-area-inset-bottom)) !important; /* clears the bottom nav and the floating chat button */
   }
 }
 
@@ -668,12 +668,12 @@ input[type="time"] {
    Only applies to background and color, not layout props, so there
    is no jank on page-load (the inline script sets data-theme first).
    ══════════════════════════════════════════════════════════════════ */
-html[data-theme] body,
-html[data-theme] header,
-html[data-theme] aside,
-html[data-theme] nav,
-html[data-theme] main,
-html[data-theme] footer {
+html.theme-ready[data-theme] body,
+html.theme-ready[data-theme] header,
+html.theme-ready[data-theme] aside,
+html.theme-ready[data-theme] nav,
+html.theme-ready[data-theme] main,
+html.theme-ready[data-theme] footer {
   transition:
     background-color 0.25s ease,
     border-color 0.25s ease,
@@ -1691,3 +1691,8 @@ body:has(.fixed.inset-0.z-50:not(.mobile-overlay)) .cc-fab,
 body:has([role="dialog"][aria-modal="true"]) .cc-fab,
 body:has(.fixed.inset-0.z-50:not(.mobile-overlay)) .pwa-banner,
 body:has([role="dialog"][aria-modal="true"]) .pwa-banner { display: none !important; }
+
+/* Inputs that sit inside their own bordered wrapper (search bars) are transparent by design:
+   no inner well or border, and the wrapper shows the focus ring instead */
+input.bg-transparent, textarea.bg-transparent { box-shadow: none !important; border-color: transparent !important; background: transparent !important; }
+*:has(> input.bg-transparent:focus-visible) { box-shadow: 0 0 0 2px rgba(245,196,0,0.4) !important; }

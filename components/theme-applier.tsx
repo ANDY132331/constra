@@ -15,5 +15,11 @@ export function ThemeApplier() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
+  // Animate theme changes only after the first paint, so page loads never fade from dark to light
+  useEffect(() => {
+    const id = setTimeout(() => document.documentElement.classList.add("theme-ready"), 400);
+    return () => clearTimeout(id);
+  }, []);
+
   return null;
 }
