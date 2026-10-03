@@ -323,6 +323,33 @@ function loadState(): StoreState {
   }
 }
 
+// Postgres tells us exactly why a write failed; "check your connection" is wrong for most of
+// these and sends people hunting for a problem that isn't theirs.
+function saveErrorMessage(err: { code?: string; message?: string }): string {
+  switch (err.code) {
+    case "42501": return err.message || "You don't have permission to make that change";
+    case "42P01": return "That feature isn't set up on this workspace yet";
+    case "23505": return "That already exists";
+    case "23503": return "Something it links to was deleted";
+    case "23502": return "A required field was empty";
+    case "23514": return "That value isn't allowed";
+    case "22001": return "That text is too long";
+    case "P0001": return err.message || "That change was rejected";
+    default: return "Save failed";
+  }
+}
+
+function saveErrorHint(err: { code?: string; message?: string }): string | undefined {
+  switch (err.code) {
+    case "42P01": return "A database update is still pending. Ask whoever set up this workspace to finish it.";
+    case "42501": return "Ask an admin if you need access.";
+    case "23503": return "Refresh and try again.";
+    case "23502": case "23514": case "22001": return "Check the form and try again.";
+    case undefined: return "Check your connection and try again.";
+    default: return undefined;
+  }
+}
+
 const Ctx = createContext<StoreCtx | null>(null);
 const TransientCtx = createContext<TransientState>({
   isOnline: true, pendingSync: 0, isRealtimeConnected: false, isSaving: false, savedRecently: false,
@@ -835,8 +862,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!err.code && /fetch|network|load failed/i.test(err.message ?? "")) { queueOrWarn(); return; }
       // The change is already on screen; reload so it doesn't look saved when it wasn't
       scheduleResync();
-      if (err.code === "42501") { toast.error(err.message || "You don't have permission to make that change"); return; }
-      toast.error("Save failed — check your connection and try again");
+      toast.error(saveErrorMessage(err), { id: `save-${err.code ?? "x"}`, description: saveErrorHint(err) });
     }, (e: unknown) => {
       console.error(`[store:${label}]`, e);
       queueOrWarn();

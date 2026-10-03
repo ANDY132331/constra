@@ -59,6 +59,13 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   }, []);
   const { pullY, refreshing } = usePullToRefresh(mainRef, handleRefresh);
 
+  // The store reads saved data from this device during its first render, so the server's
+  // HTML can never match the browser's. Holding the shell back until after mount makes the
+  // first client render identical to the server's, which is what React hydrates against —
+  // otherwise it discards the server output and re-renders the whole page.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   // ── Splash screen state ─────────────────────────────────────────────────────
   // If the app is already booted when this layout mounts (e.g. client-side
   // navigation back into the dashboard), skip the splash entirely so it never
@@ -116,7 +123,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <>
       {/* ── App shell — only mount after auth resolves ── */}
-      {!isLoading && onboarded && (
+      {mounted && !isLoading && onboarded && (
         <I18nProvider locale={language}>
           {(
             /* ── Dashboard shell (messages fills it edge to edge) ── */
@@ -173,7 +180,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       )}
 
       {/* ── Splash overlay — stays mounted until exit animation completes ── */}
-      {!splashGone && <SplashScreen exiting={splashExiting} />}
+      {(!mounted || !splashGone) && <SplashScreen exiting={mounted && splashExiting} />}
     </>
   );
 }
