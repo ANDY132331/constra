@@ -226,6 +226,7 @@ export default function EstimatesPage() {
         {/* List */}
         {filtered.length === 0 ? (
           <EmptyState
+            isFiltered={!!search.trim() || statusFilter !== "all"}
             icon={FileText}
             title="No estimates yet"
             body="Create your first estimate to start winning more jobs."
@@ -347,6 +348,7 @@ export default function EstimatesPage() {
               <div className="flex-1 overflow-y-auto">
                 {filtered.length === 0 ? (
                   <EmptyState
+            isFiltered={!!search.trim() || statusFilter !== "all"}
                     icon={FileText}
                     title="No estimates yet"
                     body="Create your first estimate to start winning more jobs."

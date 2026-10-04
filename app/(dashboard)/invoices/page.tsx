@@ -250,6 +250,7 @@ export default function InvoicesPage() {
         {/* Invoice list */}
         {filtered.length === 0 ? (
           <EmptyState
+            isFiltered={!!search.trim() || statusFilter !== "all"}
             icon={FileText}
             title="No invoices yet"
             body="Create your first invoice to start getting paid faster."
@@ -375,6 +376,7 @@ export default function InvoicesPage() {
           <div className="flex-1 overflow-y-auto">
             {filtered.length === 0 ? (
               <EmptyState
+            isFiltered={!!search.trim() || statusFilter !== "all"}
                 icon={FileText}
                 title="No invoices"
                 body="Create your first invoice to get paid."

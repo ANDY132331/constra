@@ -302,6 +302,7 @@ export default function EquipmentPage() {
 
           {equipment.length === 0 ? (
             <EmptyState
+            isFiltered={!!search.trim() || statusFilter !== "all"}
               icon={Truck}
               title="No equipment yet"
               body="Track vehicles, machinery, and tools — assign them to projects and log service dates."

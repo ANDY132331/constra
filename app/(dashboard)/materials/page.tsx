@@ -252,6 +252,7 @@ export default function MaterialsPage() {
         <div className="px-5 space-y-3">
           {filteredEntries.filter((e) => e.type === entryType).length === 0 ? (
             <EmptyState
+            isFiltered={!!searchQuery.trim() || selectedProject !== "all" || selectedTrade !== "all"}
               icon={Package}
               title={`No ${entryType} logs yet`}
               body={`Tap "Log Material" to track your first ${entryType === "delivery" ? "material delivery" : "usage entry"}.`}
@@ -442,6 +443,7 @@ export default function MaterialsPage() {
             </div>
             {filteredEntries.filter((e) => e.type === entryType).length === 0 ? (
               <EmptyState
+            isFiltered={!!searchQuery.trim() || selectedProject !== "all" || selectedTrade !== "all"}
                 icon={Package}
                 title={`No ${entryType} logs yet`}
                 body={`Click "Log Material" to track your first ${entryType === "delivery" ? "material delivery" : "usage entry"}.`}

@@ -261,6 +261,7 @@ export default function BudgetPage() {
       <div className="flex-1 overflow-auto px-4 md:px-6 py-4 space-y-4">
         {grouped.size === 0 ? (
           <EmptyState
+            isFiltered={!!search.trim() || filterProject !== "all" || filterCategory !== "all"}
             icon={DollarSign}
             title="No budget lines yet"
             body="Add cost code line items to track project spend against budget."
