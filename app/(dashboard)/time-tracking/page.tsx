@@ -1106,15 +1106,16 @@ export default function TimeTrackingPage() {
                                 {isLive && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0" />}
                                 <p className="text-[13px] font-bold text-white/85 truncate">{worker.name}</p>
                                 {worstSev && (
-                                  <button aria-label="Show verification flags" onClick={() => setFlagDetailId(flagDetailId === entry.id ? null : entry.id)} className={`flex-shrink-0 ${flagCol}`}>
-                                    <AlertTriangle size={11} />
+                                  <button aria-label={`Show verification flags for ${worker.name}`} onClick={() => setFlagDetailId(flagDetailId === entry.id ? null : entry.id)} className={`flex-shrink-0 inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 -m-2 ${flagCol}`}>
+                                    <AlertTriangle size={13} />
                                   </button>
                                 )}
                                 {hasGps && (
                                   <a href={`https://www.google.com/maps?q=${(entry as { gps?: GpsLocation }).gps!.lat},${(entry as { gps?: GpsLocation }).gps!.lng}`}
                                     target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-                                    className="text-green-400/60 flex-shrink-0">
-                                    <MapPin size={10} />
+                                    aria-label={`Open ${worker.name}'s clock-in location in Maps`}
+                                    className="text-green-400/70 hover:text-green-400 flex-shrink-0 inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 -m-2">
+                                    <MapPin size={13} />
                                   </a>
                                 )}
                               </div>
@@ -1131,11 +1132,11 @@ export default function TimeTrackingPage() {
                                   {hrs ? `${hrs}h` : elapsed(entry.clockIn)}
                                 </span>
                                 {!isLive && !isEmployee && (
-                                  <button aria-label="Edit"
+                                  <button aria-label={`Edit ${worker.name}'s times`}
                                     onClick={() => { const w = getWorkerById(entry.workerId); setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: w?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut }); }}
-                                    className="text-white/20 active:text-white/60 ml-0.5"
+                                    className="text-white/35 hover:text-white/70 active:text-white/80 inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 -my-2 -mr-1 ml-0.5"
                                   >
-                                    <Edit2 size={11} />
+                                    <Edit2 size={13} />
                                   </button>
                                 )}
                               </div>
