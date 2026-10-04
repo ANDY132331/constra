@@ -20,6 +20,7 @@ import {
 import { subscribeToPush } from "@/lib/push-client";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { useUnsavedGuard } from "@/lib/use-unsaved-guard";
 import { isAdminOrAbove } from "@/lib/permissions";
 
 type Tab = "company" | "preferences" | "workers" | "roles" | "notifications" | "security" | "access";
@@ -276,6 +277,20 @@ function SettingsInner() {
   // so it can't be purely derived — this effect just re-syncs it once the store loads.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (inviteCode) setDisplayCode(inviteCode); }, [inviteCode]);
+
+  // These forms are drafts until Save is pressed. Without a cue, edits vanish silently
+  // when someone switches tab or reloads.
+  const companyDirty =
+    companyForm.name !== companyName ||
+    companyForm.businessNumber !== businessNumber ||
+    companyForm.address !== companyAddress ||
+    companyForm.taxRate !== String(defaultTaxRate);
+  const overtimeDirty =
+    overtimeForm.enabled !== overtimeEnabled ||
+    overtimeForm.dailyThreshold !== (overtimeDailyThreshold != null ? String(overtimeDailyThreshold) : "") ||
+    overtimeForm.weeklyThreshold !== (overtimeWeeklyThreshold != null ? String(overtimeWeeklyThreshold) : "40") ||
+    overtimeForm.multiplier !== String(overtimeMultiplier);
+  useUnsavedGuard(companyDirty || overtimeDirty);
 
   // ── Confirmation dialogs ──────────────────────────────────────────────────────
   const [kickConfirm, setKickConfirm] = useState<{ id: string; name: string } | null>(null);
@@ -534,9 +549,17 @@ function SettingsInner() {
                     onChange={(e) => setCompanyForm((f) => ({ ...f, address: e.target.value }))} />
                 </div>
               </div>
-              <button onClick={saveCompany} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
-                Save Changes
-              </button>
+              <div className="flex items-center gap-3 flex-wrap">
+                <button onClick={saveCompany} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
+                  Save Changes
+                </button>
+                {companyDirty && (
+                  <span className="flex items-center gap-1.5 text-[12px] text-amber-400/90">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" aria-hidden />
+                    Unsaved changes
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* ── Overtime Rules ── */}
