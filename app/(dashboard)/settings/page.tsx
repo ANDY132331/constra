@@ -1077,7 +1077,7 @@ function SettingsInner() {
 
         {/* Delete account confirmation modal */}
         {showDeleteModal && (
-          <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
+          <div role="dialog" aria-modal="true" aria-label="Delete account" className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm">
             <div className="sheet bg-[#1a1a1a] border border-red-500/20 rounded-t-2xl sm:rounded-2xl p-6 w-full max-w-sm shadow-2xl">
               {deleteStatus === "requested" ? (
                 <>

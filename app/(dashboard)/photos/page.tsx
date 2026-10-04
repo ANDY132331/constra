@@ -687,7 +687,7 @@ export default function PhotosPage() {
         const uploader = getWorkerById(p.uploadedById);
         const project = getProjectById(p.projectId);
         return (
-          <div className="fixed inset-0 z-[60] bg-black/95 flex flex-col items-center justify-center p-4"
+          <div role="dialog" aria-modal="true" aria-label={`Photo: ${p.caption || "site photo"}`} className="fixed inset-0 z-[60] bg-black/95 flex flex-col items-center justify-center p-4"
             onClick={() => setLightboxIdx(null)}>
             <button aria-label="Close" className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
               onClick={() => setLightboxIdx(null)}>
