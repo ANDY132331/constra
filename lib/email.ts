@@ -44,9 +44,11 @@ export function emailShell({
 <style>
   body{margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
   .wrap{max-width:520px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  .hd{background:#111;padding:20px 28px;display:flex;align-items:center;gap:10px}
-  .hd-logo{font-size:16px;font-weight:800;color:#F5C400;letter-spacing:-0.3px}
-  .hd-co{font-size:12px;color:#ffffff60;margin-left:4px}
+  .hd{background:#151617;padding:18px 28px}
+  .hd td{vertical-align:middle}
+  .hd-mark{display:block;border:0;outline:none;text-decoration:none;border-radius:7px}
+  .hd-logo{font-size:17px;font-weight:800;color:#F5C400;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+  .hd-co{font-size:12px;color:#9A9C9F;padding-top:2px}
   .bd{padding:28px}
   .ft{padding:14px 28px;background:#f9f9f9;border-top:1px solid #e5e5e5;font-size:11px;color:#999;line-height:1.5}
   .cta{display:inline-block;background:#F5C400;color:#000!important;font-weight:700;font-size:13px;padding:11px 22px;border-radius:8px;text-decoration:none;margin-top:20px}
@@ -58,10 +60,17 @@ export function emailShell({
 </head>
 <body>
 <div class="wrap">
-  <div class="hd">
-    <span class="hd-logo">⚡ Constra</span>
-    <span class="hd-co">· ${co}</span>
-  </div>
+  <table class="hd" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+      <td width="36" style="padding-right:12px">
+        <img class="hd-mark" src="${APP_URL}/site/email-logo.png" width="36" height="36" alt="Constra"/>
+      </td>
+      <td>
+        <div class="hd-logo">Constra</div>
+        <div class="hd-co">${co}</div>
+      </td>
+    </tr>
+  </table>
   <div class="bd">${body}</div>
   <div class="ft">
     You're receiving this because you're a member of <strong>${co}</strong> on Constra.<br/>
