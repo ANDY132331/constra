@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { SearchModal } from "@/components/search-modal";
+import { EscapeToClose } from "@/components/escape-to-close";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineBanner } from "@/components/offline-banner";
 import { NotifPermissionPrompt } from "@/components/notif-permission-prompt";
@@ -172,6 +173,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
               {!isDocDetail && <ErrorBoundary fallback={null}><MobileNav /></ErrorBoundary>}
               <ErrorBoundary fallback={null}><AIChatWidget /></ErrorBoundary>
               <ErrorBoundary fallback={null}><SearchModal /></ErrorBoundary>
+              <EscapeToClose />
               <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>
               <ErrorBoundary fallback={null}><NotifPermissionPrompt /></ErrorBoundary>
             </div>

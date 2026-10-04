@@ -51,7 +51,6 @@ export default function ReportsPage() {
   const router = useRouter();
   const [pdfLoading, setPdfLoading] = useState(false);
   const t = useT();
-  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isAdminOrAbove(currentUser.role)) router.replace("/dashboard");
@@ -62,7 +61,7 @@ export default function ReportsPage() {
   useEffect(() => {
     if (!exportMenuOpen) return;
     const handler = (e: MouseEvent) => {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+      if (!(e.target as HTMLElement)?.closest?.("[data-export-menu]")) {
         setExportMenuOpen(false);
       }
     };
@@ -217,7 +216,7 @@ export default function ReportsPage() {
                 <FileText size={13} />
                 {pdfLoading ? "…" : "PDF"}
               </button>
-              <div className="relative" ref={exportMenuRef}>
+              <div className="relative" data-export-menu>
                 <button
                   onClick={() => setExportMenuOpen((o) => !o)}
                   className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.07] text-white/60 font-bold text-[12px] px-3 py-2 rounded-xl"
@@ -460,7 +459,7 @@ export default function ReportsPage() {
                 <FileText size={14} />
                 {pdfLoading ? "Generating…" : "Download PDF"}
               </button>
-              <div className="relative" ref={exportMenuRef}>
+              <div className="relative" data-export-menu>
                 <button
                   onClick={() => setExportMenuOpen((o) => !o)}
                   className="flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.08] text-white/60 font-bold text-[13px] px-4 py-2 rounded-full transition-colors border border-white/[0.07]"

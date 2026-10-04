@@ -248,7 +248,10 @@ export function exportPayroll(
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `constra-payroll-${periodLabel.replace(/\s/g, "-").toLowerCase()}.${adapter.fileExtension}`;
+  // Keep the name plain ASCII: en dashes, commas and accents from a period label trip up
+  // Windows, Excel and some payroll portals.
+  const slug = periodLabel.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  a.download = `constra-payroll-${slug}.${adapter.fileExtension}`;
   // Must append to DOM before clicking — required for Firefox and mobile browsers
   a.style.display = "none";
   document.body.appendChild(a);
