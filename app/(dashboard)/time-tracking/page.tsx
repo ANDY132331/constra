@@ -486,6 +486,15 @@ export default function TimeTrackingPage() {
   ).filter((w) => clockEntries.some((e) => e.workerId === w.id && !e.clockOut)),
   [isEmployee, workers, currentUser.id, clockEntries]);
 
+  const workerMatches = useCallback((w: Worker) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return w.name.toLowerCase().includes(q) || (w.customRole ?? w.role ?? "").toLowerCase().includes(q);
+  }, [search]);
+  /** Crew shown in the lists — the counts above them stay on the whole crew. */
+  const clockedInShown = useMemo(() => clockedIn.filter(workerMatches), [clockedIn, workerMatches]);
+  const availableShown = useMemo(() => workers.filter((w) => !w.clockedIn && workerMatches(w)), [workers, workerMatches]);
+
   const todayHours = useMemo(() => clockEntries
     .filter((e) => e.clockOut && new Date(e.clockIn) >= todayStart)
     .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0),
@@ -936,13 +945,13 @@ export default function TimeTrackingPage() {
       </div>
 
       {/* Clocked In Now */}
-      {clockedIn.length > 0 && (
+      {clockedInShown.length > 0 && (
         <div className="px-5 mb-5">
           <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
             Clocked In Now
           </p>
-          {clockedIn.map((worker) => {
+          {clockedInShown.map((worker) => {
             const activeEntry = clockEntries.find((e) => e.workerId === worker.id && !e.clockOut);
             const project = getProjectById(activeEntry?.projectId ?? worker.projectIds[0] ?? "");
             const ci = worker.clockInTime ?? new Date();
@@ -972,11 +981,11 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Clock In Worker (admin / PM / foreman only) */}
-      {isForemanOrAbove(currentUser.role) && workers.filter((w) => !w.clockedIn).length > 0 && (
+      {isForemanOrAbove(currentUser.role) && availableShown.length > 0 && (
         <div className="px-5 mb-5">
           <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest mb-3">Clock In Worker</p>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl overflow-hidden">
-            {workers.filter((w) => !w.clockedIn).map((worker, idx, arr) => (
+            {availableShown.map((worker, idx, arr) => (
               <div key={worker.id} className={`flex items-center gap-3 px-4 py-3.5 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""}`}>
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
                   style={{ backgroundColor: worker.color + "25", color: worker.color }}>
@@ -1249,14 +1258,14 @@ export default function TimeTrackingPage() {
       </div>
 
       {/* Currently clocked in */}
-      {clockedIn.length > 0 && (
+      {clockedInShown.length > 0 && (
         <div>
           <h3 className="text-[14px] font-bold text-white mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             Currently On Site
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {clockedIn.map((worker) => {
+            {clockedInShown.map((worker) => {
               const activeEntry = clockEntries.find((e) => e.workerId === worker.id && !e.clockOut);
               const project = getProjectById(activeEntry?.projectId ?? worker.projectIds[0] ?? "");
               const ci = worker.clockInTime ?? new Date();
@@ -1312,11 +1321,11 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Off site — quick clock in buttons */}
-      {workers.filter((w) => !w.clockedIn).length > 0 && (
+      {availableShown.length > 0 && (
         <div>
           <h3 className="text-[14px] font-bold text-white/50 mb-3">Off Site</h3>
           <div className="flex gap-2 flex-wrap">
-            {workers.filter((w) => !w.clockedIn).map((worker) => (
+            {availableShown.map((worker) => (
               <button key={worker.id} onClick={() => requestClockIn(worker)} disabled={geofenceChecking}
                 className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] hover:border-green-500/30 hover:bg-green-500/[0.04] rounded-full px-3 py-2 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                 <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[9px] font-bold flex-shrink-0"
