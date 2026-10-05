@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { HardHat, Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
-import { getClient } from "@/lib/supabase/client";
+import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -17,6 +17,11 @@ function ResetPasswordForm() {
   const tokenHash = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!SUPABASE_ENABLED) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setErrorMsg("Password reset isn't available right now. Please contact support.");
+      return;
+    }
     const supabase = getClient();
     const url = new URL(window.location.href);
 
@@ -80,6 +85,11 @@ function ResetPasswordForm() {
     }
     setStatus("loading");
     setErrorMsg("");
+    if (!SUPABASE_ENABLED) {
+      setStatus("idle");
+      setErrorMsg("Password reset isn't available right now. Please contact support.");
+      return;
+    }
     try {
       const supabase = getClient();
       if (tokenHash.current) {
@@ -151,9 +161,9 @@ function ResetPasswordForm() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {!sessionReady && (
-                <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                  <AlertCircle size={14} className="text-amber-400 flex-shrink-0" />
-                  <p className="text-[12px] text-amber-300">Verifying reset link…</p>
+                <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border ${errorMsg ? "bg-red-500/10 border-red-500/20" : "bg-amber-500/10 border-amber-500/20"}`}>
+                  <AlertCircle size={14} className={`flex-shrink-0 ${errorMsg ? "text-red-400" : "text-amber-400"}`} />
+                  <p className={`text-[12px] ${errorMsg ? "text-red-300" : "text-amber-300"}`}>{errorMsg || "Verifying reset link…"}</p>
                 </div>
               )}
 
