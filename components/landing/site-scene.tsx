@@ -68,11 +68,15 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
     io.observe(host);
 
     function build(THREE: typeof T, el: HTMLDivElement) {
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "low-power" });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.outputColorSpace = THREE.SRGBColorSpace;
+      // Filmic response keeps the midday sun from blowing out the concrete and holds
+      // detail in the shadowed bays, which is most of what reads as "real" here.
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.35;
       el.appendChild(renderer.domElement);
       renderer.domElement.setAttribute("aria-hidden", "true");
 
@@ -83,24 +87,69 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
 
       const camera = new THREE.PerspectiveCamera(34, 1, 0.5, 200);
 
+      // A room environment gives every surface something to reflect. Without it, steel
+      // reads as flat grey paint no matter how the roughness is tuned.
+      let pmrem: T.PMREMGenerator | null = null;
+      import("three/examples/jsm/environments/RoomEnvironment.js")
+        .then(({ RoomEnvironment }) => {
+          if (disposed) return;
+          pmrem = new THREE.PMREMGenerator(renderer);
+          scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+          scene.environmentIntensity = 0.35;
+        })
+        .catch(() => { /* lighting still works without it */ });
+
       // ── Materials ─────────────────────────────────────────────────────────
+      /** Grainy tile used to break up large flat surfaces (gravel pad, dirt). */
+      function grainTexture(base: string, speck: string, density: number, size = 256) {
+        const c = document.createElement("canvas");
+        c.width = c.height = size;
+        const g = c.getContext("2d");
+        if (!g) return null;
+        g.fillStyle = base;
+        g.fillRect(0, 0, size, size);
+        for (let i = 0; i < density; i++) {
+          const r = Math.random() * 2.2 + 0.4;
+          g.globalAlpha = 0.05 + Math.random() * 0.22;
+          g.fillStyle = Math.random() > 0.5 ? speck : "#000000";
+          g.beginPath();
+          g.arc(Math.random() * size, Math.random() * size, r, 0, Math.PI * 2);
+          g.fill();
+        }
+        const tex = new THREE.CanvasTexture(c);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        return tex;
+      }
+
+      const padTex = grainTexture("#4A4C4E", "#8A8C8E", 2600);
+      const dirtTex = grainTexture("#26282A", "#3C3E40", 1800);
+      if (padTex) padTex.repeat.set(10, 7);
+      if (dirtTex) dirtTex.repeat.set(26, 26);
+
       const std = (color: string, extra: Partial<T.MeshStandardMaterialParameters> = {}) =>
-        new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.05, flatShading: true, ...extra });
+        new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.05, ...extra });
       const M = {
-        ground: std("#1C1E20"),
-        pad: std("#2E2F30"),
-        concrete: std("#B9B5AD"),
-        freshConcrete: std("#8E8B85"),
-        steel: std("#7D848B", { metalness: 0.35, roughness: 0.55 }),
-        hv: std("#F5C400", { roughness: 0.6 }),
-        hvDark: std("#C99F00"),
-        ink: std("#202224"),
-        trailer: std("#E7E5E0"),
-        glass: std("#3B4A55", { transparent: true, opacity: 0.55, roughness: 0.2, metalness: 0.4 }),
-        skin: std("#C68E63"),
-        hat: std("#F5F4F1"),
-        load: std("#9C4A2E"),
-        pallet: std("#8B6B43"),
+        ground: std(dirtTex ? "#FFFFFF" : "#26282A", { roughness: 1, map: dirtTex ?? undefined }),
+        pad: std(padTex ? "#FFFFFF" : "#4A4C4E", { roughness: 0.95, map: padTex ?? undefined }),
+        // Cured concrete: rough, slightly warm, no shine
+        concrete: std("#BDB9B1", { roughness: 0.92, metalness: 0 }),
+        // Wet pour is darker and still damp enough to catch a little light
+        freshConcrete: std("#8A8781", { roughness: 0.55, metalness: 0 }),
+        steel: std("#8A9199", { metalness: 0.85, roughness: 0.42 }),
+        hv: std("#F5C400", { roughness: 0.45, metalness: 0.1 }),
+        hvDark: std("#C99F00", { roughness: 0.5, metalness: 0.1 }),
+        ink: std("#1E2022", { roughness: 0.7, metalness: 0.2 }),
+        trailer: std("#DEDCD7", { roughness: 0.6, metalness: 0.05 }),
+        glass: std("#43535F", { transparent: true, opacity: 0.4, roughness: 0.08, metalness: 0.9 }),
+        skin: std("#C68E63", { roughness: 0.75 }),
+        hat: std("#F5F4F1", { roughness: 0.35 }),
+        load: std("#9C4A2E", { roughness: 0.8 }),
+        pallet: std("#8B6B43", { roughness: 0.95 }),
+        rebar: std("#6E5B4B", { metalness: 0.7, roughness: 0.65 }),
+        mesh: std("#9AA0A6", { metalness: 0.8, roughness: 0.5 }),
+        cone: std("#E2561F", { roughness: 0.6 }),
         pin: new THREE.MeshStandardMaterial({ color: "#2EAA62", emissive: "#1E7A45", emissiveIntensity: 0.9, roughness: 0.4 }),
       };
       const geos: T.BufferGeometry[] = [];
@@ -114,14 +163,20 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
       };
 
       // ── Lights ────────────────────────────────────────────────────────────
-      const hemi = new THREE.HemisphereLight("#C9D3DD", "#2A2420", 0.9);
+      const hemi = new THREE.HemisphereLight("#BBD4EC", "#3A3028", 0.55);
       scene.add(hemi);
-      const sun = new THREE.DirectionalLight("#FFFFFF", 2.4);
+      const sun = new THREE.DirectionalLight("#FFF6E8", 2.6);
       sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024);
-      Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22, near: 1, far: 90 });
-      sun.shadow.bias = -0.0008;
+      sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -24, right: 24, top: 26, bottom: -24, near: 1, far: 90 });
+      sun.shadow.bias = -0.0006;
+      sun.shadow.normalBias = 0.02;
+      sun.shadow.radius = 2.5;
       scene.add(sun, sun.target);
+      // Cool bounce from the open sky on the shaded side, so dark faces aren't dead black
+      const bounce = new THREE.DirectionalLight("#9FB8D6", 0.35);
+      bounce.position.set(-18, 8, -16);
+      scene.add(bounce);
 
       // ── Ground + site ─────────────────────────────────────────────────────
       const ground = mesh(new THREE.PlaneGeometry(200, 200), M.ground, 0, 0, 0, false);
@@ -146,7 +201,9 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
       const slabGeo = box(10.4, 0.24, 6.4);
       for (let lvl = 0; lvl < 3; lvl++) {
         for (const x of XS) for (const z of ZS) building.add(mesh(colGeo, M.steel, x, lvl * FLOOR + FLOOR / 2 + 0.12, z));
-        building.add(mesh(slabGeo, M.concrete, 0, (lvl + 1) * FLOOR + 0.12, 0));
+        const slab = mesh(slabGeo, M.concrete.clone(), 0, (lvl + 1) * FLOOR + 0.12, 0);
+        (slab.material as T.MeshStandardMaterial).color.offsetHSL(0, 0, (lvl - 1) * 0.012);
+        building.add(slab);
         if (lvl < 2) {
           // Glazing on the finished floors
           const gz = box(9.6, FLOOR - 0.3, 0.06);
@@ -176,6 +233,67 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
       const pour = mesh(slabGeo, M.freshConcrete, 0, 4 * FLOOR + 0.12, 0);
       pour.visible = false;
       building.add(pour);
+
+      // Rebar mat on the working deck — the grid you actually see before a pour
+      const rebarGroup = new THREE.Group();
+      building.add(rebarGroup);
+      const rebarGeoX = box(10.2, 0.06, 0.06);
+      const rebarGeoZ = box(0.06, 0.06, 6.2);
+      for (let z = -3; z <= 3; z += 0.75) rebarGroup.add(mesh(rebarGeoX, M.rebar, 0, deckY + 0.14, z, false));
+      for (let x = -5; x <= 5; x += 0.75) rebarGroup.add(mesh(rebarGeoZ, M.rebar, x, deckY + 0.2, 0, false));
+
+      // Scaffolding up one elevation
+      const scaff = new THREE.Group();
+      scene.add(scaff);
+      const poleGeo = box(0.12, 3 * FLOOR + 0.6, 0.12);
+      const ledgerGeo = box(2.4, 0.09, 0.09);
+      const plankGeo = box(2.4, 0.08, 1.1);
+      for (let i = 0; i < 5; i++) {
+        const x = -5.4 + i * 2.4;
+        scaff.add(mesh(poleGeo, M.mesh, x, (3 * FLOOR + 0.6) / 2, 3.9));
+        scaff.add(mesh(poleGeo, M.mesh, x, (3 * FLOOR + 0.6) / 2, 4.9));
+      }
+      for (let lvl = 1; lvl <= 3; lvl++) {
+        const y = lvl * FLOOR;
+        for (let i = 0; i < 4; i++) {
+          const x = -4.2 + i * 2.4;
+          scaff.add(mesh(ledgerGeo, M.mesh, x, y, 3.9, false));
+          scaff.add(mesh(ledgerGeo, M.mesh, x, y, 4.9, false));
+          scaff.add(mesh(plankGeo, M.pallet, x, y + 0.1, 4.4));
+        }
+      }
+
+      // Mesh fence panels around the pad, with the hi-vis rail that reads at a distance
+      const fenceGroup = new THREE.Group();
+      scene.add(fenceGroup);
+      const panelGeo = box(3.4, 2, 0.05);
+      const fencePostGeo = box(0.1, 2.1, 0.1);
+      const fenceMatPanel = new THREE.MeshStandardMaterial({ color: "#8E959C", metalness: 0.75, roughness: 0.55, transparent: true, opacity: 0.32 });
+      const fenceLine = (x0: number, z0: number, x1: number, z1: number) => {
+        const len = Math.hypot(x1 - x0, z1 - z0);
+        const n = Math.max(1, Math.round(len / 3.5));
+        const ang = Math.atan2(z1 - z0, x1 - x0);
+        for (let i = 0; i < n; i++) {
+          const t = (i + 0.5) / n;
+          const px = x0 + (x1 - x0) * t, pz = z0 + (z1 - z0) * t;
+          const panel = mesh(panelGeo, fenceMatPanel, px, 1, pz, false);
+          panel.rotation.y = -ang;
+          fenceGroup.add(panel);
+          const post = mesh(fencePostGeo, M.mesh, x0 + (x1 - x0) * (i / n), 1.05, z0 + (z1 - z0) * (i / n));
+          fenceGroup.add(post);
+        }
+      };
+      fenceLine(-13, 9.5, 13, 9.5);
+      fenceLine(-13, -9.5, -13, 9.5);
+      fenceLine(13, -9.5, 13, 4);
+
+      // Cones along the haul route
+      const coneGeo = new THREE.ConeGeometry(0.28, 0.7, 12); geos.push(coneGeo);
+      const coneBaseGeo = box(0.6, 0.06, 0.6);
+      for (const [cx, cz] of [[6.5, 7.5], [8.5, 7.1], [10.5, 6.7], [-8.5, 7.6]]) {
+        scene.add(mesh(coneGeo, M.cone, cx, 0.45, cz));
+        scene.add(mesh(coneBaseGeo, M.ink, cx, 0.1, cz, false));
+      }
 
       // ── Tower crane ───────────────────────────────────────────────────────
       const crane = new THREE.Group();
@@ -289,7 +407,7 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
       vis.observe(el);
 
       const warm = new THREE.Color("#FFB070"), white = new THREE.Color("#FFFFFF");
-      const sky0 = new THREE.Color("#1B1A22"), sky1 = new THREE.Color("#1E2328");
+      const sky0 = new THREE.Color("#171621"), sky1 = new THREE.Color("#2B3647");
 
       let t = initialProgress * LOOP_SECONDS;
       let orbit = 0.65;
@@ -303,9 +421,9 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
         const sunA = Math.PI * (0.08 + 0.84 * p);
         sun.position.set(Math.cos(sunA) * 30, Math.sin(sunA) * 24 + 4, 12);
         const edge = 1 - Math.sin(Math.PI * p);
-        sun.color.copy(white).lerp(warm, edge * 0.85);
-        sun.intensity = 1.6 + 1.2 * (1 - edge);
-        hemi.intensity = 0.55 + 0.45 * (1 - edge);
+        sun.color.copy(white).lerp(warm, edge * 0.8);
+        sun.intensity = 2.4 + 1.6 * (1 - edge);
+        hemi.intensity = 0.5 + 0.5 * (1 - edge);
         (scene.background as T.Color).copy(sky0).lerp(sky1, 1 - edge);
         (scene.fog as T.Fog).color.copy(scene.background as T.Color);
 
@@ -318,6 +436,7 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
         });
         // Deck pour spreads across (1:30 to 3:00)
         const ps = smooth(0.62, 0.78, p);
+        rebarGroup.visible = ps < 0.999;
         pour.visible = ps > 0.001;
         pour.scale.set(Math.max(ps, 0.001), 1, 1);
         pour.position.x = -5.2 + 5.2 * ps;
@@ -403,6 +522,10 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
         Object.values(M).forEach((m) => m.dispose());
         fenceMat.dispose();
         pulseMat.dispose();
+        padTex?.dispose();
+        dirtTex?.dispose();
+        pmrem?.dispose();
+        scene.environment = null;
         renderer.dispose();
         renderer.domElement.remove();
       };
