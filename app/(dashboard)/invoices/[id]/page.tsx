@@ -256,7 +256,7 @@ export default function InvoiceDetailPage() {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-56 bg-[#1a1a1a] border border-white/[0.08] rounded-2xl shadow-2xl z-40 py-1.5 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1.5 w-72 max-w-[calc(100vw-2rem)] bg-[#1a1a1a] border border-white/[0.08] rounded-2xl shadow-2xl z-40 py-1.5 overflow-hidden">
                 {invoice.status === "draft" && (
                   <button onClick={() => { updateInvoice(invoice.id, { status: "sent" }); toast.success("Marked as sent"); setMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-blue-400 hover:bg-white/[0.05] transition-colors text-left">
@@ -288,8 +288,7 @@ export default function InvoiceDetailPage() {
                 >
                   <Download size={14} /> {pdfLoading ? "Generating…" : "Download PDF"}
                 </button>
-                <div className="px-4 py-2 flex items-center justify-between">
-                  <span className="text-[12px] text-white/40">Template</span>
+                <div className="px-4 py-2.5 border-y border-white/[0.06] my-1">
                   <TemplatePicker value={template} onChange={setTemplate} />
                 </div>
                 <button onClick={() => { handleDuplicate(); setMenuOpen(false); }}
