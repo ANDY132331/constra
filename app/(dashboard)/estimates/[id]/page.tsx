@@ -577,7 +577,7 @@ export default function EstimateDetailPage() {
 
       {/* ── Floating save bar ──────────────────────────────────────────── */}
       {isDirty && (
-        <div className="fixed bottom-0 left-0 lg:left-[240px] right-0 z-30 flex items-center gap-3 px-5 py-3.5 bg-[#111]/90 backdrop-blur-md border-t border-amber-500/20 shadow-2xl" style={{ paddingBottom: "calc(0.875rem + env(safe-area-inset-bottom))" }}>
+        <div className="save-bar fixed bottom-0 left-0 lg:left-[240px] right-0 z-[55] flex items-center gap-3 px-5 py-3.5 bg-[#111]/90 backdrop-blur-md border-t border-amber-500/20 shadow-2xl" style={{ paddingBottom: "calc(0.875rem + env(safe-area-inset-bottom))" }}>
           <span className="text-[12px] text-amber-400/70 flex-1">Unsaved changes</span>
           <button
             onClick={() => setDraft(toDraft(estimate))}

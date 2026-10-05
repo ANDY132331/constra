@@ -1718,3 +1718,7 @@ input.bg-transparent, textarea.bg-transparent { box-shadow: none !important; bor
   /* Once scrolled to the end there is nothing more to hint at */
   .scroll-hint-x:has(> *:last-child:nth-child(-n + 3)) { -webkit-mask-image: none; mask-image: none; }
 }
+
+/* The floating save bar must win over the chat button, which otherwise sits on top of
+   "Save Invoice" and swallows the click */
+body:has(.save-bar) .cc-fab { display: none !important; }
