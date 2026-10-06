@@ -1244,14 +1244,16 @@ export default function TimeTrackingPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "On Site Now", value: clockedIn.length, sub: "workers live", color: "#22c55e" },
-          { label: "Hours Today", value: `${todayTotal}h`, sub: "all workers combined", color: "#3b82f6" },
-          { label: "Total Sessions", value: clockEntries.filter((e) => e.clockOut && new Date(e.clockOut).getTime() !== 0).length, sub: "completed all time", color: "#F5C400" },
-          { label: "Active Projects", value: activeProjects.length, sub: "currently running", color: "#8b5cf6" },
-        ].map(({ label, value, sub, color }) => (
+          // Classes, not inline hex: an inline colour is invisible to the light-theme remap,
+          // so these labels sat at 1.5-2.1:1 on the light card — the hi-vis one unreadable.
+          { label: "On Site Now", value: clockedIn.length, sub: "workers live", tone: "text-green-400" },
+          { label: "Hours Today", value: `${todayTotal}h`, sub: "all workers combined", tone: "text-blue-400" },
+          { label: "Total Sessions", value: clockEntries.filter((e) => e.clockOut && new Date(e.clockOut).getTime() !== 0).length, sub: "completed all time", tone: "text-amber-400" },
+          { label: "Active Projects", value: activeProjects.length, sub: "currently running", tone: "text-purple-400" },
+        ].map(({ label, value, sub, tone }) => (
           <div key={label} className="bg-[#111111] border border-white/[0.06] rounded-xl p-4">
             <p className="text-2xl font-bold text-white">{value}</p>
-            <p className="text-[12px] font-semibold mt-0.5" style={{ color }}>{label}</p>
+            <p className={`text-[12px] font-semibold mt-0.5 ${tone}`}>{label}</p>
             <p className="text-[11px] text-white/30 mt-0.5">{sub}</p>
           </div>
         ))}

@@ -173,10 +173,49 @@
 [data-theme="light"] .text-white\/40 { color: rgba(0,0,0,0.58) !important; }
 [data-theme="light"] .text-white\/35 { color: rgba(0,0,0,0.57) !important; }
 [data-theme="light"] .text-white\/30 { color: rgba(0,0,0,0.57) !important; }
-[data-theme="light"] .text-white\/25 { color: rgba(0,0,0,0.56) !important; }
-[data-theme="light"] .text-white\/20 { color: rgba(0,0,0,0.56) !important; }
+[data-theme="light"] .text-white\/25 { color: rgba(0,0,0,0.58) !important; }
+[data-theme="light"] .text-white\/20 { color: rgba(0,0,0,0.58) !important; }
 [data-theme="light"] .text-white\/15 { color: rgba(0,0,0,0.15) !important; }
 [data-theme="light"] .text-white\/10 { color: rgba(0,0,0,0.10) !important; }
+
+/* ── Accent text on the light ground ──
+   The light theme remapped text-white/* but never the -300/-400 accents, so every coloured
+   number kept its dark-mode brightness on #E7E5E0: the emerald revenue figure measured
+   1.5:1, "Clocked In" 1.6:1, the safety score 1.6:1 — unreadable in daylight on a phone.
+   Each class takes the darkest shade its hue needs, at the lowest alpha (never below the
+   class's own) that still clears 4.5:1. Ratios are measured, not guessed. */
+[data-theme="light"] .text-amber-300 { color: #92400e !important; } /* 5.63:1 */
+[data-theme="light"] .text-amber-300\/70 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-amber-300\/80 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-amber-400 { color: #92400e !important; } /* 5.63:1 */
+[data-theme="light"] .text-amber-400\/30 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-amber-400\/40 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-amber-400\/50 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-amber-400\/70 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-amber-400\/80 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-amber-400\/90 { color: rgba(146,64,14,0.9) !important; } /* 4.67:1 */
+[data-theme="light"] .text-blue-300 { color: #1d4ed8 !important; } /* 5.32:1 */
+[data-theme="light"] .text-blue-400 { color: #1d4ed8 !important; } /* 5.32:1 */
+[data-theme="light"] .text-blue-400\/70 { color: rgba(29,78,216,0.9) !important; } /* 4.51:1 */
+[data-theme="light"] .text-emerald-400 { color: #065f46 !important; } /* 6.10:1 */
+[data-theme="light"] .text-emerald-400\/80 { color: rgba(6,95,70,0.85) !important; } /* 4.50:1 */
+[data-theme="light"] .text-green-300 { color: #166534 !important; } /* 5.66:1 */
+[data-theme="light"] .text-green-400 { color: #166534 !important; } /* 5.66:1 */
+[data-theme="light"] .text-green-400\/70 { color: rgba(22,101,52,0.9) !important; } /* 4.65:1 */
+[data-theme="light"] .text-green-400\/80 { color: rgba(22,101,52,0.9) !important; } /* 4.65:1 */
+[data-theme="light"] .text-orange-400 { color: #9a3412 !important; } /* 5.80:1 */
+[data-theme="light"] .text-orange-400\/80 { color: rgba(154,52,18,0.9) !important; } /* 4.87:1 */
+[data-theme="light"] .text-purple-400 { color: #7e22ce !important; } /* 5.55:1 */
+[data-theme="light"] .text-purple-400\/70 { color: rgba(126,34,206,0.9) !important; } /* 4.79:1 */
+[data-theme="light"] .text-red-300 { color: #b91c1c !important; } /* 5.14:1 */
+[data-theme="light"] .text-red-300\/60 { color: rgba(185,28,28,0.9) !important; } /* 4.58:1 */
+[data-theme="light"] .text-red-300\/70 { color: rgba(185,28,28,0.9) !important; } /* 4.58:1 */
+[data-theme="light"] .text-red-400 { color: #b91c1c !important; } /* 5.14:1 */
+[data-theme="light"] .text-red-400\/50 { color: rgba(185,28,28,0.9) !important; } /* 4.58:1 */
+[data-theme="light"] .text-red-400\/70 { color: rgba(185,28,28,0.9) !important; } /* 4.58:1 */
+[data-theme="light"] .text-red-400\/80 { color: rgba(185,28,28,0.9) !important; } /* 4.58:1 */
+[data-theme="light"] .text-sky-400 { color: #0369a1 !important; } /* 4.71:1 */
+[data-theme="light"] .text-sky-400\/80 { color: #0369a1 !important; } /* 4.71:1 */
 
 /* ── Border: white/opacity → dark equivalent ── */
 [data-theme="light"] .border-white\/\[0\.04\] { border-color: rgba(0,0,0,0.07) !important; }
