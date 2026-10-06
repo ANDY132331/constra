@@ -233,7 +233,7 @@ export default function ReportsPage() {
                         onClick={() => handlePayrollExport(adapter.id)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors text-left"
                       >
-                        <FileDown size={12} className="text-amber-400/60" />
+                        <FileDown size={12} className="text-amber-400/80" />
                         {adapter.label}
                       </button>
                     ))}
@@ -476,7 +476,7 @@ export default function ReportsPage() {
                         onClick={() => handlePayrollExport(adapter.id)}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors text-left"
                       >
-                        <FileDown size={12} className="text-amber-400/60" />
+                        <FileDown size={12} className="text-amber-400/80" />
                         {adapter.label}
                       </button>
                     ))}
@@ -697,7 +697,7 @@ export default function ReportsPage() {
                         <span className="text-[10px] text-white/35">Reg {worker.regularHours?.toFixed(1)}h</span>
                         <span className="text-[10px] text-amber-400 font-semibold">OT {worker.overtimeHours.toFixed(1)}h</span>
                         {worker.overtimePay != null && (
-                          <span className="text-[10px] text-amber-400/60">+{formatCurrencyCompact(worker.overtimePay, currency)} OT pay</span>
+                          <span className="text-[10px] text-amber-400/80">+{formatCurrencyCompact(worker.overtimePay, currency)} OT pay</span>
                         )}
                       </div>
                     )}

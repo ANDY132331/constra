@@ -640,7 +640,7 @@ export default function DashboardPage() {
           <div className="px-5 pt-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[12px] font-medium text-white/35">Open Issues</p>
-              <Link href="/punch-list" className="-my-2 py-2 text-[11px] text-amber-400/60">View all</Link>
+              <Link href="/punch-list" className="-my-2 py-2 text-[11px] text-amber-400/80">View all</Link>
             </div>
             <div className="bg-[#111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04] overflow-hidden">
               {myPunchItems.slice(0, 3).map((item) => (
@@ -879,7 +879,7 @@ export default function DashboardPage() {
               </span>
             )}
           </div>
-          <Link href="/time-tracking" className="-my-2 py-2 text-[11px] text-amber-400/60 flex items-center gap-1">
+          <Link href="/time-tracking" className="-my-2 py-2 text-[11px] text-amber-400/80 flex items-center gap-1">
             See all <ArrowRight size={11} />
           </Link>
         </div>
@@ -933,7 +933,7 @@ export default function DashboardPage() {
       <div className="px-5 pt-7">
         <div className="flex items-center justify-between mb-3.5">
           <h3 className="text-[15px] font-bold text-white">Active Jobs</h3>
-          <Link href="/projects" className="-my-2 py-2 text-[11px] text-amber-400/60 flex items-center gap-1">
+          <Link href="/projects" className="-my-2 py-2 text-[11px] text-amber-400/80 flex items-center gap-1">
             See all <ArrowRight size={11} />
           </Link>
         </div>
@@ -1029,7 +1029,7 @@ export default function DashboardPage() {
         <div className="px-5 pt-7">
           <div className="flex items-center justify-between mb-3.5">
             <h3 className="text-[15px] font-bold text-white">Tasks</h3>
-            <Link href="/tasks" className="-my-2 py-2 text-[11px] text-amber-400/60 flex items-center gap-1">
+            <Link href="/tasks" className="-my-2 py-2 text-[11px] text-amber-400/80 flex items-center gap-1">
               See all <ArrowRight size={11} />
             </Link>
           </div>
@@ -1064,7 +1064,7 @@ export default function DashboardPage() {
         <div className="px-5 pt-7">
           <div className="flex items-center justify-between mb-3.5">
             <h3 className="text-[15px] font-bold text-white">Issues</h3>
-            <Link href="/punch-list" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+            <Link href="/punch-list" className="text-[11px] text-amber-400/80 flex items-center gap-1">
               Punch list <ArrowRight size={11} />
             </Link>
           </div>
@@ -1092,7 +1092,7 @@ export default function DashboardPage() {
         <div className="px-5 pt-7">
           <div className="flex items-center justify-between mb-3.5">
             <h3 className="text-[15px] font-bold text-white">Budget Health</h3>
-            <Link href="/projects" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+            <Link href="/projects" className="text-[11px] text-amber-400/80 flex items-center gap-1">
               Projects <ArrowRight size={11} />
             </Link>
           </div>
@@ -1355,7 +1355,7 @@ export default function DashboardPage() {
               <p className="text-[13px] font-semibold text-white/40">No one on site right now</p>
               <p className="text-[11px] text-white/20 mt-0.5">
                 Workers will appear here when they clock in from the{" "}
-                <Link href="/time-tracking" className="text-amber-400/60 hover:text-amber-400 transition-colors">time tracking</Link> page.
+                <Link href="/time-tracking" className="text-amber-400/80 hover:text-amber-400 transition-colors">time tracking</Link> page.
               </p>
             </div>
           </div>

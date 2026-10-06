@@ -203,15 +203,15 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
           </div>
           <div className="bg-[#131110] border border-red-500/20 rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-red-400 leading-none">{safetyIncidents.filter((i) => i.severity === "critical").length}</p>
-            <p className="text-[11px] text-red-400/60 font-medium mt-0.5">Critical</p>
+            <p className="text-[11px] text-red-400/80 font-medium mt-0.5">Critical</p>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-orange-400 leading-none">{safetyIncidents.filter((i) => i.severity === "high").length}</p>
-            <p className="text-[11px] text-orange-400/60 font-medium mt-0.5">High</p>
+            <p className="text-[11px] text-orange-400/80 font-medium mt-0.5">High</p>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-sky-400 leading-none">{safetyIncidents.filter((i) => i.reportedToOSHA).length}</p>
-            <p className="text-[11px] text-sky-400/60 font-medium mt-0.5">{regulator}</p>
+            <p className="text-[11px] text-sky-400/80 font-medium mt-0.5">{regulator}</p>
           </div>
         </div>
 
@@ -308,7 +308,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     </button>
                     <button aria-label="Delete"
                       onClick={() => setDeleteConfirm(incident.id)}
-                      className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                     >
                       <Trash2 size={13} />
                     </button>

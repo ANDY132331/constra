@@ -158,7 +158,7 @@ export default function EquipmentPage() {
             <AlertTriangle size={16} className="text-amber-400 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-bold text-amber-300">{needsService.length} unit{needsService.length > 1 ? "s" : ""} due for service</p>
-              <p className="text-[11px] text-amber-400/60 truncate">{needsService.map((e) => e.name).join(", ")}</p>
+              <p className="text-[11px] text-amber-400/80 truncate">{needsService.map((e) => e.name).join(", ")}</p>
             </div>
           </div>
         )}
@@ -234,7 +234,7 @@ export default function EquipmentPage() {
                         <Pencil size={13} />
                       </button>
                       <button aria-label="Delete" onClick={() => handleDelete(eq.id, eq.name)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -283,7 +283,7 @@ export default function EquipmentPage() {
               <AlertTriangle size={18} className="text-amber-400 flex-shrink-0" />
               <div className="flex-1">
                 <p className="text-[13px] font-bold text-amber-300">{needsService.length} unit{needsService.length > 1 ? "s" : ""} due for service</p>
-                <p className="text-[12px] text-amber-400/60 mt-0.5">{needsService.map((e) => e.name).join(", ")}</p>
+                <p className="text-[12px] text-amber-400/80 mt-0.5">{needsService.map((e) => e.name).join(", ")}</p>
               </div>
               <button onClick={() => { const first = needsService[0]; if (first) openEdit(first); }}
                 className="text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-full transition-colors">

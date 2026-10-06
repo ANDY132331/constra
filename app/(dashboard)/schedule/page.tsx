@@ -492,7 +492,7 @@ export default function SchedulePage() {
                             <Pencil size={13} />
                           </button>
                           <button aria-label="Delete event" onClick={() => setDeleteEventConfirm(e.id)}
-                            className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                            className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                             <X size={13} />
                           </button>
                         </div>

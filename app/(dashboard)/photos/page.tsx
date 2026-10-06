@@ -595,7 +595,7 @@ export default function PhotosPage() {
                       <div key={i} className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-white/[0.08] bg-white/[0.03]">
                         {item.isImage
                           ? <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
-                          : <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-1"><Upload size={16} className="text-amber-400/60" /><p className="text-[8px] text-white/40 text-center truncate w-full">{item.name}</p></div>
+                          : <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-1"><Upload size={16} className="text-amber-400/80" /><p className="text-[8px] text-white/40 text-center truncate w-full">{item.name}</p></div>
                         }
                         <button aria-label="Remove photo" onClick={() => setPhotoItems((prev) => prev.filter((_, j) => j !== i))}
                           className="absolute top-1 right-1 w-5 h-5 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">

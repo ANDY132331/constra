@@ -102,7 +102,7 @@ export default function DeleteAccountPage() {
 
         <p className="text-[12px] text-white/25 text-center mt-8">
           Questions? Contact us at{" "}
-          <a href="mailto:privacy@getconstra.com" className="text-amber-400/60 hover:text-amber-400 transition-colors">
+          <a href="mailto:privacy@getconstra.com" className="text-amber-400/80 hover:text-amber-400 transition-colors">
             privacy@getconstra.com
           </a>
         </p>

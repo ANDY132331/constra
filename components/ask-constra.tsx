@@ -364,7 +364,7 @@ export function AskConstra() {
                     <button
                       key={q}
                       onClick={() => ask(q)}
-                      className="text-[10px] text-amber-400/60 bg-amber-500/6 hover:bg-amber-500/12 border border-amber-500/10 rounded-lg px-2 py-1 transition-all active:scale-95"
+                      className="text-[10px] text-amber-400/80 bg-amber-500/6 hover:bg-amber-500/12 border border-amber-500/10 rounded-lg px-2 py-1 transition-all active:scale-95"
                     >
                       {q}
                     </button>

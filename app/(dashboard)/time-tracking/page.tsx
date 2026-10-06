@@ -1295,7 +1295,7 @@ export default function TimeTrackingPage() {
                       href={`https://www.google.com/maps?q=${worker.clockInGps.lat},${worker.clockInGps.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-[10px] text-green-400/60 hover:text-green-400 mb-2 transition-colors"
+                      className="flex items-center gap-1 text-[10px] text-green-400/80 hover:text-green-400 mb-2 transition-colors"
                     >
                       <Navigation size={8} />
                       <span>{worker.clockInGps.lat.toFixed(5)}, {worker.clockInGps.lng.toFixed(5)}</span>
@@ -1513,7 +1513,7 @@ export default function TimeTrackingPage() {
                           rel="noopener noreferrer"
                           title="View clock-in location on Google Maps"
                           onClick={(e) => e.stopPropagation()}
-                          className="-m-2 p-2 inline-flex text-green-400/60 hover:text-green-400 transition-colors"
+                          className="-m-2 p-2 inline-flex text-green-400/80 hover:text-green-400 transition-colors"
                         >
                           <MapPin size={11} />
                         </a>

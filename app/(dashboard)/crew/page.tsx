@@ -97,8 +97,8 @@ function HoursModal({
         {/* Current hours display */}
         <div className="mx-6 mt-5 bg-amber-500/[0.07] border border-amber-500/20 rounded-xl px-5 py-4 flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-amber-400/60">Total Hours</p>
-            <p className="text-[32px] font-black text-amber-400">{totalHours.toFixed(1)}<span className="text-[16px] font-normal text-amber-400/60">h</span></p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-amber-400/80">Total Hours</p>
+            <p className="text-[32px] font-black text-amber-400">{totalHours.toFixed(1)}<span className="text-[16px] font-normal text-amber-400/80">h</span></p>
           </div>
           <Clock size={28} className="text-amber-400/30" />
         </div>
@@ -521,7 +521,7 @@ export default function CrewPage() {
                         <Pencil size={13} />
                       </button>
                       {worker.id !== currentUser.id && (
-                        <button aria-label="Delete" onClick={() => handleDelete(worker.id)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        <button aria-label="Delete" onClick={() => handleDelete(worker.id)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                           <Trash2 size={13} />
                         </button>
                       )}
@@ -695,7 +695,7 @@ export default function CrewPage() {
                   </div>
                   {isAdminOrAbove(currentUser.role) && (
                     <button onClick={() => setHoursWorker(worker)}
-                      className="text-[10px] font-bold text-amber-400/60 hover:text-amber-400 bg-amber-500/[0.06] hover:bg-amber-500/10 px-2.5 py-[6px] rounded-full transition-colors">
+                      className="text-[10px] font-bold text-amber-400/80 hover:text-amber-400 bg-amber-500/[0.06] hover:bg-amber-500/10 px-2.5 py-[6px] rounded-full transition-colors">
                       Manage Hours
                     </button>
                   )}

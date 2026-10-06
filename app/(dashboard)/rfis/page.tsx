@@ -286,7 +286,7 @@ export default function RFIsPage() {
                       {rfi.question && <p className="text-[12px] text-white/60 leading-relaxed">{rfi.question}</p>}
                       {rfi.answer && (
                         <div className="bg-green-500/[0.06] border border-green-500/15 rounded-xl px-3 py-2.5">
-                          <p className="text-[9px] font-bold text-green-400/60 uppercase tracking-wider mb-1">Answer</p>
+                          <p className="text-[9px] font-bold text-green-400/80 uppercase tracking-wider mb-1">Answer</p>
                           <p className="text-[12px] text-white/65 leading-relaxed">{rfi.answer}</p>
                         </div>
                       )}

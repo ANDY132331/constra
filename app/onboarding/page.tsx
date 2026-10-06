@@ -696,7 +696,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <p className="text-center text-[10px] text-white/15 mt-5 flex items-center justify-center gap-1.5">
               <Globe size={10} />
               Already have an account?{" "}
-              <Link href="/login" className="text-amber-400/60 hover:text-amber-400 ml-0.5">Sign in</Link>
+              <Link href="/login" className="text-amber-400/80 hover:text-amber-400 ml-0.5">Sign in</Link>
             </p>
           </div>
         </div>

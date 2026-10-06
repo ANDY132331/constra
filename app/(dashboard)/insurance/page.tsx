@@ -316,7 +316,7 @@ export default function InsurancePage() {
                             </button>
                             <button aria-label="Delete"
                               onClick={() => setDeleteId(policy.id)}
-                              className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
+                              className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                             >
                               <Trash2 size={13} />
                             </button>

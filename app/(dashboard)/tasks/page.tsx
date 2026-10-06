@@ -209,7 +209,7 @@ export default function TasksPage() {
                     <button aria-label="Edit" onClick={() => openEdit(task)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors">
                       <Pencil size={13} />
                     </button>
-                    <button aria-label="Delete" onClick={() => handleDelete(task.projectId, task.id, task.name)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors">
+                    <button aria-label="Delete" onClick={() => handleDelete(task.projectId, task.id, task.name)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors">
                       <Trash2 size={13} />
                     </button>
                   </div>

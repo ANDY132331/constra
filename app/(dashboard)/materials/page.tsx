@@ -215,11 +215,11 @@ export default function MaterialsPage() {
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-emerald-400 leading-none">{filteredEntries.filter((e) => e.type === "delivery").length}</p>
-            <p className="text-[11px] text-emerald-400/60 font-medium mt-0.5">Deliveries</p>
+            <p className="text-[11px] text-emerald-400/80 font-medium mt-0.5">Deliveries</p>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-amber-400 leading-none">{filteredEntries.filter((e) => e.type === "usage").length}</p>
-            <p className="text-[11px] text-amber-400/60 font-medium mt-0.5">Usage</p>
+            <p className="text-[11px] text-amber-400/80 font-medium mt-0.5">Usage</p>
           </div>
         </div>
 
@@ -301,7 +301,7 @@ export default function MaterialsPage() {
                       <span>{format(new Date(entry.date), "MMM d, yyyy")}</span>
                     </div>
                     <button aria-label="Delete" onClick={() => setDeleteConfirm(entry.id)}
-                      className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                      className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                       <Trash2 size={13} />
                     </button>
                   </div>
@@ -583,7 +583,7 @@ export default function MaterialsPage() {
                 {selectedMaterial && (
                   <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                     <Check size={12} className="text-amber-400 flex-shrink-0" />
-                    <span className="text-[12px] text-amber-300">{selectedMaterial.name} <span className="text-amber-400/60">({selectedMaterial.unit})</span></span>
+                    <span className="text-[12px] text-amber-300">{selectedMaterial.name} <span className="text-amber-400/80">({selectedMaterial.unit})</span></span>
                   </div>
                 )}
               </div>

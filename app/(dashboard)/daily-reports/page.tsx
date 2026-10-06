@@ -198,7 +198,7 @@ export default function DailyReportsPage() {
               {isAdminOrAbove(currentUser.role) && (
                 <button aria-label="Delete"
                   onClick={() => setDeleteConfirm(selected.id)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -644,7 +644,7 @@ export default function DailyReportsPage() {
 function Section({ title, content, color }: { title: string; content: string; color?: "amber" }) {
   return (
     <div>
-      <p className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${color === "amber" ? "text-amber-400/60" : "text-white/25"}`}>{title}</p>
+      <p className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${color === "amber" ? "text-amber-400/80" : "text-white/25"}`}>{title}</p>
       <p className={`text-[13px] leading-relaxed whitespace-pre-wrap ${color === "amber" ? "text-amber-300/80" : "text-white/65"}`}>{content}</p>
     </div>
   );

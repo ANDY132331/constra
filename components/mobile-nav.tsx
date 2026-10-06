@@ -111,8 +111,8 @@ export function MobileNav() {
                   <Icon size={22} className="text-black" strokeWidth={2.5} />
                 </div>
                 <span
-                  className="text-[9px] font-black uppercase tracking-wider mt-2"
-                  style={{ color: clockedIn ? "#16a34a" : activeColor }}
+                  className="text-[10px] font-black uppercase tracking-wider mt-2"
+                  style={{ color: clockedIn ? "#22c55e" : activeColor }}
                 >
                   {label}
                 </span>

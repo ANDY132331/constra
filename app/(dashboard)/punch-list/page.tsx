@@ -155,15 +155,15 @@ export default function PunchListPage() {
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-red-400 leading-none">{counts.open}</p>
-            <p className="text-[11px] text-red-400/60 font-medium mt-0.5">Open</p>
+            <p className="text-[11px] text-red-400/80 font-medium mt-0.5">Open</p>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-amber-400 leading-none">{counts["in-progress"]}</p>
-            <p className="text-[11px] text-amber-400/60 font-medium mt-0.5">In Progress</p>
+            <p className="text-[11px] text-amber-400/80 font-medium mt-0.5">In Progress</p>
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl px-4 py-3 flex-shrink-0">
             <p className="text-[22px] font-bold text-green-400 leading-none">{counts.resolved}</p>
-            <p className="text-[11px] text-green-400/60 font-medium mt-0.5">Done</p>
+            <p className="text-[11px] text-green-400/80 font-medium mt-0.5">Done</p>
           </div>
         </div>
 
@@ -263,7 +263,7 @@ export default function PunchListPage() {
                         <Pencil size={13} />
                       </button>
                       <button aria-label="Delete item" onClick={() => setDeleteConfirm(item.id)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/60 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                         <X size={13} />
                       </button>
                     </div>

@@ -62,7 +62,7 @@ export function OfflineBanner() {
   if (savedRecently) {
     return (
       <div className="fixed bottom-24 lg:bottom-4 right-4 z-50 flex items-center gap-2 bg-[#1a1a1a] border border-white/[0.07] rounded-full px-3 py-1.5 shadow-xl">
-        <CheckCircle2 size={12} className="text-green-400/60 flex-shrink-0" />
+        <CheckCircle2 size={12} className="text-green-400/80 flex-shrink-0" />
         <span className="text-[11px] text-white/30">Saved</span>
       </div>
     );
