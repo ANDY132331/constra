@@ -640,7 +640,7 @@ export default function DashboardPage() {
           <div className="px-5 pt-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[12px] font-medium text-white/35">Open Issues</p>
-              <Link href="/punch-list" className="text-[11px] text-amber-400/60">View all</Link>
+              <Link href="/punch-list" className="-my-2 py-2 text-[11px] text-amber-400/60">View all</Link>
             </div>
             <div className="bg-[#111] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.04] overflow-hidden">
               {myPunchItems.slice(0, 3).map((item) => (
@@ -879,7 +879,7 @@ export default function DashboardPage() {
               </span>
             )}
           </div>
-          <Link href="/time-tracking" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+          <Link href="/time-tracking" className="-my-2 py-2 text-[11px] text-amber-400/60 flex items-center gap-1">
             See all <ArrowRight size={11} />
           </Link>
         </div>
@@ -933,7 +933,7 @@ export default function DashboardPage() {
       <div className="px-5 pt-7">
         <div className="flex items-center justify-between mb-3.5">
           <h3 className="text-[15px] font-bold text-white">Active Jobs</h3>
-          <Link href="/projects" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+          <Link href="/projects" className="-my-2 py-2 text-[11px] text-amber-400/60 flex items-center gap-1">
             See all <ArrowRight size={11} />
           </Link>
         </div>
@@ -1029,7 +1029,7 @@ export default function DashboardPage() {
         <div className="px-5 pt-7">
           <div className="flex items-center justify-between mb-3.5">
             <h3 className="text-[15px] font-bold text-white">Tasks</h3>
-            <Link href="/tasks" className="text-[11px] text-amber-400/60 flex items-center gap-1">
+            <Link href="/tasks" className="-my-2 py-2 text-[11px] text-amber-400/60 flex items-center gap-1">
               See all <ArrowRight size={11} />
             </Link>
           </div>
@@ -1341,7 +1341,7 @@ export default function DashboardPage() {
               {clockedInWorkers.length} active
             </span>
           </div>
-          <Link href="/time-tracking" className="text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
+          <Link href="/time-tracking" className="-my-2 py-2 text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
             {t.dashboard.viewAll} <ArrowRight size={12} />
           </Link>
         </div>
@@ -1378,7 +1378,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-[15px] font-bold text-white">{t.dashboard.projectStatus}</h3>
-            <Link href="/projects" className="text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
+            <Link href="/projects" className="-my-2 py-2 text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
               {t.dashboard.seeAll} <ArrowRight size={12} />
             </Link>
           </div>
@@ -1439,7 +1439,7 @@ export default function DashboardPage() {
                 Today
               </div>
               {activityFeed.length > 8 && (
-                <Link href="/reports" className="text-[11px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
+                <Link href="/reports" className="-my-2 py-2 text-[11px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
                   View all <ArrowRight size={11} />
                 </Link>
               )}
@@ -1476,7 +1476,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[15px] font-bold text-white">{t.dashboard.upcomingTasks ?? "Upcoming Tasks"}</h3>
-            <Link href="/tasks" className="text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
+            <Link href="/tasks" className="-my-2 py-2 text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
               {t.dashboard.seeAll} <ArrowRight size={12} />
             </Link>
           </div>
@@ -1515,7 +1515,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[15px] font-bold text-white">{t.dashboard.priorityIssues ?? "Priority Issues"}</h3>
-            <Link href="/punch-list" className="text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
+            <Link href="/punch-list" className="-my-2 py-2 text-[12px] text-white/35 hover:text-amber-400 flex items-center gap-1 transition-colors">
               Punch list <ArrowRight size={12} />
             </Link>
           </div>
@@ -1559,7 +1559,7 @@ export default function DashboardPage() {
               <h3 className="text-[15px] font-bold text-white">Budget Health</h3>
               <p className="text-[11px] text-white/30 mt-0.5">Budget · Committed · Actual · Forecast per project</p>
             </div>
-            <Link href="/projects" className="text-[11px] text-white/30 hover:text-amber-400 flex items-center gap-1 transition-colors">
+            <Link href="/projects" className="-my-2 py-2 text-[11px] text-white/30 hover:text-amber-400 flex items-center gap-1 transition-colors">
               All projects <ArrowRight size={11} />
             </Link>
           </div>

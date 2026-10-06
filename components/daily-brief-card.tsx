@@ -47,15 +47,69 @@ function invTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number
   return moneyTotals(inv.items, inv.taxRate).total;
 }
 
+// The dashboard mounts this card twice — once in the narrow layout, once in the wide one —
+// and CSS hides whichever does not apply. Both still run their effects, so without this the
+// same brief is generated, and billed, twice on every load. One request streams; every
+// mounted card listens to it.
+type BriefState = { text: string; loading: boolean; error: string | null; at: Date | null };
+const listeners = new Set<(s: BriefState) => void>();
+let shared: BriefState = { text: "", loading: false, error: null, at: null };
+let sharedAbort: AbortController | null = null;
+let sharedRun: Promise<void> | null = null;
+
+function push(patch: Partial<BriefState>) {
+  shared = { ...shared, ...patch };
+  for (const fn of listeners) fn(shared);
+}
+
+function runShared(payload: unknown): Promise<void> {
+  if (sharedRun) return sharedRun;
+  sharedAbort?.abort();
+  const controller = new AbortController();
+  sharedAbort = controller;
+  push({ loading: true, error: null, text: "" });
+
+  sharedRun = (async () => {
+    try {
+      const res = await fetch("/api/daily-brief", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      if (!res.body) throw new Error("No response body");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        full += decoder.decode(value, { stream: true });
+        push({ text: full });
+      }
+      push({ at: new Date() });
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      push({ error: err instanceof Error ? err.message : "Failed to generate brief" });
+    } finally {
+      push({ loading: false });
+      sharedRun = null;
+    }
+  })();
+  return sharedRun;
+}
+
 export function DailyBriefCard() {
   const { workers, projects, punchItems, safetyIncidents, companyName, invoices } = useStore();
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
+  const [{ text, loading, error, at: generatedAt }, setBrief] = useState<BriefState>(shared);
   const [collapsed, setCollapsed] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-  const hasGeneratedRef = useRef(false);
+
+  useEffect(() => {
+    listeners.add(setBrief);
+    setBrief(shared);
+    return () => { listeners.delete(setBrief); };
+  }, []);
 
   const buildPayload = useCallback(() => {
     const now = new Date();
@@ -131,54 +185,21 @@ export function DailyBriefCard() {
     };
   }, [workers, projects, punchItems, safetyIncidents, companyName, invoices]);
 
-  const generate = useCallback(async () => {
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
+  // Regenerate is an explicit user action, so it always starts a fresh run.
+  const generate = useCallback(() => { sharedRun = null; return runShared(buildPayload()); }, [buildPayload]);
 
-    setLoading(true);
-    setError(null);
-    setText("");
-
-    try {
-      const res = await fetch("/api/daily-brief", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildPayload()),
-        signal: controller.signal,
-      });
-
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-      if (!res.body) throw new Error("No response body");
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        fullText += chunk;
-        setText(fullText);
-      }
-
-      setGeneratedAt(new Date());
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : "Failed to generate brief");
-    } finally {
-      setLoading(false);
-    }
-  }, [buildPayload]);
-
+  // Kick the first brief off once. This used to depend on generate(), whose identity changes
+  // with the store, so the cleanup aborted the in-flight request the moment the store
+  // hydrated and a ref guard blocked the retry — the card stayed blank forever. The shared
+  // runner now de-duplicates, and the request is only cancelled once no card is listening.
+  const payloadRef = useRef(buildPayload);
+  payloadRef.current = buildPayload;
   useEffect(() => {
-    if (!hasGeneratedRef.current) {
-      hasGeneratedRef.current = true;
-      generate();
-    }
-    return () => { abortRef.current?.abort(); };
-  }, [generate]);
+    if (!shared.text && !shared.loading && !shared.error) runShared(payloadRef.current());
+    // Deliberately no abort here. Cancelling on unmount raced React's remount and left the
+    // card blank with nothing willing to retry; letting the stream finish caches the result,
+    // so a card that mounts a moment later shows the brief immediately.
+  }, []);
 
   const lines = text.split("\n");
 
@@ -241,6 +262,19 @@ export function DailyBriefCard() {
           {error && (
             <div className="text-[12px] text-red-400/80 bg-red-500/8 border border-red-500/15 rounded-xl px-3 py-2.5">
               {error}
+            </div>
+          )}
+
+          {/* A 200 that streams nothing used to leave an empty box with no way back in. */}
+          {!loading && !error && !text && (
+            <div className="flex flex-wrap items-center gap-3 py-2">
+              <p className="text-[12px] text-white/35">No brief yet for today.</p>
+              <button
+                onClick={generate}
+                className="text-[12px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                Write today&apos;s brief
+              </button>
             </div>
           )}
 

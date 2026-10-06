@@ -626,7 +626,7 @@ export default function ProjectsPage() {
                       {isAdmin && (
                         <button aria-label="Delete"
                           onClick={() => setDeleteConfirm(project.id)}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -668,7 +668,7 @@ export default function ProjectsPage() {
                           {isAdmin && (
                             <button aria-label="Delete"
                               onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
-                              className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
+                              className="p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
                             >
                               <Trash2 size={13} />
                             </button>

@@ -482,7 +482,7 @@ export default function MaterialsPage() {
                         <div className="text-[10px] text-white/30">{entry.unit}</div>
                       </div>
                       <button aria-label="Delete" onClick={() => setDeleteConfirm(entry.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
                         <Trash2 size={13} />
                       </button>
                     </div>

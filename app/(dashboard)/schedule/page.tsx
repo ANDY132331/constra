@@ -768,7 +768,7 @@ export default function SchedulePage() {
                         {customEvt && (
                           <div className="flex items-center gap-1">
                             <button aria-label="Edit" onClick={() => openEditEvent(customEvt)}
-                              className="p-1 rounded text-white/25 hover:text-white/60 active:text-white/60 transition-colors">
+                              className="p-[7px] rounded text-white/25 hover:text-white/60 active:text-white/60 transition-colors">
                               <Pencil size={11} />
                             </button>
                             <button aria-label="Delete event" onClick={() => setDeleteEventConfirm(e.id)}

@@ -356,11 +356,11 @@ export default function TasksPage() {
               </button>
               <div className="flex items-center justify-end gap-1">
                 <button aria-label="Edit" onClick={() => openEdit(task)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-all">
+                  className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-all">
                   <Pencil size={11} />
                 </button>
                 <button aria-label="Delete" onClick={() => handleDelete(task.projectId, task.id, task.name)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/15 hover:text-red-400 transition-all">
+                  className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-red-500/15 text-white/15 hover:text-red-400 transition-all">
                   <Trash2 size={11} />
                 </button>
               </div>

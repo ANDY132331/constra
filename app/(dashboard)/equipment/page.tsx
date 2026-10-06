@@ -351,11 +351,11 @@ export default function EquipmentPage() {
                     <span className="text-right text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/d</span>
                     <div className="flex items-center justify-end gap-1">
                       <button aria-label="Edit" onClick={() => openEdit(eq)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all">
                         <Pencil size={12} />
                       </button>
                       <button aria-label="Delete" onClick={() => handleDelete(eq.id, eq.name)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
                         <Trash2 size={12} />
                       </button>
                     </div>

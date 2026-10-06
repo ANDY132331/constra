@@ -405,11 +405,11 @@ export default function RFIsPage() {
                   </button>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button aria-label="Edit" onClick={(e) => { e.stopPropagation(); openEdit(rfi); }}
-                        className="p-1 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
+                        className="p-[7px] rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
                         <Pencil size={12} />
                       </button>
                       <button aria-label="Delete" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(rfi.id); }}
-                        className="p-1 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
+                        className="p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
                         <Trash2 size={12} />
                       </button>
                     </div>

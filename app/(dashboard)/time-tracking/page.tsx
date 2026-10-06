@@ -1513,9 +1513,9 @@ export default function TimeTrackingPage() {
                           rel="noopener noreferrer"
                           title="View clock-in location on Google Maps"
                           onClick={(e) => e.stopPropagation()}
-                          className="text-green-400/60 hover:text-green-400 transition-colors"
+                          className="-m-2 p-2 inline-flex text-green-400/60 hover:text-green-400 transition-colors"
                         >
-                          <MapPin size={9} />
+                          <MapPin size={11} />
                         </a>
                       )}
                     </div>

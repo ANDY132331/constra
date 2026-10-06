@@ -652,13 +652,13 @@ export default function CrewPage() {
                     </span>
                     {canEdit && (
                       <button aria-label="Edit" onClick={() => openEdit(worker)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded text-white/30 hover:text-white/70 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded text-white/30 hover:text-white/70 transition-all">
                         <Pencil size={12} />
                       </button>
                     )}
                     {canEdit && worker.id !== currentUser.id && (
                       <button aria-label="Delete" onClick={() => handleDelete(worker.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded text-white/30 hover:text-red-400 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded text-white/30 hover:text-red-400 transition-all">
                         <Trash2 size={12} />
                       </button>
                     )}
@@ -695,7 +695,7 @@ export default function CrewPage() {
                   </div>
                   {isAdminOrAbove(currentUser.role) && (
                     <button onClick={() => setHoursWorker(worker)}
-                      className="text-[10px] font-bold text-amber-400/60 hover:text-amber-400 bg-amber-500/[0.06] hover:bg-amber-500/10 px-2 py-0.5 rounded-full transition-colors">
+                      className="text-[10px] font-bold text-amber-400/60 hover:text-amber-400 bg-amber-500/[0.06] hover:bg-amber-500/10 px-2.5 py-[6px] rounded-full transition-colors">
                       Manage Hours
                     </button>
                   )}
