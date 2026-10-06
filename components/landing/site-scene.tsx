@@ -22,11 +22,13 @@ type Props = {
   initialProgress?: number;
   /** 0 = wide establishing shot, 1 = settled working shot. Driven by scroll. */
   reveal?: number;
+  /** Adds bloom, a cooled grade, vignette and grain for the hero. Costs a frame; worth it there. */
+  cinematic?: boolean;
   onProgress?: (p: number) => void;
   onReady?: (ok: boolean) => void;
 };
 
-export default function SiteScene({ playing, initialProgress = 0, reveal = 1, onProgress, onReady }: Props) {
+export default function SiteScene({ playing, initialProgress = 0, reveal = 1, cinematic = false, onProgress, onReady }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const playingRef = useRef(playing);
   const revealRef = useRef(reveal);
@@ -80,7 +82,9 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
       // Filmic response keeps the midday sun from blowing out the concrete and holds
       // detail in the shadowed bays, which is most of what reads as "real" here.
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.35;
+      // The hero runs lower-key: in a dark shot the white slabs otherwise read as the
+      // brightest thing on screen and pull the eye off the headline.
+      renderer.toneMappingExposure = cinematic ? 1.02 : 1.35;
       el.appendChild(renderer.domElement);
       renderer.domElement.setAttribute("aria-hidden", "true");
 
@@ -410,15 +414,70 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
       flash.position.set(2, deckY + 1.6, 3.6);
       scene.add(flash);
 
+      // ── Cinematic grade ───────────────────────────────────────────────────
+      // A real-time scene cannot be a photoreal offline render, but most of what reads as
+      // "cinematic" is the grade, not the geometry: bloom on the hot sources, a cooled
+      // shadow, a vignette and a little grain so the image is not clinically clean.
+      let composer: InstanceType<typeof import("three/examples/jsm/postprocessing/EffectComposer.js")["EffectComposer"]> | null = null;
+      let grade: T.ShaderMaterial | null = null;
+      if (cinematic) {
+        Promise.all([
+          import("three/examples/jsm/postprocessing/EffectComposer.js"),
+          import("three/examples/jsm/postprocessing/RenderPass.js"),
+          import("three/examples/jsm/postprocessing/UnrealBloomPass.js"),
+          import("three/examples/jsm/postprocessing/ShaderPass.js"),
+          import("three/examples/jsm/postprocessing/OutputPass.js"),
+        ]).then(([{ EffectComposer }, { RenderPass }, { UnrealBloomPass }, { ShaderPass }, { OutputPass }]) => {
+          if (disposed) return;
+          const c = new EffectComposer(renderer);
+          c.addPass(new RenderPass(scene, camera));
+          const w = el.clientWidth || 1, h = el.clientHeight || 1;
+          c.addPass(new UnrealBloomPass(new THREE.Vector2(w, h), 0.62, 0.72, 0.82));
+          const gradePass = new ShaderPass({
+            uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAmt: { value: 1 } },
+            vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+            fragmentShader: `
+              uniform sampler2D tDiffuse; uniform float uTime; uniform float uAmt; varying vec2 vUv;
+              void main() {
+                vec3 c = texture2D(tDiffuse, vUv).rgb;
+                // Cool the shadows, keep the hi-vis yellow warm where it is already bright
+                float l = dot(c, vec3(0.299, 0.587, 0.114));
+                c = mix(c, c * vec3(0.86, 0.91, 1.12), (1.0 - smoothstep(0.0, 0.55, l)) * uAmt);
+                c = mix(vec3(l), c, 1.0 + 0.16 * uAmt);                      // a touch more saturation
+                vec2 d = vUv - 0.5;
+                c *= 1.0 - smoothstep(0.34, 0.84, dot(d, d) * 2.0) * 0.55 * uAmt;  // vignette
+                float g = fract(sin(dot(vUv * (1.0 + uTime * 0.0007), vec2(12.9898, 78.233))) * 43758.5453);
+                c += (g - 0.5) * 0.035 * uAmt;                                // grain
+                gl_FragColor = vec4(c, 1.0);
+              }`,
+          });
+          c.addPass(gradePass);
+          c.addPass(new OutputPass());
+          // Bloom and grain are soft by nature; 1.5x is indistinguishable and far cheaper on phones.
+          c.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+          c.setSize(w, h);
+          grade = gradePass.material;
+          composer = c;
+        }).catch(() => { /* the scene still renders unfiltered */ });
+      }
+
       // ── Sizing ────────────────────────────────────────────────────────────
       let narrow = false;
       const resize = () => {
         const w = el.clientWidth || 1, h = el.clientHeight || 1;
         renderer.setSize(w, h, false);
+        composer?.setSize(w, h);
         camera.aspect = w / h;
         // Pull back on narrow screens so the whole site stays in frame
         narrow = w < 640;
         camera.fov = narrow ? 40 : 34;
+        // In the hero, slide the frame so the site sits in the lower part of the shot and
+        // the sky above is left clear for the type, the way an establishing shot is composed.
+        if (cinematic) {
+          // Wide: site to the right, copy owns the left. Narrow: copy on top, site below.
+          if (narrow) camera.setViewOffset(w, h, 0, -h * 0.25, w, h);
+          else camera.setViewOffset(w, h, -w * 0.21, -h * 0.07, w, h);
+        }
         camera.updateProjectionMatrix();
       };
       const ro = new ResizeObserver(resize);
@@ -443,6 +502,17 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
 
       const warm = new THREE.Color("#FFB070"), white = new THREE.Color("#FFFFFF");
       const sky0 = new THREE.Color("#171621"), sky1 = new THREE.Color("#2B3647");
+      if (cinematic) {
+        // Hero grade: a deep indigo dusk instead of slate, and a violet rim from behind so
+        // the steel edges separate from the sky the way they do in architectural film.
+        sky0.set("#090A13"); sky1.set("#181C33");
+        const rim = new THREE.DirectionalLight("#8E7DFF", 1.6);
+        rim.position.set(-22, 16, -20);
+        scene.add(rim);
+        const fill = new THREE.PointLight("#5E7BFF", 40, 60, 2);
+        fill.position.set(-14, 6, 10);
+        scene.add(fill);
+      }
 
       let t = initialProgress * LOOP_SECONDS;
       let orbit = 0.65;
@@ -514,7 +584,7 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
         // Wide and high at the start of the section, settling in as it scrolls up
         const rv = clamp01(revealRef.current);
         const eased = 1 - Math.pow(1 - rv, 3);
-        const R = (narrow ? 37 : 42) + (1 - eased) * 46;
+        const R = (narrow ? 37 : 42) + (1 - eased) * 46 + (cinematic ? (narrow ? 18 : 4) : 0);
         const H = (narrow ? 19 : 21) - py * 5 + (1 - eased) * 30;
         camera.position.set(Math.cos(a) * R, H, Math.sin(a) * R);
         camera.lookAt(0, 6.5 - (1 - eased) * 2, 0);
@@ -555,7 +625,12 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
         pulseMat.opacity = live ? 0.5 * (1 - k) : 0;
         fenceMat.opacity = live ? 0.55 : 0.25;
 
-        renderer.render(scene, camera);
+        if (composer && grade) {
+          grade.uniforms.uTime.value = t;
+          composer.render();
+        } else {
+          renderer.render(scene, camera);
+        }
         if (Math.abs(p - lastP) > 0.001) { lastP = p; progressCb.current?.(p); }
       };
       apply(clamp01(t / LOOP_SECONDS));
@@ -577,6 +652,7 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
         phoneVideo.pause();
         phoneVideo.removeAttribute("src");
         phoneVideo.load();
+        composer?.dispose();
         screenTex.dispose();
         screenMat.dispose();
         padTex?.dispose();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOff } from "lucide-react";
@@ -9,6 +9,7 @@ import SavingsCalc from "@/components/landing/savings-calc";
 import AppTour from "@/components/landing/app-tour";
 import RealPhotos from "@/components/landing/real-photos";
 import RealClips from "@/components/landing/real-clips";
+import HeroScene from "@/components/landing/hero-scene";
 
 const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
@@ -197,6 +198,7 @@ export default function LandingPage() {
   const alreadyIn = useSyncExternalStore(noopSubscribe, readOnboarded, () => false);
   const rootRef = useRef<HTMLDivElement>(null);
   const tiltRef = useRef<HTMLDivElement>(null);
+  const [overShot, setOverShot] = useState(true);
 
   // Hero mockups lean toward the pointer
   useEffect(() => {
@@ -236,6 +238,16 @@ export default function LandingPage() {
     return () => root.removeEventListener("click", onClick);
   }, []);
 
+  useEffect(() => {
+    const root = rootRef.current;
+    const shot = root?.querySelector(".lp-cine") as HTMLElement | null;
+    if (!root || !shot) return;
+    const onScroll = () => setOverShot(root.scrollTop < shot.offsetHeight - 70);
+    onScroll();
+    root.addEventListener("scroll", onScroll, { passive: true });
+    return () => root.removeEventListener("scroll", onScroll);
+  }, []);
+
   const startHref = alreadyIn ? "/dashboard" : "/onboarding";
   const startLabel = alreadyIn ? "Open dashboard" : "Start free";
 
@@ -246,7 +258,7 @@ export default function LandingPage() {
 
       <a href="#main" className="lp-skip">Skip to content</a>
 
-      <header className="lp-nav">
+      <header className={`lp-nav${overShot ? " lp-nav-dark" : ""}`}>
         <div className="lp-wrap lp-nav-inner">
           <Link href="/" className="lp-brand" aria-label="Constra home">
             <span className="lp-brand-mark"><HardHat size={16} strokeWidth={2.5} aria-hidden /></span>
@@ -266,12 +278,14 @@ export default function LandingPage() {
       </header>
 
       <main id="main">
-        {/* Hero */}
+        <HeroScene startHref={startHref} startLabel={startLabel} />
+
+        {/* Product */}
         <section className="lp-hero">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
               <p className="lp-kicker">For contractors and trade crews</p>
-              <h1 className="lp-h1">Run the job.<br />Not the paperwork.</h1>
+              <h2 className="lp-h1">Run the job.<br />Not the paperwork.</h2>
               <p className="lp-lede">
                 Constra puts GPS-verified timesheets, daily reports, safety logs, change orders and invoices in one app, on the phones your crew already carries.
               </p>
@@ -492,6 +506,47 @@ const JSON_LD = JSON.stringify([
 ]).replace(/</g, "\\u003c");
 
 const CSS = `
+/* Cinematic opening shot */
+.lp-cine{position:relative; height:min(100svh,940px); min-height:600px; margin-top:calc(-61px - env(safe-area-inset-top,0px)); background:#090A13; color:#F2F0EB; overflow:hidden; isolation:isolate}
+.lp-cine-scene{position:absolute; inset:0; z-index:0; pointer-events:none; animation:lp-cine-in 2.2s cubic-bezier(.2,.7,.2,1) both}
+.lp-cine .lp-scene{position:absolute; inset:0; height:auto}
+.lp-cine .lp-scene canvas{cursor:default}
+.lp-cine-scrim{position:absolute; inset:0; z-index:1; pointer-events:none; background:
+  linear-gradient(90deg, rgba(9,10,19,.82) 0%, rgba(9,10,19,.5) 34%, rgba(9,10,19,0) 58%),
+  linear-gradient(180deg, rgba(9,10,19,.7) 0%, rgba(9,10,19,0) 22%),
+  linear-gradient(0deg, rgba(9,10,19,.9) 0%, rgba(9,10,19,0) 26%)}
+.lp-cine-copy{position:relative; z-index:2; height:100%; max-width:1200px; margin:0 auto; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; text-align:left; padding:calc(61px + env(safe-area-inset-top,0px)) 24px 72px}
+.lp-cine-eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.32em; text-transform:uppercase; color:rgba(242,240,235,.62); margin:0 0 18px; animation:lp-rise 1.2s .5s both}
+.lp-cine-h1{font-family:var(--display); font-weight:800; text-transform:uppercase; font-size:clamp(68px,10.5vw,176px); line-height:.84; max-width:6.2ch; letter-spacing:-.01em; margin:0; color:#F7F5F0; text-shadow:0 2px 40px rgba(0,0,0,.45); animation:lp-rise 1.3s .25s both}
+.lp-cine-sub{font-size:clamp(16px,1.7vw,20px); line-height:1.45; color:rgba(242,240,235,.82); margin:22px 0 0; max-width:34ch; text-wrap:balance; animation:lp-rise 1.2s .7s both}
+.lp-cine-ctas{display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:14px 22px; margin-top:36px; animation:lp-rise 1.2s .9s both}
+.lp-cine-pill{display:inline-flex; align-items:center; gap:14px; min-height:52px; padding:6px 6px 6px 24px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); backdrop-filter:blur(14px) saturate(1.3); -webkit-backdrop-filter:blur(14px) saturate(1.3); color:#F7F5F0; font-weight:600; font-size:15px; text-decoration:none; transition:background .2s, border-color .2s}
+.lp-cine-pill:hover{background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.28)}
+.lp-cine-pill-go{width:40px; height:40px; border-radius:999px; background:var(--hv); color:var(--hv-ink); display:grid; place-items:center; transition:transform .2s}
+.lp-cine-pill:hover .lp-cine-pill-go{transform:translateX(3px)}
+.lp-cine-ghost{display:inline-flex; align-items:center; gap:8px; min-height:44px; font-size:14px; color:rgba(242,240,235,.72); text-decoration:none}
+.lp-cine-ghost:hover{color:#F7F5F0}
+.lp-cine :focus-visible{outline-color:var(--hv)}
+.lp-cine-cue{position:absolute; z-index:2; left:50%; bottom:22px; width:22px; height:34px; margin-left:-11px; border:1.5px solid rgba(242,240,235,.38); border-radius:12px; opacity:0; transition:opacity 1s}
+.lp-cine-cue.is-on{opacity:1}
+.lp-cine-cue span{position:absolute; left:50%; top:7px; width:3px; height:7px; margin-left:-1.5px; border-radius:2px; background:rgba(242,240,235,.7); animation:lp-cue 1.8s ease-in-out infinite}
+@keyframes lp-cine-in{from{opacity:0; transform:scale(1.08)} to{opacity:1; transform:none}}
+@keyframes lp-rise{from{opacity:0; transform:translateY(18px)} to{opacity:1; transform:none}}
+@keyframes lp-cue{0%{transform:translateY(0); opacity:0} 30%{opacity:1} 80%{transform:translateY(10px); opacity:0} 100%{opacity:0}}
+.lp-nav.lp-nav-dark{background:rgba(9,10,19,.28); border-bottom-color:rgba(255,255,255,.08); color:#F2F0EB}
+.lp-nav-dark .lp-nav-links a{color:rgba(242,240,235,.72)}
+.lp-nav-dark .lp-nav-links a:hover{color:#F7F5F0}
+.lp-nav-dark .lp-link{text-decoration-color:rgba(255,255,255,.3)}
+.lp-nav{transition:background .35s, border-color .35s, color .35s}
+@media (prefers-reduced-motion: reduce){.lp-cine-scene,.lp-cine-eyebrow,.lp-cine-h1,.lp-cine-sub,.lp-cine-ctas{animation:none}.lp-cine-cue span{animation:none}}
+@media (max-width:640px){
+  .lp-cine{height:min(100svh,780px); min-height:600px}
+  .lp-cine-copy{justify-content:flex-start; padding-top:calc(61px + 44px + env(safe-area-inset-top,0px))}
+  .lp-cine-eyebrow{letter-spacing:.2em; font-size:11px}
+  .lp-cine-h1{font-size:clamp(64px,21vw,96px)}
+  .lp-cine-scrim{background:linear-gradient(180deg, rgba(9,10,19,.92) 0%, rgba(9,10,19,.6) 42%, rgba(9,10,19,0) 62%), linear-gradient(0deg, rgba(9,10,19,.85) 0%, rgba(9,10,19,0) 22%)}
+}
+
 .lp{
   --ground:#E7E5E0; --paper:#F5F4F1; --ink:#151617; --ink2:#4B4D50; --ink3:#77797C;
   --rule:#CBC8C1; --hv:#F5C400; --hv-ink:#1A1600; --go:#1E7A45; --stop:#B9382C;
