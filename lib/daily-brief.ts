@@ -1,0 +1,141 @@
+// The morning brief is pure logic over data the client already holds — no model, no secret,
+// no network needed. It lives here so the dashboard can build it offline, which matters in a
+// basement with no signal, and the API route can serve the same text to anything else.
+
+export type BriefPayload = {
+  workerCount: number;
+  clockedInWorkers: Array<{ name: string; role: string; project: string; hoursIn: number }>;
+  activeProjects: Array<{ name: string; progress: number; tasksTotal: number; tasksDue: number; tasksOverdue: number; budgetPct?: number | null }>;
+  tasksDueToday: Array<{ name: string; project: string; worker: string; overdue: boolean }>;
+  openPunchItems: number;
+  highPriorityPunchItems: number;
+  safetyIncidentsThisWeek: number;
+  companyName: string;
+  currentTime: string;
+  /** Machine-readable stamp; currentTime is for display only and does not parse. */
+  nowIso?: string;
+  // Financial
+  totalOutstanding?: number;
+  overdueInvoices?: Array<{ number: string; amount: number; client: string; daysOverdue: number }>;
+  overBudgetProjects?: Array<{ name: string; budgetPct: number | null }>;
+};
+
+export function generateBrief(data: BriefPayload): string {
+  // currentTime is a display string ("Monday, October 5 at 03:10 PM") that Date cannot parse,
+  // so this was NaN and every comparison below fell through — the brief said "Good evening"
+  // at every hour of the day. Prefer the ISO stamp, and fall back to the clock, never to NaN.
+  const stamp = new Date(data.nowIso ?? data.currentTime);
+  const hour = Number.isNaN(stamp.getTime()) ? new Date().getHours() : stamp.getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const due = data.tasksDueToday.filter((t) => !t.overdue);
+  const overdue = data.tasksDueToday.filter((t) => t.overdue);
+
+  const lines: string[] = [];
+
+  // Header
+  lines.push(`**${greeting} — here's your site snapshot.**`);
+  lines.push("");
+
+  // Crew
+  lines.push("**Crew on Site**");
+  if (data.clockedInWorkers.length === 0) {
+    lines.push(`No workers clocked in yet. ${data.workerCount} total crew in your workspace.`);
+  } else {
+    lines.push(`${data.clockedInWorkers.length} of ${data.workerCount} workers currently on site:`);
+    data.clockedInWorkers.slice(0, 5).forEach((w) => {
+      // A worker with no project assigned should read as one fewer fact, not as "Unknown".
+      const where = w.project && w.project !== "Unknown" ? `${w.project}, ` : "";
+      lines.push(`• ${w.name} (${w.role}) — ${where}${w.hoursIn.toFixed(1)}h in`);
+    });
+    if (data.clockedInWorkers.length > 5) {
+      lines.push(`• …and ${data.clockedInWorkers.length - 5} more`);
+    }
+  }
+  lines.push("");
+
+  // Projects
+  if (data.activeProjects.length > 0) {
+    lines.push("**Active Projects**");
+    data.activeProjects.slice(0, 4).forEach((p) => {
+      const flags: string[] = [];
+      if (p.tasksOverdue > 0) flags.push(`${p.tasksOverdue} task${p.tasksOverdue > 1 ? "s" : ""} overdue`);
+      if (p.tasksDue > 0) flags.push(`${p.tasksDue} due today`);
+      const flagStr = flags.length > 0 ? ` — ⚠ ${flags.join(", ")}` : "";
+      const pct = Number.isFinite(p.progress) ? `: ${Math.round(p.progress)}% complete` : "";
+      lines.push(`• ${p.name}${pct}${flagStr}`);
+    });
+    lines.push("");
+  }
+
+  // Tasks
+  if (overdue.length > 0 || due.length > 0) {
+    lines.push("**Tasks**");
+    if (overdue.length > 0) {
+      lines.push(`${overdue.length} overdue task${overdue.length > 1 ? "s" : ""} need immediate attention:`);
+      overdue.slice(0, 3).forEach((t) => lines.push(`• "${t.name}" — ${t.project} (${t.worker})`));
+      if (overdue.length > 3) lines.push(`• …and ${overdue.length - 3} more`);
+    }
+    if (due.length > 0) {
+      lines.push(`${due.length} task${due.length > 1 ? "s" : ""} due today:`);
+      due.slice(0, 3).forEach((t) => lines.push(`• "${t.name}" — ${t.project} (${t.worker})`));
+      if (due.length > 3) lines.push(`• …and ${due.length - 3} more`);
+    }
+    lines.push("");
+  }
+
+  // Issues
+  const hasIssues = data.openPunchItems > 0 || data.safetyIncidentsThisWeek > 0;
+  if (hasIssues) {
+    lines.push("**Open Issues**");
+    if (data.openPunchItems > 0) {
+      lines.push(`${data.openPunchItems} open punch list item${data.openPunchItems > 1 ? "s" : ""}${data.highPriorityPunchItems > 0 ? ` — ${data.highPriorityPunchItems} high priority` : ""}.`);
+    }
+    if (data.safetyIncidentsThisWeek > 0) {
+      lines.push(`⚠ ${data.safetyIncidentsThisWeek} safety incident${data.safetyIncidentsThisWeek > 1 ? "s" : ""} logged this week — review before mobilising crew.`);
+    }
+    lines.push("");
+  }
+
+  // Financial alerts
+  const hasFinancial =
+    (data.overdueInvoices && data.overdueInvoices.length > 0) ||
+    (data.overBudgetProjects && data.overBudgetProjects.length > 0) ||
+    (data.totalOutstanding && data.totalOutstanding > 0);
+
+  if (hasFinancial) {
+    lines.push("**Money**");
+    if (data.overdueInvoices && data.overdueInvoices.length > 0) {
+      data.overdueInvoices.slice(0, 3).forEach((inv) => {
+        lines.push(`🚨 Invoice ${inv.number} — $${inv.amount.toLocaleString()} from ${inv.client} is ${inv.daysOverdue} days overdue.`);
+      });
+      if (data.overdueInvoices.length > 3) {
+        lines.push(`• …and ${data.overdueInvoices.length - 3} more overdue invoices.`);
+      }
+    }
+    if (data.totalOutstanding && data.totalOutstanding > 0 && (!data.overdueInvoices || data.overdueInvoices.length === 0)) {
+      lines.push(`$${data.totalOutstanding.toLocaleString()} outstanding in unpaid invoices.`);
+    }
+    if (data.overBudgetProjects && data.overBudgetProjects.length > 0) {
+      data.overBudgetProjects.forEach((p) => {
+        lines.push(`⚠ ${p.name} has used ${p.budgetPct}% of its budget.`);
+      });
+    }
+    lines.push("");
+  }
+
+  // Action items
+  const actions: string[] = [];
+  if (data.safetyIncidentsThisWeek > 0) actions.push("Review this week's safety incidents before crew mobilises");
+  if (data.overdueInvoices && data.overdueInvoices.length > 0) actions.push(`Chase ${data.overdueInvoices.length} overdue invoice${data.overdueInvoices.length > 1 ? "s" : ""} — cash flow at risk`);
+  if (data.overBudgetProjects && data.overBudgetProjects.length > 0) actions.push(`Review budget on ${data.overBudgetProjects.map((p) => p.name).join(", ")}`);
+  if (data.highPriorityPunchItems > 0) actions.push(`Clear ${data.highPriorityPunchItems} high-priority punch item${data.highPriorityPunchItems > 1 ? "s" : ""}`);
+  if (overdue.length > 0) actions.push(`Follow up on ${overdue.length} overdue task${overdue.length > 1 ? "s" : ""} — delays compound`);
+  if (due.length > 0) actions.push(`${due.length} task${due.length > 1 ? "s" : ""} due today — confirm assignments are clear`);
+  if (data.clockedInWorkers.length === 0 && data.workerCount > 0) actions.push("No one clocked in yet — check on crew status");
+  if (actions.length === 0) actions.push("All clear — solid start to the day");
+
+  lines.push("**What to Focus On**");
+  actions.slice(0, 4).forEach((a, i) => lines.push(`${i + 1}. ${a}`));
+
+  return lines.join("\n");
+}

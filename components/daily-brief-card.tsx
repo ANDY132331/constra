@@ -5,6 +5,7 @@ import { Sparkles, RefreshCw, Clock, ChevronDown, ChevronUp } from "lucide-react
 import { useStore } from "@/lib/store";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
+import { generateBrief, type BriefPayload } from "@/lib/daily-brief";
 
 function parseBold(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -48,56 +49,25 @@ function invTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number
 }
 
 // The dashboard mounts this card twice — once in the narrow layout, once in the wide one —
-// and CSS hides whichever does not apply. Both still run their effects, so without this the
-// same brief is generated, and billed, twice on every load. One request streams; every
-// mounted card listens to it.
+// and CSS hides whichever does not apply. Sharing one result keeps both copies showing the
+// same brief and the same timestamp, so resizing across the breakpoint never swaps the text.
 type BriefState = { text: string; loading: boolean; error: string | null; at: Date | null };
 const listeners = new Set<(s: BriefState) => void>();
 let shared: BriefState = { text: "", loading: false, error: null, at: null };
-let sharedAbort: AbortController | null = null;
-let sharedRun: Promise<void> | null = null;
 
 function push(patch: Partial<BriefState>) {
   shared = { ...shared, ...patch };
   for (const fn of listeners) fn(shared);
 }
 
-function runShared(payload: unknown): Promise<void> {
-  if (sharedRun) return sharedRun;
-  sharedAbort?.abort();
-  const controller = new AbortController();
-  sharedAbort = controller;
-  push({ loading: true, error: null, text: "" });
-
-  sharedRun = (async () => {
-    try {
-      const res = await fetch("/api/daily-brief", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-      if (!res.body) throw new Error("No response body");
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let full = "";
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        full += decoder.decode(value, { stream: true });
-        push({ text: full });
-      }
-      push({ at: new Date() });
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === "AbortError") return;
-      push({ error: err instanceof Error ? err.message : "Failed to generate brief" });
-    } finally {
-      push({ loading: false });
-      sharedRun = null;
-    }
-  })();
-  return sharedRun;
+function runShared(payload: BriefPayload) {
+  // Built on the spot from data the store already holds. No request, so it works with no
+  // signal and cannot fail with a server error the way the old fetch did.
+  try {
+    push({ loading: false, error: null, text: generateBrief(payload), at: new Date() });
+  } catch (err: unknown) {
+    push({ loading: false, text: "", error: err instanceof Error ? err.message : "Could not build the brief" });
+  }
 }
 
 export function DailyBriefCard() {
@@ -178,6 +148,7 @@ export function DailyBriefCard() {
       safetyIncidentsThisWeek: safetyThisWeek,
       companyName: companyName || "Your Company",
       currentTime: now.toLocaleString("en-US", { weekday: "long", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+      nowIso: now.toISOString(),
       // Financial additions
       totalOutstanding: Math.round(totalOutstanding),
       overdueInvoices,
@@ -186,7 +157,7 @@ export function DailyBriefCard() {
   }, [workers, projects, punchItems, safetyIncidents, companyName, invoices]);
 
   // Regenerate is an explicit user action, so it always starts a fresh run.
-  const generate = useCallback(() => { sharedRun = null; return runShared(buildPayload()); }, [buildPayload]);
+  const generate = useCallback(() => runShared(buildPayload()), [buildPayload]);
 
   // Kick the first brief off once. This used to depend on generate(), whose identity changes
   // with the store, so the cleanup aborted the in-flight request the moment the store
