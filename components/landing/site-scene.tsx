@@ -346,6 +346,37 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
       pulse.position.y = 0.17;
       scene.add(pulse);
 
+      // ── The app, on site ──────────────────────────────────────────────────
+      // Screen plays the real screen recording, so what glows here is the product itself.
+      const phoneRig = new THREE.Group();
+      phoneRig.position.set(10.9, 0, 5.9);
+      scene.add(phoneRig);
+
+      const phoneVideo = document.createElement("video");
+      phoneVideo.src = "/site/app-demo.webm";
+      phoneVideo.loop = true;
+      phoneVideo.muted = true;
+      phoneVideo.playsInline = true;
+      phoneVideo.preload = "auto";
+      phoneVideo.crossOrigin = "anonymous";
+      const screenTex = new THREE.VideoTexture(phoneVideo);
+      screenTex.colorSpace = THREE.SRGBColorSpace;
+      void phoneVideo.play().catch(() => { /* a still frame is fine if autoplay is refused */ });
+
+      // Stand it on a lumber stack so it reads as left on site, not floating
+      phoneRig.add(mesh(box(3.4, 0.55, 2.6), M.pallet, 0, 0.275, 0));
+      const PH = 5.2, PW = 2.55, PD = 0.26;
+      const body = mesh(box(PW, PH, PD), M.ink, 0, 0.55 + PH / 2, 0);
+      phoneRig.add(body);
+      const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false });
+      const screen = new THREE.Mesh(box(PW - 0.22, PH - 0.3, 0.02), screenMat);
+      screen.position.set(0, 0.55 + PH / 2, PD / 2 + 0.012);
+      phoneRig.add(screen);
+      // The screen throws a little light the way a real one does at dusk
+      const screenGlow = new THREE.PointLight("#CFE4FF", 6, 14, 2);
+      screenGlow.position.set(0, 0.55 + PH / 2, PD / 2 + 1.6);
+      phoneRig.add(screenGlow);
+
       // ── Crew ──────────────────────────────────────────────────────────────
       const bodyGeo = new THREE.CapsuleGeometry(0.26, 0.6, 3, 8); geos.push(bodyGeo);
       const headGeo = new THREE.SphereGeometry(0.2, 10, 8); geos.push(headGeo);
@@ -464,7 +495,11 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
         raf = requestAnimationFrame(frame);
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
-        if (!onScreen || document.hidden) return;
+        if (!onScreen || document.hidden) {
+          if (!phoneVideo.paused) phoneVideo.pause();
+          return;
+        }
+        if (phoneVideo.paused && playingRef.current) void phoneVideo.play().catch(() => {});
 
         if (playingRef.current) {
           t += dt;
@@ -486,6 +521,12 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
         // A touch of dolly-zoom: the frame tightens as the camera closes in
         const targetFov = (narrow ? 40 : 34) + (1 - eased) * 10;
         if (Math.abs(camera.fov - targetFov) > 0.01) { camera.fov = targetFov; camera.updateProjectionMatrix(); }
+
+        // Turn the phone to the camera so the screen is never edge-on
+        phoneRig.rotation.y = Math.atan2(
+          camera.position.x - phoneRig.position.x,
+          camera.position.z - phoneRig.position.z,
+        );
 
         apply(p);
 
@@ -533,6 +574,11 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, on
         Object.values(M).forEach((m) => m.dispose());
         fenceMat.dispose();
         pulseMat.dispose();
+        phoneVideo.pause();
+        phoneVideo.removeAttribute("src");
+        phoneVideo.load();
+        screenTex.dispose();
+        screenMat.dispose();
         padTex?.dispose();
         dirtTex?.dispose();
         pmrem?.dispose();
