@@ -1266,8 +1266,9 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* AI Daily Brief + Ask Constra */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      {/* AI Daily Brief + Ask Constra. items-start: stretched rows turned a collapsed card
+          into a tall empty box beside the open one. */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <ErrorBoundary fallback={
           <div className="bg-[#111111] border border-white/[0.06] rounded-2xl px-5 py-4 text-[12px] text-white/30">
             Morning brief unavailable — <button onClick={() => window.location.reload()} className="text-amber-400 hover:text-amber-300 underline">reload to retry</button>

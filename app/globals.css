@@ -710,8 +710,9 @@ html.theme-ready[data-theme] footer {
   -webkit-backdrop-filter: blur(20px);
 }
 
-/* Main content area */
-[data-theme="light"] main {
+/* Main content area. Scoped off the landing page (.lp), which has its own palette and
+   must not change with the app theme the visitor last picked. */
+[data-theme="light"] main:not(.lp main) {
   background: #f5f5f5 !important;
 }
 

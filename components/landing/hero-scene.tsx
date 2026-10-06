@@ -48,7 +48,11 @@ export default function HeroScene({ startHref, startLabel }: { startHref: string
       <div className="lp-cine-scrim" aria-hidden />
 
       <div className="lp-cine-copy">
-        <p className="lp-cine-eyebrow">GPS-verified · Built for the field</p>
+        <a href="#features" className="lp-announce">
+          <span className="lp-announce-tag">Offline</span>
+          Clock-ins work with no signal
+          <ArrowRight size={13} aria-hidden />
+        </a>
         <h1 id="cine-title" className="lp-cine-h1">Run the job.</h1>
         <p className="lp-cine-sub">
           Timesheets, daily reports and invoices
@@ -57,7 +61,7 @@ export default function HeroScene({ startHref, startLabel }: { startHref: string
         </p>
 
         <div className="lp-cine-ctas">
-          <Link href={startHref} className="lp-cine-pill">
+          <Link href={startHref} className="lp-cine-pill lp-shimmer">
             {startLabel}
             <span className="lp-cine-pill-go"><ArrowRight size={15} aria-hidden /></span>
           </Link>
@@ -66,6 +70,10 @@ export default function HeroScene({ startHref, startLabel }: { startHref: string
           </a>
         </div>
       </div>
+
+      {/* The horizon: a lit arc where the shot meets the page, so the dark hero hands off to
+          the next section instead of ending on a hard edge. */}
+      <div className="lp-cine-horizon" aria-hidden />
 
       <div className={`lp-cine-cue${ready ? " is-on" : ""}`} aria-hidden>
         <span />
