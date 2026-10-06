@@ -740,8 +740,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Weather + urgent badge */}
-        <div className="relative flex items-center gap-2 flex-wrap">
+        {/* Weather */}
+        {weather && <div className="relative flex items-center gap-2 flex-wrap">
           {weather && (() => {
             const wMeta = weatherMeta(weather.code);
             const WIcon = wMeta.icon;
@@ -756,16 +756,7 @@ export default function DashboardPage() {
               </div>
             );
           })()}
-          {urgentItems.length > 0 && (
-            <Link
-              href={urgentItems[0].href}
-              className="flex items-center gap-1.5 bg-red-500/[0.12] border border-red-500/25 rounded-lg px-3 py-1.5"
-            >
-              <AlertTriangle size={11} className="text-red-400" />
-              <span className="text-[11px] font-bold text-red-400">{urgentItems.length} urgent</span>
-            </Link>
-          )}
-        </div>
+        </div>}
       </div>
 
       {/* ── Getting started nudge (only when no projects exist) ───────────── */}
@@ -813,22 +804,22 @@ export default function DashboardPage() {
       <div className="px-5 pt-6">
         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar scroll-hint-x">
           {(([
-            { label: "Hrs/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, color: "#0ea5e9",                    href: "/time-tracking" },
-            { label: "Open Issues", value: openPunchItems.length,                              color: dk ? "#F5C400" : "#d97706",   href: "/punch-list"    },
-            { label: "Priority",    value: highPriority.length,                                color: "#ef4444",                    href: "/punch-list"    },
+            { label: "Hrs/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, alert: false,                    href: "/time-tracking" },
+            { label: "Open Issues", value: openPunchItems.length,                              alert: false,                    href: "/punch-list"    },
+            { label: "Priority",    value: highPriority.length,                                alert: highPriority.length > 0,  href: "/punch-list"    },
             ...(canSeeFinancials
               ? [
-                  { label: "Collected",   value: formatCurrencyCompact(totalPaid, currency as never),        color: "#22c55e", href: "/invoices" },
-                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), color: dk ? "#F5C400" : "#d97706", href: "/invoices" },
+                  { label: "Collected",   value: formatCurrencyCompact(totalPaid, currency as never),        alert: false,                 href: "/invoices" },
+                  { label: "Outstanding", value: formatCurrencyCompact(totalOutstanding, currency as never), alert: totalOutstanding > 0,  href: "/invoices" },
                 ]
               : []),
-          ]) as { label: string; value: string | number; color: string; href: string }[]).map((chip) => (
+          ]) as { label: string; value: string | number; alert: boolean; href: string }[]).map((chip) => (
             <Link
               key={chip.label}
               href={chip.href}
               className={`flex-shrink-0 rounded-2xl px-4 py-3 border active:scale-[0.96] transition-transform ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 shadow-sm"}`}
             >
-              <p className="text-[22px] font-black tabular-nums leading-none" style={{ color: chip.color }}>{chip.value}</p>
+              <p className={`text-[22px] font-black tabular-nums leading-none ${chip.alert ? "text-red-400" : dk ? "text-white" : "text-gray-900"}`}>{chip.value}</p>
               <p className={`text-[10px] font-semibold mt-1.5 whitespace-nowrap ${dk ? "text-white/35" : "text-gray-500"}`}>{chip.label}</p>
             </Link>
           ))}
@@ -839,21 +830,18 @@ export default function DashboardPage() {
       <div className="px-5 pt-6">
         <div className="grid grid-cols-2 gap-2.5">
           {[
-            { label: "Daily Report",  icon: FileText,      href: "/daily-reports?new=1",  color: "#22c55e" },
-            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders?new=1", color: dk ? "#F5C400" : "#d97706" },
-            { label: "Invoice",       icon: ReceiptText,   href: "/invoices?new=1",       color: "#0ea5e9" },
-            { label: "Punch Item",    icon: AlertTriangle, href: "/punch-list?new=1",     color: "#ef4444" },
-          ].map(({ label, icon: Icon, href, color }) => (
+            { label: "Daily Report",  icon: FileText,      href: "/daily-reports?new=1" },
+            { label: "Change Order",  icon: GitPullRequest, href: "/change-orders?new=1" },
+            { label: "Invoice",       icon: ReceiptText,   href: "/invoices?new=1" },
+            { label: "Punch Item",    icon: AlertTriangle, href: "/punch-list?new=1" },
+          ].map(({ label, icon: Icon, href }) => (
             <Link
               key={label}
               href={href}
               className={`card-hover flex items-center gap-3.5 rounded-2xl px-4 py-4 active:scale-[0.97] border ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 hover:border-gray-300 shadow-sm"}`}
             >
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: color + "18" }}
-              >
-                <Icon size={17} style={{ color }} />
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dk ? "bg-white/[0.06]" : "bg-gray-100"}`}>
+                <Icon size={17} className={dk ? "text-amber-400" : "text-amber-600"} />
               </div>
               <p className={`text-[13px] font-semibold leading-tight ${dk ? "text-white/80" : "text-gray-800"}`}>{label}</p>
             </Link>
