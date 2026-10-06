@@ -20,17 +20,21 @@ type Props = {
   playing: boolean;
   /** Start position when the scene mounts paused (e.g. reduced motion) */
   initialProgress?: number;
+  /** 0 = wide establishing shot, 1 = settled working shot. Driven by scroll. */
+  reveal?: number;
   onProgress?: (p: number) => void;
   onReady?: (ok: boolean) => void;
 };
 
-export default function SiteScene({ playing, initialProgress = 0, onProgress, onReady }: Props) {
+export default function SiteScene({ playing, initialProgress = 0, reveal = 1, onProgress, onReady }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const playingRef = useRef(playing);
+  const revealRef = useRef(reveal);
   const progressCb = useRef(onProgress);
   const readyCb = useRef(onReady);
 
   useEffect(() => { playingRef.current = playing; }, [playing]);
+  useEffect(() => { revealRef.current = reveal; }, [reveal]);
   useEffect(() => { progressCb.current = onProgress; readyCb.current = onReady; }, [onProgress, onReady]);
 
   useEffect(() => {
@@ -472,9 +476,16 @@ export default function SiteScene({ playing, initialProgress = 0, onProgress, on
         px += (tx - px) * 0.05;
         py += (ty - py) * 0.05;
         const a = orbit + px * 0.35;
-        const R = narrow ? 37 : 42, H = (narrow ? 19 : 21) - py * 5;
+        // Wide and high at the start of the section, settling in as it scrolls up
+        const rv = clamp01(revealRef.current);
+        const eased = 1 - Math.pow(1 - rv, 3);
+        const R = (narrow ? 37 : 42) + (1 - eased) * 46;
+        const H = (narrow ? 19 : 21) - py * 5 + (1 - eased) * 30;
         camera.position.set(Math.cos(a) * R, H, Math.sin(a) * R);
-        camera.lookAt(0, 6.5, 0);
+        camera.lookAt(0, 6.5 - (1 - eased) * 2, 0);
+        // A touch of dolly-zoom: the frame tightens as the camera closes in
+        const targetFov = (narrow ? 40 : 34) + (1 - eased) * 10;
+        if (Math.abs(camera.fov - targetFov) > 0.01) { camera.fov = targetFov; camera.updateProjectionMatrix(); }
 
         apply(p);
 

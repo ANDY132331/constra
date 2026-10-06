@@ -19,6 +19,42 @@ const EVENTS = [
   { at: 0.96, icon: Receipt, title: "Payroll ready · INV-0143 drafted", meta: "51.5 crew hours · $12,860.00", tone: "go" },
 ] as const;
 
+const TALLY: [string, number, string, number][] = [
+  // label, target, suffix, decimals
+  ["Crew on site", 6, "", 0],
+  ["Hours logged", 51.5, " h", 1],
+  ["Site photos", 9, "", 0],
+  ["Payroll ready", 12860, "", 0],
+];
+
+function useCountUp(target: number, run: boolean, decimals: number) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!run) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setN(target); return; }
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - t0) / 1100);
+      setN(target * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, run]);
+  return decimals ? n.toFixed(decimals) : Math.round(n).toLocaleString("en-CA");
+}
+
+function Tally({ label, value, suffix, decimals, run }: { label: string; value: number; suffix: string; decimals: number; run: boolean }) {
+  const shown = useCountUp(value, run, decimals);
+  return (
+    <div className="lp-tally">
+      <span className="lp-tally-n">{label === "Payroll ready" ? "$" : ""}{shown}{suffix}</span>
+      <span className="lp-tally-l">{label}</span>
+    </div>
+  );
+}
+
 function clockLabel(p: number) {
   const mins = Math.round((DAY_START + p * DAY_LEN) / 5) * 5;
   const h = Math.floor(mins / 60), m = mins % 60;
@@ -33,6 +69,9 @@ export default function LiveSite() {
   const [failed, setFailed] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  // 0 while the section is still below the fold, 1 once it has settled in view
+  const [reveal, setReveal] = useState(0);
   // A still of the scene covers the WebGL load (16KB). The clip is a full stand-in and only
   // downloads when WebGL can't run at all, so nobody pays 1.7MB for a fallback they don't need.
   const showPoster = !sceneReady && !failed;
@@ -44,6 +83,27 @@ export default function LiveSite() {
     if (r) { setReduce(true); setPlaying(false); setP(REDUCED_AT); }
     setMounted(true);
     /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+
+  // Tie the camera to scroll position so the figures hand off into the site itself
+  useEffect(() => {
+    const el = sectionRef.current;
+    const scroller = el?.closest(".lp") as HTMLElement | null;
+    if (!el || !scroller) return;
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const r = el.getBoundingClientRect();
+      const h = window.innerHeight || 1;
+      // Fully revealed once the section top has risen through the lower third
+      const k = 1 - (r.top - h * 0.12) / (h * 0.72);
+      setReveal((prev) => { const next = Math.min(1, Math.max(0, k)); return Math.abs(next - prev) > 0.01 ? next : prev; });
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(measure); };
+    measure();
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { cancelAnimationFrame(raf); scroller.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
   }, []);
 
   // Throttle React updates to visible changes (5-minute clock steps)
@@ -64,7 +124,7 @@ export default function LiveSite() {
   const latest = shown.length - 1;
 
   return (
-    <section className="lp-sitecam" aria-labelledby="live-title">
+    <section className="lp-sitecam" ref={sectionRef} aria-labelledby="live-title">
       <div className="lp-wrap lp-live-head">
         <div>
           <p className="lp-kicker lp-kicker-inv">Live site view</p>
@@ -76,8 +136,16 @@ export default function LiveSite() {
       </div>
 
       <div className="lp-wrap">
+        <div className="lp-tallies" aria-label="What this sample day produced">
+          {TALLY.map(([label, value, suffix, decimals]) => (
+            <Tally key={label} label={label} value={value} suffix={suffix} decimals={decimals} run={reveal > 0.12} />
+          ))}
+        </div>
+      </div>
+
+      <div className="lp-wrap">
         <div className={`lp-stage3d${failed ? " lp-stage3d-flat" : ""}`}>
-          {!failed && mounted && <SiteScene playing={playing} initialProgress={reduce ? REDUCED_AT : 0} onProgress={onProgress} onReady={onReady} />}
+          {!failed && mounted && <SiteScene playing={playing} initialProgress={reduce ? REDUCED_AT : 0} reveal={reveal} onProgress={onProgress} onReady={onReady} />}
           {showPoster && (
             <img className="lp-scene-video" src="/site/site-tour-poster.webp" alt="" aria-hidden width={960} height={592} />
           )}

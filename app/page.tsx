@@ -8,6 +8,7 @@ import LiveSite from "@/components/landing/live-site";
 import SavingsCalc from "@/components/landing/savings-calc";
 import AppTour from "@/components/landing/app-tour";
 import RealPhotos from "@/components/landing/real-photos";
+import RealClips from "@/components/landing/real-clips";
 
 const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
@@ -395,6 +396,8 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <RealClips />
+
         <RealPhotos />
 
         <SavingsCalc />
@@ -711,6 +714,12 @@ const CSS = `
 .lp-scene-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#1B1A22; display:block}
 .lp-stage3d-flat .lp-scene-video{position:relative; inset:auto; height:auto; aspect-ratio:1200/740}
 
+/* Sample-day tally that hands off into the 3D site */
+.lp-tallies{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--night-rule); border:1px solid var(--night-rule); margin-bottom:28px}
+.lp-tally{background:#16151C; padding:18px 20px; display:flex; flex-direction:column; gap:4px}
+.lp-tally-n{font-family:var(--display); font-weight:800; font-size:clamp(30px,4.2vw,46px); line-height:1; letter-spacing:.01em; color:var(--hv); font-variant-numeric:tabular-nums}
+.lp-tally-l{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--night-dim)}
+
 /* The actual app: screen recording + real screens */
 .lp-tour{padding-block:96px; background:var(--paper); border-block:1px solid var(--rule)}
 .lp-tour-grid{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center}
@@ -726,6 +735,16 @@ const CSS = `
 .lp-device figcaption{font-size:11px; color:var(--ink3); text-align:center; letter-spacing:.04em}
 .lp-device-video{transform:translateY(-10px)}
 .lp-device-shot{transform:translateY(16px)}
+
+/* Real clips (hidden until lib/site-clips.ts lists some) */
+.lp-clips{padding-block:96px; background:var(--night); color:var(--night-ink)}
+.lp-clips .lp-section-note{color:var(--night-dim)}
+.lp-clip-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px}
+.lp-clip{margin:0}
+.lp-clip-frame{border:1px solid var(--night-rule); background:#000; overflow:hidden}
+.lp-clip-frame video,.lp-clip-frame img{display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover}
+.lp-clip figcaption{display:flex; flex-direction:column; gap:3px; padding:12px 2px 0; font-size:13px; color:var(--night-ink)}
+.lp-clip-credit{font-family:var(--mono); font-size:11px; color:var(--night-dim)}
 
 /* Photos from real sites (hidden until lib/site-photos.ts lists some) */
 .lp-real{padding-block:96px; border-top:1px solid var(--rule)}
@@ -806,6 +825,7 @@ const CSS = `
   .lp-tilt .lp-slip{left:-70px; right:auto; margin:0}
   .lp-float{right:-40px}
   .lp-sitecam{padding-block:64px 72px}
+  .lp-tallies{grid-template-columns:1fr 1fr}
   .lp-stage3d{height:auto; display:flex; flex-direction:column}
   .lp-scene{position:relative; inset:auto; height:min(440px,100vw)}
   .lp-scene-video{position:relative; inset:auto; height:min(440px,100vw); order:0}
