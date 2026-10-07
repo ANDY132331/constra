@@ -111,7 +111,7 @@ export default function InvoicesPage() {
       if (effectiveStatus !== statusFilter) return false;
     }
     const q = search.toLowerCase();
-    return !q || i.clientName.toLowerCase().includes(q) || i.number.toLowerCase().includes(q);
+    return !q || (i.clientName ?? "").toLowerCase().includes(q) || (i.number ?? "").toLowerCase().includes(q);
   });
 
   const totalOutstanding = invoices

@@ -127,7 +127,7 @@ export default function DailyReportsPage() {
     if (search) {
       const q = search.toLowerCase();
       const proj = projects.find((p) => p.id === r.projectId);
-      if (!proj?.name.toLowerCase().includes(q) && !r.workCompleted.toLowerCase().includes(q) && !r.notes.toLowerCase().includes(q)) return false;
+      if (!(proj?.name ?? "").toLowerCase().includes(q) && !(r.workCompleted ?? "").toLowerCase().includes(q) && !(r.notes ?? "").toLowerCase().includes(q)) return false;
     }
     return true;
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

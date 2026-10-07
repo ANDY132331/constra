@@ -56,7 +56,7 @@ export default function PunchListPage() {
   const filtered = punchItems.filter((item) => {
     if (search) {
       const q = search.toLowerCase();
-      if (!item.title.toLowerCase().includes(q) && !(item.description?.toLowerCase().includes(q)) && !(item.location?.toLowerCase().includes(q))) return false;
+      if (!(item.title ?? "").toLowerCase().includes(q) && !(item.description?.toLowerCase().includes(q)) && !(item.location?.toLowerCase().includes(q))) return false;
     }
     if (statusFilter !== "all" && item.status !== statusFilter) return false;
     if (priorityFilter !== "all" && item.priority !== priorityFilter) return false;

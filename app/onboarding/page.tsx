@@ -125,8 +125,8 @@ export default function OnboardingPage() {
 
   const filteredCountries = COUNTRIES.filter(
     (c) =>
-      c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
-      c.currency.toLowerCase().includes(countrySearch.toLowerCase()),
+      (c.name ?? "").toLowerCase().includes(countrySearch.toLowerCase()) ||
+      (c.currency ?? "").toLowerCase().includes(countrySearch.toLowerCase()),
   );
 
   const filteredIndustries = INDUSTRIES.filter((i) =>

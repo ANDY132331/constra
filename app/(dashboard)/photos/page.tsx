@@ -53,7 +53,7 @@ export default function PhotosPage() {
   }, []);
 
   const filtered = photos.filter((p) => {
-    const matchSearch = !search || p.caption.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+    const matchSearch = !search || (p.caption ?? "").toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
     const matchTag = !tagFilter || p.tags.includes(tagFilter);
     const matchProject = projectFilter === "all" || p.projectId === projectFilter;
     return matchSearch && matchTag && matchProject;

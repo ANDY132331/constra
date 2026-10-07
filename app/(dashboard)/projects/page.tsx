@@ -156,7 +156,7 @@ export default function ProjectsPage() {
   const pendingProjects = isAdmin ? projects.filter((p) => p.pendingApproval) : [];
   const filtered = projects.filter((p) => {
     if (p.pendingApproval && isAdmin) return false; // admins see pending in a separate section
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.client.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (p.name ?? "").toLowerCase().includes(search.toLowerCase()) || (p.client ?? "").toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     return matchSearch && matchStatus;
   });

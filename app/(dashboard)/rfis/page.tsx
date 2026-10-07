@@ -56,7 +56,7 @@ export default function RFIsPage() {
     if (!search) return true;
     const q = search.toLowerCase();
     const proj = getProjectById(r.projectId);
-    return r.subject.toLowerCase().includes(q) || r.number.toLowerCase().includes(q) || r.question.toLowerCase().includes(q) || !!(proj?.name.toLowerCase().includes(q));
+    return (r.subject ?? "").toLowerCase().includes(q) || (r.number ?? "").toLowerCase().includes(q) || (r.question ?? "").toLowerCase().includes(q) || !!((proj?.name ?? "").toLowerCase().includes(q));
   });
 
   const nextNumber = (() => {

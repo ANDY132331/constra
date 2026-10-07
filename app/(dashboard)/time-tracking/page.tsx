@@ -188,7 +188,7 @@ function ProjectPickerModal({
   }, [projects, worker.projectIds, recentProjectId]);
 
   const q = query.trim().toLowerCase();
-  const shown = q ? ordered.filter((p) => p.name.toLowerCase().includes(q) || (p.client ?? "").toLowerCase().includes(q)) : ordered;
+  const shown = q ? ordered.filter((p) => (p.name ?? "").toLowerCase().includes(q) || (p.client ?? "").toLowerCase().includes(q)) : ordered;
 
   const sheet = (
     <div
@@ -489,7 +489,7 @@ export default function TimeTrackingPage() {
   const workerMatches = useCallback((w: Worker) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
-    return w.name.toLowerCase().includes(q) || (w.customRole ?? w.role ?? "").toLowerCase().includes(q);
+    return (w.name ?? "").toLowerCase().includes(q) || (w.customRole ?? w.role ?? "").toLowerCase().includes(q);
   }, [search]);
   /** Crew shown in the lists — the counts above them stay on the whole crew. */
   const clockedInShown = useMemo(() => clockedIn.filter(workerMatches), [clockedIn, workerMatches]);
@@ -715,7 +715,7 @@ export default function TimeTrackingPage() {
     if (search) {
       const q = search.toLowerCase();
       const proj = getProjectById(e.projectId);
-      if (!worker.name.toLowerCase().includes(q) && !(proj?.name.toLowerCase().includes(q))) return false;
+      if (!(worker.name ?? "").toLowerCase().includes(q) && !((proj?.name ?? "").toLowerCase().includes(q))) return false;
     }
     if (selectedProject !== "all" && e.projectId !== selectedProject) return false;
     return true;

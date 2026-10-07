@@ -84,7 +84,7 @@
   s.safetyIncidents = [{
     id: "si-1", projectId: "p-dundas", reportedById: "w-tyler", date: at(12, 35, -1),
     type: "near-miss", severity: "medium", description: "Open trench near the north wall was not barricaded. Taped off and foreman notified.",
-    location: "North elevation", status: "resolved", correctiveAction: "Barricade installed", photos: [],
+    location: "North elevation", status: "resolved", actionTaken: "Barricade installed", photos: [],
   }];
 
   s.punchItems = [

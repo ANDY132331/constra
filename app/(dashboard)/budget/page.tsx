@@ -99,9 +99,9 @@ export default function BudgetPage() {
         const q = search.toLowerCase();
         const proj = projects.find((p) => p.id === b.projectId);
         if (
-          !b.code.toLowerCase().includes(q) &&
-          !b.description.toLowerCase().includes(q) &&
-          !proj?.name.toLowerCase().includes(q)
+          !(b.code ?? "").toLowerCase().includes(q) &&
+          !(b.description ?? "").toLowerCase().includes(q) &&
+          !(proj?.name ?? "").toLowerCase().includes(q)
         ) return false;
       }
       return true;

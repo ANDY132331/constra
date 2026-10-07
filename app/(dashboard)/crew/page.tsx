@@ -237,10 +237,10 @@ export default function CrewPage() {
   const filtered = workers.filter((w) => {
     const q = search.toLowerCase();
     const matchSearch =
-      w.name.toLowerCase().includes(q) ||
-      w.role.toLowerCase().includes(q) ||
+      (w.name ?? "").toLowerCase().includes(q) ||
+      (w.role ?? "").toLowerCase().includes(q) ||
       (w.customRole ?? "").toLowerCase().includes(q) ||
-      w.email.toLowerCase().includes(q) ||
+      (w.email ?? "").toLowerCase().includes(q) ||
       w.phone.includes(search);
     const matchRole = filterRole === "all" || w.role === filterRole;
     return matchSearch && matchRole;

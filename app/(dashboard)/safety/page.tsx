@@ -68,9 +68,9 @@ export default function SafetyPage() {
     if (search) {
       const q = search.toLowerCase();
       const project = getProjectById(i.projectId);
-      if (!i.description.toLowerCase().includes(q) &&
-        !i.actionTaken.toLowerCase().includes(q) &&
-        !project?.name.toLowerCase().includes(q)) return false;
+      if (!(i.description ?? "").toLowerCase().includes(q) &&
+        !(i.actionTaken ?? "").toLowerCase().includes(q) &&
+        !(project?.name ?? "").toLowerCase().includes(q)) return false;
     }
     return true;
   });

@@ -89,7 +89,7 @@ export default function DocumentsPage() {
       if (selectedCategory !== "all" && d.category !== selectedCategory) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        if (!d.name.toLowerCase().includes(q) && !d.category.toLowerCase().includes(q)) return false;
+        if (!(d.name ?? "").toLowerCase().includes(q) && !(d.category ?? "").toLowerCase().includes(q)) return false;
       }
       return true;
     }).sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());

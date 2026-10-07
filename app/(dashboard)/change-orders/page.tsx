@@ -76,7 +76,7 @@ export default function ChangeOrdersPage() {
     if (search) {
       const q = search.toLowerCase();
       const proj = projects.find((p) => p.id === c.projectId);
-      if (!c.title.toLowerCase().includes(q) && !c.number.toLowerCase().includes(q) && !(proj?.name.toLowerCase().includes(q)) && !c.description.toLowerCase().includes(q) && !c.reason.toLowerCase().includes(q)) return false;
+      if (!(c.title ?? "").toLowerCase().includes(q) && !(c.number ?? "").toLowerCase().includes(q) && !((proj?.name ?? "").toLowerCase().includes(q)) && !(c.description ?? "").toLowerCase().includes(q) && !(c.reason ?? "").toLowerCase().includes(q)) return false;
     }
     return true;
   }).sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());

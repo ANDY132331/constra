@@ -90,9 +90,9 @@ export default function InsurancePage() {
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((p) =>
-        p.holderName.toLowerCase().includes(q) ||
-        p.insurer.toLowerCase().includes(q) ||
-        p.policyNumber.toLowerCase().includes(q)
+        (p.holderName ?? "").toLowerCase().includes(q) ||
+        (p.insurer ?? "").toLowerCase().includes(q) ||
+        (p.policyNumber ?? "").toLowerCase().includes(q)
       );
     }
     // Sort: expired first, then expiring soon, then valid; within each group sort by expiry ASC

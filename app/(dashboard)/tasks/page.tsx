@@ -65,7 +65,7 @@ export default function TasksPage() {
   const filtered = allTasks.filter((t) => {
     const worker = getWorkerById(t.workerId);
     const matchSearch =
-      t.name.toLowerCase().includes(search.toLowerCase()) ||
+      (t.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
       (worker?.name ?? "").toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === "all" || t.status === filterStatus;
     const matchProject = filterProject === "all" || t.projectId === filterProject;

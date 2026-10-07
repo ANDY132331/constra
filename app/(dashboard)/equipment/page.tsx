@@ -55,7 +55,7 @@ export default function EquipmentPage() {
   useEffect(() => { if (searchParams.get("new") === "1") { setEditId(null); setForm(blank()); setShowModal(true); } }, [searchParams]);
 
   const filtered = equipment.filter((e) => {
-    if (search && !e.name.toLowerCase().includes(search.toLowerCase()) && !e.type.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !(e.name ?? "").toLowerCase().includes(search.toLowerCase()) && !(e.type ?? "").toLowerCase().includes(search.toLowerCase())) return false;
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
     return true;
   });

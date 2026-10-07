@@ -76,7 +76,7 @@ export default function MaterialsPage() {
   const filteredLibrary = useMemo(() => {
     if (!pickerSearch.trim()) return libraryForTrade;
     const q = pickerSearch.toLowerCase();
-    return libraryForTrade.filter((m) => m.name.toLowerCase().includes(q));
+    return libraryForTrade.filter((m) => (m.name ?? "").toLowerCase().includes(q));
   }, [libraryForTrade, pickerSearch]);
 
   // Sort: recently used first, then alphabetical
@@ -95,7 +95,7 @@ export default function MaterialsPage() {
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const proj = projects.find((p) => p.id === e.projectId);
-        if (!e.materialName.toLowerCase().includes(q) && !(e.note?.toLowerCase().includes(q)) && !(e.trade?.toLowerCase().includes(q)) && !(proj?.name.toLowerCase().includes(q))) return false;
+        if (!(e.materialName ?? "").toLowerCase().includes(q) && !(e.note?.toLowerCase().includes(q)) && !(e.trade?.toLowerCase().includes(q)) && !((proj?.name ?? "").toLowerCase().includes(q))) return false;
       }
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

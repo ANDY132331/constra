@@ -405,7 +405,7 @@ export default function MessagesPage() {
 
   const filteredProjects = useMemo(() => {
     const q = sidebarSearch.toLowerCase();
-    return projects.filter((p) => !q || p.name.toLowerCase().includes(q));
+    return projects.filter((p) => !q || (p.name ?? "").toLowerCase().includes(q));
   }, [projects, sidebarSearch]);
 
   const canSend = !recording && (!!text.trim() || !!pendingAttachment);

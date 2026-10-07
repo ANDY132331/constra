@@ -104,7 +104,7 @@ export default function EstimatesPage() {
   const filtered = estimates.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
     const q = search.toLowerCase();
-    return !q || e.projectName.toLowerCase().includes(q) || e.clientName.toLowerCase().includes(q) || e.number.toLowerCase().includes(q);
+    return !q || (e.projectName ?? "").toLowerCase().includes(q) || (e.clientName ?? "").toLowerCase().includes(q) || (e.number ?? "").toLowerCase().includes(q);
   });
 
   const totalPending = estimates
