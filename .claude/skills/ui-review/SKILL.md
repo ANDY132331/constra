@@ -136,3 +136,14 @@ Be suspicious of your own harness before declaring a bug. In past sweeps, "14 pa
 filter" and "two forms have no validation" were both measurement errors — a hidden duplicate
 input and native browser validation the probe couldn't see. Confirm a failure a second way
 before reporting or "fixing" it, and say plainly when a result turned out to be a false alarm.
+
+### 13. Search filters that crash on absent fields
+Typing in the Safety Log search took the page down: `Cannot read properties of undefined
+(reading 'toLowerCase')`. The filter called `.toLowerCase()` straight on `incident.actionTaken`,
+which is optional — the same file guards it with `&&` in both render paths. 48 filters across
+19 pages had the same shape. Note that `proj?.name.toLowerCase()` guards the *object* and not
+the *field*.
+
+Check: delete optional fields from seeded records, then search on every page. Nothing should
+crash. The fields most likely to be absent are notes, descriptions, emails and anything added
+to the schema after launch.
