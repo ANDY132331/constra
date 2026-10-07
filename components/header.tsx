@@ -149,7 +149,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
       <button
         onClick={onMenuClick}
         aria-label="Open menu"
-        className="lg:hidden w-10 h-10 flex items-center justify-center text-white/35 hover:text-white/70 active:text-white/80 rounded-full transition-colors flex-shrink-0 -ml-1"
+        className="lg:hidden w-11 h-11 flex items-center justify-center text-white/35 hover:text-white/70 active:text-white/80 rounded-full transition-colors flex-shrink-0 -ml-1"
       >
         <Menu size={20} strokeWidth={1.8} />
       </button>
@@ -159,7 +159,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         <p className="text-[11px] text-white/30 mt-0.5 hidden sm:block">{dateStr}</p>
       </div>
 
-      <div className="flex items-center gap-0.5 sm:gap-1.5">
+      {/* 2px between 44px targets meant a gloved thumb aiming for Search could hit
+          Notifications. Material asks 8dp minimum between targets. */}
+      <div className="flex items-center gap-2 sm:gap-1.5">
         {/* Quick Add */}
         <div ref={newRef} className="relative">
           <button
@@ -167,7 +169,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             aria-label="Quick add"
             aria-expanded={showNew}
             aria-haspopup="true"
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[13px] font-bold px-3 py-2 sm:py-1.5 rounded-full transition-all duration-100"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 active:bg-amber-600 text-black text-[13px] font-bold px-3.5 py-2 sm:py-1.5 rounded-full transition-all duration-100"
           >
             <Plus size={15} className="sm:hidden" />
             <Plus size={13} className="hidden sm:block" />
@@ -197,7 +199,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           onClick={openSearch}
           title="Search (⌘K)"
           aria-label="Search"
-          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-full sm:rounded-lg transition-all"
+          className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] active:bg-white/[0.08] rounded-full sm:rounded-lg transition-all"
         >
           <Search size={16} className="sm:hidden" />
           <Search size={15} className="hidden sm:block" />
@@ -220,7 +222,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             aria-label={hasUnread ? `Notifications — ${unreadCount} unread` : "Notifications"}
             aria-expanded={showNotif}
             aria-haspopup="true"
-            className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-full sm:rounded-lg transition-all relative"
+            className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.05] rounded-full sm:rounded-lg transition-all relative"
           >
             <Bell size={15} />
             {hasUnread && (
@@ -313,7 +315,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             aria-label="Account menu"
             aria-expanded={showUser}
             aria-haspopup="true"
-            className="flex items-center gap-2 rounded-xl sm:rounded-lg px-2 py-2 sm:py-1.5 hover:bg-white/[0.05] active:bg-white/[0.08] transition-colors min-h-[40px] sm:min-h-0"
+            className="flex items-center gap-2 rounded-xl sm:rounded-lg px-2 py-2 sm:py-1.5 hover:bg-white/[0.05] active:bg-white/[0.08] transition-colors min-h-[44px] sm:min-h-0"
           >
             <div
               className="relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold flex-shrink-0"

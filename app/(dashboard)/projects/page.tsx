@@ -606,7 +606,7 @@ export default function ProjectsPage() {
                       </div>
                       {project.workerIds.length > 3 && <span className="text-[10px] text-white/30">+{project.workerIds.length - 3}</span>}
                     </div>
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
                         className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-white/8 transition-all"
@@ -656,7 +656,7 @@ export default function ProjectsPage() {
                           <h3 className="text-[14px] font-bold text-white group-hover:text-amber-300 transition-colors truncate">{project.name}</h3>
                           <p className="text-[12px] text-white/40 truncate">{project.client}</p>
                         </div>
-                        <div className="flex items-center gap-1 flex-shrink-0">
+                        <div className="flex items-center gap-3 flex-shrink-0">
                           <button
                             onClick={(e) => { e.stopPropagation(); copyShare(project.id); }}
                             className="p-1.5 rounded hover:bg-emerald-500/10 transition-colors"
@@ -918,7 +918,7 @@ export default function ProjectsPage() {
                   <div className="flex gap-3 flex-wrap">
                     {COLORS.map((c) => (
                       <button type="button" key={c} aria-label={`Colour ${c}`} aria-pressed={form.color === c} onClick={() => setForm((f) => ({ ...f, color: c }))}
-                        className="w-10 h-10 rounded-2xl active:scale-90 transition-transform"
+                        className="w-11 h-11 rounded-2xl active:scale-90 transition-transform"
                         style={{ backgroundColor: c, outline: form.color === c ? `3px solid ${c}` : "none", outlineOffset: "3px" }} />
                     ))}
                   </div>
@@ -959,7 +959,7 @@ export default function ProjectsPage() {
           <div className="bg-[#161616] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Project" : "New Project"}</h3>
-              <button aria-label="Close" onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button aria-label="Close" onClick={closeModal} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>

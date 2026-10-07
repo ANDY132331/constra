@@ -138,7 +138,9 @@ export default function ReportsPage() {
   );
 
   const totalBudget = projectBudgets.reduce((s, p) => s + p.budget, 0);
-  const totalSpent = projectBudgets.reduce((s, p) => s + p.spent, 0);
+  // A project with no spend recorded yet yields undefined here; one of them turned the whole
+  // sum into NaN and the Budget Used tile rendered "NaN%" on screen.
+  const totalSpent = projectBudgets.reduce((s, p) => s + (Number.isFinite(p.spent) ? p.spent : 0), 0);
 
   // Top workers by actual hours in period, including OT breakdown when enabled
   const topWorkers = useMemo(() => {
@@ -259,7 +261,7 @@ export default function ReportsPage() {
           {[
             { label: "Total Hours", icon: Clock, color: "text-amber-400", value: hasHoursData ? `${totalHours.toFixed(1)}h` : "0h", sub: hasHoursData ? `${periodEntries.length} sessions` : "No sessions" },
             { label: "On Site Now", icon: Users, color: "text-blue-400", value: activeWorkers.toString(), sub: `of ${workers.length} crew` },
-            { label: "Budget Used", icon: DollarSign, color: "text-green-400", value: totalBudget > 0 ? `${((totalSpent / totalBudget) * 100).toFixed(0)}%` : "—", sub: totalBudget > 0 ? `${formatCurrencyCompact(totalSpent, currency)} spent` : "No budgets" },
+            { label: "Budget Used", icon: DollarSign, color: "text-green-400", value: totalBudget > 0 && Number.isFinite(totalSpent) ? `${Math.round((totalSpent / totalBudget) * 100)}%` : "—", sub: totalBudget > 0 ? `${formatCurrencyCompact(totalSpent, currency)} spent` : "No budgets" },
             { label: "Avg Hrs/Worker", icon: TrendingUp, color: "text-purple-400", value: workers.length > 0 && hasHoursData ? `${(totalHours / workers.length).toFixed(1)}h` : "—", sub: "This period" },
           ].map((kpi) => (
             <div key={kpi.label} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
@@ -284,10 +286,19 @@ export default function ReportsPage() {
                 {dailyBars.map((d, i) => {
                   const pct = (d.hours / maxBarH) * 100;
                   return (
-                    <div key={i} className="flex-1 min-w-[20px] flex flex-col items-center gap-1">
-                      {d.hours > 0 && <span className="text-[8px] text-white/30 whitespace-nowrap">{d.hours}h</span>}
-                      <div className="w-full rounded-t bg-amber-500/70" style={{ height: `${Math.max(pct, d.hours > 0 ? 10 : 2)}%`, minHeight: "2px" }} />
-                      <span className="text-[8px] text-white/30 whitespace-nowrap">{d.label}</span>
+                    <div key={i} className="flex-1 min-w-[30px] h-full flex flex-col items-center gap-1">
+                      <span className="text-[11px] text-white/45 whitespace-nowrap tabular-nums h-4">{d.hours > 0 ? `${d.hours}h` : ""}</span>
+                      {/* The bar needs a parent with a definite height: it used to sit in an
+                          auto-height column, so its percentage height resolved to nothing and
+                          the chart drew labels with no bars at all. */}
+                      <div className="flex-1 w-full flex items-end min-h-0">
+                        <div
+                          className="w-full rounded-t bg-amber-500/70"
+                          style={{ height: `${Math.max(pct, d.hours > 0 ? 8 : 1.5)}%`, minHeight: d.hours > 0 ? "3px" : "1px" }}
+                          title={`${d.label}: ${d.hours}h`}
+                        />
+                      </div>
+                      <span className="text-[11px] text-white/45 whitespace-nowrap">{d.label}</span>
                     </div>
                   );
                 })}
@@ -431,7 +442,7 @@ export default function ReportsPage() {
           <p className="text-white/35 text-sm mt-0.5">{periodLabel}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
+          <div className="flex gap-2 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
             {(["week", "month", "quarter"] as const).map((p) => (
               <button key={p} onClick={() => setPeriod(p)}
                 className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-colors ${period === p ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>

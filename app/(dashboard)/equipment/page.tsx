@@ -228,13 +228,13 @@ export default function EquipmentPage() {
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
                     <span className="text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/day</span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-3">
                       <button aria-label="Edit" onClick={() => openEdit(eq)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
+                        className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
                       </button>
                       <button aria-label="Delete" onClick={() => handleDelete(eq.id, eq.name)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        className="w-11 h-11 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -349,7 +349,7 @@ export default function EquipmentPage() {
                       {serviceOverdue ? "OVERDUE" : new Date(eq.nextService).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
                     </span>
                     <span className="text-right text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/d</span>
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-3">
                       <button aria-label="Edit" onClick={() => openEdit(eq)}
                         className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all">
                         <Pencil size={12} />
@@ -374,7 +374,7 @@ export default function EquipmentPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Equipment" : "Add Equipment"}</h3>
-              <button aria-label="Close" onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button aria-label="Close" onClick={() => setShowModal(false)} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>

@@ -63,6 +63,12 @@ export function formatCurrency(
   const locale = meta?.locale ?? "en-US";
   const { compact = false, decimals } = opts ?? {};
 
+  // Intl formats NaN as the literal "$NaN", which has shipped to screen on the dashboard,
+  // projects and reports whenever a project had no spend recorded yet. A figure we do not
+  // have is a dash, never a number and never "NaN" — this is the one place every currency
+  // string in the app passes through, screens, PDFs and emails alike.
+  if (!Number.isFinite(amount)) return "—";
+
   try {
     const formatter = new Intl.NumberFormat(locale, {
       style: "currency",

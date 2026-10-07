@@ -290,25 +290,25 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                     <span style={{ color: typeCfg.color }}><TypeIcon size={15} /></span>
                     <span className="text-[13px] font-bold text-white/80">{typeCfg.label}</span>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${sevCfg.className}`}>{sevCfg.label}</span>
                     <button
                       onClick={() => exportPdf(incident)}
                       title="Export PDF"
-                      className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-amber-400/20 transition-colors"
+                      className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-amber-400/20 transition-colors"
                     >
                       <FileText size={13} />
                     </button>
                     {canManage && (<>
                     <button aria-label="Edit"
                       onClick={() => openEdit(incident)}
-                      className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
+                      className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors"
                     >
                       <Pencil size={13} />
                     </button>
                     <button aria-label="Delete"
                       onClick={() => setDeleteConfirm(incident.id)}
-                      className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
+                      className="w-11 h-11 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -508,7 +508,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
           <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Incident" : "Log Incident"}</h3>
-              <button aria-label="Close" type="button" onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button aria-label="Close" type="button" onClick={() => { setShowModal(false); setEditId(null); }} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>

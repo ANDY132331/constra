@@ -195,7 +195,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
           <button
             onClick={() => { stopStream(); onClose(); }}
             aria-label="Close camera"
-            className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1"
+            className="w-11 h-11 flex items-center justify-center rounded-xl text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1"
           >
             <X size={18} />
           </button>
@@ -255,7 +255,7 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
 
           {/* GPS indicator + flip camera button */}
           {cameraState === "ready" && (
-            <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5">
+            <div className="absolute top-2 right-2 flex flex-col items-end gap-2.5">
               <button
                 onClick={flipCamera}
                 className="flex items-center gap-1 bg-black/60 hover:bg-black/80 text-white/70 hover:text-white px-2 py-1 rounded transition-colors"

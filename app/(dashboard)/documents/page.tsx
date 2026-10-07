@@ -542,7 +542,7 @@ export default function DocumentsPage() {
                   <Trash2 size={14} />
                 </button>
                 <button aria-label="Close" onClick={() => { setPreviewDoc(null); setShowVersions(false); }}
-                  className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+                  className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                   ✕
                 </button>
               </div>

@@ -409,7 +409,7 @@ export default function InvoicesPage() {
                 <h3 className="text-[15px] font-bold text-white">New Invoice</h3>
                 <p className="text-[11px] text-white/30 mt-0.5 font-mono">{nextNumber}</p>
               </div>
-              <button onClick={() => setShowModal(false)} aria-label="Close" className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1">
+              <button onClick={() => setShowModal(false)} aria-label="Close" className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all -mr-1">
                 <X size={16} />
               </button>
             </div>

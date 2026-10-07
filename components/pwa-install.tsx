@@ -150,7 +150,7 @@ export default function PwaInstall() {
             <p className="text-[12px] font-bold text-white">Install Constra</p>
             <p className="text-[10px] text-white/40 mt-0.5">Add to home screen for quick access</p>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2.5">
             <button onClick={handleInstall}
               className="text-[11px] font-bold text-black bg-amber-500 hover:bg-amber-400 px-2.5 py-1.5 rounded-lg transition-colors">
               Install

@@ -192,24 +192,24 @@ export default function TasksPage() {
               <div key={task.id} className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 overflow-hidden relative hover:border-white/[0.12]"
                 style={{ borderLeftColor: borderAccent, borderLeftWidth: 3 }}>
                 <div className="flex items-start gap-3 mb-3">
-                  <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} aria-label={`Status: ${cfg.label} — tap to cycle`} className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full -ml-1 -mt-1 active:bg-white/[0.06] transition-colors">
+                  <button onClick={() => cycleStatus(task.projectId, task.id, task.status)} aria-label={`Status: ${cfg.label} — tap to cycle`} className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full -ml-1 -mt-1 active:bg-white/[0.06] transition-colors">
                     <MIcon size={18} className={cfg.className} />
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-bold text-white leading-tight">{task.name}</p>
                     {mProject && (
-                      <div className="flex items-center gap-1.5 mt-1">
+                      <div className="flex items-center gap-3.5 mt-1">
                         <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: mProject.color }} />
                         <span className="text-[12px] text-amber-400/80">{mProject.name}</span>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <div className="flex items-center gap-3 flex-shrink-0">
                     {isOverdueMobile && <span className="text-[9px] font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded-full mr-1">OVERDUE</span>}
-                    <button aria-label="Edit" onClick={() => openEdit(task)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors">
+                    <button aria-label="Edit" onClick={() => openEdit(task)} className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-colors">
                       <Pencil size={13} />
                     </button>
-                    <button aria-label="Delete" onClick={() => handleDelete(task.projectId, task.id, task.name)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors">
+                    <button aria-label="Delete" onClick={() => handleDelete(task.projectId, task.id, task.name)} className="w-11 h-11 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-colors">
                       <Trash2 size={13} />
                     </button>
                   </div>
@@ -354,7 +354,7 @@ export default function TasksPage() {
               >
                 ↻
               </button>
-              <div className="flex items-center justify-end gap-1">
+              <div className="flex items-center justify-end gap-3">
                 <button aria-label="Edit" onClick={() => openEdit(task)}
                   className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-all">
                   <Pencil size={11} />
@@ -378,7 +378,7 @@ export default function TasksPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editTaskId ? "Edit Task" : "New Task"}</h3>
-              <button aria-label="Close" onClick={() => setShowModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button aria-label="Close" onClick={() => setShowModal(false)} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>

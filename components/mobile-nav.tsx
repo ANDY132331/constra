@@ -131,7 +131,7 @@ export function MobileNav() {
                 style={{ color: idle }}
               >
                 <Icon size={22} strokeWidth={1.6} />
-                <span className="text-[9px] font-semibold uppercase tracking-wider">{label}</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider">{label}</span>
               </button>
             );
           }
@@ -164,7 +164,7 @@ export function MobileNav() {
                 <Icon size={22} strokeWidth={active ? 2.2 : 1.6} />
               </span>
               <span
-                className="text-[9px] uppercase tracking-wider transition-all duration-150"
+                className="text-[11px] uppercase tracking-wider transition-all duration-150"
                 style={{ fontWeight: active ? 800 : 500 }}
               >
                 {label}

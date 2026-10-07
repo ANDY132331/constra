@@ -202,7 +202,7 @@ export default function BlueprintsPage() {
           <>
             <div className="w-px h-4 bg-white/10" />
             {/* Filter: type */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {(["all", "issue", "safety", "rfi", "info"] as const).map((t) => (
                 <button
                   key={t}
@@ -365,7 +365,7 @@ export default function BlueprintsPage() {
                         >
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-[10px] font-bold capitalize" style={{ color: COLOR }}>{pin.type}</span>
-                            <div className="flex gap-1">
+                            <div className="flex gap-2">
                               <button aria-label={pin.resolved ? "Reopen pin" : "Resolve pin"}
                                 onClick={() => { updateBlueprintPin(pin.id, { resolved: !pin.resolved }); toast.success(pin.resolved ? "Pin reopened" : "Pin resolved"); }}
                                 className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${pin.resolved ? "bg-white/[0.05] text-white/30" : "bg-green-500/15 text-green-400 hover:bg-green-500/25"}`}

@@ -282,7 +282,7 @@ export default function PhotosPage() {
           })}
         </div>
         {topTags.length > 0 && (
-          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4">
+          <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4">
             {topTags.map(([tag, count]) => (
               <button key={tag} onClick={() => setTagFilter(tagFilter === tag ? "" : tag)}
                 className={`flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full transition-colors ${tagFilter === tag ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-white/[0.04] text-white/35 border border-white/[0.05]"}`}>
@@ -341,7 +341,7 @@ export default function PhotosPage() {
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
                 placeholder="Search photos, tags…" value={search} onChange={(e) => setSearch(e.target.value)} maxLength={100} />
             </div>
-            <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-lg p-0.5 gap-0.5 ml-auto">
+            <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-lg p-0.5 gap-2 ml-auto">
               <button onClick={() => setView("grid")} title="Grid" className={`p-2 rounded-md transition-colors ${view === "grid" ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70"}`}>
                 <Grid3X3 size={13} />
               </button>
@@ -580,7 +580,7 @@ export default function PhotosPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">Upload Photos</h3>
-              <button aria-label="Close" onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button aria-label="Close" onClick={closeModal} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -595,7 +595,7 @@ export default function PhotosPage() {
                       <div key={i} className="relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-white/[0.08] bg-white/[0.03]">
                         {item.isImage
                           ? <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
-                          : <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-1"><Upload size={16} className="text-amber-400/80" /><p className="text-[8px] text-white/40 text-center truncate w-full">{item.name}</p></div>
+                          : <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-1"><Upload size={16} className="text-amber-400/80" /><p className="text-[10px] text-white/45 text-center truncate w-full">{item.name}</p></div>
                         }
                         <button aria-label="Remove photo" onClick={() => setPhotoItems((prev) => prev.filter((_, j) => j !== i))}
                           className="absolute top-1 right-1 w-5 h-5 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center">
@@ -694,13 +694,13 @@ export default function PhotosPage() {
               <X size={18} />
             </button>
             {lightboxIdx > 0 && (
-              <button aria-label="Previous" className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
+              <button aria-label="Previous" className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
                 onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i ?? 1) - 1); }}>
                 <ChevronLeft size={20} />
               </button>
             )}
             {lightboxIdx < filtered.length - 1 && (
-              <button aria-label="Next" className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
+              <button aria-label="Next" className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
                 onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i ?? 0) + 1); }}>
                 <ChevronRight size={20} />
               </button>

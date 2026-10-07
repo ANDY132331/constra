@@ -35,7 +35,9 @@
     ["p-queen", "Queen St Condo", "Northline Developments", "#3b82f6", 240000],
     ["p-harbour", "Harbourfront Fit-out", "Bayside Retail Co.", "#22c55e", 128000],
   ];
-  const base = s.projects[0] ?? {};
+  // The store may not have hydrated yet, so constra_v1 can be {} with no projects array.
+  // Reading s.projects[0] then throws and the whole seed fails with a confusing message.
+  const base = (Array.isArray(s.projects) && s.projects[0]) || {};
   s.projects = P.map(([id, name, client, color, budget]) => ({
     ...base, id, name, client, color, budget, status: "active",
     address: "Toronto, ON", startDate: at(7, 0, -28), endDate: at(17, 0, 60),

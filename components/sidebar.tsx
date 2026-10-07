@@ -160,7 +160,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
         <button
           onClick={onClose}
           aria-label="Close menu"
-          className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/5 active:bg-white/10 transition-all -mr-1"
+          className="lg:hidden w-11 h-11 flex items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/5 active:bg-white/10 transition-all -mr-1"
         >
           <X size={18} />
         </button>

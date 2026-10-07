@@ -103,7 +103,7 @@ function EditEntryModal({
             <h3 className="text-[15px] font-bold text-white">Edit Time Entry</h3>
             <p className="text-[11px] text-white/35 mt-0.5">{entry.workerName}</p>
           </div>
-          <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button aria-label="Close" onClick={onClose} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -206,7 +206,7 @@ function ProjectPickerModal({
             <h3 id="pick-project-title" className="text-[16px] font-bold text-white">Which site?</h3>
             <p className="text-[12px] text-white/40 mt-0.5 truncate">Clocking in {worker.name}</p>
           </div>
-          <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button aria-label="Close" onClick={onClose} className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={18} />
           </button>
         </div>
@@ -1111,7 +1111,7 @@ export default function TimeTrackingPage() {
 
                             {/* Name + project */}
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-2.5">
                                 {isLive && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0" />}
                                 <p className="text-[13px] font-bold text-white/85 truncate">{worker.name}</p>
                                 {worstSev && (
@@ -1534,7 +1534,7 @@ export default function TimeTrackingPage() {
                 <span className={`text-right text-[13px] font-bold ${entry.clockOut ? "text-white/70" : "text-amber-400"}`}>
                   {entry.clockOut ? `${hrs}h` : elapsed(entry.clockIn)}
                 </span>
-                <div className="flex items-center justify-end gap-1">
+                <div className="flex items-center justify-end gap-2">
                   {worstSeverity && (
                     <button
                       onClick={() => setFlagDetailId(flagDetailId === entry.id ? null : entry.id)}

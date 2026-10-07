@@ -257,13 +257,13 @@ export default function PunchListPage() {
                     </button>
                   )}
                   {canEdit && (
-                    <div className="flex items-center gap-1 ml-auto">
+                    <div className="flex items-center gap-3 ml-auto">
                       <button aria-label="Edit" onClick={() => openEdit(item)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
+                        className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
                       </button>
                       <button aria-label="Delete item" onClick={() => setDeleteConfirm(item.id)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        className="w-11 h-11 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                         <X size={13} />
                       </button>
                     </div>
@@ -469,7 +469,7 @@ export default function PunchListPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Item" : "Add Punch Item"}</h3>
-              <button aria-label="Close" onClick={() => { setShowModal(false); setEditId(null); }} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+              <button aria-label="Close" onClick={() => { setShowModal(false); setEditId(null); }} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>

@@ -352,7 +352,7 @@ export function AskConstra() {
 
               {/* Ask another question chips (after response) */}
               {response && !streaming && (
-                <div className="flex flex-wrap gap-1.5 mt-3">
+                <div className="flex flex-wrap gap-2.5 mt-3">
                   <button
                     onClick={() => { setResponse(""); setLastQuestion(null); setError(null); }}
                     className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white/50 bg-white/[0.04] hover:bg-white/[0.07] rounded-lg px-2 py-1 transition-colors"

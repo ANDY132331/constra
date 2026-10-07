@@ -592,7 +592,7 @@ export default function OnboardingPage() {
               const lvl = levels[Math.min(score, 4)];
               return (
                 <div className="mt-2">
-                  <div className="flex gap-1 mb-1">
+                  <div className="flex gap-2 mb-1">
                     {[1,2,3,4].map(i => (
                       <div key={i} className="h-1 flex-1 rounded-full transition-all" style={{ backgroundColor: i <= lvl.bars ? lvl.color : "rgba(255,255,255,0.08)" }} />
                     ))}

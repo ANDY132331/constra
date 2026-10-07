@@ -89,7 +89,7 @@ function HoursModal({
             <h3 className="text-[15px] font-bold text-white">Manage Hours</h3>
             <p className="text-[11px] text-white/40 mt-0.5">{worker.name}</p>
           </div>
-          <button aria-label="Close" onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+          <button aria-label="Close" onClick={onClose} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -104,7 +104,7 @@ function HoursModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mx-6 mt-5 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
+        <div className="flex gap-2 mx-6 mt-5 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1">
           {(["adjust", "history"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-[12px] font-bold transition-colors ${tab === t ? "bg-amber-500 text-black" : "text-white/35 hover:text-white/55"}`}>
@@ -509,19 +509,19 @@ export default function CrewPage() {
                     <span className="text-[11px] text-white/25 font-semibold tabular-nums flex-shrink-0 bg-white/[0.04] px-2 py-0.5 rounded-full">{workerHours}</span>
                   )}
                 </div>
-                <div className="flex items-center gap-0.5 flex-shrink-0 ml-2">
+                <div className="flex items-center gap-3 flex-shrink-0 ml-2">
                   {canEdit && isAdminOrAbove(currentUser.role) && (
-                    <button onClick={() => setHoursWorker(worker)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
+                    <button onClick={() => setHoursWorker(worker)} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 active:bg-white/5 transition-all" title="Manage Hours">
                       <Clock size={13} />
                     </button>
                   )}
                   {canEdit && (
                     <>
-                      <button aria-label="Edit" onClick={() => openEdit(worker)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
+                      <button aria-label="Edit" onClick={() => openEdit(worker)} className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
                       </button>
                       {worker.id !== currentUser.id && (
-                        <button aria-label="Delete" onClick={() => handleDelete(worker.id)} className="w-10 h-10 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
+                        <button aria-label="Delete" onClick={() => handleDelete(worker.id)} className="w-11 h-11 flex items-center justify-center rounded-full text-red-400/80 bg-red-500/[0.07] active:bg-red-500/15 transition-all">
                           <Trash2 size={13} />
                         </button>
                       )}
@@ -646,7 +646,7 @@ export default function CrewPage() {
                     <p className="text-[14px] font-bold text-white/90">{worker.name}</p>
                     <p className="text-[11px] text-white/40">{worker.customRole}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className="flex items-center gap-3.5 flex-shrink-0">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleCfg.className}`}>
                       {roleCfg.label}
                     </span>
@@ -687,7 +687,7 @@ export default function CrewPage() {
 
                 {/* Hours row */}
                 <div className="flex items-center justify-between mt-3">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2.5">
                     <Clock size={10} className="text-white/25" />
                     <span className="text-[11px] text-white/40">
                       {totalHours > 0 ? `${totalHours.toFixed(1)}h total` : "No hours logged"}
@@ -758,7 +758,7 @@ export default function CrewPage() {
           <div className="sheet bg-[#161616] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-8 flex flex-col items-center gap-5 w-full sm:w-72">
             <div className="flex items-center justify-between w-full">
               <h3 className="text-[15px] font-bold text-white">Invite Workers</h3>
-              <button aria-label="Close" onClick={() => setShowQR(false)} className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
+              <button aria-label="Close" onClick={() => setShowQR(false)} className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10">
                 <X size={16} />
               </button>
             </div>
@@ -782,7 +782,7 @@ export default function CrewPage() {
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/[0.06]">
               <h3 className="text-[15px] font-bold text-white">{editId ? "Edit Worker" : "Add Worker"}</h3>
               <button aria-label="Close" type="button" onClick={() => setShowModal(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
+                className="w-11 h-11 flex items-center justify-center rounded-full text-white/30 hover:text-white/70 hover:bg-white/5 active:bg-white/10 transition-all">
                 <X size={16} />
               </button>
             </div>

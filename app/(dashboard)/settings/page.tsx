@@ -785,7 +785,7 @@ function SettingsInner() {
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                         style={{ backgroundColor: roleColor + "18", color: roleColor }}>{worker.role}</span>
                     </div>
-                    <div className="flex items-center gap-1 justify-end">
+                    <div className="flex items-center gap-2 justify-end">
                       {!isMe ? (
                         <button onClick={() => handleKick(worker.id, worker.name)}
                           className="flex items-center gap-1 text-[11px] font-bold text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2 py-1 rounded-full transition-all">
@@ -858,7 +858,7 @@ function SettingsInner() {
                     ) : (
                       <>
                         <span className="text-[13px] text-white/70 flex-1">{role}</span>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-3">
                           <button aria-label="Edit" onClick={() => { setEditingRole(role); setEditRoleValue(role); }}
                             className="w-7 h-7 flex items-center justify-center text-white/40 bg-white/[0.04] active:bg-white/10 rounded-full transition-colors"><Edit2 size={10} /></button>
                           <button aria-label="Delete" onClick={() => setDeleteRoleConfirm(role)}
