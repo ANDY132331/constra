@@ -447,7 +447,7 @@ export default function InvoiceDetailPage() {
                         </td>
                         <td className="py-2.5 px-3 w-14">
                           <input
-                            type="number"
+                            type="number" inputMode="numeric"
                             className={ec("w-full text-center text-gray-500 text-[13px]")}
                             value={item.qty}
                             onChange={(e) => updItem(i, "qty", e.target.value)}
@@ -456,7 +456,7 @@ export default function InvoiceDetailPage() {
                         </td>
                         <td className="py-2.5 px-3 w-24">
                           <input
-                            type="number"
+                            type="number" inputMode="decimal"
                             className={ec("w-full text-right text-gray-500 text-[13px]")}
                             value={item.rate}
                             onChange={(e) => updItem(i, "rate", e.target.value)}
@@ -501,7 +501,7 @@ export default function InvoiceDetailPage() {
                   <span className="text-gray-500">Tax</span>
                   <div className="flex items-center gap-1.5">
                     <input
-                      type="number"
+                      type="number" inputMode="decimal"
                       className={ec("w-12 text-center text-gray-500 text-[12px]")}
                       value={draft.taxRate}
                       onChange={(e) => setDraft((d) => ({ ...d, taxRate: e.target.value }))}

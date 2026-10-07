@@ -595,7 +595,7 @@ export default function MaterialsPage() {
                     Quantity {selectedMaterial && <span className="text-white/25 normal-case font-normal">({selectedMaterial.unit})</span>}
                   </label>
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     min="0"
                     step="0.1"
                     value={quantity}

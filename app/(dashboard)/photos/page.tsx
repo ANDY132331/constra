@@ -184,11 +184,11 @@ export default function PhotosPage() {
         )}
         {/* Search */}
         <div className="px-4 mb-3">
-          <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3">
+          <label className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-4 py-3 cursor-text">
             <Search size={14} className="text-white/30" />
             <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
               placeholder="Search photos..." value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" spellCheck={false} maxLength={100} />
-          </div>
+          </label>
         </div>
         {/* Photo grid */}
         {filtered.length === 0 ? (
@@ -336,11 +336,11 @@ export default function PhotosPage() {
         {/* Main */}
         <div className="flex-1 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 flex-1 sm:max-w-64">
+            <label className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] rounded-lg px-3 py-2 flex-1 sm:max-w-64 cursor-text">
               <Search size={13} className="text-white/30" />
               <input className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1"
                 placeholder="Search photos, tags…" value={search} onChange={(e) => setSearch(e.target.value)} maxLength={100} />
-            </div>
+            </label>
             <div className="flex items-center bg-[#111111] border border-white/[0.06] rounded-lg p-0.5 gap-2 ml-auto">
               <button onClick={() => setView("grid")} title="Grid" className={`p-2 rounded-md transition-colors ${view === "grid" ? "bg-amber-500 text-black" : "text-white/40 hover:text-white/70"}`}>
                 <Grid3X3 size={13} />

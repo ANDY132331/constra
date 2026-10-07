@@ -283,6 +283,38 @@ function defaultState(): StoreState {
   };
 }
 
+// A project is expected to carry tasks[] and workerIds[]. One that does not — saved by an
+// older version, half-written by a failed sync, or returned by a query that did not join its
+// tasks — crashed the projects, dashboard, tasks and schedule screens outright on
+// `p.tasks.filter(...)`. Reproduced: adding a single project with no tasks array took down
+// four pages. Fixed where the data enters, so no screen has to defend itself.
+function normaliseProjects(projects: unknown): Project[] {
+  if (!Array.isArray(projects)) return [];
+  return projects.filter(Boolean).map((p) => {
+    const proj = p as Project;
+    const str = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
+    const num = (v: unknown, fallback = 0) => (Number.isFinite(v) ? (v as number) : fallback);
+    return {
+      ...proj,
+      // Arrays the screens iterate without checking
+      tasks: Array.isArray(proj.tasks) ? proj.tasks.filter(Boolean) : [],
+      workerIds: Array.isArray(proj.workerIds) ? proj.workerIds.filter(Boolean) : [],
+      // Strings the screens call methods on — a missing address crashed the dashboard on
+      // `project.address.split(",")`
+      name: str(proj.name, "Untitled project"),
+      client: str(proj.client),
+      address: str(proj.address),
+      color: str(proj.color, "#F5C400"),
+      managerId: str(proj.managerId),
+      status: proj.status === "upcoming" || proj.status === "completed" ? proj.status : "active",
+      // Numbers that feed arithmetic and would otherwise print as NaN
+      progress: num(proj.progress),
+      budget: num(proj.budget),
+      spent: num(proj.spent),
+    };
+  });
+}
+
 function loadState(): StoreState {
   if (typeof window === "undefined") return defaultState();
   try {
@@ -297,6 +329,9 @@ function loadState(): StoreState {
       onboarded: parsed.onboarded ?? false,
       companyId: parsed.companyId ?? null,
       authUserId: parsed.authUserId ?? null,
+      projects: normaliseProjects(parsed.projects),
+      workers: Array.isArray(parsed.workers) ? parsed.workers.filter(Boolean) : [],
+      clockEntries: Array.isArray(parsed.clockEntries) ? parsed.clockEntries.filter(Boolean) : [],
       hoursAdjustments: parsed.hoursAdjustments ?? [],
       materialTypes: parsed.materialTypes ?? [],
       materialEntries: parsed.materialEntries ?? [],

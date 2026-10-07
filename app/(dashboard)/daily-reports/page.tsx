@@ -242,7 +242,7 @@ export default function DailyReportsPage() {
             </div>
 
             {/* Search */}
-            <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-2xl">
+            <label className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-2xl cursor-text">
               <Search size={14} className="text-white/30 flex-shrink-0" />
               <input
                 className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
@@ -251,7 +251,7 @@ export default function DailyReportsPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 autoComplete="off" spellCheck={false}
               />
-            </div>
+            </label>
 
             {/* Project filter */}
             <div className="px-5 mb-4">
@@ -344,7 +344,7 @@ export default function DailyReportsPage() {
           <div className={`flex flex-col ${selected ? "hidden lg:flex" : "flex"} w-full lg:w-[360px] lg:min-w-[360px] border-r border-white/[0.06]`}>
         {/* Toolbar */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-          <div className="flex-1 flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
+          <label className="flex-1 flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2 cursor-text">
             <Search size={13} className="text-white/30 flex-shrink-0" />
             <input
               className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/25 outline-none"
@@ -353,7 +353,7 @@ export default function DailyReportsPage() {
               onChange={(e) => setSearch(e.target.value)}
               autoComplete="off" spellCheck={false}
             />
-          </div>
+          </label>
           <button
             onClick={() => { setForm(emptyForm()); setShowForm(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-2 rounded-full transition-colors flex-shrink-0"
@@ -571,11 +571,11 @@ export default function DailyReportsPage() {
                 </div>
                 <div>
                   <label className={lbl}>Temp ({unit})</label>
-                  <input className={inp} type="number" placeholder={metric ? "18" : "65"} value={form.temperatureF} onChange={(e) => setForm((f) => ({ ...f, temperatureF: e.target.value }))} />
+                  <input className={inp} type="number" inputMode="decimal" placeholder={metric ? "18" : "65"} value={form.temperatureF} onChange={(e) => setForm((f) => ({ ...f, temperatureF: e.target.value }))} />
                 </div>
                 <div>
                   <label className={lbl}>Crew Count</label>
-                  <input className={inp} type="number" min="0" placeholder="0" value={form.crewCount} onChange={(e) => setForm((f) => ({ ...f, crewCount: e.target.value }))} />
+                  <input className={inp} type="number" inputMode="numeric" min="0" placeholder="0" value={form.crewCount} onChange={(e) => setForm((f) => ({ ...f, crewCount: e.target.value }))} />
                 </div>
               </div>
               <div>

@@ -405,7 +405,7 @@ export default function InsurancePage() {
                 </div>
                 <div>
                   <label className={lbl}>Coverage Amount</label>
-                  <input value={form.coverageAmount} onChange={(e) => f("coverageAmount", e.target.value)} placeholder="2000000" type="number" min="0" className={inp} />
+                  <input value={form.coverageAmount} onChange={(e) => f("coverageAmount", e.target.value)} placeholder="2000000" type="number" inputMode="decimal" min="0" className={inp} />
                 </div>
               </div>
 

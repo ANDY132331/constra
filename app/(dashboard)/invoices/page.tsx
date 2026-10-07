@@ -212,7 +212,7 @@ export default function InvoicesPage() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.06] mx-5 mb-3 px-3.5 py-3 rounded-2xl">
+        <label className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.06] mx-5 mb-3 px-3.5 py-3 rounded-2xl cursor-text">
           <Search size={14} className="text-white/30 flex-shrink-0" />
           <input
             className="bg-transparent text-[13px] text-white/80 placeholder:text-white/30 outline-none flex-1"
@@ -221,7 +221,7 @@ export default function InvoicesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </div>
+        </label>
 
         {/* Status filter pills */}
         <div className="flex gap-2 px-5 pb-3 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
@@ -340,7 +340,7 @@ export default function InvoicesPage() {
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Search + filter */}
           <div className="px-3 py-3 border-b border-white/[0.05] space-y-2 flex-shrink-0">
-            <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
+            <label className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2 cursor-text">
               <Search size={13} className="text-white/30 flex-shrink-0" />
               <input
                 className="bg-transparent text-[12px] text-white/70 placeholder:text-white/25 outline-none flex-1 min-w-0"
@@ -349,7 +349,7 @@ export default function InvoicesPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 maxLength={100}
               />
-            </div>
+            </label>
             <div className="flex gap-1 overflow-x-auto pb-0.5">
               {TABS.map((tab) => (
                 <button
@@ -475,12 +475,12 @@ export default function InvoicesPage() {
                       <div className="flex gap-2 sm:contents">
                         <div className="flex-1">
                           <p className="text-[9px] font-bold text-white/25 uppercase tracking-wider mb-1 sm:hidden">Qty</p>
-                          <input className={inp} type="number" min="0" placeholder="1" value={item.qty}
+                          <input className={inp} type="number" inputMode="numeric" min="0" placeholder="1" value={item.qty}
                             onChange={(e) => updateItem(idx, "qty", e.target.value)} />
                         </div>
                         <div className="flex-1">
                           <p className="text-[9px] font-bold text-white/25 uppercase tracking-wider mb-1 sm:hidden">Rate ($)</p>
-                          <input className={inp} type="number" placeholder="0.00" value={item.rate}
+                          <input className={inp} type="number" inputMode="decimal" placeholder="0.00" value={item.rate}
                             onChange={(e) => updateItem(idx, "rate", e.target.value)} />
                         </div>
                         <button aria-label="Remove line item" onClick={() => removeItem(idx)} className="self-end text-white/20 hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10">
@@ -495,7 +495,7 @@ export default function InvoicesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Tax Rate (%)</label>
-                  <input className={inp} type="number" placeholder="13" min="0" max="100" step="0.01" value={form.taxRate}
+                  <input className={inp} type="number" inputMode="decimal" placeholder="13" min="0" max="100" step="0.01" value={form.taxRate}
                     onChange={(e) => setForm((f) => ({ ...f, taxRate: e.target.value }))} />
                 </div>
                 <div className="flex flex-col justify-end">

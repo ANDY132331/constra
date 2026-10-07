@@ -129,7 +129,7 @@ function HoursModal({
 
             <div>
               <label className={lbl}>Hours to {mode === "add" ? "Add" : "Remove"}</label>
-              <input className={inp} type="number" min="0.1" step="0.5" placeholder="e.g. 8"
+              <input className={inp} type="number" inputMode="decimal" min="0.1" step="0.5" placeholder="e.g. 8"
                 value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
 
@@ -449,7 +449,7 @@ export default function CrewPage() {
 
       {/* Search */}
       <div className="px-5 mb-4">
-        <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3 focus-within:border-amber-500/30 transition-colors">
+        <label className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3 focus-within:border-amber-500/30 transition-colors cursor-text">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30 flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input
             placeholder="Search crew..."
@@ -458,7 +458,7 @@ export default function CrewPage() {
             autoComplete="off" spellCheck={false} maxLength={100}
             className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
           />
-        </div>
+        </label>
       </div>
 
       {/* Worker list */}
@@ -853,7 +853,7 @@ export default function CrewPage() {
 
               <div>
                 <label className={lbl}>Hourly Rate ({getCurrencySymbol(currency)})</label>
-                <input className={inp} type="number" min="0" placeholder="0"
+                <input className={inp} type="number" inputMode="decimal" min="0" placeholder="0"
                   value={form.hourlyRate} onChange={(e) => setForm((f) => ({ ...f, hourlyRate: e.target.value }))} />
               </div>
 

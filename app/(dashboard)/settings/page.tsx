@@ -538,7 +538,7 @@ function SettingsInner() {
                 </div>
                 <div>
                   <label className={lbl}>Default Tax Rate (%)</label>
-                  <input className={inp} type="number" min="0" max="100" step="0.01" value={companyForm.taxRate}
+                  <input className={inp} type="number" inputMode="decimal" min="0" max="100" step="0.01" value={companyForm.taxRate}
                     placeholder="13"
                     onChange={(e) => setCompanyForm((f) => ({ ...f, taxRate: e.target.value }))} />
                   <p className="text-[10px] text-white/25 mt-1">Pre-fills new invoices &amp; estimates — still editable per document.</p>
@@ -602,7 +602,7 @@ function SettingsInner() {
                     <label className={lbl}>Daily Threshold (hrs)</label>
                     <input
                       className={inp}
-                      type="number"
+                      type="number" inputMode="numeric"
                       min="1"
                       step="0.5"
                       value={overtimeForm.dailyThreshold}
@@ -615,7 +615,7 @@ function SettingsInner() {
                     <label className={lbl}>Weekly Threshold (hrs)</label>
                     <input
                       className={inp}
-                      type="number"
+                      type="number" inputMode="numeric"
                       min="1"
                       step="0.5"
                       value={overtimeForm.weeklyThreshold}
@@ -628,7 +628,7 @@ function SettingsInner() {
                     <label className={lbl}>Overtime Multiplier</label>
                     <input
                       className={inp}
-                      type="number"
+                      type="number" inputMode="numeric"
                       min="1"
                       step="0.25"
                       value={overtimeForm.multiplier}

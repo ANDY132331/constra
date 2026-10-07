@@ -317,7 +317,7 @@ export default function ProjectsPage() {
 
         {/* Search + filter */}
         <div className="px-5 mb-4 space-y-2.5">
-          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-2xl px-3.5 py-3">
+          <label className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-2xl px-3.5 py-3 cursor-text">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30 flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input
               className="bg-transparent text-[14px] text-white/80 placeholder:text-white/30 outline-none flex-1"
@@ -326,7 +326,7 @@ export default function ProjectsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-          </div>
+          </label>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             {["all", "active", "upcoming", "completed"].map((s) => (
               <button
@@ -900,7 +900,7 @@ export default function ProjectsPage() {
                 </div>
                 <div>
                   <label className={mLbl}>Budget ({currency})</label>
-                  <input className={mInp} type="number" min="0" placeholder="0"
+                  <input className={mInp} type="number" inputMode="decimal" min="0" placeholder="0"
                     value={form.budget} onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
                 </div>
                 <div>
@@ -1095,7 +1095,7 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Budget ({currency})</label>
-                  <input className={inp} type="number" min="0" placeholder="0"
+                  <input className={inp} type="number" inputMode="decimal" min="0" placeholder="0"
                     value={form.budget} onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
                 </div>
                 <div>

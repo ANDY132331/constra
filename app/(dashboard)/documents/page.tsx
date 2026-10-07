@@ -280,7 +280,7 @@ export default function DocumentsPage() {
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-xl">
+        <label className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] mx-5 mb-4 px-3.5 py-3 rounded-xl cursor-text">
           <Search size={14} className="text-white/30" />
           <input
             value={searchQuery}
@@ -289,7 +289,7 @@ export default function DocumentsPage() {
             autoComplete="off" spellCheck={false} maxLength={100}
             className="bg-transparent text-[13px] text-white/70 placeholder:text-white/25 outline-none flex-1"
           />
-        </div>
+        </label>
 
         {/* Category filter pills */}
         <div className="flex gap-2 px-4 pb-3 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">

@@ -217,11 +217,11 @@ export default function ChangeOrdersPage() {
               </div>
             </div>
             <div className="px-5 mb-4">
-              <div className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-2xl px-3.5 py-3">
+              <label className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-2xl px-3.5 py-3 cursor-text">
                 <Search size={14} className="text-white/30 flex-shrink-0" />
                 <input className="flex-1 bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none"
                   placeholder="Search change orders…" value={search} onChange={(e) => setSearch(e.target.value)} maxLength={100} />
-              </div>
+              </label>
             </div>
             <div className="flex gap-2 px-5 mb-4 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
               {(["all", "pending", "approved", "rejected", "void"] as const).map((s) => (
@@ -346,7 +346,7 @@ export default function ChangeOrdersPage() {
       <div className={`flex flex-col ${selected ? "hidden lg:flex" : "flex"} w-full lg:w-[380px] lg:min-w-[380px] border-r border-white/[0.06]`}>
         {/* Toolbar */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-          <div className="flex-1 flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2">
+          <label className="flex-1 flex items-center gap-2 bg-white/[0.04] rounded-lg px-3 py-2 cursor-text">
             <Search size={13} className="text-white/30 flex-shrink-0" />
             <input
               className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/25 outline-none"
@@ -355,7 +355,7 @@ export default function ChangeOrdersPage() {
               onChange={(e) => setSearch(e.target.value)}
               autoComplete="off" spellCheck={false} maxLength={100}
             />
-          </div>
+          </label>
           <button
             onClick={openNew}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold px-3 py-2 rounded-full transition-colors flex-shrink-0"
@@ -584,7 +584,7 @@ export default function ChangeOrdersPage() {
               </div>
               <div>
                 <label className={lbl}>Amount ({getCurrencySymbol(currency as never)})</label>
-                <input className={inp} type="number" placeholder="0.00" step="0.01" value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} />
+                <input className={inp} type="number" inputMode="decimal" placeholder="0.00" step="0.01" value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} />
               </div>
               <div>
                 <label className={lbl}>Description</label>

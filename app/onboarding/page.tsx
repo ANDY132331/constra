@@ -434,7 +434,7 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2">
+          <label className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 cursor-text">
             <Search size={13} className="text-white/30" />
             <input
               className="bg-transparent text-[13px] text-white placeholder:text-white/20 outline-none flex-1"
@@ -442,7 +442,7 @@ export default function OnboardingPage() {
               value={countrySearch}
               onChange={(e) => setCountrySearch(e.target.value)}
             />
-          </div>
+          </label>
 
           <div className="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
             {filteredCountries.map((c) => (
@@ -485,7 +485,7 @@ export default function OnboardingPage() {
 
           <div>
             <label htmlFor="ob-industry-487" className={lbl}>Industry</label>
-            <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 mb-2">
+            <label className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 mb-2 cursor-text">
               <Briefcase size={13} className="text-white/30" />
               <input id="ob-industry-487"
                 className="bg-transparent text-[12px] text-white placeholder:text-white/20 outline-none flex-1"
@@ -493,7 +493,7 @@ export default function OnboardingPage() {
                 value={industrySearch}
                 onChange={(e) => setIndustrySearch(e.target.value)}
               />
-            </div>
+            </label>
             <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto">
               {filteredIndustries.map((ind) => (
                 <button key={ind} onClick={() => setIndustryVal(ind)}

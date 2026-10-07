@@ -165,7 +165,7 @@ export default function EquipmentPage() {
 
         {/* Search */}
         <div className="px-5 mb-4">
-          <div className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3">
+          <label className="flex items-center gap-2.5 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3 cursor-text">
             <Search size={14} className="text-white/30 flex-shrink-0" />
             <input
               className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1"
@@ -174,7 +174,7 @@ export default function EquipmentPage() {
               onChange={(e) => setSearch(e.target.value)}
               autoComplete="off" spellCheck={false} maxLength={100}
             />
-          </div>
+          </label>
         </div>
 
         {/* Equipment cards */}
@@ -426,7 +426,7 @@ export default function EquipmentPage() {
                 </div>
                 <div>
                   <label className={lbl}>Daily Rate ({currency})</label>
-                  <input className={inp} type="number" min="0" placeholder="0"
+                  <input className={inp} type="number" inputMode="decimal" min="0" placeholder="0"
                     value={form.dailyRate} onChange={(e) => setForm((f) => ({ ...f, dailyRate: e.target.value }))} />
                 </div>
               </div>

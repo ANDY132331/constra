@@ -465,7 +465,7 @@ export default function BudgetPage() {
                 <div>
                   <label className={lbl}>Budgeted ($)</label>
                   <input
-                    type="number"
+                    type="number" inputMode="decimal"
                     min="0"
                     step="0.01"
                     className={inp}
@@ -477,7 +477,7 @@ export default function BudgetPage() {
                 <div>
                   <label className={lbl}>Actual ($)</label>
                   <input
-                    type="number"
+                    type="number" inputMode="numeric"
                     min="0"
                     step="0.01"
                     className={inp}
