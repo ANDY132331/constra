@@ -638,8 +638,20 @@ export default function TimeTrackingPage() {
       ["Worker", "Role", "Project", "Date", "Clock In", "Clock Out", "Hours"],
     ];
     const fmt12 = (d: Date | string) => new Date(d).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-    clockEntries
-      .filter((e) => e.clockOut && new Date(e.clockOut).getTime() !== 0)
+    // A shift still running has no clock-out, so it cannot be exported as hours worked.
+    // That is correct, but it used to happen silently: export at 3pm with the crew on site
+    // and the file quietly came back without them.
+    const done = clockEntries.filter((e) => e.clockOut && new Date(e.clockOut).getTime() !== 0);
+    const stillOn = clockEntries.length - done.length;
+    if (done.length === 0) {
+      toast.error(
+        stillOn > 0
+          ? "Nothing to export yet — every shift is still running. Clock out first."
+          : "Nothing to export yet — no completed shifts.",
+      );
+      return;
+    }
+    done
       .sort((a, b) => new Date(b.clockIn).getTime() - new Date(a.clockIn).getTime())
       .forEach((e) => {
         const w = getWorkerById(e.workerId);
@@ -665,7 +677,11 @@ export default function TimeTrackingPage() {
     a.download = `constra-time-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("CSV exported");
+    toast.success(
+      stillOn > 0
+        ? `Exported ${done.length} ${done.length === 1 ? "entry" : "entries"} — ${stillOn} still on site, not included`
+        : `Exported ${done.length} ${done.length === 1 ? "entry" : "entries"}`,
+    );
   };
 
   const allEntries = [

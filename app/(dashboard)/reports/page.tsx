@@ -189,7 +189,17 @@ export default function ReportsPage() {
       return;
     }
     exportPayroll(adapterId, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings);
-    toast.success("Payroll exported");
+    // A shift with no clock-out has no hours to pay yet, so it is left out of both the
+    // figures on screen and the file. Say so, or running Friday payroll quietly short-pays
+    // whoever is still on site.
+    const running = clockEntries.filter(
+      (e) => !e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd,
+    ).length;
+    toast.success(
+      running > 0
+        ? `Payroll exported — ${running} ${running === 1 ? "shift is" : "shifts are"} still running and not included`
+        : "Payroll exported",
+    );
     setExportMenuOpen(false);
   }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings]);
 
