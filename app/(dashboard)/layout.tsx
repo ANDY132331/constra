@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { SearchModal } from "@/components/search-modal";
 import { EscapeToClose } from "@/components/escape-to-close";
+import { DialogSemantics } from "@/components/dialog-semantics";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineBanner } from "@/components/offline-banner";
 import { NotifPermissionPrompt } from "@/components/notif-permission-prompt";
@@ -174,6 +175,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
               <ErrorBoundary fallback={null}><AIChatWidget /></ErrorBoundary>
               <ErrorBoundary fallback={null}><SearchModal /></ErrorBoundary>
               <EscapeToClose />
+              <DialogSemantics />
               <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>
               <ErrorBoundary fallback={null}><NotifPermissionPrompt /></ErrorBoundary>
             </div>
