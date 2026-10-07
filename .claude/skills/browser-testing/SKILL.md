@@ -83,6 +83,34 @@ motion-related through Playwright, which stays visible.
 claims, measure with `getBoundingClientRect` / `getComputedStyle`, or sample pixels with
 `sharp`, rather than judging by eye from one frame.
 
+**`getComputedStyle` hands back `oklab()`, not `rgb()`.** Tailwind v4 emits colours in oklab,
+so `color` reads as `oklab(0.999994 0.0000455 0.00002 / 0.5)`. Pulling the numbers out with a
+regex treats lightness as red: pure white becomes near-black. This produced a contrast audit
+claiming the entire sidebar sat at 1.08:1 on every page — 21 pages of confident nonsense.
+Resolve every colour through a canvas instead, which normalises any CSS colour syntax:
+
+```js
+const cx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+const rgba = (css) => { cx.clearRect(0,0,1,1); cx.fillStyle = css; cx.fillRect(0,0,1,1);
+  const d = cx.getImageData(0,0,1,1).data; return [d[0], d[1], d[2], d[3]/255]; };
+```
+
+Then sanity-check one finding by hand before believing a sweep. A ratio near 1.0 usually means
+the probe resolved the wrong background, not that the app ships invisible text.
+
+**Selectors match the chrome as well as the page.** The header carries its own "+ New"
+dropdown, so a text-matched locator finds it on every page and reports that each page's create
+button "opened nothing". Scope to `main`, and exclude the control you know is global.
+
+**Hidden copies are not the only reason an element is unreachable.** Besides `:visible`, check
+the element is the topmost thing at its own coordinates before judging it — otherwise closed
+dropdowns and panels behind a scrim get counted as on-screen:
+
+```js
+const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+const reallyVisible = top === el || el.contains(top) || top.contains(el);
+```
+
 ## Measuring instead of eyeballing
 
 ```js

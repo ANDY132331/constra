@@ -51,11 +51,23 @@ buttons. Unusable in gloves, invisible to a screen reader.
 Check: every visible button/link ≥36×36px and has a non-empty accessible name.
 
 ### 6. Dialog behaviour
-Each dialog needs: `role="dialog"` + `aria-modal`, Escape to dismiss, backdrop click to
-dismiss, focus starting on the safe choice (Cancel, not Delete).
+Every modal here is hand-rolled from a stacked full-screen layer plus a `.sheet` panel, and
+for a long time not one of them was a dialog to assistive tech: no `role`, no `aria-modal`,
+no name, and focus left on the button behind the overlay.
 
-One caveat learned the hard way: **Escape must not discard typed work.** `escape-to-close.tsx`
-ignores Escape once someone has typed into the dialog.
+Two global components now cover this by finding panels by shape, so **do not hand-roll these
+per dialog** — a new modal is covered automatically:
+- `escape-to-close.tsx` — Escape presses the panel's own close control. Learned the hard way:
+  **Escape must not discard typed work**, so it backs off once someone has typed.
+- `dialog-semantics.tsx` — role, `aria-modal`, a name from the panel's own heading, focus
+  moved to the first real field, Tab trapped inside, focus restored on close.
+
+Two things that version caught only by testing: landing focus on a leading **Close** button
+reads as if the dialog is already over (skip it), and React often re-creates the trigger while
+the dialog is open, so restoring focus to a saved element reference drops you at the top of
+the document — match the replacement by accessible name instead.
+
+Check: open a dialog, press Tab 40 times, and assert focus never leaves it.
 
 ### 7. Contrast in both themes
 A colour that reads on dark can vanish on light. Faint text (`text-white/10`–`/45`) and yellow
@@ -75,6 +87,31 @@ Show an "Unsaved changes" indicator and use `lib/use-unsaved-guard.ts`.
 Money and durations need guards: shift length can never be negative (a phone clock running
 ahead once produced "-6h -32m" and subtracted from payroll); a missing rate must read as $0
 and be flagged, not NaN; line totals must sum to the printed total (`lib/money.ts`).
+
+### 11. Colours the theme layer cannot reach
+Light mode works by remapping classes in `globals.css`. Two things escape it:
+- **Inline `style={{ color: "#F5C400" }}`.** No rule can override it, so hi-vis yellow stayed
+  on a light card at 1.49:1 — invisible. Use a class; the remap handles the rest.
+- **Classes with no mapping.** `text-white/*` was remapped but the `-300/-400` accents were
+  not, so every coloured number kept dark-mode brightness on the light ground: the revenue
+  figure at 1.5:1, "Clocked In" at 1.6:1.
+
+Also beware a mapping that *looks* right: `text-white/50` → `rgba(0,0,0,0.50)` is a literal
+alpha swap, not an equivalent. White at 50% on near-black reads fine; black at 50% on the
+`#E7E5E0` ground is 3.8:1. Measure the real ground and solve for the alpha that clears 4.5:1.
+
+Check: grep for `style={{ color` and for accent classes with no `[data-theme="light"]` rule.
+
+### 12. Exports that quietly leave rows out
+Both time and payroll exports filter to shifts with a clock-out — correct, since a running
+shift has no hours to pay — but they did it silently. Exporting at 3pm with four people on
+site produced a file missing all four under a toast reading "CSV exported". On a Friday that
+is four people short-paid.
+
+A filtered export must say what it dropped and why. Same for a header-only file: say there is
+nothing to export rather than handing over an empty one.
+
+Check: seed running shifts, export, and read the toast.
 
 ## How to sweep
 
