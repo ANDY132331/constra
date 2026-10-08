@@ -21,6 +21,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
+import { useProjectSpend } from "@/lib/project-spend";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -190,7 +191,8 @@ function WorkerCard({ worker }: { worker: Worker }) {
 // ── Project card ───────────────────────────────────────────────────────────────
 
 function ProjectStatusCard({ project, currency, showFinancials }: { project: Project; currency: string; showFinancials: boolean }) {
-  const spent = project.spent;
+  const spendOf = useProjectSpend();
+  const spent = spendOf(project).total;
   const budget = project.budget;
   const overBudget = spent > budget;
   const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
@@ -293,6 +295,7 @@ function ShareNudge() {
 }
 
 export default function DashboardPage() {
+  const spendOf = useProjectSpend();
   const {
     workers, projects, punchItems, clockEntries, activityFeed,
     currentUser, getWorkerById, getProjectById, currency,
@@ -947,7 +950,7 @@ export default function DashboardPage() {
               const doneTasks = p.tasks.filter((t) => t.status === "completed").length;
               const totalTasks = p.tasks.length;
               const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-              const budgetPct = p.budget > 0 ? Math.min(100, Math.round((p.spent / p.budget) * 100)) : 0;
+              const budgetPct = p.budget > 0 ? Math.min(100, Math.round((spendOf(p).total / p.budget) * 100)) : 0;
               const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
               const daysLeft = Math.ceil((new Date(p.endDate).getTime() - Date.now()) / 86400000);
               return (
@@ -1098,11 +1101,11 @@ export default function DashboardPage() {
           </div>
           <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 space-y-4">
             {activeProjects.filter((p) => p.budget > 0).map((p) => {
-              const committed = p.committed ?? p.spent;
-              const forecast = p.forecast ?? p.spent;
+              const committed = p.committed ?? spendOf(p).total;
+              const forecast = p.forecast ?? spendOf(p).total;
               const variance = p.budget - forecast;
               const overBudget = variance < 0;
-              const spentPct = Math.min(100, (p.spent / p.budget) * 100);
+              const spentPct = Math.min(100, (spendOf(p).total / p.budget) * 100);
               const commitPct = Math.min(100, (committed / p.budget) * 100);
               const forecastPct = Math.min(100, (forecast / p.budget) * 100);
               return (
@@ -1122,7 +1125,7 @@ export default function DashboardPage() {
                     <div className="absolute inset-y-0 w-0.5 rounded-full" style={{ left: `${Math.min(99, forecastPct)}%`, background: overBudget ? "#ef4444" : "rgba(255,255,255,0.5)" }} />
                   </div>
                   <div className="flex justify-between mt-1 text-[9px] text-white/25">
-                    <span>Spent {formatCurrencyCompact(p.spent, currency as never)}</span>
+                    <span>Spent {formatCurrencyCompact(spendOf(p).total, currency as never)}</span>
                     <span>Budget {formatCurrencyCompact(p.budget, currency as never)}</span>
                   </div>
                 </div>
@@ -1566,12 +1569,12 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-4">
             {activeProjects.filter((p) => p.budget > 0).map((p) => {
-              const committed = p.committed ?? p.spent;
-              const forecast = p.forecast ?? p.spent;
+              const committed = p.committed ?? spendOf(p).total;
+              const forecast = p.forecast ?? spendOf(p).total;
               const variance = p.budget - forecast;
               const overBudget = variance < 0;
               const commitPct = Math.min(100, (committed / p.budget) * 100);
-              const spentPct = Math.min(100, (p.spent / p.budget) * 100);
+              const spentPct = Math.min(100, (spendOf(p).total / p.budget) * 100);
               const forecastPct = Math.min(100, (forecast / p.budget) * 100);
               return (
                 <div key={p.id}>
@@ -1597,7 +1600,7 @@ export default function DashboardPage() {
                     <div className="absolute inset-y-0 w-0.5 rounded-full" style={{ left: `${Math.min(99, forecastPct)}%`, background: overBudget ? "#ef4444" : "rgba(255,255,255,0.5)" }} />
                   </div>
                   <div className="flex gap-4 mt-1.5 text-[10px] text-white/25">
-                    <span>Spent {formatCurrencyCompact(p.spent, currency as never)}</span>
+                    <span>Spent {formatCurrencyCompact(spendOf(p).total, currency as never)}</span>
                     <span>Committed {formatCurrencyCompact(committed, currency as never)}</span>
                     <span style={{ color: overBudget ? "#ef4444" : "#22c55e" }}>Forecast {formatCurrencyCompact(forecast, currency as never)}</span>
                   </div>

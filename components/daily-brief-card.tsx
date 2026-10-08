@@ -7,6 +7,7 @@ import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
 import { generateBrief, type BriefPayload } from "@/lib/daily-brief";
 import { isOutstanding, isOverdue } from "@/lib/invoice-status";
+import { useProjectSpend } from "@/lib/project-spend";
 
 function parseBold(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -72,6 +73,7 @@ function runShared(payload: BriefPayload) {
 }
 
 export function DailyBriefCard() {
+  const spendOf = useProjectSpend();
   const { workers, projects, punchItems, safetyIncidents, companyName, invoices } = useStore();
   const [{ text, loading, error, at: generatedAt }, setBrief] = useState<BriefState>(shared);
   const [collapsed, setCollapsed] = useState(false);
@@ -103,7 +105,7 @@ export function DailyBriefCard() {
         const tasksOverdue = p.tasks.filter(
           (t) => t.status !== "completed" && new Date(t.endDate) < now
         ).length;
-        const budgetPct = p.budget > 0 ? Math.round((p.spent / p.budget) * 100) : null;
+        const budgetPct = p.budget > 0 ? Math.round((spendOf(p).total / p.budget) * 100) : null;
         return { name: p.name, progress: p.progress, tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
       });
 
@@ -155,7 +157,7 @@ export function DailyBriefCard() {
       overdueInvoices,
       overBudgetProjects: overBudgetProjects.map((p) => ({ name: p.name, budgetPct: p.budgetPct })),
     };
-  }, [workers, projects, punchItems, safetyIncidents, companyName, invoices]);
+  }, [workers, projects, punchItems, safetyIncidents, companyName, invoices, spendOf]);
 
   // Regenerate is an explicit user action, so it always starts a fresh run.
   const generate = useCallback(() => runShared(buildPayload()), [buildPayload]);

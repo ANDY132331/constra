@@ -15,6 +15,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { EmptyState } from "@/components/empty-state";
 import { toLocalDateString } from "@/lib/utils";
+import { useProjectSpend } from "@/lib/project-spend";
 
 type View = "gantt" | "table" | "cards" | "map";
 
@@ -52,6 +53,7 @@ const blank: FormState = {
 };
 
 export default function ProjectsPage() {
+  const spendOf = useProjectSpend();
   const { projects, workers, addProject, updateProject, deleteProject, approveProject, getWorkerById, currency, currentUser, updateTask } = useStore();
   const isAdmin = isAdminOrAbove(currentUser.role);
   const isForeman = isForemanOrAbove(currentUser.role);
@@ -560,7 +562,7 @@ export default function ProjectsPage() {
                 <span>Progress</span><span>Budget</span><span>Deadline</span><span className="text-center">Team</span><span></span>
               </div>
               {filtered.map((project) => {
-                const overBudget = project.spent > project.budget;
+                const overBudget = spendOf(project).total > project.budget;
                 return (
                   <div key={project.id} className="grid items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
                     style={{ gridTemplateColumns: "2fr 1fr 80px 120px 100px 100px 80px 64px" }}>
@@ -585,7 +587,7 @@ export default function ProjectsPage() {
                     </div>
                     <div>
                       <p className={`text-[12px] font-semibold ${overBudget ? "text-red-400" : "text-white/70"}`}>
-                        {formatCurrencyCompact(project.spent, currency as never)}
+                        {formatCurrencyCompact(spendOf(project).total, currency as never)}
                       </p>
                       <p className="text-[10px] text-white/25">/ {formatCurrencyCompact(project.budget, currency as never)}</p>
                     </div>
@@ -644,8 +646,8 @@ export default function ProjectsPage() {
               {filtered.map((project) => {
                 const manager = getWorkerById(project.managerId);
                 const activeTasks = project.tasks.filter((t) => t.status === "in-progress").length;
-                const overBudget = project.spent > project.budget;
-                const budgetPct = project.budget > 0 ? Math.min(100, (project.spent / project.budget) * 100) : 0;
+                const overBudget = spendOf(project).total > project.budget;
+                const budgetPct = project.budget > 0 ? Math.min(100, (spendOf(project).total / project.budget) * 100) : 0;
                 return (
                   <div key={project.id} onClick={() => openEdit(project)} className="bg-[#111111] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-white/10 transition-colors group cursor-pointer">
                     <div className="h-1" style={{ backgroundColor: project.color }} />
@@ -700,7 +702,7 @@ export default function ProjectsPage() {
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[13px] font-bold text-white">{formatCurrencyCompact(project.spent, currency as never)}</span>
+                          <span className="text-[13px] font-bold text-white">{formatCurrencyCompact(spendOf(project).total, currency as never)}</span>
                           <span className="text-[11px] text-white/30">/ {formatCurrencyCompact(project.budget, currency as never)}</span>
                         </div>
                       </div>

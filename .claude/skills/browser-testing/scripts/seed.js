@@ -40,6 +40,9 @@
   const base = (Array.isArray(s.projects) && s.projects[0]) || {};
   s.projects = P.map(([id, name, client, color, budget]) => ({
     ...base, id, name, client, color, budget, status: "active",
+    // Spend is derived from timesheets and the budget ledger; a preset figure here would
+    // be counted on top of them.
+    spent: 0,
     address: "Toronto, ON", startDate: at(7, 0, -28), endDate: at(17, 0, 60),
     gps: { lat: 43.6532, lng: -79.3832 }, geofenceRadius: 500,
     tasks: [

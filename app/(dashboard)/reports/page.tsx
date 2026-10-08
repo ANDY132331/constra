@@ -12,6 +12,7 @@ import { PAYROLL_ADAPTERS, exportPayroll } from "@/lib/payroll-export";
 import { exportReportPdf } from "@/lib/pdf-export";
 import { computeWorkerOvertime } from "@/lib/overtime";
 import { hoursBetween } from "@/lib/hours";
+import { useProjectSpend } from "@/lib/project-spend";
 
 function periodBounds(period: "week" | "month" | "quarter"): { start: Date; end: Date; label: string } {
   const now = new Date();
@@ -44,6 +45,7 @@ function periodBounds(period: "week" | "month" | "quarter"): { start: Date; end:
 }
 
 export default function ReportsPage() {
+  const spendOf = useProjectSpend();
   const {
     workers, projects, clockEntries, currency, currentUser, companyName,
     overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
@@ -131,10 +133,10 @@ export default function ReportsPage() {
         name: p.name,
         color: p.color,
         budget: p.budget,
-        spent: p.spent,
-        pct: p.budget > 0 ? Math.min(100, (p.spent / p.budget) * 100) : 0,
+        spent: spendOf(p).total,
+        pct: p.budget > 0 ? Math.min(100, (spendOf(p).total / p.budget) * 100) : 0,
       })),
-    [projects]
+    [projects, spendOf]
   );
 
   const totalBudget = projectBudgets.reduce((s, p) => s + p.budget, 0);

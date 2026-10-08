@@ -12,6 +12,7 @@ import { useStore } from "@/lib/store";
 import type { CompanySnap, ProjectSnap } from "@/lib/ask-constra-types";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { isBilled, isOutstanding, isOverdue } from "@/lib/invoice-status";
+import { useProjectSpend } from "@/lib/project-spend";
 
 // ── Helper: compute an invoice's subtotal ──────────────────────────────────────
 function invoiceTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
@@ -22,7 +23,7 @@ function invoiceTotal(inv: { items: { qty: number; rate: number }[]; taxRate: nu
 function msToHours(ms: number) { return ms / 3_600_000; }
 
 // ── Build snapshot from store data ────────────────────────────────────────────
-function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
+function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<typeof useProjectSpend>): CompanySnap {
   const {
     companyName, currency, workers, projects, clockEntries,
     invoices, budgetLines, equipment, changeOrders,
@@ -89,7 +90,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
       name: p.name,
       status: p.status,
       budget: p.budget ?? 0,
-      spent: p.spent ?? 0,
+      spent: spendOf(p).total,
       laborCost: laborByProject[p.id] ?? 0,
       revenue: revenueByClient[p.client] ?? 0,
       progress: p.progress ?? 0,
@@ -194,6 +195,7 @@ const QUICK_QUESTIONS = [
 
 // ── Main component ─────────────────────────────────────────────────────────────
 export function AskConstra() {
+  const spendOf = useProjectSpend();
   const store = useStore();
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
@@ -218,7 +220,7 @@ export function AskConstra() {
     if (collapsed) setCollapsed(false);
 
     try {
-      const snapshot = buildSnapshot(store);
+      const snapshot = buildSnapshot(store, spendOf);
       const res = await fetch("/api/ask-constra", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -250,7 +252,7 @@ export function AskConstra() {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [store, streaming, collapsed]);
+  }, [store, streaming, collapsed, spendOf]);
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
