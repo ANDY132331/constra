@@ -425,7 +425,7 @@ export default function CrewPage() {
               <button aria-label="Show invite QR code" onClick={() => handleShowQR()} className="p-2 rounded-full bg-white/[0.05] text-white/40 active:text-white/70">
                 <QrCode size={14} />
               </button>
-              <button onClick={() => handleCopy()} className="flex items-center gap-1.5 bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-full px-3 py-1.5 text-[12px] font-bold">
+              <button onClick={() => handleCopy()} className="min-h-[44px] flex items-center gap-1.5 bg-amber-500/15 text-amber-400 border border-amber-500/20 rounded-full px-5 py-1.5 text-[12px] font-bold">
                 {copied ? <Check size={12} /> : <Copy size={12} />}
                 {copied ? "Copied" : "Copy"}
               </button>
@@ -652,13 +652,13 @@ export default function CrewPage() {
                     </span>
                     {canEdit && (
                       <button aria-label="Edit" onClick={() => openEdit(worker)}
-                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded text-white/30 hover:text-white/70 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-2.5 rounded text-white/30 hover:text-white/70 transition-all">
                         <Pencil size={12} />
                       </button>
                     )}
                     {canEdit && worker.id !== currentUser.id && (
                       <button aria-label="Delete" onClick={() => handleDelete(worker.id)}
-                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded text-white/30 hover:text-red-400 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-2.5 rounded text-white/30 hover:text-red-400 transition-all">
                         <Trash2 size={12} />
                       </button>
                     )}

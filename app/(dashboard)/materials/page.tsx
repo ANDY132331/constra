@@ -201,7 +201,7 @@ export default function MaterialsPage() {
         {projectSummary && Object.keys(projectSummary).length > 0 && (
           <div className="px-5 -mt-2 mb-3">
             <button onClick={exportPdf} disabled={pdfLoading}
-              className="flex items-center gap-1.5 text-[12px] font-bold text-white/60 bg-white/[0.05] border border-white/[0.07] px-3 py-1.5 rounded-full disabled:opacity-50">
+              className="min-h-[44px] flex items-center gap-1.5 text-[12px] font-bold text-white/60 bg-white/[0.05] border border-white/[0.07] px-5 py-1.5 rounded-full disabled:opacity-50">
               <FileText size={13} /> {pdfLoading ? "Generating…" : "Export PDF"}
             </button>
           </div>
@@ -482,7 +482,7 @@ export default function MaterialsPage() {
                         <div className="text-[10px] text-white/30">{entry.unit}</div>
                       </div>
                       <button aria-label="Delete" onClick={() => setDeleteConfirm(entry.id)}
-                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-2.5 rounded-lg text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all">
                         <Trash2 size={13} />
                       </button>
                     </div>

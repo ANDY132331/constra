@@ -788,7 +788,7 @@ function SettingsInner() {
                     <div className="flex items-center gap-2 justify-end">
                       {!isMe ? (
                         <button onClick={() => handleKick(worker.id, worker.name)}
-                          className="flex items-center gap-1 text-[11px] font-bold text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2 py-1 rounded-full transition-all">
+                          className="min-h-[44px] flex items-center gap-1 text-[11px] font-bold text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2 py-1 rounded-full transition-all">
                           <Trash2 size={11} /> Kick
                         </button>
                       ) : (

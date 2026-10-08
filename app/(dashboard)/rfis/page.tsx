@@ -127,11 +127,11 @@ export default function RFIsPage() {
                 value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
               <div className="flex gap-2">
                 <button onClick={() => handleAnswer(rfi.id)}
-                  className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
+                  className="inline-flex items-center justify-center min-h-[44px] text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-5 py-1.5 rounded-full transition-colors">
                   Submit Answer
                 </button>
                 <button onClick={() => setAnswerRfiId(null)}
-                  className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
+                  className="inline-flex items-center justify-center min-h-[44px] text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-5 py-1.5 rounded-full transition-colors">
                   Cancel
                 </button>
               </div>
@@ -139,14 +139,14 @@ export default function RFIsPage() {
           ) : (
             <div className="flex gap-2 pt-1">
               <button onClick={() => { setAnswerRfiId(rfi.id); setAnswerText(""); }}
-                className="text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-3 py-1.5 rounded-full transition-colors">
+                className="inline-flex items-center justify-center min-h-[44px] text-[12px] font-semibold bg-green-500/10 text-green-400 hover:bg-green-500/15 px-5 py-1.5 rounded-full transition-colors">
                 Submit Answer
               </button>
               <button onClick={() => {
                 if (!rfi.answer) { setCloseNoAnswerConfirm(rfi.id); return; }
                 updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed");
               }}
-                className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
+                className="inline-flex items-center justify-center min-h-[44px] text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-5 py-1.5 rounded-full transition-colors">
                 Close RFI
               </button>
             </div>
@@ -155,11 +155,11 @@ export default function RFIsPage() {
         {rfi.status === "answered" && (
           <div className="flex gap-2 pt-1">
             <button onClick={() => { updateRFI(rfi.id, { status: "closed" }); toast.success("RFI closed"); }}
-              className="text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-3 py-1.5 rounded-full transition-colors">
+              className="inline-flex items-center justify-center min-h-[44px] text-[12px] font-semibold bg-white/5 text-white/40 hover:bg-white/8 px-5 py-1.5 rounded-full transition-colors">
               Close RFI
             </button>
             <button onClick={() => { updateRFI(rfi.id, { status: "open", answer: undefined }); toast.success("RFI reopened"); }}
-              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
+              className="inline-flex items-center justify-center min-h-[44px] text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-5 py-1.5 rounded-full transition-colors">
               Reopen
             </button>
           </div>
@@ -167,7 +167,7 @@ export default function RFIsPage() {
         {rfi.status === "closed" && (
           <div className="flex gap-2 pt-1">
             <button onClick={() => { updateRFI(rfi.id, { status: "open" }); toast.success("RFI reopened"); }}
-              className="text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors">
+              className="inline-flex items-center justify-center min-h-[44px] text-[12px] font-semibold bg-amber-500/10 text-amber-400 hover:bg-amber-500/15 px-5 py-1.5 rounded-full transition-colors">
               Reopen RFI
             </button>
           </div>
@@ -293,11 +293,11 @@ export default function RFIsPage() {
                       {rfiActions(rfi)}
                       <div className="flex gap-2">
                         <button onClick={() => openEdit(rfi)}
-                          className="flex items-center gap-1.5 text-[12px] font-semibold bg-white/5 text-white/50 px-3 py-1.5 rounded-full">
+                          className="min-h-[44px] flex items-center gap-1.5 text-[12px] font-semibold bg-white/5 text-white/50 px-5 py-1.5 rounded-full">
                           <Pencil size={12} /> Edit
                         </button>
                         <button onClick={() => setDeleteConfirm(rfi.id)}
-                          className="flex items-center gap-1.5 text-[12px] font-semibold bg-red-500/10 text-red-400 px-3 py-1.5 rounded-full">
+                          className="min-h-[44px] flex items-center gap-1.5 text-[12px] font-semibold bg-red-500/10 text-red-400 px-5 py-1.5 rounded-full">
                           <Trash2 size={12} /> Delete
                         </button>
                       </div>
@@ -405,11 +405,11 @@ export default function RFIsPage() {
                   </button>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <button aria-label="Edit" onClick={(e) => { e.stopPropagation(); openEdit(rfi); }}
-                        className="p-[7px] rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
+                        className="p-2.5 rounded hover:bg-white/8 text-white/20 hover:text-white/60 transition-colors">
                         <Pencil size={12} />
                       </button>
                       <button aria-label="Delete" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(rfi.id); }}
-                        className="p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
+                        className="p-2.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors">
                         <Trash2 size={12} />
                       </button>
                     </div>

@@ -466,16 +466,16 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                             {new Date(incident.date).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                           </span>
                           <button onClick={() => exportPdf(incident)} title="Export PDF"
-                            className="p-[7px] rounded hover:bg-white/8 text-white/30 hover:text-amber-400 active:text-amber-400 transition-all">
+                            className="p-2.5 rounded hover:bg-white/8 text-white/30 hover:text-amber-400 active:text-amber-400 transition-all">
                             <FileText size={12} />
                           </button>
                           {canManage && (<>
                           <button aria-label="Edit" onClick={() => openEdit(incident)}
-                            className="p-[7px] rounded hover:bg-white/8 text-white/30 hover:text-white/60 active:text-white/60 transition-all">
+                            className="p-2.5 rounded hover:bg-white/8 text-white/30 hover:text-white/60 active:text-white/60 transition-all">
                             <Pencil size={12} />
                           </button>
                           <button aria-label="Delete" onClick={() => setDeleteConfirm(incident.id)}
-                            className="p-[7px] rounded hover:bg-red-500/15 text-white/30 hover:text-red-400 active:text-red-400 transition-all">
+                            className="p-2.5 rounded hover:bg-red-500/15 text-white/30 hover:text-red-400 active:text-red-400 transition-all">
                             <Trash2 size={12} />
                           </button>
                           </>)}

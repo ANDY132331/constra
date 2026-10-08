@@ -240,19 +240,19 @@ export default function PunchListPage() {
                 <div className="flex items-center gap-2 pt-2 border-t border-white/[0.05]">
                   {item.status === "open" && (
                     <button onClick={() => { updatePunchItem(item.id, { status: "in-progress" }); toast.success("Item started"); }}
-                      className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full transition-colors">
+                      className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-5 py-1 rounded-full transition-colors">
                       Start
                     </button>
                   )}
                   {item.status !== "resolved" && (
                     <button onClick={() => { updatePunchItem(item.id, { status: "resolved" }); toast.success("Item resolved"); }}
-                      className="text-[11px] font-semibold text-green-400 bg-green-500/10 px-3 py-1 rounded-full transition-colors">
+                      className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-semibold text-green-400 bg-green-500/10 px-5 py-1 rounded-full transition-colors">
                       Resolve
                     </button>
                   )}
                   {item.status === "resolved" && (
                     <button onClick={() => { updatePunchItem(item.id, { status: "open" }); toast.success("Item reopened"); }}
-                      className="text-[11px] font-semibold text-white/30 bg-white/5 px-3 py-1 rounded-full transition-colors">
+                      className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-semibold text-white/30 bg-white/5 px-5 py-1 rounded-full transition-colors">
                       Reopen
                     </button>
                   )}
@@ -426,19 +426,19 @@ export default function PunchListPage() {
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.05]">
                       {item.status === "open" && (
                         <button onClick={() => { updatePunchItem(item.id, { status: "in-progress" }); toast.success("Item started"); }}
-                          className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1 rounded-full transition-colors">
+                          className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-5 py-1 rounded-full transition-colors">
                           Start Work
                         </button>
                       )}
                       {item.status !== "resolved" && (
                         <button onClick={() => { updatePunchItem(item.id, { status: "resolved" }); toast.success("Item resolved"); }}
-                          className="text-[11px] font-semibold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/15 px-3 py-1 rounded-full transition-colors">
+                          className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-semibold text-green-400 hover:text-green-300 bg-green-500/10 hover:bg-green-500/15 px-5 py-1 rounded-full transition-colors">
                           Mark Resolved
                         </button>
                       )}
                       {item.status === "resolved" && (
                         <button onClick={() => { updatePunchItem(item.id, { status: "open" }); toast.success("Item reopened"); }}
-                          className="text-[11px] font-semibold text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/8 px-3 py-1 rounded-full transition-colors">
+                          className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-semibold text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/8 px-5 py-1 rounded-full transition-colors">
                           Reopen
                         </button>
                       )}

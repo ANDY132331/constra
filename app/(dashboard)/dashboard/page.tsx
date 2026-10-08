@@ -1150,7 +1150,7 @@ export default function DashboardPage() {
               return (
                 <button
                   onClick={() => setWeatherExpanded(e => !e)}
-                  className="flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/10 rounded-full px-2.5 py-1 text-[12px] transition-all"
+                  className="min-h-[44px] flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/10 rounded-full px-2.5 py-1 text-[12px] transition-all"
                   style={{ color: meta.color }}
                 >
                   <WeatherIcon size={13} />

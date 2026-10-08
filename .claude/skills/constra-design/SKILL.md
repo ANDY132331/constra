@@ -81,7 +81,19 @@ Rules that keep this working:
 
 ## Touch and reach
 
-- Minimum tap target **36×36px**, and 44px for anything primary. Icon-only controls need
+**`field-app-design` is the authority on sizing — these two used to disagree.** This file said
+36px while that one said 44px, and the app shipped 25px row actions, so nothing matched
+anything. The numbers below now follow it; if they ever drift apart again, that file wins.
+
+- Minimum tap target **44×44px** (the Apple HIG figure and this repo's working floor), 48px
+  for anything on a phone. **16px of clear space** between a destructive control and whatever
+  sits beside it — Edit measured 8–14px from Delete across the app, which is close enough for
+  a gloved thumb to hit the wrong one. `globals.css` enforces that gap globally for
+  `[aria-label^="Delete"]` following another control, so you do not have to remember it.
+- A mouse is more precise than a thumb: dense desktop row actions sit at 32px, which clears
+  the WCAG 2.2 floor of 24 and keeps tables readable. That is the one deliberate exception,
+  and it only applies to hover-revealed actions inside a table row.
+- Icon-only controls need
   padding plus a matching negative margin so the target grows without moving the layout:
   `inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 -m-2`.
 - Every icon-only control needs an accessible name that says what it acts on —
@@ -115,3 +127,39 @@ when it wasn't.
 Run through `ui-review` in this repo. It lists the failures that have actually shipped here
 (clipped popovers, z-index collisions, unreachable controls, empty states that lie) rather
 than generic advice.
+
+## Colour rules the theme layer depends on
+
+These are measured against the real light ground `#E7E5E0`, not estimated.
+
+- **Never set colour in an inline `style`.** No rule can override it, so it escapes the light
+  theme entirely. Hi-vis yellow set inline measured 1.49:1 on a light card — invisible.
+  Use a class and let `globals.css` remap it.
+- **Muted text floor in light mode is alpha 0.56** on black (4.5:1 on that ground). The old
+  mapping swapped alpha literally — `text-white/50` became `rgba(0,0,0,0.50)` — which is not
+  an equivalent: white at 50% on near-black reads, black at 50% on `#E7E5E0` is 3.8:1.
+  The dim steps now compress into 0.56–0.62 so hierarchy survives and all of it is legible.
+- **Accent text needs a darker shade on light ground.** The `-400` shades keep dark-mode
+  brightness and wash out. `globals.css` maps all 32 accent classes in use; these are the
+  shades that clear 4.5:1:
+
+| Hue | Light-mode shade | Ratio |
+|---|---|---|
+| red | `#b91c1c` (700) | 5.14 |
+| orange | `#9a3412` (800) | 5.80 |
+| amber | `#92400e` (800) | 5.63 |
+| green | `#166534` (800) | 5.66 |
+| emerald | `#065f46` (800) | 6.10 |
+| sky | `#0369a1` (700) | 4.71 |
+| blue | `#1d4ed8` (700) | 5.32 |
+| purple | `#7e22ce` (700) | 5.55 |
+
+Add a new accent class and you must add its light mapping, or it ships invisible on light.
+
+## Also global, so don't rebuild per screen
+
+- `components/dialog-semantics.tsx` — gives every panel `role="dialog"`, `aria-modal`, a name
+  from its own heading, focus into the first real field, a Tab trap, and focus restored on
+  close. Build a modal as a stacked layer plus a `.sheet` panel with a heading and it is
+  covered.
+- Destructive spacing, as above, is a `globals.css` rule rather than per-button margins.

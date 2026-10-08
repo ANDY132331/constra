@@ -565,7 +565,7 @@ export default function SchedulePage() {
                 <>
                   <button
                     onClick={() => setImperial((v) => !v)}
-                    className="text-[11px] font-bold text-white/40 hover:text-white/70 bg-white/[0.04] hover:bg-white/[0.07] px-2.5 py-1.5 rounded-full transition-colors"
+                    className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-bold text-white/40 hover:text-white/70 bg-white/[0.04] hover:bg-white/[0.07] px-2.5 py-1.5 rounded-full transition-colors"
                     title="Toggle temperature units"
                   >
                     {imperial ? "°F" : "°C"}
@@ -720,7 +720,7 @@ export default function SchedulePage() {
                 <h4 className="text-[14px] font-bold text-white">{format(selectedDay, "EEEE, MMMM d, yyyy")}</h4>
                 <button
                   onClick={() => { setEditEventId(null); setAddForm({ title: "", date: format(selectedDay, "yyyy-MM-dd"), type: "meeting", description: "" }); setShowAddModal(true); }}
-                  className="flex items-center gap-1.5 text-[12px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-3 py-1.5 rounded-full transition-colors"
+                  className="min-h-[44px] flex items-center gap-1.5 text-[12px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 px-5 py-1.5 rounded-full transition-colors"
                 >
                   <Plus size={13} /> Add Event
                 </button>
@@ -769,7 +769,7 @@ export default function SchedulePage() {
                         {customEvt && (
                           <div className="flex items-center gap-2">
                             <button aria-label="Edit" onClick={() => openEditEvent(customEvt)}
-                              className="p-[7px] rounded text-white/25 hover:text-white/60 active:text-white/60 transition-colors">
+                              className="p-2.5 rounded text-white/25 hover:text-white/60 active:text-white/60 transition-colors">
                               <Pencil size={11} />
                             </button>
                             <button aria-label="Delete event" onClick={() => setDeleteEventConfirm(e.id)}

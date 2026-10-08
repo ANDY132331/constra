@@ -243,7 +243,7 @@ export default function EstimateDetailPage() {
             onClick={handleSend}
             disabled={sendLoading || !estimate.clientEmail}
             title={!estimate.clientEmail ? "Add a client email first" : "Send estimate by email"}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-white/70 bg-white/[0.08] hover:bg-white/[0.12] px-3 py-1.5 rounded-full transition-colors disabled:opacity-40"
+            className="min-h-[44px] flex items-center gap-1.5 text-[12px] font-semibold text-white/70 bg-white/[0.08] hover:bg-white/[0.12] px-5 py-1.5 rounded-full transition-colors disabled:opacity-40"
           >
             <Mail size={13} />
             <span className="hidden sm:inline">{sendLoading ? "Sending…" : "Send"}</span>

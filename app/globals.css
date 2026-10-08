@@ -178,6 +178,16 @@
 [data-theme="light"] .text-white\/15 { color: rgba(0,0,0,0.15) !important; }
 [data-theme="light"] .text-white\/10 { color: rgba(0,0,0,0.10) !important; }
 
+/* ── Destructive adjacency ──
+   Edit sat 8-14px from Delete in row actions. A gloved thumb aiming for one lands on the
+   other, and one of them cannot be undone. Where a destructive action sits directly beside
+   another control, push it away: 16px is the field-use minimum between adjacent targets. */
+button:not([aria-label^="Delete"]):not([aria-label^="Remove"]) + button[aria-label^="Delete"],
+button:not([aria-label^="Delete"]):not([aria-label^="Remove"]) + button[aria-label^="Remove"],
+a + button[aria-label^="Delete"] {
+  margin-left: 12px;
+}
+
 /* ── Accent text on the light ground ──
    The light theme remapped text-white/* but never the -300/-400 accents, so every coloured
    number kept its dark-mode brightness on #E7E5E0: the emerald revenue figure measured

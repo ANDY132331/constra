@@ -458,13 +458,13 @@ export default function ProjectsPage() {
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => setRejectConfirm(p.id)}
-                        className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                        className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-bold px-5 py-1.5 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => { approveProject(p.id); toast.success("Project approved"); }}
-                        className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+                        className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-bold px-5 py-1.5 rounded-full bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
                       >
                         Approve
                       </button>
@@ -626,7 +626,7 @@ export default function ProjectsPage() {
                       {isAdmin && (
                         <button aria-label="Delete"
                           onClick={() => setDeleteConfirm(project.id)}
-                          className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-2.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -668,7 +668,7 @@ export default function ProjectsPage() {
                           {isAdmin && (
                             <button aria-label="Delete"
                               onClick={(e) => { e.stopPropagation(); setDeleteConfirm(project.id); }}
-                              className="p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
+                              className="p-2.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-colors"
                             >
                               <Trash2 size={13} />
                             </button>

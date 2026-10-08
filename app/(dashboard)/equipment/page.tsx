@@ -286,7 +286,7 @@ export default function EquipmentPage() {
                 <p className="text-[12px] text-amber-400/80 mt-0.5">{needsService.map((e) => e.name).join(", ")}</p>
               </div>
               <button onClick={() => { const first = needsService[0]; if (first) openEdit(first); }}
-                className="text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-full transition-colors">
+                className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-5 py-1.5 rounded-full transition-colors">
                 Update Service Date
               </button>
             </div>
@@ -351,11 +351,11 @@ export default function EquipmentPage() {
                     <span className="text-right text-[12px] font-semibold text-amber-400">{formatCurrency(eq.dailyRate, currency as never)}/d</span>
                     <div className="flex items-center justify-end gap-3">
                       <button aria-label="Edit" onClick={() => openEdit(eq)}
-                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-2.5 rounded hover:bg-white/8 text-white/30 hover:text-white/70 transition-all">
                         <Pencil size={12} />
                       </button>
                       <button aria-label="Delete" onClick={() => handleDelete(eq.id, eq.name)}
-                        className="opacity-0 group-hover:opacity-100 p-[7px] rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
+                        className="opacity-0 group-hover:opacity-100 p-2.5 rounded hover:bg-red-500/15 text-white/20 hover:text-red-400 transition-all">
                         <Trash2 size={12} />
                       </button>
                     </div>

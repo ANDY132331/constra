@@ -454,7 +454,7 @@ export default function DailyReportsPage() {
               <button
                 onClick={() => handleExportPdf(selected)}
                 disabled={pdfLoading}
-                className="flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-3 py-1.5 rounded-full transition-colors disabled:opacity-40"
+                className="min-h-[44px] flex items-center gap-1.5 text-[12px] font-semibold text-white/50 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] px-5 py-1.5 rounded-full transition-colors disabled:opacity-40"
               >
                 <Download size={13} /> {pdfLoading ? "…" : "PDF"}
               </button>

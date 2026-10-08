@@ -737,12 +737,12 @@ export default function TimeTrackingPage() {
         <h2 className="text-[22px] font-bold text-white">Time</h2>
         <div className="flex items-center gap-2">
           {clockEntries.filter((e) => e.clockOut).length > 0 && !isEmployee && (
-            <button onClick={exportCsv} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-full">
+            <button onClick={exportCsv} className="min-h-[44px] flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-full">
               <Download size={12} /> CSV
             </button>
           )}
           {clockedIn.length > 1 && (currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
-            <button onClick={() => setClockOutAllConfirm(true)} className="flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-full">
+            <button onClick={() => setClockOutAllConfirm(true)} className="min-h-[44px] flex items-center gap-1 bg-white/[0.06] border border-white/[0.08] text-white/50 text-[12px] font-bold px-2.5 py-1.5 rounded-full">
               <LogOut size={12} /> All Out
             </button>
           )}
@@ -892,7 +892,7 @@ export default function TimeTrackingPage() {
                     <button
                       type="button"
                       onClick={() => setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: worker?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut })}
-                      className="flex-shrink-0 px-3 py-1.5 rounded-full bg-red-500/15 hover:bg-red-500/25 active:bg-red-500/30 text-red-200 font-semibold"
+                      className="min-h-[44px] flex-shrink-0 px-5 py-1.5 rounded-full bg-red-500/15 hover:bg-red-500/25 active:bg-red-500/30 text-red-200 font-semibold"
                     >
                       Fix times
                     </button>
@@ -1404,7 +1404,7 @@ export default function TimeTrackingPage() {
                       <button
                         type="button"
                         onClick={() => setEditEntry({ id: entry.id, workerId: entry.workerId, workerName: worker?.name ?? "", clockIn: entry.clockIn, clockOut: entry.clockOut })}
-                        className="px-2.5 py-1 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-200 font-semibold"
+                        className="inline-flex items-center justify-center min-h-[44px] px-2.5 py-1 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-200 font-semibold"
                       >
                         Fix times
                       </button>

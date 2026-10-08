@@ -534,7 +534,7 @@ export default function DocumentsPage() {
                   <input ref={versionInputRef} type="file" className="hidden" onChange={handleVersionUpload} disabled={uploadingVersion} />
                 </label>
                 <button onClick={() => downloadDoc(previewDoc)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold transition-colors">
+                  className="min-h-[44px] flex items-center gap-1.5 px-5 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[12px] font-bold transition-colors">
                   <Download size={12} /> Download
                 </button>
                 <button aria-label="Delete document" title="Delete document" onClick={() => setDeleteConfirm(previewDoc.id)}
