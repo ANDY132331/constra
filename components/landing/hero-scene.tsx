@@ -55,9 +55,9 @@ export default function HeroScene({ startHref, startLabel }: { startHref: string
         </a>
         <h1 id="cine-title" className="lp-cine-h1">Run the job.</h1>
         <p className="lp-cine-sub">
-          Timesheets, daily reports and invoices
+          See who is on site, what they did, and bill it —
           <br />
-          from the phones your crew already carries.
+          without re-typing a single hour.
         </p>
 
         <div className="lp-cine-ctas">
