@@ -9,10 +9,18 @@ import { Clock, Camera, Search, MapPin, LogIn, LogOut, Edit2, X, AlertTriangle, 
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { useStore } from "@/lib/store";
-const CameraCapture = dynamic(
-  () => import("@/components/camera-capture").then((m) => ({ default: m.CameraCapture })),
-  { ssr: false },
-);
+const loadCamera = () => import("@/components/camera-capture").then((m) => ({ default: m.CameraCapture }));
+const CameraCapture = dynamic(loadCamera, { ssr: false });
+
+// The camera lives in its own chunk, fetched the first time someone opens it. The service
+// worker only caches what has already been requested, so a phone that has never taken a
+// clock-in photo has no copy of it — and at the gate with no signal the import fails and the
+// clock-in dies with nothing on screen. Pull the chunk down while there is still signal, and
+// remember whether it arrived.
+let cameraChunkReady = false;
+function warmCamera() {
+  return loadCamera().then(() => { cameraChunkReady = true; }).catch(() => { cameraChunkReady = false; });
+}
 import type { Worker, GpsLocation, VerificationFlag } from "@/lib/mock-data";
 import { runVerification } from "@/lib/verification";
 import { uploadPhoto } from "@/lib/supabase/storage";
@@ -510,7 +518,24 @@ export default function TimeTrackingPage() {
 
   const todayTotal = (todayHours + liveHours).toFixed(1);
 
+  // Fetch the camera chunk while the page loads, so a clock-in later with no signal still
+  // has it. Runs once; a failure here is retried at the moment it is actually needed.
+  useEffect(() => { void warmCamera(); }, []);
+
   const proceedToCamera = useCallback(async (worker: Worker, projectId: string) => {
+    if (!cameraChunkReady) {
+      // Never cached, and we may be offline now. Try once more, and if it will not come,
+      // say so rather than opening nothing.
+      await warmCamera();
+      if (!cameraChunkReady) {
+        toast.error(
+          navigator.onLine
+            ? "Could not load the camera. Check your connection and try again."
+            : "The camera needs to load once while you have signal. Open Time Tracking on Wi-Fi, then clock in here.",
+        );
+        return;
+      }
+    }
     const project = getProjectById(projectId);
     if (project?.gps) {
       setGeofenceChecking(true);
