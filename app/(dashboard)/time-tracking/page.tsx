@@ -54,6 +54,7 @@ import { sendPushEvent } from "@/lib/push-client";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { hoursBetween, elapsedLabel, isImplausibleShift, LONG_SHIFT_HOURS } from "@/lib/hours";
+import { computeWorkerOvertime } from "@/lib/overtime";
 
 const elapsed = (start: Date, end?: Date): string => elapsedLabel(start, end);
 
@@ -433,7 +434,24 @@ export default function TimeTrackingPage() {
     workers, clockEntries, projects, currentUser,
     addClockEntry, updateClockEntry, deleteClockEntry, updateWorker,
     getWorkerById, getProjectById, companyId, companyName,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
   } = useStore();
+
+  // The overtime banner used to hardcode 8h a day and 44h a week. Payroll uses the
+  // company's own rules, which default to overtime off. So the banner announced overtime
+  // payroll would never pay, and with a 40h weekly rule it stayed silent at 42h — exactly the
+  // worker payroll was paying overtime to. It now asks the same engine payroll does.
+  const overtimeThisWeek = (workerId: string, rate: number) => {
+    if (!overtimeEnabled) return 0;
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0, 0, 0, 0);
+    const entries = clockEntries.filter((e) => e.workerId === workerId && e.clockOut && new Date(e.clockIn) >= weekStart);
+    return computeWorkerOvertime(entries, rate, {
+      enabled: overtimeEnabled,
+      dailyThreshold: overtimeDailyThreshold,
+      weeklyThreshold: overtimeWeeklyThreshold,
+      multiplier: overtimeMultiplier,
+    }).overtimeHours;
+  };
 
   const [search, setSearch] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
@@ -708,7 +726,7 @@ export default function TimeTrackingPage() {
       implausible > 0 ? `${implausible} over ${LONG_SHIFT_HOURS}h — check for missed clock-outs` : null,
     ].filter(Boolean);
     const summary = `Exported ${done.length} ${done.length === 1 ? "entry" : "entries"}`;
-    if (implausible > 0) toast.warning?.(`${summary} — ${notes.join("; ")}`) ?? toast.success(`${summary} — ${notes.join("; ")}`);
+    if (implausible > 0) toast.warning(`${summary} — ${notes.join("; ")}`);
     else toast.success(notes.length ? `${summary} — ${notes.join("; ")}` : summary);
   };
 
@@ -934,13 +952,7 @@ export default function TimeTrackingPage() {
       })()}
 
       {!isEmployee && (() => {
-        const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
-        const ot = workers.filter((w) => {
-          const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);
-          const todayHrs = wEntries.filter((e) => new Date(e.clockIn) >= todayStart).reduce((s,e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
-          const weekHrs = wEntries.filter((e) => new Date(e.clockIn) >= weekStart).reduce((s,e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
-          return todayHrs > 8 || weekHrs > 44;
-        });
+        const ot = workers.filter((w) => overtimeThisWeek(w.id, w.hourlyRate) > 0);
         if (ot.length === 0) return null;
         return (
           <div className="mx-4 mb-3 flex items-center gap-2 bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[12px] font-semibold px-4 py-2.5 rounded-xl">
@@ -1458,20 +1470,10 @@ export default function TimeTrackingPage() {
 
       {/* Overtime alerts */}
       {(() => {
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-        weekStart.setHours(0, 0, 0, 0);
         const overtimeWorkers: { name: string; reason: string }[] = [];
         workers.forEach((w) => {
-          const wEntries = clockEntries.filter((e) => e.workerId === w.id && e.clockOut);
-          const todayHrs = wEntries
-            .filter((e) => new Date(e.clockIn) >= todayStart)
-            .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
-          const weekHrs = wEntries
-            .filter((e) => new Date(e.clockIn) >= weekStart)
-            .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
-          if (todayHrs > 8) overtimeWorkers.push({ name: w.name, reason: `${todayHrs.toFixed(1)}h today` });
-          else if (weekHrs > 44) overtimeWorkers.push({ name: w.name, reason: `${weekHrs.toFixed(1)}h this week` });
+          const ot = overtimeThisWeek(w.id, w.hourlyRate);
+          if (ot > 0) overtimeWorkers.push({ name: w.name, reason: `${ot.toFixed(1)}h overtime this week` });
         });
         if (overtimeWorkers.length === 0) return null;
         return (
