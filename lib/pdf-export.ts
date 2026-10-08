@@ -1,6 +1,7 @@
 import type { ClockEntry, Worker, Project, Estimate, Invoice, DailyReport, ChangeOrder } from "./mock-data";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "./hours";
+import { isOverdue } from "./invoice-status";
 
 type PdfReportInput = {
   workers: Worker[];
@@ -1289,7 +1290,7 @@ export async function exportInvoicePdf(
     doc.setFontSize(8.5);
     doc.setTextColor(...BLACK);
     doc.text(fmtDate(invoice.issueDate), metaValX, y - 2, { align: "right" });
-    doc.setTextColor(...(invoice.status === "overdue" ? RED : BLACK));
+    doc.setTextColor(...(isOverdue(invoice) ? RED : BLACK));
     doc.text(fmtDate(invoice.dueDate), metaValX, y + 6, { align: "right" });
     doc.setTextColor(...BLACK);
     doc.text("Due on Receipt", metaValX, y + 14, { align: "right" });
@@ -1379,7 +1380,7 @@ export async function exportInvoicePdf(
 
     metaRow(metaLblX, metaValX, "BILL TO", invoice.clientName, y);
     metaRow(meta2LblX, meta2ValX, "INVOICE DATE", fmtDate(invoice.issueDate), y);
-    metaRow(PW - MR - 65, PW - MR, "DUE DATE", fmtDate(invoice.dueDate), y, invoice.status === "overdue" ? RED : BLACK);
+    metaRow(PW - MR - 65, PW - MR, "DUE DATE", fmtDate(invoice.dueDate), y, isOverdue(invoice) ? RED : BLACK);
     y += 18;
     metaRow(metaLblX, metaValX, "EMAIL", invoice.clientEmail || "—", y);
     metaRow(PW - MR - 65, PW - MR, "TERMS", "Due on Receipt", y);
@@ -1451,7 +1452,7 @@ export async function exportInvoicePdf(
 
     const deets: [string, string, [number,number,number]?][] = [
       ["Invoice Date", fmtDate(invoice.issueDate)],
-      ["Due Date", fmtDate(invoice.dueDate), invoice.status === "overdue" ? RED : undefined],
+      ["Due Date", fmtDate(invoice.dueDate), isOverdue(invoice) ? RED : undefined],
       ["Terms", "Due on Receipt"],
     ];
     let dy = y - 1;

@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
 import { generateBrief, type BriefPayload } from "@/lib/daily-brief";
+import { isOutstanding, isOverdue } from "@/lib/invoice-status";
 
 function parseBold(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -126,10 +127,10 @@ export function DailyBriefCard() {
 
     // ── Financial ────────────────────────────────────────────────────────────
     const totalOutstanding = invoices
-      .filter((i) => i.status === "sent")
+      .filter(isOutstanding)
       .reduce((s, i) => s + invTotal(i), 0);
     const overdueInvoices = invoices
-      .filter((i) => i.status === "overdue")
+      .filter((i) => isOverdue(i, now))
       .map((i) => ({
         number: i.number,
         amount: Math.round(invTotal(i)),

@@ -14,6 +14,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 import type { InvoiceTemplate } from "@/lib/pdf-export";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { isOverdue as isOverdueNow } from "@/lib/invoice-status";
 
 // ── Paper styles ─────────────────────────────────────────────────────────────
 function paperStyles(t: InvoiceTemplate, isPaid: boolean) {
@@ -124,7 +125,7 @@ export default function InvoiceDetailPage() {
   const isDirty = JSON.stringify(draft) !== JSON.stringify(toDraft(invoice));
   const cfg = STATUS_CFG[invoice.status];
   const isPaid    = invoice.status === "paid";
-  const isOverdue = invoice.status === "overdue";
+  const isOverdue = isOverdueNow(invoice);
   const ps = paperStyles(template, isPaid);
 
   const taxPct = parseFloat(draft.taxRate) || 0;
@@ -187,7 +188,7 @@ export default function InvoiceDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           invoiceId: invoice.id, notes: invoice.notes, pdfDataUrl,
-          isReminder: invoice.status === "overdue",
+          isReminder: isOverdueNow(invoice),
         }),
       });
       if (res.ok) {

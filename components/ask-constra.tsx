@@ -11,6 +11,7 @@ import { Sparkles, Send, Loader2, ChevronDown, ChevronUp, RotateCcw } from "luci
 import { useStore } from "@/lib/store";
 import type { CompanySnap, ProjectSnap } from "@/lib/ask-constra-types";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { isBilled, isOutstanding, isOverdue } from "@/lib/invoice-status";
 
 // ── Helper: compute an invoice's subtotal ──────────────────────────────────────
 function invoiceTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
@@ -31,16 +32,16 @@ function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   // ── Revenue ─────────────────────────────────────────────────────────────────
-  const totalBilled = invoices.reduce((s, i) => s + invoiceTotal(i), 0);
+  const totalBilled = invoices.filter(isBilled).reduce((s, i) => s + invoiceTotal(i), 0);
   const totalCollected = invoices
     .filter((i) => i.status === "paid")
     .reduce((s, i) => s + invoiceTotal(i), 0);
   const totalOutstanding = invoices
-    .filter((i) => i.status === "sent")
+    .filter(isOutstanding)
     .reduce((s, i) => s + invoiceTotal(i), 0);
 
   const overdueInvoices = invoices
-    .filter((i) => i.status === "overdue")
+    .filter((i) => isOverdue(i, now))
     .map((i) => ({
       number: i.number,
       amount: invoiceTotal(i),
@@ -74,7 +75,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>): CompanySnap {
   // Invoices don't have projectId; match by clientName = project.client
   const revenueByClient: Record<string, number> = {};
   invoices
-    .filter((i) => i.status === "paid" || i.status === "sent")
+    .filter((i) => i.status === "paid" || isOutstanding(i))
     .forEach((i) => {
       revenueByClient[i.clientName] = (revenueByClient[i.clientName] ?? 0) + invoiceTotal(i);
     });
