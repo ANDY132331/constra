@@ -527,13 +527,6 @@ const CSS = `
 /* Cinematic opening shot */
 .lp-cine{position:relative; height:min(100svh,940px); min-height:600px; margin-top:calc(-61px - env(safe-area-inset-top,0px)); background:#090A13; color:#F2F0EB; overflow:hidden; isolation:isolate}
 .lp-cine-scene{position:absolute; inset:0; z-index:0; pointer-events:none; animation:lp-cine-in 2.2s cubic-bezier(.2,.7,.2,1) both}
-.lp-cine-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:60% 50%; display:block; background:#090A13}
-@media (max-width:640px){
-  /* A 16:9 shot cropped to a tall phone blows one corner up until it is mush, and the copy
-     ends up over the building. Sit it as a band across the bottom instead: the site stays at
-     its own scale and the text has clean ground above it. */
-  .lp-cine-video{top:auto; bottom:0; height:62%; object-position:50% 38%}
-}
 .lp-cine .lp-scene{position:absolute; inset:0; height:auto}
 .lp-cine .lp-scene canvas{cursor:default}
 .lp-cine-scrim{position:absolute; inset:0; z-index:1; pointer-events:none; background:
