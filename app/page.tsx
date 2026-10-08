@@ -302,10 +302,10 @@ export default function LandingPage() {
         <section className="lp-hero">
           <div className="lp-wrap lp-hero-grid">
             <div className="lp-hero-copy">
-              <p className="lp-kicker">For owners and foremen</p>
+              <p className="lp-kicker">For contractors and trade crews</p>
               <h2 className="lp-h1">Not the<br />paperwork.</h2>
               <p className="lp-lede">
-                Hours arrive GPS-verified from the crew’s own phones, so Friday payroll is already done. Daily reports, safety logs and change orders back up every invoice you send.
+                Constra puts GPS-verified timesheets, daily reports, safety logs, change orders and invoices in one app, on the phones your crew already carries.
               </p>
               <div className="lp-hero-ctas">
                 <Link href={startHref} className="lp-btn">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
