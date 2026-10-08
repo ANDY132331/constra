@@ -109,6 +109,7 @@ export default function EstimateDetailPage() {
   const [template, setTemplate] = useTemplateChoice("constra_estimate_template");
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmReconvert, setConfirmReconvert] = useState(false);
   useEffect(() => {
     if (!menuOpen) return;
     const close = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false); };
@@ -171,8 +172,29 @@ export default function EstimateDetailPage() {
     router.push("/estimates");
   }
 
-  function handleConvertToInvoice() {
+  // Converting the same estimate twice made two invoices for the same work, and nothing
+  // stopped it: the estimate stayed "accepted" and kept offering Convert. A double tap, or
+  // coming back a week later, billed the client twice.
+  //
+  // There is no field linking the two (adding one is a schema change), so recognise the
+  // earlier conversion by what it copied: same client, same tax rate, same lines.
+  const convertedTo = estimate
+    ? invoices.find((i) =>
+        i.clientName === estimate.clientName &&
+        Number(i.taxRate) === Number(estimate.taxRate) &&
+        i.items.length === estimate.items.length &&
+        i.items.every((it, k) => {
+          const e = estimate.items[k];
+          return it.description === e.description && Number(it.qty) === Number(e.qty) && Number(it.rate) === Number(e.rate);
+        }))
+    : undefined;
+
+  function handleConvertToInvoice(again = false) {
     if (!estimate) return;
+    if (convertedTo && !again) {
+      router.push(`/invoices/${convertedTo.id}`);
+      return;
+    }
     const nums = invoices.map((i) => parseInt(i.number.split("-").pop() ?? "0", 10)).filter((n) => n > 0);
     const num = `INV-${new Date().getFullYear()}-${String(Math.max(...nums, 0) + 1).padStart(3, "0")}`;
     const inv = addInvoice({
@@ -278,11 +300,24 @@ export default function EstimateDetailPage() {
                     </button>
                   </>
                 )}
-                {isAccepted && (
+                {isAccepted && !convertedTo && (
                   <button onClick={() => { handleConvertToInvoice(); setMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-amber-400 hover:bg-white/[0.05] transition-colors text-left">
                     <FileDown size={14} /> Convert to Invoice
                   </button>
+                )}
+                {isAccepted && convertedTo && (
+                  <>
+                    <button onClick={() => { setMenuOpen(false); router.push(`/invoices/${convertedTo.id}`); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-amber-400 hover:bg-white/[0.05] transition-colors text-left">
+                      <FileDown size={14} /> Open invoice {convertedTo.number}
+                    </button>
+                    {/* Progress billing is real, so a second invoice stays possible — on purpose. */}
+                    <button onClick={() => { setMenuOpen(false); setConfirmReconvert(true); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/50 hover:bg-white/[0.05] transition-colors text-left">
+                      <FileDown size={14} /> Create another invoice…
+                    </button>
+                  </>
                 )}
                 <div className="my-1 border-t border-white/[0.06]" />
                 <button
@@ -601,6 +636,16 @@ export default function EstimateDetailPage() {
         confirmLabel="Delete"
         onConfirm={() => { deleteEstimate(estimate.id); toast.success("Estimate deleted"); router.push("/estimates"); }}
         onCancel={() => setDeleteConfirm(false)}
+      />
+      <ConfirmModal
+        open={confirmReconvert}
+        title="Create a second invoice?"
+        body={convertedTo
+          ? `This estimate is already on ${convertedTo.number}. A second invoice bills the same work again — only do this for progress billing or a deliberate re-issue.`
+          : ""}
+        confirmLabel="Create another"
+        onConfirm={() => { setConfirmReconvert(false); handleConvertToInvoice(true); }}
+        onCancel={() => setConfirmReconvert(false)}
       />
     </div>
   );
