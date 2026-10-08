@@ -531,6 +531,12 @@ export async function exportEstimatePdf(
 
   const currFmt = (n: number) =>
     new Intl.NumberFormat("en-CA", { style: "currency", currency: currency || "CAD" }).format(n);
+  // Rates can carry more than two decimals; print them so the line still multiplies out.
+  const rateFmt = (n: number) =>
+    new Intl.NumberFormat("en-CA", {
+      style: "currency", currency: currency || "CAD",
+      minimumFractionDigits: 2, maximumFractionDigits: 4,
+    }).format(n);
 
   const { subtotal, tax, total } = moneyTotals(estimate.items, estimate.taxRate);
 
@@ -618,7 +624,7 @@ export async function exportEstimatePdf(
         item.description,
         item.category || "—",
         item.qty.toString(),
-        currFmt(item.rate),
+        rateFmt(item.rate),
         currFmt(lineAmount(item.qty, item.rate)),
       ]),
       headStyles: { fillColor: headFill, textColor: headText, fontSize: 8, fontStyle: "bold", cellPadding: { top: 4, bottom: 4, left: 3, right: 3 } },
@@ -914,7 +920,7 @@ export async function exportEstimatePdf(
         item.description,
         item.category || "—",
         item.qty.toString(),
-        currFmt(item.rate),
+        rateFmt(item.rate),
         currFmt(lineAmount(item.qty, item.rate)),
       ]),
       headStyles: { fillColor: [245, 245, 245] as [number,number,number], textColor: MID, fontSize: 7.5, fontStyle: "bold", cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 } },
@@ -1045,6 +1051,12 @@ export async function exportInvoicePdf(
 
   const currFmt = (n: number) =>
     new Intl.NumberFormat("en-CA", { style: "currency", currency: currency || "CAD" }).format(n);
+  // Rates can carry more than two decimals; print them so the line still multiplies out.
+  const rateFmt = (n: number) =>
+    new Intl.NumberFormat("en-CA", {
+      style: "currency", currency: currency || "CAD",
+      minimumFractionDigits: 2, maximumFractionDigits: 4,
+    }).format(n);
 
   const fmtDate = (d: Date) =>
     d.toLocaleDateString("en-CA", { day: "numeric", month: "long", year: "numeric" });
@@ -1081,7 +1093,7 @@ export async function exportInvoicePdf(
         String(idx + 1),
         item.description,
         item.qty.toString(),
-        currFmt(item.rate),
+        rateFmt(item.rate),
         currFmt(lineAmount(item.qty, item.rate)),
       ]),
       headStyles: {
