@@ -561,22 +561,15 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, ci
         flash.intensity = 60 * Math.max(0, 1 - Math.abs(p - 0.44) * 60);
       };
 
-      const frame = (now: number) => {
-        raf = requestAnimationFrame(frame);
-        const dt = Math.min(0.05, (now - last) / 1000);
-        last = now;
-        if (!onScreen || document.hidden) {
-          if (!phoneVideo.paused) phoneVideo.pause();
-          return;
-        }
-        if (phoneVideo.paused && playingRef.current) void phoneVideo.play().catch(() => {});
-
-        if (playingRef.current) {
-          t += dt;
-          orbit += dt * 0.045;
-          if (t > LOOP_SECONDS + HOLD_SECONDS) t = 0;
-        }
+      // Draw whatever the current t/orbit describe. Split out of the animation loop so a
+      // frame can also be rendered on demand at an exact time — that is how the hero video
+      // is pre-rendered, where racing a real clock would give uneven motion.
+      const draw = () => {
         const p = clamp01(t / LOOP_SECONDS);
+        // Idle motion (crew wander, pin bob, geofence pulse) used the raw rAF timestamp.
+        // Deriving it from t instead makes any given moment reproducible, which is what
+        // lets the hero video be rendered frame by frame without jitter.
+        const now = t * 1000;
 
         px += (tx - px) * 0.05;
         py += (ty - py) * 0.05;
@@ -633,6 +626,29 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, ci
         }
         if (Math.abs(p - lastP) > 0.001) { lastP = p; progressCb.current?.(p); }
       };
+
+      const frame = (now: number) => {
+        raf = requestAnimationFrame(frame);
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+        if (!onScreen || document.hidden) {
+          if (!phoneVideo.paused) phoneVideo.pause();
+          return;
+        }
+        if (phoneVideo.paused && playingRef.current) void phoneVideo.play().catch(() => {});
+        if (playingRef.current) {
+          t += dt;
+          orbit += dt * 0.045;
+          if (t > LOOP_SECONDS + HOLD_SECONDS) t = 0;
+        }
+        draw();
+      };
+
+      if (process.env.NODE_ENV !== "production") {
+        (window as unknown as { __siteFrame?: (sec: number, orb: number) => void }).__siteFrame =
+          (sec, orb) => { t = sec; orbit = orb; px = tx; py = ty; draw(); };
+      }
+
       apply(clamp01(t / LOOP_SECONDS));
       progressCb.current?.(clamp01(t / LOOP_SECONDS));
       raf = requestAnimationFrame(frame);
