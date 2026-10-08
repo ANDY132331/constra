@@ -13,6 +13,7 @@ import type { CompanySnap, ProjectSnap } from "@/lib/ask-constra-types";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { isBilled, isOutstanding, isOverdue } from "@/lib/invoice-status";
 import { useProjectSpend } from "@/lib/project-spend";
+import { projectProgress } from "@/lib/project-progress";
 
 // ── Helper: compute an invoice's subtotal ──────────────────────────────────────
 function invoiceTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
@@ -93,7 +94,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<t
       spent: spendOf(p).total,
       laborCost: laborByProject[p.id] ?? 0,
       revenue: revenueByClient[p.client] ?? 0,
-      progress: p.progress ?? 0,
+      progress: projectProgress(p),
       overdueTasks,
     };
   });

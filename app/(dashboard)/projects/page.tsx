@@ -17,6 +17,7 @@ import { EmptyState } from "@/components/empty-state";
 import { toLocalDateString } from "@/lib/utils";
 import { useProjectSpend } from "@/lib/project-spend";
 
+import { projectProgress } from "@/lib/project-progress";
 type View = "gantt" | "table" | "cards" | "map";
 
 const COLORS = ["#F5C400","#3b82f6","#8b5cf6","#22c55e","#ef4444","#06b6d4","#ec4899","#f97316"];
@@ -396,10 +397,10 @@ export default function ProjectsPage() {
                   <div className="mb-3.5">
                     <div className="flex items-center justify-between mb-1.5">
                       <p className="text-[11px] text-white/35">{completedTasks}/{totalTasks} tasks</p>
-                      <p className="text-[11px] font-black tabular-nums" style={{ color: p.color }}>{p.progress}%</p>
+                      <p className="text-[11px] font-black tabular-nums" style={{ color: p.color }}>{projectProgress(p)}%</p>
                     </div>
                     <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full progress-bar" style={{ width: `${p.progress}%`, backgroundColor: p.color }} />
+                      <div className="h-full rounded-full progress-bar" style={{ width: `${projectProgress(p)}%`, backgroundColor: p.color }} />
                     </div>
                   </div>
                   {/* Action strip — edit for foremen+, delete for admins only */}
@@ -579,10 +580,10 @@ export default function ProjectsPage() {
                     <div className="flex justify-center"><StatusBadge status={project.status} /></div>
                     <div className="pr-4">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[11px] text-white/40">{project.progress}%</span>
+                        <span className="text-[11px] text-white/40">{projectProgress(project)}%</span>
                       </div>
                       <div className="h-1 bg-white/8 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
+                        <div className="h-full rounded-full" style={{ width: `${projectProgress(project)}%`, backgroundColor: project.color }} />
                       </div>
                     </div>
                     <div>
@@ -683,10 +684,10 @@ export default function ProjectsPage() {
                       <div className="mb-4">
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[11px] text-white/40">Overall Progress</span>
-                          <span className="text-[13px] font-bold text-white">{project.progress}%</span>
+                          <span className="text-[13px] font-bold text-white">{projectProgress(project)}%</span>
                         </div>
                         <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
+                          <div className="h-full rounded-full transition-all" style={{ width: `${projectProgress(project)}%`, backgroundColor: project.color }} />
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3 mb-4">

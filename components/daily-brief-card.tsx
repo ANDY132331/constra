@@ -8,6 +8,7 @@ import { hoursBetween } from "@/lib/hours";
 import { generateBrief, type BriefPayload } from "@/lib/daily-brief";
 import { isOutstanding, isOverdue } from "@/lib/invoice-status";
 import { useProjectSpend } from "@/lib/project-spend";
+import { projectProgress } from "@/lib/project-progress";
 
 function parseBold(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -106,7 +107,7 @@ export function DailyBriefCard() {
           (t) => t.status !== "completed" && new Date(t.endDate) < now
         ).length;
         const budgetPct = p.budget > 0 ? Math.round((spendOf(p).total / p.budget) * 100) : null;
-        return { name: p.name, progress: p.progress, tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
+        return { name: p.name, progress: projectProgress(p), tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
       });
 
     const tasksDueToday = projects.flatMap((p) =>

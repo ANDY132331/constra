@@ -22,6 +22,7 @@ import { isForemanOrAbove } from "@/lib/permissions";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
+import { projectProgress } from "@/lib/project-progress";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -213,10 +214,10 @@ function ProjectStatusCard({ project, currency, showFinancials }: { project: Pro
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[11px] text-white/40">Progress</span>
-          <span className="text-[12px] font-bold text-white">{project.progress}%</span>
+          <span className="text-[12px] font-bold text-white">{projectProgress(project)}%</span>
         </div>
         <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
-          <div className="progress-bar h-full rounded-full" style={{ width: `${project.progress}%`, backgroundColor: project.color }} />
+          <div className="progress-bar h-full rounded-full" style={{ width: `${projectProgress(project)}%`, backgroundColor: project.color }} />
         </div>
       </div>
       {showFinancials && (
@@ -605,9 +606,9 @@ export default function DashboardPage() {
                     <p className="text-[13px] font-bold text-white/85 truncate">{proj.name}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                        <div className="h-full bg-amber-500 rounded-full" style={{ width: `${proj.progress ?? 0}%` }} />
+                        <div className="h-full bg-amber-500 rounded-full" style={{ width: `${projectProgress(proj)}%` }} />
                       </div>
-                      <span className="text-[10px] text-white/35 font-semibold flex-shrink-0">{proj.progress ?? 0}%</span>
+                      <span className="text-[10px] text-white/35 font-semibold flex-shrink-0">{projectProgress(proj)}%</span>
                     </div>
                   </div>
                   <ArrowRight size={13} className="text-white/20 flex-shrink-0" />

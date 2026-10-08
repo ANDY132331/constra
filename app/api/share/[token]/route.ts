@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { projectProgress } from "@/lib/project-progress";
 
 function getAdmin() {
   return createClient(
@@ -46,7 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
     client: project.client,
     address: project.address,
     status: project.status,
-    progress: project.progress,
+    progress: projectProgress(project as Parameters<typeof projectProgress>[0]),
     color: project.color,
     startDate: project.start_date,
     endDate: project.end_date,
