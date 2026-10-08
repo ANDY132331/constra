@@ -53,12 +53,11 @@ function ClockPhoto({ src, className }: { src: string; className?: string }) {
 import { sendPushEvent } from "@/lib/push-client";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { isForemanOrAbove } from "@/lib/permissions";
-import { hoursBetween, elapsedLabel } from "@/lib/hours";
+import { hoursBetween, elapsedLabel, isImplausibleShift, LONG_SHIFT_HOURS } from "@/lib/hours";
 
 const elapsed = (start: Date, end?: Date): string => elapsedLabel(start, end);
 
 /** Past this many hours an open shift is almost certainly a forgotten clock-out. */
-const LONG_SHIFT_HOURS = 16;
 
 function fmt(date: Date | string) {
   return new Date(date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
@@ -702,11 +701,15 @@ export default function TimeTrackingPage() {
     a.download = `constra-time-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success(
-      stillOn > 0
-        ? `Exported ${done.length} ${done.length === 1 ? "entry" : "entries"} — ${stillOn} still on site, not included`
-        : `Exported ${done.length} ${done.length === 1 ? "entry" : "entries"}`,
-    );
+    const implausible = done.filter((e) => isImplausibleShift(e.clockIn, e.clockOut)).length;
+    const notes = [
+      stillOn > 0 ? `${stillOn} still on site, not included` : null,
+      // Worth saying before the numbers reach payroll, not after.
+      implausible > 0 ? `${implausible} over ${LONG_SHIFT_HOURS}h — check for missed clock-outs` : null,
+    ].filter(Boolean);
+    const summary = `Exported ${done.length} ${done.length === 1 ? "entry" : "entries"}`;
+    if (implausible > 0) toast.warning?.(`${summary} — ${notes.join("; ")}`) ?? toast.success(`${summary} — ${notes.join("; ")}`);
+    else toast.success(notes.length ? `${summary} — ${notes.join("; ")}` : summary);
   };
 
   const allEntries = [
@@ -1121,7 +1124,17 @@ export default function TimeTrackingPage() {
                       const project = getProjectById(entry.projectId);
                       if (!worker) return null;
                       const isLive = !!(entry as { live?: boolean }).live;
-                      const entryFlags: VerificationFlag[] = (entry as { verificationFlags?: VerificationFlag[] }).verificationFlags || [];
+                      const storedFlags: VerificationFlag[] = (entry as { verificationFlags?: VerificationFlag[] }).verificationFlags || [];
+                      // Derived rather than stored: a missed clock-out is only visible once the
+                      // shift closes, and deriving it also catches entries recorded before the
+                      // check existed.
+                      const entryFlags: VerificationFlag[] = isImplausibleShift(entry.clockIn, entry.clockOut)
+                        ? [...storedFlags, {
+                            type: "long-shift" as const, severity: "medium" as const,
+                            note: `${hoursBetween(entry.clockIn, entry.clockOut).toFixed(1)}h shift — over ${LONG_SHIFT_HOURS}h, check for a missed clock-out`,
+                            detectedAt: new Date(entry.clockOut!),
+                          }]
+                        : storedFlags;
                       const worstSev = entryFlags.some((f) => f.severity === "high") ? "high" : entryFlags.some((f) => f.severity === "medium") ? "medium" : entryFlags.length > 0 ? "low" : null;
                       const flagCol = worstSev === "high" ? "text-red-400" : worstSev === "medium" ? "text-amber-400" : "text-blue-400/70";
                       const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;
@@ -1526,7 +1539,16 @@ export default function TimeTrackingPage() {
               : null;
             const isLive = !!(entry as { live?: boolean }).live;
             const hasGps = !isLive && (entry as { gps?: GpsLocation }).gps;
-            const flags: VerificationFlag[] = (entry as { verificationFlags?: VerificationFlag[] }).verificationFlags || [];
+            const storedDeskFlags: VerificationFlag[] = (entry as { verificationFlags?: VerificationFlag[] }).verificationFlags || [];
+            // Same derived missed-clock-out flag as the narrow layout. This page renders the
+            // list twice and wiring only one copy is how the flag went missing on desktop.
+            const flags: VerificationFlag[] = isImplausibleShift(entry.clockIn, entry.clockOut)
+              ? [...storedDeskFlags, {
+                  type: "long-shift" as const, severity: "medium" as const,
+                  note: `${hoursBetween(entry.clockIn, entry.clockOut).toFixed(1)}h shift — over ${LONG_SHIFT_HOURS}h, check for a missed clock-out`,
+                  detectedAt: new Date(entry.clockOut!),
+                }]
+              : storedDeskFlags;
             const worstSeverity = flags.some((f) => f.severity === "high")
               ? "high"
               : flags.some((f) => f.severity === "medium")

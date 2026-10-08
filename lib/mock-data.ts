@@ -6,7 +6,7 @@
 
 // Background verification flag attached to a clock entry
 export type VerificationFlag = {
-  type: "impossible-travel" | "off-site" | "multiple-devices" | "suspicious-gps" | "duplicate-image";
+  type: "impossible-travel" | "off-site" | "multiple-devices" | "suspicious-gps" | "duplicate-image" | "long-shift";
   severity: "low" | "medium" | "high";
   note: string;
   detectedAt: Date;
