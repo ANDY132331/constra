@@ -205,6 +205,12 @@ export async function runVerification({
 }: VerificationInput): Promise<VerificationFlag[]> {
   const flags: VerificationFlag[] = [];
 
+  // Impossible travel: check speed required to get from last clock-out to this clock-in
+  if (entry.gps) {
+    const travelFlag = checkImpossibleTravel(entry, pastEntries);
+    if (travelFlag) flags.push(travelFlag);
+  }
+
   if (entry.gps && project) {
     const offSiteFlag = checkOffSite(entry.gps, project);
     if (offSiteFlag) flags.push(offSiteFlag);

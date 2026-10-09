@@ -1,6 +1,6 @@
 import type { ClockEntry, Worker, Project, Estimate, Invoice, DailyReport, ChangeOrder } from "./mock-data";
 import { moneyTotals, lineAmount } from "@/lib/money";
-import { hoursBetween } from "./hours";
+import { hoursBetween, LONG_SHIFT_HOURS } from "./hours";
 import { isOverdue } from "./invoice-status";
 
 type PdfReportInput = {
@@ -76,7 +76,6 @@ export async function exportReportPdf(input: PdfReportInput) {
   );
   const missingRates = rows.filter((r) => !(r.rate > 0)).map((r) => r.name);
   // A shift nobody closed keeps counting, so call it out rather than quietly paying it
-  const LONG_SHIFT_HOURS = 16;
   const longShifts = entries
     .filter((e) => hrs(e) >= LONG_SHIFT_HOURS)
     .map((e) => ({ name: workerMap.get(e.workerId)?.name ?? "Unknown", hours: hrs(e) }));
