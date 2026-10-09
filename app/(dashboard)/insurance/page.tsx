@@ -14,7 +14,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toast } from "sonner";
-import { toLocalDateString } from "@/lib/utils";
+import { toLocalDateString, endOfDay } from "@/lib/utils";
 
 const inp = "w-full bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] text-white/80 placeholder:text-white/25 outline-none focus:border-amber-500/40 transition-colors";
 const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider mb-1.5";
@@ -46,15 +46,15 @@ const blank: FormState = {
 };
 
 function expiryStatus(d: Date): "expired" | "soon" | "valid" {
-  const now = Date.now();
-  const ms = new Date(d).getTime() - now;
+  // Compare against end-of-day so a policy expiring today stays "valid" until midnight.
+  const ms = endOfDay(d).getTime() - Date.now();
   if (ms <= 0) return "expired";
   if (ms < 30 * 24 * 60 * 60 * 1000) return "soon";
   return "valid";
 }
 
 function daysUntilExpiry(d: Date): number {
-  return Math.ceil((new Date(d).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  return Math.ceil((endOfDay(d).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
 const STATUS_CONFIG = {

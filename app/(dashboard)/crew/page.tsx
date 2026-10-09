@@ -18,7 +18,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 import { toast } from "sonner";
-import { toLocalDateString } from "@/lib/utils";
+import { toLocalDateString, endOfDay } from "@/lib/utils";
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Admin: { label: "Admin", className: "bg-purple-500/15 text-purple-400" },
@@ -716,8 +716,8 @@ export default function CrewPage() {
                   return (
                     <div className="flex flex-wrap gap-1 mt-2.5">
                       {worker.certifications.map((c) => {
-                        const expired = c.expiryDate && new Date(c.expiryDate).getTime() < now;
-                        const expiringSoon = !expired && c.expiryDate && (new Date(c.expiryDate).getTime() - now) < soon;
+                        const expired = c.expiryDate && endOfDay(c.expiryDate).getTime() < now;
+                        const expiringSoon = !expired && c.expiryDate && (endOfDay(c.expiryDate).getTime() - now) < soon;
                         return (
                           <span key={c.id} className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${expired ? "bg-red-500/15 text-red-400" : expiringSoon ? "bg-amber-500/15 text-amber-400" : "bg-white/[0.06] text-white/40"}`}>
                             {(expired || expiringSoon) && <AlertTriangle size={8} />}

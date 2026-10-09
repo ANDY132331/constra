@@ -10,6 +10,7 @@ import {
 import { useStore, useTransientStore } from "@/lib/store";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { Shield } from "lucide-react";
+import { endOfDay } from "@/lib/utils";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -83,7 +84,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
   // Insurance expiry alerts (expired or expiring within 30 days)
   const expiryAlerts = isAdmin ? insurancePolicies.filter((p) => {
-    const ms = new Date(p.expiryDate).getTime() - Date.now();
+    const ms = endOfDay(p.expiryDate).getTime() - Date.now();
     return ms < 30 * 24 * 60 * 60 * 1000;
   }) : [];
   const QUICK_ADD = ALL_QUICK_ADD.filter(({ minLevel }) =>
@@ -250,7 +251,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                 <div className="max-h-80 overflow-y-auto overscroll-contain" style={{WebkitOverflowScrolling:"touch" as never}}>
                   {/* Insurance expiry alerts — shown first */}
                   {expiryAlerts.map((p) => {
-                    const ms = new Date(p.expiryDate).getTime() - Date.now();
+                    const ms = endOfDay(p.expiryDate).getTime() - Date.now();
                     const expired = ms <= 0;
                     const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
                     return (
