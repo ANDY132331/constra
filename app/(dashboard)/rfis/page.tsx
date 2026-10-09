@@ -245,7 +245,8 @@ export default function RFIsPage() {
               const project = getProjectById(rfi.projectId);
               const statusCfg = STATUS_CONFIG[rfi.status];
               const prioCfg = PRIORITY_CONFIG[rfi.priority];
-              const isOverdue = new Date(rfi.dueDate) < new Date() && rfi.status === "open";
+              const rfiDueEnd = new Date(rfi.dueDate); rfiDueEnd.setHours(23, 59, 59, 999);
+              const isOverdue = rfiDueEnd < new Date() && rfi.status === "open";
               const borderColor = rfi.priority === "critical" ? "#ef4444" : rfi.priority === "urgent" ? "#F5C400" : "#3b82f6";
               return (
                 <div
@@ -377,7 +378,8 @@ export default function RFIsPage() {
               const prioCfg = PRIORITY_CONFIG[rfi.priority];
               const StatusIcon = statusCfg.icon;
               const isOpen = expanded === rfi.id;
-              const isOverdue = new Date(rfi.dueDate) < new Date() && rfi.status === "open";
+              const rfiDueEnd2 = new Date(rfi.dueDate); rfiDueEnd2.setHours(23, 59, 59, 999);
+              const isOverdue = rfiDueEnd2 < new Date() && rfi.status === "open";
 
               return (
                 <div key={rfi.id} className={`card-hover bg-[#111111] border rounded-2xl overflow-hidden ${isOverdue ? "border-red-500/20 hover:border-red-500/35" : "border-white/[0.06] hover:border-white/[0.12]"}`}

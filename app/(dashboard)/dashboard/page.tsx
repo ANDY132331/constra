@@ -23,6 +23,7 @@ import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
 import { projectProgress } from "@/lib/project-progress";
+import { isPastDue as invoiceIsPastDue } from "@/lib/invoice-status";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -355,7 +356,7 @@ export default function DashboardPage() {
   const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);
   const totalPaid = useMemo(() => invoices.filter((i) => i.status === "paid").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
   const totalOutstanding = useMemo(() => invoices.filter((i) => i.status === "sent" || i.status === "overdue").reduce((s, i) => s + invoiceTotal(i), 0), [invoices]);
-  const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && new Date(i.dueDate) < now)), [invoices, now]);
+  const overdueInvoices = useMemo(() => invoices.filter((i) => i.status === "overdue" || invoiceIsPastDue(i, now)), [invoices, now]);
   const pendingCOs = useMemo(() => changeOrders.filter((co) => co.status === "pending"), [changeOrders]);
   const overdueTasks = useMemo(() =>
     projects.flatMap((p) =>

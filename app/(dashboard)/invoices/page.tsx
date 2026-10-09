@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/empty-state";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toLocalDateString } from "@/lib/utils";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { isPastDue as invoiceIsPastDue } from "@/lib/invoice-status";
 
 const STATUS_CONFIG = {
   draft:   { label: "Draft",   bg: "bg-zinc-700/60",       text: "text-zinc-300",   dot: "bg-zinc-400",   bar: "bg-zinc-600" },
@@ -52,7 +53,7 @@ function InvoiceRow({ invoice, currency, onClick }: {
   invoice: Invoice; currency: string; onClick: () => void;
 }) {
   const total = invoiceTotal(invoice);
-  const isPastDue = invoice.status === "sent" && new Date(invoice.dueDate) < new Date();
+  const isPastDue = invoiceIsPastDue(invoice);
   const cfg = isPastDue ? STATUS_CONFIG.overdue : STATUS_CONFIG[invoice.status];
   const isOverdue = invoice.status === "overdue" || isPastDue;
   const isPaid = invoice.status === "paid";
@@ -106,7 +107,7 @@ export default function InvoicesPage() {
 
   const filtered = invoices.filter((i) => {
     if (statusFilter !== "all") {
-      const isPastDue = i.status === "sent" && new Date(i.dueDate) < now;
+      const isPastDue = invoiceIsPastDue(i, now);
       const effectiveStatus = isPastDue ? "overdue" : i.status;
       if (effectiveStatus !== statusFilter) return false;
     }
@@ -122,7 +123,7 @@ export default function InvoicesPage() {
     .filter((i) => i.status === "paid")
     .reduce((s, i) => s + invoiceTotal(i), 0);
 
-  const overdueCount = invoices.filter((i) => i.status === "overdue" || (i.status === "sent" && new Date(i.dueDate) < now)).length;
+  const overdueCount = invoices.filter((i) => i.status === "overdue" || invoiceIsPastDue(i, now)).length;
 
   const calcTotal = useCallback((items: LineItem[], taxRate: string) => {
     return moneyTotals(items, taxRate).total;
@@ -260,7 +261,7 @@ export default function InvoicesPage() {
           <div className="mx-5 space-y-2.5">
             {filtered.map((inv) => {
               const total = invoiceTotal(inv);
-              const pastDue = inv.status === "sent" && new Date(inv.dueDate) < new Date();
+              const pastDue = invoiceIsPastDue(inv);
               const effectiveStatus = pastDue ? "overdue" : inv.status;
               const cfg = STATUS_CONFIG[effectiveStatus];
               const isOverdue = inv.status === "overdue" || pastDue;

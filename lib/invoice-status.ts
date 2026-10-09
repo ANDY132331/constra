@@ -9,9 +9,17 @@
 
 type Inv = { status: string; dueDate: Date | string };
 
-/** Sent, unpaid, and past its due date — overdue in fact even if not on record. */
+/** Sent, unpaid, and past its due date — overdue in fact even if not on record.
+ *
+ * Due dates are stored at noon local time (new Date(dateString + "T12:00:00")).
+ * We compare against the END of the due date day so an invoice due today stays
+ * "sent" until midnight, not until noon.
+ */
 export function isPastDue(inv: Inv, now: Date = new Date()): boolean {
-  return inv.status === "sent" && new Date(inv.dueDate).getTime() < now.getTime();
+  if (inv.status !== "sent") return false;
+  const dueEnd = new Date(inv.dueDate);
+  dueEnd.setHours(23, 59, 59, 999);
+  return dueEnd.getTime() < now.getTime();
 }
 
 /** Overdue on record, or overdue by the calendar. */

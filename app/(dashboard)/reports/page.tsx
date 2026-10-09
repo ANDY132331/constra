@@ -60,6 +60,16 @@ export default function ReportsPage() {
   const [period, setPeriod] = useState<"week" | "month" | "quarter">("week");
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
 
+  // Refresh date-based memos at midnight so a page left open overnight stays
+  // accurate. todayKey is a dependency for any useMemo that calls new Date().
+  const [todayKey, setTodayKey] = useState(() => new Date().toDateString());
+  useEffect(() => {
+    const now = new Date();
+    const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+    const t = setTimeout(() => setTodayKey(new Date().toDateString()), msToMidnight);
+    return () => clearTimeout(t);
+  }, [todayKey]); // re-arm after each midnight tick
+
   useEffect(() => {
     if (!exportMenuOpen) return;
     const handler = (e: MouseEvent) => {
@@ -73,7 +83,8 @@ export default function ReportsPage() {
   const canSeeFinancials = currentUser.role === "Admin" || currentUser.role === "Project Manager";
 
   const { start: periodStart, end: periodEnd, label: periodLabel } = useMemo(
-    () => periodBounds(period), [period]
+    // todayKey changes at midnight, keeping the date range correct on a long-open tab
+    () => periodBounds(period), [period, todayKey] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // Hours within the selected period
@@ -120,7 +131,7 @@ export default function ReportsPage() {
       return weeks;
     }
     return days;
-  }, [clockEntries, period]);
+  }, [clockEntries, period, todayKey]); // todayKey keeps chart dates accurate past midnight
 
   const maxBarH = Math.max(...dailyBars.map((d) => d.hours), 1);
   const hasHoursData = totalHours > 0;
