@@ -576,9 +576,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         language: ((() => { try { return localStorage.getItem("constra_language"); } catch { return null; } })() ?? co?.language ?? s.language) as Locale,
         currency: (co?.currency ?? s.currency) as CurrencyCode,
         industry: co?.industry ?? s.industry,
-        workers: (profilesData ?? []).map(dbToWorker),
-        projects: (projectsData ?? []).map((p) => dbToProject(p, tasksByProject[p.id] ?? [])),
+        // Reconcile clockedIn flag against actual open clock entries.
+        // The clocked_in column is set at clock-in and cleared at clock-out. If a browser
+        // crash, network failure, or direct DB edit leaves the flag out of sync with the
+        // actual entries, workers would appear stuck as clocked in or out forever.
+        // Deriving it from open entries here ensures the UI is always consistent with reality.
         clockEntries: (clockData ?? []).map(dbToClockEntry),
+        workers: (() => {
+          const openWorkerIds = new Set(
+            (clockData ?? []).filter((e) => !(e as { clock_out?: string | null }).clock_out).map((e) => (e as { worker_id: string }).worker_id),
+          );
+          return (profilesData ?? []).map((row) => {
+            const w = dbToWorker(row);
+            const hasOpenEntry = openWorkerIds.has(w.id);
+            if (w.clockedIn !== hasOpenEntry) return { ...w, clockedIn: hasOpenEntry, ...(!hasOpenEntry ? { clockInTime: undefined, clockInGps: undefined } : {}) };
+            return w;
+          });
+        })(),
+        projects: (projectsData ?? []).map((p) => dbToProject(p, tasksByProject[p.id] ?? [])),
         punchItems: (punchData ?? []).map(dbToPunchItem),
         safetyIncidents: (safetyData ?? []).map(dbToSafetyIncident),
         equipment: (equipData ?? []).map(dbToEquipment),
