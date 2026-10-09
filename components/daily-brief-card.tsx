@@ -106,7 +106,7 @@ export function DailyBriefCard() {
         const tasksOverdue = p.tasks.filter(
           (t) => t.status !== "completed" && new Date(t.endDate) < now
         ).length;
-        const budgetPct = p.budget > 0 ? Math.round((spendOf(p).total / p.budget) * 100) : null;
+        const budgetPct = spendOf(p).revisedBudget > 0 ? Math.round((spendOf(p).total / spendOf(p).revisedBudget) * 100) : null;
         return { name: p.name, progress: projectProgress(p), tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
       });
 

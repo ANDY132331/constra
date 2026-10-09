@@ -57,12 +57,14 @@ function buildContext(d: CompanySnap): string {
     lines.push(``, `=== PROJECTS (${d.projects.length} total) ===`);
     d.projects.forEach((p) => {
       const budgetPct = p.budget > 0 ? ((p.spent / p.budget) * 100).toFixed(0) + "%" : "N/A";
-      const grossProfit = p.revenue - p.laborCost - p.spent;
+      // p.spent already includes labour (derived from timesheets via spendOf); do NOT subtract
+      // laborCost again or labour gets double-counted and gross profit goes deeply negative.
+      const grossProfit = p.revenue - p.spent;
       const margin = p.revenue > 0 ? ((grossProfit / p.revenue) * 100).toFixed(1) + "%" : "N/A";
       lines.push(
         `  ${p.name} [${p.status}]: ${p.progress}% complete` +
         ` | Budget ${p.budget.toFixed(0)} / spent ${p.spent.toFixed(0)} (${budgetPct})` +
-        ` | Labour ${p.laborCost.toFixed(0)}` +
+        ` | Labour ${p.laborCost.toFixed(0)} | Other ${Math.max(0, p.spent - p.laborCost).toFixed(0)}` +
         ` | Revenue ${p.revenue.toFixed(0)}` +
         ` | Est. gross profit ${grossProfit.toFixed(0)} (${margin})` +
         (p.overdueTasks > 0 ? ` | ⚠ ${p.overdueTasks} overdue tasks` : "")

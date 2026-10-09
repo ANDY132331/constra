@@ -132,7 +132,7 @@ export default function ReportsPage() {
       .map((p) => ({
         name: p.name,
         color: p.color,
-        budget: p.budget,
+        budget: spendOf(p).revisedBudget,
         spent: spendOf(p).total,
         pct: spendOf(p).revisedBudget > 0 ? Math.min(100, (spendOf(p).total / spendOf(p).revisedBudget) * 100) : 0,
       })),
