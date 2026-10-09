@@ -10,7 +10,7 @@ import { format, isBefore } from "date-fns";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { EmptyState } from "@/components/empty-state";
-import { toLocalDateString } from "@/lib/utils";
+import { toLocalDateString, endOfDay } from "@/lib/utils";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
   completed: { label: "Completed", icon: CheckCircle2, className: "text-green-400" },
@@ -186,7 +186,7 @@ export default function TasksPage() {
             const mWorker = getWorkerById(task.workerId);
             const cfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG["not-started"];
             const MIcon = cfg.icon;
-            const isOverdueMobile = task.status !== "completed" && !!task.endDate && isBefore(new Date(task.endDate), today);
+            const isOverdueMobile = task.status !== "completed" && !!task.endDate && isBefore(endOfDay(task.endDate), today);
             const borderAccent = isOverdueMobile ? "#ef4444" : task.status === "delayed" ? "#ef4444" : task.status === "in-progress" ? "#F5C400" : task.status === "completed" ? "#22c55e" : "#3b82f6";
             return (
               <div key={task.id} className="card-hover bg-[#131110] border border-white/[0.07] rounded-2xl p-4 active:scale-[0.985] active:opacity-90 overflow-hidden relative hover:border-white/[0.12]"
@@ -310,7 +310,7 @@ export default function TasksPage() {
           const worker = getWorkerById(task.workerId);
           const cfg = STATUS_CONFIG[task.status] ?? STATUS_CONFIG["not-started"];
           const Icon = cfg.icon;
-          const isOverdue = task.status !== "completed" && !!task.endDate && isBefore(new Date(task.endDate), today);
+          const isOverdue = task.status !== "completed" && !!task.endDate && isBefore(endOfDay(task.endDate), today);
 
           return (
             <div key={task.id} className="grid grid-cols-[1fr_160px_130px_120px_100px_80px_64px] items-center px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors last:border-0 group">
