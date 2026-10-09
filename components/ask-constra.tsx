@@ -12,6 +12,7 @@ import { useStore } from "@/lib/store";
 import type { CompanySnap, ProjectSnap } from "@/lib/ask-constra-types";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { isBilled, isOutstanding, isOverdue } from "@/lib/invoice-status";
+import { endOfDay } from "@/lib/utils";
 import { useProjectSpend } from "@/lib/project-spend";
 import { projectProgress } from "@/lib/project-progress";
 import { hoursBetween } from "@/lib/hours";
@@ -83,7 +84,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<t
   // ── Project snapshots ────────────────────────────────────────────────────────
   const projectSnaps: ProjectSnap[] = projects.map((p) => {
     const overdueTasks = p.tasks.filter(
-      (t) => t.status !== "completed" && new Date(t.endDate) < now
+      (t) => t.status !== "completed" && endOfDay(t.endDate) < now
     ).length;
     return {
       name: p.name,

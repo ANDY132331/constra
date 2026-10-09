@@ -7,6 +7,7 @@ import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
 import { generateBrief, type BriefPayload } from "@/lib/daily-brief";
 import { isOutstanding, isOverdue } from "@/lib/invoice-status";
+import { endOfDay } from "@/lib/utils";
 import { useProjectSpend } from "@/lib/project-spend";
 import { projectProgress } from "@/lib/project-progress";
 
@@ -104,7 +105,7 @@ export function DailyBriefCard() {
           (t) => t.status !== "completed" && new Date(t.endDate).toDateString() === now.toDateString()
         ).length;
         const tasksOverdue = p.tasks.filter(
-          (t) => t.status !== "completed" && new Date(t.endDate) < now
+          (t) => t.status !== "completed" && endOfDay(t.endDate) < now
         ).length;
         const budgetPct = spendOf(p).revisedBudget > 0 ? Math.round((spendOf(p).total / spendOf(p).revisedBudget) * 100) : null;
         return { name: p.name, progress: projectProgress(p), tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
@@ -113,14 +114,14 @@ export function DailyBriefCard() {
     const tasksDueToday = projects.flatMap((p) =>
       p.tasks
         .filter((t) => t.status !== "completed")
-        .filter((t) => new Date(t.endDate).toDateString() === now.toDateString() || new Date(t.endDate) < now)
+        .filter((t) => new Date(t.endDate).toDateString() === now.toDateString() || endOfDay(t.endDate) < now)
         .map((t) => {
           const worker = workers.find((w) => w.id === t.workerId);
           return {
             name: t.name,
             project: p.name,
             worker: worker?.name ?? "Unassigned",
-            overdue: new Date(t.endDate) < now && new Date(t.endDate).toDateString() !== now.toDateString(),
+            overdue: endOfDay(t.endDate) < now && new Date(t.endDate).toDateString() !== now.toDateString(),
           };
         })
     );
