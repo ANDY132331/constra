@@ -24,6 +24,7 @@ import { hoursBetween } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
 import { projectProgress } from "@/lib/project-progress";
 import { isPastDue as invoiceIsPastDue } from "@/lib/invoice-status";
+import { endOfDay } from "@/lib/utils";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -361,8 +362,7 @@ export default function DashboardPage() {
   const overdueTasks = useMemo(() =>
     projects.flatMap((p) =>
       p.tasks.filter((t) => {
-        const end = t.endDate instanceof Date ? t.endDate : new Date(t.endDate + "T12:00:00");
-        return t.status !== "completed" && end < now;
+        return t.status !== "completed" && endOfDay(t.endDate) < now;
       })
     ),
   [projects, now]);
@@ -422,8 +422,8 @@ export default function DashboardPage() {
     const myTasks = projects
       .flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.name })))
       .filter((t) => t.workerId === currentUser.id && t.status !== "completed");
-    const urgentTasks = myTasks.filter((t) => new Date(t.endDate) <= now);
-    const todayTasks = myTasks.filter((t) => new Date(t.endDate).toDateString() === now.toDateString() && new Date(t.endDate) > now);
+    const urgentTasks = myTasks.filter((t) => endOfDay(t.endDate) <= now);
+    const todayTasks = myTasks.filter((t) => new Date(t.endDate).toDateString() === now.toDateString() && endOfDay(t.endDate) > now);
 
     // My punch items (items on my projects)
     const myPunchItems = punchItems.filter(
@@ -1044,7 +1044,7 @@ export default function DashboardPage() {
               p.tasks.filter((t) => t.status !== "completed").map((t) => ({ ...t, projectName: p.name, projectColor: p.color }))
             ).slice(0, 5).map((task) => {
               const worker = getWorkerById(task.workerId);
-              const isLate = new Date(task.endDate) < now && task.progress < 100;
+              const isLate = endOfDay(task.endDate) < now && task.progress < 100;
               return (
                 <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-4 active:bg-white/[0.03]">
                   <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: task.projectColor }} />
@@ -1493,7 +1493,7 @@ export default function DashboardPage() {
               p.tasks.filter((t) => t.status !== "completed").map((t) => ({ ...t, projectName: p.name, projectColor: p.color }))
             ).slice(0, 6).map((task) => {
               const worker = getWorkerById(task.workerId);
-              const isLate = new Date(task.endDate) < now && task.progress < 100;
+              const isLate = endOfDay(task.endDate) < now && task.progress < 100;
               return (
                 <Link key={task.id} href="/tasks" className="flex items-center gap-3 p-3 hover:bg-white/[0.03] transition-colors group">
                   <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: task.projectColor }} />

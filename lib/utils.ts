@@ -20,6 +20,18 @@ export function cn(...inputs: ClassValue[]) {
  *  The store currently revives these as Date objects, but the signature accepts strings and
  *  rows from the database arrive as strings.
  */
+/** Return a new Date set to 23:59:59.999 on the same local calendar day as d.
+ *
+ *  Dates in this app are stored at local noon (form.date + "T12:00:00") to
+ *  survive timezone shifts. Comparing one directly to `new Date()` marks it
+ *  overdue from noon; comparing against endOfDay() waits until midnight.
+ */
+export function endOfDay(d: Date | string): Date {
+  const t = d instanceof Date ? new Date(d) : new Date(d);
+  t.setHours(23, 59, 59, 999);
+  return t;
+}
+
 export function toLocalDateString(d: Date | string): string {
   const t = d instanceof Date
     ? d

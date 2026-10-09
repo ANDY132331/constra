@@ -1,4 +1,5 @@
 // What an invoice's status *means*, in one place.
+import { endOfDay } from "./utils";
 //
 // "overdue" is sometimes stored and sometimes only true by the calendar: an invoice marked
 // "sent" whose due date has passed is overdue whether or not anyone pressed the button.
@@ -16,10 +17,7 @@ type Inv = { status: string; dueDate: Date | string };
  * "sent" until midnight, not until noon.
  */
 export function isPastDue(inv: Inv, now: Date = new Date()): boolean {
-  if (inv.status !== "sent") return false;
-  const dueEnd = new Date(inv.dueDate);
-  dueEnd.setHours(23, 59, 59, 999);
-  return dueEnd.getTime() < now.getTime();
+  return inv.status === "sent" && endOfDay(inv.dueDate).getTime() < now.getTime();
 }
 
 /** Overdue on record, or overdue by the calendar. */
