@@ -14,14 +14,12 @@ import { moneyTotals, lineAmount } from "@/lib/money";
 import { isBilled, isOutstanding, isOverdue } from "@/lib/invoice-status";
 import { useProjectSpend } from "@/lib/project-spend";
 import { projectProgress } from "@/lib/project-progress";
+import { hoursBetween } from "@/lib/hours";
 
 // ── Helper: compute an invoice's subtotal ──────────────────────────────────────
 function invoiceTotal(inv: { items: { qty: number; rate: number }[]; taxRate: number }) {
   return moneyTotals(inv.items, inv.taxRate).total;
 }
-
-// ── Helper: ms → hours ────────────────────────────────────────────────────────
-function msToHours(ms: number) { return ms / 3_600_000; }
 
 // ── Build snapshot from store data ────────────────────────────────────────────
 function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<typeof useProjectSpend>): CompanySnap {
@@ -58,7 +56,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<t
   let totalLaborCostThisMonth = 0;
   let totalHoursThisMonth = 0;
   monthEntries.forEach((e) => {
-    const hours = msToHours(new Date(e.clockOut!).getTime() - new Date(e.clockIn).getTime());
+    const hours = hoursBetween(e.clockIn, e.clockOut!);
     const worker = workers.find((w) => w.id === e.workerId);
     totalHoursThisMonth += hours;
     totalLaborCostThisMonth += hours * (worker?.hourlyRate ?? 0);
@@ -68,7 +66,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<t
   const laborByProject: Record<string, number> = {};
   clockEntries.forEach((e) => {
     if (!e.clockOut) return;
-    const hours = msToHours(new Date(e.clockOut).getTime() - new Date(e.clockIn).getTime());
+    const hours = hoursBetween(e.clockIn, e.clockOut);
     const rate = workers.find((w) => w.id === e.workerId)?.hourlyRate ?? 0;
     laborByProject[e.projectId] = (laborByProject[e.projectId] ?? 0) + hours * rate;
   });
