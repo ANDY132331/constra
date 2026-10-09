@@ -14,6 +14,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 import type { InvoiceTemplate } from "@/lib/pdf-export";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { endOfDay } from "@/lib/utils";
 
 // ── Paper styles ─────────────────────────────────────────────────────────────
 function paperStyles(t: InvoiceTemplate, isAccepted: boolean) {
@@ -125,7 +126,7 @@ export default function EstimateDetailPage() {
   const isSent     = estimate.status === "sent";
   const isAccepted = estimate.status === "accepted";
   const isDeclined = estimate.status === "declined";
-  const isExpired  = new Date(estimate.validUntil) < new Date() && isSent;
+  const isExpired  = endOfDay(estimate.validUntil) < new Date() && isSent;
   const ps = paperStyles(template, isAccepted);
 
   const taxPct = parseFloat(draft.taxRate) || 0;
