@@ -627,10 +627,13 @@ export default function TimeTrackingPage() {
     toast.success(`${worker.name} clocked in`);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([80, 30, 80]);
 
-    // Run background verification silently after UI is updated
+    // Run background verification silently after UI is updated.
+    // Exclude the newly-added entry from pastEntries — otherwise checkDuplicateImage
+    // would compare the photo against itself (entryId is now in clockEntries) and
+    // flag every photo clock-in as a high-severity duplicate on the very first check.
     const project = getProjectById(projectId);
     try {
-      const flags = await runVerification({ entry: { ...newEntry, clockInPhoto: dataUrl }, worker, project, pastEntries: clockEntries });
+      const flags = await runVerification({ entry: { ...newEntry, clockInPhoto: dataUrl }, worker, project, pastEntries: clockEntries.filter((e) => e.id !== entryId) });
       if (flags.length > 0) {
         updateClockEntry(entryId, { verificationFlags: flags });
       }
