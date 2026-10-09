@@ -90,7 +90,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<t
     return {
       name: p.name,
       status: p.status,
-      budget: p.budget ?? 0,
+      budget: spendOf(p).revisedBudget,
       spent: spendOf(p).total,
       laborCost: laborByProject[p.id] ?? 0,
       revenue: revenueByClient[p.client] ?? 0,

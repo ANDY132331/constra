@@ -193,8 +193,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
 
 function ProjectStatusCard({ project, currency, showFinancials }: { project: Project; currency: string; showFinancials: boolean }) {
   const spendOf = useProjectSpend();
-  const spent = spendOf(project).total;
-  const budget = project.budget;
+  const { total: spent, revisedBudget: budget } = spendOf(project);
   const overBudget = spent > budget;
   const budgetPct = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
   const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
@@ -951,7 +950,7 @@ export default function DashboardPage() {
               const doneTasks = p.tasks.filter((t) => t.status === "completed").length;
               const totalTasks = p.tasks.length;
               const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-              const budgetPct = p.budget > 0 ? Math.min(100, Math.round((spendOf(p).total / p.budget) * 100)) : 0;
+              const { total: _pSpend, revisedBudget: _pBudget } = spendOf(p); const budgetPct = _pBudget > 0 ? Math.min(100, Math.round((_pSpend / _pBudget) * 100)) : 0;
               const burnColor = budgetPct > 90 ? "#ef4444" : budgetPct > 70 ? "#F5C400" : "#22c55e";
               const daysLeft = Math.ceil((new Date(p.endDate).getTime() - Date.now()) / 86400000);
               return (
@@ -1104,11 +1103,12 @@ export default function DashboardPage() {
             {activeProjects.filter((p) => p.budget > 0).map((p) => {
               const committed = p.committed ?? spendOf(p).total;
               const forecast = p.forecast ?? spendOf(p).total;
-              const variance = p.budget - forecast;
+              const _rb1 = spendOf(p).revisedBudget;
+              const variance = _rb1 - forecast;
               const overBudget = variance < 0;
-              const spentPct = Math.min(100, (spendOf(p).total / p.budget) * 100);
-              const commitPct = Math.min(100, (committed / p.budget) * 100);
-              const forecastPct = Math.min(100, (forecast / p.budget) * 100);
+              const spentPct = Math.min(100, (spendOf(p).total / _rb1) * 100);
+              const commitPct = Math.min(100, (committed / _rb1) * 100);
+              const forecastPct = Math.min(100, (forecast / _rb1) * 100);
               return (
                 <div key={p.id}>
                   <div className="flex items-center justify-between mb-1.5">
@@ -1572,11 +1572,12 @@ export default function DashboardPage() {
             {activeProjects.filter((p) => p.budget > 0).map((p) => {
               const committed = p.committed ?? spendOf(p).total;
               const forecast = p.forecast ?? spendOf(p).total;
-              const variance = p.budget - forecast;
+              const _rb2 = spendOf(p).revisedBudget;
+              const variance = _rb2 - forecast;
               const overBudget = variance < 0;
-              const commitPct = Math.min(100, (committed / p.budget) * 100);
-              const spentPct = Math.min(100, (spendOf(p).total / p.budget) * 100);
-              const forecastPct = Math.min(100, (forecast / p.budget) * 100);
+              const commitPct = Math.min(100, (committed / _rb2) * 100);
+              const spentPct = Math.min(100, (spendOf(p).total / _rb2) * 100);
+              const forecastPct = Math.min(100, (forecast / _rb2) * 100);
               return (
                 <div key={p.id}>
                   <div className="flex items-center justify-between mb-1.5">

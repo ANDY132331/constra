@@ -134,7 +134,7 @@ export default function ReportsPage() {
         color: p.color,
         budget: p.budget,
         spent: spendOf(p).total,
-        pct: p.budget > 0 ? Math.min(100, (spendOf(p).total / p.budget) * 100) : 0,
+        pct: spendOf(p).revisedBudget > 0 ? Math.min(100, (spendOf(p).total / spendOf(p).revisedBudget) * 100) : 0,
       })),
     [projects, spendOf]
   );
