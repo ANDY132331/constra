@@ -324,8 +324,10 @@ export default function DashboardPage() {
   // ── Computed ─────────────────────────────────────────────────────────────────
   const clockedInWorkers = useMemo(() => workers.filter((w) => w.clockedIn), [workers]);
   const canSeeFinancials = currentUser.role === "Admin" || currentUser.role === "Project Manager";
-  const activeProjects = useMemo(() => projects.filter((p) => p.status === "active"), [projects]);
-  const upcomingProjects = useMemo(() => projects.filter((p) => p.status === "upcoming"), [projects]);
+  // Exclude projects pending admin approval — a foreman-created project is active in the DB
+  // but not yet approved, and including it inflates counts and budget charts.
+  const activeProjects = useMemo(() => projects.filter((p) => p.status === "active" && !p.pendingApproval), [projects]);
+  const upcomingProjects = useMemo(() => projects.filter((p) => p.status === "upcoming" && !p.pendingApproval), [projects]);
   const completedProjects = useMemo(() => projects.filter((p) => p.status === "completed"), [projects]);
   const openPunchItems = useMemo(() => punchItems.filter((p) => p.status !== "resolved"), [punchItems]);
   const highPriority = useMemo(() => openPunchItems.filter((p) => p.priority === "high"), [openPunchItems]);
