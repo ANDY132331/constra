@@ -261,6 +261,8 @@ export function AskConstra() {
     }
   };
 
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
+
   // Auto-size textarea
   useEffect(() => {
     if (inputRef.current) {

@@ -85,6 +85,8 @@ function AIChatWidgetInner() {
     }
   }, [open]);
 
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
+
   const send = useCallback(async () => {
     const text = input.trim();
     if (!text || streaming) return;
