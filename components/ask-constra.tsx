@@ -47,7 +47,7 @@ function buildSnapshot(store: ReturnType<typeof useStore>, spendOf: ReturnType<t
       number: i.number,
       amount: invoiceTotal(i),
       client: i.clientName,
-      daysOverdue: Math.floor((now.getTime() - new Date(i.dueDate).getTime()) / 86_400_000),
+      daysOverdue: Math.floor((now.getTime() - endOfDay(i.dueDate).getTime()) / 86_400_000),
     }));
 
   // ── Labor (this month) ───────────────────────────────────────────────────────

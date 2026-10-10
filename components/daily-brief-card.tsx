@@ -139,7 +139,7 @@ export function DailyBriefCard() {
         number: i.number,
         amount: Math.round(invTotal(i)),
         client: i.clientName,
-        daysOverdue: Math.floor((now.getTime() - new Date(i.dueDate).getTime()) / 86400000),
+        daysOverdue: Math.floor((now.getTime() - endOfDay(i.dueDate).getTime()) / 86400000),
       }));
     const overBudgetProjects = activeProjects.filter((p) => p.budgetPct !== null && p.budgetPct > 90);
 
