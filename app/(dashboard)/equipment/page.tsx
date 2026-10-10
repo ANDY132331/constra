@@ -12,7 +12,7 @@ import { useT } from "@/lib/i18n";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 import { isAdminOrAbove } from "@/lib/permissions";
-import { toLocalDateString } from "@/lib/utils";
+import { toLocalDateString, endOfDay } from "@/lib/utils";
 
 const STATUS_CONFIG = {
   available:   { label: "Available",   className: "bg-green-500/15 text-green-400",  dot: "#22c55e" },
@@ -221,7 +221,7 @@ export default function EquipmentPage() {
                       </span>
                     </div>
                     {eq.certExpiry && (
-                      <div className={new Date(eq.certExpiry) < new Date() ? "text-red-400" : ""}>
+                      <div className={endOfDay(eq.certExpiry).getTime() < Date.now() ? "text-red-400" : ""}>
                         Cert: {new Date(eq.certExpiry).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
                       </div>
                     )}
@@ -327,7 +327,7 @@ export default function EquipmentPage() {
                     <div>
                       <p className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">{eq.name}</p>
                       {eq.certExpiry && (
-                        <p className={`text-[10px] mt-0.5 ${new Date(eq.certExpiry) < new Date() ? "text-red-400" : "text-white/30"}`}>
+                        <p className={`text-[10px] mt-0.5 ${endOfDay(eq.certExpiry).getTime() < Date.now() ? "text-red-400" : "text-white/30"}`}>
                           Cert expires {new Date(eq.certExpiry).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                         </p>
                       )}
