@@ -71,11 +71,10 @@ export function GanttChart({
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [dragDelta, setDragDelta] = useState(0); // in days
 
-  const viewStart = useMemo(() => {
-    const d = addDays(new Date(), -10);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
+  // viewStart anchored to today — recompute on each render so the Gantt's
+  // "today" marker stays correct when the page is left open past midnight.
+  const todayMidnight = startOfDay(new Date());
+  const viewStart = addDays(todayMidnight, -10);
 
   const allDates = useMemo(
     () =>
@@ -83,10 +82,11 @@ export function GanttChart({
         start: viewStart,
         end: addDays(viewStart, TOTAL_DAYS - 1),
       }),
-    [viewStart]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [todayMidnight.getTime()]
   );
 
-  const todayOffset = differenceInDays(startOfDay(new Date()), viewStart);
+  const todayOffset = differenceInDays(todayMidnight, viewStart);
 
   const getBar = useCallback(
     (task: { startDate: Date; endDate: Date }) => {
@@ -116,6 +116,16 @@ export function GanttChart({
     if (cur) months.push({ label: cur, count });
     return months;
   }, [allDates]);
+
+  // Scroll today's column into centre on first mount
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const todayPx = todayOffset * DAY_WIDTH;
+    const visibleWidth = el.clientWidth;
+    el.scrollLeft = Math.max(0, todayPx - visibleWidth / 2 + DAY_WIDTH / 2);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount
 
   // Vertical scroll sync between left and right panels
   useEffect(() => {
