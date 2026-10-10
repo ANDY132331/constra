@@ -10,7 +10,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { toLocalDateString } from "@/lib/utils";
+import { toLocalDateString, endOfDay } from "@/lib/utils";
 
 const PRIORITY_CONFIG = {
   high: { label: "HIGH", className: "bg-red-500/15 text-red-400" },
@@ -71,8 +71,7 @@ export default function PunchListPage() {
   };
 
   const isOverdue = (item: typeof punchItems[0]) => {
-    const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
-    return item.dueDate && new Date(item.dueDate) < todayEnd && item.status !== "resolved";
+    return item.dueDate && endOfDay(item.dueDate) < new Date() && item.status !== "resolved";
   };
 
   const openEdit = (item: typeof punchItems[0]) => {
