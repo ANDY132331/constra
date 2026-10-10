@@ -93,6 +93,7 @@ export default function ProjectsPage() {
     }).catch(() => toast.error("Could not copy link"));
   };
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (geoTimer.current) clearTimeout(geoTimer.current); }, []);
 
   const closeModal = () => {
     setShowModal(false);

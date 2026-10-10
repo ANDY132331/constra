@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export type RecordingState = "idle" | "recording" | "processing" | "error";
 export type RecordingError = "permission-denied" | "not-supported" | "unknown";
@@ -125,6 +125,16 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     }
     setState("idle");
     setDurationSeconds(0);
+  }, []);
+
+  // Stop mic and timer if the component unmounts while recording is in progress.
+  useEffect(() => () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (recorderRef.current) {
+      recorderRef.current.stream?.getTracks().forEach((t) => t.stop());
+      try { recorderRef.current.stop(); } catch { /* ignore */ }
+      recorderRef.current = null;
+    }
   }, []);
 
   return { state, error, durationSeconds, supported, start, stop, cancel, clearError };
