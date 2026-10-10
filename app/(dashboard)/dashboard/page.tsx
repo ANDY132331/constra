@@ -344,14 +344,14 @@ export default function DashboardPage() {
   [clockEntries, weekStart]);
 
   const todayActiveHours = useMemo(() => {
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
     return clockedInWorkers.reduce((sum, w) => {
       if (!w.clockInTime) return sum;
       const cit = new Date(w.clockInTime);
       const effectiveStart = cit < todayStart ? todayStart : cit;
-      return sum + hoursBetween(effectiveStart);
+      return sum + hoursBetween(effectiveStart, now);
     }, 0);
-  }, [clockedInWorkers]);
+  }, [clockedInWorkers, now]);
 
   // Financial stats
   const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);

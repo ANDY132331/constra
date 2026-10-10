@@ -49,11 +49,13 @@ export async function GET(request: Request) {
     .eq("status", "sent")
     .lt("due_date", today);
 
-  // Fetch all overdue invoices with their company name and currency
+  // Fetch overdue invoices not reminded in the last 7 days
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const { data: invoices, error } = await supabase
     .from("invoices")
     .select("*, companies(name, currency)")
-    .eq("status", "overdue");
+    .eq("status", "overdue")
+    .or(`last_reminded_at.is.null,last_reminded_at.lt.${sevenDaysAgo}`);
 
   if (error) {
     console.error("Cron invoice fetch error:", error);
@@ -112,6 +114,10 @@ export async function GET(request: Request) {
         html,
       });
       sent++;
+      await supabase
+        .from("invoices")
+        .update({ last_reminded_at: new Date().toISOString() })
+        .eq("id", inv.id);
     } catch (e) {
       errors.push(`${inv.number}: ${e}`);
     }
