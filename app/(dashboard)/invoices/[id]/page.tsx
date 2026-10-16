@@ -89,6 +89,14 @@ const STATUS_CFG = {
 const ec = (extra = "") =>
   `bg-transparent border-b border-gray-200 hover:border-gray-400 focus:border-amber-500 focus:bg-amber-500/[0.03] outline-none transition-colors placeholder:text-gray-300 cursor-text rounded-sm ${extra}`;
 
+// grow a textarea to fit its text (fallback where CSS field-sizing isn't supported)
+const autoGrow = (el: HTMLTextAreaElement | null) => {
+  if (!el) return;
+  el.style.height = "auto";
+  // hidden (display:none on wide screens) reports 0 — leave it at its natural height
+  if (el.scrollHeight > 0) el.style.height = `${el.scrollHeight}px`;
+};
+
 export default function InvoiceDetailPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
@@ -421,7 +429,66 @@ export default function InvoiceDetailPage() {
 
             {/* Line items */}
             <div className="px-7 sm:px-12 pt-5 pb-3">
-              <div className="overflow-x-auto">
+              {/* Phones: stacked per-item rows so the description wraps and the amount never clips */}
+              <div className="sm:hidden">
+                <div className={`flex items-center justify-between rounded-lg px-3 py-3 ${ps.tableHeadBg}`}>
+                  <span className={`text-[9px] font-black uppercase tracking-[0.12em] ${ps.tableHeadText}`}>Item / Description</span>
+                  <span className={`text-[9px] font-black uppercase tracking-[0.12em] ${ps.tableHeadText}`}>Amount</span>
+                </div>
+                {draft.items.map((item, i) => (
+                  <div key={i} className={`border-b border-gray-100 px-1 py-3 ${i % 2 === 1 ? ps.altRowBg : ""}`}>
+                    <div className="flex items-start gap-2">
+                      <span className="text-gray-400 text-[12px] w-5 pt-0.5 text-center flex-shrink-0">{i + 1}</span>
+                      <textarea
+                        rows={1}
+                        ref={autoGrow}
+                        className={ec("flex-1 min-w-0 resize-none overflow-hidden field-sizing-content text-gray-800 font-medium text-[13px] leading-snug")}
+                        value={item.description}
+                        onChange={(e) => { autoGrow(e.target); updItem(i, "description", e.target.value.replace(/\n/g, " ")); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+                        placeholder="Item description"
+                        maxLength={200}
+                      />
+                      {draft.items.length > 1 && (
+                        <button aria-label="Remove line item"
+                          onClick={() => setDraft((d) => ({ ...d, items: d.items.filter((_, j) => j !== i) }))}
+                          className="text-gray-300 hover:text-red-400 transition-colors p-0.5 flex-shrink-0"
+                        >
+                          <X size={13} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-end gap-3 mt-2 pl-7">
+                      <label className="block">
+                        <span className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.12em]">Qty</span>
+                        <input
+                          type="number" inputMode="numeric"
+                          className={ec("w-12 text-gray-500 text-[13px]")}
+                          value={item.qty}
+                          onChange={(e) => updItem(i, "qty", e.target.value)}
+                          min="0"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.12em]">Rate</span>
+                        <input
+                          type="number" inputMode="decimal"
+                          className={ec("w-20 text-gray-500 text-[13px]")}
+                          value={item.rate}
+                          onChange={(e) => updItem(i, "rate", e.target.value)}
+                          min="0"
+                          placeholder="0.00"
+                        />
+                      </label>
+                      <p className="ml-auto text-right text-gray-800 font-bold text-[13px] whitespace-nowrap">
+                        {formatCurrency(lineAmount(item.qty, item.rate), currency as never)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-[13px] min-w-[400px]">
                   <thead>
                     <tr className={ps.tableHeadBg}>
