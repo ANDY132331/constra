@@ -87,6 +87,13 @@ function AIChatWidgetInner() {
 
   useEffect(() => () => { abortRef.current?.abort(); }, []);
 
+  // phones open the assistant from the menu (the floating button is hidden there)
+  useEffect(() => {
+    const open = () => setOpen(true);
+    window.addEventListener("open-ai-chat", open);
+    return () => window.removeEventListener("open-ai-chat", open);
+  }, []);
+
   const send = useCallback(async () => {
     const text = input.trim();
     if (!text || streaming) return;
@@ -170,14 +177,17 @@ function AIChatWidgetInner() {
           opacity: 0;
           pointer-events: none;
         }
-        .cc-fab {
-          position: fixed;
-          z-index: 50;
-          right: 16px;
-          bottom: calc(4.5rem + env(safe-area-inset-bottom));
-        }
+        /* Phones: hidden. Resting bottom-right it covered row actions like Clock Out and Delete;
+           the assistant opens from More → AI Assistant instead. */
+        .cc-fab { display: none; }
         @media (min-width: 1024px) {
-          .cc-fab { bottom: 24px; }
+          .cc-fab {
+            display: flex;
+            position: fixed;
+            z-index: 50;
+            right: 16px;
+            bottom: 24px;
+          }
         }
 
         .cc-panel {

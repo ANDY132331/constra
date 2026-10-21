@@ -1791,3 +1791,12 @@ input.bg-transparent, textarea.bg-transparent { box-shadow: none !important; bor
 /* The floating save bar must win over the chat button, which otherwise sits on top of
    "Save Invoice" and swallows the click */
 body:has(.save-bar) .cc-fab { display: none !important; }
+
+/* ── Field-legibility floor ──
+   Apple's minimum is 11pt; below that is a defect, not a style. The app used 8–10px for
+   ~425 labels (tile captions, bottom-nav labels, badges, avatar initials), which is
+   unreadable in sun or at arm's length on a ladder. One floor here instead of 425 edits;
+   the marketing site and the printed PDF are outside the shell and keep their own sizes. */
+body:has([data-app-shell]) .text-\[8px\],
+body:has([data-app-shell]) .text-\[9px\],
+body:has([data-app-shell]) .text-\[10px\] { font-size: 11px !important; }

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Layers, Upload, AlertTriangle, Check, X, FileImage, FilePlus, Download, ExternalLink } from "lucide-react";
 import { useStore } from "@/lib/store";
@@ -26,6 +26,15 @@ export default function BlueprintsPage() {
   const [filterType, setFilterType] = useState<"all" | "issue" | "safety" | "rfi" | "info">("all");
   const [filterResolved, setFilterResolved] = useState<"all" | "open" | "resolved">("open");
   const [deletePinConfirm, setDeletePinConfirm] = useState<string | null>(null);
+  // mount one viewer for the current layout, not two (a PDF would otherwise render twice)
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const project = projects.find((p) => p.id === selectedProjectId);
@@ -157,7 +166,24 @@ export default function BlueprintsPage() {
         {selectedDoc && (
           <div className="px-4 mt-4">
             <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest mb-2">Selected: {selectedDoc.name}</p>
-            <div className="flex gap-2 mt-2">
+            {/* The viewer now pans with a finger and pinch-zooms, so phones get the real drawing with pins
+                instead of "available on desktop". Fixed height so dragging the drawing doesn't fight page scroll. */}
+            {isDesktop === false && selectedUrl && !selectedUrlError && (
+              <div style={{ height: "62dvh", minHeight: 360 }}>
+                <BlueprintViewer
+                  key={selectedDoc.id}
+                  fileUrl={selectedUrl}
+                  fileType={fileType(selectedDoc.publicUrl ?? selectedDoc.dataUrl)}
+                  documentId={selectedDoc.id}
+                  pins={docPins}
+                  onAddPin={addBlueprintPin}
+                  onUpdatePin={updateBlueprintPin}
+                  onDeletePin={deleteBlueprintPin}
+                />
+              </div>
+            )}
+            {selectedUrlError && <p className="text-[13px] text-red-400 mt-2">{selectedUrlError}</p>}
+            <div className="flex gap-2 mt-3">
               {(selectedDoc.publicUrl ?? selectedDoc.dataUrl) && (
                 <a
                   href={selectedUrl}
@@ -178,7 +204,7 @@ export default function BlueprintsPage() {
                 </a>
               )}
             </div>
-            <p className="text-[10px] text-white/20 mt-2 text-center">Pin annotations available on desktop</p>
+            <p className="text-[11px] text-white/30 mt-2 text-center">Drag to move · pinch to zoom · Add Pin to mark an issue</p>
           </div>
         )}
       </div>
@@ -328,7 +354,7 @@ export default function BlueprintsPage() {
                   <p className="text-[13px] text-red-400">{selectedUrlError}</p>
                 ) : !selectedUrl ? (
                   <div className="text-white/30 text-[13px]">Loading drawing…</div>
-                ) : (
+                ) : isDesktop === false ? null : (
                 <BlueprintViewer
                   key={selectedDoc.id}
                   fileUrl={selectedUrl}

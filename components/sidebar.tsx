@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck,
+  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -239,6 +239,18 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
         <div className="mt-4 pt-3 border-t border-white/[0.06]">
           <NavItem href="/settings" label={t.nav.settings} icon={Settings} active={isActive("/settings")} onClose={onClose} />
           <NavItem href="/support" label="Support" icon={LifeBuoy} active={isActive("/support")} onClose={onClose} />
+          {/* Phones only: the floating chat button sat on top of row actions (Clock Out, Delete), so on
+              small screens the assistant opens from here instead. Desktop keeps the floating button. */}
+          {pathname !== "/messages" && (
+            <button
+              type="button"
+              onClick={() => { onClose?.(); window.dispatchEvent(new Event("open-ai-chat")); }}
+              className="lg:hidden group w-full flex items-center gap-3 py-2.5 px-3 rounded-2xl text-[13px] font-medium text-white/50 hover:text-white/85 hover:bg-white/[0.06] transition-all duration-150 mb-0.5 active:scale-[0.97] active:opacity-80 text-left"
+            >
+              <Bot size={15} className="flex-shrink-0 text-white/30 group-hover:text-white/60" />
+              <span className="flex-1">AI Assistant</span>
+            </button>
+          )}
         </div>
       </nav>
 

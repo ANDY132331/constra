@@ -2,7 +2,7 @@
 import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus, CloudRain, CloudSnow, Cloud, Sun, Wind, AlertTriangle, MapPin, RefreshCw, X, Briefcase, Truck, ClipboardCheck, Calendar, Pencil } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, addMonths, subMonths, getDay, isSameDay } from "date-fns";
@@ -96,7 +96,9 @@ const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider 
 export default function SchedulePage() {
   const { projects, currency, scheduleEvents, addScheduleEvent, updateScheduleEvent, deleteScheduleEvent } = useStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  // open on today: on site the first question is "what's on today", not "pick a day"
+  const [selectedDay, setSelectedDay] = useState<Date | null>(() => new Date());
+  const dayStripRef = useRef<HTMLDivElement>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [lat, setLat] = useState(DEFAULT_LAT);
@@ -140,6 +142,15 @@ export default function SchedulePage() {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+  // bring the selected day (or today) into view in the phone's day strip instead of always starting at the 1st
+  const stripFocusKey = format(selectedDay ?? new Date(), "yyyy-MM-dd");
+  useEffect(() => {
+    const strip = dayStripRef.current;
+    const btn = strip?.querySelector<HTMLElement>(`[data-day="${stripFocusKey}"]`);
+    if (!strip || !btn) return;
+    strip.scrollLeft = btn.offsetLeft - strip.clientWidth / 2 + btn.offsetWidth / 2;
+  }, [stripFocusKey, currentMonth]);
   const startPad = getDay(monthStart);
   const paddingDays = Array.from({ length: startPad }, (_, i) => i);
 
@@ -350,9 +361,11 @@ export default function SchedulePage() {
             <button
               onClick={() => setImperial((v) => !v)}
               aria-label={`Showing ${imperial ? "Fahrenheit" : "Celsius"} — switch to ${imperial ? "Celsius" : "Fahrenheit"}`}
-              className="text-[11px] font-bold text-white/30 hover:text-white/60 transition-colors ml-1 min-w-11 h-11 px-2 -my-2 inline-flex items-center justify-center rounded-lg"
+              className="text-[11px] font-bold transition-colors ml-1 min-w-11 h-11 px-2 -my-2 inline-flex items-center justify-center gap-1 rounded-lg"
             >
-              {imperial ? "°F" : "°C"}
+              <span className={imperial ? "text-white/30" : "text-white"}>°C</span>
+              <span className="text-white/20">/</span>
+              <span className={imperial ? "text-white" : "text-white/30"}>°F</span>
             </button>
           )}
         </div>
@@ -371,7 +384,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Day strip */}
-        <div className="overflow-x-auto scrollbar-none px-5 mb-4">
+        <div ref={dayStripRef} className="overflow-x-auto scrollbar-none px-5 mb-4">
           <div className="flex gap-1.5 pb-0.5" style={{ minWidth: "max-content" }}>
             {days.map((day) => {
               const todayFlag = isToday(day);
@@ -382,6 +395,9 @@ export default function SchedulePage() {
               return (
                 <button
                   key={day.toISOString()}
+                  data-day={format(day, "yyyy-MM-dd")}
+                  aria-pressed={isSelected}
+                  aria-label={`${format(day, "EEEE, MMMM d")}${todayFlag ? ", today" : ""}${dayEvents.length ? `, ${dayEvents.length} event${dayEvents.length === 1 ? "" : "s"}` : ""}`}
                   onClick={() => setSelectedDay(selectedDay && isSameDay(day, selectedDay) ? null : day)}
                   className={`flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl transition-all min-w-[44px] ${
                     isSelected

@@ -129,7 +129,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
         <I18nProvider locale={language}>
           {(
             /* ── Dashboard shell (messages fills it edge to edge) ── */
-            <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#0a0a0a]">
+            <div data-app-shell className="flex h-[100dvh] w-screen overflow-hidden bg-[#0a0a0a]">
               {sidebarOpen && (
                 <div
                   className="mobile-overlay fixed inset-0 z-40 bg-black/55 lg:hidden"
