@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ink } from "@/lib/utils";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -225,7 +226,7 @@ export function SearchModal() {
                     >
                       <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: r.color + "18" }}>
-                        <span style={{ color: r.color }}><Icon size={14} /></span>
+                        <span style={{ color: ink(r.color) }}><Icon size={14} /></span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-medium text-white/85 truncate">{r.label}</p>
@@ -254,7 +255,7 @@ export function SearchModal() {
                   >
                     <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: s.color + "18" }}>
-                      <span style={{ color: s.color }}><Icon size={14} /></span>
+                      <span style={{ color: ink(s.color) }}><Icon size={14} /></span>
                     </div>
                     <p className="text-[13px] font-medium text-white/70">{s.label}</p>
                   </button>

@@ -718,7 +718,7 @@ export default function PhotosPage() {
               <div className="text-center space-y-1.5">
                 <p className="text-white font-semibold text-[15px]">{p.caption}</p>
                 <div className="flex items-center justify-center gap-3 text-[12px] text-white/40">
-                  {project && <span style={{ color: project.color }}>{project.name}</span>}
+                  {project && <span style={{ color: ink(project.color) }}>{project.name}</span>}
                   {uploader && <span>{uploader.name}</span>}
                   <span>{new Date(p.uploadedAt).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}</span>
                 </div>

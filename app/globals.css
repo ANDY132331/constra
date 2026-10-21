@@ -1813,3 +1813,28 @@ body:has([data-app-shell]) .text-\[10px\] { font-size: 11px !important; }
 :where([data-theme="light"] body:has([data-app-shell])) :where(button, a[href], [role="button"], summary):where(:not(:disabled)):active {
   filter: brightness(0.9);
 }
+
+/* ── Reduced motion (app) ──
+   The marketing site honoured this, the app never did: pulsing live dots, pop-in menus,
+   sliding sheets and press-scale all ran regardless. Movement becomes an instant change;
+   spinners keep turning (slowly) because a frozen spinner reads as a hung app. */
+@media (prefers-reduced-motion: reduce) {
+  body:has([data-app-shell]) *,
+  body:has([data-app-shell]) *::before,
+  body:has([data-app-shell]) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  body:has([data-app-shell]) .animate-spin {
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* ── Aligned figures (app) ──
+   Hours, money and counts stack in lists all over the app but only 22 spots opted into
+   tabular figures, so columns of amounts went ragged ($7,661.40 over $28,024.00). Inherited
+   from here; prose is unaffected in practice since Plex's tabular digits are the same weight. */
+body:has([data-app-shell]) { font-variant-numeric: tabular-nums; }

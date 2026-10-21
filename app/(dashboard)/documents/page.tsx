@@ -337,7 +337,7 @@ export default function DocumentsPage() {
                 >
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: cat.color + "18" }}>
-                    <Icon size={18} style={{ color: cat.color + "dd" }} />
+                    <Icon size={18} style={{ color: ink(cat.color) }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-white/85 truncate" title={doc.name}>{doc.name}</p>
@@ -466,7 +466,7 @@ export default function DocumentsPage() {
                     <DocThumb src={doc.publicUrl ?? doc.dataUrl} alt={doc.name} />
                   ) : (
                     <div className="flex flex-col items-center gap-2">
-                      <Icon size={32} style={{ color: cat.color + "90" }} />
+                      <Icon size={32} style={{ color: ink(cat.color) }} />
                       <span className="text-[10px] text-white/20 uppercase font-bold tracking-wider">
                         {doc.name.split(".").pop()?.toUpperCase()}
                       </span>

@@ -287,7 +287,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <span style={{ color: typeCfg.color }}><TypeIcon size={15} /></span>
+                    <span style={{ color: ink(typeCfg.color) }}><TypeIcon size={15} /></span>
                     <span className="text-[13px] font-bold text-white/80">{typeCfg.label}</span>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -367,7 +367,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
               return (
                 <button key={type} onClick={() => setTypeFilter(typeFilter === type ? "all" : type)}
                   className={`bg-[#111111] border rounded-xl p-4 text-left transition-all ${typeFilter === type ? "border-amber-500/40" : "border-white/[0.06] hover:border-white/10"}`}>
-                  <span style={{ color: cfg.color }} className="mb-2 block"><Icon size={18} /></span>
+                  <span style={{ color: ink(cfg.color) }} className="mb-2 block"><Icon size={18} /></span>
                   <p className="text-2xl font-bold text-white">{count}</p>
                   <p className="text-[11px] text-white/40 mt-0.5">{cfg.label}</p>
                 </button>
@@ -450,7 +450,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center"
                       style={{ backgroundColor: typeCfg.color + "18" }}>
-                      <span style={{ color: typeCfg.color }}><TypeIcon size={18} /></span>
+                      <span style={{ color: ink(typeCfg.color) }}><TypeIcon size={18} /></span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3 mb-2">

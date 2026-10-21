@@ -232,14 +232,15 @@ export default function InvoicesPage() {
               onClick={() => setStatusFilter(tab.key)}
               className={`flex-shrink-0 snap-start flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full transition-all ${
                 statusFilter === tab.key
-                  ? "bg-amber-500/15 text-amber-400 border border-amber-500/25"
+                  ? "bg-amber-500 text-[#1A1600] border border-amber-500"
                   : "text-white/40 bg-white/[0.04] border border-transparent"
               }`}
+              aria-pressed={statusFilter === tab.key}
             >
               {tab.label}
               {tab.count > 0 && (
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                  statusFilter === tab.key ? "bg-amber-500/25 text-amber-300" : "bg-white/[0.07] text-white/25"
+                  statusFilter === tab.key ? "bg-[#1A1600]/15 text-[#1A1600]" : "bg-white/[0.07] text-white/25"
                 }`}>
                   {tab.count}
                 </span>

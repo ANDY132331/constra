@@ -801,7 +801,7 @@ export default function CrewPage() {
                       </div>
                     </>
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-1" style={{ color: form.color }}>
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-1" style={{ color: ink(form.color) }}>
                       <Upload size={18} /><span className="text-[9px] font-bold">PHOTO</span>
                     </div>
                   )}

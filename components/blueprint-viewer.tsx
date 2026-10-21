@@ -1,4 +1,5 @@
 "use client";
+import { ink } from "@/lib/utils";
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { ZoomIn, ZoomOut, Maximize2, Plus, X, Check, AlertTriangle, Info, ShieldAlert, MessageSquare, Trash2 } from "lucide-react";
@@ -321,7 +322,7 @@ export function BlueprintViewer({ fileUrl, fileType, documentId, pins, onAddPin,
                     style={{ zIndex: 20 }}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: meta.color }}>{meta.label}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: ink(meta.color) }}>{meta.label}</span>
                       <button onClick={() => setSelectedPin(null)} aria-label="Close" className="w-11 h-11 flex items-center justify-center text-white/30 hover:text-white/70 rounded-md transition-colors -mr-3 -my-2"><X size={15} /></button>
                     </div>
                     <p className="text-[12px] text-white/70 mb-3">{pin.note || <span className="italic text-white/30">No note</span>}</p>

@@ -494,7 +494,7 @@ export default function DashboardPage() {
                   const meta = weatherMeta(weather.code);
                   const WeatherIcon = meta.icon;
                   return (
-                    <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: meta.color }}>
+                    <span className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: ink(meta.color) }}>
                       <WeatherIcon size={11} />
                       {weather.temp}{useFahrenheit ? "°F" : "°C"}
                     </span>
@@ -754,7 +754,7 @@ export default function DashboardPage() {
             return (
               <div
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 border ${dk ? "bg-white/[0.05] border-white/[0.07]" : "bg-white/60 border-gray-200"}`}
-                style={{ color: wMeta.color }}
+                style={{ color: ink(wMeta.color) }}
               >
                 <WIcon size={12} />
                 <span className="text-[12px] font-bold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
@@ -806,9 +806,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Stat chips — horizontal scroll */}
+      {/* Stat chips — a wrapping grid. As a sideways scroller the 4th tile was cut in half and the 5th
+          (Outstanding money) sat entirely off-screen with nothing saying it was there. */}
       <div className="px-5 pt-6">
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar scroll-hint-x">
+        <div className="grid grid-cols-3 gap-2">
           {(([
             { label: "Hrs/Week",    value: `${(weeklyHours + todayActiveHours).toFixed(0)}h`, alert: false,                    href: "/time-tracking" },
             { label: "Open Issues", value: openPunchItems.length,                              alert: false,                    href: "/punch-list"    },
@@ -823,10 +824,10 @@ export default function DashboardPage() {
             <Link
               key={chip.label}
               href={chip.href}
-              className={`flex-shrink-0 rounded-2xl px-4 py-3 border active:scale-[0.96] transition-transform ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 shadow-sm"}`}
+              className={`min-w-0 rounded-2xl px-3 py-3 border active:scale-[0.96] transition-transform ${dk ? "bg-[#131110] border-white/[0.07] hover:border-white/[0.12]" : "bg-white border-gray-200 shadow-sm"}`}
             >
-              <p className={`text-[22px] font-black tabular-nums leading-none ${chip.alert ? "text-red-400" : dk ? "text-white" : "text-gray-900"}`}>{chip.value}</p>
-              <p className={`text-[10px] font-semibold mt-1.5 whitespace-nowrap ${dk ? "text-white/35" : "text-gray-500"}`}>{chip.label}</p>
+              <p className={`text-[22px] font-black tabular-nums leading-none truncate ${chip.alert ? "text-red-400" : dk ? "text-white" : "text-gray-900"}`}>{chip.value}</p>
+              <p className={`text-[10px] font-semibold mt-1.5 truncate ${dk ? "text-white/35" : "text-gray-500"}`}>{chip.label}</p>
             </Link>
           ))}
         </div>
@@ -1017,7 +1018,7 @@ export default function DashboardPage() {
                     className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5"
                     style={{ backgroundColor: iconDef.color + "18" }}
                   >
-                    <span style={{ color: iconDef.color }}><AIcon size={13} /></span>
+                    <span style={{ color: ink(iconDef.color) }}><AIcon size={13} /></span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] text-white/70 leading-snug">{event.description}</p>
@@ -1158,7 +1159,7 @@ export default function DashboardPage() {
                 <button
                   onClick={() => setWeatherExpanded(e => !e)}
                   className="min-h-[44px] flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/10 rounded-full px-2.5 py-1 text-[12px] transition-all"
-                  style={{ color: meta.color }}
+                  style={{ color: ink(meta.color) }}
                 >
                   <WeatherIcon size={13} />
                   <span className="font-semibold">{weather.temp}{useFahrenheit ? "°F" : "°C"}</span>
@@ -1208,7 +1209,7 @@ export default function DashboardPage() {
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${isToday ? "text-amber-400" : "text-white/30"}`}>
                     {isToday ? "Today" : date.toLocaleDateString("en-CA", { weekday: "short" })}
                   </span>
-                  <span style={{ color: meta.color }}><DayIcon size={16} /></span>
+                  <span style={{ color: ink(meta.color) }}><DayIcon size={16} /></span>
                   {day.rainChance > 20 && (
                     <span className="text-[9px] text-blue-400 font-semibold">{day.rainChance}%</span>
                   )}
@@ -1465,7 +1466,7 @@ export default function DashboardPage() {
               return (
                 <Link key={event.id} href={iconDef.href} className="flex gap-3 p-3 hover:bg-white/[0.03] transition-colors group">
                   <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: iconDef.color + "18" }}>
-                    <span style={{ color: iconDef.color }}><Icon size={13} /></span>
+                    <span style={{ color: ink(iconDef.color) }}><Icon size={13} /></span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] text-white/70 leading-snug group-hover:text-white/90 transition-colors">{event.description}</p>

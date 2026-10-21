@@ -1014,7 +1014,7 @@ function SettingsInner() {
                                 style={{ backgroundColor: i <= lvl.bars ? lvl.color : "rgba(255,255,255,0.08)" }} />
                             ))}
                           </div>
-                          <p className="text-[10px] font-semibold" style={{ color: lvl.color }}>{lvl.label}</p>
+                          <p className="text-[10px] font-semibold" style={{ color: ink(lvl.color) }}>{lvl.label}</p>
                         </div>
                       );
                     })()}

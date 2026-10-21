@@ -156,9 +156,9 @@ export default function TasksPage() {
         </div>
         <div className="px-5 mb-4 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           {FILTER_TABS.map((tab) => (
-            <button key={tab.key} onClick={() => setFilterStatus(tab.key)}
-              className={`flex-shrink-0 snap-start text-[12px] font-semibold px-3.5 py-2 rounded-full border transition-all ${filterStatus === tab.key ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
-              {tab.label} <span className="opacity-50">{counts[tab.key] ?? 0}</span>
+            <button key={tab.key} onClick={() => setFilterStatus(tab.key)} aria-pressed={filterStatus === tab.key}
+              className={`flex-shrink-0 snap-start text-[12px] font-semibold px-3.5 py-2 rounded-full border transition-all ${filterStatus === tab.key ? "bg-amber-500 text-[#1A1600] border-amber-500" : "bg-[#131110] text-white/50 border-white/[0.07]"}`}>
+              {tab.label} <span className={filterStatus === tab.key ? "opacity-70" : "opacity-50"}>{counts[tab.key] ?? 0}</span>
             </button>
           ))}
         </div>
