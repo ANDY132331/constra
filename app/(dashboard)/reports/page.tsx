@@ -195,6 +195,20 @@ export default function ReportsPage() {
     multiplier: overtimeMultiplier,
   }), [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
 
+  // A shift with no clock-out has no hours to pay yet, so it is left out of the figures on
+  // screen, the payroll file and the PDF. Say so, or running Friday payroll quietly
+  // short-pays whoever is still on site.
+  const runningInPeriod = useMemo(
+    () => clockEntries.filter((e) => !e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd).length,
+    [clockEntries, periodStart, periodEnd],
+  );
+  const withRunningNote = useCallback(
+    (msg: string) => runningInPeriod > 0
+      ? `${msg} — ${runningInPeriod} ${runningInPeriod === 1 ? "shift is" : "shifts are"} still running and not included`
+      : msg,
+    [runningInPeriod],
+  );
+
   const handlePayrollExport = useCallback((adapterId: string) => {
     if (periodEntries.length === 0) {
       toast.error("No entries in this period — add clock-ins first");
@@ -202,19 +216,9 @@ export default function ReportsPage() {
       return;
     }
     exportPayroll(adapterId, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings);
-    // A shift with no clock-out has no hours to pay yet, so it is left out of both the
-    // figures on screen and the file. Say so, or running Friday payroll quietly short-pays
-    // whoever is still on site.
-    const running = clockEntries.filter(
-      (e) => !e.clockOut && new Date(e.clockIn) >= periodStart && new Date(e.clockIn) <= periodEnd,
-    ).length;
-    toast.success(
-      running > 0
-        ? `Payroll exported — ${running} ${running === 1 ? "shift is" : "shifts are"} still running and not included`
-        : "Payroll exported",
-    );
+    toast.success(withRunningNote("Payroll exported"));
     setExportMenuOpen(false);
-  }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings]);
+  }, [periodEntries.length, clockEntries, workers, projects, periodStart, periodEnd, periodLabel, overtimeSettings, withRunningNote]);
 
   return (
     <>
@@ -231,7 +235,7 @@ export default function ReportsPage() {
               <button
                 onClick={async () => {
                   setPdfLoading(true);
-                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } }); toast.success("PDF downloaded"); }
+                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } }); toast.success(withRunningNote("PDF downloaded")); }
                   catch { toast.error("Failed to export PDF"); }
                   finally { setPdfLoading(false); }
                 }}
@@ -480,7 +484,7 @@ export default function ReportsPage() {
                   setPdfLoading(true);
                   try {
                     await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } });
-                    toast.success("PDF downloaded");
+                    toast.success(withRunningNote("PDF downloaded"));
                   } catch {
                     toast.error("Failed to export PDF");
                   } finally {
