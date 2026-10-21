@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
+import { ink, textOn } from "@/lib/utils";
 import {
   addDays,
   differenceInDays,
@@ -52,8 +53,9 @@ type DragState = {
   originalEnd: Date;
 };
 
+// Returns a plain #rrggbb: callers append their own alpha. Completed tasks used to get "80"
+// appended here too, which produced "#F5C40080cc" — invalid, so the bar rendered with no fill.
 function statusColor(status: string, base: string) {
-  if (status === "completed") return base + "80";
   if (status === "delayed") return "#ef4444";
   return base;
 }
@@ -313,7 +315,7 @@ export function GanttChart({
                   </span>
                   <span
                     className="text-center text-[11px] font-bold"
-                    style={{ color: progColor }}
+                    style={{ color: ink(progColor) }}
                   >
                     {task.progress}%
                   </span>
@@ -322,7 +324,7 @@ export function GanttChart({
                       className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold"
                       style={{
                         backgroundColor: task.workerColor + "30",
-                        color: task.workerColor,
+                        color: ink(task.workerColor),
                       }}
                     >
                       {task.workerInitials}
@@ -486,6 +488,9 @@ export function GanttChart({
 
                 const { left, width } = getBar({ startDate: displayStart, endDate: displayEnd });
                 const color = statusColor(task.status, task.color);
+                const done = task.status === "completed";
+                // completed bars are dimmed, so they take on the chart ground's lightness: the label follows the theme
+                const labelColor = done ? "var(--gantt-done-label, #fff)" : textOn(color);
                 const visible = left + width > 0 && left < TOTAL_DAYS * DAY_WIDTH;
                 const canDrag = !!onTaskDatesChange;
 
@@ -518,7 +523,7 @@ export function GanttChart({
                           width: width,
                           top: 10,
                           height: ROW_HEIGHT - 20,
-                          backgroundColor: color + "cc",
+                          backgroundColor: color + (done ? "66" : "cc"),
                           border: `1px solid ${color}40`,
                           cursor: canDrag ? (isDragging ? "grabbing" : "grab") : "pointer",
                           userSelect: "none",
@@ -551,8 +556,10 @@ export function GanttChart({
                         />
                         {/* Label */}
                         <span
-                          className="absolute inset-0 flex items-center px-2 text-[11px] font-semibold text-white truncate"
-                          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
+                          className="absolute inset-0 flex items-center px-2 text-[11px] font-semibold truncate"
+                          style={labelColor === "#111"
+                            ? { color: "#111" }
+                            : { color: labelColor, textShadow: done ? "var(--gantt-done-shadow, 0 1px 2px rgba(0,0,0,0.5))" : "0 1px 2px rgba(0,0,0,0.5)" }}
                         >
                           {width > 60 ? task.name : ""}
                         </span>

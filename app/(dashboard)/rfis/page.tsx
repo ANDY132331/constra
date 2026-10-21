@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { toast } from "sonner";
 
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { toLocalDateString, endOfDay } from "@/lib/utils";
+import { toLocalDateString, endOfDay, ink } from "@/lib/utils";
 
 const STATUS_CONFIG = {
   open: { label: "Open", className: "bg-red-500/15 text-red-400", icon: Clock },
@@ -432,14 +432,14 @@ export default function RFIsPage() {
                           {submitter && (
                             <div className="flex items-center gap-1.5">
                               <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"
-                                style={{ backgroundColor: submitter.color + "25", color: submitter.color }}>{submitter.initials}</div>
+                                style={{ backgroundColor: submitter.color + "25", color: ink(submitter.color) }}>{submitter.initials}</div>
                               <span>Submitted by {submitter.name}</span>
                             </div>
                           )}
                           {assignee && (
                             <div className="flex items-center gap-1.5">
                               <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"
-                                style={{ backgroundColor: assignee.color + "25", color: assignee.color }}>{assignee.initials}</div>
+                                style={{ backgroundColor: assignee.color + "25", color: ink(assignee.color) }}>{assignee.initials}</div>
                               <span>Assigned to {assignee.name}</span>
                             </div>
                           )}

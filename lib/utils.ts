@@ -26,6 +26,27 @@ export function cn(...inputs: ClassValue[]) {
  *  survive timezone shifts. Comparing one directly to `new Date()` marks it
  *  overdue from noon; comparing against endOfDay() waits until midnight.
  */
+/**
+ * Text colour from a person's or project's colour, which can be any shade the admin picked.
+ * Mixed toward the theme's ink (`--ink-mix` / `--ink-base` in globals.css): lighter on dark so
+ * a plum or navy avatar stays readable, darker on light so hi-vis yellow does. Inline styles
+ * can't be reached by the light-theme class remaps, so they go through this instead.
+ */
+export function ink(color: string | undefined | null): string | undefined {
+  return color ? `color-mix(in oklab, ${color} var(--ink-mix, 65%), var(--ink-base, #fff))` : undefined;
+}
+
+/** Readable text colour for a label sitting on a solid `#rrggbb` fill: near-black on light fills (hi-vis yellow), white on dark ones. */
+export function textOn(hex: string | undefined | null): string {
+  const m = /^#?([0-9a-f]{6})/i.exec(hex ?? "");
+  if (!m) return "#fff";
+  const n = parseInt(m[1], 16);
+  const lin = (c: number) => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+  const L = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  // above ~0.18 white falls under 4.5:1 while near-black clears it
+  return L > 0.18 ? "#111" : "#fff";
+}
+
 export function endOfDay(d: Date | string): Date {
   const t = d instanceof Date ? new Date(d) : new Date(d);
   t.setHours(23, 59, 59, 999);

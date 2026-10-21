@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,7 +18,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
 import { toast } from "sonner";
-import { toLocalDateString, endOfDay } from "@/lib/utils";
+import { toLocalDateString, endOfDay, ink } from "@/lib/utils";
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   Admin: { label: "Admin", className: "bg-purple-500/15 text-purple-400" },
@@ -475,7 +475,7 @@ export default function CrewPage() {
               {/* Row 1: Avatar + Name + Role badge */}
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[14px] font-black ring-2 ring-white/10"
-                  style={{ backgroundColor: worker.color + "20", color: worker.color }}>
+                  style={{ backgroundColor: worker.color + "20", color: ink(worker.color) }}>
                   {worker.photo
                     ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                     : worker.initials}
@@ -634,7 +634,7 @@ export default function CrewPage() {
                   <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[16px] font-black"
-                    style={{ backgroundColor: worker.color + "20", color: worker.color }}>
+                    style={{ backgroundColor: worker.color + "20", color: ink(worker.color) }}>
                     {worker.initials}
                   </div>
                 )}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { toLocalDateString } from "@/lib/utils";
+import { toLocalDateString, ink } from "@/lib/utils";
 
 const TYPE_CONFIG = {
   "near-miss": { label: "Near Miss", icon: AlertTriangle, color: "#F5C400" },
@@ -490,7 +490,7 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                       )}
                       <div className="flex items-center gap-4 flex-wrap text-[11px] text-white/30">
                         {project && <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: project.color }} /><span>{project.name}</span></div>}
-                        {reporter && <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: reporter.color + "25", color: reporter.color }}>{reporter.initials}</div><span>Reported by {reporter.name}</span></div>}
+                        {reporter && <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: reporter.color + "25", color: ink(reporter.color) }}>{reporter.initials}</div><span>Reported by {reporter.name}</span></div>}
                         {injured && <div className="flex items-center gap-1 text-red-400/70"><User size={10} /><span>Injured: {injured.name}</span></div>}
                       </div>
                     </div>

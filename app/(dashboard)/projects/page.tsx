@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { toast } from "sonner";
 
 import { useState, useRef, useEffect } from "react";
@@ -14,7 +14,7 @@ import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { EmptyState } from "@/components/empty-state";
-import { toLocalDateString } from "@/lib/utils";
+import { toLocalDateString, ink } from "@/lib/utils";
 import { useProjectSpend } from "@/lib/project-spend";
 
 import { projectProgress } from "@/lib/project-progress";
@@ -398,7 +398,7 @@ export default function ProjectsPage() {
                   <div className="mb-3.5">
                     <div className="flex items-center justify-between mb-1.5">
                       <p className="text-[11px] text-white/35">{completedTasks}/{totalTasks} tasks</p>
-                      <p className="text-[11px] font-black tabular-nums" style={{ color: p.color }}>{projectProgress(p)}%</p>
+                      <p className="text-[11px] font-black tabular-nums" style={{ color: ink(p.color) }}>{projectProgress(p)}%</p>
                     </div>
                     <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
                       <div className="h-full rounded-full progress-bar" style={{ width: `${projectProgress(p)}%`, backgroundColor: p.color }} />
@@ -602,7 +602,7 @@ export default function ProjectsPage() {
                           const w = getWorkerById(wid);
                           return w ? (
                             <div key={wid} className="w-6 h-6 rounded-full border border-[#111111] flex items-center justify-center text-[9px] font-bold overflow-hidden"
-                              style={{ backgroundColor: w.color + "30", color: w.color }} title={w.name}>
+                              style={{ backgroundColor: w.color + "30", color: ink(w.color) }} title={w.name}>
                               {w.photo ? <img src={w.photo} alt={w.name} className="w-full h-full object-cover" /> : w.initials}
                             </div>
                           ) : null;
@@ -713,7 +713,7 @@ export default function ProjectsPage() {
                           {manager && (
                             <>
                               <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold overflow-hidden"
-                                style={{ backgroundColor: manager.color + "30", color: manager.color }}>
+                                style={{ backgroundColor: manager.color + "30", color: ink(manager.color) }}>
                                 {manager.photo ? <img src={manager.photo} alt={manager.name} className="w-full h-full object-cover" /> : manager.initials}
                               </div>
                               <span className="text-[11px] text-white/35">{manager.name}</span>

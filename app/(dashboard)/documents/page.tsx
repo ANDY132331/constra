@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ink } from "@/lib/utils";
 import { toast } from "sonner";
 
 import { useState, useRef, useMemo, useEffect } from "react";
@@ -342,7 +343,7 @@ export default function DocumentsPage() {
                     <p className="text-[13px] font-semibold text-white/85 truncate" title={doc.name}>{doc.name}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                        style={{ backgroundColor: cat.color + "20", color: cat.color }}>{cat.label}</span>
+                        style={{ backgroundColor: cat.color + "20", color: ink(cat.color) }}>{cat.label}</span>
                       {doc.sizeBytes ? <span className="text-[10px] text-white/30">{formatBytes(doc.sizeBytes)}</span> : null}
                     </div>
                   </div>
@@ -473,7 +474,7 @@ export default function DocumentsPage() {
                   )}
                   {/* Category badge */}
                   <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
-                    style={{ backgroundColor: cat.color + "22", color: cat.color }}>
+                    style={{ backgroundColor: cat.color + "22", color: ink(cat.color) }}>
                     {cat.label}
                   </div>
                 </div>

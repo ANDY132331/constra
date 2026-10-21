@@ -75,6 +75,13 @@
 }
 
 [data-theme="light"] {
+  /* person/project colours used as text: hi-vis yellow is 1.2:1 on the light ground, so
+     ink() mixes it halfway to black here (see lib/utils.ts; the dark default lightens) */
+  --ink-mix: 50%;
+  --ink-base: #000;
+  /* completed gantt bars are a 40% tint, so on the light ground they're pale */
+  --gantt-done-label: #1c1917;
+  --gantt-done-shadow: none;
   --app-bg-0:     #f0f0f0;
   --app-bg-1:     #f4f4f4;
   --app-bg-2:     #ffffff;
@@ -207,6 +214,10 @@ a + button[aria-label^="Delete"] {
 [data-theme="light"] .text-blue-300 { color: #1d4ed8 !important; } /* 5.32:1 */
 [data-theme="light"] .text-blue-400 { color: #1d4ed8 !important; } /* 5.32:1 */
 [data-theme="light"] .text-blue-400\/70 { color: rgba(29,78,216,0.9) !important; } /* 4.51:1 */
+/* neutral "Draft" / "Void" status badges: dark-mode grey chip + light-grey text was 2.6:1 on the light ground */
+[data-theme="light"] .bg-zinc-700\/60 { background-color: rgba(113,113,122,0.16) !important; }
+[data-theme="light"] .text-zinc-300 { color: #3f3f46 !important; }
+[data-theme="light"] .text-zinc-400 { color: #52525b !important; }
 [data-theme="light"] .text-emerald-400 { color: #065f46 !important; } /* 6.10:1 */
 [data-theme="light"] .text-emerald-400\/80 { color: rgba(6,95,70,0.85) !important; } /* 4.50:1 */
 [data-theme="light"] .text-green-300 { color: #166534 !important; } /* 5.66:1 */
@@ -1676,7 +1687,7 @@ html[data-theme="light"] header:not(.lp-nav) { box-shadow: 0 1px 0 var(--c-rule)
    unreadable on paper. Muted text keeps its place in the hierarchy but never drops
    below ~4.5:1. Yellow text is for dark grounds; on light ones it becomes dark gold. */
 [data-theme="light"] .text-white\/10, [data-theme="light"] .text-white\/15,
-[data-theme="light"] .text-white\/20, [data-theme="light"] .text-white\/25 { color: rgba(0,0,0,0.55) !important; }
+[data-theme="light"] .text-white\/20, [data-theme="light"] .text-white\/25 { color: rgba(0,0,0,0.58) !important; } /* 0.55 measured 4.41:1 on the gantt ground */
 [data-theme="light"] .text-white\/30, [data-theme="light"] .text-white\/35 { color: rgba(0,0,0,0.58) !important; }
 [data-theme="light"] .text-white\/40, [data-theme="light"] .text-white\/45 { color: rgba(0,0,0,0.62) !important; }
 [data-theme="light"] [class*="placeholder:text-white"]::placeholder,

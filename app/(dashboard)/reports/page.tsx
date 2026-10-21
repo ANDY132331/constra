@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
@@ -376,7 +377,7 @@ export default function ReportsPage() {
                   <div key={worker.id} className="flex items-center gap-3">
                     <span className="text-[12px] font-black text-white/20 w-4 flex-shrink-0">{i + 1}</span>
                     <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center text-[11px] font-black flex-shrink-0"
-                      style={{ backgroundColor: worker.color + "20", color: worker.color }}>
+                      style={{ backgroundColor: worker.color + "20", color: ink(worker.color) }}>
                       {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -711,7 +712,7 @@ export default function ReportsPage() {
                 <div key={worker.id} className="flex items-center gap-4">
                   <span className="text-[13px] font-black text-white/20 w-4 flex-shrink-0">{i + 1}</span>
                   <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center text-[11px] font-black flex-shrink-0"
-                    style={{ backgroundColor: worker.color + "20", color: worker.color }}>
+                    style={{ backgroundColor: worker.color + "20", color: ink(worker.color) }}>
                     {worker.photo
                       ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                       : worker.initials}

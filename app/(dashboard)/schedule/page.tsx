@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
 import { useState, useEffect, useCallback } from "react";
@@ -481,7 +482,7 @@ export default function SchedulePage() {
                         )}
                         {cfg && (
                           <span className="text-[10px] font-bold mt-1 inline-block px-2 py-0.5 rounded-full"
-                            style={{ backgroundColor: cfg.color + "22", color: cfg.color }}>
+                            style={{ backgroundColor: cfg.color + "22", color: ink(cfg.color) }}>
                             {cfg.label}
                           </span>
                         )}
@@ -692,7 +693,7 @@ export default function SchedulePage() {
                       <div className="space-y-0.5">
                         {dayEvents.slice(0, 2).map((e) => (
                           <div key={e.id} className="text-[9px] font-semibold px-1.5 py-0.5 rounded truncate"
-                            style={{ backgroundColor: e.color + "25", color: e.color }}>
+                            style={{ backgroundColor: e.color + "25", color: ink(e.color) }}>
                             {e.source === "task" ? e.title.replace(" (Start)", "★").replace(" (Due)", "✓") : e.title}
                           </div>
                         ))}

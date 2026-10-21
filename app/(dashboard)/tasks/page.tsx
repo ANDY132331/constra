@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -10,7 +10,7 @@ import { format, isBefore } from "date-fns";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { EmptyState } from "@/components/empty-state";
-import { toLocalDateString, endOfDay } from "@/lib/utils";
+import { toLocalDateString, endOfDay, ink } from "@/lib/utils";
 
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
   completed: { label: "Completed", icon: CheckCircle2, className: "text-green-400" },
@@ -218,7 +218,7 @@ export default function TasksPage() {
                   {mWorker ? (
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[9px] font-black flex-shrink-0"
-                        style={{ backgroundColor: mWorker.color + "25", color: mWorker.color }}>
+                        style={{ backgroundColor: mWorker.color + "25", color: ink(mWorker.color) }}>
                         {mWorker.photo ? <img src={mWorker.photo} alt={mWorker.name} className="w-full h-full object-cover" /> : mWorker.initials}
                       </div>
                       <span className="text-[12px] text-white/45">{mWorker.name.split(" ")[0]}</span>
@@ -329,7 +329,7 @@ export default function TasksPage() {
                 {worker ? (
                   <div className="flex items-center gap-1.5">
                     <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[7px] font-black flex-shrink-0"
-                      style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                      style={{ backgroundColor: worker.color + "25", color: ink(worker.color) }}>
                       {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
                     </div>
                     <span>{worker.name.split(" ")[0]}</span>

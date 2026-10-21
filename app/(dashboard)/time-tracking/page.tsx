@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
@@ -1017,7 +1018,7 @@ export default function TimeTrackingPage() {
             return (
               <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[13px] font-bold"
-                  style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                  style={{ backgroundColor: worker.color + "25", color: ink(worker.color) }}>
                   {worker.photo
                     ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                     : worker.initials}
@@ -1047,7 +1048,7 @@ export default function TimeTrackingPage() {
             {availableShown.map((worker, idx, arr) => (
               <div key={worker.id} className={`flex items-center gap-3 px-4 py-3.5 ${idx < arr.length - 1 ? "border-b border-white/[0.05]" : ""}`}>
                 <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-bold"
-                  style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                  style={{ backgroundColor: worker.color + "25", color: ink(worker.color) }}>
                   {worker.photo
                     ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                     : worker.initials}
@@ -1173,7 +1174,7 @@ export default function TimeTrackingPage() {
                               </button>
                             ) : (
                               <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-[11px] font-black"
-                                style={{ backgroundColor: worker.color + "22", color: worker.color }}>
+                                style={{ backgroundColor: worker.color + "22", color: ink(worker.color) }}>
                                 {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
                               </div>
                             )}
@@ -1348,9 +1349,10 @@ export default function TimeTrackingPage() {
                     {worker.photo
                       ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover rounded-lg" />
                       : <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-                          style={{ backgroundColor: worker.color + "30", color: worker.color }}>{worker.initials}</div>
+                          style={{ backgroundColor: worker.color + "30", color: ink(worker.color) }}>{worker.initials}</div>
                     }
-                    <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 bg-black/60 text-[9px] text-white/70 px-1.5 py-0.5 rounded">
+                    {/* sits on a dark scrim in both themes, so its text stays white (an arbitrary value escapes the light-theme remap) */}
+                    <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 bg-black/60 text-[9px] text-[#ffffffcc] px-1.5 py-0.5 rounded">
                       <Camera size={8} />
                       {worker.photo ? "Clock-in photo" : "No photo"}
                     </div>
@@ -1400,7 +1402,7 @@ export default function TimeTrackingPage() {
               <button key={worker.id} onClick={() => requestClockIn(worker)} disabled={geofenceChecking}
                 className="flex items-center gap-2 bg-[#111111] border border-white/[0.06] hover:border-green-500/30 hover:bg-green-500/[0.04] rounded-full px-3 py-2 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                 <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[9px] font-bold flex-shrink-0"
-                  style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                  style={{ backgroundColor: worker.color + "25", color: ink(worker.color) }}>
                   {worker.photo
                     ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                     : worker.initials}
@@ -1567,7 +1569,7 @@ export default function TimeTrackingPage() {
                 <div className="flex items-center gap-3">
                   {isLive && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse flex-shrink-0" />}
                   <div className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-[10px] font-bold"
-                    style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                    style={{ backgroundColor: worker.color + "25", color: ink(worker.color) }}>
                     {worker.photo
                       ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
                       : worker.initials}

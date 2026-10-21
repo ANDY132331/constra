@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -408,7 +409,7 @@ export default function PhotosPage() {
                         <div className="flex items-center gap-1.5">
                           {uploader && (
                             <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold"
-                              style={{ backgroundColor: uploader.color + "30", color: uploader.color }}>
+                              style={{ backgroundColor: uploader.color + "30", color: ink(uploader.color) }}>
                               {uploader.photo ? <img src={uploader.photo} alt={uploader.name} className="w-full h-full object-cover" /> : uploader.initials}
                             </div>
                           )}
@@ -551,7 +552,7 @@ export default function PhotosPage() {
                     {uploader && (
                       <div className="flex items-center gap-1.5">
                         <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold"
-                          style={{ backgroundColor: uploader.color + "30", color: uploader.color }}>
+                          style={{ backgroundColor: uploader.color + "30", color: ink(uploader.color) }}>
                           {uploader.photo ? <img src={uploader.photo} alt={uploader.name} className="w-full h-full object-cover" /> : uploader.initials}
                         </div>
                         <span className="text-[11px] text-white/40">{uploader.name.split(" ")[0]}</span>

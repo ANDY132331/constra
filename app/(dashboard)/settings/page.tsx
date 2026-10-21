@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
 import { useState, useEffect, Suspense } from "react";
@@ -772,7 +773,7 @@ function SettingsInner() {
                     style={{ gridTemplateColumns: "2fr 1fr 120px 80px", minWidth: "420px" }}>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold flex-shrink-0"
-                        style={{ backgroundColor: worker.color + "25", color: worker.color }}>
+                        style={{ backgroundColor: worker.color + "25", color: ink(worker.color) }}>
                         {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
                       </div>
                       <div>
@@ -1422,7 +1423,7 @@ function AccessControlTab({
                   className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/[0.02] active:bg-white/[0.04] transition-colors text-left"
                 >
                   <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-[12px] font-bold"
-                    style={{ backgroundColor: worker.color + "22", color: worker.color }}>
+                    style={{ backgroundColor: worker.color + "22", color: ink(worker.color) }}>
                     {worker.photo ? <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" /> : worker.initials}
                   </div>
                   <div className="flex-1 min-w-0">

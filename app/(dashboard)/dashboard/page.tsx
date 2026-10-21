@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import {
@@ -24,7 +24,7 @@ import { hoursBetween } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
 import { projectProgress } from "@/lib/project-progress";
 import { isPastDue as invoiceIsPastDue } from "@/lib/invoice-status";
-import { endOfDay } from "@/lib/utils";
+import { endOfDay, ink } from "@/lib/utils";
 
 // ── Weather ────────────────────────────────────────────────────────────────────
 
@@ -160,7 +160,7 @@ function WorkerCard({ worker }: { worker: Worker }) {
           <img src={worker.photo} alt={worker.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold"
-            style={{ backgroundColor: worker.color + "30", color: worker.color }}>
+            style={{ backgroundColor: worker.color + "30", color: ink(worker.color) }}>
             {worker.initials}
           </div>
         )}
@@ -521,7 +521,7 @@ export default function DashboardPage() {
               style={{
                 backgroundColor: (currentUser.color ?? "#F5C400") + "22",
                 borderColor: (currentUser.color ?? "#F5C400") + "44",
-                color: currentUser.color ?? "#F5C400",
+                color: ink(currentUser.color ?? "#F5C400"),
               }}
             >
               {currentUser.photo
@@ -602,7 +602,7 @@ export default function DashboardPage() {
                   className="flex items-center gap-3 bg-[#111] border border-white/[0.06] active:bg-white/[0.04] rounded-2xl p-3.5 transition-all">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: (proj.color ?? "#F5C400") + "18" }}>
-                    <FolderKanban size={18} style={{ color: proj.color ?? "#F5C400" }} />
+                    <FolderKanban size={18} style={{ color: ink(proj.color ?? "#F5C400") }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-bold text-white/85 truncate">{proj.name}</p>
@@ -907,7 +907,7 @@ export default function DashboardPage() {
                   <div className="relative">
                     <div
                       className="w-11 h-11 rounded-full flex items-center justify-center text-[13px] font-black"
-                      style={{ backgroundColor: w.color + "28", color: w.color }}
+                      style={{ backgroundColor: w.color + "28", color: ink(w.color) }}
                     >
                       {w.photo
                         ? <img src={w.photo} alt={w.name} className="w-full h-full rounded-full object-cover" />

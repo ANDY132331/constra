@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { toast } from "sonner";
 
 import { useState, useEffect } from "react";
@@ -10,7 +10,7 @@ import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { MicButton } from "@/components/mic-button";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { toLocalDateString, endOfDay } from "@/lib/utils";
+import { toLocalDateString, endOfDay, ink } from "@/lib/utils";
 
 const PRIORITY_CONFIG = {
   high: { label: "HIGH", className: "bg-red-500/15 text-red-400" },
@@ -221,7 +221,7 @@ export default function PunchListPage() {
                   {assignee && (
                     <div className="flex items-center gap-1.5">
                       <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold flex-shrink-0"
-                        style={{ backgroundColor: assignee.color + "30", color: assignee.color }}>
+                        style={{ backgroundColor: assignee.color + "30", color: ink(assignee.color) }}>
                         {assignee.photo
                           ? <img src={assignee.photo} alt={assignee.name} className="w-full h-full object-cover" />
                           : assignee.initials}
@@ -406,7 +406,7 @@ export default function PunchListPage() {
                         {assignee && (
                           <div className="flex items-center gap-1.5">
                             <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-bold"
-                              style={{ backgroundColor: assignee.color + "30", color: assignee.color }}>
+                              style={{ backgroundColor: assignee.color + "30", color: ink(assignee.color) }}>
                               {assignee.photo ? <img src={assignee.photo} alt={assignee.name} className="w-full h-full object-cover" /> : assignee.initials}
                             </div>
                             <span>{assignee.name}</span>

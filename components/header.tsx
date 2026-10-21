@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import {
 import { useStore, useTransientStore } from "@/lib/store";
 import { isAdminOrAbove, isForemanOrAbove } from "@/lib/permissions";
 import { Shield } from "lucide-react";
-import { endOfDay } from "@/lib/utils";
+import { endOfDay, ink } from "@/lib/utils";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -320,7 +320,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           >
             <div
               className="relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-              style={{ backgroundColor: currentUser.color + "33", color: currentUser.color }}
+              style={{ backgroundColor: currentUser.color + "33", color: ink(currentUser.color) }}
             >
               {currentUser.initials}
               {currentUser.photo && (
@@ -339,7 +339,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                 ) : (
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
-                    style={{ backgroundColor: currentUser.color + "33", color: currentUser.color }}
+                    style={{ backgroundColor: currentUser.color + "33", color: ink(currentUser.color) }}
                   >
                     {currentUser.initials}
                   </div>
