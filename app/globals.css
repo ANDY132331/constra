@@ -1800,3 +1800,16 @@ body:has(.save-bar) .cc-fab { display: none !important; }
 body:has([data-app-shell]) .text-\[8px\],
 body:has([data-app-shell]) .text-\[9px\],
 body:has([data-app-shell]) .text-\[10px\] { font-size: 11px !important; }
+
+/* ── Default press feedback ──
+   About half the app's controls (filter chips, tabs, menu rows) only reacted to :hover, which a
+   touch screen never shows, so a tap on a slow site connection gave no sign it landed and got
+   tapped again. :where() keeps this at zero specificity: any control with its own active: style
+   wins, and only filter changes, so it never fights a control's transform or background. */
+:where(body:has([data-app-shell])) :where(button, a[href], [role="button"], summary):where(:not(:disabled)):active {
+  filter: brightness(1.28);
+  transition: filter 0s;
+}
+:where([data-theme="light"] body:has([data-app-shell])) :where(button, a[href], [role="button"], summary):where(:not(:disabled)):active {
+  filter: brightness(0.9);
+}

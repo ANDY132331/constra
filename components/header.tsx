@@ -156,7 +156,9 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
       </button>
 
       <div className="flex-1 min-w-0">
-        <h1 className="text-[16px] font-bold text-white/90 leading-none truncate tracking-tight"><span className="sm:hidden">{shortTitle}</span><span className="hidden sm:inline">{title}</span></h1>
+        {/* Phones: every page shows its own big heading right below, and squeezed between the menu and
+            the action buttons this truncated to "DASHBOA…" (or "D." at 320px). Kept for screen readers as the page's h1. */}
+        <h1 className="sr-only sm:not-sr-only text-[16px] font-bold text-white/90 leading-none truncate tracking-tight"><span className="sm:hidden">{shortTitle}</span><span className="hidden sm:inline">{title}</span></h1>
         <p className="text-[11px] text-white/30 mt-0.5 hidden sm:block">{dateStr}</p>
       </div>
 
