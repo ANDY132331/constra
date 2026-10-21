@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/currency";
 import type { Estimate } from "@/lib/mock-data";
 import { exportEstimatePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { useUnsavedGuard } from "@/lib/use-unsaved-guard";
 import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 import type { InvoiceTemplate } from "@/lib/pdf-export";
 import { moneyTotals, lineAmount } from "@/lib/money";
@@ -126,9 +127,11 @@ export default function EstimateDetailPage() {
     return () => document.removeEventListener("mousedown", close);
   }, [menuOpen]);
 
-  if (!estimate) return null;
+  const isDirty = !!estimate && JSON.stringify(draft) !== JSON.stringify(toDraft(estimate));
+  useUnsavedGuard(isDirty);
+  const [leaveConfirm, setLeaveConfirm] = useState(false);
 
-  const isDirty = JSON.stringify(draft) !== JSON.stringify(toDraft(estimate));
+  if (!estimate) return null;
   const cfg = STATUS_CFG[estimate.status];
   const isDraft    = estimate.status === "draft";
   const isSent     = estimate.status === "sent";
@@ -251,7 +254,7 @@ export default function EstimateDetailPage() {
         style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))', paddingBottom: '0.75rem' }}
       >
         <button
-          onClick={() => router.push("/estimates")}
+          onClick={() => (isDirty ? setLeaveConfirm(true) : router.push("/estimates"))}
           aria-label="Back to estimates"
           className="flex items-center gap-1 min-w-11 min-h-11 -ml-3 pl-3 pr-1 text-white/50 hover:text-white transition-colors shrink-0"
         >
@@ -725,6 +728,14 @@ export default function EstimateDetailPage() {
         confirmLabel="Create another"
         onConfirm={() => { setConfirmReconvert(false); handleConvertToInvoice(true); }}
         onCancel={() => setConfirmReconvert(false)}
+      />
+      <ConfirmModal
+        open={leaveConfirm}
+        title="Discard your changes?"
+        body="Your edits to this estimate haven't been saved."
+        confirmLabel="Discard"
+        onConfirm={() => { setLeaveConfirm(false); router.push("/estimates"); }}
+        onCancel={() => setLeaveConfirm(false)}
       />
     </div>
   );

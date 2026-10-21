@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/currency";
 import type { Invoice } from "@/lib/mock-data";
 import { exportInvoicePdf } from "@/lib/pdf-export";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { useUnsavedGuard } from "@/lib/use-unsaved-guard";
 import { TemplatePicker, useTemplateChoice } from "@/components/pdf-template-picker";
 import type { InvoiceTemplate } from "@/lib/pdf-export";
 import { moneyTotals, lineAmount } from "@/lib/money";
@@ -128,9 +129,11 @@ export default function InvoiceDetailPage() {
     return () => document.removeEventListener("mousedown", close);
   }, [menuOpen]);
 
-  if (!invoice) return null;
+  const isDirty = !!invoice && JSON.stringify(draft) !== JSON.stringify(toDraft(invoice));
+  useUnsavedGuard(isDirty);
+  const [leaveConfirm, setLeaveConfirm] = useState(false);
 
-  const isDirty = JSON.stringify(draft) !== JSON.stringify(toDraft(invoice));
+  if (!invoice) return null;
   const cfg = STATUS_CFG[invoice.status];
   const isPaid    = invoice.status === "paid";
   const isOverdue = isOverdueNow(invoice);
@@ -228,7 +231,7 @@ export default function InvoiceDetailPage() {
         style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))', paddingBottom: '0.75rem' }}
       >
         <button
-          onClick={() => router.push("/invoices")}
+          onClick={() => (isDirty ? setLeaveConfirm(true) : router.push("/invoices"))}
           aria-label="Back to invoices"
           className="flex items-center gap-1 min-w-11 min-h-11 -ml-3 pl-3 pr-1 text-white/50 hover:text-white transition-colors shrink-0"
         >
@@ -649,6 +652,14 @@ export default function InvoiceDetailPage() {
         confirmLabel="Delete"
         onConfirm={() => { deleteInvoice(invoice.id); toast.success("Invoice deleted"); router.push("/invoices"); }}
         onCancel={() => setDeleteConfirm(false)}
+      />
+      <ConfirmModal
+        open={leaveConfirm}
+        title="Discard your changes?"
+        body="Your edits to this invoice haven't been saved."
+        confirmLabel="Discard"
+        onConfirm={() => { setLeaveConfirm(false); router.push("/invoices"); }}
+        onCancel={() => setLeaveConfirm(false)}
       />
     </div>
   );

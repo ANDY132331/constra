@@ -1069,6 +1069,18 @@ export default function TimeTrackingPage() {
         </div>
       )}
 
+      {/* Every list on this screen hides itself when empty, so a search that matches nobody left a blank page */}
+      {(search || selectedProject !== "all") && allEntries.length === 0 && clockedInShown.length === 0 && availableShown.length === 0 && (
+        <div className="px-5">
+          <EmptyState
+            icon={Clock}
+            title="No matching workers or shifts"
+            body="Nothing matches your search or site filter. Clear them to see everyone."
+            isFiltered
+          />
+        </div>
+      )}
+
       {/* Timesheet — day-grouped, professional layout */}
       {allEntries.length > 0 && (() => {
         const completedEntries = allEntries.filter((e) => e.clockOut);
@@ -1523,11 +1535,20 @@ export default function TimeTrackingPage() {
 
       {/* Entries table */}
       {allEntries.length === 0 ? (
-        <EmptyState
-          icon={Clock}
-          title="No time entries yet"
-          body="Use the Clock In button above to start tracking time for your crew."
-        />
+        search || selectedProject !== "all" ? (
+          <EmptyState
+            icon={Clock}
+            title="No matching entries"
+            body="No shifts match your search or site filter. Clear them to see everyone."
+            isFiltered
+          />
+        ) : (
+          <EmptyState
+            icon={Clock}
+            title="No time entries yet"
+            body="Use the Clock In button above to start tracking time for your crew."
+          />
+        )
       ) : (
         <div className="overflow-x-auto rounded-xl">
         <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[700px]">

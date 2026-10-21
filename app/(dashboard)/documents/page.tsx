@@ -319,9 +319,9 @@ export default function DocumentsPage() {
         {filteredDocs.length === 0 ? (
           <EmptyState
             icon={FolderOpen}
-            title="No files here yet"
-            body="Upload contracts, permits, inspection reports, blueprints, and more."
-            isFiltered={documents.filter((d) => !selectedProject || d.projectId === selectedProject).length > 0}
+            title={documents.length > 0 ? "No matching files" : "No files here yet"}
+            body={documents.length > 0 ? "Try a different search, category or project." : "Upload contracts, permits, inspection reports, blueprints, and more."}
+            isFiltered={documents.length > 0}
           />
         ) : (
           <div className="px-4 pb-4 space-y-2.5">
@@ -442,10 +442,10 @@ export default function DocumentsPage() {
       {filteredDocs.length === 0 ? (
         <EmptyState
           icon={FolderOpen}
-          title="No files here yet"
-          body="Upload blueprints, permits, contracts, and more to keep everything organized."
-          action={{ label: "Upload File", onClick: () => fileInputRef.current?.click() }}
-          isFiltered={selectedCategory !== "all"}
+          title={documents.length > 0 ? "No matching files" : "No files here yet"}
+          body={documents.length > 0 ? "Try a different search, category or project." : "Upload blueprints, permits, contracts, and more to keep everything organized."}
+          action={documents.length > 0 ? undefined : { label: "Upload File", onClick: () => fileInputRef.current?.click() }}
+          isFiltered={documents.length > 0}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
