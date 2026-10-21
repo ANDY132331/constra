@@ -112,7 +112,7 @@ export function MobileNav() {
                 </div>
                 <span
                   className="text-[10px] font-black uppercase tracking-wider mt-2"
-                  style={{ color: clockedIn ? "#22c55e" : activeColor }}
+                  style={{ color: clockedIn ? (dk ? "#22c55e" : "#15803d") : activeColor }}
                 >
                   {label}
                 </span>

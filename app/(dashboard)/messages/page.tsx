@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
+import { ink } from "@/lib/utils";
 import {
   Send, Paperclip, X, Download, Trash2, MessagesSquare,
   Search, ChevronLeft, Mic, Play, Pause, ChevronDown,
@@ -561,7 +562,7 @@ export default function MessagesPage() {
                         className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold border-2 flex-shrink-0"
                         style={{
                           background: w.color + "40",
-                          color: w.color,
+                          color: ink(w.color),
                           borderColor: C.headerBg,
                           marginLeft: i === 0 ? 0 : -8,
                           zIndex: teamAvatars.length - i,

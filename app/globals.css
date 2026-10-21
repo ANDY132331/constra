@@ -1701,7 +1701,11 @@ html[data-theme="light"] header:not(.lp-nav) { box-shadow: 0 1px 0 var(--c-rule)
 
 [data-theme="dark"] .text-white\/10, [data-theme="dark"] .text-white\/15,
 [data-theme="dark"] .text-white\/20 { color: rgba(255,255,255,0.4) !important; }
-[data-theme="dark"] .text-white\/25, [data-theme="dark"] .text-white\/30 { color: rgba(255,255,255,0.46) !important; }
+/* Secondary text tiers. /35–/45 were left at their raw alpha, so they read *dimmer* than the
+   lifted /30 and measured 3.2–4.4:1 on the #111 ground; each tier now clears 4.5:1 in order. */
+[data-theme="dark"] .text-white\/25, [data-theme="dark"] .text-white\/30 { color: rgba(255,255,255,0.5) !important; }
+[data-theme="dark"] .text-white\/35, [data-theme="dark"] .text-white\/40 { color: rgba(255,255,255,0.54) !important; }
+[data-theme="dark"] .text-white\/45 { color: rgba(255,255,255,0.58) !important; }
 [data-theme="dark"] [class*="placeholder:text-white"]::placeholder { color: rgba(255,255,255,0.34) !important; }
 
 /* ── Light-mode mappings for remaining theme classes (generated) ── */

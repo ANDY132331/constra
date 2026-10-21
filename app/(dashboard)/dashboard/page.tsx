@@ -709,7 +709,7 @@ export default function DashboardPage() {
         {/* Greeting + live clock */}
         <div className="relative flex items-start justify-between mb-5">
           <div>
-            <p className={`text-[11px] font-black uppercase tracking-[0.14em] mb-0.5 ${dk ? "text-amber-500/60" : "text-amber-700"}`}>
+            <p className={`text-[11px] font-black uppercase tracking-[0.14em] mb-0.5 ${dk ? "text-amber-500/60" : "text-[#7A5C00]"}`}>
               {greeting.split(",")[0]}
             </p>
             <h2 className={`text-[24px] font-black tracking-tight leading-tight ${dk ? "text-white" : "text-gray-900"}`}>
@@ -733,16 +733,16 @@ export default function DashboardPage() {
               <span className={`text-[44px] font-black leading-none tabular-nums ${dk ? "text-white" : "text-gray-900"}`}>{clockedInWorkers.length}</span>
               <span className={`text-[14px] font-bold mb-2 ${dk ? "text-amber-400/50" : "text-amber-600/60"}`}>/{workers.length}</span>
             </div>
-            <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${dk ? "text-amber-500/70" : "text-amber-700"}`}>Crew on Site</p>
+            <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${dk ? "text-amber-500/70" : "text-[#7A5C00]"}`}>Crew on Site</p>
             <div className="flex items-center gap-1.5 mt-2">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-[10px] text-green-600 font-bold">Live</span>
+              <span className={`text-[10px] font-bold ${dk ? "text-green-500" : "text-[#166534]"}`}>Live</span>
             </div>
           </div>
           <div className={`flex-1 rounded-2xl p-4 border ${dk ? "bg-white/[0.04] border-white/[0.08]" : "bg-white/70 border-gray-200/80 backdrop-blur-sm"}`}>
             <span className={`text-[44px] font-black leading-none tabular-nums block mb-1 ${dk ? "text-white" : "text-gray-900"}`}>{activeProjects.length}</span>
             <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${dk ? "text-white/40" : "text-gray-500"}`}>Active Jobs</p>
-            <p className={`text-[10px] mt-2 ${dk ? "text-white/30" : "text-gray-400"}`}>{upcomingProjects.length} upcoming</p>
+            <p className={`text-[10px] mt-2 ${dk ? "text-white/30" : "text-gray-500"}`}>{upcomingProjects.length} upcoming</p>
           </div>
         </div>
 

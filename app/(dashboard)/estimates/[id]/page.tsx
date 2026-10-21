@@ -26,25 +26,25 @@ function paperStyles(t: InvoiceTemplate, isAccepted: boolean) {
     totalLabelColor: "text-white/40", totalAmtColor: "text-white",
     tableHeadBg: "bg-[#1c2026]", tableHeadText: "text-white/80", altRowBg: "bg-gray-50",
     totalBg: isAccepted ? "bg-emerald-500" : "bg-amber-500",
-    footerBg: "bg-[#1c2026]", footerText: "text-white/60", clientNameColor: "text-amber-400",
+    footerBg: "bg-[#1c2026]", footerText: "text-white/60", clientNameColor: "text-[#8A6400]",
   } as const;
   if (t === "minimal") return {
     headerBg: "bg-white", headerBorder: "border-gray-200", accentStrip: false,
-    companyNameColor: "text-gray-700", companyAddrColor: "text-gray-400",
-    titleColor: "text-gray-300", numColor: "text-gray-400",
-    totalLabelColor: "text-gray-400", totalAmtColor: "text-gray-800",
+    companyNameColor: "text-gray-700", companyAddrColor: "text-gray-500",
+    titleColor: "text-gray-300", numColor: "text-gray-500",
+    totalLabelColor: "text-gray-500", totalAmtColor: "text-gray-800",
     tableHeadBg: "bg-gray-50", tableHeadText: "text-gray-500", altRowBg: "",
     totalBg: isAccepted ? "bg-emerald-500" : "bg-gray-800",
-    footerBg: "bg-gray-100", footerText: "text-gray-400", clientNameColor: "text-gray-700",
+    footerBg: "bg-gray-100", footerText: "text-gray-500", clientNameColor: "text-gray-700",
   } as const;
   return {
     headerBg: "bg-white", headerBorder: "border-gray-100", accentStrip: false,
-    companyNameColor: "text-amber-600", companyAddrColor: "text-gray-400",
-    titleColor: "text-gray-800", numColor: "text-gray-400",
-    totalLabelColor: "text-gray-400", totalAmtColor: "text-gray-900",
-    tableHeadBg: "bg-amber-500", tableHeadText: "text-white", altRowBg: "bg-gray-50",
+    companyNameColor: "text-[#8A6400]", companyAddrColor: "text-gray-500",
+    titleColor: "text-gray-800", numColor: "text-gray-500",
+    totalLabelColor: "text-gray-500", totalAmtColor: "text-gray-900",
+    tableHeadBg: "bg-amber-500", tableHeadText: "text-[#1A1600]", altRowBg: "bg-gray-50",
     totalBg: isAccepted ? "bg-emerald-500" : "bg-amber-500",
-    footerBg: "bg-amber-500", footerText: "text-white/80", clientNameColor: "text-amber-600",
+    footerBg: "bg-amber-500", footerText: "text-[#1A1600]/80", clientNameColor: "text-[#8A6400]",
   } as const;
 }
 
@@ -375,7 +375,7 @@ export default function EstimateDetailPage() {
                     </div>
                   ) : (
                     <div className="w-14 h-14 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-[22px] font-black">{(companyName ?? "C").charAt(0)}</span>
+                      <span className="text-[#1A1600] text-[22px] font-black">{(companyName ?? "C").charAt(0)}</span>
                     </div>
                   )}
                   <div className="min-w-0">
@@ -426,7 +426,7 @@ export default function EstimateDetailPage() {
             <div className="px-7 sm:px-12 pt-6 pb-5 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:gap-12">
                 <div className="flex-1 mb-5 sm:mb-0">
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-2">Prepared For</p>
+                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] mb-2">Prepared For</p>
                   <input
                     className={ec(`text-[16px] font-bold ${ps.clientNameColor} w-full`)}
                     value={draft.clientName}
@@ -437,7 +437,7 @@ export default function EstimateDetailPage() {
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <Mail size={11} className="text-gray-300 flex-shrink-0" />
                     <input
-                      className={ec("text-[12px] text-gray-400 flex-1")}
+                      className={ec("text-[12px] text-gray-500 flex-1")}
                       value={draft.clientEmail}
                       onChange={(e) => setDraft((d) => ({ ...d, clientEmail: e.target.value }))}
                       placeholder="client@email.com"
@@ -445,7 +445,7 @@ export default function EstimateDetailPage() {
                     />
                   </div>
                   <div className="mt-3">
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Project</p>
+                    <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] mb-1">Project</p>
                     <input
                       className={ec("text-[13px] text-gray-700 font-semibold w-full")}
                       value={draft.projectName}
@@ -457,7 +457,7 @@ export default function EstimateDetailPage() {
                 </div>
                 <div className="flex flex-row sm:flex-col gap-6 sm:gap-4 flex-shrink-0">
                   <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Issue Date</p>
+                    <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] mb-1">Issue Date</p>
                     <input
                       type="date"
                       className={ec("text-[13px] text-gray-700 font-semibold")}
@@ -466,7 +466,7 @@ export default function EstimateDetailPage() {
                     />
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Valid Until</p>
+                    <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] mb-1">Valid Until</p>
                     <input
                       type="date"
                       className={ec(`text-[13px] font-semibold ${isExpired ? "text-red-600" : "text-gray-700"}`)}
@@ -489,7 +489,7 @@ export default function EstimateDetailPage() {
                 {draft.items.map((item, i) => (
                   <div key={i} className={`border-b border-gray-100 px-1 py-3 ${i % 2 === 1 ? ps.altRowBg : ""}`}>
                     <div className="flex items-start gap-2">
-                      <span className="text-gray-400 text-[12px] w-5 pt-0.5 text-center flex-shrink-0">{i + 1}</span>
+                      <span className="text-gray-500 text-[12px] w-5 pt-0.5 text-center flex-shrink-0">{i + 1}</span>
                       <textarea
                         rows={1}
                         ref={autoGrow}
@@ -510,7 +510,7 @@ export default function EstimateDetailPage() {
                       )}
                     </div>
                     <label className="flex items-center gap-2 mt-2 pl-7">
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.12em]">Category</span>
+                      <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.12em]">Category</span>
                       <select
                         className={ec("text-gray-500 text-[12px] py-0.5")}
                         value={item.category}
@@ -521,7 +521,7 @@ export default function EstimateDetailPage() {
                     </label>
                     <div className="flex items-end gap-3 mt-2 pl-7">
                       <label className="block">
-                        <span className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.12em]">Qty</span>
+                        <span className="block text-[9px] font-black text-gray-500 uppercase tracking-[0.12em]">Qty</span>
                         <input
                           type="number" inputMode="numeric"
                           className={ec("w-12 text-gray-500 text-[13px]")}
@@ -531,7 +531,7 @@ export default function EstimateDetailPage() {
                         />
                       </label>
                       <label className="block">
-                        <span className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.12em]">Rate</span>
+                        <span className="block text-[9px] font-black text-gray-500 uppercase tracking-[0.12em]">Rate</span>
                         <input
                           type="number" inputMode="decimal"
                           className={ec("w-20 text-gray-500 text-[13px]")}
@@ -565,7 +565,7 @@ export default function EstimateDetailPage() {
                   <tbody>
                     {draft.items.map((item, i) => (
                       <tr key={i} className={`border-b border-gray-100 group ${i % 2 === 1 ? ps.altRowBg : ""}`}>
-                        <td className="py-2.5 px-3 text-gray-400 text-center text-[12px]">{i + 1}</td>
+                        <td className="py-2.5 px-3 text-gray-500 text-center text-[12px]">{i + 1}</td>
                         <td className="py-2.5 px-3">
                           <input
                             className={ec("w-full text-gray-800 font-medium text-[13px]")}
@@ -623,7 +623,7 @@ export default function EstimateDetailPage() {
               </div>
               <button
                 onClick={() => setDraft((d) => ({ ...d, items: [...d.items, { description: "", qty: "1", rate: "", category: "Labour" }] }))}
-                className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-amber-500 hover:text-amber-400 transition-colors px-1 py-1"
+                className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-[#8A6400] hover:text-[#5C4500] transition-colors px-1 py-1"
               >
                 <Plus size={12} /> Add line item
               </button>
@@ -646,7 +646,7 @@ export default function EstimateDetailPage() {
                       onChange={(e) => setDraft((d) => ({ ...d, taxRate: e.target.value }))}
                       min="0" max="100"
                     />
-                    <span className="text-gray-400 text-[12px]">%</span>
+                    <span className="text-gray-500 text-[12px]">%</span>
                     <span className="text-gray-800 font-semibold">{formatCurrency(tax, currency as never)}</span>
                   </div>
                 </div>
@@ -655,8 +655,8 @@ export default function EstimateDetailPage() {
                   <span className="text-gray-900 font-bold">{formatCurrency(Math.round(total * 100) / 100, currency as never)}</span>
                 </div>
                 <div className={`flex justify-between items-center px-5 py-3.5 mt-3 rounded-2xl ${ps.totalBg}`}>
-                  <span className="text-[13px] font-black text-white">Estimate Total</span>
-                  <span className="text-[20px] font-black text-white">
+                  <span className={`text-[13px] font-black ${ps.totalBg.includes("gray-800") ? "text-[#ffffff]" : "text-[#1A1600]"}`}>Estimate Total</span>
+                  <span className={`text-[20px] font-black ${ps.totalBg.includes("gray-800") ? "text-[#ffffff]" : "text-[#1A1600]"}`}>
                     {formatCurrency(Math.round(total * 100) / 100, currency as never)}
                   </span>
                 </div>
@@ -665,7 +665,7 @@ export default function EstimateDetailPage() {
 
             {/* Notes */}
             <div className="mx-6 sm:mx-12 mb-5 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1.5">Notes &amp; Scope</p>
+              <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] mb-1.5">Notes &amp; Scope</p>
               <textarea
                 className={ec("w-full text-[13px] text-gray-600 leading-relaxed resize-none")}
                 rows={2}
@@ -678,8 +678,8 @@ export default function EstimateDetailPage() {
 
             {/* Terms */}
             <div className="mx-6 sm:mx-12 mb-7">
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] mb-1">Terms &amp; Conditions</p>
-              <p className="text-[11px] text-gray-400 leading-relaxed">This estimate is valid until the date stated above. Prices are subject to change after expiry. Acceptance constitutes agreement to the stated scope and pricing.</p>
+              <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] mb-1">Terms &amp; Conditions</p>
+              <p className="text-[11px] text-gray-500 leading-relaxed">This estimate is valid until the date stated above. Prices are subject to change after expiry. Acceptance constitutes agreement to the stated scope and pricing.</p>
             </div>
 
             {/* Footer band */}
