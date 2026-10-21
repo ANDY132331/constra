@@ -241,7 +241,7 @@ export default function CrewPage() {
       (w.role ?? "").toLowerCase().includes(q) ||
       (w.customRole ?? "").toLowerCase().includes(q) ||
       (w.email ?? "").toLowerCase().includes(q) ||
-      w.phone.includes(search);
+      (w.phone ?? "").includes(search);
     const matchRole = filterRole === "all" || w.role === filterRole;
     return matchSearch && matchRole;
   });

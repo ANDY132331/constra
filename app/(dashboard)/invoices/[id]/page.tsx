@@ -229,7 +229,8 @@ export default function InvoiceDetailPage() {
       >
         <button
           onClick={() => router.push("/invoices")}
-          className="flex items-center gap-1 text-white/50 hover:text-white transition-colors shrink-0"
+          aria-label="Back to invoices"
+          className="flex items-center gap-1 min-w-11 min-h-11 -ml-3 pl-3 pr-1 text-white/50 hover:text-white transition-colors shrink-0"
         >
           <ChevronLeft size={20} />
           <span className="text-[13px] font-medium hidden sm:inline">Invoices</span>
@@ -452,7 +453,7 @@ export default function InvoiceDetailPage() {
                       {draft.items.length > 1 && (
                         <button aria-label="Remove line item"
                           onClick={() => setDraft((d) => ({ ...d, items: d.items.filter((_, j) => j !== i) }))}
-                          className="text-gray-300 hover:text-red-400 transition-colors p-0.5 flex-shrink-0"
+                          className="text-gray-300 hover:text-red-400 transition-colors p-2.5 -m-2 flex-shrink-0"
                         >
                           <X size={13} />
                         </button>
@@ -539,7 +540,7 @@ export default function InvoiceDetailPage() {
                           {draft.items.length > 1 && (
                             <button aria-label="Remove line item"
                               onClick={() => setDraft((d) => ({ ...d, items: d.items.filter((_, j) => j !== i) }))}
-                              className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
+                              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100 p-2 -m-2 text-gray-300 hover:text-red-400 transition-all"
                             >
                               <X size={13} />
                             </button>
