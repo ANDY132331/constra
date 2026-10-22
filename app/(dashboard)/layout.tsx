@@ -79,8 +79,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !splashGone) {
-      const t1 = setTimeout(() => setSplashExiting(true), 300);
-      const t2 = setTimeout(() => setSplashGone(true),    300 + 500);
+      // Leave the moment data is ready: on a mid-range phone the page was already rendered
+      // behind the splash, which then held it for another 0.8s (300ms pause + 500ms fade).
+      const t1 = setTimeout(() => setSplashExiting(true), 0);
+      const t2 = setTimeout(() => setSplashGone(true),    250);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
