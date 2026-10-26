@@ -1,4 +1,5 @@
 "use client";
+import { getCurrentPosition, geolocationAvailable } from "@/lib/native";
 import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -196,8 +197,8 @@ export default function SchedulePage() {
       setLat(loc.lat); setLon(loc.lon); setLocationName(loc.name);
       fetchWeather(loc.lat, loc.lon, loc.name);
     };
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
+    if (geolocationAvailable()) {
+      getCurrentPosition(
         (pos) => {
           const name = "Your Location";
           setLat(pos.coords.latitude);

@@ -1,4 +1,5 @@
 "use client";
+import { getCurrentPosition, geolocationAvailable } from "@/lib/native";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Camera, X, RotateCcw, AlertTriangle, CheckCircle2, Loader2, MapPin, FlipHorizontal } from "lucide-react";
@@ -30,12 +31,12 @@ export function CameraCapture({ workerName, onCapture, onClose }: Props) {
   }, []);
 
   const requestGps = useCallback(() => {
-    if (!navigator.geolocation) {
+    if (!geolocationAvailable()) {
       setGpsState("unavailable");
       return;
     }
     setGpsState("fetching");
-    navigator.geolocation.getCurrentPosition(
+    getCurrentPosition(
       (pos) => {
         setGps({
           lat: pos.coords.latitude,

@@ -5,6 +5,16 @@ import type { NextRequest } from "next/server";
 const PUBLIC_PATHS = ["/demo", "/login", "/onboarding", "/auth", "/terms", "/privacy", "/support", "/reset-password", "/share/", "/pay/", "/co/", "/delete-account", "/.well-known/", "/opengraph-image", "/sitemap", "/robots"];
 
 export async function proxy(request: NextRequest) {
+  // The iOS app (Capacitor appends "ConstraApp-iOS" to its user agent) must never show the
+  // marketing page: it carries pricing and a subscribe flow, and App Review rejects selling a
+  // digital subscription outside in-app purchase (guideline 3.1.1). Signed-out users land on
+  // /login from here via the normal guard below.
+  if (request.nextUrl.pathname === "/" && /ConstraApp-iOS/.test(request.headers.get("user-agent") ?? "")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
   // Allow through if Supabase isn't configured (local dev without env vars).
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return NextResponse.next();

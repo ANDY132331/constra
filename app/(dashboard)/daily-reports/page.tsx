@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { getCurrentPosition, geolocationAvailable } from "@/lib/native";
 import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
@@ -105,9 +106,9 @@ export default function DailyReportsPage() {
   }, [currency]);
 
   const fetchWeather = useCallback(() => {
-    if (!navigator.geolocation) return;
+    if (!geolocationAvailable()) return;
     setFetchingWeather(true);
-    navigator.geolocation.getCurrentPosition(
+    getCurrentPosition(
       ({ coords }) => fetchWeatherForCoords(coords.latitude, coords.longitude),
       () => { setFetchingWeather(false); toast.error("Location access denied"); }
     );

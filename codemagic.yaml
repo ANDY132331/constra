@@ -1,0 +1,40 @@
+# Builds the Constra iOS app on a cloud Mac and uploads it to App Store Connect / TestFlight.
+# No Mac needed locally. One-time setup in Codemagic (codemagic.io):
+#   1. Add this GitHub repo as an app.
+#   2. Teams > Integrations > App Store Connect: add an API key (from App Store Connect >
+#      Users and Access > Integrations > Keys, "App Manager" role) and name it "Constra ASC".
+#   3. Start the "iOS release" workflow manually. Codemagic creates the signing certificate
+#      and App Store provisioning profile for com.getconstra.app automatically.
+workflows:
+  ios-release:
+    name: iOS release
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Constra ASC
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.getconstra.app
+      node: 22
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: npm ci
+      - name: Sync the native project (copies config, fallback page and plugins)
+        script: npx cap sync ios
+      - name: Apply signing profiles
+        script: xcode-project use-profiles
+      - name: Set build number
+        # App Store Connect rejects a repeated build number; Codemagic's counter always goes up.
+        script: |
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" ios/App/App.xcodeproj/project.pbxproj
+      - name: Build the .ipa
+        script: xcode-project build-ipa --project "ios/App/App.xcodeproj" --scheme "App"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

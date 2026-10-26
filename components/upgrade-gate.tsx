@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Zap, Lock } from "lucide-react";
 import { useStore } from "@/lib/store";
 import PLANS, { withinLimit, limitLabel } from "@/config/plans";
+import { isNativeApp } from "@/lib/native";
 
 type GateProps = {
   feature: "workers" | "activeProjects";
@@ -21,6 +22,23 @@ export function UpgradeGate({ feature, currentCount, children, softWarn = false 
 
   // Pro has unlimited — never gate
   if (isPro || within) return <>{children}</>;
+
+  // Inside the iOS app, no prices, upgrade buttons or links to buy (App Store guideline 3.1.1):
+  // say what the limit is and leave plan changes to the website.
+  if (isNativeApp()) {
+    const what = feature === "workers" ? "worker" : "active project";
+    return (
+      <>
+        <div className="mb-4 bg-white/[0.04] border border-white/[0.08] rounded-xl p-4 flex items-center gap-3">
+          <Lock size={16} className="text-white/40 flex-shrink-0" />
+          <p className="text-[13px] text-white/60">
+            Your workspace has reached its {limitLabel(limit)} {what} limit. Your account admin can change the plan.
+          </p>
+        </div>
+        {softWarn && children}
+      </>
+    );
+  }
 
   if (softWarn) {
     return (

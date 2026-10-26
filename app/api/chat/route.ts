@@ -188,7 +188,10 @@ export async function POST(request: Request) {
         stream: true,
         max_tokens: 512,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: /ConstraApp-iOS/.test(request.headers.get("user-agent") ?? "")
+            // App Store guideline 3.1.1: no prices, plans or purchase steps inside the iOS app
+            ? `${SYSTEM_PROMPT}\n\n## This user is in the Constra iOS app\nDo not mention prices, plans, upgrades, subscriptions, trials or how to pay or subscribe, and do not point to billing settings or the website for purchasing. If asked about plans, billing or pricing, say their account admin manages that, and offer to help with anything else.`
+            : SYSTEM_PROMPT },
           ...userMessages.map((m) => ({ role: m.role, content: m.content })),
         ],
       }),

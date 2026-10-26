@@ -1,4 +1,5 @@
 "use client";
+import { getCurrentPosition, geolocationAvailable } from "@/lib/native";
 import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -290,8 +291,8 @@ function fmtDist(m: number) {
 /** Try to get the device's current position once, with the given timeout. */
 function tryGetPosition(timeoutMs: number): Promise<GeolocationPosition | null> {
   return new Promise((res) => {
-    if (!("geolocation" in navigator)) return res(null);
-    navigator.geolocation.getCurrentPosition(
+    if (!geolocationAvailable()) return res(null);
+    getCurrentPosition(
       (pos) => res(pos),
       () => res(null),
       { timeout: timeoutMs, maximumAge: 15_000, enableHighAccuracy: true },

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Constra</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0a0a0a; color: #ECEAE5; font-family: -apple-system, system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; text-align: center; box-sizing: border-box; }
+  img { width: 72px; height: 72px; border-radius: 18px; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
+  p { margin: 0; max-width: 300px; font-size: 15px; line-height: 1.45; color: #9A9C9F; }
+  button { min-height: 48px; padding: 0 28px; border: 0; border-radius: 999px; background: #F5C400; color: #1A1600; font-size: 16px; font-weight: 700; }
+  button:active { filter: brightness(.9); }
+  .tape { position: fixed; top: 0; left: 0; right: 0; height: 8px; background: repeating-linear-gradient(135deg, #151617 0 8px, #F5C400 8px 16px); }
+</style>
+</head>
+<body>
+  <div class="tape"></div>
+  <img src="icon.png" alt="">
+  <h1>No connection</h1>
+  <p>Constra needs a connection the first time it opens on this phone. After that, clock-ins work offline and sync when you're back in range.</p>
+  <button onclick="location.href='https://getconstra.com/dashboard'">Try again</button>
+</body>
+</html>

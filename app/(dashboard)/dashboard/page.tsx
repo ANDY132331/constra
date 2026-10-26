@@ -1,4 +1,5 @@
 "use client";
+import { getCurrentPosition } from "@/lib/native";
 
 import { useState, useEffect, useMemo } from "react";
 import {
@@ -43,7 +44,7 @@ function weatherMeta(code: number): { label: string; icon: React.ComponentType<{
 function useWeather(useFahrenheit: boolean): WeatherData {
   const [weather, setWeather] = useState<WeatherData>(null);
   useEffect(() => {
-    navigator.geolocation?.getCurrentPosition(({ coords }) => {
+    getCurrentPosition(({ coords }) => {
       const { latitude: lat, longitude: lon } = coords;
       const unit = useFahrenheit ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
       fetch(
