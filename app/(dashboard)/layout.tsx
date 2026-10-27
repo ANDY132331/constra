@@ -19,6 +19,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { RTL_LOCALES } from "@/lib/i18n/locales";
 import { isForemanOrAbove, isAdminOrAbove } from "@/lib/permissions";
 import { SplashScreen } from "@/components/splash-screen";
+import { setNativeStatusBar } from "@/lib/native";
 
 // Pages that are always accessible regardless of role/grants
 const ALWAYS_ALLOWED = ["/dashboard", "/time-tracking", "/safety", "/messages", "/photos", "/settings"];
@@ -40,6 +41,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   // (Global ThemeApplier in root layout handles the initial value)
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    setNativeStatusBar(theme);
   }, [theme]);
   const router = useRouter();
   const pathname = usePathname();

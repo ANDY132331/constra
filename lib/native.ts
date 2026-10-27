@@ -74,3 +74,11 @@ export async function saveFile(data: Blob | string, filename: string): Promise<v
     if (!/cancel/i.test(String(e?.message ?? e))) throw e;
   });
 }
+
+/** Keeps the iPhone clock and battery readable: dark text on the light theme, light text on dark. */
+export function setNativeStatusBar(theme: "dark" | "light"): void {
+  if (!isNativeApp()) return;
+  void import("@capacitor/status-bar")
+    .then(({ StatusBar, Style }) => StatusBar.setStyle({ style: theme === "light" ? Style.Light : Style.Dark }))
+    .catch(() => {});
+}
