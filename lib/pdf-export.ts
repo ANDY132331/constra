@@ -2,6 +2,7 @@ import type { ClockEntry, Worker, Project, Estimate, Invoice, DailyReport, Chang
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween, LONG_SHIFT_HOURS } from "./hours";
 import { isOverdue } from "./invoice-status";
+import { saveFile } from "@/lib/native";
 
 type PdfReportInput = {
   workers: Worker[];
@@ -381,7 +382,7 @@ export async function exportReportPdf(input: PdfReportInput) {
     doc.text("Made with Constra", W / 2, H - 8, { align: "center" });
   }
 
-  doc.save(`payroll-${company.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${periodLabel.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`);
+  saveFile(doc.output("blob"), `payroll-${company.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${periodLabel.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`).catch(console.error);
 }
 
 // ── Materials Summary PDF ────────────────────────────────────────────────────
@@ -498,7 +499,7 @@ export async function exportMaterialsPdf(
   doc.text(`${companyName ?? "Constra"} · ${projectName} · Materials Report`, MARGIN, pH - 4);
   doc.text(`Generated ${new Date().toLocaleDateString("en-CA")}`, PAGE_W - MARGIN, pH - 4, { align: "right" });
 
-  doc.save(`materials-${projectName.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+  saveFile(doc.output("blob"), `materials-${projectName.replace(/\s+/g, "-").toLowerCase()}.pdf`).catch(console.error);
 }
 
 // ── Template Type ─────────────────────────────────────────────────────────────
@@ -981,7 +982,7 @@ export async function exportEstimatePdf(
   }
 
   if (mode === "dataurl") return doc.output("datauristring");
-  doc.save(`${estimate.number}.pdf`);
+  saveFile(doc.output("blob"), `${estimate.number}.pdf`).catch(console.error);
 }
 
 export async function generateEstimatePdfDataUrl(
@@ -1505,7 +1506,7 @@ export async function exportInvoicePdf(
   }
 
   if (mode === "dataurl") return doc.output("datauristring");
-  doc.save(`${invoice.number}.pdf`);
+  saveFile(doc.output("blob"), `${invoice.number}.pdf`).catch(console.error);
 }
 
 // ── Daily Report PDF ──────────────────────────────────────────────────────────
@@ -1602,7 +1603,7 @@ export async function exportDailyReportPdf({
   doc.text(`${companyName ?? "Constra"}  ·  Daily Report  ·  ${projectName}`, ML, PH - 3);
 
   const dateStr = report.date.toISOString().slice(0, 10);
-  doc.save(`daily-report-${projectName.replace(/\s+/g, "-").toLowerCase()}-${dateStr}.pdf`);
+  saveFile(doc.output("blob"), `daily-report-${projectName.replace(/\s+/g, "-").toLowerCase()}-${dateStr}.pdf`).catch(console.error);
 }
 
 // ── Change Order PDF ──────────────────────────────────────────────────────────
@@ -1744,5 +1745,5 @@ export async function exportChangeOrderPdf({
   doc.setTextColor(160, 160, 160);
   doc.text(`${companyName ?? "Constra"}  ·  Change Order  ·  ${changeOrder.number}`, ML, PH - 3);
 
-  doc.save(`${changeOrder.number.replace(/\s+/g, "-")}.pdf`);
+  saveFile(doc.output("blob"), `${changeOrder.number.replace(/\s+/g, "-")}.pdf`).catch(console.error);
 }

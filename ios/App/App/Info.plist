@@ -74,6 +74,8 @@
 	<string>Constra takes a photo when you clock in to verify who is on site, and lets you photograph site progress, issues and documents.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Constra uses the microphone to record voice messages to your crew and voice notes on reports.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Constra turns your speech into text when you tap the mic on a report, punch item, RFI or safety form.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Constra lets you attach site photos and documents you've already taken.</string>
 

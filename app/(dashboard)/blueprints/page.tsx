@@ -10,6 +10,7 @@ import { useFileUrl } from "@/lib/supabase/signed-url";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
 import { CustomSelect, type SelectOption } from "@/components/ui/custom-select";
+import { saveFile } from "@/lib/native";
 
 const PIN_TYPE_LABELS = { issue: "Issues", safety: "Safety", rfi: "RFIs", info: "Info" } as const;
 
@@ -195,13 +196,13 @@ export default function BlueprintsPage() {
                 </a>
               )}
               {(selectedDoc.publicUrl ?? selectedDoc.dataUrl) && (
-                <a
-                  href={selectedUrl}
-                  download={selectedDoc.name}
+                <button
+                  type="button"
+                  onClick={() => { if (selectedUrl) saveFile(selectedUrl, selectedDoc.name).catch(() => window.open(selectedUrl, "_blank", "noopener,noreferrer")); }}
                   className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/[0.05] border border-white/[0.07] rounded-2xl text-white/60 text-[13px] font-bold active:scale-95 transition-transform"
                 >
                   <Download size={14} /> Download
-                </a>
+                </button>
               )}
             </div>
             <p className="text-[11px] text-white/30 mt-2 text-center">Drag to move · pinch to zoom · Add Pin to mark an issue</p>

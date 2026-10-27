@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   const sections = [
     {
       title: "1. Information We Collect",
-      body: `We collect information you provide directly when creating an account (name, email, company name), information generated through your use of the Service (time entries, project data, photos, GPS coordinates during clock-in), and technical information (device type, IP address, browser type) for security and diagnostics.`,
+      body: `We collect information you provide directly when creating an account (name, email, phone number, company name), information generated through your use of the Service (time entries, project data, photos, voice messages, GPS coordinates during clock-in), and technical information (device type, IP address, browser type) for security and diagnostics.`,
     },
     {
       title: "2. GPS and Photo Data",
@@ -24,6 +24,10 @@ export default function PrivacyPage() {
     {
       title: "5. Data Sharing",
       body: `We do not sell your personal information. We share data only with: (a) infrastructure providers necessary to operate the Service (Supabase for database, file storage and authentication; Vercel for hosting; Resend for email; Groq, which processes the questions you ask the in-app assistant along with the relevant company data; Stripe for card payments on invoices; and Open-Meteo and OpenStreetMap, which receive job-site coordinates or addresses to look up weather and map locations) under their respective terms; (b) law enforcement or regulators when required by law; or (c) a successor organization if Constra is acquired or merged, with advance notice to you.`,
+    },
+    {
+      title: "6. Microphone and Voice",
+      body: `Constra only uses your microphone when you tap a mic button. Voice messages you record are stored in your company's workspace and are visible to the people you send them to. When you dictate into a form, your device's speech service (for example Apple or Google) turns the speech into text; Constra saves only the resulting text, not the recording.`,
     },
     {
       title: "7. Data Retention",
@@ -47,7 +51,7 @@ export default function PrivacyPage() {
     },
     {
       title: "12. Cookies and Local Storage",
-      body: `We use session cookies and browser local/session storage to maintain your authenticated session and remember your preferences within the app. We do not use advertising cookies or third-party tracking cookies. You can disable cookies in your browser, but some features may not work correctly.`,
+      body: `We use session cookies and browser local/session storage to maintain your authenticated session and remember your preferences within the app. We do not use advertising cookies or third-party tracking cookies. We count page views with Vercel Analytics, which uses no cookies and does not identify you. You can disable cookies in your browser, but some features may not work correctly.`,
     },
     {
       title: "13. Changes to This Policy",
@@ -71,7 +75,7 @@ export default function PrivacyPage() {
         </Link>
 
         <h1 className="text-4xl font-black tracking-tight mb-2">Privacy Policy</h1>
-        <p className="text-white/40 text-[14px] mb-12">Last updated: October 2, 2026</p>
+        <p className="text-white/40 text-[14px] mb-12">Last updated: October 26, 2026</p>
 
         <div className="space-y-10">
           {sections.map(({ title, body }) => (

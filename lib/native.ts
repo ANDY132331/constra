@@ -45,3 +45,32 @@ export function getCurrentPosition(success: Success, failure?: Failure, options?
     }
   })();
 }
+
+/**
+ * Save a generated file. Browsers get a normal download; the iOS WebView can't download, so the
+ * native app writes the file to the cache and opens the share sheet (Save to Files, Mail, AirDrop).
+ */
+export async function saveFile(data: Blob | string, filename: string): Promise<void> {
+  if (!isNativeApp()) {
+    const url = typeof data === "string" ? data : URL.createObjectURL(data);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.rel = "noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+    if (typeof data !== "string") setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    return;
+  }
+  const blob = typeof data === "string" ? await fetch(data).then((r) => r.blob()) : data;
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1] ?? "");
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+  const [{ Filesystem, Directory }, { Share }] = await Promise.all([import("@capacitor/filesystem"), import("@capacitor/share")]);
+  const safe = filename.replace(/[\/:*?"<>|]+/g, "-");
+  const { uri } = await Filesystem.writeFile({ path: safe, data: base64, directory: Directory.Cache });
+  await Share.share({ title: safe, files: [uri] }).catch((e) => {
+    // Closing the share sheet without picking anything is not an error.
+    if (!/cancel/i.test(String(e?.message ?? e))) throw e;
+  });
+}

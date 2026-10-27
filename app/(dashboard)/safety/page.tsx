@@ -12,6 +12,7 @@ import { MicButton } from "@/components/mic-button";
 import { useT } from "@/lib/i18n";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toLocalDateString, ink } from "@/lib/utils";
+import { isNativeApp, saveFile } from "@/lib/native";
 
 const TYPE_CONFIG = {
   "near-miss": { label: "Near Miss", icon: AlertTriangle, color: "#F5C400" },
@@ -174,6 +175,11 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
 <div class="footer">This document was generated from the Constra safety log. Keep a signed copy for compliance records.</div>
 <script>window.onload = function() { window.print(); }<\/script>
 </body></html>`;
+    // The iOS app can't open print pop-ups, so it hands over the report as a file instead.
+    if (isNativeApp()) {
+      saveFile(new Blob([html], { type: "text/html" }), `incident-${incident.date}.html`).catch(() => toast.error("Could not export the report"));
+      return;
+    }
     const win = window.open("", "_blank");
     if (win) { win.document.write(html); win.document.close(); }
     else { toast.error("Popup blocked — allow popups to export the report"); }

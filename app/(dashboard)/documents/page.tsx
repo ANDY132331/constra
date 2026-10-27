@@ -17,6 +17,7 @@ import { uploadDocument } from "@/lib/supabase/storage";
 import { compressImage } from "@/lib/compress-image";
 import { useFileUrl, resolveFileUrl } from "@/lib/supabase/signed-url";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { saveFile } from "@/lib/native";
 
 type Category = ProjectDocument["category"];
 
@@ -171,26 +172,13 @@ export default function DocumentsPage() {
       try {
         const resp = await fetch(url);
         if (!resp.ok) throw new Error();
-        const blob = await resp.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = doc.name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        await saveFile(await resp.blob(), doc.name);
       } catch {
         window.open(url, "_blank", "noopener,noreferrer");
       }
       return;
     }
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = doc.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    await saveFile(url, doc.name).catch(() => {});
   }
 
   async function handleVersionUpload(e: React.ChangeEvent<HTMLInputElement>) {

@@ -6,6 +6,7 @@ import type { ClockEntry, Worker, Project } from "./mock-data";
 import type { OvertimeSettings } from "./overtime";
 import { computeWorkerOvertime } from "./overtime";
 import { hoursBetween } from "./hours";
+import { saveFile } from "@/lib/native";
 
 export type PayrollRow = {
   workerName: string;
@@ -245,17 +246,8 @@ export function exportPayroll(
   const content = adapter.serialize(rows, periodLabel, overtimeSummaries, overtimeSettings?.multiplier);
   // BOM so Excel reads names with accents correctly (not for QuickBooks IIF)
   const blob = new Blob([adapter.fileExtension === "csv" ? "\uFEFF" + content : content], { type: adapter.mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
   // Keep the name plain ASCII: en dashes, commas and accents from a period label trip up
   // Windows, Excel and some payroll portals.
   const slug = periodLabel.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  a.download = `constra-payroll-${slug}.${adapter.fileExtension}`;
-  // Must append to DOM before clicking — required for Firefox and mobile browsers
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  saveFile(blob, `constra-payroll-${slug}.${adapter.fileExtension}`).catch(console.error);
 }

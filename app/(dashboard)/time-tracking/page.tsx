@@ -1,5 +1,5 @@
 "use client";
-import { getCurrentPosition, geolocationAvailable } from "@/lib/native";
+import { getCurrentPosition, geolocationAvailable, saveFile } from "@/lib/native";
 import { ink } from "@/lib/utils";
 
 import { toast } from "sonner";
@@ -718,12 +718,7 @@ export default function TimeTrackingPage() {
     const cell = (c: unknown) => { const s = String(c); return `"${(/^[=+\-@\t\r]/.test(s) ? `'${s}` : s).replace(/"/g, '""')}"`; };
     const csv = "\uFEFF" + rows.map((r) => r.map(cell).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `constra-time-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    saveFile(blob, `constra-time-${new Date().toISOString().slice(0, 10)}.csv`).catch(console.error);
     const implausible = done.filter((e) => isImplausibleShift(e.clockIn, e.clockOut)).length;
     const notes = [
       stillOn > 0 ? `${stillOn} still on site, not included` : null,

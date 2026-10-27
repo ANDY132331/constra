@@ -12,6 +12,7 @@ import { useStore } from "@/lib/store";
 import { compressImage } from "@/lib/compress-image";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/confirm-modal";
+import { saveFile } from "@/lib/native";
 
 // Chat colours come from the same ink/hi-vis set as the rest of the app and follow
 // the light/dark setting, so this page never looks like a different product.
@@ -394,8 +395,7 @@ export default function MessagesPage() {
   }
 
   function downloadAttachment(name: string, data: string) {
-    const a = document.createElement("a");
-    a.href = data; a.download = name; a.click();
+    saveFile(data, name).catch(console.error);
   }
 
   const isImage    = (data: string) => data.startsWith("data:image");
