@@ -7,6 +7,7 @@ import { Download, X, Smartphone } from "lucide-react";
 const PUBLIC_PREFIXES = ["/", "/login", "/onboarding", "/reset-password", "/terms", "/privacy", "/support", "/share", "/pay", "/delete-account", "/demo", "/co/"];
 import { subscribeToPush } from "@/lib/push-client";
 import { useStore } from "@/lib/store";
+import { isNativeApp } from "@/lib/native";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -30,7 +31,8 @@ function CustomTabBanner() {
         (navigator as { standalone?: boolean }).standalone === true;
       const dismissed = localStorage.getItem("constra_ctab_v1") === "1";
 
-      if (isMobile && !isStandalone && !dismissed) {
+      // Inside the App Store / Play shell the app is already installed.
+      if (isMobile && !isStandalone && !dismissed && !isNativeApp()) {
         // Delay so it doesn't flash during normal page load
         const t = setTimeout(() => { setIsAndroid(android); setVisible(true); }, 1800);
         return () => clearTimeout(t);
