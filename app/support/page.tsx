@@ -29,7 +29,7 @@ const FAQS = [
   },
   {
     q: "How do I cancel or change my plan?",
-    a: "Go to Settings → Billing → Manage Subscription. You can upgrade, downgrade, or cancel at any time with no penalties or hidden fees.",
+    a: "Email support@getconstra.com from your company admin's address and we'll change or cancel it for you — no penalties or hidden fees.",
   },
   {
     q: "Is my data secure?",
