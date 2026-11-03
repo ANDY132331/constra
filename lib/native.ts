@@ -1,10 +1,31 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
+import { ANDROID_APP_REFERRER, STORE_APP_COOKIE } from "@/lib/store-app";
 
 /** True inside the Constra iOS/Android shell (Capacitor), false in a browser or installed PWA. */
 export function isNativeApp(): boolean {
   try { return Capacitor.isNativePlatform(); } catch { return false; }
+}
+
+// The Android app is a Trusted Web Activity: plain Chrome, so Capacitor can't see it. Its first
+// page load carries this referrer; we keep a cookie so the server (lib/store-app.ts, read by
+// proxy.ts and /api/chat) and every later page know too.
+
+/** Call once on load: marks this browser as the Play Store app when launched from it. */
+export function rememberStoreApp(): void {
+  if (typeof document === "undefined" || !document.referrer.startsWith(ANDROID_APP_REFERRER)) return;
+  document.cookie = `${STORE_APP_COOKIE}=android; path=/; max-age=31536000; SameSite=Lax; Secure`;
+}
+
+/**
+ * True inside either store app (iOS shell or Android TWA). Use this, not isNativeApp(), for
+ * anything store policy cares about — prices, plans, upgrade buttons, links to buy.
+ */
+export function isStoreApp(): boolean {
+  if (isNativeApp()) return true;
+  if (typeof document === "undefined") return false;
+  return document.cookie.split("; ").includes(`${STORE_APP_COOKIE}=android`) || document.referrer.startsWith(ANDROID_APP_REFERRER);
 }
 
 export function geolocationAvailable(): boolean {

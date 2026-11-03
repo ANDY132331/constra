@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Zap, Lock } from "lucide-react";
 import { useStore } from "@/lib/store";
 import PLANS, { withinLimit, limitLabel } from "@/config/plans";
-import { isNativeApp } from "@/lib/native";
+import { isStoreApp } from "@/lib/native";
 
 type GateProps = {
   feature: "workers" | "activeProjects";
@@ -23,9 +23,9 @@ export function UpgradeGate({ feature, currentCount, children, softWarn = false 
   // Pro has unlimited — never gate
   if (isPro || within) return <>{children}</>;
 
-  // Inside the iOS app, no prices, upgrade buttons or links to buy (App Store guideline 3.1.1):
-  // say what the limit is and leave plan changes to the website.
-  if (isNativeApp()) {
+  // Inside the store apps, no prices, upgrade buttons or links to buy (App Store 3.1.1, Play
+  // payments policy): say what the limit is and leave plan changes to the website.
+  if (isStoreApp()) {
     const what = feature === "workers" ? "worker" : "active project";
     return (
       <>

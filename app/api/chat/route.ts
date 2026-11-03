@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { fromStoreApp } from "@/lib/store-app";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -263,9 +264,9 @@ export async function POST(request: Request) {
     SYSTEM_PROMPT,
     await userContext(supabase, user.id, page),
     `Today is ${new Date().toISOString().slice(0, 10)}.`,
-    /ConstraApp-iOS/.test(request.headers.get("user-agent") ?? "")
-      // App Store guideline 3.1.1: no prices, plans or purchase steps inside the iOS app
-      ? "## This user is in the Constra iOS app\nDo not mention prices, plans, upgrades, subscriptions, trials or how to pay or subscribe, and do not point to billing settings or the website for purchasing. If asked about plans, billing or pricing, say their account admin manages that, and offer to help with anything else. The app is already installed, so never explain how to install Constra or add it to the home screen."
+    fromStoreApp(request)
+      // App Store 3.1.1 / Play payments policy: no prices, plans or purchase steps in the store apps
+      ? "## This user is in the Constra phone app (App Store or Google Play)\nDo not mention prices, plans, upgrades, subscriptions, trials or how to pay or subscribe, and do not point to billing settings or the website for purchasing. If asked about plans, billing or pricing, say their account admin manages that, and offer to help with anything else. The app is already installed, so never explain how to install Constra or add it to the home screen."
       : "",
   ].filter(Boolean).join("\n\n");
 

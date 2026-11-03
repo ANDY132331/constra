@@ -1,15 +1,26 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { ANDROID_APP_REFERRER, STORE_APP_COOKIE, fromStoreApp } from "@/lib/store-app";
 
 const PUBLIC_PATHS = ["/demo", "/login", "/onboarding", "/auth", "/terms", "/privacy", "/support", "/reset-password", "/share/", "/pay/", "/co/", "/delete-account", "/.well-known/", "/opengraph-image", "/sitemap", "/robots"];
 
 export async function proxy(request: NextRequest) {
-  // The iOS app (Capacitor appends "ConstraApp-iOS" to its user agent) must never show the
-  // marketing page: it carries pricing and a subscribe flow, and App Review rejects selling a
-  // digital subscription outside in-app purchase (guideline 3.1.1). Signed-out users land on
-  // /login from here via the normal guard below.
-  if (request.nextUrl.pathname === "/" && /ConstraApp-iOS/.test(request.headers.get("user-agent") ?? "")) {
+  const response = await route(request);
+  // The Play Store app's launch request carries its package as the referrer, on that one
+  // request only. Remember it so later pages (and the client, via isStoreApp) still know.
+  if ((request.headers.get("referer") ?? "").startsWith(ANDROID_APP_REFERRER)) {
+    response.cookies.set(STORE_APP_COOKIE, "android", { path: "/", maxAge: 31_536_000, sameSite: "lax", secure: true });
+  }
+  return response;
+}
+
+async function route(request: NextRequest): Promise<NextResponse> {
+  // The store apps must never show the marketing page: it carries pricing, and App Review
+  // (guideline 3.1.1) and Google Play's payments policy reject pointing users to buy a digital
+  // subscription outside the store's billing. Signed-out users land on /login from here via the
+  // normal guard below.
+  if (request.nextUrl.pathname === "/" && fromStoreApp(request)) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
