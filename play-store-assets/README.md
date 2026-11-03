@@ -81,7 +81,7 @@ https://getconstra.com/.well-known/assetlinks.json shows it.
 1. Go to **https://play.google.com/console**
 2. Open the **Constra** app (create it only once, ever — every later build updates the same app) → the closed testing track until 12 testers have been opted in for 14 days, then Production
 3. Fill in listing details:
-   - Title: **Constra — Field Workforce Management**
+   - Title (30 max): **Constra: Crew & Job Manager**
    - Short description: **GPS clock-in, crew scheduling & invoicing for construction teams**
    - Long description: (see below)
    - Package name: `com.getconstra.app`
@@ -110,9 +110,9 @@ Constra is the all-in-one field management app built for construction crews. Tra
 • Team chat for every project
 • Daily reports and analytics
 • Crew management with role-based access
-• Works offline (PWA)
+• Keeps working when the signal drops — clock-ins sync when you're back online
 
-Free to use. No subscription required.
+Constra needs a company account. Your company admin can invite you, or you can create one at getconstra.com.
 
 **Tags:**
 construction management, crew scheduling, time tracking, invoicing, field service
