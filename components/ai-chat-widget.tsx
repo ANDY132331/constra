@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useStore } from "@/lib/store";
 import {
   MessageCircle,
   X,
@@ -65,7 +66,30 @@ function RichText({ text, onNavigate }: { text: string; onNavigate: () => void }
   );
 }
 
+// The assistant answers these from the user's own data, so they're worth a tap
+function starterQuestions(role: string, pathname: string): string[] {
+  const admin = role === "Admin";
+  const here = pathname.split("/")[1];
+  const pageQ: Record<string, string> = {
+    "time-tracking": "How do I fix a wrong clock-in?",
+    invoices: "How do I send an invoice?",
+    estimates: "How do I turn an estimate into an invoice?",
+    crew: "How do I add a worker?",
+    blueprints: "How do I mark up a drawing?",
+    safety: "How do I report an incident?",
+    schedule: "How do I schedule my crew?",
+  };
+  return [
+    ...(pageQ[here] ? [pageQ[here]] : []),
+    "How many hours have I worked this week?",
+    admin ? "Which projects are open right now?" : "What tasks are assigned to me?",
+    "How do I clock in?",
+  ].slice(0, 3);
+}
+
 function AIChatWidgetInner({ pathname }: { pathname: string }) {
+  const role = useStore().currentUser.role;
+  const suggestions = starterQuestions(role, pathname);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState("");
@@ -113,8 +137,8 @@ function AIChatWidgetInner({ pathname }: { pathname: string }) {
     return () => window.removeEventListener("open-ai-chat", open);
   }, []);
 
-  const send = useCallback(async () => {
-    const text = input.trim();
+  const send = useCallback(async (preset?: string) => {
+    const text = (preset ?? input).trim();
     if (!text || streaming) return;
 
     const userMsg: Message = { role: "user", content: text };
@@ -325,6 +349,21 @@ function AIChatWidgetInner({ pathname }: { pathname: string }) {
               </div>
             ))}
 
+            {/* Starter questions until the first one is asked */}
+            {messages.length === 1 && !streaming && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {suggestions.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => send(q)}
+                    className="text-[12px] text-amber-300/90 bg-amber-500/[0.08] border border-amber-500/20 hover:bg-amber-500/15 active:scale-[0.97] rounded-full px-3 py-1.5 transition-all text-left"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Escalation card */}
             {showContact && (
               <div
@@ -391,7 +430,7 @@ function AIChatWidgetInner({ pathname }: { pathname: string }) {
               style={{ maxHeight: 96, overflowY: "auto" }}
             />
             <button
-              onClick={send}
+              onClick={() => send()}
               disabled={!input.trim() || streaming}
               aria-label="Send"
               className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl bg-amber-500 disabled:bg-white/[0.07] disabled:cursor-not-allowed text-black transition-all active:scale-95 hover:bg-amber-400"
