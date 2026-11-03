@@ -1,7 +1,7 @@
 # Constra — Play Store Visual Assets
 
-**Live URL:** https://www.getconstra.com  
-**Package ID:** com.constra.app
+**Live URL:** https://getconstra.com  
+**Package ID:** com.getconstra.app (never change it — it is the app's identity on Google Play)
 
 All HTML files here are **pixel-accurate mockups** of the real app UI.
 Open each in Chrome, screenshot it, and upload to Google Play Console.
@@ -53,58 +53,38 @@ Open each in Chrome, screenshot it, and upload to Google Play Console.
 
 ## How to build and submit the Android app
 
-### Step 1 — Generate the AAB with PWABuilder (no Java needed)
+### Step 1 — Build the AAB with PWABuilder, signed with the EXISTING key
 
-1. Go to **https://pwabuilder.com**
-2. Enter `https://www.getconstra.com` → click **Start**
-3. Click **Build My PWA** → choose **Android**
-4. Settings to confirm:
-   - Package ID: `com.constra.app`
-   - App name: `Constra`
+1. Go to **https://pwabuilder.com** and enter `https://getconstra.com` → **Start**.
+   No `www.` — www only redirects, and Android verifies the exact domain it is given.
+2. **Package for stores** → **Android** → **Options**:
+   - Package ID: `com.getconstra.app`
+   - App name / launcher name: `Constra`
    - Start URL: `/dashboard`
-   - Theme color: `#0a0a0a`
-   - Background color: `#0a0a0a`
-5. Click **Generate Package** → download the ZIP
-6. Inside the ZIP you'll find:
-   - `app-release-bundle.aab` ← upload this to Play Console
-   - `signing-key-info.txt` ← contains the **SHA-256 fingerprint**
+   - Theme and background colour: `#0a0a0a`
+   - App version code: one higher than the last upload (Play rejects a repeat)
+   - **Signing key: "Use mine"** → upload `Desktop\Constra-Signing-Key\signing.keystore`,
+     alias `my-key-alias`, passwords from that folder's README.
+     **Never pick "Create new"** — a new key can't update the existing Play app.
+3. **Generate** → download the ZIP → upload `app-release-bundle.aab` to Play Console.
 
-### Step 2 — Update assetlinks.json
+### Step 2 — assetlinks.json (already live; only touch it if Android shows a browser bar)
 
-After downloading the ZIP, open `signing-key-info.txt` and copy the SHA-256 fingerprint.
+`public/.well-known/assetlinks.json` must contain the SHA-256 of the key **Google** signs the
+app with: Play Console → the app → **Test and release → App integrity → App signing** →
+"App signing key certificate" → SHA-256. If it differs from the one in the file, add it to the
+`sha256_cert_fingerprints` array (keep the existing entry), push, and check
+https://getconstra.com/.well-known/assetlinks.json shows it.
 
-Then update this file: `public/.well-known/assetlinks.json`
-
-Replace `PASTE_YOUR_SHA256_FINGERPRINT_HERE` with the real fingerprint.
-
-```json
-{
-  "sha256_cert_fingerprints": [
-    "AB:CD:12:34:..."  ← paste here
-  ]
-}
-```
-
-### Step 3 — Push to GitHub (auto-deploys to getconstra.com)
-
-```bash
-git add public/.well-known/assetlinks.json
-git commit -m "fix: add real SHA-256 fingerprint for TWA"
-git push
-```
-
-Wait ~1 minute for Vercel to deploy. Then verify the file is live:
-`https://www.getconstra.com/.well-known/assetlinks.json`
-
-### Step 4 — Submit to Play Console
+### Step 3 — Submit to Play Console
 
 1. Go to **https://play.google.com/console**
-2. Create a new app → Production track
+2. Open the **Constra** app (create it only once, ever — every later build updates the same app) → the closed testing track until 12 testers have been opted in for 14 days, then Production
 3. Fill in listing details:
    - Title: **Constra — Field Workforce Management**
    - Short description: **GPS clock-in, crew scheduling & invoicing for construction teams**
    - Long description: (see below)
-   - Package name: `com.constra.app`
+   - Package name: `com.getconstra.app`
 4. Upload **Feature Graphic** (from `constra-feature-graphic.html` screenshot)
 5. Upload **Phone screenshots** (all 8: `phone1-` through `phone8-`)
 6. Upload **7" Tablet screenshots** (`tablet7-landscape.html`, `tablet7-projects.html`)
