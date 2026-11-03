@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   MessageCircle,
@@ -18,7 +19,7 @@ type Message = { role: "user" | "assistant"; content: string };
 const WELCOME: Message = {
   role: "assistant",
   content:
-    "Hi! I'm the Constra AI assistant. Ask me anything about the app — clock-ins, crew management, projects, billing, or anything else.",
+    "Hi! I'm the Constra AI assistant. Ask me how to do anything in the app, or about your own hours, tasks and projects.",
 };
 
 const CONTACT_PHONE = "672-338-9890";
@@ -43,10 +44,28 @@ function hasEscalation(text: string) {
 export function AIChatWidget() {
   const pathname = usePathname();
   if (pathname === "/messages") return null;
-  return <AIChatWidgetInner />;
+  return <AIChatWidgetInner pathname={pathname} />;
 }
 
-function AIChatWidgetInner() {
+// Answers link screens as [Label](/path) and bold button names as **Label**; render both, leave the rest as text
+function RichText({ text, onNavigate }: { text: string; onNavigate: () => void }) {
+  return (
+    <>
+      {text.split(/(\[[^\]\n]+\]\(\/[a-z0-9\-/]*\)|\*\*[^*\n]+\*\*)/g).map((part, i) => {
+        const link = /^\[([^\]]+)\]\((\/[a-z0-9\-/]*)\)$/.exec(part);
+        if (link) return (
+          <Link key={i} href={link[2]} onClick={onNavigate} className="text-amber-400 font-semibold underline underline-offset-2 decoration-amber-400/40 hover:decoration-amber-400">
+            {link[1]}
+          </Link>
+        );
+        if (part.length > 4 && part.startsWith("**") && part.endsWith("**")) return <strong key={i} className="font-semibold text-white">{part.slice(2, -2)}</strong>;
+        return part;
+      })}
+    </>
+  );
+}
+
+function AIChatWidgetInner({ pathname }: { pathname: string }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState("");
@@ -115,6 +134,7 @@ function AIChatWidgetInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: history.map((m) => ({ role: m.role, content: m.content })),
+          page: pathname,
         }),
         signal: ctrl.signal,
       });
@@ -157,7 +177,7 @@ function AIChatWidgetInner() {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [input, messages, streaming]);
+  }, [input, messages, streaming, pathname]);
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -291,7 +311,10 @@ function AIChatWidgetInner() {
                   }
                 >
                   {msg.content ? (
-                    msg.content
+                    msg.role === "assistant"
+                      // on phones the panel covers the page, so close it when a link takes you somewhere
+                      ? <RichText text={msg.content} onNavigate={() => { if (window.innerWidth < 1024) setOpen(false); }} />
+                      : msg.content
                   ) : (
                     <span className="flex items-center gap-1.5 text-white/40">
                       <Loader2 size={12} className="animate-spin" />
@@ -328,7 +351,7 @@ function AIChatWidgetInner() {
                   <Mail size={12} className="text-amber-500 flex-shrink-0" />
                   {CONTACT_EMAIL}
                 </a>
-                <p className="text-white/25 text-[11px]">Available anytime</p>
+                <p className="text-white/25 text-[11px]">Mon – Fri, 8am – 6pm PT</p>
               </div>
             )}
 
