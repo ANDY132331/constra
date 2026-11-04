@@ -14,6 +14,9 @@ Stack: Next.js 16 (Turbopack, middleware lives in `proxy.ts`), React 19, Tailwin
 - Dev server: use the Browser preview tool with `.claude/launch.json` (`construction-web`, or `constra-offline` to run without Supabase). Never start servers from Bash.
 - Stop the dev server before `npm run build`. If tsc complains about `.next/dev/types/validator.ts`, run `rm -rf .next/dev`.
 - Browser testing: see `.claude/skills/browser-testing/` (Playwright, `channel: "msedge"`, scripts in a `.tmp-*` folder).
+- Before a store build: `node .claude/skills/store-release/scripts/preflight.mjs` (the `store-release` skill).
+- Which migrations are live: `node .claude/skills/database-changes/scripts/status.mjs` (the `database-changes` skill).
+- Crew flows end to end, with `constra-offline` running: `node .claude/skills/field-testing/scripts/field-run.mjs <port>` (the `field-testing` skill).
 
 ## Shipping
 
