@@ -1,6 +1,7 @@
 // Store release preflight. Run from the repo root: node .claude/skills/store-release/scripts/preflight.mjs
 // Read-only. Checks what Apple's upload, App Review and Google Play reject on most often, using
 // the repo, the App Store kit on the Desktop (if it's on this machine) and the live site.
+import { execSync } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -89,6 +90,18 @@ const gate = read("components/upgrade-gate.tsx") ?? "";
 check("Code", "Upgrade gate uses isStoreApp (covers Android too)", gate.includes("isStoreApp()"));
 const signIns = hits(/signInWithOAuth/);
 check("Code", "No social login (else Sign in with Apple is required, 4.8)", signIns.length === 0, signIns.join(", "));
+
+// ── Dependencies ─────────────────────────────────────────────────────────────
+// npm audit exits non-zero when it finds anything, so read its output from the error too.
+// Production only: warnings in dev tools never reach users. Remote code execution bugs in Next.js
+// sat unnoticed here for months, on a site using the affected features.
+let audit;
+try { audit = execSync("npm audit --omit=dev --json", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }); }
+catch (e) { audit = e.stdout; }
+try {
+  const n = JSON.parse(audit).metadata.vulnerabilities;
+  check("Dependencies", "No critical or high warnings in shipped packages", !n.critical && !n.high, `${n.critical} critical, ${n.high} high: read them, then npm audit fix`);
+} catch { check("Dependencies", "npm audit could run", false, "no answer from the registry"); }
 
 // ── Live site ────────────────────────────────────────────────────────────────
 const SITE = "https://getconstra.com";
