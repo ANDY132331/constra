@@ -11,6 +11,7 @@ import RealPhotos from "@/components/landing/real-photos";
 import RealClips from "@/components/landing/real-clips";
 import HeroScene from "@/components/landing/hero-scene";
 import ProductReveal from "@/components/landing/product-reveal";
+import { PLAY_STORE_URL } from "@/lib/store-app";
 
 const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
 const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
@@ -420,7 +421,7 @@ export default function LandingPage() {
               </p>
             </div>
             <dl className="lp-field-list">
-              <div><dt><WifiOff size={18} aria-hidden /> Offline</dt><dd>Clock-ins and updates queue on the phone and sync when signal returns.</dd></div>
+              <div><dt><WifiOff size={18} aria-hidden /> Offline</dt><dd>Clock-ins and clock-outs queue on the phone and sync when signal returns.</dd></div>
               <div><dt><MapPin size={18} aria-hidden /> Geofence</dt><dd>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</dd></div>
               <div><dt><span className="lp-field-num">15</span> Languages</dt><dd>Each person picks their own, from Spanish and Polish to Hindi, Arabic and Chinese.</dd></div>
               <div><dt><span className="lp-field-num">OT</span> Overtime</dt><dd>Daily and weekly overtime calculated from the punches, ready for payroll.</dd></div>
@@ -478,7 +479,7 @@ export default function LandingPage() {
             <h2 className="lp-h2">Get your crew on it<br />before Monday.</h2>
             <div className="lp-final-ctas">
               <Link href={startHref} className="lp-btn lp-btn-ink">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
-              <a href="https://play.google.com/store/apps/details?id=com.getconstra.app" target="_blank" rel="noopener noreferrer" className="lp-link lp-link-ink">Get the Android app</a>
+              {PLAY_STORE_URL && <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="lp-link lp-link-ink">Get the Android app</a>}
             </div>
           </div>
         </section>

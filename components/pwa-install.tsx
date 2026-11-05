@@ -8,6 +8,7 @@ const PUBLIC_PREFIXES = ["/", "/login", "/onboarding", "/reset-password", "/term
 import { subscribeToPush } from "@/lib/push-client";
 import { useStore } from "@/lib/store";
 import { isNativeApp } from "@/lib/native";
+import { PLAY_STORE_URL } from "@/lib/store-app";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -63,14 +64,18 @@ function CustomTabBanner() {
               Get the full app experience
             </p>
             <p className="text-[11px] text-white/50 leading-snug mb-3">
-              {isAndroid
+              {isAndroid && PLAY_STORE_URL
                 ? "Install the Android app for faster clock-ins and notifications."
                 : "Add Constra to your home screen for the best experience."}
             </p>
 
-            {isAndroid ? (
+            {isAndroid && !PLAY_STORE_URL ? (
+              <p className="text-[11px] text-white/70">
+                Tap <span className="font-bold text-white">⋮</span> → <span className="font-bold text-white">Install app</span> in Chrome
+              </p>
+            ) : isAndroid ? (
               <a
-                href="https://play.google.com/store/apps/details?id=com.getconstra.app"
+                href={PLAY_STORE_URL ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={dismiss}

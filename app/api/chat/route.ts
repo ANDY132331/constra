@@ -30,7 +30,7 @@ Constra is a mobile-first PWA for construction workforce management, used by con
 
 **Clock In / Out (Time Tracking)**
 - GPS-verified clock-in with optional photo capture
-- Works fully offline — clock-ins queue and sync when reconnected
+- Clock-ins and clock-outs still work with no signal — they queue and sync when reconnected
 - View history, hours, and export timesheets (CSV or PDF)
 - Admins can edit clock entries from Time Tracking → worker → Edit Entry
 
@@ -93,8 +93,8 @@ Constra is a mobile-first PWA for construction workforce management, used by con
 - Cancel anytime, no penalties, no hidden fees
 
 ## Offline Mode
-- Clock-ins, safety logs, and tasks queue on device and auto-sync when reconnected
-- GPS and photo capture still work offline (stored locally until sync)
+- Clock-ins and clock-outs queue on the device and auto-sync when reconnected, with their GPS and photo
+- Everything else (tasks, safety reports, invoices, messages) needs a connection: offline, the app shows "that change wasn't saved" and the user has to redo it once back online
 
 ## Common Troubleshooting
 

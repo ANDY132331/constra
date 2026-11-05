@@ -25,7 +25,7 @@ export function OfflineBanner() {
       <div className="fixed bottom-24 lg:bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-[#1a1a1a] border border-white/10 rounded-full px-4 py-2 shadow-2xl">
         <WifiOff size={13} className="text-amber-400 flex-shrink-0" />
         <span className="text-[12px] font-medium text-white/70">
-          Offline — changes saved locally
+          Offline — clock-ins will sync when you reconnect
           {pendingSync > 0 && `, ${pendingSync} pending`}
         </span>
       </div>

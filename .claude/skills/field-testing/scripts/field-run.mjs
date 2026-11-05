@@ -114,7 +114,7 @@ await step("The same worker can't be clocked in twice", async () => {
 
 await step("Signal drops: page says so and stays usable", async () => {
   await ctx.setOffline(true);
-  await p.getByText(/Offline — changes saved locally/).waitFor({ timeout: 8000 });
+  await p.getByText(/Offline — clock-ins will sync/).waitFor({ timeout: 8000 });
   await p.locator("main").getByText(worker).first().waitFor({ timeout: 5000 });
 });
 
@@ -132,7 +132,7 @@ await step("Clock out with no signal", async () => {
 
 await step("Signal returns: offline notice clears", async () => {
   await ctx.setOffline(false);
-  await p.getByText(/Offline — changes saved locally/).waitFor({ state: "hidden", timeout: 8000 });
+  await p.getByText(/Offline — clock-ins will sync/).waitFor({ state: "hidden", timeout: 8000 });
 });
 
 await step("No negative hours anywhere on Time", async () => {
