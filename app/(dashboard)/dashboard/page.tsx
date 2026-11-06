@@ -20,6 +20,7 @@ import { DailyBriefCard } from "@/components/daily-brief-card";
 import { AskConstra } from "@/components/ask-constra";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { isForemanOrAbove } from "@/lib/permissions";
+import { SetupGuide } from "@/components/setup-guide";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
@@ -688,7 +689,8 @@ export default function DashboardPage() {
   return (
     <>
     {/* ── Share nudge — dismissible, fires once via localStorage ─────────── */}
-    <ShareNudge />
+    {/* Asking someone to recommend it before they've used it reads as noise */}
+    {clockEntries.length > 0 && <ShareNudge />}
 
     {/* ── MOBILE DASHBOARD ──────────────────────────────────────────────── */}
     <div className="lg:hidden -mx-5 -mt-5 pb-24">
@@ -766,23 +768,7 @@ export default function DashboardPage() {
         </div>}
       </div>
 
-      {/* ── Getting started nudge (only when no projects exist) ───────────── */}
-      {activeProjects.length === 0 && projects.length === 0 && (
-        <div className="px-5 pt-4">
-          <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-4">
-            <p className="text-[13px] font-black text-amber-400 mb-1">🏗️ Let&apos;s get you set up</p>
-            <p className="text-[12px] text-white/50 mb-3 leading-snug">Create your first project, add your crew, and start tracking work.</p>
-            <div className="flex gap-2 flex-wrap">
-              <Link href="/projects" className="flex items-center gap-1.5 bg-amber-500 text-black text-[12px] font-black px-3 py-2 rounded-full">
-                <FolderKanban size={13} /> New Project
-              </Link>
-              <Link href="/crew" className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.08] text-white/70 text-[12px] font-bold px-3 py-2 rounded-full">
-                <Users size={13} /> Add Crew
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="px-5 pt-4 empty:hidden"><SetupGuide /></div>
 
       {/* ── Urgent alerts panel ──────────────────────────────────────────── */}
       {urgentItems.length > 0 && (
@@ -1225,34 +1211,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* New-user setup guide */}
-      {projects.length === 0 && workers.length <= 1 && (
-        <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-2xl p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Zap size={14} className="text-amber-400" />
-            <span className="text-[12px] font-black text-amber-400 uppercase tracking-widest">Get Started</span>
-          </div>
-          <p className="text-[14px] text-white/70 mb-4">Welcome to Constra! Complete these steps to set up your job site.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { n: "1", label: "Add your first project", sub: "Create a job site to track tasks, crew, and costs.", href: "/projects", done: projects.length > 0 },
-              { n: "2", label: "Invite crew members", sub: "Share your invite code so workers can join.", href: "/settings", done: workers.length > 1 },
-              { n: "3", label: "Clock in your first worker", sub: "Start tracking hours from the time tracking page.", href: "/time-tracking", done: workers.some((w) => w.clockedIn) },
-            ].map((step) => (
-              <Link key={step.n} href={step.href}
-                className={`flex items-start gap-3 p-4 rounded-2xl border transition-colors ${step.done ? "border-green-500/20 bg-green-500/[0.05]" : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05]"}`}>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-black ${step.done ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
-                  {step.done ? <CheckCircle2 size={14} /> : step.n}
-                </div>
-                <div>
-                  <p className={`text-[13px] font-semibold ${step.done ? "text-white/40 line-through" : "text-white/80"}`}>{step.label}</p>
-                  <p className="text-[11px] text-white/30 mt-0.5">{step.sub}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      <SetupGuide />
 
       {/* Quick Actions */}
       <div className="flex items-center gap-2 flex-wrap">
