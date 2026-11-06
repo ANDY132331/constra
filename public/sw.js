@@ -1,4 +1,4 @@
-const CACHE = "constra-v8";
+const CACHE = "constra-v9";
 
 const PRECACHE = ["/", "/dashboard", "/time-tracking", "/schedule", "/crew"];
 
@@ -75,6 +75,11 @@ self.addEventListener("fetch", (e) => {
         if (cached) return cached;
         // Navigation fallback — serve cached dashboard so the app shell still loads
         if (e.request.mode === "navigate") {
+          // An invoice or estimate not opened before: any one's page works, it reads the id from
+          // the address and the data is already on the phone.
+          const detail = /^\/(invoices|estimates)\/[^/]+$/.exec(url.pathname);
+          const shell = detail && await caches.match(`/${detail[1]}/offline`);
+          if (shell) return shell;
           const fallback = await caches.match("/dashboard");
           if (fallback) return fallback;
         }
@@ -83,8 +88,39 @@ self.addEventListener("fetch", (e) => {
   );
 });
 
+// Fetches every screen and its code ahead of time, so a page first opened on a job site with no
+// signal still loads. Sent by the app once someone is signed in.
+const APP_PAGES = ["/invoices/offline", "/estimates/offline", "/dashboard","/time-tracking", "/schedule", "/safety", "/messages", "/photos", "/projects", "/tasks", "/punch-list", "/rfis", "/equipment", "/materials", "/documents", "/blueprints", "/daily-reports", "/crew", "/reports", "/estimates", "/invoices", "/change-orders", "/budget", "/insurance", "/settings", "/support"];
+
+async function warmCache() {
+  const cache = await caches.open(CACHE);
+  const seen = new Set();
+  const queue = [];
+  const found = (text) => {
+    // Code loaded on demand (the camera, PDF export) is only named inside other code files
+    for (const match of text.match(/(?:\/_next\/)?static\/(?:chunks|media|css)\/[^"'`\\\s<>)]+/g) ?? []) {
+      const asset = match.startsWith("/_next/") ? match : `/_next/${match}`;
+      if (!seen.has(asset)) { seen.add(asset); queue.push(asset); }
+    }
+  };
+  await Promise.allSettled(APP_PAGES.map(async (page) => {
+    const res = await fetch(page, { credentials: "same-origin" });
+    await cachePage(cache, page, res.clone());
+    if (res.ok && !res.redirected) found(await res.text());
+  }));
+  while (queue.length && seen.size < 1000) {
+    await Promise.allSettled(queue.splice(0, 8).map(async (asset) => {
+      const res = (await cache.match(asset)) ?? await fetch(asset);
+      if (!res.ok) return;
+      if (!(await cache.match(asset))) await cache.put(asset, res.clone());
+      if (/\.js(\?|$)/.test(asset)) found(await res.text());
+    }));
+  }
+}
+
 // Sign-out clears cached app pages so the next person on this device starts clean.
 self.addEventListener("message", (e) => {
+  if (e.data?.type === "warm-offline") { e.waitUntil(warmCache()); return; }
   if (e.data?.type !== "clear-page-cache") return;
   e.waitUntil(
     caches.open(CACHE).then(async (c) => {

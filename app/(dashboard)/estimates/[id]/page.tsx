@@ -1,7 +1,7 @@
 "use client";
 import { toast } from "sonner";
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   ChevronLeft, Send, CheckCircle2, XCircle, Mail,
   FileDown, Copy, Trash2, Plus, X, MoreVertical, AlertTriangle, Clock,
@@ -97,7 +97,8 @@ const autoGrow = (el: HTMLTextAreaElement | null) => {
 
 export default function EstimateDetailPage() {
   const router = useRouter();
-  const { id } = useParams<{ id: string }>();
+  // From the address, not useParams: offline the service worker serves a shared copy of this page
+  const id = usePathname().split("/")[2];
   const {
     estimates, updateEstimate, deleteEstimate, addEstimate,
     invoices, addInvoice,

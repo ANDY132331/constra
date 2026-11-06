@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: "What happens if there's no internet on site?",
-    a: "Clock-ins and clock-outs, with their GPS and photo, save on the device and sync automatically when it reconnects. Other changes, like tasks or safety reports, need a connection: if you're offline the app tells you they weren't saved, so you can try again later.",
+    a: "Keep working. Clock-ins, reports, tasks, invoices, photos and documents save on the device and sync automatically when it reconnects. A few things need a connection: adding a new crew member, emailing an invoice, the AI assistant, and seeing changes others made.",
   },
   {
     q: "How do I export payroll or timesheets?",

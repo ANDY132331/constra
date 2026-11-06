@@ -118,9 +118,12 @@ export default function DocumentsPage() {
           reader.readAsDataURL(file);
         });
 
-        if (SUPABASE_ENABLED && companyId) {
-          const publicUrl = await uploadDocument(dataUrl, companyId, file.name);
-          if (!publicUrl) throw new Error("Upload failed");
+        // No signal, or one too weak to finish the upload: the file stays with the row and the
+        // queue uploads it later, and says so if the server ever refuses it
+        const publicUrl = SUPABASE_ENABLED && companyId && navigator.onLine
+          ? await uploadDocument(dataUrl, companyId, file.name)
+          : null;
+        if (publicUrl) {
           addDocument({
             projectId: selectedProject,
             name: file.name,
@@ -196,18 +199,19 @@ export default function DocumentsPage() {
 
       let newPublicUrl: string | undefined;
       let storeDataUrl = dataUrl;
-      if (SUPABASE_ENABLED && companyId) {
+      if (SUPABASE_ENABLED && companyId && navigator.onLine) {
         const uploaded = await uploadDocument(dataUrl, companyId, file.name);
-        if (!uploaded) throw new Error("Upload failed");
-        newPublicUrl = uploaded;
-        storeDataUrl = uploaded; // store URL, not raw base64
+        if (uploaded) {
+          newPublicUrl = uploaded;
+          storeDataUrl = uploaded; // store URL, not raw base64
+        }
       }
 
       addDocumentVersion(previewDoc.id, storeDataUrl, file.size, currentUser.id);
       setPreviewDoc((prev) => prev ? {
         ...prev,
         dataUrl: newPublicUrl ? undefined : dataUrl,
-        publicUrl: newPublicUrl ?? prev.publicUrl,
+        publicUrl: newPublicUrl,
         sizeBytes: file.size,
         uploadedAt: new Date(),
         versions: [

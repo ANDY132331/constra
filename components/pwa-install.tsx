@@ -120,6 +120,10 @@ export default function PwaInstall() {
           if (typeof Notification !== "undefined" && Notification.permission === "granted" && companyId && currentUser?.id) {
             subscribeToPush(companyId, currentUser.id).catch(() => {});
           }
+          // Signed in: get every screen ready for when the signal drops
+          if (companyId && navigator.onLine) {
+            void navigator.serviceWorker.ready.then((reg) => reg.active?.postMessage({ type: "warm-offline" }));
+          }
         }).catch(() => {});
       }
     }

@@ -17,6 +17,7 @@ Stack: Next.js 16 (Turbopack, middleware lives in `proxy.ts`), React 19, Tailwin
 - Before a store build: `node .claude/skills/store-release/scripts/preflight.mjs` (the `store-release` skill).
 - Which migrations are live: `node .claude/skills/database-changes/scripts/status.mjs` (the `database-changes` skill).
 - Crew flows end to end, with `constra-offline` running: `node .claude/skills/field-testing/scripts/field-run.mjs <port>` (the `field-testing` skill).
+- Real offline sync against a mock database: `offline-sync.mjs` in the same skill. Run it after changing the offline queue, `bg()`, `public/sw.js` or uploads.
 
 ## Shipping
 

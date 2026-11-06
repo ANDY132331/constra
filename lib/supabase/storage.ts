@@ -1,6 +1,6 @@
 import { getClient } from "./client";
 
-function dataUrlToBlob(dataUrl: string): { blob: Blob; mime: string } {
+export function dataUrlToBlob(dataUrl: string): { blob: Blob; mime: string } {
   const [header, base64] = dataUrl.split(",");
   const mime = header.match(/:(.*?);/)?.[1] ?? "application/octet-stream";
   const binary = atob(base64);

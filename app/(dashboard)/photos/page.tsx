@@ -83,10 +83,22 @@ export default function PhotosPage() {
           const ext = file.name.split(".").pop() ?? "bin";
           const prefix = companyId ?? "shared";
           const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          const isImage = file.type.startsWith("image/");
+          // No signal: keep the file in the page. The offline queue uploads it when saved.
+          const inline = () => new Promise<{ url: string; name: string; isImage: boolean }>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({ url: reader.result as string, name: file.name, isImage });
+            reader.onerror = () => reject(new Error("Couldn't read that file"));
+            reader.readAsDataURL(file);
+          });
+          if (!navigator.onLine) return inline();
           const { data, error } = await getClient().storage.from("photos").upload(path, file, { upsert: false });
-          if (error) throw error;
+          if (error) {
+            if (/fetch|network|load failed/i.test(error.message)) return inline();
+            throw error;
+          }
           const { data: { publicUrl } } = getClient().storage.from("photos").getPublicUrl(data.path);
-          return { url: publicUrl, name: file.name, isImage: file.type.startsWith("image/") };
+          return { url: publicUrl, name: file.name, isImage };
         }));
         setPhotoItems((prev) => [...prev, ...results]);
       } catch (err: unknown) {

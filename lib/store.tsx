@@ -11,10 +11,9 @@ import type {
 } from "./mock-data";
 import type { Locale } from "./i18n/locales";
 import type { CurrencyCode } from "./currency";
-import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
-import { enqueue, flushQueue, queueLength } from "@/lib/offline-queue";
+import { getClient as supabaseClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
+import { enqueue, flushQueue, hasUnsentFile, loadQueue, queueLength, writeRecorder, type NewOp } from "@/lib/offline-queue";
 import { toast } from "sonner";
-import type { QueuedOp } from "@/lib/offline-queue";
 import { hoursBetween } from "./hours";
 import {
   notifyClockIn, notifyClockOut, notifySafetyIncident,
@@ -55,6 +54,10 @@ function reviveDates(_key: string, value: unknown): unknown {
   }
   return value;
 }
+
+// While bg() notes a write for the offline queue, store actions talk to its recorder instead
+let recording: ReturnType<typeof writeRecorder>["client"] | null = null;
+const getClient = () => (recording ?? supabaseClient()) as ReturnType<typeof supabaseClient>;
 
 export function genId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
@@ -402,6 +405,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const isOnlineRef = useRef(typeof navigator !== "undefined" ? navigator.onLine : true);
   const savingCountRef = useRef(0);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flushRef = useRef<(() => Promise<void>) | null>(null);
   const localSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -437,8 +441,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Track online/offline and flush queued ops when reconnected
   useEffect(() => {
     const goOnline = async () => {
-      isOnlineRef.current = true;
-      setTransient((t) => ({ ...t, isOnline: true, pendingSync: queueLength() }));
+      // Also runs to send the queue on a schedule, so ask the browser rather than assume
+      isOnlineRef.current = navigator.onLine;
+      setTransient((t) => ({ ...t, isOnline: navigator.onLine, pendingSync: queueLength() }));
       if (SUPABASE_ENABLED) {
         const { synced, dropped } = await flushQueue(getClient());
         if (synced > 0 || dropped.length > 0) {
@@ -446,6 +451,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
         if (synced > 0) {
           toast.success(`${synced} offline change${synced > 1 ? "s" : ""} synced`);
+          // Picks up the links of files that just uploaded, and anything others changed meanwhile
+          scheduleResync();
         }
         if (dropped.length > 0) {
           // Never let a change disappear quietly — the person believed it was saved
@@ -465,12 +472,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const retry = () => {
       if (SUPABASE_ENABLED && navigator.onLine && queueLength() > 0) void goOnline();
     };
-    const startTimer = setTimeout(retry, 3000);
+    flushRef.current = goOnline;
+    // Show the count of changes saved in an earlier session straight away, then send them
+    void loadQueue().then(() => { setTransient((t) => ({ ...t, pendingSync: queueLength() })); retry(); });
     const interval = setInterval(retry, 60_000);
     return () => {
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
-      clearTimeout(startTimer);
       clearInterval(interval);
     };
   }, []);
@@ -495,6 +503,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const supabase = getClient();
 
     async function loadAllData(companyId: string, userId: string) {
+      // Send anything waiting first, or this load would replace it on screen with the older server copy
+      await loadQueue();
+      if (queueLength() > 0) await flushRef.current?.();
       const [
         { data: profilesData },
         { data: companiesData },
@@ -884,23 +895,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const up = useCallback((fn: (s: StoreState) => StoreState) => setState(fn), []);
 
+  const queueWrite = useCallback(async (op: NewOp) => {
+    const saved = await enqueue(op);
+    if (!saved) toast.error("That change wasn't saved", { id: "queue-full", description: "This device is out of storage for offline changes. Free up space, then try again." });
+    setTransient((t) => ({ ...t, pendingSync: queueLength() }));
+  }, []);
+
   // Fire-and-forget background Supabase write.
   // Uses `any` because PostgrestFilterBuilder is thenable but not a full Promise.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function bg(fn: () => any, label: string, queuedOp?: Omit<QueuedOp, "id" | "timestamp">) {
+  function bg(fn: () => any, label: string) {
     if (!SUPABASE_ENABLED || !companyIdRef.current) return;
+    // Note what this write is now, while the state it reads is current, in case it has to wait
+    const recorder = writeRecorder();
+    recording = recorder.client;
+    try { fn(); } catch { /* no write to note */ } finally { recording = null; }
+    const op = recorder.op();
     const queueOrWarn = () => {
-      if (queuedOp) {
-        if (!enqueue(queuedOp)) {
-          toast.error("That change wasn't saved", { id: "queue-full", description: "This device is out of storage for offline changes. Free up space, then try again." });
-          return;
-        }
-        setTransient((t) => ({ ...t, pendingSync: queueLength() }));
-      } else {
+      if (!op) {
         toast.error("You're offline — that change wasn't saved", { id: "offline-unsaved", description: "Try again once you have signal." });
+        return;
       }
+      void queueWrite(op);
     };
     if (!isOnlineRef.current) { queueOrWarn(); return; }
+    // Writing now would overtake queued changes it may depend on, and a captured file has to
+    // reach Storage first, so both go through the queue even with signal.
+    if (op && (queueLength() > 0 || hasUnsentFile(op))) {
+      void queueWrite(op).then(() => flushRef.current?.());
+      return;
+    }
     savingCountRef.current++;
     setTransient((t) => ({ ...t, isSaving: true, savedRecently: false }));
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
@@ -945,23 +969,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const merged = stateRef.current.workers.find((w) => w.id === id);
       if (!merged) return Promise.resolve({ error: null });
       return getClient().from("profiles").update(workerToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
-    }, "updateWorker", (() => {
-      // Queueable so an offline clock-in/out keeps the worker's on-site status in sync
-      const merged = stateRef.current.workers.find((w) => w.id === id);
-      if (!merged || !companyIdRef.current) return undefined;
-      return { table: "profiles", op: "update" as const, data: workerToDb({ ...merged, ...u }, companyIdRef.current) as Record<string, unknown>, eqId: id };
-    })());
+    }, "updateWorker");
   }, [up]);
 
   const deleteWorker = useCallback((id: string) => {
     up((s) => ({ ...s, workers: s.workers.filter((w) => w.id !== id) }));
     // Delete the Supabase auth user (and their profile) via server route — auth.admin requires service role
+    const viaQueue = () => queueWrite({ table: "/api/delete-worker", op: "post", data: { workerId: id } });
+    if (!isOnlineRef.current) { void viaQueue(); return; }
     fetch("/api/delete-worker", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ workerId: id }),
-    }).catch((err) => console.error("deleteWorker API error:", err));
-  }, [up]);
+    }).catch((err) => { console.error("deleteWorker API error:", err); void viaQueue(); });
+  }, [up, queueWrite]);
 
   // ── Projects ─────────────────────────────────────────────────────────────────
 
@@ -1076,12 +1097,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const id = genId();
     const entry = { ...e, id };
     up((s) => ({ ...s, clockEntries: [...s.clockEntries, entry] }));
-    const dbRow = companyIdRef.current ? clockEntryToDb(entry, companyIdRef.current) : null;
-    bg(
-      () => getClient().from("clock_entries").insert(dbRow!),
-      "addClockEntry",
-      dbRow ? { table: "clock_entries", op: "insert", data: dbRow as Record<string, unknown> } : undefined,
-    );
+    bg(() => getClient().from("clock_entries").insert(clockEntryToDb(entry, companyIdRef.current!)), "addClockEntry");
     const w = stateRef.current.workers.find(w => w.id === e.workerId);
     const pr = stateRef.current.projects.find(p => p.id === e.projectId);
     if (w && pr) notifyClockIn(w.name, pr.name, id);
@@ -1094,17 +1110,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const merged = stateRef.current.clockEntries.find((e) => e.id === id);
       if (!merged) return Promise.resolve({ error: null });
       return getClient().from("clock_entries").update(clockEntryToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
-    }, "updateClockEntry", (() => {
-      const merged = stateRef.current.clockEntries.find((e) => e.id === id);
-      if (!merged || !companyIdRef.current) return undefined;
-      return { table: "clock_entries", op: "update" as const, data: clockEntryToDb({ ...merged, ...u }, companyIdRef.current) as Record<string, unknown>, eqId: id };
-    })());
+    }, "updateClockEntry");
   }, [up]);
 
   const deleteClockEntry = useCallback((id: string) => {
     up((s) => ({ ...s, clockEntries: s.clockEntries.filter((e) => e.id !== id) }));
-    bg(() => getClient().from("clock_entries").delete().eq("id", id), "deleteClockEntry",
-      { table: "clock_entries", op: "delete" as const, data: {}, eqId: id });
+    bg(() => getClient().from("clock_entries").delete().eq("id", id), "deleteClockEntry");
   }, [up]);
 
   // ── Punch items ───────────────────────────────────────────────────────────────
@@ -1190,8 +1201,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const deleteSafetyIncident = useCallback((id: string) => {
     up((s) => ({ ...s, safetyIncidents: s.safetyIncidents.filter((x) => x.id !== id) }));
-    bg(() => getClient().from("safety_incidents").delete().eq("id", id), "deleteSafetyIncident",
-      { table: "safety_incidents", op: "delete" as const, data: {}, eqId: id });
+    bg(() => getClient().from("safety_incidents").delete().eq("id", id), "deleteSafetyIncident");
   }, [up]);
 
   // ── RFIs ──────────────────────────────────────────────────────────────────────
@@ -1213,8 +1223,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const deleteRFI = useCallback((id: string) => {
     up((s) => ({ ...s, rfis: s.rfis.filter((r) => r.id !== id) }));
-    bg(() => getClient().from("rfis").delete().eq("id", id), "deleteRFI",
-      { table: "rfis", op: "delete" as const, data: {}, eqId: id });
+    bg(() => getClient().from("rfis").delete().eq("id", id), "deleteRFI");
   }, [up]);
 
   // ── Invoices ──────────────────────────────────────────────────────────────────
@@ -1361,8 +1370,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       ...s,
       documents: s.documents.map((d) => {
         if (d.id !== id) return d;
-        const prevVersion = { versionedAt: d.uploadedAt, uploadedById: d.uploadedById, sizeBytes: d.sizeBytes, dataUrl: d.dataUrl, note };
-        return { ...d, dataUrl, sizeBytes, uploadedAt: new Date(), uploadedById, versions: [prevVersion, ...(d.versions ?? [])] };
+        const prevVersion = { versionedAt: d.uploadedAt, uploadedById: d.uploadedById, sizeBytes: d.sizeBytes, dataUrl: d.dataUrl ?? d.publicUrl, note };
+        return { ...d, dataUrl, publicUrl: undefined, sizeBytes, uploadedAt: new Date(), uploadedById, versions: [prevVersion, ...(d.versions ?? [])] };
       }),
     }));
     bg(() => {

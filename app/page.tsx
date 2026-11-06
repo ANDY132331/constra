@@ -421,7 +421,7 @@ export default function LandingPage() {
               </p>
             </div>
             <dl className="lp-field-list">
-              <div><dt><WifiOff size={18} aria-hidden /> Offline</dt><dd>Clock-ins and clock-outs queue on the phone and sync when signal returns.</dd></div>
+              <div><dt><WifiOff size={18} aria-hidden /> Offline</dt><dd>Clock-ins, reports and photos save on the phone and sync when signal returns.</dd></div>
               <div><dt><MapPin size={18} aria-hidden /> Geofence</dt><dd>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</dd></div>
               <div><dt><span className="lp-field-num">15</span> Languages</dt><dd>Each person picks their own, from Spanish and Polish to Hindi, Arabic and Chinese.</dd></div>
               <div><dt><span className="lp-field-num">OT</span> Overtime</dt><dd>Daily and weekly overtime calculated from the punches, ready for payroll.</dd></div>

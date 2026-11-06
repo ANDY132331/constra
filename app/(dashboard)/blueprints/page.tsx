@@ -68,10 +68,22 @@ export default function BlueprintsPage() {
     setUploadError(null);
     try {
       await Promise.all(files.map(async (file) => {
+        // No signal, or one too weak to finish: the offline queue uploads it later
+        const saveForLater = async () => {
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(new Error("Couldn't read that file"));
+            reader.readAsDataURL(file);
+          });
+          addDocument({ projectId: selectedProjectId, name: file.name.replace(/\.[^.]+$/, ""), category: "blueprint", dataUrl, uploadedAt: new Date(), uploadedById: currentUser.id, sizeBytes: file.size });
+        };
+        if (!navigator.onLine) return saveForLater();
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
         const path = `${companyId}/blueprints/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
         const supabase = getClient();
         const { error: uploadErr } = await supabase.storage.from("documents").upload(path, file);
+        if (uploadErr && /fetch|network|load failed/i.test(uploadErr.message)) return saveForLater();
         if (uploadErr) throw uploadErr;
         const { data: { publicUrl } } = supabase.storage.from("documents").getPublicUrl(path);
         addDocument({ projectId: selectedProjectId, name: file.name.replace(/\.[^.]+$/, ""), category: "blueprint", publicUrl, uploadedById: currentUser.id, uploadedAt: new Date(), sizeBytes: file.size });
@@ -86,7 +98,7 @@ export default function BlueprintsPage() {
   };
 
   const fileType = (url: string | undefined): "pdf" | "image" =>
-    url?.toLowerCase().includes(".pdf") ? "pdf" : "image";
+    /\.pdf|^data:application\/pdf/.test(url?.toLowerCase() ?? "") ? "pdf" : "image";
 
   return (
     <>

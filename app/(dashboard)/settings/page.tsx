@@ -247,8 +247,8 @@ function SettingsInner() {
       // Update local/cached state immediately
       setCompanyLogo(dataUrl);
 
-      // Explicitly save to Supabase with feedback
-      if (SUPABASE_ENABLED && companyId) {
+      // Explicitly save to Supabase with feedback (offline, setCompanyLogo has already queued it)
+      if (SUPABASE_ENABLED && companyId && navigator.onLine) {
         const { error } = await getClient()
           .from("companies")
           .update({ logo: dataUrl })

@@ -978,7 +978,8 @@ export function documentToDb(d: ProjectDocument, companyId: string): Omit<DbDocu
     uploaded_at: d.uploadedAt.toISOString(),
     uploaded_by_id: d.uploadedById,
     size_bytes: d.sizeBytes,
-    data_url: d.dataUrl ?? null,
+    // Uploaded files only have publicUrl, and this column is the only place their link is kept
+    data_url: d.dataUrl ?? d.publicUrl ?? null,
     versions,
   };
 }
