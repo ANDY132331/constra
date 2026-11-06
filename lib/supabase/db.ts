@@ -220,7 +220,7 @@ export type DbClockEntry = {
   project_id: string | null;
   clock_in: string;
   clock_out: string | null;
-  clock_in_photo_url: string | null;
+  clock_in_photo_url?: string | null;
   gps: unknown;
   device_info: string | null;
   verification_flags: unknown;
@@ -257,7 +257,9 @@ export function clockEntryToDb(
     project_id: e.projectId || null,
     clock_in: e.clockIn.toISOString(),
     clock_out: e.clockOut?.toISOString() ?? null,
-    clock_in_photo_url: e.clockInPhoto ?? null,
+    // Left out when unknown, not sent as null: photos aren't kept in the saved copy of the data, so
+    // an edit after an offline reload would otherwise erase the photo on the server.
+    ...(e.clockInPhoto ? { clock_in_photo_url: e.clockInPhoto } : {}),
     gps: e.gps ?? null,
     device_info: e.deviceInfo ?? null,
     verification_flags: e.verificationFlags ?? [],
@@ -820,7 +822,7 @@ export type DbDocument = {
   uploaded_at: string;
   uploaded_by_id: string;
   size_bytes: number;
-  data_url: string | null;
+  data_url?: string | null;
   versions: unknown;
   created_at?: string;
 };
@@ -979,7 +981,8 @@ export function documentToDb(d: ProjectDocument, companyId: string): Omit<DbDocu
     uploaded_by_id: d.uploadedById,
     size_bytes: d.sizeBytes,
     // Uploaded files only have publicUrl, and this column is the only place their link is kept
-    data_url: d.dataUrl ?? d.publicUrl ?? null,
+    // Left out when unknown, for the same reason as clock_in_photo_url
+    ...(d.dataUrl || d.publicUrl ? { data_url: d.dataUrl ?? d.publicUrl } : {}),
     versions,
   };
 }

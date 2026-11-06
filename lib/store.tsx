@@ -450,7 +450,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setTransient((t) => ({ ...t, pendingSync: queueLength() }));
         }
         if (synced > 0) {
-          toast.success(`${synced} offline change${synced > 1 ? "s" : ""} synced`);
+          toast.success(`${synced} offline change${synced > 1 ? "s" : ""} synced`, { id: "offline-synced" });
           // Picks up the links of files that just uploaded, and anything others changed meanwhile
           scheduleResync();
         }
@@ -458,7 +458,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           // Never let a change disappear quietly — the person believed it was saved
           toast.error(
             `${dropped.length} offline change${dropped.length > 1 ? "s" : ""} couldn't be saved`,
-            { duration: 12000, description: `The server refused ${dropped.length > 1 ? "them" : "it"} (${dropped[0].reason}). Check ${[...new Set(dropped.map((d) => d.table.replace(/_/g, " ")))].join(", ")} and re-enter if needed.` },
+            { id: "offline-dropped", duration: 12000, description: `The server refused ${dropped.length > 1 ? "them" : "it"} (${dropped[0].reason}). Check ${[...new Set(dropped.map((d) => d.table.replace(/_/g, " ")))].join(", ")} and re-enter if needed.` },
           );
           scheduleResync();
         }
@@ -1640,9 +1640,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const getProjectById = useCallback((id: string) => state.projects.find((p) => p.id === id), [state.projects]);
 
   const signOut = useCallback(async () => {
-    if (SUPABASE_ENABLED) await getClient().auth.signOut();
+    if (SUPABASE_ENABLED) {
+      // Send what's waiting while this person is still signed in. Whatever can't go stays on the
+      // device and goes when they sign back in.
+      if (queueLength() > 0 && navigator.onLine) await flushRef.current?.().catch(() => {});
+      if (queueLength() > 0) toast.warning(`${queueLength()} change${queueLength() > 1 ? "s" : ""} still waiting to sync`, { description: "Sign back in on this device with signal to send them.", duration: 12000 });
+      await getClient().auth.signOut();
+    }
     setState({ ...defaultState(), isLoading: false });
-    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem("constra_offline_ready_at"); } catch {}
     // Drop any app pages the service worker cached for this session
     try { navigator.serviceWorker?.controller?.postMessage({ type: "clear-page-cache" }); } catch {}
   }, []);

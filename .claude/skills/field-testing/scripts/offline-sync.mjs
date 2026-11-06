@@ -201,6 +201,45 @@ await step("Queue is empty and the data survives a reload", async () => {
   if (await p.getByText(/pending/).count()) throw new Error("still shows pending");
 });
 
+await step("Clock in offline, reload, clock out: the photo survives", async () => {
+  const outButton = () => p.locator("main button:visible").filter({ hasText: /^ *(Out|Clock Out) *$/ }).first();
+  const confirmOut = async () => {
+    await p.waitForTimeout(500);
+    const c = p.getByRole("button", { name: /^Clock Out$/ }).last();
+    if (await c.isVisible().catch(() => false)) await c.click().catch(() => {});
+  };
+  // Close the earlier shift first, online, so this worker can clock in again
+  await open("/time-tracking");
+  if (await outButton().isVisible().catch(() => false)) { await outButton().click(); await confirmOut(); await p.waitForTimeout(1200); }
+  await ctx.setOffline(true);
+  await open("/time-tracking");
+  await p.locator("main button:visible").filter({ hasText: /Clock In/ }).first().click();
+  const photo = p.getByRole("button", { name: /Take Photo to Clock In/ });
+  const pick = p.locator("button:visible").filter({ hasText: "Maple St Reno" }).last();
+  for (let i = 0; i < 30 && !(await photo.isVisible().catch(() => false)); i++) {
+    if (await pick.isVisible().catch(() => false)) await pick.click().catch(() => {});
+    await p.waitForTimeout(400);
+  }
+  await photo.click({ timeout: 15000 });
+  await p.getByRole("button", { name: /^Confirm$/ }).click({ timeout: 10000 });
+  await toast(/clocked in/).waitFor({ timeout: 10000 });
+  await p.waitForTimeout(900); // the saved copy is written just after
+  const before = (await dbNow()).db.clock_entries.length;
+  await open("/time-tracking"); // this reload is what drops photos from the saved copy
+  await outButton().click({ timeout: 8000 });
+  await confirmOut();
+  await toast(/clocked out/).waitFor({ timeout: 8000 });
+  await p.waitForTimeout(600);
+  await ctx.setOffline(false);
+  await toast(/synced/).waitFor({ timeout: 20000 });
+  await p.waitForTimeout(1800);
+  const rows = (await dbNow()).db.clock_entries;
+  const shift = rows.find((r) => r.clock_out && String(r.clock_in_photo_url ?? "").startsWith("http") && r.id === rows[rows.length - 1].id);
+  if (rows.length < before + 1) throw new Error("the shift never arrived");
+  if (!rows[rows.length - 1].clock_out) throw new Error("clock-out didn't arrive");
+  if (!shift) throw new Error("photo lost: " + rows[rows.length - 1].clock_in_photo_url);
+});
+
 await step("Bad signal: phone thinks it's online but requests die, then it recovers", async () => {
   await open("/tasks");
   await control({ down: true });

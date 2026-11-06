@@ -120,9 +120,15 @@ export default function PwaInstall() {
           if (typeof Notification !== "undefined" && Notification.permission === "granted" && companyId && currentUser?.id) {
             subscribeToPush(companyId, currentUser.id).catch(() => {});
           }
-          // Signed in: get every screen ready for when the signal drops
-          if (companyId && navigator.onLine) {
-            void navigator.serviceWorker.ready.then((reg) => reg.active?.postMessage({ type: "warm-offline" }));
+          // Signed in: get every screen ready for when the signal drops. That's a lot of pages and
+          // code, so once a day rather than on every open, to go easy on phone plans.
+          let last = 0;
+          try { last = Number(localStorage.getItem("constra_offline_ready_at")) || 0; } catch { /* private browsing */ }
+          if (companyId && navigator.onLine && Date.now() - last > 86_400_000) {
+            void navigator.serviceWorker.ready.then((reg) => {
+              reg.active?.postMessage({ type: "warm-offline" });
+              try { localStorage.setItem("constra_offline_ready_at", String(Date.now())); } catch { /* private browsing */ }
+            });
           }
         }).catch(() => {});
       }

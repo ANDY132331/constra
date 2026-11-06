@@ -48,6 +48,8 @@ export function hasUnsentFile(op: NewOp): boolean {
 let memory: QueuedOp[] = [];
 let lastSeq = 0;
 let loading: Promise<void> | null = null;
+/** Queued this moment and not on disk yet, so a re-read mustn't mistake them for already sent. */
+const saving = new Set<string>();
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -74,6 +76,7 @@ async function withStore<T>(mode: IDBTransactionMode, run: (s: IDBObjectStore) =
 }
 
 const saveOp = (op: QueuedOp) => withStore("readwrite", (s) => s.put(op));
+const savedOps = () => withStore("readonly", (s) => s.getAll() as IDBRequest<QueuedOp[]>);
 const deleteOp = (id: string) => withStore("readwrite", (s) => s.delete(id)).catch(() => {});
 
 /** Reads the saved queue. Safe to call repeatedly; the work happens once. */
@@ -81,7 +84,7 @@ export function loadQueue(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (!loading) loading = (async () => {
     let saved: QueuedOp[] = [];
-    try { saved = await withStore("readonly", (s) => s.getAll() as IDBRequest<QueuedOp[]>); } catch { /* unavailable */ }
+    try { saved = await savedOps(); } catch { /* unavailable */ }
 
     // Changes queued by the previous version of the app, which used localStorage
     try {
@@ -103,6 +106,7 @@ export async function enqueue(op: NewOp): Promise<boolean> {
   lastSeq = Math.max(Date.now() * 1000, lastSeq + 1);
   const entry: QueuedOp = { ...op, id: crypto.randomUUID(), seq: lastSeq, timestamp: Date.now() };
   memory.push(entry);
+  saving.add(entry.id);
   // Ask the browser not to evict site data; on iPhone it can otherwise clear it after 7 idle days
   void navigator.storage?.persist?.().catch(() => {});
   try {
@@ -112,6 +116,8 @@ export async function enqueue(op: NewOp): Promise<boolean> {
     // Out of storage or storage blocked. The change is only on screen, so it is gone.
     memory = memory.filter((m) => m.id !== entry.id);
     return false;
+  } finally {
+    saving.delete(entry.id);
   }
 }
 
@@ -139,7 +145,13 @@ export function writeRecorder() {
   const client = {
     from: (table: string) => ({
       insert(data: Record<string, unknown>) { recorded = { table, op: "insert", data }; return chain; },
-      update(data: Record<string, unknown>) { recorded = { table, op: "update", data }; return chain; },
+      update(data: Record<string, unknown>) {
+        // Avatars aren't kept in the saved copy of the data either, so null here after an offline
+        // reload means "not loaded", not "remove it"
+        const { photo_url, ...rest } = data;
+        recorded = { table, op: "update", data: table === "profiles" && photo_url == null ? rest : data };
+        return chain;
+      },
       delete() { recorded = { table, op: "delete" }; return chain; },
     }),
   };
@@ -207,6 +219,11 @@ async function send(client: SupabaseClient, entry: QueuedOp): Promise<Sent> {
 
 async function runFlush(client: SupabaseClient): Promise<FlushResult> {
   await loadQueue();
+  // Another tab may have sent some of these; replaying its old updates would undo newer edits
+  try {
+    const onDisk = await savedOps();
+    memory = [...onDisk, ...memory.filter((m) => saving.has(m.id) && !onDisk.some((d) => d.id === m.id))].sort((a, b) => a.seq - b.seq);
+  } catch { /* unavailable: memory is all there is */ }
   const dropped: FlushResult["dropped"] = [];
   let synced = 0;
   const forget = async (id: string) => {
