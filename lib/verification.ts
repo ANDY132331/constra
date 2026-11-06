@@ -68,9 +68,11 @@ export function checkImpossibleTravel(
 export function checkOffSite(
   gps: GpsLocation,
   project: Project,
-  radiusMetres = 2000,
 ): VerificationFlag | null {
   if (!project.gps) return null;
+
+  // The circle the owner drew for this job, the same limit the clock-in warning uses
+  const radiusMetres = project.geofenceRadius ?? 500;
 
   const distM = haversineKm(gps, project.gps) * 1000;
   if (distM <= radiusMetres) return null;
