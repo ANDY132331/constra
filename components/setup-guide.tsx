@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Send, X } from "lucide-react";
-import { toast } from "sonner";
+import { shareInvite } from "@/lib/invite";
 import { useStore } from "@/lib/store";
 
 const DISMISSED_KEY = "constra_setup_guide_v1";
@@ -35,29 +35,13 @@ export function SetupGuide() {
     try { localStorage.setItem(DISMISSED_KEY, "1"); } catch { /* private browsing: returns next visit */ }
   };
 
-  const sendInvite = async () => {
-    const url = `${window.location.origin}/login?join=${inviteCode}`;
-    const text = `Join ${companyName || "our company"} on Constra so you can clock in from your phone. Your invite code is ${inviteCode}.`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "Join us on Constra", text, url });
-        return;
-      }
-      await navigator.clipboard.writeText(`${text} ${url}`);
-      toast.success("Invite copied. Paste it into a text to your crew.");
-    } catch (err) {
-      // They closed the share sheet, which is a choice and not a failure
-      if ((err as Error).name !== "AbortError") toast.error(`Couldn't share it. Send your crew this code: ${inviteCode}`);
-    }
-  };
-
   const action = (index: number) => {
     const primary = "inline-flex items-center justify-center gap-1.5 min-h-[44px] mt-3 px-4 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold transition-colors";
     if (index === 0) return <Link href="/projects?new=1" className={primary}>Add a job <ArrowRight size={14} /></Link>;
     if (index === 2) return <Link href="/time-tracking" className={primary}>Go to clock-in <ArrowRight size={14} /></Link>;
     // The code loads with the company; until then, the crew page has the same invite
     if (!inviteCode) return <Link href="/crew" className={primary}>Invite crew <ArrowRight size={14} /></Link>;
-    return <button type="button" onClick={sendInvite} className={primary}><Send size={14} /> Send invite</button>;
+    return <button type="button" onClick={() => shareInvite(inviteCode, companyName)} className={primary}><Send size={14} /> Send invite</button>;
   };
 
   return (

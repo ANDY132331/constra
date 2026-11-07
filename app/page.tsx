@@ -75,7 +75,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
       ["Estimates", "Itemised quotes built on site, sent as PDFs"],
       ["Invoices", "Convert an estimate in one step, track paid and overdue"],
       ["Change orders", "Priced, approved and tracked against budget"],
-      ["Payroll export", "Timesheets to CSV, QuickBooks (IIF) or Gusto"],
+      ["Payroll export", "Hours to CSV, QuickBooks or Gusto; invoices to QuickBooks Online"],
     ],
   },
   {
@@ -103,7 +103,7 @@ const FAQ: [string, string][] = [
   ["What happens when there's no signal on site?", "Clock-ins and updates are saved on the phone and sync automatically when the connection comes back."],
   ["Can someone clock in from home?", "Every punch records GPS and a photo. If it's outside the geofence you set for that project, it's flagged so you can review it before payroll."],
   ["Does it work on iPhone?", "Android has an app on Google Play. On iPhone and computers, Constra runs in the browser and you can add it to your home screen like an app."],
-  ["How do hours get into payroll?", "Export timesheets as CSV, a QuickBooks IIF file or a Gusto-ready CSV, with overtime already split out."],
+  ["How do hours get into payroll?", "Export hours as a CSV, a Gusto-ready CSV, a QuickBooks Desktop file or a summary to enter in QuickBooks Online, with overtime split out where you've turned it on."],
   ["What does it cost?", "Constra is free during launch, with every feature included and no credit card required."],
   ["Can I take my data and leave?", "Yes. Invoices, reports and timesheets export to PDF or CSV, and you can delete your account from Settings at any time."],
 ];

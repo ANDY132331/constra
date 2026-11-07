@@ -1,11 +1,13 @@
 ﻿"use client";
 import { toast } from "sonner";
+import { exportInvoicesForQuickBooks } from "@/lib/quickbooks-export";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
   Plus, Search, Lock, X, FileText, ChevronRight,
+  Download,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/currency";
@@ -105,6 +107,19 @@ export default function InvoicesPage() {
   // now must be declared before filtered — filtered's callback accesses now synchronously
   const now = new Date();
 
+  const exportToQuickBooks = async () => {
+    try {
+      const { exported, left } = await exportInvoicesForQuickBooks(invoices);
+      if (exported === 0) { toast.error("Nothing to export yet. Drafts stay out until they're sent."); return; }
+      toast.success(`${exported} invoice${exported === 1 ? "" : "s"} exported`, {
+        duration: 10000,
+        description: `In QuickBooks Online: Settings → Import data → Invoices.${left > 0 ? ` QuickBooks takes 100 at a time, so the ${left} oldest were left out.` : ""}`,
+      });
+    } catch {
+      toast.error("Couldn't save the file. Try again.");
+    }
+  };
+
   const filtered = invoices.filter((i) => {
     if (statusFilter !== "all") {
       const isPastDue = invoiceIsPastDue(i, now);
@@ -186,12 +201,15 @@ export default function InvoicesPage() {
             <h1 className="text-[24px] font-bold text-white tracking-tight">Invoices</h1>
             <p className="text-[12px] text-white/35 mt-0.5">{invoices.length} total</p>
           </div>
+          <div className="flex items-center gap-2">
+            <button onClick={exportToQuickBooks} className="flex items-center gap-1.5 min-h-[44px] px-3 rounded-full bg-white/[0.05] active:bg-white/[0.1] text-white/70 font-semibold text-[12px] transition-colors"><Download size={14} /> QuickBooks</button>
           <button
             onClick={() => { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-full transition-colors shadow-lg shadow-amber-500/20"
           >
             <Plus size={15} /> New
           </button>
+          </div>
         </div>
 
         {/* Stats row */}
@@ -326,12 +344,15 @@ export default function InvoicesPage() {
           <div className="flex items-center gap-1.5 text-[10px] text-amber-400/70 bg-amber-500/10 px-2.5 py-1 rounded-full">
             <Lock size={9} /> Private
           </div>
+          <div className="flex items-center gap-2">
+            <button onClick={exportToQuickBooks} className="flex items-center gap-1.5 text-[12px] font-semibold px-3.5 py-2 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-white/70 transition-colors"><Download size={14} /> QuickBooks</button>
           <button
             onClick={() => { setForm({ ...blank, issueDate: toLocalDateString(new Date()), taxRate: String(defaultTaxRate) }); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[12px] px-3.5 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New Invoice
           </button>
+          </div>
         </div>
       </div>
 

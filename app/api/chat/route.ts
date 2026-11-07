@@ -79,6 +79,8 @@ Constra is a mobile-first PWA for construction workforce management, used by con
 **Reports (Admin only)**
 - Payroll summaries, time reports, project cost reports
 - Export as PDF or CSV
+- Payroll exports for Gusto and QuickBooks: Reports → Export Payroll. QuickBooks Online gets a summary of hours to enter by hand; QuickBooks Desktop gets an IIF file
+- Invoices → QuickBooks makes a CSV of sent invoices for QuickBooks Online (Settings → Import data → Invoices there, up to 100 at a time)
 
 **Estimates, Invoices, Change Orders, Budget (Admin only)**
 - Full financial management suite tied to projects

@@ -1838,3 +1838,17 @@ body:has([data-app-shell]) .text-\[10px\] { font-size: 11px !important; }
    tabular figures, so columns of amounts went ragged ($7,661.40 over $28,024.00). Inherited
    from here; prose is unaffected in practice since Plex's tabular digits are the same weight. */
 body:has([data-app-shell]) { font-variant-numeric: tabular-nums; }
+
+/* Crew page: the on-site bar eases to its new width, rows answer the press */
+/* Room to scroll the actions clear of the floating assistant button */
+.crew-panel { padding-bottom: 3.5rem; }
+.crew-bar { transition: width 400ms cubic-bezier(0.16,1,0.3,1); }
+.crew-row { transition: background-color 150ms ease, transform 120ms ease; }
+.crew-row:active { transform: scale(0.99); }
+.crew-pulse { animation: crew-pulse 2s ease-in-out infinite; }
+@keyframes crew-pulse { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) {
+  .crew-bar, .crew-row { transition: none; }
+  .crew-row:active { transform: none; }
+  .crew-pulse { animation: none; }
+}

@@ -113,7 +113,7 @@ function buildOvertimeSummaries(
   return summaries.sort((a, b) => a.workerName.localeCompare(b.workerName));
 }
 
-function escapeCsv(val: string | number): string {
+export function escapeCsv(val: string | number): string {
   let s = String(val);
   // Spreadsheet apps run text starting with = + - @ as a formula (CSV injection)
   if (typeof val === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
@@ -202,25 +202,59 @@ const gustoAdapter: PayrollAdapter = {
   },
 };
 
+// QuickBooks Desktop timer activity. Tabs and line breaks would split a row, and every row needs
+// names that already exist in that company's QuickBooks. Not yet tried against a real company file.
+const iifText = (s: string) => s.replace(/[\t\r\n]+/g, " ").trim();
+
+function hoursToDuration(hours: number): string {
+  const minutes = Math.round(hours * 60);
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
+}
+
 const quickbooksAdapter: PayrollAdapter = {
   id: "quickbooks",
-  label: "QuickBooks (IIF)",
+  label: "QuickBooks Desktop (IIF)",
   fileExtension: "iif",
   mimeType: "text/plain",
-  serialize(rows, periodLabel) {
-    // QuickBooks IIF time activity format (simplified)
+  serialize(rows) {
     const lines = [
-      `!TIMEAVTY\tNAME\tJOBNAME\tITEMSERVICE\tDURATION\tPAYROLLITEM\tNOTE`,
-      `; Constra Payroll Export — ${periodLabel}`,
-      ...rows.map((r) =>
-        `TIMEAVTY\t${r.workerName}\t${r.projectName}\t\t${r.hoursWorked.toFixed(2)}\tHourly\t${r.date}`
-      ),
+      "!TIMEACT\tDATE\tJOB\tEMP\tITEM\tPITEM\tDURATION\tPROJ\tNOTE\tXFERTOPAYROLL\tBILLINGSTATUS",
+      ...rows.map((r) => {
+        const [y, m, d] = r.date.split("-");
+        return ["TIMEACT", `${m}/${d}/${y}`, iifText(r.projectName), iifText(r.workerName), "", "Hourly", hoursToDuration(r.hoursWorked), "", iifText(`${r.clockIn} to ${r.clockOut}`), "Y", "0"].join("\t");
+      }),
     ];
-    return lines.join("\n");
+    return lines.join("\r\n");
   },
 };
 
-export const PAYROLL_ADAPTERS: PayrollAdapter[] = [csvAdapter, gustoAdapter, quickbooksAdapter];
+// QuickBooks Online has no general way to import hours, so this is the sheet to enter them from
+const quickbooksOnlineAdapter: PayrollAdapter = {
+  id: "quickbooks-online",
+  label: "QuickBooks Online (hours to enter)",
+  fileExtension: "csv",
+  mimeType: "text/csv",
+  serialize(rows, periodLabel, overtimeSummaries) {
+    const totals = new Map<string, { regular: number; overtime: number }>();
+    for (const r of rows) {
+      const t = totals.get(r.workerName) ?? { regular: 0, overtime: 0 };
+      t.regular += r.hoursWorked;
+      totals.set(r.workerName, t);
+    }
+    for (const o of overtimeSummaries ?? []) totals.set(o.workerName, { regular: o.regularHours, overtime: o.overtimeHours });
+    // Overtime columns only when it's switched on: a column of zeros would read as "no overtime"
+    const withOvertime = !!overtimeSummaries?.length;
+    return [
+      `# Hours for ${periodLabel}`,
+      (withOvertime ? ["Employee", "Regular Hours", "Overtime Hours", "Total Hours"] : ["Employee", "Total Hours"]).join(","),
+      ...[...totals].map(([name, t]) => (withOvertime
+        ? [name, t.regular.toFixed(2), t.overtime.toFixed(2), (t.regular + t.overtime).toFixed(2)]
+        : [name, t.regular.toFixed(2)]).map(escapeCsv).join(",")),
+    ].join("\n");
+  },
+};
+
+export const PAYROLL_ADAPTERS: PayrollAdapter[] = [csvAdapter, gustoAdapter, quickbooksOnlineAdapter, quickbooksAdapter];
 
 export function exportPayroll(
   adapterId: string,
