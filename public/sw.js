@@ -143,7 +143,7 @@ self.addEventListener("push", (e) => {
       body: data.body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",
-      tag: data.title + data.body,
+      tag: data.tag || data.title + data.body,
       requireInteraction: false,
       data: { url: data.url },
     })

@@ -10,6 +10,7 @@ import { DialogSemantics } from "@/components/dialog-semantics";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineBanner } from "@/components/offline-banner";
 import { NotifPermissionPrompt } from "@/components/notif-permission-prompt";
+import { SiteWatcher } from "@/components/site-watcher";
 import { MobileNav } from "@/components/mobile-nav";
 import { AIChatWidget } from "@/components/ai-chat-widget";
 import { useStore } from "@/lib/store";
@@ -182,6 +183,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
               <DialogSemantics />
               <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>
               <ErrorBoundary fallback={null}><NotifPermissionPrompt /></ErrorBoundary>
+              <ErrorBoundary fallback={null}><SiteWatcher /></ErrorBoundary>
             </div>
           )}
         </I18nProvider>

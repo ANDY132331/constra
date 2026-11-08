@@ -19,6 +19,9 @@ type SharedProject = {
   status: string; progress: number; color: string;
   startDate: string; endDate: string;
   companyName: string; tasks: SharedTask[];
+  photos?: { id: string; url: string; caption: string; at: string }[];
+  logo?: string | null;
+  updatedAt?: string | null;
 };
 
 const TASK_STATUS: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
@@ -28,13 +31,16 @@ const TASK_STATUS: Record<string, { label: string; icon: React.ReactNode; color:
   delayed:       { label: "Delayed",     icon: <AlertCircle size={14} />,  color: "#ef4444", bg: "rgba(239,68,68,0.10)" },
 };
 
+// A bare "2026-12-20" parses as midnight UTC, which is the day before anywhere west of London
+const asDate = (d: string) => /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(`${d}T00:00:00`) : new Date(d);
+
 function fmtDate(d: string) {
-  try { return new Date(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }); }
+  try { return asDate(d).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }); }
   catch { return d; }
 }
 
 function daysLeft(endDate: string) {
-  const diff = Math.ceil((new Date(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const diff = Math.ceil((asDate(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   if (diff < 0) return `${Math.abs(diff)}d overdue`;
   if (diff === 0) return "Due today";
   if (diff === 1) return "1 day left";
@@ -46,6 +52,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
   const [project, setProject] = useState<SharedProject | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [viewing, setViewing] = useState<number | null>(null);
 
   useEffect(() => {
     fetch(`/api/share/${token}`)
@@ -105,9 +112,14 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
       {/* Top bar */}
       <div className="sticky top-0 z-20 bg-white/90 dark:bg-[#0d0d0d]/90 backdrop-blur-md border-b border-gray-100 dark:border-white/[0.05] px-5 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/25">
-            <HardHat size={14} className="text-black" />
-          </div>
+          {project.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={project.logo} alt={`${project.companyName} logo`} className="h-8 max-w-[110px] object-contain flex-shrink-0" />
+          ) : (
+            <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/25">
+              <HardHat size={14} className="text-black" />
+            </div>
+          )}
           <div>
             <span className="font-black text-[15px] text-gray-900 dark:text-white">{project.companyName}</span>
             <span className="text-gray-400 dark:text-white/25 text-[13px] ml-1.5 hidden sm:inline">· Project Update</span>
@@ -178,6 +190,24 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
           </div>
         </div>
 
+        {/* Latest photos from the crew */}
+        {(project.photos?.length ?? 0) > 0 && (
+          <div className="rounded-2xl border border-gray-100 dark:border-white/[0.06] bg-white dark:bg-[#111] overflow-hidden">
+            <div className="px-5 py-3.5 flex items-center justify-between">
+              <h2 className="text-[12px] font-black uppercase tracking-widest text-gray-400 dark:text-white/30">Latest photos</h2>
+              {project.updatedAt && <span className="text-[11px] text-gray-400 dark:text-white/30">Updated {fmtDate(project.updatedAt)}</span>}
+            </div>
+            <div className="grid grid-cols-3 gap-1 px-1 pb-1">
+              {project.photos!.map((p, i) => (
+                <button key={p.id} type="button" onClick={() => setViewing(i)} className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-white/[0.04]" aria-label={p.caption ? `Open photo: ${p.caption}` : `Open photo from ${fmtDate(p.at)}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.url} alt={p.caption || "Job photo"} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Task stats row */}
         {total > 0 && (
           <div className="grid grid-cols-3 gap-3">
@@ -239,6 +269,15 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {viewing !== null && project.photos?.[viewing] && (
+          <div role="dialog" aria-modal="true" aria-label="Photo" className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4" onClick={() => setViewing(null)}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={project.photos[viewing].url} alt={project.photos[viewing].caption || "Job photo"} className="max-w-full max-h-[80vh] object-contain rounded-lg" />
+            <p className="text-white/80 text-[13px] mt-3 text-center">{project.photos[viewing].caption || ""} <span className="text-white/50">{fmtDate(project.photos[viewing].at)}</span></p>
+            <button type="button" onClick={() => setViewing(null)} className="mt-4 min-h-[44px] px-6 rounded-full bg-white/10 text-white text-[14px] font-semibold">Close</button>
           </div>
         )}
 

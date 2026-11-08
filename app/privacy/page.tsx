@@ -7,11 +7,11 @@ export default function PrivacyPage() {
   const sections = [
     {
       title: "1. Information We Collect",
-      body: `We collect information you provide directly when creating an account (name, email, phone number, company name), information generated through your use of the Service (time entries, project data, photos, voice messages, GPS coordinates during clock-in), and technical information (device type, IP address, browser type) for security and diagnostics.`,
+      body: `We collect information you provide directly when creating an account (name, email, phone number, company name), information generated through your use of the Service (time entries, project data, photos, voice messages, GPS coordinates during clock-in, and while clocked in with the app open), and technical information (device type, IP address, browser type) for security and diagnostics.`,
     },
     {
       title: "2. GPS and Photo Data",
-      body: `When crew members clock in or out, Constra may capture GPS coordinates and/or a photo for verification purposes. This data is associated with the time entry and stored in your company's workspace. Only company administrators can access this data. We do not share GPS or photo data with any third party, and it is never used for purposes beyond verifying attendance.`,
+      body: `When crew members clock in or out, Constra may capture GPS coordinates and/or a photo for verification purposes. While someone is clocked in and has Constra open on their phone, it also checks their location every few minutes to notice when they leave or return to the job site's area; only the time, the job and the distance from the site are saved, not a trail of where they went. It stops at clock-out and never runs when the app is closed. This data is associated with the time entry and stored in your company's workspace. Only company administrators, project managers and foremen can see it. We do not share GPS or photo data with any third party, and it is never used for purposes beyond verifying attendance.`,
     },
     {
       title: "3. How We Use Your Information",

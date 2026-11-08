@@ -69,7 +69,7 @@
 
 	<!-- Permission prompts. App Review rejects vague wording, so each says exactly what it's for. -->
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Constra checks your location when you clock in or out, so your foreman can confirm you're at the job site. It isn't tracked in the background.</string>
+	<string>Constra checks your location when you clock in or out, and every few minutes while you're clocked in with the app open, so your foreman can confirm you're at the job site. It isn't tracked when the app is closed or after you clock out.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Constra takes a photo when you clock in to verify who is on site, and lets you photograph site progress, issues and documents.</string>
 	<key>NSMicrophoneUsageDescription</key>

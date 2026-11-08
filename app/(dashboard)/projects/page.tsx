@@ -84,13 +84,25 @@ export default function ProjectsPage() {
   // picks a new geocoder result or opens an existing project for editing.
   const [mapSeed, setMapSeed] = useState(0);
 
-  const copyShare = (projectId: string) => {
-    const url = `${window.location.origin}/share/${projectId}`;
-    navigator.clipboard.writeText(url).then(() => {
+  // A signed link the client can open without signing in: progress, latest photos and your logo
+  const copyShare = async (projectId: string) => {
+    try {
+      const res = await fetch("/api/share/link", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ projectId }) });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "Could not make the link");
+      const { token } = await res.json();
+      const url = `${window.location.origin}/share/${token}`;
+      const name = projects.find((p) => p.id === projectId)?.name ?? "your project";
+      if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+        await navigator.share({ title: name, text: `Progress and photos for ${name}`, url }).catch(() => {});
+        return;
+      }
+      await navigator.clipboard.writeText(url);
       setShareCopied(projectId);
       setTimeout(() => setShareCopied(null), 2000);
-      toast.success("Share link copied");
-    }).catch(() => toast.error("Could not copy link"));
+      toast.success("Client link copied", { description: "They see progress and recent photos. No prices, no sign-in." });
+    } catch (e) {
+      toast.error(navigator.onLine ? (e instanceof Error ? e.message : "Could not make the link") : "Making a client link needs signal.");
+    }
   };
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (geoTimer.current) clearTimeout(geoTimer.current); }, []);

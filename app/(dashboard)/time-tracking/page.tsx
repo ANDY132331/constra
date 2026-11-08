@@ -58,6 +58,7 @@ import { isForemanOrAbove } from "@/lib/permissions";
 import { hoursBetween, elapsedLabel, isImplausibleShift, LONG_SHIFT_HOURS } from "@/lib/hours";
 import { computeWorkerOvertime, weekStartOf } from "@/lib/overtime";
 import { WeekHours } from "@/components/week-hours";
+import { fmtDistance, isAwayFromSite, siteMoves } from "@/lib/site-presence";
 
 const elapsed = (start: Date, end?: Date): string => elapsedLabel(start, end);
 
@@ -553,6 +554,15 @@ export default function TimeTrackingPage() {
       if (e.workerId === w.id && !e.clockOut && (!start || new Date(e.clockIn) > start)) start = new Date(e.clockIn);
     }
     return start ?? (w.clockInTime ? new Date(w.clockInTime) : new Date());
+  }, [clockEntries]);
+
+  /** "Left site 2:14 PM · 850 m" while a clocked-in worker is outside their job's circle */
+  const awayNote = useCallback((w: Worker): string | null => {
+    const open = clockEntries.find((e) => e.workerId === w.id && !e.clockOut);
+    if (!open || !isAwayFromSite(open)) return null;
+    const moves = siteMoves(open);
+    const last = moves[moves.length - 1];
+    return `Left site ${fmt(last.at)}${last.metres != null ? ` · ${fmtDistance(last.metres)}` : ""}`;
   }, [clockEntries]);
 
   // tick drives live-elapsed recomputation every 30s
@@ -1068,6 +1078,7 @@ export default function TimeTrackingPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-bold text-white truncate">{worker.name}</p>
                   <p className="text-[11px] text-white/40 truncate">{project?.name ?? "No project"}</p>
+                  {awayNote(worker) && <p className="text-[11px] font-bold text-red-400 truncate mt-0.5">{awayNote(worker)}</p>}
                 </div>
                 <span className="text-[12px] font-bold text-amber-400 flex-shrink-0 mr-1">{elapsed(ci)}</span>
                 <button
@@ -1387,6 +1398,7 @@ export default function TimeTrackingPage() {
                   </div>
                   <p className="text-[13px] font-bold text-white">{worker.name}</p>
                   <p className="text-[11px] text-white/40 mb-2">{worker.customRole}</p>
+                  {awayNote(worker) && <p className="text-[11px] font-bold text-red-400 bg-red-500/10 rounded-md px-2 py-1 mb-2">{awayNote(worker)}</p>}
                   <div className="flex items-center gap-1 text-[11px] text-white/30 mb-1">
                     <MapPin size={9} />
                     <span className="truncate">{project?.name ?? "No project assigned"}</span>

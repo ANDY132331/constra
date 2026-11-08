@@ -21,6 +21,8 @@ import { AskConstra } from "@/components/ask-constra";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { SetupGuide } from "@/components/setup-guide";
+import { SiteAlerts } from "@/components/site-alerts";
+import { JobCosts } from "@/components/job-costs";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
@@ -769,6 +771,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="px-5 pt-4 empty:hidden"><SetupGuide /></div>
+      <div className="px-5 pt-4 empty:hidden"><SiteAlerts /></div>
 
       {/* ── Urgent alerts panel ──────────────────────────────────────────── */}
       {urgentItems.length > 0 && (
@@ -1081,50 +1084,9 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Budget Health — mobile */}
-      {canSeeFinancials && activeProjects.some((p) => p.budget > 0) && (
-        <div className="px-5 pt-7">
-          <div className="flex items-center justify-between mb-3.5">
-            <h3 className="text-[15px] font-bold text-white">Budget Health</h3>
-            <Link href="/projects" className="text-[11px] text-amber-400/80 flex items-center gap-1">
-              Projects <ArrowRight size={11} />
-            </Link>
-          </div>
-          <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 space-y-4">
-            {activeProjects.filter((p) => p.budget > 0).map((p) => {
-              const committed = p.committed ?? spendOf(p).total;
-              const forecast = p.forecast ?? spendOf(p).total;
-              const _rb1 = spendOf(p).revisedBudget;
-              const variance = _rb1 - forecast;
-              const overBudget = variance < 0;
-              const spentPct = Math.min(100, (spendOf(p).total / _rb1) * 100);
-              const commitPct = Math.min(100, (committed / _rb1) * 100);
-              const forecastPct = Math.min(100, (forecast / _rb1) * 100);
-              return (
-                <div key={p.id}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
-                      <span className="text-[12px] font-semibold text-white/70 truncate max-w-[130px]">{p.name}</span>
-                    </div>
-                    <span className={`text-[11px] font-bold ${overBudget ? "text-red-400" : "text-green-400"}`}>
-                      {overBudget ? "▲" : "▼"} {formatCurrencyCompact(Math.abs(variance), currency as never)} {overBudget ? "over" : "under"}
-                    </span>
-                  </div>
-                  <div className="relative h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                    <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${commitPct}%`, background: p.color + "50" }} />
-                    <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${spentPct}%`, background: p.color }} />
-                    <div className="absolute inset-y-0 w-0.5 rounded-full" style={{ left: `${Math.min(99, forecastPct)}%`, background: overBudget ? "#ef4444" : "rgba(255,255,255,0.5)" }} />
-                  </div>
-                  <div className="flex justify-between mt-1 text-[9px] text-white/25">
-                    <span>Spent {formatCurrencyCompact(spendOf(p).total, currency as never)}</span>
-                    <span>Budget {formatCurrencyCompact(p.budget, currency as never)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      {/* Job costs — mobile */}
+      {canSeeFinancials && activeProjects.length > 0 && (
+        <div className="px-5 pt-7"><JobCosts now={liveTime.getTime()} /></div>
       )}
 
       <div className="pb-4" />
@@ -1212,6 +1174,7 @@ export default function DashboardPage() {
       )}
 
       <SetupGuide />
+      <SiteAlerts />
 
       {/* Quick Actions */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -1373,6 +1336,8 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
+            <>
+            {canSeeFinancials && activeProjects.length > 0 && <div className="mb-3"><JobCosts now={liveTime.getTime()} /></div>}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {activeProjects.map((p) => <ProjectStatusCard key={p.id} project={p} currency={currency} showFinancials={canSeeFinancials} />)}
               {upcomingProjects.slice(0, 1).map((p) => (
@@ -1396,6 +1361,7 @@ export default function DashboardPage() {
                 </Link>
               ))}
             </div>
+            </>
           )}
         </div>
 

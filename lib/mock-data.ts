@@ -6,10 +6,12 @@
 
 // Background verification flag attached to a clock entry
 export type VerificationFlag = {
-  type: "impossible-travel" | "off-site" | "multiple-devices" | "suspicious-gps" | "duplicate-image" | "long-shift";
+  type: "impossible-travel" | "off-site" | "multiple-devices" | "suspicious-gps" | "duplicate-image" | "long-shift" | "left-site" | "returned-site";
   severity: "low" | "medium" | "high";
   note: string;
   detectedAt: Date;
+  /** left-site only: how far from the site, in metres */
+  metres?: number;
 };
 
 export type WorkerCertification = {
