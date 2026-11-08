@@ -26,11 +26,11 @@ type NavDef = {
 
 // Everything about people's hours and days in one group. Everyone sees it: each page shows a
 // worker their own side and a foreman or admin the whole crew.
-const TIME_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { href: "/time-tracking", label: "Time Tracking", icon: Clock },
-  { href: "/timesheets",    label: "Timesheets",    icon: FileSpreadsheet },
-  { href: "/crew-plan",     label: "Crew Plan",     icon: CalendarRange },
-  { href: "/time-off",      label: "Time Off",      icon: CalendarOff },
+const TIME_ITEMS: { href: string; labelKey: "timeTracking" | "timesheets" | "crewPlan" | "timeOff"; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { href: "/time-tracking", labelKey: "timeTracking", icon: Clock },
+  { href: "/timesheets",    labelKey: "timesheets",   icon: FileSpreadsheet },
+  { href: "/crew-plan",     labelKey: "crewPlan",     icon: CalendarRange },
+  { href: "/time-off",      labelKey: "timeOff",      icon: CalendarOff },
 ];
 
 const NAV_ITEMS: NavDef[] = [
@@ -210,9 +210,9 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
         ))}
 
         <div className="mt-4 pt-3 border-t border-white/[0.06]">
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Time &amp; Crew</p>
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">{t.nav.timeAndCrew}</p>
           {TIME_ITEMS.map((item) => (
-            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} onClose={onClose} />
+            <NavItem key={item.href} href={item.href} label={t.nav[item.labelKey]} icon={item.icon} active={isActive(item.href)} onClose={onClose} />
           ))}
         </div>
 

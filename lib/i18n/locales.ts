@@ -10,6 +10,7 @@ export type Translations = {
     safety: string; equipment: string; crew: string; reports: string;
     estimates: string; invoices: string; settings: string; finance: string; mainMenu: string;
     materials: string; documents: string; messages: string;
+    timesheets: string; crewPlan: string; timeOff: string; timeAndCrew: string;
   };
   common: {
     save: string; cancel: string; delete: string; edit: string; add: string;
@@ -63,6 +64,7 @@ const locales: AllLocales = {
       crew: "Crew & Workers", reports: "Reports", estimates: "Estimates",
       invoices: "Invoices", settings: "Settings", finance: "Finance", mainMenu: "Main Menu",
       materials: "Materials", documents: "Documents", messages: "Messages",
+      timesheets: "Timesheets", crewPlan: "Crew Plan", timeOff: "Time Off", timeAndCrew: "Time & Crew",
     },
     common: {
       save: "Save", cancel: "Cancel", delete: "Delete", edit: "Edit", add: "Add",
@@ -125,6 +127,7 @@ const locales: AllLocales = {
       estimates: "Presupuestos", invoices: "Facturas", settings: "Configuración",
       finance: "Finanzas", mainMenu: "Menú Principal",
       materials: "Materiales", documents: "Documentos", messages: "Mensajes",
+      timesheets: "Hojas de horas", crewPlan: "Plan de cuadrilla", timeOff: "Días libres", timeAndCrew: "Tiempo y cuadrilla",
     },
     common: {
       save: "Guardar", cancel: "Cancelar", delete: "Eliminar", edit: "Editar", add: "Agregar",
@@ -189,6 +192,7 @@ const locales: AllLocales = {
       estimates: "Devis", invoices: "Factures", settings: "Paramètres",
       finance: "Finance", mainMenu: "Menu principal",
       materials: "Matériaux", documents: "Documents", messages: "Messages",
+      timesheets: "Feuilles de temps", crewPlan: "Planning d'équipe", timeOff: "Congés", timeAndCrew: "Temps et équipe",
     },
     common: {
       save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", edit: "Modifier", add: "Ajouter",
@@ -254,6 +258,7 @@ const locales: AllLocales = {
       estimates: "Kostenvoranschläge", invoices: "Rechnungen", settings: "Einstellungen",
       finance: "Finanzen", mainMenu: "Hauptmenü",
       materials: "Materialien", documents: "Dokumente", messages: "Nachrichten",
+      timesheets: "Stundenzettel", crewPlan: "Einsatzplan", timeOff: "Urlaub", timeAndCrew: "Zeit & Team",
     },
     common: {
       save: "Speichern", cancel: "Abbrechen", delete: "Löschen", edit: "Bearbeiten", add: "Hinzufügen",
@@ -319,6 +324,7 @@ const locales: AllLocales = {
       estimates: "Orçamentos", invoices: "Faturas", settings: "Configurações",
       finance: "Finanças", mainMenu: "Menu Principal",
       materials: "Materiais", documents: "Documentos", messages: "Mensagens",
+      timesheets: "Folhas de horas", crewPlan: "Plano da equipe", timeOff: "Folgas", timeAndCrew: "Tempo e equipe",
     },
     common: {
       save: "Salvar", cancel: "Cancelar", delete: "Excluir", edit: "Editar", add: "Adicionar",
@@ -384,6 +390,7 @@ const locales: AllLocales = {
       estimates: "Preventivi", invoices: "Fatture", settings: "Impostazioni",
       finance: "Finanze", mainMenu: "Menu Principale",
       materials: "Materiali", documents: "Documenti", messages: "Messaggi",
+      timesheets: "Fogli presenze", crewPlan: "Piano squadra", timeOff: "Ferie", timeAndCrew: "Tempo e squadra",
     },
     common: {
       save: "Salva", cancel: "Annulla", delete: "Elimina", edit: "Modifica", add: "Aggiungi",
@@ -449,6 +456,7 @@ const locales: AllLocales = {
       estimates: "Offertes", invoices: "Facturen", settings: "Instellingen",
       finance: "Financiën", mainMenu: "Hoofdmenu",
       materials: "Materialen", documents: "Documenten", messages: "Berichten",
+      timesheets: "Urenstaten", crewPlan: "Ploegplanning", timeOff: "Verlof", timeAndCrew: "Tijd & ploeg",
     },
     common: {
       save: "Opslaan", cancel: "Annuleren", delete: "Verwijderen", edit: "Bewerken", add: "Toevoegen",
@@ -514,6 +522,7 @@ const locales: AllLocales = {
       estimates: "Kosztorysy", invoices: "Faktury", settings: "Ustawienia",
       finance: "Finanse", mainMenu: "Menu Główne",
       materials: "Materiały", documents: "Dokumenty", messages: "Wiadomości",
+      timesheets: "Karty czasu pracy", crewPlan: "Plan ekipy", timeOff: "Urlopy", timeAndCrew: "Czas i ekipa",
     },
     common: {
       save: "Zapisz", cancel: "Anuluj", delete: "Usuń", edit: "Edytuj", add: "Dodaj",
@@ -579,6 +588,7 @@ const locales: AllLocales = {
       estimates: "Tahminler", invoices: "Faturalar", settings: "Ayarlar",
       finance: "Finans", mainMenu: "Ana Menü",
       materials: "Malzemeler", documents: "Belgeler", messages: "Mesajlar",
+      timesheets: "Puantajlar", crewPlan: "Ekip planı", timeOff: "İzin", timeAndCrew: "Zaman ve ekip",
     },
     common: {
       save: "Kaydet", cancel: "İptal", delete: "Sil", edit: "Düzenle", add: "Ekle",
@@ -644,6 +654,7 @@ const locales: AllLocales = {
       estimates: "التقديرات", invoices: "الفواتير", settings: "الإعدادات",
       finance: "المالية", mainMenu: "القائمة الرئيسية",
       materials: "المواد", documents: "المستندات", messages: "الرسائل",
+      timesheets: "سجلات الدوام", crewPlan: "خطة الطاقم", timeOff: "الإجازات", timeAndCrew: "الوقت والطاقم",
     },
     common: {
       save: "حفظ", cancel: "إلغاء", delete: "حذف", edit: "تعديل", add: "إضافة",
@@ -709,6 +720,7 @@ const locales: AllLocales = {
       estimates: "अनुमान", invoices: "चालान", settings: "सेटिंग्स",
       finance: "वित्त", mainMenu: "मुख्य मेनू",
       materials: "सामग्री", documents: "दस्तावेज़", messages: "संदेश",
+      timesheets: "टाइमशीट", crewPlan: "दल योजना", timeOff: "छुट्टी", timeAndCrew: "समय और दल",
     },
     common: {
       save: "सहेजें", cancel: "रद्द करें", delete: "हटाएं", edit: "संपादित करें", add: "जोड़ें",
@@ -774,6 +786,7 @@ const locales: AllLocales = {
       estimates: "报价单", invoices: "发票", settings: "设置",
       finance: "财务", mainMenu: "主菜单",
       materials: "材料", documents: "文件", messages: "消息",
+      timesheets: "工时表", crewPlan: "班组安排", timeOff: "请假", timeAndCrew: "工时与班组",
     },
     common: {
       save: "保存", cancel: "取消", delete: "删除", edit: "编辑", add: "添加",
@@ -839,6 +852,7 @@ const locales: AllLocales = {
       estimates: "估價單", invoices: "發票", settings: "設定",
       finance: "財務", mainMenu: "主選單",
       materials: "材料", documents: "文件", messages: "訊息",
+      timesheets: "工時表", crewPlan: "班組安排", timeOff: "請假", timeAndCrew: "工時與班組",
     },
     common: {
       save: "儲存", cancel: "取消", delete: "刪除", edit: "編輯", add: "新增",
@@ -904,6 +918,7 @@ const locales: AllLocales = {
       estimates: "見積もり", invoices: "請求書", settings: "設定",
       finance: "財務", mainMenu: "メインメニュー",
       materials: "資材", documents: "書類", messages: "メッセージ",
+      timesheets: "タイムシート", crewPlan: "作業員配置", timeOff: "休暇", timeAndCrew: "勤怠と作業員",
     },
     common: {
       save: "保存", cancel: "キャンセル", delete: "削除", edit: "編集", add: "追加",
@@ -969,6 +984,7 @@ const locales: AllLocales = {
       estimates: "견적", invoices: "청구서", settings: "설정",
       finance: "재무", mainMenu: "메인 메뉴",
       materials: "자재", documents: "문서", messages: "메시지",
+      timesheets: "근무시간표", crewPlan: "작업자 배치", timeOff: "휴가", timeAndCrew: "근무와 작업자",
     },
     common: {
       save: "저장", cancel: "취소", delete: "삭제", edit: "편집", add: "추가",
