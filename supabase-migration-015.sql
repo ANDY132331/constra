@@ -1,31 +1,20 @@
--- Migration 015: lunch breaks, payroll email, saved certifications, time off, crew plan
+-- Migration 015: clock-out reminders, payroll email, saved certifications, time off, crew plan
 --
 -- Run AFTER 013 (it uses 013's caller_level() and my_company_id()). Safe to run more than once.
 -- Adds only; nothing existing is changed or removed.
 --
---   companies.break_minutes / break_after_hours  unpaid break taken off shifts longer than N hours
+--   clock_entries.reminder_sent_at                when a long open shift was last nudged, so it's once
 --   companies.payroll_email / payroll_email_on    where the weekly timesheet goes, and whether to send it
 --   profiles.certifications                       tickets and expiry dates (they only lived on one phone before)
 --   time_off_requests                             a worker asks, a foreman or admin decides
 --   crew_assignments                              who works where on which day
 
 -- ── Company settings ──────────────────────────────────────────────────────────
-alter table public.companies add column if not exists break_minutes integer not null default 0;
-alter table public.companies add column if not exists break_after_hours numeric not null default 5;
 alter table public.companies add column if not exists payroll_email text;
 alter table public.companies add column if not exists payroll_email_on boolean not null default false;
 
-do $$
-begin
-  if not exists (select 1 from pg_constraint where conname = 'companies_break_minutes_range') then
-    alter table public.companies add constraint companies_break_minutes_range
-      check (break_minutes between 0 and 120) not valid;
-  end if;
-  if not exists (select 1 from pg_constraint where conname = 'companies_break_after_range') then
-    alter table public.companies add constraint companies_break_after_range
-      check (break_after_hours between 0 and 24) not valid;
-  end if;
-end $$;
+-- The hourly reminder job marks a shift once it has nudged about it, so nobody is told twice
+alter table public.clock_entries add column if not exists reminder_sent_at timestamptz;
 
 -- ── Certifications, saved with the person ─────────────────────────────────────
 alter table public.profiles add column if not exists certifications jsonb not null default '[]'::jsonb;

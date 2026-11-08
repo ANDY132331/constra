@@ -7,8 +7,8 @@ import fs from "fs";
 const PROBES = [
   { migration: "013", what: "schedule_events table", path: "schedule_events?select=id&limit=0" },
   { migration: "014", what: "invoices.last_reminded_at", path: "invoices?select=last_reminded_at&limit=0" },
-  { migration: "015", what: "time_off_requests, crew_assignments, breaks, certifications", path: "crew_assignments?select=id&limit=0" },
-  { migration: "015", what: "companies.break_minutes", path: "companies?select=break_minutes,payroll_email&limit=0" },
+  { migration: "015", what: "time_off_requests, crew_assignments", path: "crew_assignments?select=id&limit=0" },
+  { migration: "015", what: "clock_entries.reminder_sent_at, companies.payroll_email", path: "clock_entries?select=reminder_sent_at&limit=0" },
   { migration: "015", what: "profiles.certifications", path: "profiles?select=certifications&limit=0" },
 ];
 
