@@ -193,6 +193,16 @@ await step("A worker can't clock other people in", async () => {
   if (await p.getByText("Clock In Worker").count()) throw new Error("worker sees the crew clock-in list");
 });
 
+await step("A worker's timesheet shows only their own hours", async () => {
+  await open("/timesheets");
+  await p.locator(".ts-paper").waitFor({ timeout: 10000 });
+  const sheets = await p.locator(".ts-paper section[id^=ts-]").count();
+  const others = await p.locator(".ts-paper section[id^=ts-]:not(#ts-w-dev)").count();
+  if (others > 0) throw new Error(`worker sees ${others} other people's timesheets`);
+  if (await p.getByText("Everyone").count()) throw new Error("worker can pick other crew");
+  return `${sheets} sheet (their own)`;
+});
+
 await browser.close();
 
 // ── Report ───────────────────────────────────────────────────────────────────

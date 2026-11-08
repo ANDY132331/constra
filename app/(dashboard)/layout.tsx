@@ -22,7 +22,7 @@ import { SplashScreen } from "@/components/splash-screen";
 import { setNativeStatusBar } from "@/lib/native";
 
 // Pages that are always accessible regardless of role/grants
-const ALWAYS_ALLOWED = ["/dashboard", "/time-tracking", "/safety", "/messages", "/photos", "/settings"];
+const ALWAYS_ALLOWED = ["/dashboard", "/time-tracking", "/safety", "/messages", "/photos", "/settings", "/timesheets"];
 
 // Default role-based access for pages that require elevation
 // Workers can view: schedule, projects, punch-list (read-only enforced inside each page)

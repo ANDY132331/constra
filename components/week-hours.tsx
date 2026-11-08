@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import type { ClockEntry, Worker } from "@/lib/mock-data";
 import { hoursBetween } from "@/lib/hours";
 import { computeWorkerOvertime, type OvertimeSettings } from "@/lib/overtime";
@@ -172,6 +173,11 @@ export function WeekHours({
           <p className="mt-5 lg:mt-2 text-[13px] text-white/55 text-center py-4">No shifts this week.</p>
         )}
       </div>
+      <Link href="/timesheets" className="flex items-center justify-center gap-2 min-h-[48px] border-t border-white/[0.07] text-[13px] font-semibold text-white/70 hover:text-white hover:bg-white/[0.03] transition-colors">
+        <FileText size={14} className="text-amber-400" />
+        Timesheet with your logo: PDF or Excel
+        <ChevronRight size={14} className="text-white/40" />
+      </Link>
     </section>
   );
 }

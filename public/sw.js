@@ -1,6 +1,6 @@
 const CACHE = "constra-v9";
 
-const PRECACHE = ["/", "/dashboard", "/time-tracking", "/schedule", "/crew"];
+const PRECACHE = ["/", "/dashboard", "/time-tracking", "/timesheets", "/schedule", "/crew"];
 
 // A signed-out request for an app page redirects to /login. Storing that as the app shell
 // would show a login screen to someone who is signed in but offline, so redirects are skipped.

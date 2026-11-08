@@ -15,6 +15,7 @@ import { endOfDay, ink } from "@/lib/utils";
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/time-tracking": "Time Tracking",
+  "/timesheets": "Timesheets",
   "/projects": "Projects",
   "/tasks": "Task List",
   "/punch-list": "Punch List",
@@ -41,6 +42,7 @@ const PAGE_TITLES: Record<string, string> = {
 // Phone header has room for about nine capital letters next to the action buttons
 const SHORT_TITLES: Record<string, string> = {
   "/time-tracking": "Time",
+  "/timesheets": "Timesheets",
   "/tasks": "Tasks",
   "/punch-list": "Punch List",
   "/photos": "Photos",

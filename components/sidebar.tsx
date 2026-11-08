@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot,
+  Package, FolderOpen, MessagesSquare, FileText, FileSpreadsheet, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -16,6 +16,8 @@ import { isForemanOrAbove, isAdminOrAbove } from "@/lib/permissions";
 type NavDef = {
   href: string;
   labelKey: keyof ReturnType<typeof useT>["nav"];
+  /** English-only label for items without a translation yet; wins over labelKey */
+  label?: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   /** Minimum access level required. Omit = everyone. */
   minLevel?: "foreman" | "admin";
@@ -25,6 +27,7 @@ type NavDef = {
 const NAV_ITEMS: NavDef[] = [
   { href: "/dashboard",     labelKey: "dashboard",    icon: LayoutDashboard },
   { href: "/time-tracking", labelKey: "timeTracking", icon: Clock },
+  { href: "/timesheets",    labelKey: "timeTracking", label: "Timesheets", icon: FileSpreadsheet },
   { href: "/schedule",      labelKey: "schedule",     icon: CalendarDays },
   { href: "/safety",        labelKey: "safety",       icon: ShieldAlert },
   { href: "/messages",      labelKey: "messages",     icon: MessagesSquare },
@@ -191,7 +194,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
           <NavItem
             key={item.href}
             href={item.href}
-            label={t.nav[item.labelKey]}
+            label={item.label ?? t.nav[item.labelKey]}
             icon={item.icon}
             badge={item.badge?.(pendingCount)}
             active={isActive(item.href)}

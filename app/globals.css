@@ -1857,3 +1857,29 @@ body:has([data-app-shell]) { font-variant-numeric: tabular-nums; }
 .font-display { font-family: var(--font-barlow-condensed), "Arial Narrow", sans-serif; }
 .week-bar { transition: height 350ms cubic-bezier(0.16,1,0.3,1), width 350ms cubic-bezier(0.16,1,0.3,1); }
 @media (prefers-reduced-motion: reduce) { .week-bar { transition: none; } }
+
+/* Timesheets: the preview is a sheet of paper in both themes, so it matches what prints */
+.ts-paper { background: #ffffff; color: #151617; box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 12px 32px -12px rgba(0,0,0,0.35); }
+.ts-head { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 22px 20px 16px; }
+@media (min-width: 640px) { .ts-head { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; padding: 28px 32px 20px; } }
+.ts-logo { max-height: 44px; max-width: 120px; object-fit: contain; flex-shrink: 0; }
+.ts-mark { width: 40px; height: 40px; border-radius: 8px; background: #151617; color: #F5C400; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; flex-shrink: 0; }
+.ts-company { font-weight: 700; font-size: 15px; color: #151617; }
+.ts-title { font-family: var(--font-barlow-condensed), "Arial Narrow", sans-serif; font-weight: 800; font-size: 26px; line-height: 1; text-transform: uppercase; letter-spacing: 0.02em; color: #151617; }
+.ts-rule { display: flex; align-items: center; margin: 0 20px; height: 2px; background: #E7E4DE; }
+.ts-rule span { width: 56px; height: 3px; background: #F5C400; }
+@media (min-width: 640px) { .ts-rule { margin: 0 32px; } }
+.ts-paper .ts-ink { color: #151617; }
+.ts-paper .ts-ink2 { color: #4B4D50; }
+.ts-paper .ts-muted { color: #6B6D70; }
+.ts-paper .ts-ot { color: #9a3412; }
+.ts-paper .ts-border { border-color: #E7E4DE; }
+.ts-row { border-bottom: 1px solid #EEEBE6; }
+.ts-row:hover { background: #FAF9F7; }
+.ts-table > li { border-bottom: 1px solid #EEEBE6; }
+.ts-table > li:first-child { border-top: 2px solid #151617; }
+.ts-off { opacity: 0.55; }
+.ts-total { background: #F5F4F1; }
+.ts-sign { border-bottom: 1px solid #151617; }
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
