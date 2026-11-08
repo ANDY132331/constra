@@ -56,14 +56,15 @@ import { sendPushEvent } from "@/lib/push-client";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { hoursBetween, elapsedLabel, isImplausibleShift, LONG_SHIFT_HOURS } from "@/lib/hours";
-import { computeWorkerOvertime } from "@/lib/overtime";
+import { computeWorkerOvertime, weekStartOf } from "@/lib/overtime";
+import { WeekHours } from "@/components/week-hours";
 
 const elapsed = (start: Date, end?: Date): string => elapsedLabel(start, end);
 
 /** Past this many hours an open shift is almost certainly a forgotten clock-out. */
 
 function fmt(date: Date | string) {
-  return new Date(date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  return new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
 // Edit entry modal
@@ -457,7 +458,16 @@ export default function TimeTrackingPage() {
 
   const [search, setSearch] = useState("");
   const [selectedProject, setSelectedProject] = useState("all");
+  /** 0 = this week, -1 = last week. The shift list below follows it. */
+  const [weekOffset, setWeekOffset] = useState(0);
+  const overtimeRules = useMemo(() => ({
+    enabled: overtimeEnabled,
+    dailyThreshold: overtimeDailyThreshold,
+    weeklyThreshold: overtimeWeeklyThreshold,
+    multiplier: overtimeMultiplier,
+  }), [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
   const [tick, setTick] = useState(0);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const [isOnline, setIsOnline] = useState(true);
 
   // Step 1: project picker
@@ -477,7 +487,7 @@ export default function TimeTrackingPage() {
   const [photoView, setPhotoView] = useState<{ src: string; caption: string } | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 30000);
+    const id = setInterval(() => { setTick((t) => t + 1); setNowMs(Date.now()); }, 30000);
     return () => clearInterval(id);
   }, []);
 
@@ -506,6 +516,13 @@ export default function TimeTrackingPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
 
+  const weekStart = useMemo(() => {
+    const d = weekStartOf(new Date());
+    d.setDate(d.getDate() + weekOffset * 7);
+    return d;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekOffset, tick]);
+
   // Cross-check: only show worker as "live" if they have an actual open clock entry (no clockOut).
   const clockedIn = useMemo(() => (isEmployee
     ? workers.filter((w) => w.clockedIn && w.id === currentUser.id)
@@ -527,13 +544,24 @@ export default function TimeTrackingPage() {
     .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0),
   [clockEntries, todayStart]);
 
+  // The open clock entry is the record payroll reads. worker.clockInTime is a copy on the
+  // profile that can lag behind it, which had the same shift showing 9h 8m on the card and
+  // 8h 12m in the list right below.
+  const liveStart = useCallback((w: Worker): Date => {
+    let start: Date | undefined;
+    for (const e of clockEntries) {
+      if (e.workerId === w.id && !e.clockOut && (!start || new Date(e.clockIn) > start)) start = new Date(e.clockIn);
+    }
+    return start ?? (w.clockInTime ? new Date(w.clockInTime) : new Date());
+  }, [clockEntries]);
+
   // tick drives live-elapsed recomputation every 30s
   const liveHours = useMemo(() => clockedIn.reduce((s, w) => {
-    if (!w.clockInTime) return s;
-    return s + hoursBetween(w.clockInTime);
+    if (!w.clockInTime && !clockEntries.some((e) => e.workerId === w.id && !e.clockOut)) return s;
+    return s + hoursBetween(liveStart(w));
   }, 0),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [clockedIn, tick]);
+  [clockedIn, clockEntries, liveStart, tick]);
 
   const todayTotal = (todayHours + liveHours).toFixed(1);
 
@@ -767,6 +795,24 @@ export default function TimeTrackingPage() {
     return true;
   });
 
+  // The shift list shows one week at a time, the same week as the summary above it
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
+  const weekEntries = allEntries.filter((e) => {
+    const t = new Date(e.clockIn).getTime();
+    return t >= weekStart.getTime() && t < weekEnd.getTime();
+  });
+  const weekHours = (
+    <WeekHours
+      entries={weekEntries}
+      weekStart={weekStart}
+      weekOffset={weekOffset}
+      onWeekChange={setWeekOffset}
+      getWorker={getWorkerById}
+      overtime={overtimeRules}
+      now={nowMs}
+    />
+  );
+
   return (
     <>
     {/* ── MOBILE ── */}
@@ -838,7 +884,7 @@ export default function TimeTrackingPage() {
                     <span className="text-[11px] font-bold text-green-400/80 uppercase tracking-widest">On Site</span>
                   </div>
                   <p className="text-[28px] font-black text-green-400 leading-none tracking-tight tabular-nums">
-                    {elapsed(currentUser.clockInTime ?? new Date())}
+                    {elapsed(liveStart(currentUser))}
                   </p>
                   {(() => {
                     const myEntry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
@@ -1010,7 +1056,7 @@ export default function TimeTrackingPage() {
           {clockedInShown.map((worker) => {
             const activeEntry = clockEntries.find((e) => e.workerId === worker.id && !e.clockOut);
             const project = getProjectById(activeEntry?.projectId ?? worker.projectIds[0] ?? "");
-            const ci = worker.clockInTime ?? new Date();
+            const ci = liveStart(worker);
             return (
               <div key={worker.id} className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4 flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-[13px] font-bold"
@@ -1078,15 +1124,12 @@ export default function TimeTrackingPage() {
       )}
 
       {/* Timesheet — day-grouped, professional layout */}
-      {allEntries.length > 0 && (() => {
-        const completedEntries = allEntries.filter((e) => e.clockOut);
-        const totalH = completedEntries.reduce(
-          (s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0
-        );
+      {allEntries.length > 0 && <div className="px-5 mb-5">{weekHours}</div>}
 
-        // Group by date string (allEntries is newest-first, so Map insertion order = newest day first)
-        const dayMap = new Map<string, typeof allEntries>();
-        for (const entry of allEntries) {
+      {weekEntries.length > 0 && (() => {
+        // Group by date string (newest-first, so Map insertion order = newest day first)
+        const dayMap = new Map<string, typeof weekEntries>();
+        for (const entry of weekEntries) {
           const key = new Date(entry.clockIn).toLocaleDateString("en-CA");
           if (!dayMap.has(key)) dayMap.set(key, []);
           dayMap.get(key)!.push(entry);
@@ -1094,36 +1137,13 @@ export default function TimeTrackingPage() {
 
         return (
           <div className="px-5">
-            {/* Company header */}
-            {companyName && (
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/[0.06]">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center text-black text-[11px] font-black flex-shrink-0" style={{ background: "#F5C400" }}>
-                  {companyName.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="text-[13px] font-bold text-white leading-none">{companyName}</p>
-                  <p className="text-[10px] text-white/30 mt-0.5">Timesheet</p>
-                </div>
-              </div>
-            )}
-            {/* Section header + period total */}
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-bold text-white/35 uppercase tracking-widest">
-                {companyName ? "All Entries" : "Timesheet"}
-              </p>
-              {totalH > 0 && (
-                <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full px-2.5 py-1">
-                  <Clock size={10} className="text-amber-400" />
-                  <span className="text-[11px] font-black text-amber-400">{totalH.toFixed(1)}h total</span>
-                </div>
-              )}
-            </div>
+            <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest mb-3 px-1">
+              Shifts
+            </p>
 
             {[...dayMap.entries()].map(([dateKey, dayEntries]) => {
-              const dayCompleted = dayEntries.filter((e) => e.clockOut);
-              const dayTotal = dayCompleted.reduce(
-                (s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0
-              );
+              // Running shifts count up to now, the same as the week summary above
+              const dayTotal = dayEntries.reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut), 0);
               const todayKey = new Date().toLocaleDateString("en-CA");
               const dayLabel = dateKey === todayKey
                 ? "Today"
@@ -1135,8 +1155,8 @@ export default function TimeTrackingPage() {
                   <div className="flex items-center justify-between mb-2 px-1">
                     <span className="text-[12px] font-bold text-white/50">{dayLabel}</span>
                     {dayTotal > 0 && (
-                      <span className="text-[11px] font-semibold text-white/25">
-                        {dayCompleted.length} session{dayCompleted.length !== 1 ? "s" : ""} · {dayTotal.toFixed(1)}h
+                      <span className="text-[11px] font-semibold text-white/50 tabular-nums">
+                        {dayEntries.length} shift{dayEntries.length !== 1 ? "s" : ""} · {dayTotal.toFixed(1)}h
                       </span>
                     )}
                   </div>
@@ -1348,7 +1368,7 @@ export default function TimeTrackingPage() {
             {clockedInShown.map((worker) => {
               const activeEntry = clockEntries.find((e) => e.workerId === worker.id && !e.clockOut);
               const project = getProjectById(activeEntry?.projectId ?? worker.projectIds[0] ?? "");
-              const ci = worker.clockInTime ?? new Date();
+              const ci = liveStart(worker);
               return (
                 <div key={worker.id} className="bg-[#111111] border border-green-500/20 rounded-xl p-4 relative overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-green-500/30" />
@@ -1546,6 +1566,9 @@ export default function TimeTrackingPage() {
           />
         )
       ) : (
+        <div className="space-y-4">
+        {weekHours}
+        {weekEntries.length > 0 && (
         <div className="overflow-x-auto rounded-xl">
         <div className="bg-[#111111] border border-white/[0.06] rounded-xl overflow-hidden min-w-[700px]">
           <div className="grid text-[10px] font-bold uppercase tracking-widest text-white/25 px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]"
@@ -1554,7 +1577,7 @@ export default function TimeTrackingPage() {
             <span>Clock In</span><span>Clock Out</span><span className="text-right">Hours</span><span className="text-right">Flags</span>
           </div>
 
-          {allEntries.map((entry) => {
+          {weekEntries.map((entry) => {
             const worker = getWorkerById(entry.workerId);
             const project = getProjectById(entry.projectId);
             if (!worker) return null;
@@ -1665,6 +1688,8 @@ export default function TimeTrackingPage() {
             );
           })}
         </div>
+        </div>
+        )}
         </div>
       )}
 
