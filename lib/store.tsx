@@ -8,6 +8,7 @@ import type {
   Equipment, RFI, Invoice, Estimate, PhotoEntry, ActivityEvent, HoursAdjustment,
   MaterialType, MaterialEntry, ProjectDocument, Message,
   DailyReport, ChangeOrder, BlueprintPin, BudgetLine, InsurancePolicy, ScheduleEvent,
+  TimeOffRequest, CrewAssignment, WorkerCertification,
 } from "./mock-data";
 import type { Locale } from "./i18n/locales";
 import type { CurrencyCode } from "./currency";
@@ -43,6 +44,8 @@ import {
   dbToBudgetLine, budgetLineToDb,
   dbToInsurancePolicy, insurancePolicyToDb,
   dbToScheduleEvent, scheduleEventToDb,
+  dbToTimeOff, timeOffToDb, dbToCrewAssignment, crewAssignmentToDb, certificationsToJson,
+  type DbTimeOff, type DbCrewAssignment,
   type DbTask, type DbMessage, type DbMaterialType, type DbMaterialEntry, type DbDocument,
   type DbDailyReport, type DbChangeOrder, type DbBlueprintPin, type DbBudgetLine,
   type DbInsurancePolicy, type DbScheduleEvent,
@@ -109,6 +112,13 @@ type StoreState = {
   budgetLines: BudgetLine[];
   insurancePolicies: InsurancePolicy[];
   scheduleEvents: ScheduleEvent[];
+  timeOffRequests: TimeOffRequest[];
+  crewAssignments: CrewAssignment[];
+  /** Where the weekly timesheet is emailed, and whether it's switched on (migration 015) */
+  payrollEmail: string;
+  payrollEmailOn: boolean;
+  /** Whether migration 015 is live: null until the first load says */
+  db015: boolean | null;
   customRoles: string[];
   companyAddress: string;
   businessNumber: string;
@@ -209,6 +219,13 @@ type StoreCtx = StoreState & {
   deleteChangeOrder: (id: string) => void;
 
   addScheduleEvent: (e: Omit<ScheduleEvent, "id">) => void;
+  requestTimeOff: (r: { workerId: string; startDate: string; endDate: string; reason: string }) => string;
+  decideTimeOff: (id: string, status: "approved" | "declined") => void;
+  withdrawTimeOff: (id: string) => void;
+  /** One job per person per day: replaces whatever they had that day */
+  assignCrew: (a: Omit<CrewAssignment, "id">) => void;
+  unassignCrew: (id: string) => void;
+  setPayrollEmail: (email: string, on: boolean) => void;
   updateScheduleEvent: (id: string, u: Partial<ScheduleEvent>) => void;
   deleteScheduleEvent: (id: string) => void;
 
@@ -271,6 +288,11 @@ function defaultState(): StoreState {
     budgetLines: [],
     insurancePolicies: [],
     scheduleEvents: [],
+    timeOffRequests: [],
+    crewAssignments: [],
+    payrollEmail: "",
+    payrollEmailOn: false,
+    db015: null,
     customRoles: [],
     companyAddress: "",
     businessNumber: "",
@@ -343,6 +365,9 @@ function loadState(): StoreState {
       dailyReports: parsed.dailyReports ?? [],
       changeOrders: parsed.changeOrders ?? [],
       blueprintPins: parsed.blueprintPins ?? [],
+      scheduleEvents: parsed.scheduleEvents ?? [],
+      timeOffRequests: Array.isArray(parsed.timeOffRequests) ? parsed.timeOffRequests : [],
+      crewAssignments: Array.isArray(parsed.crewAssignments) ? parsed.crewAssignments : [],
       budgetLines: parsed.budgetLines ?? [],
       insurancePolicies: parsed.insurancePolicies ?? [],
       customRoles: parsed.customRoles ?? [],
@@ -366,7 +391,7 @@ function loadState(): StoreState {
 function saveErrorMessage(err: { code?: string; message?: string }): string {
   switch (err.code) {
     case "42501": return err.message || "You don't have permission to make that change";
-    case "42P01": return "That feature isn't set up on this workspace yet";
+    case "42P01": case "PGRST205": case "PGRST204": case "42703": return "That feature isn't set up on this workspace yet";
     case "23505": return "That already exists";
     case "23503": return "Something it links to was deleted";
     case "23502": return "A required field was empty";
@@ -379,7 +404,7 @@ function saveErrorMessage(err: { code?: string; message?: string }): string {
 
 function saveErrorHint(err: { code?: string; message?: string }): string | undefined {
   switch (err.code) {
-    case "42P01": return "A database update is still pending. Ask whoever set up this workspace to finish it.";
+    case "42P01": case "PGRST205": case "PGRST204": case "42703": return "A database update is still pending. Ask whoever set up this workspace to finish it.";
     case "42501": return "Ask an admin if you need access.";
     case "23503": return "Refresh and try again.";
     case "23502": case "23514": case "22001": return "Check the form and try again.";
@@ -531,6 +556,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { data: budgetLinesData },
         { data: insurancePoliciesData },
         { data: scheduleEventsData },
+        { data: timeOffData },
+        { data: crewPlanData, error: crewPlanError },
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("company_id", companyId),
         supabase.from("companies").select("*").eq("id", companyId).single(),
@@ -563,6 +590,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         supabase.from("budget_lines").select("*").eq("company_id", companyId).order("created_at", { ascending: true }),
         supabase.from("insurance_policies").select("*").eq("company_id", companyId).order("expiry_date", { ascending: true }),
         supabase.from("schedule_events").select("*").eq("company_id", companyId).order("date", { ascending: true }),
+        supabase.from("time_off_requests").select("*").eq("company_id", companyId).order("start_date", { ascending: false }).limit(300),
+        // Two weeks back is plenty of history for the plan; it's mostly about the days ahead
+        supabase.from("crew_assignments").select("*").eq("company_id", companyId)
+          .gte("work_date", new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10)).limit(2000),
       ]);
 
       // Group tasks by project_id for efficient lookup
@@ -572,7 +603,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         tasksByProject[t.project_id].push(t as DbTask);
       });
 
-      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number; overtime_enabled?: boolean; overtime_daily_threshold?: number | null; overtime_weekly_threshold?: number | null; overtime_multiplier?: number; custom_roles?: string[]; permissions_pin?: string } | null;
+      const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number; overtime_enabled?: boolean; overtime_daily_threshold?: number | null; overtime_weekly_threshold?: number | null; overtime_multiplier?: number; custom_roles?: string[]; permissions_pin?: string; payroll_email?: string | null; payroll_email_on?: boolean } | null;
 
       const isPro = true; // free during launch period
 
@@ -624,6 +655,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         budgetLines: (budgetLinesData ?? []).map((b) => dbToBudgetLine(b as DbBudgetLine)),
         insurancePolicies: (insurancePoliciesData ?? []).map((p) => dbToInsurancePolicy(p as DbInsurancePolicy)),
         scheduleEvents: (scheduleEventsData ?? []).map(dbToScheduleEvent),
+        timeOffRequests: ((timeOffData ?? []) as DbTimeOff[]).map(dbToTimeOff),
+        crewAssignments: ((crewPlanData ?? []) as DbCrewAssignment[]).map(dbToCrewAssignment),
+        payrollEmail: co?.payroll_email ?? "",
+        payrollEmailOn: co?.payroll_email_on ?? false,
+        // A missing table means the database update hasn't run; anything else is just a bad moment
+        db015: crewPlanError ? !/crew_assignments|PGRST205|42P01/.test(`${crewPlanError.code} ${crewPlanError.message}`) : true,
         customRoles: co?.custom_roles ?? s.customRoles,
         permissionsPin: co?.permissions_pin ?? s.permissionsPin,
         theme: (co as { theme?: string })?.theme as "dark" | "light" ?? s.theme,
@@ -813,6 +850,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           else if (p.eventType === "UPDATE") setState((s) => ({ ...s, documents: s.documents.map(x => x.id === (p.new as {id:string}).id ? dbToDocument(p.new as DbDocument) : x) }));
           else if (p.eventType === "DELETE") setState((s) => ({ ...s, documents: s.documents.filter(x => x.id !== (p.old as {id:string}).id) }));
         })
+        .on("postgres_changes", { event: "*", schema: "public", table: "time_off_requests", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "DELETE") setState((s) => ({ ...s, timeOffRequests: s.timeOffRequests.filter((x) => x.id !== (p.old as { id: string }).id) }));
+          else { const r = dbToTimeOff(p.new as DbTimeOff); setState((s) => ({ ...s, timeOffRequests: [r, ...s.timeOffRequests.filter((x) => x.id !== r.id)] })); }
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "crew_assignments", filter: `company_id=eq.${companyId}` }, (p) => {
+          if (p.eventType === "DELETE") setState((s) => ({ ...s, crewAssignments: s.crewAssignments.filter((x) => x.id !== (p.old as { id: string }).id) }));
+          else { const a = dbToCrewAssignment(p.new as DbCrewAssignment); setState((s) => ({ ...s, crewAssignments: [...s.crewAssignments.filter((x) => x.id !== a.id && !(x.workerId === a.workerId && x.workDate === a.workDate)), a] })); }
+        })
         .on("postgres_changes", { event: "*", schema: "public", table: "schedule_events", filter: `company_id=eq.${companyId}` }, (p) => {
           if (p.eventType === "INSERT") setState((s) => ({ ...s, scheduleEvents: [...s.scheduleEvents.filter(x => x.id !== (p.new as {id:string}).id), dbToScheduleEvent(p.new as DbScheduleEvent)] }));
           else if (p.eventType === "UPDATE") setState((s) => ({ ...s, scheduleEvents: s.scheduleEvents.map(x => x.id === (p.new as {id:string}).id ? dbToScheduleEvent(p.new as DbScheduleEvent) : x) }));
@@ -963,6 +1008,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [up]);
 
+  const saveCertifications = useCallback((id: string, certs: WorkerCertification[] | undefined) => {
+    bg(() => getClient().from("profiles").update({ certifications: certificationsToJson(certs) }).eq("id", id), "saveCertifications");
+  }, []);
+
   const updateWorker = useCallback((id: string, u: Partial<Worker>) => {
     up((s) => ({ ...s, workers: s.workers.map((w) => w.id === id ? { ...w, ...u } : w) }));
     bg(() => {
@@ -970,7 +1019,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!merged) return Promise.resolve({ error: null });
       return getClient().from("profiles").update(workerToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
     }, "updateWorker");
-  }, [up]);
+    if (u.certifications !== undefined) saveCertifications(id, u.certifications);
+  }, [up, saveCertifications]);
 
   const deleteWorker = useCallback((id: string) => {
     up((s) => ({ ...s, workers: s.workers.filter((w) => w.id !== id) }));
@@ -1517,6 +1567,46 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // ── Schedule events ───────────────────────────────────────────────────────────
 
+  const requestTimeOff = useCallback((r: { workerId: string; startDate: string; endDate: string; reason: string }) => {
+    const req: TimeOffRequest = { ...r, id: genId(), status: "pending", createdAt: new Date() };
+    up((s) => ({ ...s, timeOffRequests: [req, ...s.timeOffRequests] }));
+    bg(() => getClient().from("time_off_requests").insert(timeOffToDb(req, companyIdRef.current!)), "requestTimeOff");
+    return req.id;
+  }, [up]);
+
+  const decideTimeOff = useCallback((id: string, status: "approved" | "declined") => {
+    const decidedBy = stateRef.current.authUserId ?? undefined;
+    const decidedAt = new Date();
+    up((s) => ({ ...s, timeOffRequests: s.timeOffRequests.map((r) => r.id === id ? { ...r, status, decidedBy, decidedAt } : r) }));
+    bg(() => getClient().from("time_off_requests").update({ status, decided_by: decidedBy ?? null, decided_at: decidedAt.toISOString() }).eq("id", id), "decideTimeOff");
+  }, [up]);
+
+  const withdrawTimeOff = useCallback((id: string) => {
+    up((s) => ({ ...s, timeOffRequests: s.timeOffRequests.filter((r) => r.id !== id) }));
+    bg(() => getClient().from("time_off_requests").delete().eq("id", id), "withdrawTimeOff");
+  }, [up]);
+
+  const assignCrew = useCallback((a: Omit<CrewAssignment, "id">) => {
+    const existing = stateRef.current.crewAssignments.find((x) => x.workerId === a.workerId && x.workDate === a.workDate);
+    const row: CrewAssignment = { ...a, id: existing?.id ?? genId() };
+    up((s) => ({ ...s, crewAssignments: [...s.crewAssignments.filter((x) => !(x.workerId === a.workerId && x.workDate === a.workDate)), row] }));
+    // Plain insert or update (not upsert), so the offline queue can replay it
+    const dbRow = crewAssignmentToDb(row, companyIdRef.current!, stateRef.current.authUserId);
+    bg(() => existing
+      ? getClient().from("crew_assignments").update(dbRow).eq("id", row.id)
+      : getClient().from("crew_assignments").insert(dbRow), "assignCrew");
+  }, [up]);
+
+  const unassignCrew = useCallback((id: string) => {
+    up((s) => ({ ...s, crewAssignments: s.crewAssignments.filter((x) => x.id !== id) }));
+    bg(() => getClient().from("crew_assignments").delete().eq("id", id), "unassignCrew");
+  }, [up]);
+
+  const setPayrollEmail = useCallback((email: string, on: boolean) => {
+    up((s) => ({ ...s, payrollEmail: email, payrollEmailOn: on }));
+    bg(() => getClient().from("companies").update({ payroll_email: email || null, payroll_email_on: on }).eq("id", companyIdRef.current!), "setPayrollEmail");
+  }, [up]);
+
   const addScheduleEvent = useCallback((e: Omit<ScheduleEvent, "id">) => {
     const event = { ...e, id: genId() };
     up((s) => ({ ...s, scheduleEvents: [...s.scheduleEvents, event] }));
@@ -1695,6 +1785,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         addDailyReport, updateDailyReport, deleteDailyReport,
         addChangeOrder, updateChangeOrder, deleteChangeOrder,
         addScheduleEvent, updateScheduleEvent, deleteScheduleEvent,
+        requestTimeOff, decideTimeOff, withdrawTimeOff, assignCrew, unassignCrew, setPayrollEmail,
         addCustomRole, deleteCustomRole,
         setCompanyAddress, setBusinessNumber, setDefaultTaxRate, setOvertimeSettings, setPermissionsPin,
         setCompanyName, setCompanyLogo, setIsPro,

@@ -111,6 +111,10 @@ ${opts.drawing ? `<drawing r:id="rId1"/>` : ""}
 }
 
 export async function exportTimesheetXlsx(sheet: Timesheet, opts: { companyName: string; logo?: string }) {
+  await saveFile(await buildTimesheetXlsx(sheet, opts), timesheetFileName(opts.companyName || "Your company", sheet.start, sheet.end, "xlsx"));
+}
+
+export async function buildTimesheetXlsx(sheet: Timesheet, opts: { companyName: string; logo?: string }): Promise<Blob> {
   const { zipSync, strToU8 } = await import("fflate");
   const logo = await loadLogo(opts.logo);
   const company = opts.companyName || "Your company";
@@ -259,6 +263,6 @@ ${logo ? `<Override PartName="/xl/drawings/drawing1.xml" ContentType="applicatio
   // Hours stay unrounded; the 0.00 format rounds what shows, so every tab sums to the same total
   const zipped = zipSync(files, { level: 6 });
   const blob = new Blob([zipped as BlobPart], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-  await saveFile(blob, timesheetFileName(company, sheet.start, sheet.end, "xlsx"));
+  return blob;
 }
 

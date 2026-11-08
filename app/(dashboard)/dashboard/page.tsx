@@ -22,6 +22,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { SetupGuide } from "@/components/setup-guide";
 import { SiteAlerts } from "@/components/site-alerts";
+import { TeamNotices } from "@/components/team-notices";
 import { JobCosts } from "@/components/job-costs";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween } from "@/lib/hours";
@@ -577,6 +578,9 @@ export default function DashboardPage() {
           )}
         </div>
 
+        {/* Where they work next, from the crew plan */}
+        <div className="px-5 pt-5 empty:hidden"><TeamNotices /></div>
+
         {/* ── Stats row ────────────────────────────────────────────────────────── */}
         <div className="flex gap-2.5 pt-6 px-5 overflow-x-auto no-scrollbar">
           {[
@@ -772,6 +776,7 @@ export default function DashboardPage() {
 
       <div className="px-5 pt-4 empty:hidden"><SetupGuide /></div>
       <div className="px-5 pt-4 empty:hidden"><SiteAlerts /></div>
+      <div className="px-5 pt-4 empty:hidden"><TeamNotices /></div>
 
       {/* ── Urgent alerts panel ──────────────────────────────────────────── */}
       {urgentItems.length > 0 && (
@@ -1175,6 +1180,7 @@ export default function DashboardPage() {
 
       <SetupGuide />
       <SiteAlerts />
+      <TeamNotices />
 
       {/* Quick Actions */}
       <div className="flex items-center gap-2 flex-wrap">

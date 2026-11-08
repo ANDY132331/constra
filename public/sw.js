@@ -1,6 +1,6 @@
 const CACHE = "constra-v9";
 
-const PRECACHE = ["/", "/dashboard", "/time-tracking", "/timesheets", "/schedule", "/crew"];
+const PRECACHE = ["/", "/dashboard", "/time-tracking", "/schedule", "/crew"];
 
 // A signed-out request for an app page redirects to /login. Storing that as the app shell
 // would show a login screen to someone who is signed in but offline, so redirects are skipped.
@@ -90,7 +90,7 @@ self.addEventListener("fetch", (e) => {
 
 // Fetches every screen and its code ahead of time, so a page first opened on a job site with no
 // signal still loads. Sent by the app once someone is signed in.
-const APP_PAGES = ["/invoices/offline", "/estimates/offline", "/dashboard","/time-tracking", "/schedule", "/safety", "/messages", "/photos", "/projects", "/tasks", "/punch-list", "/rfis", "/equipment", "/materials", "/documents", "/blueprints", "/daily-reports", "/crew", "/reports", "/estimates", "/invoices", "/change-orders", "/budget", "/insurance", "/settings", "/support"];
+const APP_PAGES = ["/invoices/offline", "/estimates/offline", "/dashboard","/time-tracking", "/timesheets", "/crew-plan", "/time-off", "/schedule", "/safety", "/messages", "/photos", "/projects", "/tasks", "/punch-list", "/rfis", "/equipment", "/materials", "/documents", "/blueprints", "/daily-reports", "/crew", "/reports", "/estimates", "/invoices", "/change-orders", "/budget", "/insurance", "/settings", "/support"];
 
 async function warmCache() {
   const cache = await caches.open(CACHE);

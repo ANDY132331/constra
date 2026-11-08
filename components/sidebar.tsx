@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, FileSpreadsheet, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot,
+  Package, FolderOpen, MessagesSquare, FileText, FileSpreadsheet, CalendarRange, CalendarOff, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
@@ -24,10 +24,17 @@ type NavDef = {
   badge?: (pendingCount: number) => string | undefined;
 };
 
+// Everything about people's hours and days in one group. Everyone sees it: each page shows a
+// worker their own side and a foreman or admin the whole crew.
+const TIME_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { href: "/time-tracking", label: "Time Tracking", icon: Clock },
+  { href: "/timesheets",    label: "Timesheets",    icon: FileSpreadsheet },
+  { href: "/crew-plan",     label: "Crew Plan",     icon: CalendarRange },
+  { href: "/time-off",      label: "Time Off",      icon: CalendarOff },
+];
+
 const NAV_ITEMS: NavDef[] = [
   { href: "/dashboard",     labelKey: "dashboard",    icon: LayoutDashboard },
-  { href: "/time-tracking", labelKey: "timeTracking", icon: Clock },
-  { href: "/timesheets",    labelKey: "timeTracking", label: "Timesheets", icon: FileSpreadsheet },
   { href: "/schedule",      labelKey: "schedule",     icon: CalendarDays },
   { href: "/safety",        labelKey: "safety",       icon: ShieldAlert },
   { href: "/messages",      labelKey: "messages",     icon: MessagesSquare },
@@ -201,6 +208,13 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
             onClose={onClose}
           />
         ))}
+
+        <div className="mt-4 pt-3 border-t border-white/[0.06]">
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">Time &amp; Crew</p>
+          {TIME_ITEMS.map((item) => (
+            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} active={isActive(item.href)} onClose={onClose} />
+          ))}
+        </div>
 
         {visibleFinance.length > 0 && (
           <div className="mt-4 pt-3 border-t border-white/[0.06]">

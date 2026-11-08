@@ -16,6 +16,8 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/time-tracking": "Time Tracking",
   "/timesheets": "Timesheets",
+  "/crew-plan": "Crew Plan",
+  "/time-off": "Time Off",
   "/projects": "Projects",
   "/tasks": "Task List",
   "/punch-list": "Punch List",
@@ -43,6 +45,8 @@ const PAGE_TITLES: Record<string, string> = {
 const SHORT_TITLES: Record<string, string> = {
   "/time-tracking": "Time",
   "/timesheets": "Timesheets",
+  "/crew-plan": "Crew Plan",
+  "/time-off": "Time Off",
   "/tasks": "Tasks",
   "/punch-list": "Punch List",
   "/photos": "Photos",

@@ -6,6 +6,7 @@ import type {
   GpsLocation, VerificationFlag, Message, MaterialType, MaterialEntry, ProjectDocument,
   DailyReport, ChangeOrder, BlueprintPin, BudgetLine, BudgetLineCategory,
   InsurancePolicy, InsuranceCoverageType, ScheduleEvent, ScheduleEventType,
+  TimeOffRequest, CrewAssignment, WorkerCertification,
 } from "@/lib/mock-data";
 
 // ── Geo helper ─────────────────────────────────────────────────────────────────
@@ -37,6 +38,8 @@ export type DbProfile = {
   hourly_rate: number;
   device_history: Array<{ ua: string; firstSeen: string; lastSeen: string }> | null;
   granted_pages: string[] | null;
+  /** Migration 015. Absent before it runs, so it's never written by workerToDb */
+  certifications?: unknown;
   created_at?: string;
 };
 
@@ -61,6 +64,7 @@ export function dbToWorker(row: DbProfile): Worker {
       lastSeen: new Date(d.lastSeen),
     })),
     grantedPages: row.granted_pages ?? undefined,
+    certifications: certificationsFromJson(row.certifications),
   };
 }
 
@@ -1161,4 +1165,121 @@ export function scheduleEventToDb(e: ScheduleEvent, companyId: string): Omit<DbS
     description: e.description,
     color: e.color,
   };
+}
+
+// ── Time off requests (migration 015) ─────────────────────────────────────────
+
+export type DbTimeOff = {
+  id: string;
+  company_id: string;
+  worker_id: string;
+  start_date: string;
+  end_date: string;
+  reason: string;
+  status: string;
+  decided_by: string | null;
+  decided_at: string | null;
+  created_at: string;
+};
+
+export function dbToTimeOff(row: DbTimeOff): TimeOffRequest {
+  return {
+    id: row.id,
+    workerId: row.worker_id,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    reason: row.reason ?? "",
+    status: row.status === "approved" || row.status === "declined" ? row.status : "pending",
+    decidedBy: row.decided_by ?? undefined,
+    decidedAt: row.decided_at ? new Date(row.decided_at) : undefined,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+export function timeOffToDb(r: TimeOffRequest, companyId: string): Omit<DbTimeOff, "created_at"> {
+  return {
+    id: r.id,
+    company_id: companyId,
+    worker_id: r.workerId,
+    start_date: r.startDate,
+    end_date: r.endDate,
+    reason: r.reason,
+    status: r.status,
+    decided_by: r.decidedBy ?? null,
+    decided_at: r.decidedAt ? r.decidedAt.toISOString() : null,
+  };
+}
+
+// ── Crew plan (migration 015) ─────────────────────────────────────────────────
+
+export type DbCrewAssignment = {
+  id: string;
+  company_id: string;
+  project_id: string;
+  worker_id: string;
+  work_date: string;
+  start_time: string;
+  note: string;
+  created_by: string | null;
+  created_at?: string;
+};
+
+export function dbToCrewAssignment(row: DbCrewAssignment): CrewAssignment {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    workerId: row.worker_id,
+    workDate: row.work_date,
+    startTime: row.start_time ?? "",
+    note: row.note ?? "",
+  };
+}
+
+export function crewAssignmentToDb(a: CrewAssignment, companyId: string, createdBy: string | null): Omit<DbCrewAssignment, "created_at"> {
+  return {
+    id: a.id,
+    company_id: companyId,
+    project_id: a.projectId,
+    worker_id: a.workerId,
+    work_date: a.workDate,
+    start_time: a.startTime,
+    note: a.note,
+    created_by: createdBy,
+  };
+}
+
+// Plain calendar days, read and written in local time so a date never slides a day east or west of UTC
+const dayOf = (d: Date | string | undefined) => {
+  if (!d) return undefined;
+  const x = new Date(d);
+  if (Number.isNaN(x.getTime())) return undefined;
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+};
+const dayFrom = (s: string | undefined) => {
+  if (!s) return undefined;
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(`${s}T00:00:00`) : new Date(s);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+};
+
+/** Certifications as stored on profiles.certifications (migration 015) */
+export function certificationsFromJson(v: unknown): WorkerCertification[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  return v.filter((c) => c && typeof c === "object" && typeof (c as { name?: unknown }).name === "string").map((c) => {
+    const x = c as { id?: string; name: string; issuedDate?: string; expiryDate?: string };
+    return {
+      id: x.id ?? x.name,
+      name: x.name,
+      issuedDate: dayFrom(x.issuedDate),
+      expiryDate: dayFrom(x.expiryDate),
+    };
+  });
+}
+
+export function certificationsToJson(certs: WorkerCertification[] | undefined) {
+  return (certs ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    issuedDate: dayOf(c.issuedDate),
+    expiryDate: dayOf(c.expiryDate),
+  }));
 }

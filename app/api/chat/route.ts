@@ -79,6 +79,11 @@ Constra is a mobile-first PWA for construction workforce management, used by con
 **Reports (Admin only)**
 - Payroll summaries, time reports, project cost reports
 - Export as PDF or CSV
+- Menu group "Time & Crew": Time Tracking, Timesheets, Crew Plan, Time Off
+- Crew Plan: a foreman or admin picks a day, adds people to each job, sets a start time, then taps Send to crew; each person gets a notification with the job, start time and address. One job per person per day. Workers see My plan for the week, and Tomorrow on their home screen
+- Time Off: anyone asks for days off (optional reason); foremen and admins get a notification and Approve or Decline; the worker is notified. Approved days show as Off in the crew plan
+- Email to payroll (admins, on Timesheets): save the payroll email, tap Email it now to send the PDF and Excel; optional Monday reminder to send last week's
+- Alerts: the owner gets a phone notification when someone leaves a job site while clocked in (while the app is open on their phone) and when they come back; anyone still clocked in after 10 hours gets a reminder; certification holders and the office hear 30, 14, 7 and 1 days before a ticket expires
 - Timesheets (menu → Timesheets, or the link under the week chart on Time): pick dates, a person and a job, see it on screen, then Download PDF or Download Excel. Both carry the company logo from Settings, one page per worker with signature lines. Workers see only their own
 - Payroll exports for Gusto and QuickBooks: Reports → Export Payroll. QuickBooks Online gets a summary of hours to enter by hand; QuickBooks Desktop gets an IIF file
 - Invoices → QuickBooks makes a CSV of sent invoices for QuickBooks Online (Settings → Import data → Invoices there, up to 100 at a time)

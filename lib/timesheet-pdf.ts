@@ -20,6 +20,10 @@ const ALL_DAYS_UP_TO = 16;
  * page with every day of the period, totals, and lines to sign.
  */
 export async function exportTimesheetPdf(sheet: Timesheet, opts: { companyName: string; logo?: string }) {
+  await saveFile(await buildTimesheetPdf(sheet, opts), timesheetFileName(opts.companyName || "Your company", sheet.start, sheet.end, "pdf"));
+}
+
+export async function buildTimesheetPdf(sheet: Timesheet, opts: { companyName: string; logo?: string }): Promise<Blob> {
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
   const logo = await loadLogo(opts.logo);
@@ -216,5 +220,5 @@ export async function exportTimesheetPdf(sheet: Timesheet, opts: { companyName: 
     doc.text(`Page ${i} of ${pages}`, W - M, H - 9, { align: "right" });
   }
 
-  await saveFile(doc.output("blob"), timesheetFileName(company, sheet.start, sheet.end, "pdf"));
+  return doc.output("blob");
 }

@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   const sections = [
     {
       title: "1. Information We Collect",
-      body: `We collect information you provide directly when creating an account (name, email, phone number, company name), information generated through your use of the Service (time entries, project data, photos, voice messages, GPS coordinates during clock-in, and while clocked in with the app open), and technical information (device type, IP address, browser type) for security and diagnostics.`,
+      body: `We collect information you provide directly when creating an account (name, email, phone number, company name), information generated through your use of the Service (time entries, project data, photos, voice messages, GPS coordinates during clock-in, and while clocked in with the app open; time-off requests and their optional reason; work schedules; and certifications with their expiry dates), and technical information (device type, IP address, browser type) for security and diagnostics.`,
     },
     {
       title: "2. GPS and Photo Data",

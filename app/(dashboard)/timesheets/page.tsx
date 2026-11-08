@@ -7,6 +7,7 @@ import { FileSpreadsheet, FileText, ImagePlus, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { PayrollEmail } from "@/components/payroll-email";
 import { weekStartOf } from "@/lib/overtime";
 import {
   buildTimesheet, fmtDate, fmtDayShort, fmtHours, fmtTime, periodLabel, type WorkerTimesheet,
@@ -46,7 +47,10 @@ export default function TimesheetsPage() {
   } = useStore();
   const canSeeCrew = isForemanOrAbove(currentUser.role);
 
-  const [preset, setPreset] = useState<Preset>("this-week");
+  // The Monday reminder opens this page with ?send=last-week, ready to send in one tap
+  const [preset, setPreset] = useState<Preset>(() => {
+    try { return new URLSearchParams(window.location.search).get("send") === "last-week" ? "last-week" : "this-week"; } catch { return "this-week"; }
+  });
   const [today] = useState(() => new Date());
   const [custom, setCustom] = useState(() => { const [a, b] = presetRange("this-week", new Date()); return { from: iso(a), to: iso(b) }; });
   const [person, setPerson] = useState("all");
@@ -167,6 +171,10 @@ export default function TimesheetsPage() {
           </Link>
         )}
       </section>
+
+      {(currentUser.role === "Admin" || currentUser.role === "Project Manager") && (
+        <PayrollEmail sheet={sheet} period={period} empty={empty} />
+      )}
 
       {/* The sheet as it will print */}
       <article aria-label={`Timesheet preview, ${period}`} className="ts-paper rounded-2xl overflow-hidden">

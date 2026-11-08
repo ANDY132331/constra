@@ -321,6 +321,29 @@ export type ScheduleEvent = {
   color: string;
 };
 
+// ── Time off and the crew plan (migration 015) ─────────────────────────────────
+
+export type TimeOffRequest = {
+  id: string;
+  workerId: string;
+  startDate: string; // yyyy-MM-dd, the worker's own calendar day
+  endDate: string;
+  reason: string;
+  status: "pending" | "approved" | "declined";
+  decidedBy?: string;
+  decidedAt?: Date;
+  createdAt: Date;
+};
+
+export type CrewAssignment = {
+  id: string;
+  projectId: string;
+  workerId: string;
+  workDate: string; // yyyy-MM-dd
+  startTime: string; // as typed, e.g. "7:00 AM"
+  note: string;
+};
+
 // ── Insurance / COI tracking ──────────────────────────────────────────────────
 
 export type InsuranceCoverageType =
