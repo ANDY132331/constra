@@ -196,7 +196,11 @@ await step("A worker can't clock other people in", async () => {
 await step("A worker's timesheet shows only their own hours", async () => {
   await open("/timesheets");
   await p.locator(".ts-paper").waitFor({ timeout: 10000 });
+  // Two weeks, so it has finished shifts in it whatever day of the week the test runs
+  await p.getByRole("radio", { name: "Last 2 weeks" }).click();
+  await p.waitForTimeout(400);
   const sheets = await p.locator(".ts-paper section[id^=ts-]").count();
+  if (!(await p.locator(".ts-paper #ts-w-dev").count())) throw new Error("worker's own timesheet is missing");
   const others = await p.locator(".ts-paper section[id^=ts-]:not(#ts-w-dev)").count();
   if (others > 0) throw new Error(`worker sees ${others} other people's timesheets`);
   if (await p.getByText("Everyone").count()) throw new Error("worker can pick other crew");

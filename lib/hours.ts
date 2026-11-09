@@ -35,3 +35,23 @@ export function isImplausibleShift(start: When, end?: When): boolean {
   if (end === undefined) return false; // still running; judge it when it closes
   return hoursBetween(start, end) > LONG_SHIFT_HOURS;
 }
+
+/**
+ * When someone's current shift started. The open clock entry is the record payroll reads;
+ * worker.clockInTime is a copy kept on their profile that can lag behind it (a clock-in queued
+ * offline, a foreman's correction), so screens that showed it disagreed with the Time page.
+ */
+export function shiftStart(
+  workerId: string,
+  entries: { workerId: string; clockIn: When; clockOut?: When | null }[],
+  fallback?: When,
+): Date | undefined {
+  let start: number | undefined;
+  for (const e of entries) {
+    if (e.workerId !== workerId || e.clockOut) continue;
+    const t = ms(e.clockIn);
+    if (Number.isFinite(t) && (start === undefined || t > start)) start = t;
+  }
+  if (start !== undefined) return new Date(start);
+  return fallback !== undefined ? new Date(fallback) : undefined;
+}

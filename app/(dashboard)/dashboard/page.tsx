@@ -25,7 +25,7 @@ import { SiteAlerts } from "@/components/site-alerts";
 import { TeamNotices } from "@/components/team-notices";
 import { JobCosts } from "@/components/job-costs";
 import { moneyTotals, lineAmount } from "@/lib/money";
-import { hoursBetween } from "@/lib/hours";
+import { hoursBetween, shiftStart } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
 import { projectProgress } from "@/lib/project-progress";
 import { isPastDue as invoiceIsPastDue } from "@/lib/invoice-status";
@@ -350,13 +350,16 @@ export default function DashboardPage() {
 
   const todayActiveHours = useMemo(() => {
     const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
-    return clockedInWorkers.reduce((sum, w) => {
-      if (!w.clockInTime) return sum;
-      const cit = new Date(w.clockInTime);
+    // The open clock entry is the record payroll reads; worker.clockInTime is a copy on the
+    // profile that can lag it, which made this disagree with the Time page by an hour
+    const on = new Set(clockedInWorkers.map((w) => w.id));
+    return clockEntries.reduce((sum, e) => {
+      if (e.clockOut || !on.has(e.workerId)) return sum;
+      const cit = new Date(e.clockIn);
       const effectiveStart = cit < todayStart ? todayStart : cit;
       return sum + hoursBetween(effectiveStart, now);
     }, 0);
-  }, [clockedInWorkers, now]);
+  }, [clockedInWorkers, clockEntries, now]);
 
   // Financial stats
   const totalBilled = useMemo(() => invoices.reduce((s, inv) => s + invoiceTotal(inv), 0), [invoices]);
@@ -407,9 +410,8 @@ export default function DashboardPage() {
     const myTodayHours = myEntries
       .filter((e) => e.clockOut && new Date(e.clockIn) >= todayStart)
       .reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
-    const liveElapsed = currentUser.clockedIn && currentUser.clockInTime
-      ? hoursBetween(currentUser.clockInTime, now)
-      : 0;
+    const myStart = currentUser.clockedIn ? shiftStart(currentUser.id, clockEntries, currentUser.clockInTime) : undefined;
+    const liveElapsed = myStart ? hoursBetween(myStart, now) : 0;
 
     // Days worked this week (streak)
     const workedDays = new Set(
@@ -544,9 +546,9 @@ export default function DashboardPage() {
                   <p className={`text-[22px] font-black tabular-nums ${dk ? "text-white" : "text-gray-900"}`}>
                     {liveElapsed.toFixed(1)}<span className={`text-[14px] font-bold ml-1 ${dk ? "text-white/50" : "text-gray-500"}`}>hrs</span>
                   </p>
-                  {currentUser.clockInTime && (
+                  {myStart && (
                     <p className={`text-[11px] ${dk ? "text-white/35" : "text-gray-500"}`}>
-                      since {new Date(currentUser.clockInTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                      since {myStart.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
                     </p>
                   )}
                 </div>

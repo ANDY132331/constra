@@ -1013,13 +1013,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateWorker = useCallback((id: string, u: Partial<Worker>) => {
+    // Certifications save on their own, and only when they really changed, including down to
+    // none (the Crew form sends `undefined` when the last one is removed)
+    const before = stateRef.current.workers.find((w) => w.id === id);
+    const certsChanged = "certifications" in u
+      && JSON.stringify(certificationsToJson(before?.certifications)) !== JSON.stringify(certificationsToJson(u.certifications));
     up((s) => ({ ...s, workers: s.workers.map((w) => w.id === id ? { ...w, ...u } : w) }));
     bg(() => {
       const merged = stateRef.current.workers.find((w) => w.id === id);
       if (!merged) return Promise.resolve({ error: null });
       return getClient().from("profiles").update(workerToDb({ ...merged, ...u }, companyIdRef.current!)).eq("id", id);
     }, "updateWorker");
-    if (u.certifications !== undefined) saveCertifications(id, u.certifications);
+    if (certsChanged) saveCertifications(id, u.certifications);
   }, [up, saveCertifications]);
 
   const deleteWorker = useCallback((id: string) => {

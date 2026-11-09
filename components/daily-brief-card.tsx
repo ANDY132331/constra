@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Sparkles, RefreshCw, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { moneyTotals, lineAmount } from "@/lib/money";
-import { hoursBetween } from "@/lib/hours";
+import { hoursBetween, shiftStart } from "@/lib/hours";
 import { generateBrief, type BriefPayload } from "@/lib/daily-brief";
 import { isOutstanding, isOverdue } from "@/lib/invoice-status";
 import { endOfDay } from "@/lib/utils";
@@ -76,7 +76,7 @@ function runShared(payload: BriefPayload) {
 
 export function DailyBriefCard() {
   const spendOf = useProjectSpend();
-  const { workers, projects, punchItems, safetyIncidents, companyName, invoices } = useStore();
+  const { workers, projects, punchItems, safetyIncidents, companyName, invoices, clockEntries } = useStore();
   const [{ text, loading, error, at: generatedAt }, setBrief] = useState<BriefState>(shared);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -92,9 +92,8 @@ export function DailyBriefCard() {
 
     const clockedInWorkers = clockedIn.map((w) => {
       const project = projects.find((p) => p.id === w.projectIds[0]);
-      const hoursIn = w.clockInTime
-        ? hoursBetween(w.clockInTime, now)
-        : 0;
+      const started = shiftStart(w.id, clockEntries, w.clockInTime);
+      const hoursIn = started ? hoursBetween(started, now) : 0;
       return { name: w.name, role: w.customRole, project: project?.name ?? "Unknown", hoursIn };
     });
 

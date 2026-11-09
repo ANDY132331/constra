@@ -44,6 +44,7 @@ export default function CrewPlanPage() {
   const off = crew.filter((w) => offOn(w.id, date));
   const unplaced = crew.filter((w) => !placed.has(w.id) && !offOn(w.id, date));
   const prevPlan = crewAssignments.filter((a) => a.workDate === addDaysIso(date, -1));
+  const clashes = [...placed].filter((id) => offOn(id, date)).length;
 
   if (db015 === false) {
     return (
@@ -140,7 +141,10 @@ export default function CrewPlanPage() {
       <section aria-label="Plan summary" className="bg-[#111111] border border-white/[0.07] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-[15px] font-bold text-white">{dayLong(date)}</p>
-          <p className="text-[12px] text-white/60 tabular-nums">{placed.size} of {crew.length - off.length} placed{off.length ? ` · ${off.length} off` : ""}</p>
+          <p className="text-[12px] text-white/60 tabular-nums">
+            {[...placed].filter((id) => !offOn(id, date)).length} of {crew.length - off.length} placed{off.length ? ` · ${off.length} off` : ""}
+            {clashes > 0 && <span className="text-red-400 font-semibold"> · {clashes} on a job but off</span>}
+          </p>
         </div>
         <div className="flex gap-2">
           {prevPlan.length > 0 && placed.size < crew.length - off.length && (
@@ -185,10 +189,12 @@ export default function CrewPlanPage() {
                 <div className="flex flex-wrap gap-2 mt-3">
                   {here.map((a) => {
                     const w = getWorkerById(a.workerId);
+                    // Time off approved after they were put here: keep them visible, but flagged
+                    const away = offOn(a.workerId, date);
                     return (
-                      <span key={a.id} className="inline-flex items-center gap-2 pl-1 pr-1 py-1 rounded-full bg-white/[0.06]">
+                      <span key={a.id} className={`inline-flex items-center gap-2 pl-1 pr-1 py-1 rounded-full ${away ? "bg-red-500/15 ring-1 ring-red-500/40" : "bg-white/[0.06]"}`}>
                         <Avatar w={w} size={28} />
-                        <span className="text-[13px] text-white">{w?.name.split(" ")[0] ?? "Someone"}</span>
+                        <span className="text-[13px] text-white">{w?.name.split(" ")[0] ?? "Someone"}{away && <span className="text-red-400 font-semibold"> · off</span>}</span>
                         <button type="button" onClick={() => unassignCrew(a.id)} aria-label={`Take ${w?.name ?? "them"} off ${p.name}`}
                           className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/[0.08]">
                           <X size={14} />

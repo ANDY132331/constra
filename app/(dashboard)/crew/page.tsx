@@ -14,7 +14,7 @@ import { useT } from "@/lib/i18n";
 import { getCurrencySymbol } from "@/lib/currency";
 import { useSearchPrefill } from "@/lib/use-search-prefill";
 import type { ClockEntry, Worker, HoursAdjustment, WorkerCertification } from "@/lib/mock-data";
-import { hoursBetween } from "@/lib/hours";
+import { hoursBetween, shiftStart } from "@/lib/hours";
 import { shareInvite } from "@/lib/invite";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { EmptyState } from "@/components/empty-state";
@@ -231,6 +231,8 @@ function WorkerRow({ worker, now, weekHours, selected, onSelect }: {
   worker: Worker; now: number; weekHours: number; selected: boolean; onSelect: () => void;
 }) {
   const alert = certAlert(worker, now);
+  const { clockEntries } = useStore();
+  const started = worker.clockedIn ? shiftStart(worker.id, clockEntries, worker.clockInTime) : undefined;
   return (
     <button
       type="button"
@@ -251,8 +253,8 @@ function WorkerRow({ worker, now, weekHours, selected, onSelect }: {
         </span>
       </span>
       <span className="flex-shrink-0 text-right">
-        {worker.clockedIn && worker.clockInTime ? (
-          <span className="block text-[14px] font-bold text-green-400 tabular-nums">{formatDuration(now - new Date(worker.clockInTime).getTime())}</span>
+        {started ? (
+          <span className="block text-[14px] font-bold text-green-400 tabular-nums">{formatDuration(now - started.getTime())}</span>
         ) : (
           <span className="block text-[14px] font-semibold text-white/70 tabular-nums">{weekHours.toFixed(1)}h</span>
         )}
@@ -269,6 +271,8 @@ function WorkerDetail({ worker, now, weekHours, totalHours, rate, canEdit, canRe
   onEdit: () => void; onHours: () => void; onRemove: () => void;
 }) {
   const roleCfg = ROLE_CONFIG[worker.role] ?? ROLE_CONFIG.Worker;
+  const { clockEntries } = useStore();
+  const started = worker.clockedIn ? shiftStart(worker.id, clockEntries, worker.clockInTime) : undefined;
   const phone = worker.phone?.replace(/[^\d+]/g, "");
   const contact = [
     phone && { href: `tel:${phone}`, label: "Call", icon: Phone },
@@ -276,7 +280,7 @@ function WorkerDetail({ worker, now, weekHours, totalHours, rate, canEdit, canRe
     worker.email && { href: `mailto:${worker.email}`, label: "Email", icon: Mail },
   ].filter(Boolean) as { href: string; label: string; icon: typeof Phone }[];
   const stats = [
-    worker.clockedIn && worker.clockInTime ? { label: "This shift", value: formatDuration(now - new Date(worker.clockInTime).getTime()) } : null,
+    started ? { label: "This shift", value: formatDuration(now - started.getTime()) } : null,
     { label: "This week", value: `${weekHours.toFixed(1)}h` },
     { label: "All time", value: `${totalHours.toFixed(1)}h` },
     rate ? { label: "Rate", value: rate } : null,
