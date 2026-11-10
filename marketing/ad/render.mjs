@@ -22,6 +22,7 @@ await ctx.route("https://ad.local/**", async (r) => {
   const u = new URL(r.request().url());
   if (u.pathname === "/") return r.fulfill({ contentType: "text/html", body: fs.readFileSync("ad.html") });
   if (u.pathname.startsWith("/img/")) return r.fulfill({ contentType: "image/png", body: fs.readFileSync(IMG[u.pathname.slice(5)]) });
+  if (u.pathname === "/soundtrack.js") return r.fulfill({ contentType: "text/javascript", body: fs.readFileSync("soundtrack.js") });
   if (u.pathname === "/mux.js") return r.fulfill({ contentType: "text/javascript", body: fs.readFileSync("../../.tmp-ad/node_modules/mp4-muxer/build/mp4-muxer.js") });
   return r.fulfill({ status: 404, body: "" });
 });
@@ -47,9 +48,10 @@ if (mode === "stills") {
   const enc = await ctx.newPage();
   await enc.goto("https://ad.local/", { waitUntil: "domcontentloaded" });
   await enc.addScriptTag({ url: "https://ad.local/mux.js" });
+  await enc.addScriptTag({ url: "https://ad.local/soundtrack.js" });
   await enc.evaluate(({ FPS }) => {
     const { Muxer, ArrayBufferTarget } = window.Mp4Muxer;
-    window.muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: 1080, height: 1920 }, fastStart: "in-memory" });
+    window.muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: 1080, height: 1920 }, audio: { codec: "aac", numberOfChannels: 2, sampleRate: 48000 }, fastStart: "in-memory" });
     window.encoder = new VideoEncoder({ output: (chunk, meta) => window.muxer.addVideoChunk(chunk, meta), error: (e) => { window.encErr = String(e); } });
     window.encoder.configure({ codec: "avc1.640033", width: 1080, height: 1920, bitrate: 10_000_000, framerate: FPS });
     window.frameNo = 0;
@@ -63,6 +65,26 @@ if (mode === "stills") {
       if (window.encoder.encodeQueueSize > 10) await new Promise((r) => setTimeout(r, 20));
     };
   }, { FPS });
+  // Soundtrack first: render it, report its levels, encode it as AAC
+  const levels = await enc.evaluate(async (DURATION) => {
+    const buf = await window.makeSoundtrack(DURATION);
+    const L = buf.getChannelData(0), R = buf.getChannelData(1);
+    let peak = 0, sum = 0;
+    for (let i = 0; i < L.length; i++) { const v = Math.max(Math.abs(L[i]), Math.abs(R[i])); if (v > peak) peak = v; sum += L[i] * L[i]; }
+    const aenc = new AudioEncoder({ output: (chunk, meta) => window.muxer.addAudioChunk(chunk, meta), error: (e) => { window.encErr = String(e); } });
+    aenc.configure({ codec: "mp4a.40.2", sampleRate: 48000, numberOfChannels: 2, bitrate: 192000 });
+    const N = 1024;
+    for (let off = 0; off < L.length; off += N) {
+      const n = Math.min(N, L.length - off);
+      const data = new Float32Array(n * 2);
+      data.set(L.subarray(off, off + n), 0); data.set(R.subarray(off, off + n), n);
+      const ad = new AudioData({ format: "f32-planar", sampleRate: 48000, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round((off / 48000) * 1e6), data });
+      aenc.encode(ad); ad.close();
+    }
+    await aenc.flush();
+    return { peak: +peak.toFixed(3), rmsDb: +(10 * Math.log10(sum / L.length)).toFixed(1) };
+  }, DURATION);
+  console.log("soundtrack", levels);
   const total = FPS * DURATION;
   for (let i = 0; i < total; i++) {
     await p.evaluate((t) => window.render(t), i / FPS);
