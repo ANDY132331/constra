@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=block">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b0b0c; }
+  body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; color: #fff; position: relative; }
+  .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 60px 60px; }
+  .glow { position: absolute; width: 1400px; height: 1400px; left: -160px; top: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(245,196,0,0.16), transparent 60%); }
+  .layer { position: absolute; inset: 0; opacity: 0; will-change: transform, opacity; }
+  .tape { position: absolute; left: -40px; right: -40px; height: 46px; background: repeating-linear-gradient(135deg, #151617 0 28px, #F5C400 28px 56px); }
+  .cap { position: absolute; left: 80px; right: 80px; font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 900; text-transform: uppercase; line-height: 0.92; letter-spacing: 0.005em; text-align: center; text-wrap: balance; }
+  .hv { color: #F5C400; }
+  .sub { position: absolute; left: 100px; right: 100px; text-align: center; font-size: 46px; font-weight: 500; color: rgba(255,255,255,0.78); line-height: 1.25; }
+  .bubble { position: absolute; max-width: 760px; padding: 30px 40px; border-radius: 44px; font-size: 52px; font-weight: 500; line-height: 1.2; }
+  .them { left: 90px; background: #26282b; border-bottom-left-radius: 12px; }
+  .me { right: 90px; background: #F5C400; color: #141414; border-bottom-right-radius: 12px; }
+  .who { font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+  .phone { position: absolute; left: 50%; width: 700px; margin-left: -350px; border-radius: 86px; padding: 22px; background: #050505; box-shadow: 0 0 0 4px #2a2c2f, 0 60px 120px rgba(0,0,0,0.7), 0 0 90px rgba(245,196,0,0.12); }
+  .phone .screen { border-radius: 66px; overflow: hidden; height: 1430px; position: relative; background: #0a0a0a; }
+  .phone .screen img { position: absolute; left: 0; top: 0; width: 100%; }
+  .notch { position: absolute; top: 40px; left: 50%; width: 200px; height: 58px; margin-left: -100px; background: #000; border-radius: 40px; z-index: 3; }
+  .notif { position: absolute; left: 70px; right: 70px; padding: 30px 34px; border-radius: 46px; background: rgba(38,40,44,0.86); backdrop-filter: blur(30px); box-shadow: 0 30px 80px rgba(0,0,0,0.6); display: flex; gap: 26px; align-items: flex-start; }
+  .notif img { width: 92px; height: 92px; border-radius: 22px; flex-shrink: 0; }
+  .notif .app { font-size: 28px; color: rgba(255,255,255,0.6); font-weight: 600; letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+  .notif .t { font-size: 40px; font-weight: 700; margin-top: 4px; }
+  .notif .b { font-size: 34px; color: rgba(255,255,255,0.82); margin-top: 6px; line-height: 1.3; }
+  .chip { position: absolute; padding: 18px 30px; border-radius: 999px; font-size: 36px; font-weight: 700; display: inline-flex; gap: 14px; align-items: center; }
+  .paper { position: absolute; left: 140px; width: 800px; border-radius: 22px; overflow: hidden; box-shadow: 0 50px 120px rgba(0,0,0,0.75); background: #fff; }
+  .paper img { display: block; width: 100%; }
+  .cta { position: absolute; left: 140px; right: 140px; height: 150px; border-radius: 999px; background: #F5C400; color: #141414; display: flex; align-items: center; justify-content: center; font-size: 52px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="glow" id="glow"></div>
+
+<!-- 1. Hook -->
+<div class="layer" id="s1">
+  <div class="tape" id="s1tape" style="top: 330px"></div>
+  <div class="cap" id="s1a" style="top: 520px; font-size: 210px">Friday.</div>
+  <div class="cap hv" id="s1b" style="top: 740px; font-size: 168px">Payroll's due.</div>
+  <div class="sub" id="s1c" style="top: 1120px; font-size: 56px">…and nobody remembers their hours.</div>
+</div>
+
+<!-- 2. The texts every owner gets -->
+<div class="layer" id="s2">
+  <div class="cap" id="s2cap" style="top: 250px; font-size: 120px">Every. Single. <span class="hv">Week.</span></div>
+  <div class="bubble them" id="b1" style="top: 560px"><div class="who">Marco</div>got there like 7?</div>
+  <div class="bubble them" id="b2" style="top: 820px"><div class="who">Dev</div>left around 4ish i think</div>
+  <div class="bubble them" id="b3" style="top: 1080px"><div class="who">Sam</div>pretty sure it was 9 hrs 🤷‍♂️</div>
+  <div class="bubble me" id="b4" style="top: 1360px">😩 ok…</div>
+</div>
+
+<!-- 3-5 and 7: the phone -->
+<div class="layer" id="phoneLayer">
+  <div class="cap" id="pcap1" style="top: 170px; font-size: 104px">So we switched<br>to <span class="hv">Constra.</span></div>
+  <div class="cap" id="pcap2" style="top: 170px; font-size: 96px">Crew clocks in<br>on <span class="hv">their own phone.</span></div>
+  <div class="cap" id="pcap3" style="top: 170px; font-size: 84px">Walks off site<br>on the clock? <span class="hv">You'll know.</span></div>
+  <div class="cap" id="pcap4" style="top: 170px; font-size: 96px">Tomorrow's crew plan.<br><span class="hv">Sent to every phone.</span></div>
+  <div class="cap" id="pcap5" style="top: 170px; font-size: 96px">Who's on site. Hours.<br><span class="hv">Job costs.</span> One app.</div>
+  <div class="phone" id="phone" style="top: 520px">
+    <div class="notch"></div>
+    <div class="screen">
+      <img id="scrTime" src="/img/time.png">
+      <img id="scrPlan" src="/img/plan.png" style="opacity:0">
+      <img id="scrDash" src="/img/dash.png" style="opacity:0">
+    </div>
+  </div>
+  <div class="chip" id="chipGps" style="left: 60px; top: 760px; background: #1E7A45; color: #fff">📍 GPS checked</div>
+  <div class="chip" id="chipPhoto" style="right: 60px; top: 900px; background: #fff; color: #141414">📸 Clock-in photo</div>
+  <div class="notif" id="notif" style="top: 540px">
+    <img src="/img/icon.png">
+    <div style="flex:1; min-width:0">
+      <div class="app"><span>CONSTRA</span><span style="font-weight:500">now</span></div>
+      <div class="t">Dev Lal left Dundas St Reno</div>
+      <div class="b">11:42 AM · 1.8 km from the site · still clocked in</div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Timesheet -->
+<div class="layer" id="s6">
+  <div class="cap" id="s6cap" style="top: 170px; font-size: 100px">Timesheets with<br><span class="hv">your logo.</span></div>
+  <div class="paper" id="paper" style="top: 520px"><img src="/img/pdf.png"></div>
+  <div class="chip" id="chipXl" style="left: 90px; top: 1400px; background: #1E7A45; color: #fff">📊 Excel too</div>
+  <div class="chip" id="chipMail" style="right: 90px; top: 1520px; background: #F5C400; color: #141414">✉️ Emailed to payroll</div>
+</div>
+
+<!-- 8. End card -->
+<div class="layer" id="s8">
+  <div class="tape" style="top: 250px"></div>
+  <img id="logo" src="/img/icon.png" style="position:absolute; left:50%; top:470px; width:260px; height:260px; margin-left:-130px; border-radius:58px">
+  <div class="cap" id="brand" style="top: 790px; font-size: 230px">Constra</div>
+  <div class="sub" id="tag" style="top: 1030px; font-size: 60px; color: #fff; font-weight: 600">Built for crews. Not desks.</div>
+  <div class="sub" id="tag2" style="top: 1130px; font-size: 44px">Time · Crew plan · Timesheets · Job costs</div>
+  <div class="cta" id="cta" style="top: 1330px">Free to start · getconstra.com</div>
+  <div class="tape" style="top: 1650px"></div>
+</div>
+
+<script>
+// Deterministic timeline: render(t) sets every style from the time alone, so frames can be
+// captured one by one at any speed and still play back smooth.
+const $ = (id) => document.getElementById(id);
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const easeIO = (x) => { x = clamp(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x) => { x = clamp(x); const c = 1.70158, c3 = c + 1; return 1 + c3 * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+// 0..1 progress of a window, and visibility with fade in/out
+const win = (t, a, b) => clamp((t - a) / (b - a));
+const vis = (t, a, b, fin = 0.25, fout = 0.25) => Math.min(clamp((t - a) / fin), clamp((b - t) / fout));
+function set(el, o, tf) { el.style.opacity = o; if (tf !== undefined) el.style.transform = tf; }
+function pop(el, t, at, dur = 0.35) { const p = win(t, at, at + dur); set(el, clamp(p * 1.6), `translateY(${(1 - easeOut(p)) * 40}px) scale(${0.85 + 0.15 * back(p)})`); }
+
+window.render = (t) => {
+  // gentle drift on the glow keeps every frame alive
+  $("glow").style.transform = `translate(${Math.sin(t * 0.5) * 60}px, ${Math.cos(t * 0.4) * 80}px)`;
+
+  // 1. Hook 0 – 3.2
+  set($("s1"), vis(t, 0, 3.2, 0.01, 0.2));
+  $("s1tape").style.transform = `translateX(${(1 - easeOut(win(t, 0, 0.35))) * -1200}px) rotate(-2deg)`;
+  pop($("s1a"), t, 0.15, 0.3);
+  pop($("s1b"), t, 0.75, 0.3);
+  pop($("s1c"), t, 1.6, 0.4);
+
+  // 2. Texts 3.2 – 6.6
+  set($("s2"), vis(t, 3.2, 6.6, 0.15, 0.25));
+  pop($("s2cap"), t, 3.25, 0.3);
+  pop($("b1"), t, 3.6); pop($("b2"), t, 4.2); pop($("b3"), t, 4.8); pop($("b4"), t, 5.6, 0.3);
+
+  // 3–5, 7. Phone 6.6 – 18.4 and 22.8 – 26.4
+  const phoneOn = Math.max(vis(t, 6.6, 18.4, 0.2, 0.3), vis(t, 22.8, 26.4, 0.3, 0.3));
+  set($("phoneLayer"), phoneOn);
+  const rise = easeOut(win(t, 6.6, 7.3)) * (t < 20 ? 1 : 0) + easeOut(win(t, 22.8, 23.4)) * (t >= 20 ? 1 : 0);
+  // a slow push-in while each screen is up, like a hand-held phone
+  const drift = Math.sin(t * 1.3) * 6;
+  $("phone").style.transform = `translateY(${(1 - rise) * 900 + drift}px) rotate(${Math.sin(t * 0.9) * 1.2}deg) scale(${1 + win(t, 6.6, 18.4) * 0.04})`;
+  $("phone").style.filter = `brightness(${1 - 0.45 * vis(t, 11, 14.6, 0.3, 0.3)})`;
+  set($("pcap1"), vis(t, 6.7, 8.6, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, 6.7, 7.1))) * 30}px)`);
+  set($("pcap2"), vis(t, 8.6, 10.8, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, 8.6, 9))) * 30}px)`);
+  set($("pcap3"), vis(t, 10.8, 14.6, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, 10.8, 11.2))) * 30}px)`);
+  set($("pcap4"), vis(t, 14.6, 18.4, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, 14.6, 15))) * 30}px)`);
+  set($("pcap5"), vis(t, 22.9, 26.4, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, 22.9, 23.3))) * 30}px)`);
+  // screens: weekly hours scrolls a little, then the plan, then the dashboard
+  $("scrTime").style.transform = `translateY(${-easeIO(win(t, 7.6, 10.4)) * 260}px)`;
+  $("scrPlan").style.opacity = clamp((t - 14.6) / 0.35) * (t < 20 ? 1 : 0);
+  $("scrPlan").style.transform = `translateY(${-easeIO(win(t, 15.4, 18)) * 180}px)`;
+  $("scrDash").style.opacity = t >= 20 ? 1 : 0;
+  $("scrDash").style.transform = `translateY(${-easeIO(win(t, 23.6, 26.2)) * 380}px)`;
+  // chips while clocking in
+  { const v = vis(t, 9.0, 10.8, 0.2, 0.2); const p = easeOut(win(t, 9.0, 9.35)); set($("chipGps"), v, `translateX(${(1 - p) * -200}px) rotate(-4deg)`); }
+  { const v = vis(t, 9.35, 10.8, 0.2, 0.2); const p = easeOut(win(t, 9.35, 9.7)); set($("chipPhoto"), v, `translateX(${(1 - p) * 200}px) rotate(3deg)`); }
+  // the lock-screen alert drops in
+  { const v = vis(t, 11.3, 14.5, 0.15, 0.25); const p = back(win(t, 11.3, 11.75)); set($("notif"), v, `translateY(${(1 - p) * -260}px)`); }
+
+  // 6. Timesheet 18.4 – 22.8
+  set($("s6"), vis(t, 18.4, 22.8, 0.2, 0.3));
+  pop($("s6cap"), t, 18.5, 0.3);
+  { const p = easeOut(win(t, 18.6, 19.3)); $("paper").style.opacity = clamp(p * 1.5); $("paper").style.transform = `translateY(${(1 - p) * 500 + Math.sin(t * 1.1) * 6}px) rotate(${-6 + p * 4 + Math.sin(t) * 0.6}deg)`; }
+  { const v = vis(t, 19.9, 22.8, 0.2, 0.3); const p = back(win(t, 19.9, 20.3)); set($("chipXl"), v, `scale(${0.6 + 0.4 * p}) rotate(-5deg)`); }
+  { const v = vis(t, 20.5, 22.8, 0.2, 0.3); const p = back(win(t, 20.5, 20.9)); set($("chipMail"), v, `scale(${0.6 + 0.4 * p}) rotate(4deg)`); }
+
+  // 8. End card 26.4 – 30
+  set($("s8"), vis(t, 26.4, 30.5, 0.25, 0.01));
+  pop($("logo"), t, 26.5, 0.4);
+  pop($("brand"), t, 26.8, 0.35);
+  pop($("tag"), t, 27.3, 0.35);
+  pop($("tag2"), t, 27.7, 0.35);
+  { const p = back(win(t, 28.1, 28.5)); set($("cta"), clamp(p * 1.4), `scale(${0.8 + 0.2 * p + Math.max(0, Math.sin((t - 28.6) * 5)) * 0.02 * (t > 28.6 ? 1 : 0)})`); }
+};
+window.render(0);
+</script>
+</body>
+</html>

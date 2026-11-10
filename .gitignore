@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Scratch harnesses used during development
 .tmp-*/
+
+# Rendered videos are large; keep the source, not the output
+marketing/*.mp4
