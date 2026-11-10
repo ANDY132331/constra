@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=block">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b0b0c; }
+  body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; color: #fff; position: relative; }
+  .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 60px 60px; }
+  .glow { position: absolute; width: 1400px; height: 1400px; left: -160px; top: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(245,196,0,0.16), transparent 60%); }
+  .layer { position: absolute; inset: 0; opacity: 0; }
+  video.bg { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+  /* footage needs a dark top and bottom so white captions always read */
+  .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.25) 34%, rgba(0,0,0,0.1) 55%, rgba(0,0,0,0.55) 100%); }
+  .tape { position: absolute; left: -40px; right: -40px; height: 46px; background: repeating-linear-gradient(135deg, #151617 0 28px, #F5C400 28px 56px); }
+  .cap { position: absolute; left: 70px; right: 70px; font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 900; text-transform: uppercase; line-height: 0.92; text-align: center; text-wrap: balance; text-shadow: 0 6px 30px rgba(0,0,0,0.55); }
+  .hv { color: #F5C400; }
+  .sub { position: absolute; left: 90px; right: 90px; text-align: center; font-size: 50px; font-weight: 600; color: #fff; line-height: 1.25; text-shadow: 0 4px 22px rgba(0,0,0,0.7); }
+  .bubble { position: absolute; max-width: 760px; padding: 30px 40px; border-radius: 44px; font-size: 52px; font-weight: 500; line-height: 1.2; box-shadow: 0 20px 50px rgba(0,0,0,0.45); }
+  .them { left: 80px; background: rgba(38,40,43,0.94); border-bottom-left-radius: 12px; }
+  .me { right: 80px; background: #F5C400; color: #141414; border-bottom-right-radius: 12px; }
+  .who { font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+  .phone { position: absolute; left: 50%; width: 700px; margin-left: -350px; border-radius: 86px; padding: 22px; background: #050505; box-shadow: 0 0 0 4px #2a2c2f, 0 60px 120px rgba(0,0,0,0.7), 0 0 90px rgba(245,196,0,0.12); }
+  .phone .screen { border-radius: 66px; overflow: hidden; height: 1430px; position: relative; background: #0a0a0a; }
+  .phone .screen img { position: absolute; left: 0; top: 0; width: 100%; }
+  .notch { position: absolute; top: 40px; left: 50%; width: 200px; height: 58px; margin-left: -100px; background: #000; border-radius: 40px; z-index: 3; }
+  .notif { position: absolute; left: 70px; right: 70px; padding: 30px 34px; border-radius: 46px; background: rgba(38,40,44,0.9); box-shadow: 0 30px 80px rgba(0,0,0,0.6); display: flex; gap: 26px; align-items: flex-start; }
+  .notif img { width: 92px; height: 92px; border-radius: 22px; flex-shrink: 0; }
+  .notif .app { font-size: 28px; color: rgba(255,255,255,0.6); font-weight: 600; letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+  .notif .t { font-size: 40px; font-weight: 700; margin-top: 4px; }
+  .notif .b { font-size: 34px; color: rgba(255,255,255,0.82); margin-top: 6px; line-height: 1.3; }
+  .chip { position: absolute; padding: 20px 32px; border-radius: 999px; font-size: 40px; font-weight: 700; display: inline-flex; gap: 14px; align-items: center; box-shadow: 0 18px 40px rgba(0,0,0,0.45); }
+  .paper { position: absolute; left: 140px; width: 800px; border-radius: 22px; overflow: hidden; box-shadow: 0 50px 120px rgba(0,0,0,0.75); background: #fff; }
+  .paper img { display: block; width: 100%; }
+  .cta { position: absolute; left: 140px; right: 140px; height: 150px; border-radius: 999px; background: #F5C400; color: #141414; display: flex; align-items: center; justify-content: center; font-size: 52px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="glow" id="glow"></div>
+
+<!-- 1. Hook, over real footage: a worker frowning at paperwork -->
+<div class="layer" id="s1">
+  <video class="bg" id="vPaper" muted playsinline preload="auto"></video>
+  <div class="shade"></div>
+  <div class="tape" id="s1tape" style="top: 150px"></div>
+  <div class="cap" id="s1a" style="top: 280px; font-size: 190px">Friday.</div>
+  <div class="cap hv" id="s1b" style="top: 470px; font-size: 150px">Payroll's due.</div>
+  <div class="sub" id="s1c" style="top: 1560px">…and nobody remembers their hours.</div>
+</div>
+
+<!-- 2. A real crew, and the texts every owner gets -->
+<div class="layer" id="s2">
+  <video class="bg" id="vCrew" muted playsinline preload="auto"></video>
+  <div class="shade" style="background: rgba(0,0,0,0.45)"></div>
+  <div class="cap" id="s2cap" style="top: 210px; font-size: 120px">Every. Single. <span class="hv">Week.</span></div>
+  <div class="bubble them" id="b1" style="top: 560px"><div class="who">Marco</div>got there like 7?</div>
+  <div class="bubble them" id="b2" style="top: 820px"><div class="who">Dev</div>left around 4ish i think</div>
+  <div class="bubble them" id="b3" style="top: 1080px"><div class="who">Sam</div>pretty sure it was 9 hrs 🤷‍♂️</div>
+  <div class="bubble me" id="b4" style="top: 1360px">😩 ok…</div>
+</div>
+
+<!-- 3. The switch: a foreman on the phone on site -->
+<div class="layer" id="s3">
+  <video class="bg" id="vPhone" muted playsinline preload="auto"></video>
+  <div class="shade"></div>
+  <div class="cap" id="s3cap" style="top: 230px; font-size: 128px">So we switched<br>to <span class="hv">Constra.</span></div>
+</div>
+
+<!-- 4. Clocking in: hard hat on, phone out -->
+<div class="layer" id="s4">
+  <video class="bg" id="vHat" muted playsinline preload="auto"></video>
+  <div class="shade"></div>
+  <div class="cap" id="s4cap" style="top: 210px; font-size: 112px">Crew clocks in<br>on <span class="hv">their own phone.</span></div>
+  <div class="chip" id="chipGps" style="left: 70px; top: 1260px; background: #1E7A45; color: #fff">📍 GPS checked</div>
+  <div class="chip" id="chipPhoto" style="right: 70px; top: 1420px; background: #fff; color: #141414">📸 Clock-in photo</div>
+</div>
+
+<!-- 5. The app: site alert, then tomorrow's plan; 7. the dashboard -->
+<div class="layer" id="phoneLayer">
+  <div class="cap" id="pcap3" style="top: 170px; font-size: 84px">Walks off site<br>on the clock? <span class="hv">You'll know.</span></div>
+  <div class="cap" id="pcap4" style="top: 170px; font-size: 96px">Tomorrow's crew plan.<br><span class="hv">Sent to every phone.</span></div>
+  <div class="cap" id="pcap5" style="top: 170px; font-size: 96px">Who's on site. Hours.<br><span class="hv">Job costs.</span> One app.</div>
+  <div class="phone" id="phone" style="top: 520px">
+    <div class="notch"></div>
+    <div class="screen">
+      <img id="scrTime" src="/img/time.png">
+      <img id="scrPlan" src="/img/plan.png" style="opacity:0">
+      <img id="scrDash" src="/img/dash.png" style="opacity:0">
+    </div>
+  </div>
+  <div class="notif" id="notif" style="top: 540px">
+    <img src="/img/icon.png">
+    <div style="flex:1; min-width:0">
+      <div class="app"><span>CONSTRA</span><span style="font-weight:500">now</span></div>
+      <div class="t">Dev Lal left Dundas St Reno</div>
+      <div class="b">11:42 AM · 1.8 km from the site · still clocked in</div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Timesheet -->
+<div class="layer" id="s6">
+  <div class="cap" id="s6cap" style="top: 170px; font-size: 100px">Timesheets with<br><span class="hv">your logo.</span></div>
+  <div class="paper" id="paper" style="top: 520px"><img src="/img/pdf.png"></div>
+  <div class="chip" id="chipXl" style="left: 90px; top: 1400px; background: #1E7A45; color: #fff">📊 Excel too</div>
+  <div class="chip" id="chipMail" style="right: 90px; top: 1520px; background: #F5C400; color: #141414">✉️ Emailed to payroll</div>
+</div>
+
+<!-- 8. End card -->
+<div class="layer" id="s8">
+  <div class="tape" style="top: 250px"></div>
+  <img id="logo" src="/img/icon.png" style="position:absolute; left:50%; top:470px; width:260px; height:260px; margin-left:-130px; border-radius:58px">
+  <div class="cap" id="brand" style="top: 790px; font-size: 230px">Constra</div>
+  <div class="sub" id="tag" style="top: 1030px; font-size: 60px">Built for crews. Not desks.</div>
+  <div class="sub" id="tag2" style="top: 1130px; font-size: 44px; font-weight: 500; color: rgba(255,255,255,0.78)">Time · Crew plan · Timesheets · Job costs</div>
+  <div class="cta" id="cta" style="top: 1330px">Free to start · getconstra.com</div>
+  <div class="tape" style="top: 1650px"></div>
+</div>
+
+<script>
+// Scene times (seconds). Each voiceover line starts just after its scene does.
+const T = { s1: [0, 5.0], s2: [5.0, 8.4], s3: [8.4, 10.6], s4: [10.6, 13.1], alert: [13.1, 17.0], plan: [17.0, 20.4], doc: [20.4, 24.4], dash: [24.4, 29.6], end: [29.6, 36.5] };
+window.DURATION = 36.5;
+// Footage: which file, and where in it each scene starts
+const CLIPS = { vPaper: ["/stock/paperwork.mp4", 0.6, "s1"], vCrew: ["/stock/crew.mp4", 0.5, "s2"], vPhone: ["/stock/phone.mp4", 2.0, "s3"], vHat: ["/stock/hardhat.mp4", 0.3, "s4"] };
+
+const $ = (id) => document.getElementById(id);
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const easeIO = (x) => { x = clamp(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const back = (x) => { x = clamp(x); const c = 1.70158, c3 = c + 1; return 1 + c3 * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const win = (t, a, b) => clamp((t - a) / (b - a));
+const vis = (t, a, b, fin = 0.25, fout = 0.25) => Math.min(clamp((t - a) / fin), clamp((b - t) / fout));
+function set(el, o, tf) { el.style.opacity = o; if (tf !== undefined) el.style.transform = tf; }
+function pop(el, t, at, dur = 0.35) { const p = win(t, at, at + dur); set(el, clamp(p * 1.6), `translateY(${(1 - easeOut(p)) * 40}px) scale(${0.85 + 0.15 * back(p)})`); }
+
+// Load each clip whole into memory, so seeking to any frame is exact
+window.ready = (async () => {
+  await Promise.all(Object.entries(CLIPS).map(async ([id, [src]]) => {
+    const blob = await (await fetch(src)).blob();
+    const v = $(id);
+    v.src = URL.createObjectURL(blob);
+    await new Promise((r, j) => { v.onloadeddata = r; v.onerror = () => j(new Error("can't load " + src)); });
+  }));
+  await document.fonts.ready;
+  return Object.fromEntries(Object.keys(CLIPS).map((id) => [id, $(id).duration]));
+})();
+
+async function seekClips(t) {
+  const jobs = [];
+  for (const [id, [, offset, scene]] of Object.entries(CLIPS)) {
+    const [a, b] = T[scene];
+    if (t < a - 0.3 || t > b + 0.3) continue;
+    const v = $(id);
+    // a gentle slow-mo keeps short clips from running out, and reads as more cinematic
+    const want = Math.min(v.duration - 0.05, offset + Math.max(0, t - a) * 0.8);
+    if (Math.abs(v.currentTime - want) < 0.001) continue;
+    jobs.push(new Promise((r) => { v.onseeked = () => r(); v.currentTime = want; }));
+  }
+  await Promise.all(jobs);
+}
+
+window.render = async (t) => {
+  await seekClips(t);
+  $("glow").style.transform = `translate(${Math.sin(t * 0.5) * 60}px, ${Math.cos(t * 0.4) * 80}px)`;
+  // slow push-in on footage, like a hand-held shot
+  for (const id of Object.keys(CLIPS)) { const [a, b] = T[CLIPS[id][2]]; $(id).style.transform = `scale(${1.04 + 0.06 * win(t, a, b)})`; }
+
+  // 1
+  set($("s1"), vis(t, ...T.s1, 0.01, 0.2));
+  $("s1tape").style.transform = `translateX(${(1 - easeOut(win(t, 0, 0.35))) * -1200}px) rotate(-2deg)`;
+  pop($("s1a"), t, 0.15, 0.3);
+  pop($("s1b"), t, 0.9, 0.3);
+  pop($("s1c"), t, 2.6, 0.4);
+  // 2
+  set($("s2"), vis(t, ...T.s2, 0.15, 0.2));
+  pop($("s2cap"), t, 5.05, 0.3);
+  pop($("b1"), t, 5.4); pop($("b2"), t, 6.0); pop($("b3"), t, 6.6); pop($("b4"), t, 7.4, 0.3);
+  // 3
+  set($("s3"), vis(t, ...T.s3, 0.15, 0.2));
+  pop($("s3cap"), t, 8.5, 0.35);
+  // 4
+  set($("s4"), vis(t, ...T.s4, 0.15, 0.2));
+  pop($("s4cap"), t, 10.7, 0.35);
+  { const p = easeOut(win(t, 11.4, 11.75)); set($("chipGps"), clamp(p * 1.5), `translateX(${(1 - p) * -260}px) rotate(-4deg)`); }
+  { const p = easeOut(win(t, 11.8, 12.15)); set($("chipPhoto"), clamp(p * 1.5), `translateX(${(1 - p) * 260}px) rotate(3deg)`); }
+  // 5 and 7: the phone
+  const phoneOn = Math.max(vis(t, T.alert[0], T.plan[1], 0.2, 0.3), vis(t, ...T.dash, 0.3, 0.3));
+  set($("phoneLayer"), phoneOn);
+  const rise = t < T.doc[0] ? easeOut(win(t, T.alert[0], T.alert[0] + 0.6)) : easeOut(win(t, T.dash[0], T.dash[0] + 0.6));
+  $("phone").style.transform = `translateY(${(1 - rise) * 900 + Math.sin(t * 1.3) * 6}px) rotate(${Math.sin(t * 0.9) * 1.2}deg) scale(${1 + win(t, T.alert[0], T.plan[1]) * 0.04})`;
+  $("phone").style.filter = `brightness(${1 - 0.45 * vis(t, 13.4, 16.9, 0.3, 0.3)})`;
+  set($("pcap3"), vis(t, ...T.alert, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, T.alert[0], T.alert[0] + 0.4))) * 30}px)`);
+  set($("pcap4"), vis(t, ...T.plan, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, T.plan[0], T.plan[0] + 0.4))) * 30}px)`);
+  set($("pcap5"), vis(t, ...T.dash, 0.2, 0.2), `translateY(${(1 - easeOut(win(t, T.dash[0], T.dash[0] + 0.4))) * 30}px)`);
+  $("scrTime").style.transform = `translateY(${-easeIO(win(t, 14.2, 16.6)) * 260}px)`;
+  $("scrPlan").style.opacity = t < T.doc[0] ? clamp((t - T.plan[0]) / 0.35) : 0;
+  $("scrPlan").style.transform = `translateY(${-easeIO(win(t, 17.6, 20.0)) * 180}px)`;
+  $("scrDash").style.opacity = t >= T.doc[0] ? 1 : 0;
+  $("scrDash").style.transform = `translateY(${-easeIO(win(t, 25.2, 29.2)) * 380}px)`;
+  { const v = vis(t, 13.7, 16.9, 0.15, 0.25); const p = back(win(t, 13.7, 14.15)); set($("notif"), v, `translateY(${(1 - p) * -260}px)`); }
+  // 6
+  set($("s6"), vis(t, ...T.doc, 0.2, 0.3));
+  pop($("s6cap"), t, 20.5, 0.3);
+  { const p = easeOut(win(t, 20.6, 21.3)); $("paper").style.opacity = clamp(p * 1.5); $("paper").style.transform = `translateY(${(1 - p) * 500 + Math.sin(t * 1.1) * 6}px) rotate(${-6 + p * 4 + Math.sin(t) * 0.6}deg)`; }
+  { const v = vis(t, 21.9, 24.4, 0.2, 0.3); const p = back(win(t, 21.9, 22.3)); set($("chipXl"), v, `scale(${0.6 + 0.4 * p}) rotate(-5deg)`); }
+  { const v = vis(t, 22.5, 24.4, 0.2, 0.3); const p = back(win(t, 22.5, 22.9)); set($("chipMail"), v, `scale(${0.6 + 0.4 * p}) rotate(4deg)`); }
+  // 8
+  set($("s8"), vis(t, T.end[0], T.end[1] + 1, 0.25, 0.01));
+  pop($("logo"), t, 29.7, 0.4);
+  pop($("brand"), t, 30.0, 0.35);
+  pop($("tag"), t, 30.9, 0.35);
+  pop($("tag2"), t, 31.4, 0.35);
+  { const p = back(win(t, 31.5, 31.9)); set($("cta"), clamp(p * 1.4), `scale(${0.8 + 0.2 * p + (t > 32 ? Math.max(0, Math.sin((t - 32) * 5)) * 0.02 : 0)})`); }
+};
+
+// Soundtrack cue sheet for this cut: hits, pops and whooshes on the cuts, the music ducks
+// under every spoken line, and each line starts just after its scene.
+window.VO_AT = [0.1, 2.55, 5.1, 8.5, 10.7, 13.25, 17.15, 20.55, 24.55, 29.75];
+window.CUES = {
+  hook: { hits: [0.15, 0.9], riserAt: 4.0 },
+  texts: { start: 5.0, beats: 7, pops: [5.4, 6.0, 6.6], womp: 7.4, whooshOut: 7.95 },
+  dropAt: 8.4,
+  chipPops: [11.4, 11.8],
+  alert: { whoosh: 13.5, ping: 13.75 },
+  whooshes: [10.45, 16.8, 20.2, 24.2],
+  docPops: [21.9, 22.5],
+  end: { riserAt: 28.6, hitAt: 29.6, ctaPop: 31.5 },
+  duck: [],
+  voice: [],
+};
+</script>
+</body>
+</html>

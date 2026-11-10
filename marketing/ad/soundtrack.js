@@ -4,7 +4,21 @@
 // the site alert, whooshes on scene changes, and a big hit on the end card.
 // Runs in the browser: window.makeSoundtrack() → AudioBuffer (48 kHz stereo).
 
-window.makeSoundtrack = async function makeSoundtrack(duration = 30) {
+// Cue sheet for the original 30-second cut. The voiced cut passes its own (see ad2.html).
+const V1_CUES = {
+  hook: { hits: [0.15, 0.75], riserAt: 2.2 },
+  texts: { start: 3.2, beats: 7, pops: [3.6, 4.2, 4.8], womp: 5.6, whooshOut: 6.15 },
+  dropAt: 6.6,
+  chipPops: [9.0, 9.35],
+  alert: { whoosh: 10.75, ping: 11.32 },
+  whooshes: [14.4, 18.2, 22.6],
+  docPops: [19.9, 20.5],
+  end: { riserAt: 25.4, hitAt: 26.4, ctaPop: 28.1 },
+  duck: [[11.2, 13.4, 0.45]],
+  voice: [],
+};
+
+window.makeSoundtrack = async function makeSoundtrack(duration = 30, cues = V1_CUES) {
   const SR = 48000;
   const ctx = new OfflineAudioContext(2, Math.ceil(SR * duration), SR);
   const BEAT = 0.5; // 120 BPM
@@ -18,15 +32,25 @@ window.makeSoundtrack = async function makeSoundtrack(duration = 30) {
   master.gain.linearRampToValueAtTime(0, duration - 0.05);
   comp.connect(master).connect(ctx.destination);
 
-  // Music bus, ducked under the site alert so the ping lands
+  // Music bus, ducked where the cue sheet says (the site alert ping, every spoken line)
   const music = ctx.createGain();
   music.connect(comp);
   music.gain.setValueAtTime(1, 0);
-  music.gain.setValueAtTime(1, 11.2);
-  music.gain.linearRampToValueAtTime(0.45, 11.35);
-  music.gain.setValueAtTime(0.45, 12.6);
-  music.gain.linearRampToValueAtTime(1, 13.4);
+  for (const [a, b, level] of [...(cues.duck ?? [])].sort((x, y) => x[0] - y[0])) {
+    music.gain.setValueAtTime(1, Math.max(0, a - 0.15));
+    music.gain.linearRampToValueAtTime(level, a);
+    music.gain.setValueAtTime(level, b);
+    music.gain.linearRampToValueAtTime(1, b + 0.4);
+  }
   const sfx = ctx.createGain(); sfx.gain.value = 0.9; sfx.connect(comp);
+  // Voice skips the bus compressor so it stays clear and on top
+  const vox = ctx.createGain(); vox.gain.value = 1.0;
+  const voxEq = ctx.createBiquadFilter(); voxEq.type = "highpass"; voxEq.frequency.value = 90;
+  const voxPresence = ctx.createBiquadFilter(); voxPresence.type = "peaking"; voxPresence.frequency.value = 3000; voxPresence.gain.value = 3;
+  vox.connect(voxEq).connect(voxPresence).connect(master);
+  for (const v of cues.voice ?? []) {
+    const s = ctx.createBufferSource(); s.buffer = v.buffer; s.connect(vox); s.start(v.at);
+  }
 
   // White noise, shared
   const noise = ctx.createBuffer(1, SR * 2, SR);
@@ -122,26 +146,28 @@ window.makeSoundtrack = async function makeSoundtrack(duration = 30) {
     const g = ctx.createGain(); env(g, t, 0.01, 0.22, 0.5); o.connect(g).connect(sfx); o.start(t); o.stop(t + 0.6);
   }
 
-  // ── Arrangement ──
-  // 0 – 3.2  hook: tense drone and two hits
-  pad(0, [220, 261.63, 329.63], 3.3, 0.9);
-  bass(0, 55, 3.1, 0.6);
+  // ── Arrangement, from the cue sheet ──
+  const c = cues;
+  const hookEnd = c.texts.start;
+  // hook: tense drone and hits
+  pad(0, [220, 261.63, 329.63], hookEnd + 0.1, 0.9);
+  bass(0, 55, hookEnd - 0.1, 0.6);
   whoosh(0, 0.32, 0.9);
-  impact(0.15, 0.9);
-  impact(0.75, 1);
-  riser(2.2, 1.0);
-  // 3.2 – 6.6  the texts: half-time groove, pops on each message
-  for (let b = 0; b < 7; b++) {
-    const t = 3.2 + b * BEAT;
+  c.hook.hits.forEach((t, i) => impact(t, i ? 1 : 0.9));
+  riser(c.hook.riserAt, 1.0);
+  // the texts: half-time groove, pops on each message
+  for (let b = 0; b < c.texts.beats; b++) {
+    const t = c.texts.start + b * BEAT;
     if (b % 2 === 0) kick(t, music, 0.7);
     hat(t + BEAT / 2, 0.6);
   }
-  pad(3.2, triads[1], 3.4, 0.7);
-  pop(3.6, 650); pop(4.2, 700); pop(4.8, 760); sadWomp(5.6);
-  whoosh(6.15, 0.45, 1);
-  // 6.6 – 29.5  the drop: full groove under the product
-  impact(6.6, 0.8);
-  const start = 6.6, end = 29.6;
+  pad(c.texts.start, triads[1], c.dropAt - c.texts.start + 0.2, 0.7);
+  c.texts.pops.forEach((t, i) => pop(t, 650 + i * 55));
+  if (c.texts.womp != null) sadWomp(c.texts.womp);
+  whoosh(c.texts.whooshOut, 0.45, 1);
+  // the drop: full groove under the product, until the end card fades
+  impact(c.dropAt, 0.8);
+  const start = c.dropAt, end = duration - 0.4;
   for (let i = 0, t = start; t < end - 0.01; i++, t = start + i * BEAT) {
     const bar = Math.floor(i / 4), inBar = i % 4;
     const chord = bar % 4;
@@ -155,16 +181,14 @@ window.makeSoundtrack = async function makeSoundtrack(duration = 30) {
     if (inBar === 2) stab(t + BEAT * 0.75, triads[chord], 0.18, 0.8, 0.3);
   }
   // cues on the product scenes
-  pop(9.0, 900, 0.9); pop(9.35, 1000, 0.9);
-  whoosh(10.75, 0.3, 0.6, false);
-  ping(11.32);
-  whoosh(14.4, 0.4, 0.9); whoosh(18.2, 0.4, 0.9);
-  pop(19.9, 800); pop(20.5, 880);
-  whoosh(22.6, 0.4, 0.9);
-  riser(25.4, 1.0);
-  impact(26.4, 1.1);
-  pad(26.4, triads[0], 3.6, 1.2);
-  pop(28.1, 1100, 0.8);
+  c.chipPops.forEach((t, i) => pop(t, 900 + i * 100, 0.9));
+  if (c.alert) { whoosh(c.alert.whoosh, 0.3, 0.6, false); ping(c.alert.ping); }
+  c.whooshes.forEach((t) => whoosh(t, 0.4, 0.9));
+  c.docPops.forEach((t, i) => pop(t, 800 + i * 80));
+  riser(c.end.riserAt, 1.0);
+  impact(c.end.hitAt, 1.1);
+  pad(c.end.hitAt, triads[0], duration - c.end.hitAt, 1.2);
+  pop(c.end.ctaPop, 1100, 0.8);
 
   return await ctx.startRendering();
 };
