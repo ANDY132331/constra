@@ -15,6 +15,9 @@ const IMG = {
   "pdf.png": "assets/timesheet-pdf.png",
 };
 const FPS = 30, DURATION = 30;
+// "web" makes a light 720p copy for the website, plus a poster image
+const WEB = mode === "web";
+const OUT_W = WEB ? 720 : 1080, OUT_H = WEB ? 1280 : 1920, BITRATE = WEB ? 2_200_000 : 10_000_000;
 
 const b = await chromium.launch({ channel: "msedge" });
 const ctx = await b.newContext({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
@@ -44,27 +47,28 @@ if (mode === "stills") {
   await sheet.screenshot({ path: "stills.png", fullPage: true });
   console.log("stills.png");
 } else {
+  if (WEB) { await p.evaluate(() => window.render(2.8)); await p.screenshot({ path: "constra-ad-poster.jpg", type: "jpeg", quality: 82 }); }
   // Encoder runs in its own secure page; frames are passed in as JPEG bytes
   const enc = await ctx.newPage();
   await enc.goto("https://ad.local/", { waitUntil: "domcontentloaded" });
   await enc.addScriptTag({ url: "https://ad.local/mux.js" });
   await enc.addScriptTag({ url: "https://ad.local/soundtrack.js" });
-  await enc.evaluate(({ FPS }) => {
+  await enc.evaluate(({ FPS, OUT_W, OUT_H, BITRATE }) => {
     const { Muxer, ArrayBufferTarget } = window.Mp4Muxer;
-    window.muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: 1080, height: 1920 }, audio: { codec: "aac", numberOfChannels: 2, sampleRate: 48000 }, fastStart: "in-memory" });
+    window.muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: OUT_W, height: OUT_H }, audio: { codec: "aac", numberOfChannels: 2, sampleRate: 48000 }, fastStart: "in-memory" });
     window.encoder = new VideoEncoder({ output: (chunk, meta) => window.muxer.addVideoChunk(chunk, meta), error: (e) => { window.encErr = String(e); } });
-    window.encoder.configure({ codec: "avc1.640033", width: 1080, height: 1920, bitrate: 10_000_000, framerate: FPS });
+    window.encoder.configure({ codec: "avc1.640033", width: OUT_W, height: OUT_H, bitrate: BITRATE, framerate: FPS });
     window.frameNo = 0;
     window.addFrame = async (b64) => {
       const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-      const bmp = await createImageBitmap(new Blob([bytes], { type: "image/jpeg" }));
+      const bmp = await createImageBitmap(new Blob([bytes], { type: "image/jpeg" }), { resizeWidth: OUT_W, resizeHeight: OUT_H, resizeQuality: "high" });
       const frame = new VideoFrame(bmp, { timestamp: Math.round((window.frameNo * 1e6) / FPS), duration: Math.round(1e6 / FPS) });
       window.encoder.encode(frame, { keyFrame: window.frameNo % (FPS * 2) === 0 });
       frame.close(); bmp.close();
       window.frameNo++;
       if (window.encoder.encodeQueueSize > 10) await new Promise((r) => setTimeout(r, 20));
     };
-  }, { FPS });
+  }, { FPS, OUT_W, OUT_H, BITRATE });
   // Soundtrack first: render it, report its levels, encode it as AAC
   const levels = await enc.evaluate(async (DURATION) => {
     const buf = await window.makeSoundtrack(DURATION);
@@ -101,7 +105,8 @@ if (mode === "stills") {
     return { data: btoa(s), err: window.encErr || null };
   });
   if (b64.err) throw new Error(b64.err);
-  fs.writeFileSync("constra-ad.mp4", Buffer.from(b64.data, "base64"));
-  console.log("constra-ad.mp4", fs.statSync("constra-ad.mp4").size, "bytes");
+  const outName = WEB ? "constra-ad-web.mp4" : "constra-ad.mp4";
+  fs.writeFileSync(outName, Buffer.from(b64.data, "base64"));
+  console.log(outName, fs.statSync(outName).size, "bytes");
 }
 await b.close();

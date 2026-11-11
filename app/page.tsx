@@ -64,18 +64,20 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
     group: "Crew",
     items: [
       ["GPS clock-in", "Selfie + location on every punch, per-site geofence"],
+      ["Site alerts", "A phone alert when someone on the clock leaves the job, with the time and distance"],
       ["Scheduling", "Assign crew by project and shift, with the 7-day forecast"],
       ["Roles", "Separate views for owners, project managers, foremen and crew"],
       ["Messages", "Project chat with photos and files, no group texts"],
     ],
   },
   {
-    group: "Money",
+    group: "Hours & money",
     items: [
-      ["Estimates", "Itemised quotes built on site, sent as PDFs"],
-      ["Invoices", "Convert an estimate in one step, track paid and overdue"],
-      ["Change orders", "Priced, approved and tracked against budget"],
+      ["Timesheets", "One page per worker with your logo, as a PDF or Excel file"],
       ["Payroll export", "Hours to CSV, QuickBooks or Gusto; invoices to QuickBooks Online"],
+      ["Job costs", "Live labour cost per job against budget, flagged at 80%"],
+      ["Estimates & invoices", "Quotes built on site, turned into invoices in one step"],
+      ["Change orders", "Priced, approved and tracked against budget"],
     ],
   },
   {
@@ -85,6 +87,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
       ["Safety log", "Near misses, injuries and hazards with photos"],
       ["Punch lists & RFIs", "Assigned, photographed, closed out"],
       ["Equipment & materials", "Service dates, cert expiry, deliveries, low stock"],
+      ["Client progress link", "Progress and recent photos for the client, no login, no prices"],
     ],
   },
   {
@@ -94,6 +97,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
       ["Documents", "Contracts, permits and specs, versioned by project"],
       ["Photos", "Every site photo, sorted by project and day"],
       ["Morning brief", "A morning summary of crew, overdue tasks and weather risk"],
+      ["Forgot-to-clock-out reminder", "A nudge when a shift is still open hours later"],
     ],
   },
 ];
@@ -102,10 +106,11 @@ const FAQ: [string, string][] = [
   ["Do my workers each need to sign up?", "They join your company with an invite code from Settings. It takes about a minute and they only see what their role allows."],
   ["What happens when there's no signal on site?", "Clock-ins and updates are saved on the phone and sync automatically when the connection comes back."],
   ["Can someone clock in from home?", "Every punch records GPS and a photo. If it's outside the geofence you set for that project, it's flagged so you can review it before payroll."],
-  ["Does it work on iPhone?", "Android has an app on Google Play. On iPhone and computers, Constra runs in the browser and you can add it to your home screen like an app."],
+  ["Does it work on iPhone and Android?", "Yes. Constra runs in the browser on any phone or computer, and you can add it to your home screen like an app. Store apps for iPhone and Android are in testing."],
+  ["Does it track my crew all day?", "No. It checks location at clock-in and clock-out, and every few minutes while someone is clocked in with the app open, only to notice when they leave or return to the job site. It saves the time and distance, not a trail of where they went, and stops at clock-out."],
   ["How do hours get into payroll?", "Export hours as a CSV, a Gusto-ready CSV, a QuickBooks Desktop file or a summary to enter in QuickBooks Online, with overtime split out where you've turned it on."],
   ["What does it cost?", "Constra is free during launch, with every feature included and no credit card required."],
-  ["Can I take my data and leave?", "Yes. Invoices, reports and timesheets export to PDF or CSV, and you can delete your account from Settings at any time."],
+  ["Can I take my data and leave?", "Yes. Invoices, reports and timesheets export to PDF, Excel or CSV, and you can delete your account from Settings at any time."],
 ];
 
 function Chip({ icon, text }: { icon: string; text: string }) {
@@ -345,6 +350,30 @@ export default function LandingPage() {
           <div className="lp-tape" aria-hidden />
         </section>
 
+        {/* The 30-second ad: the problem, then the real app */}
+        <section id="watch" className="lp-watch" aria-label="See Constra in 30 seconds">
+          <div className="lp-wrap lp-watch-grid">
+            <div>
+              <p className="lp-kicker">See it in 30 seconds</p>
+              <h2 className="lp-h2">Friday payroll,<br />without the guessing.</h2>
+              <p className="lp-section-note">
+                Your crew clocks in on their own phones. You hear when someone walks off site on the clock, and timesheets come out with your logo, ready for payroll. Every screen in the video is the real app.
+              </p>
+              <Link href={startHref} className="lp-btn lp-watch-cta">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
+            </div>
+            <div className="lp-watch-frame">
+              <video
+                src="/marketing/constra-ad-web.mp4"
+                poster="/marketing/constra-ad-poster.jpg"
+                controls
+                playsInline
+                preload="none"
+                aria-label="Constra in 30 seconds: from paper timesheets to the app"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* A day on site */}
         <section id="day" className="lp-day">
           <div className="lp-wrap">
@@ -388,7 +417,7 @@ export default function LandingPage() {
           <div className="lp-wrap">
             <div className="lp-section-head lp-section-head-row">
               <h2 className="lp-h2">Everything the site needs.<br />Nothing extra to buy.</h2>
-              <p className="lp-section-note">All sixteen tools are included on every account. No add-ons and no per-project fees.</p>
+              <p className="lp-section-note">Every tool is included on every account. No add-ons and no per-project fees.</p>
             </div>
             <div className="lp-spec">
               {FEATURES.map((g) => (
@@ -423,7 +452,7 @@ export default function LandingPage() {
             <dl className="lp-field-list">
               <div><dt><WifiOff size={18} aria-hidden /> Offline</dt><dd>Clock-ins, reports and photos save on the phone and sync when signal returns.</dd></div>
               <div><dt><MapPin size={18} aria-hidden /> Geofence</dt><dd>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</dd></div>
-              <div><dt><span className="lp-field-num">15</span> Languages</dt><dd>Each person picks their own, from Spanish and Polish to Hindi, Arabic and Chinese.</dd></div>
+              <div><dt><span className="lp-field-num">15</span> Languages</dt><dd>Menus and sign-up in 15 languages, from Spanish and Polish to Hindi, Arabic and Chinese. Each person picks their own.</dd></div>
               <div><dt><span className="lp-field-num">OT</span> Overtime</dt><dd>Daily and weekly overtime calculated from the punches, ready for payroll.</dd></div>
             </dl>
           </div>
@@ -449,7 +478,7 @@ export default function LandingPage() {
                 <span className="lp-price">$0</span>
               </div>
               <ul>
-                {["Unlimited crew and projects", "GPS + photo clock-in", "Estimates, invoices and change orders", "Daily reports and safety logs", "Payroll export (CSV, QuickBooks, Gusto)", "Morning brief and AI assistant"].map((f) => (
+                {["Unlimited crew and projects", "GPS + photo clock-in, with site alerts", "Timesheets with your logo (PDF and Excel)", "Estimates, invoices and change orders", "Live job costs against budget", "Payroll export (CSV, QuickBooks, Gusto)", "Daily reports, safety logs and AI assistant"].map((f) => (
                   <li key={f}><Check size={15} strokeWidth={2.5} aria-hidden />{f}</li>
                 ))}
               </ul>
@@ -695,6 +724,11 @@ const CSS = `
 /* Field */
 .lp-field{padding-block:96px; background:var(--paper); border-block:1px solid var(--rule)}
 .lp-field-grid{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start}
+.lp-watch{padding:110px 0 40px}
+.lp-watch-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:64px; align-items:center}
+.lp-watch-cta{margin-top:28px; display:inline-flex}
+.lp-watch-frame{justify-self:center; width:100%; max-width:360px; aspect-ratio:9/16; border-radius:36px; overflow:hidden; background:#000; box-shadow:0 0 0 6px #1b1c1f, 0 40px 90px rgba(0,0,0,0.55), 0 0 80px rgba(245,196,0,0.10)}
+.lp-watch-frame video{width:100%; height:100%; object-fit:cover; display:block}
 .lp-field-list{margin:0; display:grid; gap:0}
 .lp-field-list div{display:grid; grid-template-columns:150px 1fr; gap:20px; padding:20px 0; border-bottom:1px solid var(--rule)}
 .lp-field-list div:first-child{border-top:1px solid var(--rule)}
@@ -869,7 +903,9 @@ const CSS = `
   .lp-nav-links{display:none}
   .lp-nav-cta{margin-left:auto}
   .lp-hero{padding-block:40px 56px}
-  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid,.lp-calc-grid,.lp-tour-grid{grid-template-columns:1fr; gap:40px}
+  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid,.lp-calc-grid,.lp-tour-grid,.lp-watch-grid{grid-template-columns:1fr; gap:40px}
+  .lp-watch{padding:72px 0 24px}
+  .lp-watch-frame{max-width:320px}
   .lp-tour{padding-block:64px}
   .lp-device-video,.lp-device-shot{transform:none}
   .lp-calc{padding-block:64px}

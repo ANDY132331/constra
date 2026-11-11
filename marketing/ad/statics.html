@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=block">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #0b0b0c; }
+  body { font-family: "IBM Plex Sans", "Segoe UI", sans-serif; color: #fff; }
+  .ad { position: relative; overflow: hidden; background: #0b0b0c; }
+  .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 54px 54px; }
+  .glow { position: absolute; width: 1200px; height: 1200px; border-radius: 50%; background: radial-gradient(circle, rgba(245,196,0,0.18), transparent 60%); }
+  .tape { position: absolute; left: -40px; right: -40px; height: 40px; background: repeating-linear-gradient(135deg, #151617 0 24px, #F5C400 24px 48px); }
+  .h { position: absolute; left: 72px; right: 72px; font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 900; text-transform: uppercase; line-height: 0.9; text-wrap: balance; }
+  .hv { color: #F5C400; }
+  .sub { position: absolute; left: 72px; right: 72px; font-size: 38px; font-weight: 500; line-height: 1.3; color: rgba(255,255,255,0.82); }
+  .brand { position: absolute; left: 72px; display: flex; align-items: center; gap: 18px; }
+  .brand img { width: 74px; height: 74px; border-radius: 17px; }
+  .brand span { font-family: "Barlow Condensed", sans-serif; font-weight: 900; font-size: 54px; letter-spacing: 0.01em; }
+  .cta { position: absolute; right: 72px; height: 84px; padding: 0 40px; border-radius: 999px; background: #F5C400; color: #141414; font-size: 32px; font-weight: 700; display: flex; align-items: center; }
+  .phone { position: absolute; width: 470px; border-radius: 60px; padding: 15px; background: #050505; box-shadow: 0 0 0 3px #2a2c2f, 0 50px 100px rgba(0,0,0,0.65), 0 0 70px rgba(245,196,0,0.12); }
+  .phone .screen { border-radius: 46px; overflow: hidden; position: relative; background: #0a0a0a; }
+  .phone .screen img { display: block; width: 100%; }
+  .notif { position: absolute; padding: 26px 30px; border-radius: 40px; background: rgba(38,40,44,0.96); box-shadow: 0 30px 70px rgba(0,0,0,0.6); display: flex; gap: 22px; align-items: flex-start; }
+  .notif img { width: 80px; height: 80px; border-radius: 19px; flex-shrink: 0; }
+  .notif .app { font-size: 24px; color: rgba(255,255,255,0.6); font-weight: 600; letter-spacing: 0.04em; display: flex; justify-content: space-between; }
+  .notif .t { font-size: 34px; font-weight: 700; margin-top: 4px; }
+  .notif .b { font-size: 29px; color: rgba(255,255,255,0.82); margin-top: 4px; line-height: 1.3; }
+  .paper { position: absolute; border-radius: 18px; overflow: hidden; background: #fff; box-shadow: 0 40px 100px rgba(0,0,0,0.7); }
+  .paper img { display: block; width: 100%; }
+  .chip { position: absolute; padding: 16px 28px; border-radius: 999px; font-size: 32px; font-weight: 700; box-shadow: 0 16px 36px rgba(0,0,0,0.45); }
+  .photo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.85) 100%); }
+  .bubble { position: absolute; padding: 22px 32px; border-radius: 36px; border-bottom-left-radius: 10px; background: rgba(38,40,43,0.95); font-size: 38px; font-weight: 500; box-shadow: 0 16px 40px rgba(0,0,0,0.45); }
+  .bubble .who { font-size: 24px; font-weight: 600; color: rgba(255,255,255,0.55); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// Five hooks x two feed sizes. Every claim matches what the app does today; no invented numbers.
+const params = new URLSearchParams(location.search);
+const V = params.get("v") || "paper";
+const W = 1080, H = Number(params.get("h") || 1350);
+const sq = H === 1080;
+
+const foot = (y) => `
+  <div class="brand" style="top:${y}px"><img src="/img/icon.png"><span>CONSTRA</span></div>
+  <div class="cta" style="top:${y - 5}px">Free to start · getconstra.com</div>`;
+
+const ads = {
+  // 1. The everyday pain, asked straight
+  paper: () => `
+    <div class="glow" style="left:-300px;top:${sq ? 200 : 300}px"></div>
+    <div class="tape" style="top:56px;transform:rotate(-2deg)"></div>
+    <div class="h" style="top:140px;font-size:${sq ? 116 : 132}px">Still doing<br>timesheets <span class="hv">on paper?</span></div>
+    <div class="sub" style="top:${sq ? 490 : 540}px;right:${sq ? 540 : 520}px">Your crew clocks in on their own phone. GPS and a photo on every punch.</div>
+    <div class="phone" style="left:${sq ? 560 : 560}px;top:${sq ? 500 : 560}px;transform:rotate(4deg)"><div class="screen" style="height:${sq ? 600 : 620}px"><img src="/img/time.png" style="margin-top:-8px"></div></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:280px;background:linear-gradient(180deg,transparent,#0b0b0c 60%)"></div>
+    ${foot(H - 140)}`,
+
+  // 2. The site alert
+  alert: () => `
+    <div class="glow" style="right:-400px;top:200px"></div>
+    <div class="h" style="top:96px;font-size:${sq ? 104 : 120}px">Walks off site<br>on the clock?<br><span class="hv">You'll know.</span></div>
+    <div class="phone" style="left:300px;top:${sq ? 520 : 600}px;opacity:0.55"><div class="screen" style="height:900px"><img src="/img/time.png"></div></div>
+    <div class="notif" style="left:60px;right:60px;top:${sq ? 560 : 690}px">
+      <img src="/img/icon.png">
+      <div style="flex:1;min-width:0">
+        <div class="app"><span>CONSTRA</span><span style="font-weight:500">now</span></div>
+        <div class="t">Dev Lal left Dundas St Reno</div>
+        <div class="b">11:42 AM · 1.8 km from the site · still clocked in</div>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:260px;background:linear-gradient(180deg,transparent,#0b0b0c 55%)"></div>
+    ${foot(H - 140)}`,
+
+  // 3. Timesheets with their logo
+  timesheet: () => `
+    <div class="glow" style="left:-300px;top:400px"></div>
+    <div class="h" style="top:96px;font-size:${sq ? 108 : 124}px">Timesheets<br>with <span class="hv">your logo.</span></div>
+    <div class="sub" style="top:${sq ? 340 : 370}px">One page per worker, every day, signature lines. PDF or Excel in one tap.</div>
+    <div class="paper" style="left:${sq ? 300 : 170}px;top:${sq ? 470 : 560}px;width:${sq ? 480 : 740}px;transform:rotate(-3deg)"><img src="/img/pdf.png"></div>
+    <div class="chip" style="left:60px;top:${sq ? 760 : 1010}px;background:#1E7A45;color:#fff;transform:rotate(-4deg)">📊 Excel too</div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(180deg,transparent,#0b0b0c 60%)"></div>
+    ${foot(H - 140)}`,
+
+  // 4. Real footage: the paperwork face
+  photo: () => `
+    <div class="photo" style="background-image:url(/img/frame-paper.jpg);background-position:center 20%"></div>
+    <div class="shade" style="background:linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.1) 35%, rgba(0,0,0,0.75) 62%, rgba(0,0,0,0.92) 100%)"></div>
+    <div class="h" style="top:${sq ? 520 : 700}px;font-size:${sq ? 104 : 120}px">Nobody remembers<br>their hours.<br><span class="hv">Their phone does.</span></div>
+    ${foot(H - 140)}`,
+
+  // 5. The group-chat texts
+  texts: () => `
+    <div class="photo" style="background-image:url(/img/frame-crew.jpg);opacity:0.55"></div>
+    <div class="shade" style="background:rgba(0,0,0,0.5)"></div>
+    <div class="h" style="top:80px;font-size:${sq ? 96 : 110}px">Friday payroll,<br><span class="hv">every single week:</span></div>
+    <div class="bubble" style="left:72px;top:${sq ? 300 : 400}px"><div class="who">Marco</div>got there like 7?</div>
+    <div class="bubble" style="left:72px;top:${sq ? 455 : 610}px"><div class="who">Dev</div>left around 4ish i think</div>
+    <div class="bubble" style="left:72px;top:${sq ? 610 : 820}px"><div class="who">Sam</div>pretty sure it was 9 hrs 🤷‍♂️</div>
+    <div class="sub" style="top:${sq ? 800 : 1040}px;font-weight:700;color:#F5C400;font-size:42px">Constra: real hours, from their phones.</div>
+    ${foot(H - 140)}`,
+};
+
+document.getElementById("root").innerHTML = `<div class="ad" style="width:${W}px;height:${H}px"><div class="grid"></div>${ads[V]()}</div>`;
+window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+</script>
+</body>
+</html>
