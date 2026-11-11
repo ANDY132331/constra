@@ -14,6 +14,11 @@ import { ArrowRight } from "lucide-react";
  * saver stops at a quarter of them. Reduced motion gets a still.
  */
 const FRAMES = 120;
+// A tiny blurred copy of the first frame for each layout, inline so the shot is there instantly.
+// Low-detail on purpose: the browser doesn't treat it as the page's main content, so the
+// headline stays what the page is measured by.
+const TINY_W = "data:image/webp;base64,UklGRhYDAABXRUJQVlA4WAoAAAAgAAAAHwAAEQAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggKAEAADAGAJ0BKiAAEgA+0VSjS6gkoyGwCAEAGgllAMadIHhh3BhH4z39VFJmFY3tcbsPG4qG//bXUYmBUCAA/vLLwzxoG22te8lG1KPTMyf2HaUgz0eIGPmG0BGbGCI7ksQZc9dMFA8iM9cL7aZJGPqCghEW3y+Ww7lhJJFZMwrSikVOjJEQRwy/S4IGGGdb1MLUaT9ENazuGAmdmiHRkINVSF11uiPHJSSfYbNhpfA68rfqbSE9J58ZBuTzDPqs9AIZVZqyIfnYqvVf4hA/dE7qwBrHYPGefKPeGm0k1KIQ4KfePUYuvwlx3XZMiL80xrFXLl2Nh0D8RmOAx9KEKcoMxtMQkw8hx0P9T14ZOwAkFiFICEnjTXpJRsokH9dJEWX5lDJWld7IAAAA";
+const TINY_M = "data:image/webp;base64,UklGRsICAABXRUJQVlA4WAoAAAAgAAAAEQAAHwAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDgg1AAAAHAFAJ0BKhIAIAA+0VikTSgkoyIwGAgBABoJZQC7AYvMavZr0+fR/8Q1tNv5k8LJNLpqsvQA/trV+TcwZyRER2JnVjWAwvUrmL5spIYFJ6Vt71+r0iEXWZsOtBtz5th1Alz7xEezcvn0QVl7wMh+ASIQ2X/y0ijXyzzH4nDNwR62ZaL0Sx1r1kpUWSPho9pKUPOPzDRXy27zIr4zWzrFUWAj5h5vlAkog8ZHYQZOdlJMvrCw1+MfqxAcmbmjzQLronzKn2aqpmtxkCXzuPNhCwQ7QUAA";
 const src = (set: "w" | "m", i: number) => `/hero/${set}/${String(i).padStart(3, "0")}.webp`;
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
 const ease = (x: number) => 1 - Math.pow(1 - clamp(x), 3);
@@ -53,6 +58,8 @@ export default function FlyHero({ startHref, startLabel }: { startHref: string; 
 
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
     const slow = !!conn?.saveData || /(^|-)(2g|3g)$/.test(conn?.effectiveType ?? "");
+    // The first frame comes straight away; the rest wait until the page has loaded
+    void load(0);
     const run = async () => {
       await load(0);
       if (mq.matches) return;
@@ -134,11 +141,7 @@ export default function FlyHero({ startHref, startLabel }: { startHref: string; 
       <style>{CSS}</style>
       <div className="fh-stick">
         <div className="fh-media" aria-hidden style={{ transform: `scale(${zoom})` }}>
-          {/* First frame as a plain image, so the shot is there before any script runs */}
-          <picture>
-            <source media="(max-aspect-ratio: 1/1)" srcSet={src("m", 0)} />
-            <img className="fh-poster" src={src("w", 0)} alt="" fetchPriority="high" decoding="async" />
-          </picture>
+          <div className="fh-poster" />
           <canvas ref={canvasRef} className="fh-canvas" />
         </div>
         <div className="fh-grade" aria-hidden />
@@ -208,7 +211,9 @@ const CSS = `
 .fh.fh-still{height:100vh}
 .fh-stick{position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden}
 .fh-media{position:absolute; inset:0; transform-origin:50% 45%; will-change:transform}
-.fh-poster,.fh-canvas{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block}
+.fh-poster,.fh-canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.fh-poster{background:url('${TINY_W}') center/cover no-repeat; filter:blur(18px); transform:scale(1.08)}
+@media (max-aspect-ratio: 1/1){ .fh-poster{background-image:url('${TINY_M}')} }
 .fh-canvas{filter:none}
 .fh-media{filter:brightness(.7) contrast(1.08) saturate(1.06)}
 .fh-grade{position:absolute; inset:0; pointer-events:none;
