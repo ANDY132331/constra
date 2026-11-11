@@ -147,7 +147,7 @@ export default function LiveSite() {
         <div className={`lp-stage3d${failed ? " lp-stage3d-flat" : ""}`}>
           {!failed && mounted && <SiteScene playing={playing} initialProgress={reduce ? REDUCED_AT : 0} reveal={reveal} onProgress={onProgress} onReady={onReady} />}
           {showPoster && (
-            <img className="lp-scene-video" src="/site/site-tour-poster.webp" alt="" aria-hidden width={960} height={592} />
+            <img className="lp-scene-video" src="/site/site-tour-poster.webp" alt="" aria-hidden width={960} height={592} loading="lazy" decoding="async" />
           )}
           {failed && (
             /* Recorded from this same scene, so machines without WebGL still see the day */

@@ -94,7 +94,7 @@ export default function AppTour() {
                   aria-label="Screen recording of the Constra app: dashboard, live crew hours, invoices and a daily report"
                 />
               ) : (
-                <img src="/site/app-demo-poster.webp" alt="" aria-hidden width={780} height={1688} />
+                <img src="/site/app-demo-poster.webp" alt="" aria-hidden width={780} height={1688} loading="lazy" decoding="async" />
               )}
             </div>
             <figcaption className="lp-mono">Recorded on a phone screen</figcaption>

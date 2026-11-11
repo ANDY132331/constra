@@ -8,14 +8,17 @@ import { ThemeApplier } from "@/components/theme-applier";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
+// Only a fallback behind Plex, so it isn't fetched up front
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  preload: false,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 const plexSans = IBM_Plex_Sans({
@@ -30,6 +33,8 @@ const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
+  // Small labels only; not worth delaying the first screen for
+  preload: false,
 });
 
 const barlowCondensed = Barlow_Condensed({

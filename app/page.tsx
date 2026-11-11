@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOff } from "lucide-react";
 import LiveSite from "@/components/landing/live-site";
 import SavingsCalc from "@/components/landing/savings-calc";
@@ -13,8 +12,6 @@ import HeroScene from "@/components/landing/hero-scene";
 import ProductReveal from "@/components/landing/product-reveal";
 import { PLAY_STORE_URL } from "@/lib/store-app";
 
-const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--lp-sans", display: "swap" });
-const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--lp-mono", display: "swap" });
 
 function readOnboarded(): boolean {
   try {
@@ -275,7 +272,7 @@ export default function LandingPage() {
   const startLabel = alreadyIn ? "Open dashboard" : "Start free";
 
   return (
-    <div ref={rootRef} className={`lp ${plexSans.variable} ${plexMono.variable}`}>
+    <div ref={rootRef} className="lp">
       <style>{CSS}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON_LD }} />
 
@@ -388,7 +385,7 @@ export default function LandingPage() {
                 ["afternoon", "4:00 PM", "Deck poured, report sent"],
               ].map(([slug, time, caption]) => (
                 <figure key={slug}>
-                  <img src={`/site/site-${slug}.webp`} width={1400} height={864} decoding="async" alt={`The same job site at ${time}: ${caption.toLowerCase()}`} />
+                  <img src={`/site/site-${slug}.webp`} width={1400} height={864} loading="lazy" decoding="async" alt={`The same job site at ${time}: ${caption.toLowerCase()}`} />
                   <figcaption>
                     <span className="lp-mono">{time}</span>
                     {caption}
@@ -603,7 +600,7 @@ const CSS = `
   --night:#0E1016; --night2:#171A22; --night-rule:#2A2E39; --night-ink:#ECEAE5; --night-dim:#9A9C9F;
   color-scheme:dark;
   --display:var(--font-barlow-condensed),'Arial Narrow',sans-serif;
-  --sans:var(--lp-sans),system-ui,sans-serif; --mono:var(--lp-mono),ui-monospace,monospace;
+  --sans:var(--font-plex-sans),system-ui,sans-serif; --mono:var(--font-plex-mono),ui-monospace,monospace;
   position:fixed; inset:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;
   background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
   -webkit-font-smoothing:antialiased;
