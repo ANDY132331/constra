@@ -47,3 +47,4 @@ next-env.d.ts
 
 # Rendered videos are large; keep the source, not the output
 marketing/*.mp4
+marketing/hero/flight/out/

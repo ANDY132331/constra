@@ -84,12 +84,13 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, ci
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       // The hero runs lower-key: in a dark shot the white slabs otherwise read as the
       // brightest thing on screen and pull the eye off the headline.
-      renderer.toneMappingExposure = cinematic ? 1.02 : 1.35;
+      renderer.toneMappingExposure = cinematic ? 1.02 : 1.0;
       el.appendChild(renderer.domElement);
       renderer.domElement.setAttribute("aria-hidden", "true");
 
       const scene = new THREE.Scene();
-      const NIGHT = new THREE.Color("#151617");
+      // Daylight, to match the rest of the homepage
+      const NIGHT = new THREE.Color(cinematic ? "#151617" : "#CFE5F5");
       scene.background = NIGHT.clone();
       scene.fog = new THREE.Fog(NIGHT.clone(), 48, 100);
 
@@ -131,16 +132,16 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, ci
         return tex;
       }
 
-      const padTex = grainTexture("#4A4C4E", "#8A8C8E", 2600);
-      const dirtTex = grainTexture("#26282A", "#3C3E40", 1800);
+      const padTex = grainTexture("#B4B1AA", "#D8D5CE", 2600);
+      const dirtTex = grainTexture("#A08E72", "#BBA98C", 1800);
       if (padTex) padTex.repeat.set(10, 7);
       if (dirtTex) dirtTex.repeat.set(26, 26);
 
       const std = (color: string, extra: Partial<T.MeshStandardMaterialParameters> = {}) =>
         new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0.05, ...extra });
       const M = {
-        ground: std(dirtTex ? "#FFFFFF" : "#26282A", { roughness: 1, map: dirtTex ?? undefined }),
-        pad: std(padTex ? "#FFFFFF" : "#4A4C4E", { roughness: 0.95, map: padTex ?? undefined }),
+        ground: std(dirtTex ? "#FFFFFF" : "#A08E72", { roughness: 1, map: dirtTex ?? undefined }),
+        pad: std(padTex ? "#FFFFFF" : "#B4B1AA", { roughness: 0.95, map: padTex ?? undefined }),
         // Cured concrete: rough, slightly warm, no shine
         concrete: std("#BDB9B1", { roughness: 0.92, metalness: 0 }),
         // Wet pour is darker and still damp enough to catch a little light
@@ -171,7 +172,7 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, ci
       };
 
       // ── Lights ────────────────────────────────────────────────────────────
-      const hemi = new THREE.HemisphereLight("#BBD4EC", "#3A3028", 0.55);
+      const hemi = new THREE.HemisphereLight("#BBD4EC", "#8A7A64", 0.55);
       scene.add(hemi);
       const sun = new THREE.DirectionalLight("#FFF6E8", 2.6);
       sun.castShadow = true;
@@ -193,7 +194,7 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, ci
       scene.add(ground);
       scene.add(mesh(box(30, 0.12, 22), M.pad, 0, 0.06, 0, false));
 
-      const grid = new THREE.GridHelper(30, 15, "#3A3D40", "#2A2C2E");
+      const grid = new THREE.GridHelper(30, 15, "#8F8C85", "#A3A098");
       grid.position.y = 0.13;
       (grid.material as T.Material).transparent = true;
       (grid.material as T.Material).opacity = 0.6;
@@ -501,7 +502,7 @@ export default function SiteScene({ playing, initialProgress = 0, reveal = 1, ci
       vis.observe(el);
 
       const warm = new THREE.Color("#FFB070"), white = new THREE.Color("#FFFFFF");
-      const sky0 = new THREE.Color("#171621"), sky1 = new THREE.Color("#2B3647");
+      const sky0 = new THREE.Color("#BCD3E6"), sky1 = new THREE.Color("#D2E8F7");
       if (cinematic) {
         // Hero grade: a deep indigo dusk instead of slate, and a violet rim from behind so
         // the steel edges separate from the sky the way they do in architectural film.

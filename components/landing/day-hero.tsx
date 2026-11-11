@@ -2,17 +2,17 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, ChevronsRight, HardHat, MapPin, Play, WifiOff } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Camera, ChevronsRight, FileSpreadsheet, HardHat, LogOut, MapPin, Play, WifiOff } from "lucide-react";
 
 // A ~1 KB blurred copy of the first frame, so the shot is there instantly
-const TINY_W = "data:image/webp;base64,UklGRlIDAABXRUJQVlA4WAoAAAAgAAAAHwAAEQAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggZAEAADAHAJ0BKiAAEgA+0VSjS6gkoyGwCAEAGglkAKwzj2kCDAlUozXxa/TPsAdIgcH70HDQvyRxV/T0M2iChFKPOTkyAAD88PTvkUYJPz3B3Gd70KFyJ30dXKjzCUS/VrEx81s9BnlzbNU/t/B3/SI6wcC34c3Tf2GT22jhfoo+B7odbZIkOOBtS9Fr9WCDsGieD2xD4Op3GKr4W6jHCSL7rIkQSAb8aEsn6QmKZN4vlzXezZiVyGcfY+nuQQhDE/+crIungCxhVtl8pLGAu1CHHwWLAiTAc0B3ZVoHVQCjc9mSffIf0HYjIZ3vAgWFtExpuk/ruv9Q8gkr8GY73/1UeIxaPEtSakVstoNoQADqH9LCd/HBMUoKKQ67DUMnzDmR/sTyd1Ht8wmkFv+QOB20er1thiZEA0g9g+/2ELu8/7veFFCkT45QFVHnX1CPKfB4oALXKdrK5prfhcpNE3oYdYeZutgA";
+const TINY_W = "data:image/webp;base64,UklGRjADAABXRUJQVlA4WAoAAAAgAAAAHwAAEQAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggQgEAAHAGAJ0BKiAAEgA+0VSjS6gkoyGwCAEAGglAE6QekwBHgbNDUA6O3kgDx4DEXRa+FWckl/BfFug9fLhqAAD+sBKx9WuEseOkI6N1v5FASmI3GFD+USK7ppmacY0tvCkRcsN0DgdQxCZ4lkXYlOwDec8PFA6emEO70hxqvsXVkIe0ZqumSnqSR5PF8BksZlx6EZlRktE0Fi/s9Nxx6CTtTl6qo+B2wnMkGu6K0waW6JT8ylJT37PjoewR/fGf91BpujvuB5F9Wf4u5jm37b4anDLAg5IBi5j39/acrXHxgFBDaGtRavRCzbQDH3sC87zstfqdPptDlF4K/7WjntHZoe3E5lC8tUyQfAMr2EiEx5ZHxQbne0YFG9y3VaoRy5H4Mz1aukHKPHy8R0M3ON9dWMF/85dnnkOjvhQmnxQTakwwAAA=";
 
 /**
- * The opening shot in daylight: a real excavator at work under a blue sky (a free Pexels clip,
- * looped with a crossfade), a light wash on the left so the headline reads, and white cards
- * across the bottom edge. On phones the footage sits as a wide panel under the buttons, so the
- * whole machine stays in frame. The video only loads once the page
- * has; data saver and reduced motion get a still instead.
+ * The opening shot in daylight: a 3D flight around a city job site (a tower going up, two cranes,
+ * the dig next door), rendered from marketing/hero/flight and looped seamlessly. A light wash on
+ * the left keeps the headline readable and white cards sit across the bottom edge. On phones the
+ * shot is a wide panel under the buttons. The video only loads once the page has; data saver
+ * and reduced motion get a still instead.
  */
 export default function DayHero({ startHref, startLabel }: { startHref: string; startLabel: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -84,7 +84,11 @@ export default function DayHero({ startHref, startLabel }: { startHref: string; 
 
         <div className="dh-card dh-card-r">
           <a href="#day" className="dh-card-head">See a day on site <ArrowUpRight size={15} aria-hidden /></a>
-          <img src="/hero/worker.webp" alt="A worker in a yellow hard hat and hi-vis vest on site" width={480} height={640} loading="lazy" decoding="async" />
+          <ul className="dh-feed" aria-label="Example of what the office sees">
+            <li><span className="dh-feed-i"><Camera size={15} aria-hidden /></span><span><b>Clocked in</b> GPS and photo</span><time>6:58 AM</time></li>
+            <li><span className="dh-feed-i dh-feed-warn"><LogOut size={15} aria-hidden /></span><span><b>Left the site</b> alert sent</span><time>12:14 PM</time></li>
+            <li><span className="dh-feed-i dh-feed-go"><FileSpreadsheet size={15} aria-hidden /></span><span><b>Timesheet ready</b> PDF and Excel</span><time>Fri</time></li>
+          </ul>
           <div className="dh-card-foot">
             <p className="dh-card-title">Made for crews,<br />not paperwork</p>
             <span className="dh-mark" aria-hidden><HardHat size={16} strokeWidth={2.5} /></span>
@@ -100,7 +104,7 @@ const CSS = `
 .dh{position:relative; margin-top:-61px; padding-top:61px; min-height:max(760px, 100vh); background:#cfe7f7; color:#151617; overflow:hidden; isolation:isolate}
 .dh-media{position:absolute; inset:0; z-index:-2}
 .dh-tiny{position:absolute; inset:-30px; background:url('${TINY_W}') center/cover no-repeat; filter:blur(22px)}
-.dh-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:62% 40%; display:block}
+.dh-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:60% 50%; display:block}
 .dh-wash{position:absolute; inset:0; z-index:-1; pointer-events:none; background:
   linear-gradient(90deg, rgba(212,235,250,.97) 0%, rgba(212,235,250,.9) 28%, rgba(212,235,250,.45) 48%, rgba(212,235,250,0) 64%),
   linear-gradient(180deg, rgba(212,235,250,.85) 0%, rgba(212,235,250,0) 16%, rgba(0,0,0,0) 62%, rgba(10,11,16,.55) 100%)}
@@ -138,7 +142,13 @@ const CSS = `
 .dh-mid-icons span + span{margin-left:-10px; background:#F5C400}
 .dh-card-r{display:flex; flex-direction:column}
 .dh-card-head{display:flex; justify-content:space-between; align-items:center; padding:13px 16px; font-size:15px; font-weight:600; color:#151617; text-decoration:none; border-bottom:1px solid #e6e8ea}
-.dh-card-r img{width:100%; height:200px; object-fit:cover; object-position:center 20%; display:block}
+.dh-feed{list-style:none; margin:0; padding:6px 16px; display:grid}
+.dh-feed li{display:grid; grid-template-columns:30px 1fr auto; gap:10px; align-items:center; padding:9px 0; font-size:13px; color:#4b4d50; border-bottom:1px solid #eef0f2}
+.dh-feed b{display:block; color:#151617; font-size:14px; font-weight:600}
+.dh-feed time{font-family:var(--mono); font-size:11px; color:#77797c; align-self:start; padding-top:2px}
+.dh-feed-i{width:30px; height:30px; border-radius:4px; display:flex; align-items:center; justify-content:center; background:#F5C400; color:#141414}
+.dh-feed-warn{background:#fde4df; color:#b9382c}
+.dh-feed-go{background:#dcefe3; color:#1e7a45}
 .dh-card-foot{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; padding:14px 16px}
 .dh-mark{width:34px; height:34px; border-radius:4px; background:#F5C400; color:#141414; display:flex; align-items:center; justify-content:center; flex-shrink:0}
 .dh-skip-cue{display:none}
@@ -154,7 +164,7 @@ const CSS = `
   .dh-grid{order:1; padding-top:30px; gap:0}
   .dh-media{order:2; position:relative; inset:auto; z-index:0; margin:28px 16px 0; height:64vw; max-height:360px; overflow:hidden; border-radius:2px; box-shadow:0 18px 40px rgba(10,11,16,.18)}
   .dh-tiny{inset:-20px}
-  .dh-video{object-position:38% 50%}
+  .dh-video{object-position:50% 50%}
   .dh-cards{order:3; position:relative; bottom:auto; margin-top:14px; padding-bottom:28px; grid-template-columns:1fr; gap:14px}
   .dh-h1{font-size:clamp(46px, 13vw, 70px); margin-top:20px}
   .dh-sub{font-size:16px; margin-top:16px}
@@ -162,10 +172,7 @@ const CSS = `
   .dh-divider{display:none}
   .dh-play{font-size:13px}
   .dh-play-ring{width:46px; height:46px}
-  .dh-card-r{flex-direction:row; align-items:stretch}
-  .dh-card-r .dh-card-head{display:none}
-  .dh-card-r img{width:120px; height:auto; min-height:130px}
-  .dh-card-foot{flex:1; align-items:center}
+  .dh-card-r .dh-card-foot{display:none}
   .dh-card-title{font-size:20px}
 }
 `;
