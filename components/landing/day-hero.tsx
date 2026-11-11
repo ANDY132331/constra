@@ -23,7 +23,8 @@ export default function DayHero({ startHref, startLabel }: { startHref: string; 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
     const saveData = !!conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? "");
-    const set = "w";
+    // Phones show a small panel, so they get a light cut of the same loop
+    const set = window.matchMedia("(max-width: 760px)").matches ? "p" : "w";
     // A still for reduced motion and data saver (and if autoplay is refused)
     const still = () => { v.poster = `/hero/poster-${set}.webp`; };
     if (reduced || saveData) { still(); return; }

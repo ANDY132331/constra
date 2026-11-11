@@ -4,8 +4,8 @@ import path from "path";
 
 // Builds the homepage hero media from a free Pexels clip (39303176, excavator under blue sky):
 //   public/hero/loop-w.mp4   1280x720, for computers
-//   public/hero/loop-m.mp4   720x1280 centre crop, for phones
-//   public/hero/poster-w.webp, poster-m.webp   first frames
+//   public/hero/loop-p.mp4   720x450, the phone panel (~0.8 MB)
+//   public/hero/poster-w.webp, poster-p.webp   first frames
 // The last half-second crossfades into the first, so the loop has no jump.
 // Needs mp4-muxer in ../../.tmp-ad/node_modules and Microsoft Edge.
 // node make-loop.mjs <clip.mp4>
@@ -38,14 +38,15 @@ const results = await p.evaluate(async () => {
     return btoa(s);
   };
   const out = {};
-  for (const [key, W, H, bitrate] of [["w", 1280, 720, 2_600_000], ["m", 720, 1280, 2_000_000]]) {
+  for (const [key, W, H, bitrate] of [["w", 1280, 720, 2_600_000], ["p", 720, 450, 850_000]]) {
     const c = document.createElement("canvas"); c.width = W; c.height = H;
     const g = c.getContext("2d");
     const tmp = document.createElement("canvas"); tmp.width = W; tmp.height = H;
     const tg = tmp.getContext("2d");
     const draw = (ctx) => {
       if (key === "w") ctx.drawImage(v, 0, 0, W, H);
-      else { const sw = v.videoHeight * 9 / 16, sx = (v.videoWidth - sw) * 0.5; ctx.drawImage(v, sx, 0, sw, v.videoHeight, 0, 0, W, H); }
+      // phones: the 16:10 panel, cropped a little toward the machine
+      else { const sw = v.videoHeight * W / H, sx = (v.videoWidth - sw) * 0.3; ctx.drawImage(v, sx, 0, sw, v.videoHeight, 0, 0, W, H); }
     };
     const { Muxer, ArrayBufferTarget } = window.Mp4Muxer;
     const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: W, height: H }, fastStart: "in-memory" });
