@@ -361,7 +361,7 @@ export default function LandingPage() {
             <div className="lp-watch-frame">
               <video
                 src="/marketing/constra-ad-web.mp4"
-                poster="/marketing/constra-ad-poster.jpg"
+                poster="/marketing/constra-ad-poster.webp"
                 controls
                 playsInline
                 preload="none"
