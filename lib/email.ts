@@ -20,8 +20,8 @@ function esc(s: string): string {
 
 type Attachment = { filename: string; content: string; type: string; disposition: "attachment" };
 
-export async function sendEmail({ to, subject, html, attachments }: { to: string; subject: string; html: string; attachments?: Attachment[] }) {
-  return getResend().emails.send({ from: FROM, to, subject, html, ...(attachments ? { attachments } : {}) });
+export async function sendEmail({ to, subject, html, attachments, replyTo }: { to: string; subject: string; html: string; attachments?: Attachment[]; replyTo?: string }) {
+  return getResend().emails.send({ from: FROM, to, subject, html, ...(attachments ? { attachments } : {}), ...(replyTo ? { replyTo } : {}) });
 }
 
 // ── Shared template shell ─────────────────────────────────────────────────────

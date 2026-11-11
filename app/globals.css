@@ -1883,3 +1883,16 @@ body:has([data-app-shell]) { font-variant-numeric: tabular-nums; }
 .ts-sign { border-bottom: 1px solid #151617; }
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Text size (Settings → App Preferences): scales each screen's content. zoom reflows, so
+   nothing spills sideways the way a transform would */
+html[data-text-size="large"] main > .page-enter { zoom: 1.12; }
+html[data-text-size="xl"] main > .page-enter { zoom: 1.25; }
+/* Sections that bleed edge to edge use negative side margins (-mx-5); zoomed, those grow past
+   the side padding by a few pixels, so the padding grows with them */
+html[data-text-size="large"] main.main-scroll { padding-left: 22.4px; padding-right: 22.4px; }
+html[data-text-size="xl"] main.main-scroll { padding-left: 25px; padding-right: 25px; }
+@media (min-width: 768px) {
+  html[data-text-size="large"] main.main-scroll { padding-left: 26.88px; padding-right: 26.88px; }
+  html[data-text-size="xl"] main.main-scroll { padding-left: 30px; padding-right: 30px; }
+}

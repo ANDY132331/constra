@@ -7,9 +7,11 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, FileSpreadsheet, CalendarRange, CalendarOff, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot,
+  Package, FolderOpen, MessagesSquare, FileText, FileSpreadsheet, CalendarRange, CalendarOff, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot, Lightbulb,
 } from "lucide-react";
+import { useState } from "react";
 import { useStore } from "@/lib/store";
+import { FeedbackSheet } from "@/components/feedback-sheet";
 import { useT } from "@/lib/i18n";
 import { isForemanOrAbove, isAdminOrAbove } from "@/lib/permissions";
 
@@ -119,6 +121,7 @@ function NavItem({
 }
 
 export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => void }) {
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const pathname = usePathname();
   const { currentUser, projects } = useStore();
   const t = useT();
@@ -268,8 +271,17 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
               <span className="flex-1">AI Assistant</span>
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setFeedbackOpen(true)}
+            className="group w-full flex items-center gap-3 py-2.5 px-3 rounded-2xl text-[13px] font-medium text-white/50 hover:text-white/85 hover:bg-white/[0.06] transition-all duration-150 mb-0.5 active:scale-[0.97] active:opacity-80 text-left"
+          >
+            <Lightbulb size={15} className="flex-shrink-0 text-amber-400/70 group-hover:text-amber-400" />
+            <span className="flex-1">Send feedback</span>
+          </button>
         </div>
       </nav>
+      {feedbackOpen && <FeedbackSheet onClose={() => { setFeedbackOpen(false); onClose?.(); }} />}
 
       {/* Role indicator */}
       <div className="px-4 py-2 flex-shrink-0">

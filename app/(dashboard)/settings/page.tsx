@@ -9,9 +9,10 @@ import {
   Users, Building2, Bell, BellOff, Shield, HardHat, Lock,
   Plus, Edit2, Trash2, Copy, CheckCircle2, Key, X, Check,
   Globe, Briefcase, DollarSign, Eye, EyeOff, AlertCircle,
-  ShieldCheck, ChevronDown, Clock,
+  ShieldCheck, ChevronDown, Clock, Type,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { TEXT_SIZES, getTextSize, setTextSize, type TextSize } from "@/lib/text-size";
 import { LOCALE_LABELS, type Locale } from "@/lib/i18n/locales";
 import { CURRENCIES, type CurrencyCode } from "@/lib/currency";
 import {
@@ -649,22 +650,24 @@ function SettingsInner() {
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
               <h4 className="text-[14px] font-bold text-white mb-1">Team Invite Code</h4>
               <p className="text-[12px] text-white/40 mb-4">Share this code so workers can join your workspace from the sign-in page.</p>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-4 py-3 font-mono text-[18px] font-bold tracking-[0.2em] text-amber-400">
+              {/* On a phone the code takes its own line and the buttons share the next; four in a
+                  row pushed Regenerate off the screen */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="basis-full sm:basis-auto sm:flex-1 min-w-0 bg-white/[0.04] border border-white/[0.08] rounded-lg px-4 py-3 font-mono text-[18px] font-bold tracking-[0.2em] text-amber-400">
                   {displayCode}
                 </div>
                 <button onClick={copyCode}
-                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors">
+                  className="flex-1 sm:flex-none justify-center min-h-[44px] flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors whitespace-nowrap">
                   {codeCopied ? <CheckCircle2 size={15} className="text-green-400" /> : <Copy size={15} />}
                   {codeCopied ? "Copied!" : "Copy Code"}
                 </button>
                 <button onClick={copyLink}
-                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors">
+                  className="flex-1 sm:flex-none justify-center min-h-[44px] flex items-center gap-2 bg-white/8 hover:bg-white/12 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors whitespace-nowrap">
                   {linkCopied ? <CheckCircle2 size={15} className="text-green-400" /> : <Copy size={15} />}
                   {linkCopied ? "Copied!" : "Copy Link"}
                 </button>
                 <button onClick={regenerateCode} disabled={regenerating}
-                  className="flex items-center gap-2 bg-white/8 hover:bg-white/12 disabled:opacity-50 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors">
+                  className="flex-1 sm:flex-none justify-center min-h-[44px] flex items-center gap-2 bg-white/8 hover:bg-white/12 disabled:opacity-50 text-white/70 text-[12px] font-semibold px-3 py-3 rounded-full transition-colors whitespace-nowrap">
                   <Key size={15} className={regenerating ? "animate-spin" : ""} />
                   {regenerating ? "…" : "Regenerate"}
                 </button>
@@ -704,6 +707,8 @@ function SettingsInner() {
                 ))}
               </div>
             </div>
+
+            <TextSizeCard />
 
             {isAdmin && (<>
             <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
@@ -1569,3 +1574,29 @@ function AccessControlTab({
 
 
 
+
+/** Bigger text on this phone, for anyone who finds the app hard to read on site */
+function TextSizeCard() {
+  const [size, setSize] = useState<TextSize>(() => getTextSize());
+  return (
+    <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <Type size={16} className="text-amber-400" />
+        <div>
+          <h4 className="text-[14px] font-bold text-white">Text size</h4>
+          <p className="text-[11px] text-white/35">Makes every screen bigger on this phone. Everyone on your crew can pick their own.</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Text size">
+        {TEXT_SIZES.map((s) => (
+          <button key={s.id} type="button" role="radio" aria-checked={size === s.id}
+            onClick={() => { setSize(s.id); setTextSize(s.id); }}
+            className={`min-h-[64px] px-3 py-2.5 rounded-xl border text-left transition-all ${size === s.id ? "border-amber-500/50 bg-amber-500/10" : "border-white/[0.06] hover:border-white/12 hover:bg-white/[0.02]"}`}>
+            <p className={`font-bold ${size === s.id ? "text-amber-300" : "text-white/80"}`} style={{ fontSize: `${Math.round(15 * s.scale)}px` }}>Aa</p>
+            <p className={`text-[12px] font-semibold ${size === s.id ? "text-amber-300" : "text-white/60"}`}>{s.label}</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

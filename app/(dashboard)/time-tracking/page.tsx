@@ -954,7 +954,7 @@ export default function TimeTrackingPage() {
       {/* Search + project filter — foreman/admin only */}
       {!isEmployee && (
         <div className="flex gap-2 px-5 pb-4">
-          <label className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3 flex-1 cursor-text">
+          <label className="flex items-center gap-2 bg-[#131110] border border-white/[0.07] rounded-xl px-3.5 py-3 flex-1 min-w-0 cursor-text">
             <Search size={14} className="text-white/30 flex-shrink-0" />
             <input className="bg-transparent text-[14px] text-white/80 placeholder:text-white/25 outline-none flex-1 min-w-0"
               placeholder="Search workers…" value={search} onChange={(e) => setSearch(e.target.value)} />

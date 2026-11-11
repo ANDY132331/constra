@@ -79,6 +79,8 @@ Constra is a mobile-first PWA for construction workforce management, used by con
 **Reports (Admin only)**
 - Payroll summaries, time reports, project cost reports
 - Export as PDF or CSV
+- Text too small? Settings → App Preferences → Text size: Normal, Large or Extra large (per phone)
+- Ideas or problems: menu → Send feedback. It goes straight to the Constra team, who reply by email
 - Menu group "Time & Crew": Time Tracking, Timesheets, Crew Plan, Time Off
 - Crew Plan: a foreman or admin picks a day, adds people to each job, sets a start time, then taps Send to crew; each person gets a notification with the job, start time and address. One job per person per day. Workers see My plan for the week, and Tomorrow on their home screen
 - Time Off: anyone asks for days off (optional reason); foremen and admins get a notification and Approve or Decline; the worker is notified. Approved days show as Off in the crew plan

@@ -105,7 +105,7 @@ export default function RootLayout({
       <body className="bg-[#0a0a0a] text-foreground">
         {/* Apply saved theme before hydration to prevent a flash */}
         <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('constra_theme');if(!t){var s=JSON.parse(localStorage.getItem('constra_v1')||'null');t=(s&&s.theme)||'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`}
+          {`(function(){try{var t=localStorage.getItem('constra_theme');if(!t){var s=JSON.parse(localStorage.getItem('constra_v1')||'null');t=(s&&s.theme)||'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}try{var z=localStorage.getItem('constra_text_size');if(z==='large'||z==='xl')document.documentElement.setAttribute('data-text-size',z);}catch(e){}})();`}
         </Script>
         <StoreProvider>
           {/* Keeps data-theme in sync with the store everywhere in the app */}

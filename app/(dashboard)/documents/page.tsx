@@ -252,7 +252,7 @@ export default function DocumentsPage() {
 
         {/* Project + category selectors */}
         <div className="px-5 mb-4 flex gap-2">
-          <div className="flex-1 flex flex-col gap-1">
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
             <span className="text-[9px] text-white/25 font-bold uppercase tracking-wider px-1">Project</span>
             <CustomSelect
               value={selectedProject}
@@ -261,7 +261,7 @@ export default function DocumentsPage() {
               className="w-full bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 text-[12px] text-white/70 outline-none"
             />
           </div>
-          <div className="flex-1 flex flex-col gap-1">
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
             <span className="text-[9px] text-white/25 font-bold uppercase tracking-wider px-1">Upload as</span>
             <CustomSelect
               value={uploadCategory}
