@@ -8,7 +8,7 @@ import SavingsCalc from "@/components/landing/savings-calc";
 import AppTour from "@/components/landing/app-tour";
 import RealPhotos from "@/components/landing/real-photos";
 import RealClips from "@/components/landing/real-clips";
-import FlyHero from "@/components/landing/fly-hero";
+import DayHero from "@/components/landing/day-hero";
 import ProductReveal from "@/components/landing/product-reveal";
 import { PLAY_STORE_URL } from "@/lib/store-app";
 
@@ -244,7 +244,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const root = rootRef.current;
-    const shot = root?.querySelector(".lp-cine") as HTMLElement | null;
+    const shot = root?.querySelector(".dh") as HTMLElement | null;
     if (!root || !shot) return;
     const onScroll = () => setOverShot(root.scrollTop < shot.offsetHeight - 70);
     onScroll();
@@ -278,7 +278,7 @@ export default function LandingPage() {
 
       <a href="#main" className="lp-skip">Skip to content</a>
 
-      <header className={`lp-nav${overShot ? " lp-nav-dark" : ""}`}>
+      <header className={`lp-nav${overShot ? " lp-nav-day" : ""}`}>
         <div className="lp-wrap lp-nav-inner">
           <Link href="/" className="lp-brand" aria-label="Constra home">
             <span className="lp-brand-mark"><HardHat size={16} strokeWidth={2.5} aria-hidden /></span>
@@ -298,7 +298,7 @@ export default function LandingPage() {
       </header>
 
       <main id="main">
-        <FlyHero startHref={startHref} startLabel={startLabel} />
+        <DayHero startHref={startHref} startLabel={startLabel} />
         <ProductReveal />
 
         {/* Product */}
@@ -583,6 +583,13 @@ const CSS = `
 .lp-nav-dark .lp-nav-links a:hover{color:#F7F5F0}
 .lp-nav-dark .lp-link{text-decoration-color:rgba(255,255,255,.3)}
 .lp-nav{transition:background .35s, border-color .35s, color .35s}
+/* Over the daylight hero: clear, with dark type, like the sky behind it */
+.lp-nav.lp-nav-day{background:transparent; backdrop-filter:none; border-bottom-color:rgba(21,22,23,.18); color:#151617}
+.lp-nav-day .lp-nav-links a{color:rgba(21,22,23,.78)}
+.lp-nav-day .lp-nav-links a:hover{color:#151617}
+.lp-nav-day .lp-link{text-decoration-color:rgba(21,22,23,.35)}
+.lp-nav-day .lp-btn-sm{background:transparent; color:#151617; box-shadow:none; border-color:#151617}
+.lp-nav-day .lp-btn-sm:hover{background:#151617; color:#F5C400}
 @media (prefers-reduced-motion: reduce){.lp-cine-scene,.lp-cine-eyebrow,.lp-cine-h1,.lp-cine-sub,.lp-cine-ctas{animation:none}.lp-cine-cue span{animation:none}}
 @media (max-width:640px){
   .lp-cine{height:min(100svh,780px); min-height:600px}
