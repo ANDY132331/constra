@@ -8,7 +8,7 @@ import SavingsCalc from "@/components/landing/savings-calc";
 import AppTour from "@/components/landing/app-tour";
 import RealPhotos from "@/components/landing/real-photos";
 import RealClips from "@/components/landing/real-clips";
-import HeroScene from "@/components/landing/hero-scene";
+import FlyHero from "@/components/landing/fly-hero";
 import ProductReveal from "@/components/landing/product-reveal";
 import { PLAY_STORE_URL } from "@/lib/store-app";
 
@@ -298,7 +298,7 @@ export default function LandingPage() {
       </header>
 
       <main id="main">
-        <HeroScene startHref={startHref} startLabel={startLabel} />
+        <FlyHero startHref={startHref} startLabel={startLabel} />
         <ProductReveal />
 
         {/* Product */}

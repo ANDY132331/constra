@@ -43,6 +43,10 @@ self.addEventListener("fetch", (e) => {
   // Never cache Next.js server-side data fetches
   if (url.pathname.startsWith("/_next/data/")) return;
 
+  // Homepage media (the drone flight frames, the ad video, site photos) is for visitors on the
+  // website. Keeping it would put tens of MB on every crew phone for nothing the app needs.
+  if (/^\/(hero|marketing|site)\//.test(url.pathname)) return;
+
   // Cache-first for immutable static assets (content-hashed by Next.js build)
   if (url.pathname.startsWith("/_next/static/")) {
     e.respondWith(
