@@ -8,7 +8,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { mergeGeometries, mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 
 const TAU = Math.PI * 2;
 let DUSK = false;
@@ -174,6 +174,7 @@ function facadeTex(f, seed) {
     if (DUSK && r() < 0.34) {
       const warm = ["#ffd08a", "#ffc470", "#ffe2b0", "#ffb866", "#e8f0ff"][Math.floor(r() * 5)];
       const ins = Math.max(3, w * 0.07); g.fillStyle = warm; g.fillRect(x + ins, y + ins, w - 2 * ins, h - 2 * ins); eg.fillStyle = warm; eg.fillRect(x + ins, y + ins, w - 2 * ins, h - 2 * ins);
+      for (const c of [g, eg]) { c.fillStyle = c === g ? "rgba(70,45,20,.55)" : "#000"; c.fillRect(x + w / 2 - 1.5, y + ins, 3, h - 2 * ins); if (r() < 0.5) c.fillRect(x + ins, y + h * 0.58, w - 2 * ins, 3); }
     }
   };
   for (let fl = 0; fl < 8; fl++) for (let b = 0; b < 8; b++) {
@@ -479,6 +480,7 @@ function materials(T) {
     roof: std({ map: T.roof, roughness: 0.9 }),
     roofs: ["#ffffff", "#e9e7e2", "#9d9a93", "#c9c3b5"].map((c) => std({ map: T.roof, color: c, roughness: 0.9 })),
     facades: T.facades.map((f) => std({ map: f.map, roughnessMap: f.rough, roughness: 1, metalness: 0.08, envMapIntensity: 1.3, ...(DUSK ? { emissive: "#ffffff", emissiveMap: f.emis, emissiveIntensity: 1.05 } : {}) })),
+    uplight: std({ color: "#ffe0b0", emissive: "#ffb45a", emissiveIntensity: 3.6 }),
     lamp: std({ color: "#fff0d0", emissive: "#ffc878", emissiveIntensity: 3.2 }),
     bulb: std({ color: "#fff0d0", emissive: "#ffb860", emissiveIntensity: 2.6 }),
     redlight: std({ color: "#ff3030", emissive: "#ff2020", emissiveIntensity: 4 }),
@@ -498,11 +500,11 @@ function flat(mat, x0, z0, x1, z1, y, tile, { receive = true } = {}) {
 }
 
 function ground(scene, T, M) {
-  const asphalt = new THREE.MeshStandardMaterial({ map: T.asphalt, roughness: 0.92 });
+  const asphalt = new THREE.MeshStandardMaterial({ map: T.asphalt, roughness: DUSK ? 0.5 : 0.92, envMapIntensity: DUSK ? 1.6 : 1 });
   // one big asphalt sheet under everything; blocks sit on top as kerbed slabs
   scene.add(flat(asphalt, -1400, -1400, 1400, SITE.z0, 0, 12), flat(asphalt, -1400, SITE.z1, 1400, 1400, 0, 12),
     flat(asphalt, -1400, SITE.z0, SITE.x0, SITE.z1, 0, 12), flat(asphalt, SITE.x1, SITE.z0, 1400, SITE.z1, 0, 12));
-  const pave = new THREE.MeshStandardMaterial({ map: T.pave, roughness: 0.9 });
+  const pave = new THREE.MeshStandardMaterial({ map: T.pave, roughness: DUSK ? 0.72 : 0.9 });
   const grass = new THREE.MeshStandardMaterial({ map: T.grass, roughness: 1 });
   const lineMat = new THREE.MeshStandardMaterial({ color: "#e9e7df", roughness: 0.8 });
   // lane dashes and crossings near the site
@@ -550,13 +552,21 @@ function facadeBox(mat, roofMat, x, z, w, h, d, ry = 0) {
 }
 
 function treeGeo() {
-  const g = new THREE.IcosahedronGeometry(1, 2), p = g.attributes.position, r = rng(5);
-  for (let i = 0; i < p.count; i++) { const k = 0.82 + r() * 0.3; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k * 0.92, p.getZ(i) * k); }
+  let g = new THREE.IcosahedronGeometry(1, 3);
+  g.deleteAttribute("normal"); g.deleteAttribute("uv");
+  g = mergeVertices(g, 1e-4);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+    const h = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453, k = 0.84 + 0.26 * (h - Math.floor(h));
+    p.setXYZ(i, x * k, y * k * 0.92, z * k);
+  }
   g.computeVertexNormals();
   return g;
 }
 const TREE = treeGeo();
 function addTree(M, x, z, s = 1) {
+  if (DUSK && R() < 0.55) addSphere("uplight", M.uplight, x + 0.5, 0.3, z + 0.5, 0.3);
   const h = rr(5, 8) * s, cr = rr(2.4, 3.6) * s;
   addRod("trunk", M.trunk, V(x, 0, z), V(x, h * 0.55, z), 0.22 * s);
   const b = batch("leaves", TREE, M.leaves);
@@ -964,13 +974,17 @@ function hoarding(scene, M) {
 // Downscale with a light film grade: a touch more contrast, warm highlights and a soft vignette.
 export function grade(g, src, sx, sy, sw, sh, W, H) {
   g.save();
-  g.filter = "contrast(1.07) saturate(1.1) brightness(1.02)";
+  g.filter = "contrast(1.08) saturate(1.1) brightness(1.02)";
+  g.drawImage(src, sx, sy, sw, sh, 0, 0, W, H);
+  // halation: a soft, bright bloom of the highlights, like a lens
+  g.globalCompositeOperation = "screen"; g.globalAlpha = 0.2;
+  g.filter = "blur(" + Math.round(W / 130) + "px) brightness(1.25) contrast(1.15)";
   g.drawImage(src, sx, sy, sw, sh, 0, 0, W, H);
   g.restore();
-  const v = g.createRadialGradient(W * 0.55, H * 0.5, Math.min(W, H) * 0.35, W * 0.55, H * 0.5, Math.max(W, H) * 0.78);
-  v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(10,16,24,0.22)");
+  const v = g.createRadialGradient(W * 0.5, H * 0.5, Math.min(W, H) * 0.33, W * 0.5, H * 0.5, Math.max(W, H) * 0.75);
+  v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(8,10,22,0.3)");
   g.fillStyle = v; g.fillRect(0, 0, W, H);
   g.globalCompositeOperation = "soft-light";
-  g.fillStyle = "rgba(255,214,160,0.12)"; g.fillRect(0, 0, W, H);
+  g.fillStyle = "rgba(255,206,150,0.12)"; g.fillRect(0, 0, W, H);
   g.globalCompositeOperation = "source-over";
 }

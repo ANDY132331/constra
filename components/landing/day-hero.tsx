@@ -74,6 +74,12 @@ const CSS = `
 .dh-play{display:inline-flex; align-items:center; gap:14px; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:.06em; text-decoration:none; color:#fff; text-shadow:0 1px 14px rgba(0,0,0,.5)}
 .dh-play-ring{width:48px; height:48px; border-radius:50%; border:1.5px solid rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; padding-left:3px; transition:background .2s, color .2s}
 .dh-play:hover .dh-play-ring{background:#fff; color:#141414}
+@keyframes dh-rise{from{opacity:0; transform:translateY(22px)} to{opacity:1; transform:none}}
+.dh-kicker{animation:dh-rise 1.1s .2s cubic-bezier(.2,.7,.2,1) both}
+.dh-h1{animation:dh-rise 1.2s .4s cubic-bezier(.2,.7,.2,1) both}
+.dh-sub{animation:dh-rise 1.1s .7s cubic-bezier(.2,.7,.2,1) both}
+.dh-ctas{animation:dh-rise 1.1s .95s cubic-bezier(.2,.7,.2,1) both}
+@media (prefers-reduced-motion: reduce){.dh-kicker,.dh-h1,.dh-sub,.dh-ctas{animation:none}}
 @media (max-width: 760px){
   .dh{min-height:max(640px, 100svh); align-items:flex-end}
   .dh-still{background-image:url('/hero/dusk-poster-p.webp')}
