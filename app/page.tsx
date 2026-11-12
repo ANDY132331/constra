@@ -571,13 +571,13 @@ const CSS = `
 .lp-nav-dark .lp-nav-links a:hover{color:#F7F5F0}
 .lp-nav-dark .lp-link{text-decoration-color:rgba(255,255,255,.3)}
 .lp-nav{transition:background .35s, border-color .35s, color .35s}
-/* Over the daylight hero: clear, with dark type, like the sky behind it */
-.lp-nav.lp-nav-day{background:rgba(214,234,248,.72); backdrop-filter:blur(12px) saturate(1.2); -webkit-backdrop-filter:blur(12px) saturate(1.2); border-bottom-color:rgba(21,22,23,.14); color:#151617}
-.lp-nav-day .lp-nav-links a{color:rgba(21,22,23,.78)}
-.lp-nav-day .lp-nav-links a:hover{color:#151617}
-.lp-nav-day .lp-link{text-decoration-color:rgba(21,22,23,.35)}
-.lp-nav-day .lp-btn-sm{background:transparent; color:#151617; box-shadow:none; border-color:#151617}
-.lp-nav-day .lp-btn-sm:hover{background:#151617; color:#F5C400}
+/* Over the dusk hero: clear, with white type, like the sky behind it */
+.lp-nav.lp-nav-day{background:linear-gradient(180deg,rgba(14,10,24,.6),rgba(14,10,24,0)); backdrop-filter:none; -webkit-backdrop-filter:none; border-bottom-color:transparent; color:#fff}
+.lp-nav-day .lp-nav-links a{color:rgba(255,255,255,.88)}
+.lp-nav-day .lp-nav-links a:hover{color:#fff}
+.lp-nav-day .lp-link{text-decoration-color:rgba(255,255,255,.45)}
+.lp-nav-day .lp-btn-sm{background:transparent; color:#fff; box-shadow:none; border-color:rgba(255,255,255,.85)}
+.lp-nav-day .lp-btn-sm:hover{background:#fff; color:#141414}
 
 .lp{
   /* Daylight palette, continuing the hero's sky: a pale blue-grey ground, white cards with

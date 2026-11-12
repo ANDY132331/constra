@@ -76,26 +76,26 @@ export default function FlyIn() {
 }
 
 const CSS = `
-.fi{position:relative; min-height:max(640px, 100vh); background:#b9d6ee; color:#151617; overflow:hidden; isolation:isolate}
+.fi{position:relative; min-height:max(640px, 100vh); background:#2a2038; color:#fff; overflow:hidden; isolation:isolate}
 .fi-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; z-index:-2}
-.fi-shade{position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(90deg, rgba(214,234,248,.8) 0%, rgba(214,234,248,.35) 30%, rgba(214,234,248,0) 50%), linear-gradient(0deg, rgba(10,12,16,.3) 0%, rgba(10,12,16,0) 26%)}
+.fi-shade{position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(90deg, rgba(14,10,24,.72) 0%, rgba(14,10,24,.38) 32%, rgba(14,10,24,0) 55%), linear-gradient(0deg, rgba(14,10,24,.4) 0%, rgba(14,10,24,0) 26%)}
 .fi-inner{position:relative; min-height:inherit; display:flex; flex-direction:column; justify-content:center; padding-block:96px 72px}
 .fi-kicker{display:flex; align-items:center; gap:10px; margin:0 0 14px; font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:600}
-.fi-kicker span{width:18px; height:8px; background:repeating-linear-gradient(135deg,#151617 0 4px,#F5C400 4px 8px)}
+.fi-kicker span{width:18px; height:8px; background:repeating-linear-gradient(135deg,#fff 0 4px,#F5C400 4px 8px)}
 .fi-h2{margin:0; font-family:var(--display); font-weight:900; text-transform:uppercase; font-size:clamp(44px,6vw,92px); line-height:.9}
-.fi-card{margin-top:30px; width:min(400px,100%); min-height:176px; background:#fff; border-radius:2px; padding:20px 22px 22px; box-shadow:0 24px 60px rgba(10,20,30,.28); border-top:5px solid #F5C400; animation:fi-in .5s cubic-bezier(.2,.7,.2,1) both}
+.fi-card{margin-top:30px; width:min(400px,100%); min-height:176px; color:#151617; background:#fff; border-radius:2px; padding:20px 22px 22px; box-shadow:0 24px 60px rgba(10,20,30,.28); border-top:5px solid #F5C400; animation:fi-in .5s cubic-bezier(.2,.7,.2,1) both}
 .fi-tag{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:600; color:#4b4d50}
 .fi-title{margin:12px 0 6px; font-family:var(--display); font-weight:800; text-transform:uppercase; font-size:30px; line-height:1}
 .fi-body{margin:0; font-size:15px; line-height:1.5; color:#45484C}
-.fi-rail{position:absolute; right:24px; top:50%; transform:translateY(-50%); list-style:none; margin:0; padding:0; height:220px; width:3px; background:rgba(21,22,23,.22); display:flex; flex-direction:column; justify-content:space-between}
-.fi-rail i{position:absolute; inset:0; background:#F5C400; transform-origin:top; box-shadow:0 0 0 .5px #151617}
+.fi-rail{position:absolute; right:24px; top:50%; transform:translateY(-50%); list-style:none; margin:0; padding:0; height:220px; width:3px; background:rgba(255,255,255,.3); display:flex; flex-direction:column; justify-content:space-between}
+.fi-rail i{position:absolute; inset:0; background:#F5C400; transform-origin:top; box-shadow:none}
 .fi-rail li{position:relative; z-index:1; height:0}
-.fi-rail li span{position:absolute; left:-5px; top:-6px; width:13px; height:13px; background:#fff; border:2px solid #151617; transition:background .25s}
+.fi-rail li span{position:absolute; left:-5px; top:-6px; width:13px; height:13px; background:#2a2038; border:2px solid #fff; transition:background .25s}
 .fi-rail li[data-on="true"] span{background:#F5C400}
 @keyframes fi-in{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
 @media (max-width:760px){
   .fi{min-height:max(620px, 100svh)}
-  .fi-shade{background:linear-gradient(180deg, rgba(214,234,248,.9) 0%, rgba(214,234,248,.5) 32%, rgba(214,234,248,0) 52%), linear-gradient(0deg, rgba(10,12,16,.25), rgba(10,12,16,0) 30%)}
+  .fi-shade{background:linear-gradient(180deg, rgba(14,10,24,.8) 0%, rgba(14,10,24,.45) 32%, rgba(14,10,24,0) 55%), linear-gradient(0deg, rgba(14,10,24,.3), rgba(14,10,24,0) 30%)}
   .fi-inner{justify-content:flex-start; padding-block:72px 24px}
   .fi-h2{font-size:clamp(38px,12vw,56px)}
   .fi-card{margin-top:auto; width:100%; padding:16px 18px 18px; min-height:150px}
