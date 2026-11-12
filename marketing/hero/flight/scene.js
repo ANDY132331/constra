@@ -239,7 +239,7 @@ const ROAD_W = 16, PX = 144, PZ = 116, RX0 = -60, RZ0 = -50;
 export const LOOP = { seconds: 24 };
 
 export function createWorld(canvas, width, height, opts = {}) {
-  const { sunElev = 42, sunAz = 215, sunColor = "#ffeed6", sunPower = 4.3 } = opts;
+  const { sunElev = 42, sunAz = 215, sunColor = "#ffeed6", sunPower = 4.3, geofence = false } = opts;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(1);
   renderer.setSize(width, height, false);
@@ -311,7 +311,26 @@ export function createWorld(canvas, width, height, opts = {}) {
   composer.addPass(ao);
   composer.addPass(new OutputPass());
 
+  // The geofence: a hi-vis ring on the ground and a faint wall rising from it
+  if (geofence) {
+    const gc = V(12, 0, 8), gr = 96;
+    const ring = new THREE.Mesh(new THREE.RingGeometry(gr - 0.9, gr, 160), new THREE.MeshBasicMaterial({ color: "#f5c400", side: THREE.DoubleSide, toneMapped: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.set(gc.x, 0.5, gc.z); scene.add(ring);
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(gr, 160), new THREE.MeshBasicMaterial({ color: "#f5c400", transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
+    disc.rotation.x = -Math.PI / 2; disc.position.set(gc.x, 0.45, gc.z); scene.add(disc);
+    const wall = new THREE.Mesh(new THREE.CylinderGeometry(gr, gr, 46, 160, 1, true), new THREE.MeshBasicMaterial({ color: "#f5c400", transparent: true, opacity: 0.1, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
+    wall.position.set(gc.x, 23, gc.z); scene.add(wall);
+  }
   const center = V(14, 12, 6);
+  // the fly-in: a smooth path from high over the city, down to the gate, round the tower, and up
+  const FP = [
+    [V(340, 270, 390), V(12, 10, 8), 34], [V(200, 140, 262), V(12, 14, 8), 36], [V(84, 74, 178), V(30, 12, 40), 40],
+    [V(84, 14, 94), V(24, 12, 36), 44], [V(58, 9, 68), V(10, 14, 12), 48], [V(-13, 9, 70), V(14, 15, 8), 48],
+    [V(-64, 34, 54), V(12, 20, 6), 42], [V(-70, 70, -30), V(12, 22, 6), 38], [V(60, 140, -66), V(12, 18, 8), 36],
+  ];
+  const fpPos = new THREE.CatmullRomCurve3(FP.map((k) => k[0]), false, "centripetal");
+  const fpLook = new THREE.CatmullRomCurve3(FP.map((k) => k[1]), false, "centripetal");
+  const ease = (x) => x * x * (3 - 2 * x);
   const VFOV = 42, HALF = VFOV / 2;
   camera.fov = VFOV; camera.updateProjectionMatrix();
   function cameraAt(t) {
@@ -336,6 +355,14 @@ export function createWorld(canvas, width, height, opts = {}) {
     renderAt(t) {
       for (const f of anim) f(t);
       cameraAt(t);
+      composer.render();
+    },
+    flightAt(t) {
+      for (const f of anim) f(0.3 + t * 0.4);
+      const u = Math.min(1, Math.max(0, t));
+      camera.position.copy(fpPos.getPoint(u)); camera.up.set(0, 1, 0); camera.lookAt(fpLook.getPoint(u));
+      const x = u * (FP.length - 1), i = Math.min(FP.length - 2, Math.floor(x));
+      camera.fov = FP[i][2] + (FP[i + 1][2] - FP[i][2]) * ease(x - i); camera.updateProjectionMatrix();
       composer.render();
     },
     // a fixed shot (for stills)

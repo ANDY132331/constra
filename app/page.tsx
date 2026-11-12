@@ -10,6 +10,7 @@ import RealPhotos from "@/components/landing/real-photos";
 import RealClips from "@/components/landing/real-clips";
 import DayHero from "@/components/landing/day-hero";
 import ProductReveal from "@/components/landing/product-reveal";
+import FlyIn from "@/components/landing/fly-in";
 import { PLAY_STORE_URL } from "@/lib/store-app";
 
 
@@ -268,6 +269,19 @@ export default function LandingPage() {
     return () => root.removeEventListener("pointermove", onMove);
   }, []);
 
+  // Sections ease in as they scroll into view. Nothing is hidden until this has run, and
+  // people who ask for less motion never get the effect.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+    const els = Array.from(root.querySelectorAll<HTMLElement>(".lp-section-head, .lp-spec-col, .lp-day-shots figure, .lp-timeline li, .lp-price-card, .lp-faq-list details, .lp-field-list > div, .lp-tally, .lp-calc-card, .lp-watch-frame, .lp-hero-copy, .lp-hero-visual, .lp-reveal-frame"));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add("rv-in"); io.unobserve(e.target); } });
+    }, { root, rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    els.forEach((el, i) => { el.classList.add("rv"); el.style.setProperty("--rv-d", `${(i % 4) * 70}ms`); io.observe(el); });
+    return () => { io.disconnect(); els.forEach((el) => el.classList.remove("rv", "rv-in")); };
+  }, []);
+
   const startHref = alreadyIn ? "/dashboard" : "/onboarding";
   const startLabel = alreadyIn ? "Open dashboard" : "Start free";
 
@@ -285,7 +299,7 @@ export default function LandingPage() {
             Constra
           </Link>
           <nav className="lp-nav-links" aria-label="Main">
-            <a href="#day">How it works</a>
+            <a href="#how">How it works</a>
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
@@ -299,6 +313,7 @@ export default function LandingPage() {
 
       <main id="main">
         <DayHero startHref={startHref} startLabel={startLabel} />
+        <FlyIn />
         <ProductReveal />
 
         {/* Product */}
@@ -982,6 +997,8 @@ const CSS = `
   .lp-reveal-frame{transform:none}
 }
 
+.rv{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.7,.2,1) var(--rv-d,0ms), transform .7s cubic-bezier(.2,.7,.2,1) var(--rv-d,0ms)}
+.rv.rv-in{opacity:1; transform:none}
 /* ── Daylight sections ─────────────────────────────────────────────── */
 .lp-kicker::before{background:repeating-linear-gradient(135deg,#151617 0 4px,var(--hv) 4px 8px)}
 .lp-kicker-inv{color:var(--ink2)}
