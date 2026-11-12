@@ -59,13 +59,13 @@ if (mode === "stills") {
     const world = window.S.createWorld(c, 1280 * SS, 720 * SS);
     const b64 = async (x) => { const u = new Uint8Array(x instanceof Blob ? await x.arrayBuffer() : x); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
     const { Muxer, ArrayBufferTarget } = window.Mp4Muxer;
-    const sets = [["w", 1280, 720, 850_000], ["p", 720, 450, 360_000]].map(([key, W, H, bitrate]) => {
+    const sets = [["w", 1600, 900, 1_300_000], ["p", 720, 450, 360_000]].map(([key, W, H, bitrate]) => {
       const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
       const g = cv.getContext("2d"); g.imageSmoothingQuality = "high";
       const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: W, height: H, frameRate: FPS }, fastStart: "in-memory" });
       const st = { key, W, H, cv, g, muxer, err: null };
       st.enc = new VideoEncoder({ output: (ch, m) => muxer.addVideoChunk(ch, m), error: (e) => { st.err = String(e); } });
-      st.enc.configure({ codec: key === "w" ? "avc1.640028" : "avc1.64001f", width: W, height: H, bitrate, framerate: FPS });
+      st.enc.configure({ codec: key === "w" ? "avc1.640033" : "avc1.64001f", width: W, height: H, bitrate, framerate: FPS });
       return st;
     });
     const out = {};
