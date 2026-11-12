@@ -65,13 +65,13 @@ if (mode === "stills") {
     const b64 = async (x) => { const u = new Uint8Array(x instanceof Blob ? await x.arrayBuffer() : x); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
     const { Muxer, ArrayBufferTarget } = window.Mp4Muxer;
     // w: widescreen; p: a 4:5 crop from the middle for phones
-    const sets = [["w", 1920, 1080, 1_600_000, "avc1.640033"], ["p", 720, 900, 650_000, "avc1.64001f"]].map(([key, W, H, bitrate, codec]) => {
+    const sets = [["w", 1920, 1080, 2_800_000, "avc1.640033"], ["p", 720, 900, 1_000_000, "avc1.64001f"]].map(([key, W, H, bitrate, codec]) => {
       const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
       const g = cv.getContext("2d"); g.imageSmoothingQuality = "high";
       const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: W, height: H, frameRate: FPS }, fastStart: "in-memory" });
       const st = { key, W, H, cv, g, muxer, err: null };
       st.enc = new VideoEncoder({ output: (ch, m) => muxer.addVideoChunk(ch, m), error: (e) => { st.err = String(e); } });
-      st.enc.configure({ codec, width: W, height: H, bitrate, framerate: FPS });
+      st.enc.configure({ codec, width: W, height: H, bitrate, framerate: FPS, latencyMode: "quality", bitrateMode: "variable" });
       return st;
     });
     const out = {}, t0 = performance.now();
@@ -82,7 +82,7 @@ if (mode === "stills") {
         else { const sw = RH * s.W / s.H, sx = (RW - sw) * 0.5; window.S.grade(s.g, c, sx, 0, sw, RH, s.W, s.H); }
         if (i === 0) out[`poster-${s.key}`] = await b64(await new Promise((r) => s.cv.toBlob(r, "image/webp", s.key === "w" ? 0.72 : 0.7)));
         const f = new VideoFrame(s.cv, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
-        s.enc.encode(f, { keyFrame: i % 48 === 0 }); f.close();
+        s.enc.encode(f, { keyFrame: i % 96 === 0 }); f.close();
         while (s.enc.encodeQueueSize > 4) await new Promise((r) => setTimeout(r, 10));
       }
       if (i % 48 === 0) console.log(`frame ${i}/${N}`, Math.round((performance.now() - t0) / 1000), "s");
