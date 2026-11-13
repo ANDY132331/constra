@@ -116,3 +116,9 @@ Constra needs a company account. Your company admin can invite you, or you can c
 
 **Tags:**
 construction management, crew scheduling, time tracking, invoicing, field service
+
+---
+
+## Phone screenshots (updated 13 Nov 2026)
+
+`phone1`–`phone8` in this folder and in `play-store-upload/2 - Phone Screenshots/` are real captures of the app (not mockups), 1080 × 1920 (9:16), no transparency, in the order to upload: dashboard, hours this week, timesheets, Excel templates, crew plan, invoices, time off, crew. Google Play needs the long side to be at most twice the short side, so the earlier 1170 × 2532 images were too tall. Regenerate with `node app-store-screenshots/capture.mjs` (the `play-*` files in `.tmp-shots/out`).

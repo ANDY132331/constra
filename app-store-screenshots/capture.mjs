@@ -68,8 +68,8 @@ async function shot(p, path, file, { scroll = 0, before } = {}) {
 const report = {};
 
 // ── Apple 6.9" (1290 × 2796) and Google Play phone (1170 × 2532) ──
-for (const [prefix, w, h] of [["apple", 440, 956], ["play", 390, 844]]) {
-  const { ctx, p } = await page({ width: w, height: h, scale: 3 });
+for (const [prefix, w, h] of [["apple", 440, 956], ["play", 405, 720]]) {
+  const { ctx, p } = await page({ width: w, height: h, scale: prefix === "play" ? 8 / 3 : 3 });
   await shot(p, "/dashboard", `${prefix}-1-dashboard.png`);
   await shot(p, "/time-tracking", `${prefix}-2-time.png`, { before: async (p) => { await p.evaluate(() => { const el = [...document.querySelectorAll("section[aria-label='Hours by week']")].find((e) => e.getBoundingClientRect().width > 0); const m = document.querySelector("main"); m.scrollTo(0, el.getBoundingClientRect().top + m.scrollTop - m.getBoundingClientRect().top - 12); }); await p.waitForTimeout(300); } });
   await shot(p, "/crew-plan", `${prefix}-3-crew-plan.png`);
