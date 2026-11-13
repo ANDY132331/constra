@@ -1,5 +1,6 @@
 ﻿"use client";
-import { toast } from "sonner";
+
+import { ExportPdfButton } from "@/components/export-pdf-button";import { toast } from "sonner";
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -126,11 +127,11 @@ export default function EquipmentPage() {
         {/* Top bar */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h2 className="text-[22px] font-bold text-white">Equipment</h2>
-          <button onClick={openAdd}
+          <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportEquipmentListPdf(equipment, c)} /><button onClick={openAdd}
             className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
             <Plus size={14} />
             Add
-          </button>
+          </button></div>
         </div>
 
         {/* Stats chips */}
@@ -256,11 +257,11 @@ export default function EquipmentPage() {
                 {equipment.filter((e) => e.status === "in-use").length} units deployed · {formatCurrencyCompact(totalDailyValue, currency as never)}/day active cost
               </p>
             </div>
-            <button onClick={openAdd}
+            <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportEquipmentListPdf(equipment, c)} /><button onClick={openAdd}
               className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
               <Plus size={15} />
               Add Equipment
-            </button>
+            </button></div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

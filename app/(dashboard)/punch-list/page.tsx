@@ -1,5 +1,6 @@
 "use client";
-import { toast } from "sonner";
+
+import { ExportPdfButton } from "@/components/export-pdf-button";import { toast } from "sonner";
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -128,6 +129,7 @@ export default function PunchListPage() {
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h2 className="text-[22px] font-bold text-white">Punch List</h2>
           <div className="flex items-center gap-2">
+            <ExportPdfButton label="PDF" run={(m, c) => m.exportPunchListPdf(punchItems, c)} />
             {canEdit && counts.open > 0 && (
               <button
                 onClick={() => setResolveAllConfirm(true)}
@@ -257,6 +259,7 @@ export default function PunchListPage() {
                   )}
                   {canEdit && (
                     <div className="flex items-center gap-3 ml-auto">
+                      <ExportPdfButton bare title="Download this item as PDF" label="PDF" iconOnly className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all" run={(m, c) => m.exportPunchItemPdf(item, c)} />
                       <button aria-label="Edit" onClick={() => openEdit(item)}
                         className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">
                         <Pencil size={13} />
@@ -294,11 +297,11 @@ export default function PunchListPage() {
               <h2 className="text-2xl font-bold text-white tracking-tight">Punch List</h2>
               <p className="text-white/35 text-sm mt-0.5">Track and resolve defects, issues, and site observations</p>
             </div>
-            {canEdit && <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
+            <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportPunchListPdf(punchItems, c)} />{canEdit && <button onClick={() => { setForm(blank); setEditId(null); setShowModal(true); }}
               className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
               <Plus size={15} />
               Add Item
-            </button>}
+            </button>}</div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -383,6 +386,7 @@ export default function PunchListPage() {
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${prioCfg.className}`}>{prioCfg.label}</span>
                           {canEdit && <>
+                            <ExportPdfButton bare title="Download this item as PDF" label="PDF" iconOnly className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-white/20 hover:text-white/60 transition-all" run={(m, c) => m.exportPunchItemPdf(item, c)} />
                             <button aria-label="Edit" onClick={() => openEdit(item)}
                               className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-white/60 transition-all">
                               <Pencil size={13} />

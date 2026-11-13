@@ -1,5 +1,6 @@
 ﻿"use client";
-import { toast } from "sonner";
+
+import { ExportPdfButton, useDocCtx } from "@/components/export-pdf-button";import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -162,19 +163,18 @@ export default function ChangeOrdersPage() {
     setEditing(null);
   }, [form, editing, addChangeOrder, updateChangeOrder, currentUser, selected]);
 
+  const docCtx = useDocCtx();
   const handleExportPdf = useCallback(async (co: ChangeOrder) => {
     setPdfLoading(true);
     try {
-      const { exportChangeOrderPdf } = await import("@/lib/pdf-export");
-      const project = projects.find((p) => p.id === co.projectId);
-      const submitter = workers.find((w) => w.id === co.submittedById);
-      await exportChangeOrderPdf({ changeOrder: co, projectName: project?.name ?? "Unknown", submitterName: submitter?.name ?? "Unknown", currency });
+      const m = await import("@/lib/doc-pdfs");
+      await m.exportChangeOrderBrandedPdf(co, docCtx);
     } catch {
       toast.error("Failed to export PDF");
     } finally {
       setPdfLoading(false);
     }
-  }, [projects, workers, currency]);
+  }, [docCtx]);
 
   const projectMap = new Map(projects.map((p) => [p.id, p]));
   const workerMap = new Map(workers.map((w) => [w.id, w]));
@@ -194,9 +194,9 @@ export default function ChangeOrdersPage() {
             <h1 className="text-[22px] font-bold text-white">Change Orders</h1>
           )}
           {!selected && (
-            <button onClick={openNew} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-full transition-colors">
+            <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportChangeOrderListPdf(changeOrders, c)} /><button onClick={openNew} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold px-4 py-2 rounded-full transition-colors">
               <Plus size={14} /> New
-            </button>
+            </button></div>
           )}
         </div>
 

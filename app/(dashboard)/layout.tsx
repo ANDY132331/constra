@@ -30,7 +30,7 @@ const ALWAYS_ALLOWED = ["/dashboard", "/time-tracking", "/safety", "/messages", 
 const PAGE_MIN_LEVEL: Record<string, "foreman" | "admin"> = {
   "/tasks": "foreman", "/rfis": "foreman", "/equipment": "foreman",
   "/materials": "foreman", "/documents": "foreman", "/blueprints": "foreman",
-  "/daily-reports": "foreman",
+  "/daily-reports": "foreman", "/templates": "foreman",
   "/crew": "admin", "/reports": "admin", "/estimates": "admin",
   "/invoices": "admin", "/change-orders": "admin", "/budget": "admin", "/insurance": "admin",
 };

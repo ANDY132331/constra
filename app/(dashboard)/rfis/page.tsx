@@ -1,5 +1,6 @@
 "use client";
-import { toast } from "sonner";
+
+import { ExportPdfButton } from "@/components/export-pdf-button";import { toast } from "sonner";
 
 import { useState } from "react";
 import { MessageSquare, Plus, Search, Clock, CheckCircle2, XCircle, ChevronDown, ChevronRight, X, Trash2, Pencil } from "lucide-react";
@@ -172,6 +173,7 @@ export default function RFIsPage() {
             </button>
           </div>
         )}
+        <div className="pt-1"><ExportPdfButton label="Download RFI as PDF" run={(m, c) => m.exportRfiPdf(rfi, c)} /></div>
     </>
   );
 
@@ -182,12 +184,12 @@ export default function RFIsPage() {
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h1 className="text-[22px] font-bold text-white">RFIs</h1>
-          <button
+          <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportRfiListPdf(rfis, c)} /><button
             onClick={() => { setEditId(null); setForm(blank()); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
           >
             <Plus size={14} /> New RFI
-          </button>
+          </button></div>
         </div>
 
         {/* Status filter pills */}
@@ -318,11 +320,11 @@ export default function RFIsPage() {
               <h2 className="text-2xl font-bold text-white tracking-tight">RFIs</h2>
               <p className="text-white/35 text-sm mt-0.5">Request For Information — formal clarification and design queries</p>
             </div>
-            <button onClick={() => { setEditId(null); setForm(blank()); setShowModal(true); }}
+            <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportRfiListPdf(rfis, c)} /><button onClick={() => { setEditId(null); setForm(blank()); setShowModal(true); }}
               className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
               <Plus size={15} />
               New RFI
-            </button>
+            </button></div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">

@@ -1,5 +1,6 @@
 "use client";
 
+import { ExportPdfButton } from "@/components/export-pdf-button";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Circle, Clock, AlertTriangle, Plus, Search, X, Pencil, Trash2, ClipboardList } from "lucide-react";
@@ -147,12 +148,12 @@ export default function TasksPage() {
       <div className="lg:hidden -mx-5 -mt-5 pb-6">
         <div className="px-5 pt-5 pb-4 flex items-center justify-between">
           <h2 className="text-[22px] font-bold text-white">Tasks</h2>
-          <button
+          <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportTaskListPdf(projects.flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.name }))), c)} /><button
             onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask()); setShowModal(true); }}
             className="flex items-center gap-1.5 bg-amber-500 text-black font-bold text-[13px] px-4 py-2 rounded-full"
           >
             <Plus size={15} /> New
-          </button>
+          </button></div>
         </div>
         <div className="px-5 mb-4 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
           {FILTER_TABS.map((tab) => (
@@ -250,13 +251,13 @@ export default function TasksPage() {
             {allTasks.length} tasks across {projects.length} projects
           </p>
         </div>
-        <button
+        <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportTaskListPdf(projects.flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.name }))), c)} /><button
           onClick={() => { setEditTaskId(null); setEditProjectId(null); setForm(blankTask()); setShowModal(true); }}
           className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors"
         >
           <Plus size={15} />
           New Task
-        </button>
+        </button></div>
       </div>
 
       <div className="flex gap-1 bg-[#0d0d0d] border border-white/[0.06] rounded-full p-1 w-fit flex-wrap">

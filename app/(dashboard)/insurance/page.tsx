@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { ExportPdfButton } from "@/components/export-pdf-button";
 import { useState, useMemo } from "react";
 import { isAdminOrAbove } from "@/lib/permissions";
 import {
@@ -183,13 +184,13 @@ export default function InsurancePage() {
           <p className="text-[12px] text-white/35 mt-0.5">Track certificates of insurance for your company, workers, and subcontractors</p>
         </div>
         {isAdmin && (
-          <button
+          <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportInsuranceListPdf(insurancePolicies, c)} /><button
             onClick={openAdd}
             className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-all active:scale-95 shadow-lg shadow-amber-500/15"
           >
             <Plus size={15} />
             Add Policy
-          </button>
+          </button></div>
         )}
       </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { ExportPdfButton, useDocCtx } from "@/components/export-pdf-button";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -136,53 +137,9 @@ export default function SafetyPage() {
     return Math.floor((Date.now() - last.getTime()) / 86400000);
   })();
 
+  const docCtx = useDocCtx();
   const exportPdf = (incident: typeof safetyIncidents[0]) => {
-    const project = getProjectById(incident.projectId);
-    const reporter = getWorkerById(incident.reportedById);
-    const injured = incident.injuredId ? getWorkerById(incident.injuredId) : null;
-    const typeCfg = TYPE_CONFIG[incident.type];
-    const sevCfg = SEVERITY_CONFIG[incident.severity];
-    const dateStr = new Date(incident.date).toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
-    const h = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Incident Report — ${dateStr}</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; color: #111; }
-  h1 { font-size: 22px; margin-bottom: 4px; }
-  .meta { color: #555; font-size: 13px; margin-bottom: 24px; }
-  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-right: 6px; }
-  .badge-sev { background: #fef3c7; color: #92400e; }
-  .badge-osha { background: #fee2e2; color: #991b1b; }
-  .section { margin-top: 18px; }
-  .label { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 4px; }
-  .value { font-size: 14px; color: #111; line-height: 1.5; }
-  .action { background: #f0fdf4; border-left: 3px solid #16a34a; padding: 10px 14px; margin-top: 10px; border-radius: 4px; }
-  hr { border: none; border-top: 1px solid #e5e7eb; margin: 24px 0; }
-  .footer { font-size: 11px; color: #9ca3af; margin-top: 32px; }
-  @media print { body { margin: 20px; } }
-</style></head><body>
-<h1>Safety Incident Report</h1>
-<div class="meta">Generated ${new Date().toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" })} · Constra Workforce OS</div>
-<hr>
-<div><span class="badge badge-sev">${h(typeCfg.label)} · ${h(sevCfg.label)}</span>${incident.reportedToOSHA ? '<span class="badge badge-osha">OSHA REPORTED</span>' : ""}</div>
-<div class="section"><div class="label">Date of Incident</div><div class="value">${dateStr}</div></div>
-<div class="section"><div class="label">Project</div><div class="value">${h(project?.name ?? "—")}</div></div>
-<div class="section"><div class="label">Description</div><div class="value">${h(incident.description)}</div></div>
-${incident.actionTaken ? `<div class="action"><div class="label">Corrective Action Taken</div><div class="value">${h(incident.actionTaken)}</div></div>` : ""}
-${reporter ? `<div class="section"><div class="label">Reported By</div><div class="value">${h(reporter.name)}</div></div>` : ""}
-${injured ? `<div class="section"><div class="label">Injured Worker</div><div class="value">${h(injured.name)}</div></div>` : ""}
-${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Reporting Status</div><div class="value">Reported to OSHA as required</div></div>` : ""}
-<hr>
-<div class="footer">This document was generated from the Constra safety log. Keep a signed copy for compliance records.</div>
-<script>window.onload = function() { window.print(); }<\/script>
-</body></html>`;
-    // The iOS app can't open print pop-ups, so it hands over the report as a file instead.
-    if (isNativeApp()) {
-      saveFile(new Blob([html], { type: "text/html" }), `incident-${incident.date}.html`).catch(() => toast.error("Could not export the report"));
-      return;
-    }
-    const win = window.open("", "_blank");
-    if (win) { win.document.write(html); win.document.close(); }
-    else { toast.error("Popup blocked — allow popups to export the report"); }
+    import("@/lib/doc-pdfs").then((m) => m.exportIncidentPdf(incident, docCtx)).catch(() => toast.error("The PDF couldn't be made. Try again."));
   };
 
   return (
@@ -192,13 +149,13 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
         {/* Top bar */}
         <div className="px-5 pt-5 pb-4 flex items-center justify-between">
           <h1 className="text-[22px] font-bold text-white">Safety</h1>
-          <button
+          <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportIncidentListPdf(safetyIncidents, c)} /><button
             onClick={() => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); }}
             className="bg-red-500 hover:bg-red-400 text-white font-bold text-[13px] px-4 py-2 rounded-xl flex items-center gap-1.5"
           >
             <Plus size={14} />
             Report Incident
-          </button>
+          </button></div>
         </div>
 
         {/* Stats chips */}
@@ -358,11 +315,11 @@ ${incident.reportedToOSHA ? `<div class="section"><div class="label">OSHA Report
                 {safetyIncidents.length} incidents logged · {currency === "USD" ? "OSHA reporting required for injuries" : "Serious injuries may need to be reported to your safety regulator"}
               </p>
             </div>
-            <button onClick={() => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); }}
+            <div className="flex items-center gap-2"><ExportPdfButton label="PDF" run={(m, c) => m.exportIncidentListPdf(safetyIncidents, c)} /><button onClick={() => { setEditId(null); setForm({ ...blank, date: toLocalDateString(new Date()) }); setShowModal(true); }}
               className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-[13px] px-4 py-2.5 rounded-full transition-colors flex-shrink-0">
               <Plus size={15} />
               Log Incident
-            </button>
+            </button></div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

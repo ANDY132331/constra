@@ -76,6 +76,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
       ["Job costs", "Live labour cost per job against budget, flagged at 80%"],
       ["Estimates & invoices", "Quotes built on site, turned into invoices in one step"],
       ["Change orders", "Priced, approved and tracked against budget"],
+      ["Excel templates", "23 ready-made sheets with your logo: payments, job costs, RFI log, schedule and more"],
     ],
   },
   {
@@ -83,7 +84,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
     items: [
       ["Daily reports", "Hours, weather, tasks and photos, compiled for you"],
       ["Safety log", "Near misses, injuries and hazards with photos"],
-      ["Punch lists & RFIs", "Assigned, photographed, closed out"],
+      ["Punch lists & RFIs", "Assigned, photographed, closed out, each one a PDF with your logo"],
       ["Equipment & materials", "Service dates, cert expiry, deliveries, low stock"],
       ["Client progress link", "Progress and recent photos for the client, no login, no prices"],
     ],

@@ -94,7 +94,7 @@ self.addEventListener("fetch", (e) => {
 
 // Fetches every screen and its code ahead of time, so a page first opened on a job site with no
 // signal still loads. Sent by the app once someone is signed in.
-const APP_PAGES = ["/invoices/offline", "/estimates/offline", "/dashboard","/time-tracking", "/timesheets", "/crew-plan", "/time-off", "/schedule", "/safety", "/messages", "/photos", "/projects", "/tasks", "/punch-list", "/rfis", "/equipment", "/materials", "/documents", "/blueprints", "/daily-reports", "/crew", "/reports", "/estimates", "/invoices", "/change-orders", "/budget", "/insurance", "/settings", "/support"];
+const APP_PAGES = ["/invoices/offline", "/estimates/offline", "/dashboard","/time-tracking", "/timesheets", "/crew-plan", "/time-off", "/templates", "/schedule", "/safety", "/messages", "/photos", "/projects", "/tasks", "/punch-list", "/rfis", "/equipment", "/materials", "/documents", "/blueprints", "/daily-reports", "/crew", "/reports", "/estimates", "/invoices", "/change-orders", "/budget", "/insurance", "/settings", "/support"];
 
 async function warmCache() {
   const cache = await caches.open(CACHE);

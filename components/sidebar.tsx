@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Clock, FolderKanban, CheckSquare, Calculator, Receipt,
   ClipboardList, Images, CalendarDays, ShieldAlert, Truck, MessageSquare,
   BarChart3, Settings, Search, HardHat, Users, X,
-  Package, FolderOpen, MessagesSquare, FileText, FileSpreadsheet, CalendarRange, CalendarOff, GitPullRequest, Layers, LifeBuoy, DollarSign, ShieldCheck, Bot, Lightbulb,
+  Package, FolderOpen, MessagesSquare, FileText, FileSpreadsheet, CalendarRange, CalendarOff, GitPullRequest, Layers, LayoutTemplate, LifeBuoy, DollarSign, ShieldCheck, Bot, Lightbulb,
 } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
@@ -71,6 +71,7 @@ const OPS_ITEMS: { href: string; label: string; icon: React.ComponentType<{ size
   { href: "/blueprints",    label: "Blueprints",    icon: Layers,         minLevel: "foreman" },
   { href: "/daily-reports", label: "Daily Reports", icon: FileText,       minLevel: "foreman" },
   { href: "/change-orders", label: "Change Orders", icon: GitPullRequest, minLevel: "admin" },
+  { href: "/templates",     label: "Excel Templates", icon: LayoutTemplate, minLevel: "foreman" },
 ];
 
 function NavItem({

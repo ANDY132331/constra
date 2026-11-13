@@ -1,5 +1,6 @@
 "use client";
-import { getCurrentPosition, geolocationAvailable } from "@/lib/native";
+
+import { useDocCtx } from "@/components/export-pdf-button";import { getCurrentPosition, geolocationAvailable } from "@/lib/native";
 import { toast } from "sonner";
 
 import { useState, useCallback, useEffect } from "react";
@@ -156,19 +157,18 @@ export default function DailyReportsPage() {
     toast.success("Daily report created");
   }, [form, addDailyReport, currentUser.id, metric]);
 
+  const docCtx = useDocCtx();
   const handleExportPdf = useCallback(async (report: DailyReport) => {
     setPdfLoading(true);
     try {
-      const { exportDailyReportPdf } = await import("@/lib/pdf-export");
-      const project = projects.find((p) => p.id === report.projectId);
-      const submitter = workers.find((w) => w.id === report.submittedById);
-      await exportDailyReportPdf({ report, projectName: project?.name ?? "Unknown", submitterName: submitter?.name ?? "Unknown", metric });
+      const m = await import("@/lib/doc-pdfs");
+      await m.exportDailyReportBrandedPdf(report, docCtx, metric);
     } catch {
       toast.error("Failed to export PDF");
     } finally {
       setPdfLoading(false);
     }
-  }, [projects, workers, metric]);
+  }, [docCtx, metric]);
 
   const projectMap = new Map(projects.map((p) => [p.id, p]));
   const workerMap = new Map(workers.map((w) => [w.id, w]));
