@@ -48,7 +48,7 @@ function periodBounds(period: "week" | "month" | "quarter"): { start: Date; end:
 export default function ReportsPage() {
   const spendOf = useProjectSpend();
   const {
-    workers, projects, clockEntries, currency, currentUser, companyName,
+    workers, projects, clockEntries, currency, currentUser, companyName, companyLogo,
     overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
   } = useStore();
   const router = useRouter();
@@ -236,7 +236,7 @@ export default function ReportsPage() {
               <button
                 onClick={async () => {
                   setPdfLoading(true);
-                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } }); toast.success(withRunningNote("PDF downloaded")); }
+                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } }); toast.success(withRunningNote("PDF downloaded")); }
                   catch { toast.error("Failed to export PDF"); }
                   finally { setPdfLoading(false); }
                 }}
@@ -484,7 +484,7 @@ export default function ReportsPage() {
                 onClick={async () => {
                   setPdfLoading(true);
                   try {
-                    await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } });
+                    await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } });
                     toast.success(withRunningNote("PDF downloaded"));
                   } catch {
                     toast.error("Failed to export PDF");

@@ -3,12 +3,13 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Banknote, CalendarRange, ClipboardList, FileSpreadsheet, ImagePlus, Loader2, Sparkles, Users } from "lucide-react";
+import { Banknote, CalendarRange, ClipboardList, FileSpreadsheet, ImagePlus, Loader2, PencilLine, Sparkles, Users } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isAdminOrAbove } from "@/lib/permissions";
 import { saveFile } from "@/lib/native";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { CATEGORY_LABELS, TEMPLATES, type Category, type Template, type TemplateData } from "@/lib/excel-templates";
+import SheetEditor from "@/components/sheet-editor";
 
 const CATEGORY_ICON: Record<Category, React.ComponentType<{ size?: number; className?: string }>> = {
   money: Banknote, crew: Users, site: ClipboardList, plans: CalendarRange,
@@ -23,6 +24,7 @@ export default function TemplatesPage() {
   const [category, setCategory] = useState<Category | "all">("all");
   const [projectId, setProjectId] = useState("none");
   const [busy, setBusy] = useState<string | null>(null);
+  const [editor, setEditor] = useState<{ tpl: Template; withData: boolean } | null>(null);
 
   const data: TemplateData = useMemo(() => ({
     currency, workers, projects, invoices, rfis, punchItems, safetyIncidents, equipment, materialEntries, dailyReports,
@@ -62,7 +64,7 @@ export default function TemplatesPage() {
       <div>
         <h2 className="text-2xl font-bold text-white">Excel templates</h2>
         <p className="text-[13px] text-white/60 mt-1 max-w-xl">
-          Ready-made sheets with your logo on top. Download one blank, or start from your own records, then change anything you like in Excel.
+          Ready-made sheets with your logo on top. Fill one in right here, with the totals worked out as you type, then download it as Excel or a PDF.
         </p>
       </div>
 
@@ -101,7 +103,7 @@ export default function TemplatesPage() {
           const n = counts.get(t.id) ?? 0;
           const shown = t.cols.slice(0, 5).map((c) => c.label);
           const more = t.cols.length - shown.length;
-          const blankKey = `${t.id}:blank`, dataKey = `${t.id}:data`;
+          const blankKey = `${t.id}:blank`;
           return (
             <li key={t.id} className="bg-[#111111] border border-white/[0.07] rounded-2xl p-5 flex flex-col gap-3">
               <div className="flex items-start gap-3">
@@ -117,32 +119,43 @@ export default function TemplatesPage() {
               <p className="text-[12px] text-white/55 leading-relaxed">
                 {shown.join(" · ")}{more > 0 ? ` · +${more} more` : ""}
               </p>
-              <div className="mt-auto pt-1 flex flex-col sm:flex-row gap-2">
+              <div className="mt-auto pt-1 space-y-2">
                 <button
                   type="button"
-                  onClick={() => download(t, false)}
-                  disabled={!!busy}
-                  className="flex-1 inline-flex items-center justify-center gap-2 min-h-[46px] rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                  onClick={() => setEditor({ tpl: t, withData: false })}
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-[46px] rounded-full bg-amber-500 hover:bg-amber-400 text-black text-[13px] font-bold transition-colors"
                 >
-                  {busy === blankKey ? <Loader2 size={15} className="animate-spin" /> : <FileSpreadsheet size={15} />} Download blank
+                  <PencilLine size={15} /> Fill in here
                 </button>
-                {t.prefill && (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {t.prefill && (
+                    <button
+                      type="button"
+                      onClick={() => setEditor({ tpl: t, withData: true })}
+                      disabled={n === 0}
+                      title={n === 0 ? `You don't have any ${t.prefillLabel?.replace(/^my /, "")} yet` : undefined}
+                      className="flex-1 inline-flex items-center justify-center gap-2 min-h-[46px] rounded-full bg-white/[0.08] hover:bg-white/[0.12] text-white text-[13px] font-bold transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    >
+                      <Sparkles size={15} />
+                      {n > 0 ? `Start with ${t.prefillLabel} (${n})` : `No ${t.prefillLabel?.replace(/^my /, "")} yet`}
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => download(t, true)}
-                    disabled={!!busy || n === 0}
-                    title={n === 0 ? `You don't have any ${t.prefillLabel?.replace(/^my /, "")} yet` : undefined}
-                    className="flex-1 inline-flex items-center justify-center gap-2 min-h-[46px] rounded-full bg-white/[0.08] hover:bg-white/[0.12] text-white text-[13px] font-bold transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    onClick={() => download(t, false)}
+                    disabled={!!busy}
+                    className="flex-1 inline-flex items-center justify-center gap-2 min-h-[46px] rounded-full border border-white/[0.12] hover:bg-white/[0.05] text-white/85 text-[13px] font-bold transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
-                    {busy === dataKey ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-                    {n > 0 ? `With ${t.prefillLabel} (${n})` : `No ${t.prefillLabel?.replace(/^my /, "")} yet`}
+                    {busy === blankKey ? <Loader2 size={15} className="animate-spin" /> : <FileSpreadsheet size={15} />} Blank Excel file
                   </button>
-                )}
+                </div>
               </div>
             </li>
           );
         })}
       </ul>
+
+      {editor && <SheetEditor key={`${editor.tpl.id}:${editor.withData}`} tpl={editor.tpl} data={data} withData={editor.withData} projectName={projectName} onClose={() => setEditor(null)} />}
 
       <p className="text-[12px] text-white/50">
         Every sheet is a normal Excel file. Type under the last row to add more, use the arrows in the header to filter, and change the drop-down lists if you want your own.

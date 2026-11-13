@@ -129,7 +129,7 @@ export default function PunchListPage() {
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <h2 className="text-[22px] font-bold text-white">Punch List</h2>
           <div className="flex items-center gap-2">
-            <ExportPdfButton label="PDF" run={(m, c) => m.exportPunchListPdf(punchItems, c)} />
+            <ExportPdfButton label="PDF" iconOnly title="Download the punch list as PDF" run={(m, c) => m.exportPunchListPdf(punchItems, c)} />
             {canEdit && counts.open > 0 && (
               <button
                 onClick={() => setResolveAllConfirm(true)}
@@ -238,7 +238,7 @@ export default function PunchListPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 pt-2 border-t border-white/[0.05]">
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/[0.05]">
                   {item.status === "open" && (
                     <button onClick={() => { updatePunchItem(item.id, { status: "in-progress" }); toast.success("Item started"); }}
                       className="inline-flex items-center justify-center min-h-[44px] text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-5 py-1 rounded-full transition-colors">
@@ -258,7 +258,7 @@ export default function PunchListPage() {
                     </button>
                   )}
                   {canEdit && (
-                    <div className="flex items-center gap-3 ml-auto">
+                    <div className="flex items-center gap-2 ml-auto">
                       <ExportPdfButton bare title="Download this item as PDF" label="PDF" iconOnly className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all" run={(m, c) => m.exportPunchItemPdf(item, c)} />
                       <button aria-label="Edit" onClick={() => openEdit(item)}
                         className="w-11 h-11 flex items-center justify-center rounded-full text-white/50 bg-white/[0.05] active:bg-white/10 transition-all">

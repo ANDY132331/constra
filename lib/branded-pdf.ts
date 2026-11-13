@@ -38,6 +38,8 @@ export type ListPdf = {
   filename: string;
   /** colours the cell in this column by its text */
   toneColumn?: { index: number; tones: Record<string, Tone> };
+  /** the last row is a total: set it apart */
+  totalRow?: boolean;
 };
 
 const today = () => new Date().toLocaleDateString("en-CA", { dateStyle: "long" });
@@ -61,45 +63,49 @@ type Ctx = Awaited<ReturnType<typeof start>>;
 
 const lastY = (doc: Jspdf) => (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
 
-/** Logo (or an initial in a hi-vis square), company name and address, then the document kind and number on the right */
+/** Logo (or an initial in a hi-vis square) and company on the left; the document type, large, with its number on the right */
 function drawTop(c: Ctx, brand: Brand, kind: string, number?: string) {
   const { doc, W, M } = c;
-  let x = M;
   const top = 12;
+  let x = M, textY = top + 6;
   if (c.logo) {
-    const r = Math.min(46 / c.logo.width, 16 / c.logo.height);
+    const r = Math.min(52 / c.logo.width, 22 / c.logo.height);
     const w = c.logo.width * r, h = c.logo.height * r;
     doc.addImage(c.logo.dataUrl, "PNG", M, top, w, h, "logo", "FAST");
-    x = M + w + 5;
+    x = M; textY = top + h + 5;
   } else {
-    doc.setFillColor(...HV); doc.roundedRect(M, top, 14, 14, 1.5, 1.5, "F");
-    doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(...INK);
-    doc.text(t((brand.company || "C").charAt(0).toUpperCase()), M + 7, top + 9.4, { align: "center" });
-    x = M + 19;
+    doc.setFillColor(...HV); doc.roundedRect(M, top, 16, 16, 1.8, 1.8, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(...INK);
+    doc.text(t((brand.company || "C").charAt(0).toUpperCase()), M + 8, top + 11, { align: "center" });
+    x = M + 21; textY = top + 7;
   }
   doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...INK);
-  doc.text(t(brand.company || "Your company"), x, top + 6);
+  const name = t(brand.company || "Your company");
+  doc.text(name, x, textY);
+  let leftMax = Math.max(x + doc.getTextWidth(name), c.logo ? M + 52 : 0);
   if (brand.address) {
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...INK3);
-    doc.text(doc.splitTextToSize(t(brand.address), W - M - x - 60).slice(0, 2), x, top + 11);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...INK3);
+    const lines = (doc.splitTextToSize(t(brand.address), 70) as string[]).slice(0, 3);
+    doc.text(lines, x, textY + 5);
+    leftMax = Math.max(leftMax, x + Math.max(...lines.map((ln) => doc.getTextWidth(ln))));
   }
-  doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...INK3);
-  {
-    // letter-spaced text can't be right-aligned by the PDF library (it ignores the spacing), so place it by its width
-    const kt = t(kind).toUpperCase(), cs = 0.6;
-    doc.text(kt, W - M - (doc.getTextWidth(kt) + cs * (kt.length - 1)), top + 4, { charSpace: cs });
-  }
-  if (number) { doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor(...INK); doc.text(t(number), W - M, top + 12, { align: "right" }); }
-  doc.setFillColor(...HV); doc.rect(M, 33, W - M * 2, 1.1, "F");
+  // the title, sized down to fit beside the logo
+  doc.setFont("helvetica", "bold"); doc.setTextColor(...INK);
+  let size = 24; const kt = t(kind).toUpperCase(), maxW = W - M - leftMax - 8;
+  doc.setFontSize(size);
+  while (doc.getTextWidth(kt) > maxW && size > 12) { size -= 1; doc.setFontSize(size); }
+  doc.text(kt, W - M, top + 9, { align: "right" });
+  if (number) { doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK3); doc.text(t(number), W - M, top + 16, { align: "right" }); }
+  doc.setDrawColor(...RULE); doc.setLineWidth(0.3); doc.line(M, 42, W - M, 42);
 }
 
 function slimHeader(c: Ctx, brand: Brand, label: string) {
   const { doc, W, M } = c;
   doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...INK);
-  doc.text(t(brand.company), M, 12);
+  doc.text(t(brand.company), M, 11);
   doc.setFont("helvetica", "normal"); doc.setTextColor(...INK3);
-  doc.text(t(label), W - M, 12, { align: "right" });
-  doc.setFillColor(...HV); doc.rect(M, 14.5, W - M * 2, 0.7, "F");
+  doc.text(t(label), W - M, 11, { align: "right" });
+  doc.setDrawColor(...RULE); doc.setLineWidth(0.3); doc.line(M, 14, W - M, 14);
 }
 
 function finish(c: Ctx, brand: Brand, label: string) {
@@ -108,10 +114,10 @@ function finish(c: Ctx, brand: Brand, label: string) {
   for (let i = 1; i <= n; i++) {
     doc.setPage(i);
     if (i > 1) slimHeader(c, brand, label);
-    doc.setDrawColor(...RULE); doc.setLineWidth(0.2); doc.line(M, H - 13, W - M, H - 13);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...INK3);
-    doc.text(t(`${brand.company}  -  Generated ${today()}`), M, H - 8.5);
-    doc.text(`Page ${i} of ${n}`, W - M, H - 8.5, { align: "right" });
+    doc.setFillColor(...HV); doc.rect(0, H - 9, W, 9, "F");
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...INK);
+    doc.text(t(`${brand.company}   -   ${label}   -   Generated ${today()}`), M, H - 3.4);
+    doc.text(`Page ${i} of ${n}`, W - M, H - 3.4, { align: "right" });
   }
 }
 
@@ -125,7 +131,7 @@ export async function exportRecordPdf(r: RecordPdf) {
   drawTop(c, r.brand, r.kind, r.number);
 
   // title and status
-  let y = 46;
+  let y = 54;
   doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(...INK);
   const titleW = r.status ? CW - 38 : CW;
   const titleLines = doc.splitTextToSize(t(r.title), titleW) as string[];
@@ -146,7 +152,7 @@ export async function exportRecordPdf(r: RecordPdf) {
     rows.push([a[0], t(a[1]) || "-", b[0], b[0] ? t(b[1]) || "-" : ""]);
   }
   autoTable(doc, {
-    startY: y, margin: { left: M, right: M, top: 20 }, body: rows, theme: "plain",
+    startY: y, margin: { left: M, right: M, top: 20, bottom: 16 }, body: rows, theme: "plain",
     styles: { fontSize: 9.5, cellPadding: { top: 2.6, bottom: 2.6, left: 3, right: 3 }, textColor: INK, lineColor: RULE, lineWidth: 0 },
     columnStyles: {
       0: { cellWidth: 30, fontStyle: "bold", fontSize: 7.5, textColor: INK3, fillColor: PAPER },
@@ -159,7 +165,7 @@ export async function exportRecordPdf(r: RecordPdf) {
   });
   y = lastY(doc) + 8;
 
-  const room = (need: number) => { if (y + need > H - 20) { doc.addPage(); y = 24; } };
+  const room = (need: number) => { if (y + need > H - 22) { doc.addPage(); y = 24; } };
   const heading = (txt: string) => {
     room(16);
     doc.setFillColor(...HV); doc.rect(M, y - 3, 3, 3, "F");
@@ -183,9 +189,9 @@ export async function exportRecordPdf(r: RecordPdf) {
   if (r.table) {
     if (r.table.heading) heading(r.table.heading);
     autoTable(doc, {
-      startY: y, margin: { left: M, right: M, top: 20 }, head: [r.table.head.map(t)], body: r.table.rows.map((row) => row.map(t)), foot: r.table.foot ? [r.table.foot.map(t)] : undefined,
+      startY: y, margin: { left: M, right: M, top: 20, bottom: 16 }, head: [r.table.head.map(t)], body: r.table.rows.map((row) => row.map(t)), foot: r.table.foot ? [r.table.foot.map(t)] : undefined,
       theme: "plain", styles: { fontSize: 9, cellPadding: 2.6, textColor: INK2, lineColor: RULE, lineWidth: { bottom: 0.2 } },
-      headStyles: { fillColor: INK, textColor: [255, 255, 255], fontStyle: "bold", fontSize: 8, lineWidth: 0 },
+      headStyles: { fillColor: HV, textColor: INK, fontStyle: "bold", fontSize: 8, lineWidth: 0 },
       footStyles: { fillColor: PAPER, textColor: INK, fontStyle: "bold", lineWidth: 0 },
       alternateRowStyles: { fillColor: [250, 250, 248] },
       columnStyles: Object.fromEntries((r.table.align ?? []).map((a, i) => [i, { halign: a }])),
@@ -211,14 +217,9 @@ export async function exportRecordPdf(r: RecordPdf) {
 
 export async function exportListPdf(l: ListPdf) {
   const c = await start(l.brand, l.landscape);
-  const { doc, autoTable, W, M, CW } = c;
-  drawTop(c, l.brand, "Report", undefined);
-  let y = 46;
-  doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(...INK);
-  doc.text(t(l.title), M, y);
-  doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...INK3);
-  doc.text(t(l.subtitle ?? `Generated ${today()}`), W - M, y, { align: "right" });
-  y += 6;
+  const { doc, autoTable, M, CW } = c;
+  drawTop(c, l.brand, l.title, l.subtitle ?? `Generated ${today()}`);
+  let y = 50;
 
   if (l.summary?.length) {
     const n = l.summary.length, w = CW / n;
@@ -235,12 +236,13 @@ export async function exportListPdf(l: ListPdf) {
 
   const total = l.columns.reduce((s, col) => s + (col.w ?? 1), 0);
   autoTable(doc, {
-    startY: y, margin: { left: M, right: M, top: 20 }, head: [l.columns.map((col) => t(col.label))], body: l.rows.map((row) => row.map(t)),
+    startY: y, margin: { left: M, right: M, top: 20, bottom: 16 }, head: [l.columns.map((col) => t(col.label))], body: l.rows.map((row) => row.map(t)),
     theme: "plain", styles: { fontSize: 8.5, cellPadding: 2.4, textColor: INK2, lineColor: RULE, lineWidth: { bottom: 0.2 }, valign: "top" },
-    headStyles: { fillColor: INK, textColor: [255, 255, 255], fontStyle: "bold", fontSize: 7.5, lineWidth: 0 },
+    headStyles: { fillColor: HV, textColor: INK, fontStyle: "bold", fontSize: 8, lineWidth: 0 },
     alternateRowStyles: { fillColor: [250, 250, 248] },
     columnStyles: Object.fromEntries(l.columns.map((col, i) => [i, { cellWidth: (CW * (col.w ?? 1)) / total, halign: col.align ?? "left" }])),
     didParseCell: (d) => {
+      if (d.section === "body" && l.totalRow && d.row.index === l.rows.length - 1) { d.cell.styles.fontStyle = "bold"; d.cell.styles.textColor = INK; d.cell.styles.fillColor = PAPER; }
       if (d.section === "body" && l.toneColumn && d.column.index === l.toneColumn.index) {
         const tone = l.toneColumn.tones[d.cell.text.join(" ")];
         if (tone) { d.cell.styles.textColor = TONE[tone]; d.cell.styles.fontStyle = "bold"; }

@@ -1,4 +1,5 @@
-import type { ClockEntry, Worker, Project, Estimate, Invoice, DailyReport, ChangeOrder } from "./mock-data";
+import type { ClockEntry, Worker, Project, Estimate, Invoice } from "./mock-data";
+import { loadLogo } from "./timesheet";
 import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween, LONG_SHIFT_HOURS } from "./hours";
 import { isOverdue } from "./invoice-status";
@@ -13,6 +14,7 @@ type PdfReportInput = {
   periodLabel: string;
   currency: string;
   companyName?: string;
+  companyLogo?: string;
   overtime?: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number };
 };
 
@@ -29,8 +31,9 @@ export async function exportReportPdf(input: PdfReportInput) {
   const { default: autoTable } = await import("jspdf-autotable");
   const { computeWorkerOvertime } = await import("./overtime");
 
-  const { workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, overtime } = input;
+  const { workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime } = input;
   const company = companyName || "Constra";
+  const logo = await loadLogo(companyLogo);
   const otSettings = overtime ?? { enabled: false, dailyThreshold: null, weeklyThreshold: null, multiplier: 1.5 };
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
@@ -125,15 +128,30 @@ export async function exportReportPdf(input: PdfReportInput) {
   tape(0, 5);
   doc.setFillColor(...INK);
   doc.rect(0, 5, W, 38, "F");
-  doc.setFillColor(...HV);
-  doc.rect(M, 14, 9, 9, "F");
-  doc.setTextColor(...INK);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text(company.charAt(0).toUpperCase(), M + 4.5, 20.3, { align: "center" });
+  let nameX = M + 13;
+  if (logo) {
+    // the logo sits on a white plate so a dark or transparent logo reads on the dark band
+    const r = Math.min(34 / logo.width, 14 / logo.height);
+    const lw = logo.width * r, lh = logo.height * r;
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(M, 12, lw + 5, 18, 1.5, 1.5, "F");
+    doc.addImage(logo.dataUrl, "PNG", M + 2.5, 12 + (18 - lh) / 2, lw, lh, "logo", "FAST");
+    nameX = M + lw + 11;
+  } else {
+    doc.setFillColor(...HV);
+    doc.rect(M, 14, 9, 9, "F");
+    doc.setTextColor(...INK);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text(company.charAt(0).toUpperCase(), M + 4.5, 20.3, { align: "center" });
+  }
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(17);
-  doc.text(company.toUpperCase(), M + 13, 21);
+  doc.setFont("helvetica", "bold");
+  let nameSize = 17;
+  const maxName = W - M - 62 - nameX;
+  doc.setFontSize(nameSize);
+  while (doc.getTextWidth(company.toUpperCase()) > maxName && nameSize > 10) { nameSize -= 1; doc.setFontSize(nameSize); }
+  doc.text(company.toUpperCase(), nameX, 21);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(200, 200, 196);
@@ -383,123 +401,6 @@ export async function exportReportPdf(input: PdfReportInput) {
   }
 
   saveFile(doc.output("blob"), `payroll-${company.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${periodLabel.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`).catch(console.error);
-}
-
-// ── Materials Summary PDF ────────────────────────────────────────────────────
-type MaterialSummaryRow = { name: string; unit: string; deliveries: number; usage: number };
-type MaterialSummaryByTrade = Record<string, MaterialSummaryRow[]>;
-
-export async function exportMaterialsPdf(
-  projectName: string,
-  summary: MaterialSummaryByTrade,
-  companyName?: string,
-) {
-  const { default: jsPDF } = await import("jspdf");
-  const { default: autoTable } = await import("jspdf-autotable");
-
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
-  const AMBER = [245, 158, 11] as [number, number, number];
-  const DARK = [13, 13, 13] as [number, number, number];
-  const MID = [80, 80, 80] as [number, number, number];
-  const PAGE_W = doc.internal.pageSize.getWidth();
-  const MARGIN = 18;
-
-  // Header band
-  doc.setFillColor(...DARK);
-  doc.rect(0, 0, PAGE_W, 30, "F");
-  doc.setTextColor(...AMBER);
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.text(companyName ?? "Constra", MARGIN, 13);
-  doc.setTextColor(200, 200, 200);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text("MATERIALS SUMMARY REPORT", MARGIN, 21);
-  doc.setTextColor(140, 140, 140);
-  doc.setFontSize(8);
-  doc.text(new Date().toLocaleDateString("en-CA", { dateStyle: "long" }), PAGE_W - MARGIN, 21, { align: "right" });
-
-  let y = 40;
-
-  // Project name
-  doc.setTextColor(...MID);
-  doc.setFontSize(8.5);
-  doc.setFont("helvetica", "bold");
-  doc.text("PROJECT", MARGIN, y);
-  y += 5;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(13);
-  doc.setTextColor(20, 20, 20);
-  doc.text(projectName, MARGIN, y);
-  y += 12;
-
-  const trades = Object.keys(summary);
-  if (trades.length === 0) {
-    doc.setFontSize(9);
-    doc.setTextColor(...MID);
-    doc.text("No materials logged for this project.", MARGIN, y);
-  }
-
-  for (const trade of trades) {
-    const items = summary[trade];
-    if (!items || items.length === 0) continue;
-
-    // Trade heading band
-    doc.setFillColor(...AMBER);
-    doc.rect(MARGIN, y, PAGE_W - MARGIN * 2, 6.5, "F");
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text(trade.toUpperCase(), MARGIN + 3, y + 4.5);
-    y += 9;
-
-    const rows = items.map((item) => {
-      const onHand = item.deliveries - item.usage;
-      return [
-        item.name,
-        `${item.deliveries} ${item.unit}`,
-        `${item.usage} ${item.unit}`,
-        `${onHand} ${item.unit}`,
-        onHand < 0 ? "LOW" : "OK",
-      ];
-    });
-
-    autoTable(doc, {
-      startY: y,
-      margin: { left: MARGIN, right: MARGIN },
-      head: [["Material", "Delivered", "Used", "On Hand", "Status"]],
-      body: rows,
-      headStyles: { fillColor: DARK, textColor: [255, 255, 255], fontSize: 8, fontStyle: "bold" },
-      bodyStyles: { fontSize: 8, textColor: MID },
-      alternateRowStyles: { fillColor: [248, 248, 248] },
-      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "center" } },
-      didParseCell(data) {
-        if (data.column.index === 4 && data.section === "body") {
-          if (String(data.cell.raw) === "LOW") data.cell.styles.textColor = [239, 68, 68];
-          else data.cell.styles.textColor = [34, 197, 94];
-        }
-      },
-      theme: "grid",
-    });
-
-    y = (doc as any).lastAutoTable.finalY + 8;
-    if (y > doc.internal.pageSize.getHeight() - 25) {
-      doc.addPage();
-      y = 20;
-    }
-  }
-
-  // Footer
-  const pH = doc.internal.pageSize.getHeight();
-  doc.setFillColor(...DARK);
-  doc.rect(0, pH - 10, PAGE_W, 10, "F");
-  doc.setTextColor(120, 120, 120);
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "normal");
-  doc.text(`${companyName ?? "Constra"} · ${projectName} · Materials Report`, MARGIN, pH - 4);
-  doc.text(`Generated ${new Date().toLocaleDateString("en-CA")}`, PAGE_W - MARGIN, pH - 4, { align: "right" });
-
-  saveFile(doc.output("blob"), `materials-${projectName.replace(/\s+/g, "-").toLowerCase()}.pdf`).catch(console.error);
 }
 
 // ── Template Type ─────────────────────────────────────────────────────────────
@@ -1509,241 +1410,3 @@ export async function exportInvoicePdf(
   saveFile(doc.output("blob"), `${invoice.number}.pdf`).catch(console.error);
 }
 
-// ── Daily Report PDF ──────────────────────────────────────────────────────────
-
-export async function exportDailyReportPdf({
-  report,
-  projectName,
-  submitterName,
-  companyName,
-  metric = false,
-}: {
-  report: DailyReport;
-  projectName: string;
-  submitterName: string;
-  companyName?: string;
-  metric?: boolean;
-}) {
-  const { default: jsPDF } = await import("jspdf");
-  const { default: autoTable } = await import("jspdf-autotable");
-
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
-  const AMBER = [245, 158, 11] as [number, number, number];
-  const DARK = [13, 13, 13] as [number, number, number];
-  const PW = doc.internal.pageSize.getWidth();
-  const ML = 15;
-  const CW = PW - ML * 2;
-  let y = 0;
-
-  // Header
-  doc.setFillColor(...DARK);
-  doc.rect(0, 0, PW, 30, "F");
-  doc.setTextColor(245, 158, 11);
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text(companyName ?? "Constra", ML, 12);
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text("DAILY FIELD REPORT", ML, 19);
-  doc.setTextColor(160, 160, 160);
-  doc.setFontSize(8);
-  doc.text(`${projectName}  ·  Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, ML, 26);
-  y = 38;
-
-  // Date / meta block
-  autoTable(doc, {
-    startY: y,
-    margin: { left: ML, right: ML },
-    head: [["Field", "Value", "Field", "Value"]],
-    body: [
-      ["Date", report.date.toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" }), "Project", projectName],
-      ["Weather", report.weather, "Temperature", report.temperatureF !== 0 ? (metric ? `${Math.round(((report.temperatureF - 32) * 5) / 9)}°C` : `${report.temperatureF}°F`) : "—"],
-      ["Crew Count", String(report.crewCount), "Submitted By", submitterName],
-    ],
-    headStyles: { fillColor: AMBER, textColor: [0, 0, 0], fontStyle: "bold", fontSize: 8 },
-    bodyStyles: { fontSize: 8 },
-    alternateRowStyles: { fillColor: [248, 248, 248] },
-    columnStyles: { 0: { fontStyle: "bold", cellWidth: 35 }, 2: { fontStyle: "bold", cellWidth: 35 } },
-    theme: "striped",
-  });
-  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
-
-  const textBlock = (heading: string, text: string) => {
-    if (!text) return;
-    doc.setFillColor(...AMBER);
-    doc.rect(ML, y, CW, 6, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(0, 0, 0);
-    doc.text(heading.toUpperCase(), ML + 2, y + 4.2);
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(40, 40, 40);
-    const lines = doc.splitTextToSize(text, CW);
-    doc.text(lines, ML, y);
-    y += lines.length * 5 + 6;
-  };
-
-  textBlock("Work Completed", report.workCompleted);
-  if (report.crewOnSite.length > 0) textBlock("Crew on Site", report.crewOnSite.join(", "));
-  if (report.materialsUsed) textBlock("Materials Used", report.materialsUsed);
-  if (report.delays) textBlock("Delays / Issues", report.delays);
-  if (report.visitorLog) textBlock("Visitor Log", report.visitorLog);
-  if (report.notes) textBlock("Notes", report.notes);
-
-  // Footer
-  const PH = doc.internal.pageSize.getHeight();
-  doc.setFillColor(...DARK);
-  doc.rect(0, PH - 10, PW, 10, "F");
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(160, 160, 160);
-  doc.text(`${companyName ?? "Constra"}  ·  Daily Report  ·  ${projectName}`, ML, PH - 3);
-
-  const dateStr = report.date.toISOString().slice(0, 10);
-  saveFile(doc.output("blob"), `daily-report-${projectName.replace(/\s+/g, "-").toLowerCase()}-${dateStr}.pdf`).catch(console.error);
-}
-
-// ── Change Order PDF ──────────────────────────────────────────────────────────
-
-export async function exportChangeOrderPdf({
-  changeOrder,
-  projectName,
-  submitterName,
-  currency,
-  companyName,
-}: {
-  changeOrder: ChangeOrder;
-  projectName: string;
-  submitterName: string;
-  currency: string;
-  companyName?: string;
-}) {
-  const { default: jsPDF } = await import("jspdf");
-  const { default: autoTable } = await import("jspdf-autotable");
-
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
-  const AMBER = [245, 158, 11] as [number, number, number];
-  const DARK = [13, 13, 13] as [number, number, number];
-  const PW = doc.internal.pageSize.getWidth();
-  const ML = 15;
-  const CW = PW - ML * 2;
-  const PH = doc.internal.pageSize.getHeight();
-
-  const statusColors: Record<string, [number, number, number]> = {
-    pending: [245, 158, 11],
-    approved: [34, 197, 94],
-    rejected: [239, 68, 68],
-    void: [113, 113, 122],
-  };
-  const statusColor = statusColors[changeOrder.status] ?? AMBER;
-
-  const fmtAmt = new Intl.NumberFormat("en-CA", { style: "currency", currency: currency || "CAD" }).format(changeOrder.amount);
-
-  // Header
-  doc.setFillColor(...DARK);
-  doc.rect(0, 0, PW, 30, "F");
-  doc.setTextColor(245, 158, 11);
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text(companyName ?? "Constra", ML, 12);
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text("CHANGE ORDER", ML, 19);
-  doc.setTextColor(160, 160, 160);
-  doc.setFontSize(8);
-  doc.text(`${changeOrder.number}  ·  ${projectName}  ·  Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, ML, 26);
-
-  // Status badge
-  doc.setFillColor(...statusColor);
-  doc.roundedRect(PW - ML - 28, 10, 28, 10, 2, 2, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(changeOrder.status === "pending" ? 0 : 255, changeOrder.status === "pending" ? 0 : 255, changeOrder.status === "pending" ? 0 : 255);
-  doc.text(changeOrder.status.toUpperCase(), PW - ML - 14, 16.5, { align: "center" });
-
-  let y = 38;
-
-  // Title
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(20, 20, 20);
-  doc.text(changeOrder.title, ML, y);
-  y += 8;
-
-  // Meta table
-  autoTable(doc, {
-    startY: y,
-    margin: { left: ML, right: ML },
-    body: [
-      ["CO Number", changeOrder.number, "Amount", fmtAmt],
-      ["Project", projectName, "Status", changeOrder.status.charAt(0).toUpperCase() + changeOrder.status.slice(1)],
-      ["Submitted By", submitterName, "Date", new Date(changeOrder.submittedAt).toLocaleDateString("en-CA", { dateStyle: "medium" })],
-      ...(changeOrder.approvedAt
-        ? [["Approved By", changeOrder.approvedBy ?? "—", "Approved On", changeOrder.approvedAt.toLocaleDateString("en-CA", { dateStyle: "medium" })]]
-        : []),
-    ],
-    bodyStyles: { fontSize: 9 },
-    alternateRowStyles: { fillColor: [248, 248, 248] },
-    columnStyles: { 0: { fontStyle: "bold", cellWidth: 38 }, 2: { fontStyle: "bold", cellWidth: 38 } },
-    theme: "striped",
-  });
-  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
-
-  const section = (heading: string, text: string) => {
-    if (!text) return;
-    doc.setFillColor(...AMBER);
-    doc.rect(ML, y, CW, 6, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(0, 0, 0);
-    doc.text(heading.toUpperCase(), ML + 2, y + 4.2);
-    y += 8;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(40, 40, 40);
-    const lines = doc.splitTextToSize(text, CW);
-    doc.text(lines, ML, y);
-    y += lines.length * 5 + 6;
-  };
-
-  if (changeOrder.description) section("Description", changeOrder.description);
-  if (changeOrder.reason) section("Reason for Change", changeOrder.reason);
-
-  // Amount callout
-  y += 4;
-  doc.setFillColor(...statusColor);
-  doc.roundedRect(ML, y, CW, 16, 3, 3, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.setTextColor(changeOrder.status === "pending" ? 0 : 255, changeOrder.status === "pending" ? 0 : 255, changeOrder.status === "pending" ? 0 : 255);
-  doc.text(`Total Change Amount: ${fmtAmt}`, ML + CW / 2, y + 10, { align: "center" });
-
-  // Signature lines
-  y += 26;
-  const sigLine = (label: string, x: number) => {
-    doc.setDrawColor(180, 180, 180);
-    doc.line(x, y + 12, x + 70, y + 12);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(120, 120, 120);
-    doc.text(label, x, y + 17);
-  };
-  if (PH - y > 50) {
-    sigLine("Client Signature / Date", ML);
-    sigLine("Contractor Signature / Date", ML + CW - 70);
-  }
-
-  // Footer
-  doc.setFillColor(...DARK);
-  doc.rect(0, PH - 10, PW, 10, "F");
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(160, 160, 160);
-  doc.text(`${companyName ?? "Constra"}  ·  Change Order  ·  ${changeOrder.number}`, ML, PH - 3);
-
-  saveFile(doc.output("blob"), `${changeOrder.number.replace(/\s+/g, "-")}.pdf`).catch(console.error);
-}

@@ -6,7 +6,7 @@ import {
   Package, Plus, Trash2, TrendingDown, TrendingUp,
   Search, X, Check, FileText,
 } from "lucide-react";
-import { exportMaterialsPdf } from "@/lib/pdf-export";
+import { useDocCtx } from "@/components/export-pdf-button";
 import { format } from "date-fns";
 import { useStore } from "@/lib/store";
 import { ConfirmModal } from "@/components/confirm-modal";
@@ -170,12 +170,14 @@ export default function MaterialsPage() {
 
   const color = (trade: string) => TRADE_COLORS[trade] ?? "#F5C400";
 
+  const docCtx = useDocCtx();
   async function exportPdf() {
     if (!projectSummary) return;
     setPdfLoading(true);
     try {
       const proj = projects.find((p) => p.id === selectedProject);
-      await exportMaterialsPdf(proj?.name ?? "Project", projectSummary, companyName);
+      const m = await import("@/lib/doc-pdfs");
+      await m.exportMaterialsBrandedPdf(proj?.name ?? "Project", projectSummary, docCtx);
     } catch {
       toast.error("Couldn't create the PDF. Try again.");
     } finally {

@@ -4,6 +4,7 @@ import type {
 } from "./mock-data";
 import { COVERAGE_TYPE_LABELS } from "./mock-data";
 import { moneyTotals } from "./money";
+import { isoToSerial } from "./sheet-calc";
 import { Book, type Cell, type Row, type SheetDef, type Cf, type Validation, colName, serialDay } from "./xlsx-book";
 
 // Ready-made Excel sheets for a contractor's office. Every one carries the company logo and name
@@ -14,10 +15,10 @@ import { Book, type Cell, type Row, type SheetDef, type Cf, type Validation, col
 export type Category = "money" | "crew" | "site" | "plans";
 export const CATEGORY_LABELS: Record<Category, string> = { money: "Money & payments", crew: "Crew & time", site: "Site & paperwork", plans: "Plans & schedules" };
 
-type Kind = "text" | "long" | "money" | "num" | "int" | "pct" | "date" | "list";
+export type Kind = "text" | "long" | "money" | "num" | "int" | "pct" | "date" | "list";
 type Rec = Record<string, string | number | Date | null | undefined>;
 type Tone = "good" | "warn" | "bad" | "info";
-type Ref = { t: (key: string) => string; S: (key: string) => string; sum: (key: string) => string; rng: (a: string, b: string) => string };
+export type Ref = { t: (key: string) => string; S: (key: string) => string; sum: (key: string) => string; rng: (a: string, b: string) => string };
 
 type Col = {
   key: string; label: string; kind: Kind; w?: number; list?: string[];
@@ -499,6 +500,30 @@ export const TEMPLATES: Template[] = [
 ];
 
 export const templateById = (id: string) => TEMPLATES.find((t) => t.id === id);
+export type TplCol = Template["cols"][number];
+export type Rec2 = Record<string, string | number | Date | null | undefined>;
+
+/** A calculated cell stays blank until its row has something in it (shared by the Excel file and the screen) */
+export function wrapBlankFormula(tableName: string, raw: string): string {
+  if (/^IF\(/.test(raw)) return raw;
+  const conds: string[] = [];
+  const seen = new Set<string>();
+  for (const m of raw.matchAll(/\[\[#This Row\],\[([^\]]+)\]\]/g)) if (!seen.has(m[0])) { seen.add(m[0]); conds.push(`${tableName}${m[0]}=""`); }
+  for (const m of raw.matchAll(/\[\[#This Row\],\[[^\]]+\]:\[[^\]]+\]\]/g)) conds.push(`COUNT(${tableName}${m[0]})=0`);
+  return conds.length ? `IF(AND(${conds.join(",")}),"",${raw})` : raw;
+}
+
+/** The same formulas, pointed at the on-screen settings instead of spreadsheet cells */
+export function screenRef(tpl: Template): Ref {
+  const label = (key: string) => tpl.cols.find((c) => c.key === key)!.label;
+  return {
+    t: (key) => `${tpl.tableName}[[#This Row],[${label(key)}]]`,
+    S: (key) => `SETTING_${key}`,
+    sum: (key) => `SUBTOTAL(109,${tpl.tableName}[${label(key)}])`,
+    rng: (a, b) => `${tpl.tableName}[[#This Row],[${label(a)}]:[${label(b)}]]`,
+  };
+}
+
 
 // ──────────────────────────── Building the workbook ────────────────────────────
 
@@ -521,6 +546,14 @@ export type BuildOptions = {
   company: string; logo?: string; currency: string; project?: string; preparedBy?: string;
   /** Rows to start from; omit for a blank sheet */
   data?: TemplateData;
+  /** Rows typed on screen (these win over `data`) */
+  rows?: Rec2[];
+  /** Typed values for the header inputs (dates as yyyy-mm-dd) */
+  fieldValues?: Record<string, string>;
+  settingValues?: Record<string, number>;
+  /** Values for calculated columns, to show before Excel recalculates */
+  cached?: Record<string, (string | number | null)[]>;
+  resultValues?: number[];
 };
 
 export async function buildTemplateXlsx(tpl: Template, opts: BuildOptions): Promise<Blob> {
@@ -548,19 +581,11 @@ export async function buildTemplateXlsx(tpl: Template, opts: BuildOptions): Prom
   };
   const totalStyle = (k: Kind) => book.style({ bold: true, size: 11, color: INK, fill: "#F5F4F1", top: { style: "medium", color: INK }, numFmt: fmt[k], align: k === "text" ? "left" : "right" });
 
-  const prefilled = opts.data && tpl.prefill ? tpl.prefill(opts.data) : [];
-  const dataRows = prefilled.length ? prefilled.length + 10 : tpl.blank;
+  const prefilled: Rec[] = opts.rows ?? (opts.data && tpl.prefill ? tpl.prefill(opts.data) : []);
+  const dataRows = prefilled.length ? prefilled.length + (opts.rows ? 5 : 10) : tpl.blank;
   const cols = tpl.cols;
   const T = tpl.tableName;
-  const calcOf = (c: Col, r: Ref): string => {
-    const raw = c.calc!(r);
-    if (/^IF\(/.test(raw)) return raw;
-    const conds: string[] = [];
-    const seen = new Set<string>();
-    for (const m of raw.matchAll(/\[\[#This Row\],\[([^\]]+)\]\]/g)) if (!seen.has(m[0])) { seen.add(m[0]); conds.push(`${T}${m[0]}=""`); }
-    for (const m of raw.matchAll(/\[\[#This Row\],\[[^\]]+\]:\[[^\]]+\]\]/g)) conds.push(`COUNT(${T}${m[0]})=0`);
-    return conds.length ? `IF(AND(${conds.join(",")}),"",${raw})` : raw;
-  };
+  const calcOf = (c: Col, r: Ref): string => wrapBlankFormula(T, c.calc!(r));
   const hasTotals = cols.some((c) => c.total);
   const widths = cols.map((c) => c.w ?? defaultW[c.kind]);
 
@@ -581,11 +606,12 @@ export async function buildTemplateXlsx(tpl: Template, opts: BuildOptions): Prom
     return r;
   };
   for (const f of tpl.fields ?? []) {
-    if (/date|week starting/i.test(f)) addInput(f, { n: serialDay(new Date()), st: S.inputDate });
-    else addInput(f, { s: f === "Project" ? opts.project ?? "" : f === "Prepared by" ? opts.preparedBy ?? "" : "", st: S.input });
+    const given = opts.fieldValues?.[f];
+    if (/date|week starting/i.test(f)) addInput(f, { n: (given ? isoToSerial(given) : null) ?? serialDay(new Date()), st: S.inputDate });
+    else addInput(f, { s: given ?? (f === "Project" ? opts.project ?? "" : f === "Prepared by" ? opts.preparedBy ?? "" : ""), st: S.input });
   }
   for (const s of tpl.settings ?? []) {
-    const r = addInput(s.label, { n: s.value, st: book.style({ size: 11, color: INK, fill: "#FFF8D6", bottom: { style: "thin", color: INK }, numFmt: s.kind === "pct" ? "0.0%" : s.kind === "money" ? fmt.money : "#,##0.00", align: "left" }) });
+    const r = addInput(s.label, { n: opts.settingValues?.[s.key] ?? s.value, st: book.style({ size: 11, color: INK, fill: "#FFF8D6", bottom: { style: "thin", color: INK }, numFmt: s.kind === "pct" ? "0.0%" : s.kind === "money" ? fmt.money : "#,##0.00", align: "left" }) });
     refCell.set(s.key, `$B$${r}`);
   }
 
@@ -599,13 +625,13 @@ export async function buildTemplateXlsx(tpl: Template, opts: BuildOptions): Prom
     rng: (a, b) => `${tpl.tableName}[[#This Row],[${colRef(a)}]:[${colRef(b)}]]`,
   };
   if (tpl.results?.length) {
-    tpl.results.forEach((res) => {
+    tpl.results.forEach((res, ri) => {
       const r = rows.length + 1;
       const f = res.formula(ref, resultCells);
       resultCells.push(`$B$${r}`);
       const st = book.style({ bold: true, size: res.big ? 14 : 11, color: INK, numFmt: res.kind === "money" ? fmt.money : "#,##0.00", align: "left", top: res.big ? { style: "medium", color: INK } : undefined, fill: res.big ? "#FFF1C2" : undefined });
       const lab = book.style({ bold: true, size: res.big ? 14 : 11, color: INK2, top: res.big ? { style: "medium", color: INK } : undefined, fill: res.big ? "#FFF1C2" : undefined });
-      rows.push({ cells: [{ s: res.label, st: lab }, { f, v: 0, st }, { s: "", st: res.big ? lab : 0 }], height: res.big ? 26 : 20 });
+      rows.push({ cells: [{ s: res.label, st: lab }, { f, v: opts.resultValues?.[ri] ?? 0, st }, { s: "", st: res.big ? lab : 0 }], height: res.big ? 26 : 20 });
     });
   }
   rows.push({ cells: [] });
@@ -633,7 +659,8 @@ export async function buildTemplateXlsx(tpl: Template, opts: BuildOptions): Prom
       cells: cols.map((c, ci): Cell => {
         const st = cellStyle(c.kind);
         if (c.calc) {
-          const v = rec && c.value ? c.value(rec) : rec ? 0 : "";
+          const cache = opts.cached?.[c.key];
+          const v: string | number = cache ? (cache[i] ?? "") : rec && c.value ? c.value(rec) : rec ? 0 : "";
           if (rec && typeof v === "number") calcCache[ci] += v;
           return { f: calcOf(c, ref), v, st };
         }

@@ -25,7 +25,7 @@ const SEV_TONE: Record<string, Tone> = { low: "info", medium: "warn", high: "bad
 
 export function exportRfiPdf(r: RFI, c: DocCtx) {
   return exportRecordPdf({
-    brand: c.brand, kind: "Request for information", number: r.number, title: r.subject,
+    brand: c.brand, kind: "RFI", number: `${r.number}  -  Request for information`, title: r.subject,
     status: { label: cap(r.status), tone: RFI_TONE[r.status] ?? "info" },
     fields: [
       ["Project", proj(c, r.projectId)], ["Priority", cap(r.priority)],
@@ -205,5 +205,27 @@ export function exportBudgetPdf(lines: BudgetLine[], c: DocCtx) {
     columns: [{ label: "Code", w: 1 }, { label: "Project", w: 2.4 }, { label: "Description", w: 3.2 }, { label: "Category", w: 1.6 }, { label: "Budget", w: 1.5, align: "right" }, { label: "Actual", w: 1.5, align: "right" }, { label: "Left", w: 1.5, align: "right" }],
     rows: lines.map((l) => [l.code, proj(c, l.projectId), l.description, cap(l.category), money(l.budgeted, c.currency), money(l.actual, c.currency), money(l.budgeted - l.actual, c.currency)]),
     filename: `${safeName(c.brand.company)}-Budget-${stamp()}.pdf`,
+  });
+}
+
+export type MaterialsByTrade = Record<string, { name: string; unit: string; deliveries: number; usage: number }[]>;
+
+export function exportMaterialsBrandedPdf(projectName: string, byTrade: MaterialsByTrade, c: DocCtx) {
+  const rows: string[][] = [];
+  let low = 0, items = 0;
+  for (const trade of Object.keys(byTrade)) {
+    for (const m of byTrade[trade] ?? []) {
+      const onHand = m.deliveries - m.usage;
+      items++; if (onHand < 0) low++;
+      rows.push([trade, m.name, `${m.deliveries} ${m.unit}`, `${m.usage} ${m.unit}`, `${onHand} ${m.unit}`, onHand < 0 ? "Low" : "OK"]);
+    }
+  }
+  return exportListPdf({
+    brand: c.brand, title: "Materials report", subtitle: `${projectName}  -  ${day(new Date())}`,
+    summary: [["Materials", String(items)], ["Trades", String(Object.keys(byTrade).length)], ["Running low", String(low)]],
+    columns: [{ label: "Trade", w: 1.6 }, { label: "Material", w: 3.4 }, { label: "Delivered", w: 1.4, align: "right" }, { label: "Used", w: 1.4, align: "right" }, { label: "On hand", w: 1.4, align: "right" }, { label: "Status", w: 1 }],
+    rows,
+    toneColumn: { index: 5, tones: { OK: "good", Low: "bad" } },
+    filename: `${safeName(c.brand.company)}-Materials-${safeName(projectName)}-${stamp()}.pdf`,
   });
 }
