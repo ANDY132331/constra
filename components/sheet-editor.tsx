@@ -136,7 +136,7 @@ export default function SheetEditor({ tpl, data, withData, projectName, onClose 
       await exportListPdf({
         brand: { company: companyName || "Your company", logo: companyLogo || undefined, address: companyAddress || undefined },
         title: tpl.title, subtitle: sub || undefined, summary: summary.length ? summary : undefined,
-        columns: cols.map((c) => ({ label: c.label, w: c.w ?? DEFAULT_W[c.kind], align: numeric(c.kind) ? "right" as const : "left" as const })),
+        columns: cols.map((c) => ({ label: c.label, w: Math.max(c.w ?? DEFAULT_W[c.kind], c.kind === "text" ? 18 : 0), align: numeric(c.kind) ? "right" as const : "left" as const })),
         rows: body, totalRow: view.totals.some((t) => t !== undefined), landscape: cols.length > 5 || !!tpl.landscape,
         toneColumn: statusIdx >= 0 ? { index: statusIdx, tones: tpl.status!.tones } : undefined,
         filename: `${safeName(companyName)}-${safeName(tpl.title)}-${today}.pdf`,
