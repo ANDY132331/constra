@@ -293,7 +293,7 @@ export default function InvoiceDetailPage() {
                 <button onClick={() => { copyLink(); setMenuOpen(false); }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-white/70 hover:bg-white/[0.05] hover:text-white transition-colors text-left">
                   {linkCopied ? <Check size={14} className="text-emerald-400" /> : <Link2 size={14} />}
-                  {linkCopied ? "Copied!" : "Copy Payment Link"}
+                  {linkCopied ? "Copied!" : "Copy Invoice Link"}
                 </button>
                 <button
                   onClick={async () => { setMenuOpen(false); setPdfLoading(true); try { await exportInvoicePdf(invoice, currency, companyName, companyAddress, companyLogo, "#F5C400", "save", template); } finally { setPdfLoading(false); } }}

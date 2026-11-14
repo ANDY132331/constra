@@ -1,7 +1,9 @@
-// Clients should only be sent to card checkout when Stripe is live; a test-mode checkout
-// rejects real cards. Set STRIPE_ALLOW_TEST_PAYMENTS=true to try test payments yourself.
+// Card payment of invoices through Constra is switched OFF on purpose. Clients are told to pay the
+// contractor directly (e-transfer, cheque, cash), and the invoice page, the emails and the
+// checkout route all follow this one switch. Nothing else needs to change to keep it off.
+//
+// To turn it on again someday, return the old check here (live Stripe keys, or test keys with
+// STRIPE_ALLOW_TEST_PAYMENTS=true) and re-read the card-payment rules in CLAUDE.md first.
 export function onlinePaymentsEnabled(): boolean {
-  const key = process.env.STRIPE_SECRET_KEY ?? "";
-  if (key.startsWith("sk_live_") || key.startsWith("rk_live_")) return true;
-  return !!key && process.env.STRIPE_ALLOW_TEST_PAYMENTS === "true";
+  return false;
 }
