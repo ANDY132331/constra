@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { managerIds, pushToUsers } from "@/lib/push-server";
+import { isCronAuthorized } from "@/lib/security";
 
 // A forgotten clock-out is the most common time-tracking mistake and the one that costs the
 // contractor: the shift keeps counting all night. Constra is used in every time zone, so this
@@ -23,8 +24,7 @@ const fmtHours = (h: number) => { const m = Math.round(h * 60); return `${Math.f
 type Open = { id: string; company_id: string; worker_id: string; project_id: string | null; clock_in: string };
 
 export async function GET(request: Request) {
-  const secret = request.headers.get("authorization");
-  if (!process.env.CRON_SECRET || secret !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return NextResponse.json({ skipped: "not configured" });

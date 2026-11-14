@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { onlinePaymentsEnabled } from "@/lib/payments";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { clientIp } from "@/lib/security";
 
 function getAdmin() {
   return createClient(
@@ -17,7 +18,7 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ invoiceId: string }> }
 ) {
-  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(req);
   if (!rateLimit(`pay-invoice-view:${ip}`, 30, 60_000)) return rateLimitResponse();
 
   const { invoiceId } = await params;

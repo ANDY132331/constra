@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
+import { clientIp } from "@/lib/security";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -13,7 +14,7 @@ function esc(s: string) {
 // Creates a real auth user + profile for a new crew member.
 // Requires the caller to be an Admin in the same company.
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(request);
   if (!rateLimit(`create-worker:${ip}`, 20, 3_600_000)) return rateLimitResponse();
 
   const authClient = await createClient();

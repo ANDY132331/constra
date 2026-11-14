@@ -44,6 +44,7 @@ Stack: Next.js 16 (Turbopack, middleware lives in `proxy.ts`), React 19, Tailwin
 - **Secrets:** keys live only in `.env.local` (never committed) or Vercel env vars. Never ask the owner to paste keys in chat. `.env.local` can't be `source`d (an `EMAIL_FROM` value contains `<>`); pull single values with `grep '^NAME=' .env.local | cut -d= -f2-`.
 - **Android signing key:** always reuse the existing keystore in `Desktop\Constra-Signing-Key\`; never let PWABuilder generate a new one.
 - **Privacy:** if you add a new kind of data collection or a new third-party processor, update `app/privacy/page.tsx` and `ios/App/App/PrivacyInfo.xcprivacy` in the same change.
+- **Server security helpers (`lib/security.ts`):** take the caller's IP with `clientIp(req)`, check cron calls with `isCronAuthorized(req)` (constant-time), compare secrets with `safeEqual`. Card payments: the amount and currency come only from our database (`lib/invoice-charge.ts`); never read them from the request, and the Stripe webhook only marks an invoice paid when the amount and currency match.
 - **AI routes:** keep the iOS no-pricing instruction in `/api/chat`; cap any client-supplied text/snapshot before sending it to the model.
 
 ## Things the owner must do (Claude can't)

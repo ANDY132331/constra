@@ -5,9 +5,10 @@ import { randomUUID } from "crypto";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { sendEmail, accountDeletionEmail, APP_URL } from "@/lib/email";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(req);
   if (!rateLimit(`delete-account:${ip}`, 5, 3_600_000)) return rateLimitResponse();
 
   const authClient = await createClient();

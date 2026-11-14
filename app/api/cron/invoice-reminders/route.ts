@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
 import { onlinePaymentsEnabled } from "@/lib/payments";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { isCronAuthorized } from "@/lib/security";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -30,8 +31,7 @@ function fmt(n: number, currency = "USD") {
 }
 
 export async function GET(request: Request) {
-  const secret = request.headers.get("authorization");
-  if (!process.env.CRON_SECRET || secret !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

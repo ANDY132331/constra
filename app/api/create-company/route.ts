@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { sendEmail, welcomeEmail } from "@/lib/email";
 import { rateLimitResponse, rateLimitShared } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/security";
 
 function generateInviteCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // omits confusable chars
@@ -21,7 +22,7 @@ function generateInviteCode(): string {
 // Must be server-side because new users cannot INSERT into companies (no company_id yet).
 export async function POST(request: NextRequest) {
   // 5 account creations per IP per hour
-  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(request);
   if (!(await rateLimitShared(`create-company:${ip}`, 5, 3_600_000))) return rateLimitResponse();
 
   const body = await request.json().catch(() => ({}));

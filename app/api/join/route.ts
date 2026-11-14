@@ -8,13 +8,14 @@ function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 import { rateLimitResponse, rateLimitShared } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/security";
 
 // POST /api/join
 // Looks up a company by invite code (service-role bypass), signs up the user,
 // and creates their profile row — all in one server-side transaction.
 export async function POST(request: NextRequest) {
   // 10 join attempts per IP per hour
-  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(request);
   if (!(await rateLimitShared(`join:${ip}`, 10, 3_600_000))) return rateLimitResponse();
 
   const raw = await request.json().catch(() => ({}));

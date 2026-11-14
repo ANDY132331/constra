@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/security";
 
 function getAdmin() {
   return createClient(
@@ -64,7 +65,7 @@ async function findPending(token: string, scope: "profile" | "company") {
 }
 
 function limited(request: Request) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  const ip = clientIp(request);
   return !rateLimit(`restore:${ip}`, 30, 3_600_000);
 }
 

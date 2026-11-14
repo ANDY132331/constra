@@ -44,7 +44,8 @@ export function emailShell({
 <style>
   body{margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
   .wrap{max-width:520px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  .hd{background:#151617;padding:18px 28px}
+  .cover{display:block;width:100%;max-width:520px;height:auto;border:0;outline:none}
+  .hd{background:#151617;padding:11px 28px}
   .hd td{vertical-align:middle}
   .hd-mark{display:block;border:0;outline:none;text-decoration:none;border-radius:7px}
   .hd-logo{font-size:17px;font-weight:800;color:#F5C400;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
@@ -60,14 +61,11 @@ export function emailShell({
 </head>
 <body>
 <div class="wrap">
+  <a href="${APP_URL}" style="display:block;text-decoration:none"><img class="cover" src="${APP_URL}/site/email-cover.jpg" width="520" alt="Constra: field management for construction crews" style="display:block;width:100%;height:auto;border:0"/></a>
   <table class="hd" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
     <tr>
-      <td width="36" style="padding-right:12px">
-        <img class="hd-mark" src="${APP_URL}/site/email-logo.png" width="36" height="36" alt="Constra"/>
-      </td>
       <td>
-        <div class="hd-logo">Constra</div>
-        <div class="hd-co">${co}</div>
+        <div class="hd-co" style="color:#cfd0d2;font-size:13px">${co}</div>
       </td>
     </tr>
   </table>

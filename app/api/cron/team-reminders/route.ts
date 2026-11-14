@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { pushToUsers } from "@/lib/push-server";
+import { isCronAuthorized } from "@/lib/security";
 
 // Once a day (see vercel.json):
 //  - Certifications: the holder and the office hear 30, 14, 7 and 1 days before a ticket expires,
@@ -16,8 +17,7 @@ const WARN_DAYS = new Set([30, 14, 7, 1, 0]);
 type Cert = { name?: string; expiryDate?: string };
 
 export async function GET(request: Request) {
-  const secret = request.headers.get("authorization");
-  if (!process.env.CRON_SECRET || secret !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return NextResponse.json({ skipped: "not configured" });

@@ -4,13 +4,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { generateBrief, type BriefPayload } from "@/lib/daily-brief";
+import { clientIp } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(req);
   if (!rateLimit(`daily-brief:${user.id}:${ip}`, 10, 60_000)) return rateLimitResponse();
 
   let body: BriefPayload = {

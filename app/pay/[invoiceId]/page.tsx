@@ -74,12 +74,8 @@ export default function PayPage({ params }: { params: Promise<{ invoiceId: strin
       const res = await fetch("/api/stripe/pay-invoice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          invoiceId: invoice.id,
-          amount: invoice.total,
-          currency: invoice.currency,
-          description: `Invoice ${invoice.number} — ${invoice.companyName}`,
-        }),
+        // The server works out the amount and currency itself; only the invoice is named
+        body: JSON.stringify({ invoiceId: invoice.id }),
       });
 
       if (!res.ok) {

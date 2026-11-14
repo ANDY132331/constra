@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse, rateLimitShared } from "@/lib/rate-limit";
 import { sendEmail, emailShell, APP_URL } from "@/lib/email";
+import { clientIp } from "@/lib/security";
 
 // Public client-approval endpoint for change orders. The change order's random UUID is the
 // link token (same model as the invoice pay link), so only people sent the link can open it.
@@ -19,7 +20,7 @@ function esc(s: string) {
 }
 
 function ipOf(req: Request) {
-  return req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  return clientIp(req);
 }
 
 async function load(id: string) {

@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { projectProgress } from "@/lib/project-progress";
 import { readShareToken } from "@/lib/share-token";
+import { clientIp } from "@/lib/security";
 
 function getAdmin() {
   return createClient(
@@ -14,7 +15,7 @@ function getAdmin() {
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
-  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(req);
   if (!rateLimit(`share:${ip}`, 60, 60_000)) return rateLimitResponse();
 
   const { token } = await params;

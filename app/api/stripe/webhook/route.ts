@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { expectedCharge } from "@/lib/invoice-charge";
 
 function getAdmin() {
   return createClient(
@@ -53,6 +54,21 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getAdmin();
+
+    // Only mark it paid if what was collected matches what we billed, in the billed currency.
+    // Signed events can still be for a different amount (an old or altered session), and a
+    // short payment must never close an invoice.
+    const { data: inv } = await supabase.from("invoices").select("items, tax_rate, companies ( currency )").eq("id", invoiceId).single();
+    if (!inv) {
+      console.error(`[stripe/webhook] invoice ${invoiceId} not found`);
+      return NextResponse.json({ skipped: "invoice not found" });
+    }
+    const want = expectedCharge(inv as never);
+    if (session.amount_total !== want.unitAmount || (session.currency ?? "").toLowerCase() !== want.currency) {
+      console.error(`[stripe/webhook] MISMATCH on invoice ${invoiceId}: paid ${session.amount_total} ${session.currency}, expected ${want.unitAmount} ${want.currency}. Not marked paid.`);
+      return NextResponse.json({ skipped: "amount mismatch" });
+    }
+
     const { error } = await supabase
       .from("invoices")
       .update({ status: "paid" })

@@ -5,6 +5,7 @@ import webPush from "web-push";
 import { createClient as createSupabaseServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Rate limit: 30 pushes per minute per user
-    const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+    const ip = clientIp(req);
     const key = `push:send:${user.id}:${ip}`;
     if (!rateLimit(key, 30, 60_000)) return rateLimitResponse();
 

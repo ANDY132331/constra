@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isCronAuthorized } from "@/lib/security";
 
 function getAdmin() {
   return createClient(
@@ -13,8 +14,7 @@ function getAdmin() {
 const GRACE_PERIOD_DAYS = 7;
 
 export async function GET(request: Request) {
-  const secret = request.headers.get("authorization");
-  if (!process.env.CRON_SECRET || secret !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

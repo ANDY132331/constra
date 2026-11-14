@@ -6,13 +6,8 @@ import { APP_URL } from "@/lib/email";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { onlinePaymentsEnabled } from "@/lib/payments";
-import { moneyTotals, lineAmount } from "@/lib/money";
-
-// Stripe zero-decimal currencies (no cents — amount is already the smallest unit)
-const ZERO_DECIMAL = new Set([
-  "BIF","CLP","DJF","GNF","JPY","KMF","KRW","MGA","PYG","RWF",
-  "UGX","VND","VUV","XAF","XOF","XPF",
-]);
+import { expectedCharge } from "@/lib/invoice-charge";
+import { clientIp } from "@/lib/security";
 
 function getAdmin() {
   return createClient(
@@ -27,16 +22,18 @@ export async function POST(req: NextRequest) {
   }
 
   // Rate limit by IP — no auth required (this is a public client-facing endpoint)
-  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(req);
   if (!rateLimit(`pay-invoice-create:${ip}`, 10, 60_000)) return rateLimitResponse();
 
-  let body: { invoiceId?: string; currency?: string };
+  let body: { invoiceId?: string };
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const { invoiceId, currency = "CAD" } = body;
-  if (!invoiceId) {
+  // The amount and currency come only from our database. A currency sent by the browser is ignored:
+  // changing it would turn a 1,000.00 CAD invoice into a much smaller charge.
+  const { invoiceId } = body;
+  if (typeof invoiceId !== "string" || !/^[0-9a-f-]{36}$/i.test(invoiceId)) {
     return NextResponse.json({ error: "Missing invoiceId" }, { status: 400 });
   }
 
@@ -45,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   const { data: invoice, error: invErr } = await supabase
     .from("invoices")
-    .select("items, tax_rate, status, company_id")
+    .select("items, tax_rate, status, company_id, companies ( currency )")
     .eq("id", invoiceId)
     .single();
 
@@ -61,16 +58,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invoice not yet sent" }, { status: 403 });
   }
 
-  type DbItem = { qty: number; rate: number };
-  const amount: number = moneyTotals(invoice.items as DbItem[], invoice.tax_rate).total;
+  const { unitAmount, currency: stripeCurrency } = expectedCharge(invoice as never);
+  if (unitAmount <= 0) return NextResponse.json({ error: "Nothing to pay on this invoice" }, { status: 409 });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-06-24.dahlia" as any });
-
-  const stripeCurrency = currency.toLowerCase();
-  const unitAmount = ZERO_DECIMAL.has(currency.toUpperCase())
-    ? Math.round(amount)
-    : Math.round(amount * 100);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -93,7 +85,8 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Stripe error";
-    return NextResponse.json({ error: msg }, { status: 502 });
+    // The detail goes to our logs, not to whoever is on the payment page
+    console.error("[stripe/pay-invoice]", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "The payment page couldn't be opened. Try again in a minute." }, { status: 502 });
   }
 }

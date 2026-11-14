@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { onlinePaymentsEnabled } from "@/lib/payments";
 import { moneyTotals, lineAmount } from "@/lib/money";
+import { clientIp } from "@/lib/security";
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
+  const ip = clientIp(request);
   if (!rateLimit(`invoice:email:${user.id}:${ip}`, 20, 3_600_000)) return rateLimitResponse();
 
   if (!process.env.RESEND_API_KEY) {
@@ -53,6 +54,12 @@ export async function POST(request: NextRequest) {
     isReminder?: boolean;
     notes?: string;
   };
+
+  // Bound what a caller can attach or write: a PDF is a few hundred KB, a note a few lines
+  if (typeof pdfDataUrl === "string" && pdfDataUrl.length > 8_000_000) return NextResponse.json({ error: "That file is too large to email" }, { status: 413 });
+  if (typeof notes === "string" && notes.length > 2000) return NextResponse.json({ error: "That note is too long" }, { status: 400 });
+  if (typeof invoiceId !== "undefined" && typeof invoiceId !== "string") return NextResponse.json({ error: "Invalid invoice" }, { status: 400 });
+  if (typeof estimateId !== "undefined" && typeof estimateId !== "string") return NextResponse.json({ error: "Invalid estimate" }, { status: 400 });
 
   const kind = invoiceId ? "invoice" : estimateId ? "estimate" : null;
   if (!kind) return NextResponse.json({ error: "Missing invoiceId or estimateId" }, { status: 400 });
