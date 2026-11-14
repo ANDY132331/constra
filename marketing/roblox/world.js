@@ -54,6 +54,8 @@ const nameTag = (name, color) => { const t = canvasTex(256, 96, (g) => { g.font 
 
 export function createAvatar(o) {
   const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot);
+  const blobTex = canvasTex(64, 64, (g) => { const r = g.createRadialGradient(32, 32, 2, 32, 32, 30); r.addColorStop(0, 'rgba(0,0,0,.5)'); r.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); });
+  const blob = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.06; root.add(blob);
   const skin = o.skin, faces = {};
   const fo = { stache: o.stache, lashes: o.lashes, brows: o.brows, hair: o.hairColor, glasses: o.glasses };
   for (const s of ["smile", "talk1", "talk2", "talk3", "blink", "cheer", "oops"]) faces[s] = faceTex(s, fo);
@@ -96,7 +98,7 @@ export function createAvatar(o) {
     set(s) {
       root.position.set(s.x ?? 0, s.y ?? 0, s.z ?? 0); root.rotation.y = s.ry ?? 0;
       const ph = s.ph ?? 0, am = s.amt ?? 0, sw = Math.sin(ph) * 0.95 * am;
-      legL.rotation.x = sw; legR.rotation.x = -sw;
+      legL.rotation.x = s.sit ? -1.45 : sw; legR.rotation.x = s.sit ? -1.45 : -sw; blob.visible = !s.sit;
       pivot.position.y = Math.abs(Math.cos(ph)) * 0.18 * am + (s.hop ?? 0); pivot.rotation.x = (s.lean ?? 0); pivot.rotation.z = (s.sway ?? 0);
       const gl = s.armL ?? [0, 0], gr = s.armR ?? [0, 0];
       armL.rotation.x = -sw * 0.9 + gl[0]; armL.rotation.z = gl[1] + 0.04; armR.rotation.x = sw * 0.9 + gr[0]; armR.rotation.z = gr[1] - 0.04;
@@ -107,7 +109,21 @@ export function createAvatar(o) {
   return api;
 }
 
+export function createDog() {
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body); const fur = '#b9772f', dark = '#7a4a1c';
+  box(body, 0.9, 0.9, 1.9, fur, 0, 1.2, 0); box(body, 0.7, 0.7, 0.8, '#f1dcc0', 0, 1.05, 0.3);
+  const head = new THREE.Group(); head.position.set(0, 1.85, 1.0); body.add(head); box(head, 0.85, 0.8, 0.85, fur); box(head, 0.5, 0.35, 0.5, '#f1dcc0', 0, -0.15, 0.55); box(head, 0.2, 0.15, 0.1, '#111', 0, -0.02, 0.82); box(head, 0.2, 0.45, 0.2, dark, 0.5, 0.2, -0.05); box(head, 0.2, 0.45, 0.2, dark, -0.5, 0.2, -0.05);
+  for (const x of [-0.2, 0.2]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), mat('#111')); e.position.set(x, 0.12, 0.43); head.add(e); }
+  const tail = new THREE.Group(); tail.position.set(0, 1.5, -0.95); body.add(tail); box(tail, 0.2, 0.2, 0.9, fur, 0, 0.1, -0.35).rotation.x = 0.5;
+  const legs = [[-0.3, 0.7], [0.3, 0.7], [-0.3, -0.7], [0.3, -0.7]].map(([x, z]) => { const g = new THREE.Group(); g.position.set(x, 0.9, z); body.add(g); box(g, 0.3, 0.9, 0.3, dark, 0, -0.45, 0); return g; });
+  return { root, set(s) { root.position.set(s.x ?? 0, 0, s.z ?? 0); root.rotation.y = s.ry ?? 0; const ph = s.ph ?? 0, am = s.amt ?? 0;
+    legs.forEach((g, i) => { g.rotation.x = Math.sin(ph + (i % 2 ? Math.PI : 0) + (i > 1 ? 0.8 : 0)) * 0.9 * am; });
+    body.rotation.x = s.sit ? -0.5 : 0; body.position.y = s.sit ? -0.55 : Math.abs(Math.sin(ph)) * 0.12 * am; head.rotation.x = s.sit ? 0.5 : 0; head.rotation.z = s.sit ? 0.25 * Math.sin(s.t * 2) : 0;
+    tail.rotation.y = Math.sin((s.t ?? 0) * 14) * 0.7; } };
+}
+
 // ── the world ───────────────────────────────────────────────────────────────────────────────────
+const lerp3 = (a, b, t) => a + (b - a) * Math.min(1, Math.max(0, t));
 export function createWorld(W, H) {
   const scene = new THREE.Scene();
   const sky = canvasTex(8, 512, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#3d8fe6"); gr.addColorStop(0.55, "#8cc8f5"); gr.addColorStop(0.9, "#dff1fb"); gr.addColorStop(1, "#f6f1dd"); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
@@ -184,6 +200,67 @@ export function createWorld(W, H) {
   const puffs = Array.from({ length: 7 }, (_, i) => { const m = new THREE.Mesh(rb(1, 1, 1, 0.25), new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.7, roughness: 1 })); scene.add(m); return m; });
   // a work platform across the frame
   box(site, 6.5, 0.3, 1.5, '#d9a45f', 4.8, 4.55, -5.4); box(site, 0.25, 4.4, 0.25, '#8d949b', 1.6, 2.3, -5.4); box(site, 0.25, 4.4, 0.25, '#8d949b', 8, 2.3, -5.4);
+
+  const ticks = [];
+  // a real sky: gradient plus a sun with a glow
+  { const sd = sun.position.clone().normalize();
+    const skyMat = new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, fog: false, uniforms: { sd: { value: sd } },
+      vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'varying vec3 vP; uniform vec3 sd; void main(){ float h = clamp(vP.y, 0.0, 1.0); vec3 top = vec3(0.17,0.43,0.88), mid = vec3(0.47,0.75,0.98), hor = vec3(0.93,0.96,0.97); vec3 c = mix(hor, mid, smoothstep(0.0, 0.25, h)); c = mix(c, top, smoothstep(0.2, 0.85, h)); float s = max(dot(normalize(vP), sd), 0.0); c += vec3(1.0,0.92,0.72) * pow(s, 260.0) * 2.0 + vec3(1.0,0.86,0.6) * pow(s, 10.0) * 0.28; gl_FragColor = vec4(c, 1.0); }' });
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(340, 32, 16), skyMat)); scene.background = new THREE.Color('#dcecf7'); }
+  // grass tufts, flowers and rocks so the ground isn't bare
+  { const out = (x, z) => Math.abs(x) < 31 && z > -27 && z < 24;
+    const tuft = new THREE.InstancedMesh(rb(0.35, 0.8, 0.35, 0.06), new THREE.MeshStandardMaterial({ roughness: 0.8 }), 520), fl = new THREE.InstancedMesh(rb(0.35, 0.35, 0.35, 0.08), new THREE.MeshStandardMaterial({ roughness: 0.6 }), 120), rk = new THREE.InstancedMesh(rb(1, 0.7, 1, 0.15), new THREE.MeshStandardMaterial({ color: '#9aa0a6', roughness: 0.9 }), 40);
+    const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), P = new THREE.Vector3(), S = new THREE.Vector3(), C = new THREE.Color(); const greens = ['#3f9a35', '#4dab3f', '#2f8a30', '#5dbb48'], flc = ['#ffd84a', '#ff6b6b', '#ffffff', '#c05bff', '#ff9f40'];
+    const place = (im, n, y, sc, cols) => { for (let i = 0; i < n; i++) { let x, z; do { x = (rnd() - 0.5) * 130; z = (rnd() - 0.5) * 120 - 4; } while (out(x, z)); const s = sc * (0.7 + rnd() * 0.8); E.set(0, rnd() * 6, 0); Q.setFromEuler(E); P.set(x, y * s, z); S.set(s, s * (0.8 + rnd() * 0.6), s); M.compose(P, Q, S); im.setMatrixAt(i, M); if (cols) im.setColorAt(i, C.set(cols[i % cols.length])); } im.castShadow = true; scene.add(im); };
+    place(tuft, 520, 0.4, 1, greens); place(fl, 120, 0.2, 0.9, flc); place(rk, 40, 0.3, 1.2, null); }
+  // a chain-link fence round the back and sides, with a banner
+  { const ft = canvasTex(128, 128, (g) => { g.strokeStyle = 'rgba(200,210,220,.95)'; g.lineWidth = 3; for (let i = -128; i < 256; i += 16) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i + 128, 128); g.stroke(); g.beginPath(); g.moveTo(i + 128, 0); g.lineTo(i, 128); g.stroke(); } }); ft.wrapS = ft.wrapT = THREE.RepeatWrapping;
+    const fence = (x0, z0, x1, z1) => { const Ln = Math.hypot(x1 - x0, z1 - z0), t2 = ft.clone(); t2.needsUpdate = true; t2.repeat.set(Ln / 4, 1); const p = new THREE.Mesh(new THREE.PlaneGeometry(Ln, 3.4), new THREE.MeshBasicMaterial({ map: t2, transparent: true, side: THREE.DoubleSide, depthWrite: false })); p.position.set((x0 + x1) / 2, 1.9, (z0 + z1) / 2); p.rotation.y = -Math.atan2(z1 - z0, x1 - x0); scene.add(p);
+      for (let k = 0; k <= Ln; k += 4) box(scene, 0.22, 3.9, 0.22, '#8d949b', x0 + (x1 - x0) * k / Ln, 1.95, z0 + (z1 - z0) * k / Ln); box(scene, Ln, 0.16, 0.16, '#8d949b', (x0 + x1) / 2, 3.7, (z0 + z1) / 2).rotation.y = p.rotation.y; };
+    fence(-38, -24, 38, -24); fence(-38, -24, -38, 22); fence(38, -24, 38, 22);
+    const bt = canvasTex(1024, 256, (g) => { g.fillStyle = '#F5C400'; g.fillRect(0, 0, 1024, 256); g.fillStyle = '#141414'; for (let i = -2; i < 26; i++) { g.beginPath(); g.moveTo(i * 44, 0); g.lineTo(i * 44 + 22, 0); g.lineTo(i * 44 + 66, 26); g.lineTo(i * 44 + 44, 26); g.fill(); g.beginPath(); g.moveTo(i * 44, 256); g.lineTo(i * 44 + 22, 256); g.lineTo(i * 44 + 66, 230); g.lineTo(i * 44 + 44, 230); g.fill(); } g.textAlign = 'center'; g.font = '900 110px Arial'; g.fillText('SAFETY FIRST.', 512, 130); g.font = '900 78px Arial'; g.fillStyle = '#d94a38'; g.fillText('TACOS SECOND.', 512, 218); });
+    const ban = new THREE.Mesh(new THREE.PlaneGeometry(16, 4), new THREE.MeshBasicMaterial({ map: bt })); ban.position.set(-2, 2.4, -23.8); scene.add(ban); }
+  // blueprint tent with a table of plans
+  { const tent = new THREE.Group(); tent.position.set(-13, 0, -5); scene.add(tent);
+    const rt = canvasTex(256, 256, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#fff' : '#d94a38'; g.fillRect(i * 32, 0, 32, 256); } });
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(8.2, 0.3, 6), new THREE.MeshStandardMaterial({ map: rt, roughness: 0.8 })); roof.visible = false;
+    box(tent, 5, 0.3, 2.4, '#b98a52', 0, 2.2, 0); for (const [x, z] of [[-2.2, -0.9], [2.2, -0.9], [-2.2, 0.9], [2.2, 0.9]]) box(tent, 0.25, 2.1, 0.25, '#8a6a45', x, 1.05, z);
+    const bp = canvasTex(256, 128, (g) => { g.fillStyle = '#2f6db5'; g.fillRect(0, 0, 256, 128); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 2; for (let x = 0; x < 256; x += 16) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 128); g.stroke(); } for (let y = 0; y < 128; y += 16) { g.beginPath(); g.moveTo(0, y); g.lineTo(256, y); g.stroke(); } g.lineWidth = 4; g.strokeRect(40, 24, 110, 80); g.strokeRect(150, 40, 70, 64); });
+    const plan = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 1.8), new THREE.MeshStandardMaterial({ map: bp })); plan.position.set(0, 2.4, 0); tent.add(plan); }
+  // sawhorses and a plank
+  { const sh = new THREE.Group(); sh.position.set(11.8, 0, 4.6); scene.add(sh); for (const x of [-1.2, 1.2]) { box(sh, 0.3, 0.3, 1.6, '#8a6a45', x, 1.8, 0); for (const z of [-0.7, 0.7]) box(sh, 0.25, 1.9, 0.25, '#8a6a45', x, 0.95, z); } box(sh, 4.2, 0.35, 0.9, '#e8c58c', 0, 2.1, 0); }
+  // sawdust
+  const dust = Array.from({ length: 9 }, () => { const m = new THREE.Mesh(rb(0.18, 0.18, 0.18, 0.04), new THREE.MeshStandardMaterial({ color: '#e6c98f', transparent: true, roughness: 1 })); scene.add(m); return m; });
+  ticks.push((t) => dust.forEach((m, i) => { const k = (t * 1.3 + i / 9) % 1; m.position.set(11.8 + Math.sin(t * 9 + i) * 0.3 + (k - 0.3) * 0.8, 2.3 + k * 1.4, 4.6 + (k - 0.5) * 0.6); m.material.opacity = 0.9 * (1 - k); m.scale.setScalar(0.7 + k); }));
+  // forklift on a loop between the lumber and the frame
+  const fork = new THREE.Group(); scene.add(fork);
+  { box(fork, 2.6, 1.3, 3.6, '#F5C400', 0, 1.2, -0.3); box(fork, 2.6, 1.6, 1.4, '#4b4f55', 0, 1.6, -1.9); box(fork, 2.0, 0.2, 1.7, '#222', 0, 2.0, 0.2);
+    for (const [x, z] of [[-1.1, -0.6], [1.1, -0.6], [-1.1, 0.9], [1.1, 0.9]]) box(fork, 0.18, 2.5, 0.18, '#2a2d31', x, 3.2, z); box(fork, 2.6, 0.2, 2.2, '#2a2d31', 0, 4.5, 0.15);
+    for (const x of [-0.7, 0.7]) box(fork, 0.28, 5.2, 0.28, '#2a2d31', x, 2.7, 2.2);
+    for (const [x, z] of [[-1.35, -1.1], [1.35, -1.1], [-1.35, 1.2], [1.35, 1.2]]) { const wl = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.55, 16), mat('#1c1c1e')); wl.rotation.z = Math.PI / 2; wl.position.set(x, 0.7, z); wl.castShadow = true; fork.add(wl); } }
+  const load = new THREE.Group(); fork.add(load); box(load, 2.6, 0.25, 2.6, '#c4894a', 0, 0, 3.6); for (let i = 0; i < 4; i++) box(load, 2.4, 0.5, 2.3, i % 2 ? '#eef0f2' : '#e1e4e8', 0, 0.38 + i * 0.52, 3.6); for (const x of [-0.7, 0.7]) box(load, 0.2, 0.18, 2.8, '#2a2d31', x, -0.22, 3.4);
+  ticks.push((t) => { const T = 16, s = t % T; let z, ry, h = 0.5; if (s < 5) { z = lerp3(-0.5, -10.5, s / 5); ry = Math.PI; h = 0.5 + s / 5 * 1.4; } else if (s < 6) { z = -10.5; ry = lerp3(Math.PI, 0, s - 5); h = 1.9; } else if (s < 11) { z = lerp3(-10.5, -0.5, (s - 6) / 5); ry = 0; h = 1.9 - (s - 6) / 5 * 1.4; } else { z = -0.5; ry = lerp3(0, Math.PI, s - 11 > 1 ? 1 : s - 11); h = 0.5; }
+    fork.position.set(13.2, 0, z); fork.rotation.y = ry; load.position.y = h; });
+  // cement truck parked at the back with a turning drum
+  { const ct = new THREE.Group(); ct.position.set(26, 0, -13); ct.rotation.y = -0.6; scene.add(ct); box(ct, 3, 3.4, 3.2, '#d94a38', 0, 2.4, 4.2); box(ct, 2.8, 1.4, 0.2, '#9cd3ee', 0, 3.3, 5.85); box(ct, 3.2, 0.9, 9, '#3a3f46', 0, 0.95, -0.3);
+    for (const [x, z] of [[-1.5, 5], [1.5, 5], [-1.5, 0], [1.5, 0], [-1.5, -3], [1.5, -3]]) { const wl = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.6, 18), mat('#1c1c1e')); wl.rotation.z = Math.PI / 2; wl.position.set(x, 0.95, z); wl.castShadow = true; ct.add(wl); }
+    const dt = canvasTex(256, 128, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#f2f2f0' : '#F5C400'; g.fillRect(i * 32, 0, 32, 128); } }); dt.wrapS = THREE.RepeatWrapping;
+    const drum = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.3, 6.2, 24), new THREE.MeshStandardMaterial({ map: dt, roughness: 0.5 })); drum.rotation.x = Math.PI / 2 - 0.22; drum.position.set(0, 3.5, -1); drum.castShadow = true; ct.add(drum); ticks.push((t) => { dt.offset.x = t * 0.5; }); }
+  // work lights, flags, piles, pipes, rebar, porta-potties, generator
+  for (const [x, z] of [[-13, -8], [15, -10], [21, 4], [-22, 9]]) { box(scene, 0.5, 9, 0.5, '#4b5560', x, 4.5, z); box(scene, 1.4, 0.8, 0.6, '#ffffff', x, 9.3, z + 0.3, { emissive: '#fff2b0', emissiveIntensity: 0.9 }).castShadow = false; }
+  const flags = []; for (const [x, z, c] of [[20, 14, '#F5C400'], [-24, 14, '#F5C400'], [30, -2, '#d94a38']]) { box(scene, 0.25, 11, 0.25, '#cfd4d9', x, 5.5, z); const f = new THREE.Group(); f.position.set(x + 0.1, 10, z); scene.add(f); box(f, 2.6, 1.5, 0.06, c, 1.3, 0, 0, { roughness: 0.8 }); flags.push(f); }
+  ticks.push((t) => flags.forEach((f, i) => { f.rotation.y = Math.sin(t * 2.2 + i) * 0.35; f.rotation.z = Math.sin(t * 3 + i) * 0.06; }));
+  for (let i = 0; i < 7; i++) box(scene, 4 - i * 0.5, 0.7, 4 - i * 0.5, i % 2 ? '#d8c08a' : '#cdb57a', 24.5, 0.35 + i * 0.7, -4, { roughness: 1 });
+  for (let i = 0; i < 6; i++) box(scene, 3.2 - i * 0.45, 0.6, 3.2 - i * 0.45, i % 2 ? '#8d949b' : '#7c838a', 22, 0.3 + i * 0.6, -9, { roughness: 1 });
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 4 - r; c++) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 5, 14), mat(c % 2 ? '#e8e8e8' : '#e2792b')); p.rotation.z = Math.PI / 2; p.position.set(21, 0.5 + r * 0.8, 3 + c * 0.9 + r * 0.45); p.castShadow = true; scene.add(p); }
+  for (let i = 0; i < 9; i++) { const rb2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 6, 6), mat('#9c4a2a')); rb2.rotation.z = Math.PI / 2; rb2.position.set(-14.5, 0.3 + Math.floor(i / 3) * 0.22, 8 + (i % 3) * 0.3); scene.add(rb2); }
+  for (let i = 0; i < 3; i++) { box(scene, 2.2, 4.2, 2.2, '#3a86d9', -30 + i * 2.6, 2.1, 15); box(scene, 1.4, 2.6, 0.12, '#2f6db5', -30 + i * 2.6, 1.7, 16.15); }
+  box(scene, 3, 2, 2, '#d94a38', -14, 1.2, -6); box(scene, 2.6, 0.2, 1.6, '#2a2d31', -14, 2.3, -6);
+  // papers flying when the Friday chaos is described
+  const papers = Array.from({ length: 14 }, () => { const p = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.03, 1.2), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.8 })); p.visible = false; p.castShadow = true; scene.add(p); return p; });
+  const paperWin = [1e9, 1e9, -2.2, 3.4, 4.4];
+  ticks.push((t) => { const on = t > paperWin[0] && t < paperWin[1]; papers.forEach((p, i) => { p.visible = on; if (!on) return; const k = ((t - paperWin[0]) * 0.5 + i / 14) % 1, a = i * 1.7 + t * 2.2; p.position.set(paperWin[2] + Math.cos(a) * (1.2 + k * 2.2), paperWin[3] + k * 5, paperWin[4] + Math.sin(a) * (1.2 + k * 2.2)); p.rotation.set(Math.sin(t * 5 + i) * 1.2, t * 3 + i, Math.cos(t * 4 + i) * 1.2); }); });
   // trees, distant blocks, clouds
   const trees = [[-30, -20], [-26, 14], [34, -12], [30, 22], [-38, -4], [40, 6], [8, -44], [-18, -44], [26, -44], [-40, 26], [30, -26]];
   for (const [x, z] of trees) { const s = 0.9 + rnd() * 0.7, t = new THREE.Group(); t.position.set(x, 0, z); t.scale.setScalar(s); scene.add(t); box(t, 1.3, 5, 1.3, "#7b5532", 0, 2.5, 0); box(t, 5.2, 3.2, 5.2, "#2f8f3f", 0, 6, 0, { roughness: 0.7 }); box(t, 3.8, 2.6, 3.8, "#3aa84c", 0, 8.4, 0, { roughness: 0.7 }); box(t, 2.2, 1.6, 2.2, "#46bb5a", 0, 10.2, 0, { roughness: 0.7 }); }
@@ -210,8 +287,9 @@ export function createWorld(W, H) {
   const ex = new THREE.Sprite(new THREE.SpriteMaterial({ map: exTex, transparent: true, depthTest: false })); ex.scale.setScalar(1.5); ex.visible = false; ex.renderOrder = 12; scene.add(ex);
 
   return {
-    scene, sun, qs, ok, ex,
+    scene, sun, qs, ok, ex, fork, paperWin,
     update(t) {
+      for (const f of ticks) f(t);
       upper.rotation.y = Math.sin(t * 0.45) * 0.5; boom.rotation.x = -0.1 + Math.sin(t * 0.9) * 0.28; stick.rotation.x = 0.5 + Math.sin(t * 0.9 + 1.2) * 0.45; bucket.rotation.x = 0.4 + Math.sin(t * 0.9 + 2.4) * 0.5;
       for (const [c, sp, z, dir, off] of traffic) { const x = ((off + t * sp * dir) % 280 + 280) % 280 - 140; c.position.set(x, 0, z); c.rotation.y = dir > 0 ? 0 : Math.PI; }
       birds.forEach(({ b, wl, wr, ph }, i) => { const a = t * 0.35 + i * 1.05; b.position.set(14 + Math.cos(a) * (22 + i * 2), 26 + Math.sin(t * 0.7 + i) * 2 + i, -26 + Math.sin(a) * (14 + i)); b.rotation.y = -a; const f = Math.sin(t * 9 + ph) * 0.7; wl.rotation.z = f; wr.rotation.z = -f; });

@@ -19,7 +19,7 @@ export const LINES = [
   { id: 12, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+2%", t: "Hours track themselves. Every worker, every job." },
   { id: 13, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+2%", t: "I plan the crew's schedule, and see daily tasks and progress at a glance." },
   { id: 14, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+0%", t: "There's even an AI assistant. Just ask it. How many hours did Jess work?" },
-  { id: 15, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+0%", t: "Twenty-six tools, in one app. Estimates, invoices, R F Is, change orders, plus twenty-three premade Excel templates you can customize. And it all works when the signal drops." },
+  { id: 15, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+0%", t: "Twenty-six tools, in one app. Estimates, invoices, R F Is, change orders, plus twenty-three more tools. And it all works when the signal drops." },
   { id: 16, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-4%", t: `It's free while it's launching. Get your crew on ${K}.` },
   { id: 17, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-6%", t: `${K}. Run the job, not the paperwork.` },
 ];

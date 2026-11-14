@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { createWorld, createAvatar } from "/world.js";
+import { createWorld, createAvatar, createDog } from "/world.js";
 
 // ── format ──────────────────────────────────────────────────────────────────────────────────────
 const MODE = new URLSearchParams(location.search).get("mode") === "h" ? "h" : "v";
@@ -27,7 +27,7 @@ const LINES = [
   { who: "Mac",  text: "Hours track themselves. Every worker, every job.", gap: 0.4 },
   { who: "Mac",  text: "I plan the crew's schedule, and see daily tasks and progress at a glance.", gap: 0.3 },
   { who: "Mac",  text: "There's even an AI assistant. Just ask it. How many hours did Jess work?", gap: 0.3 },
-  { who: "Mac",  text: "Twenty-six tools, in one app. Estimates, invoices, RFIs, change orders, plus twenty-three premade Excel templates you can customize. And it all works when the signal drops.", gap: 0.35 },
+  { who: "Mac",  text: "Twenty-six tools, in one app. Estimates, invoices, RFIs, change orders, plus twenty-three more tools. And it all works when the signal drops.", gap: 0.35 },
   { who: "Mac",  text: "It's free while it's launching. Get your crew on Constra.", gap: 0.45 },
   { who: "Mac",  text: "Constra. Run the job, not the paperwork.", gap: 0.4 },
 ];
@@ -38,7 +38,7 @@ const COL = { Mac: "#F5C400", Jess: "#8fe3a0", Dev: "#ff9e7a" };
 // ── set-up ──────────────────────────────────────────────────────────────────────────────────────
 const out = document.getElementById("out"); out.width = W; out.height = H; const ctx = out.getContext("2d");
 const glCanvas = document.getElementById("gl"); glCanvas.width = W; glCanvas.height = H;
-let renderer, world, camera, av = {}, icon, doc, bufs = [], words = [], VO_AT = [], VO_END = [], DURATION = 0, END_AT = 0;
+let dog, renderer, world, camera, av = {}, icon, doc, bufs = [], words = [], VO_AT = [], VO_END = [], DURATION = 0, END_AT = 0;
 
 window.prepare = async () => {
   renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: true, preserveDrawingBuffer: true });
@@ -53,6 +53,10 @@ window.prepare = async () => {
   av.N1 = npc({ skin: '#c98f63', shirt: '#7a5a3a', vest: '#ff7a1c', pants: '#34495e', hat: '#ffffff', beard: true, hairColor: '#241812' });
   av.N2 = npc({ skin: '#f1c7a0', shirt: '#b5413a', vest: '#c8e63a', pants: '#3a3f46', hat: '#3a86d9', stache: true, hairColor: '#8a5a2b', glasses: true });
   av.N3 = npc({ skin: '#8d5a3b', shirt: '#2f9e8f', vest: '#ff7a1c', pants: '#2b2f3a', hat: '#F5C400', hairColor: '#120d0a', brows: true });
+  av.N4 = npc({ skin: '#d9a77c', shirt: '#6b4fa0', vest: '#c8e63a', pants: '#3a3f46', hat: '#ff7a1c', beard: true, hairColor: '#4a3220', glasses: true });
+  av.N5 = npc({ skin: '#b8835a', shirt: '#2a2d31', vest: '#ff7a1c', pants: '#2a2d31', hat: '#d94a38', stache: true, hairColor: '#1d1410', glove: '#2a2a2d' });
+  av.N6 = npc({ skin: '#efc19a', shirt: '#2f6db5', vest: '#ff7a1c', pants: '#34495e', hat: '#ffffff', brows: true, hairColor: '#8a5a2b' });
+  dog = createDog(); world.scene.add(dog.root);
   const plank = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 6), new THREE.MeshStandardMaterial({ color: '#d9a45f', roughness: 0.6 })); plank.position.set(0, 3.0, 1.1); plank.castShadow = true; av.N2.root.add(plank);
   [icon, doc] = await Promise.all([loadImg("/icon.png"), loadImg("/timesheet.png")]);
   const dec = new OfflineAudioContext(1, 48000, 48000);
@@ -139,6 +143,21 @@ function acting(t) {
   const kk = fwd ? ease(ps / 4.5) : ps > 5.5 && ps < 10 ? 1 - ease((ps - 5.5) / 4.5) : (ps >= 10 ? 0 : 1);
   const nB = { x: lerp(13, 2.2, kk), z: lerp(-0.6, -2.8, kk), ry: fwd || ps >= 10 ? -1.55 : 1.55, ph: t * 7, amt: mv ? 0.9 : 0, armL: [-1.3, 0.1], armR: [-1.3, -0.1] };
   const nC = { x: 4.8, y: 4.7, z: -5.4, ry: -0.7, armR: [-1.0 - 1.0 * Math.max(0, Math.sin(t * 7 + 1)), 0], armL: [-0.6, 0], hp: 0.12 };
+  // N4 saws a plank, N6 studies the plans and waves now and then, N5 drives the forklift
+  const nD = { x: 11.7, z: 2.9, ry: 0.35, armR: [-0.95 + 0.38 * Math.sin(t * 9), 0.1], armL: [-0.75, 0.05], lean: 0.12, hp: 0.15 };
+  const wv = Math.max(0, Math.sin(t * 0.9 + 1)) > 0.93 ? 1 : 0;
+  const nF = { x: -13, z: -6.6, ry: 0.15, lean: 0.22, hp: 0.3, armL: [-0.95, -0.15], armR: wv ? [-2.6, 0.5 + 0.35 * Math.sin(t * 11)] : [-0.95, 0.15] };
+  const fp = world.fork.position;
+  const nE = { x: fp.x, z: fp.z, y: 0.55, ry: world.fork.rotation.y, sit: true, armL: [-0.9, 0.1], armR: [-0.9, -0.1], tag: false };
+  // the dog: hangs about, chases Dev to the taco truck, begs, then follows him back
+  const sprint = (a, b) => ease((t - a) / (b - a));
+  let dg; { const o = t < L(7) + 1.2, w = t * 0.5;
+    if (o) dg = { x: 12 + 2.2 * Math.cos(w), z: -0.4 + 2.2 * Math.sin(w), ry: Math.atan2(-Math.sin(w), Math.cos(w)), amt: 0.8, ph: t * 9 };
+    else if (t < L(7) + 3.2) { const k = sprint(L(7) + 1.2, L(7) + 3.2); dg = { x: lerp(12 + 2.2 * Math.cos((L(7) + 1.2) * 0.5), 15.4, k), z: lerp(-0.4 + 2.2 * Math.sin((L(7) + 1.2) * 0.5), 7.6, k), ry: 0.95, amt: 1.2, ph: t * 14 }; }
+    else if (t < LE(9) - 0.2) dg = { x: 15.4, z: 7.6, ry: 1.9, sit: true };
+    else if (t < LE(9) + 2.2) { const k = sprint(LE(9) - 0.2, LE(9) + 2.2); dg = { x: lerp(15.4, 8.6, k), z: lerp(7.6, 5.4, k), ry: -1.5, amt: 1, ph: t * 12 }; }
+    else dg = { x: 8.6, z: 5.6, ry: -0.6, sit: true }; }
+  dg.t = t;
   // faces
   const face = (who, base, extra) => {
     const mth = mouthFor(who, t); if (mth) return mth;
@@ -149,7 +168,7 @@ function acting(t) {
     Jess: face("Jess", celeb > 0.5 ? "cheer" : "smile", celeb > 0.5 ? "cheer" : null),
     Dev: face("Dev", "smile", celeb > 0.5 ? "cheer" : (t > L(7) + 2.4 && t < LE(9) ? "oops" : null)),
   };
-  return { Mac: m, Jess: j, Dev: d, N1: nA, N2: nB, N3: nC, face: f };
+  return { Mac: m, Jess: j, Dev: d, N1: nA, N2: nB, N3: nC, N4: nD, N5: nE, N6: nF, dog: dg, face: f };
 }
 
 // ── camera ──────────────────────────────────────────────────────────────────────────────────────
@@ -180,7 +199,8 @@ function placeCamera(t) {
   const lk0 = s.look.length > 1 ? s.look[0].map((v, k) => lerp(v, s.look[1][k], pan)) : s.look[0], lk = V && s.lyV ? [lk0[0], lk0[1] + s.lyV, lk0[2]] : lk0;
   const az = lerp(s.az[0], s.az[1], u) * Math.PI / 180, el = s.el * Math.PI / 180, vm = V ? (s.vv ?? 1.55) : (s.vh ?? 1);
   const d = lerp(s.d[0], s.d[1], u) * vm;
-  camera.position.set(lk[0] + d * Math.sin(az) * Math.cos(el), lk[1] + d * Math.sin(el) + (V ? 0.4 : 0), lk[2] + d * Math.cos(az) * Math.cos(el));
+  const hx = 0.045 * Math.sin(t * 1.7) + 0.02 * Math.sin(t * 5.3), hy = 0.035 * Math.sin(t * 1.3 + 1);
+  camera.position.set(hx + lk[0] + d * Math.sin(az) * Math.cos(el), hy + lk[1] + d * Math.sin(el) + (V ? 0.4 : 0), lk[2] + d * Math.cos(az) * Math.cos(el));
   camera.lookAt(lk[0], lk[1] + (V ? 0.5 : 0), lk[2]);
   camera.updateProjectionMatrix(); return i;
 }
@@ -255,7 +275,7 @@ function drawOverlays(t) {
   { const fin = (t > LE(14) + 0.4) ? 1 - ease((t - (LE(14) + 0.4)) / 0.3) : 1, t0 = W_(14, /twenty/i);
     const kc = easeBack((t - t0 + 0.1) / 0.35) * fin;
     if (kc > 0.01) { const n = Math.round(26 * easeOut((t - t0) / 0.9)); pop(ctx, V ? W / 2 : W * 0.77, V ? H * 0.115 : H * 0.17, kc, () => { card(V ? 520 : 480, 190, "#F5C400"); ctx.fillStyle = "#151617"; ctx.font = `900 150px ${DISP}`; ctx.textAlign = "right"; ctx.fillText(String(n), -10, 54); ctx.textAlign = "left"; ctx.font = `900 52px ${DISP}`; ctx.fillText("TOOLS", 8, 8); ctx.font = `700 30px ${UI}`; ctx.fillStyle = "#4B4D50"; ctx.fillText("in one app", 8, 52); }); }
-    const items = [["Estimates", /estimates/i, "#F5C400", "#151617"], ["Invoices", /invoices/i, "#fff", "#151617"], ["RFIs", /^R$/i, "#fff", "#151617"], ["Change orders", /change/i, "#fff", "#151617"], ["+ 23 premade Excel templates", /twenty-three|^three/i, "#1E7A45", "#fff"], ["Works offline", /signal/i, "#151617", "#F5C400"]];
+    const items = [["Estimates", /estimates/i, "#F5C400", "#151617"], ["Invoices", /invoices/i, "#fff", "#151617"], ["RFIs", /^R$/i, "#fff", "#151617"], ["Change orders", /change/i, "#fff", "#151617"], ["+ 23 more tools", /twenty-three|^three/i, "#1E7A45", "#fff"], ["Works offline", /signal/i, "#151617", "#F5C400"]];
     ctx.font = `800 40px ${UI}`; const ws = items.map((it) => ctx.measureText(it[0]).width + 70);
     const rows = V ? [[0, 1, 2], [3], [4], [5]] : [[0], [1], [2], [3], [4], [5]];
     rows.forEach((row, r) => { const tot = row.reduce((a2, k) => a2 + ws[k], 0) + (row.length - 1) * 16; let x = (V ? W / 2 : W * 0.77) - tot / 2; const y = V ? H * 0.115 + 170 + r * 84 : H * 0.17 + 160 + r * 82;
@@ -306,6 +326,8 @@ function drawEnd(t) {
 
 // ── one frame ───────────────────────────────────────────────────────────────────────────────────
 window.drawFrame = (t) => {
+  world.burst(0, W_(4, /konstra/i, 0.9) - 0.05, [-2.2, 5.5, 4.4]); world.burst(1, L(15) + 0.55, [2.3, 6, 5]); world.paperWin[0] = L(1) + 0.8; world.paperWin[1] = LE(1) + 0.7;
+  world.update(t);
   const st = acting(t);
   for (const k of ["Mac", "Jess", "Dev"]) av[k].setFace(st.face[k]);
   // sprites over heads
@@ -314,10 +336,13 @@ window.drawFrame = (t) => {
   world.ok.visible = t > L(5) + 0.9 && t < LE(5) + 0.6; world.ok.position.set(POS.Jess[0], 8.5 + Math.sin(t * 5) * 0.15, POS.Jess[1]);
   world.ex.visible = t > L(7) + 0.5 && t < LE(8) + 0.4; world.ex.position.set(-2.2, 8.6 + Math.sin(t * 6) * 0.2, 4.4);
   world.burst(0, W_(4, /konstra/i, 0.9) - 0.05, [-2.2, 5.5, 4.4]); world.burst(1, L(15) + 0.55, [2.5, 6, 5]);
-  world.update(t); const si = placeCamera(t); const tg = [0, 3, 7, 10, 15].includes(si); for (const k of Object.keys(av)) av[k].set({ ...st[k], tag: tg && !/^N/.test(k) });
+  world.paperWin[0] = L(1) + 0.8; world.paperWin[1] = LE(1) + 0.7; const si = placeCamera(t); const tg = [0, 3, 7, 10, 15].includes(si); for (const k of Object.keys(av)) av[k].set({ ...st[k], tag: tg && !/^N/.test(k) });
+  dog.set(st.dog);
   av.Mac.clip.visible = t < W_(4, /konstra/i, 0.9) - 0.7;
   renderer.render(world.scene, camera);
   ctx.clearRect(0, 0, W, H); ctx.drawImage(glCanvas, 0, 0);
+  ctx.save(); ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = 'rgba(255,205,150,.16)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+  { const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.45, W / 2, H / 2, Math.hypot(W, H) * 0.62); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(10,14,28,.38)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
   drawOverlays(t); drawEnd(t); drawBrand(t); drawCaption(t);
 };
 
