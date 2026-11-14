@@ -16,15 +16,18 @@ const LINES = [
   { who: "Mac",  text: "Hey. I'm Mac. I run a framing crew.", gap: 0.9 },
   { who: "Mac",  text: "Every Friday, same story... Who worked Tuesday?", gap: 0.3 },
   { who: "Jess", text: "Mac! I was on Queen Street!", gap: 0.12 },
-  { who: "Mac",  text: "Or was it the other job? Nobody knows.", gap: 0.18 },
-  { who: "Mac",  text: "So I put the whole crew on Constra.", gap: 0.55 },
+  { who: "Mac",  text: "Or was it the other job? Honestly... nobody knows.", gap: 0.18 },
+  { who: "Mac",  text: "So I put my whole crew on Constra.", gap: 0.55 },
   { who: "Jess", text: "Clocked in. Photo, location, done.", gap: 0.35 },
-  { who: "Mac",  text: "And now I can see who's really on site.", gap: 0.3 },
-  { who: "Mac",  text: "Hold on... Dev just left the site. On the clock!", gap: 0.5 },
+  { who: "Mac",  text: "And now I can actually see who's on site.", gap: 0.3 },
+  { who: "Mac",  text: "Wait... Dev just left the site. On the clock!", gap: 0.5 },
   { who: "Dev",  text: "Uh... lunch run?", gap: 0.18 },
   { who: "Mac",  text: "Constra told me. The exact time, and how far you went.", gap: 0.22 },
-  { who: "Mac",  text: "Come Friday, the timesheets are just there. My logo on top. PDF or Excel. Overtime worked out.", gap: 0.5 },
-  { who: "Mac",  text: "Estimates, invoices, RFIs, change orders. One app. And it works when the signal drops.", gap: 0.35 },
+  { who: "Mac",  text: "Come Friday, the timesheets are just there. My logo on top. PDF or Excel. Overtime already worked out.", gap: 0.5 },
+  { who: "Mac",  text: "Hours track themselves. Every worker, every job.", gap: 0.4 },
+  { who: "Mac",  text: "I plan the crew's schedule, and see daily tasks and progress at a glance.", gap: 0.3 },
+  { who: "Mac",  text: "There's even an AI assistant. Just ask it. How many hours did Jess work?", gap: 0.3 },
+  { who: "Mac",  text: "Twenty-six tools, in one app. Estimates, invoices, RFIs, change orders, plus twenty-three premade Excel templates you can customize. And it all works when the signal drops.", gap: 0.35 },
   { who: "Mac",  text: "It's free while it's launching. Get your crew on Constra.", gap: 0.45 },
   { who: "Mac",  text: "Constra. Run the job, not the paperwork.", gap: 0.4 },
 ];
@@ -43,9 +46,14 @@ window.prepare = async () => {
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12;
   world = createWorld(W, H); camera = new THREE.PerspectiveCamera(38, W / H, 0.5, 400); window.__cam = camera; window.__dbg = { av, get world() { return world; } };
   av.Mac = createAvatar({ name: "Mac", tagColor: COL.Mac, skin: "#e8b98a", shirt: "#2f6db5", vest: "#ff7a1c", pants: "#3c4a63", hat: "#F5C400", stache: true, brows: true, hairColor: "#3a2519" });
-  av.Jess = createAvatar({ name: "Jess", tagColor: COL.Jess, skin: "#f3c9a5", shirt: "#1f9d8b", vest: "#c8e63a", pants: "#2b2f3a", hat: "#ffffff", ponytail: true, lashes: true, hairColor: "#7a3b1d" });
-  av.Dev = createAvatar({ name: "Dev", tagColor: COL.Dev, skin: "#a56f4a", shirt: "#444b57", vest: "#ff7a1c", pants: "#5b4a3a", hat: "#ff7a1c", beard: true, brows: true, hairColor: "#1d1410" });
+  av.Jess = createAvatar({ name: "Jess", tagColor: COL.Jess, skin: "#f3c9a5", shirt: "#1f9d8b", vest: "#c8e63a", pants: "#2b2f3a", hat: "#ffffff", ponytail: true, lashes: true, glasses: true, hairColor: "#7a3b1d" });
+  av.Dev = createAvatar({ name: "Dev", tagColor: COL.Dev, skin: "#a56f4a", shirt: "#444b57", vest: "#ff7a1c", pants: "#5b4a3a", hat: "#ff7a1c", beard: true, brows: true, glove: "#2a2a2d", hairColor: "#1d1410" });
   for (const a of Object.values(av)) world.scene.add(a.root);
+  const npc = (o) => { const a = createAvatar({ name: '', ...o }); world.scene.add(a.root); return a; };
+  av.N1 = npc({ skin: '#c98f63', shirt: '#7a5a3a', vest: '#ff7a1c', pants: '#34495e', hat: '#ffffff', beard: true, hairColor: '#241812' });
+  av.N2 = npc({ skin: '#f1c7a0', shirt: '#b5413a', vest: '#c8e63a', pants: '#3a3f46', hat: '#3a86d9', stache: true, hairColor: '#8a5a2b', glasses: true });
+  av.N3 = npc({ skin: '#8d5a3b', shirt: '#2f9e8f', vest: '#ff7a1c', pants: '#2b2f3a', hat: '#F5C400', hairColor: '#120d0a', brows: true });
+  const plank = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 6), new THREE.MeshStandardMaterial({ color: '#d9a45f', roughness: 0.6 })); plank.position.set(0, 3.0, 1.1); plank.castShadow = true; av.N2.root.add(plank);
   [icon, doc] = await Promise.all([loadImg("/icon.png"), loadImg("/timesheet.png")]);
   const dec = new OfflineAudioContext(1, 48000, 48000);
   let t = 0;
@@ -62,6 +70,7 @@ window.prepare = async () => {
 };
 const L = (i) => VO_AT[i], LE = (i) => VO_END[i];
 const wordT = (i, k) => VO_AT[i] + (words[i][Math.min(k, words[i].length - 1)]?.t ?? 0);
+const W_ = (i, re, fb = 0) => { const ws = words[i]; const k = ws.findIndex((w) => re.test(w.w)); return VO_AT[i] + (k >= 0 ? ws[k].t : (ws[ws.length - 1].t + ws[ws.length - 1].d) * fb); };
 const lineAt = (t) => { for (let i = 0; i < N; i++) if (t >= L(i) - 0.05 && t < LE(i) + 0.05) return i; return -1; };
 
 // ── who is talking, and the mouth ──────────────────────────────────────────────────────────────
@@ -80,7 +89,7 @@ const POS = { Mac: [-2.2, 4.4], Jess: [2.8, 4.7], Dev: [6.6, 3.9] };
 
 function acting(t) {
   const g = (who, s) => { const k = talkAmt(who, t); return gest(t, s, 0.15 + 0.85 * k); };
-  const celeb = ease((t - (L(12) + 0.5)) / 0.3);
+  const celeb = ease((t - (L(15) + 0.5)) / 0.3);
   const hop = celeb * Math.abs(Math.sin(t * 7)) * 0.9;
   // ---- Mac
   let m;
@@ -90,14 +99,14 @@ function acting(t) {
     // wave on "Hey"
     const w = ease((t - 2.4) / 0.2) * (1 - ease((t - 3.7) / 0.25)); if (w > 0) m.armR = [-2.5 * w, 0.5 * w + 0.35 * w * Math.sin(t * 11)];
     // shrug on "Nobody knows"
-    const sh = ease((t - wordT(3, 6)) / 0.2) * (1 - ease((t - LE(3)) / 0.3)); if (sh > 0) { m.armL = [-0.2 * sh, -0.85 * sh]; m.armR = [-0.2 * sh, 0.85 * sh]; m.hr = 0.18 * sh; m.hp = -0.12 * sh; }
+    const sh = ease((t - W_(3, /nobody/i, 0.7)) / 0.2) * (1 - ease((t - LE(3)) / 0.3)); if (sh > 0) { m.armL = [-0.2 * sh, -0.85 * sh]; m.armR = [-0.2 * sh, 0.85 * sh]; m.hr = 0.18 * sh; m.hp = -0.12 * sh; }
     // phone up from the moment he says Constra, until timesheets
-    const ph = ease((t - (wordT(4, 6) - 0.6)) / 0.35) * (1 - ease((t - (LE(9) + 0.25)) / 0.3));
+    const ph = Math.max(ease((t - (W_(4, /konstra/i, 0.9) - 0.6)) / 0.35) * (1 - ease((t - (LE(9) + 0.25)) / 0.3)), ease((t - (L(13) - 0.2)) / 0.35) * (1 - ease((t - (LE(13) + 2.2)) / 0.3)));
     if (ph > 0) { const pt = ease((t - L(9)) / 0.25) * (1 - ease((t - LE(9)) / 0.3)); m.armR = [-1.45 * ph - 0.12 * pt, 0.1 * ph - 0.25 * pt]; av.Mac.phone.visible = true; av.Mac.scr.material.color.set(t % 1.4 < 0.7 ? "#F5C400" : "#ffd84a"); if (t > L(6) && t < LE(7)) m.hy = -0.3 * ph; } else av.Mac.phone.visible = false;
     // cheer
     if (celeb > 0) { m.armL = [-3.0 * celeb, -0.5 * celeb]; m.armR = [-3.0 * celeb, 0.5 * celeb]; m.hop = hop; m.sway = 0.06 * Math.sin(t * 7) * celeb; }
     // lean in on the tagline
-    if (t > L(13) - 0.2) { const k = ease((t - L(13)) / 0.5); m.armR = [-0.35 * k - 0.1, 0.55 * k]; m.armL = [-0.15 * k, -0.1]; }
+    if (t > L(16) - 0.2) { const k = ease((t - L(16)) / 0.5); m.armR = [-0.35 * k - 0.1, 0.55 * k]; m.armL = [-0.15 * k, -0.1]; }
   }
   // ---- Jess
   let j;
@@ -123,6 +132,13 @@ function acting(t) {
     if (t > L(7) + 2.4 && t < LE(9)) { av.Dev.bag.visible = true; d.armL = [-0.9, 0.0]; if (t > L(8) - 0.1) d.armR = [-0.5, 0.65 + 0.2 * Math.sin(t * 5)]; } else av.Dev.bag.visible = false;
     if (celeb > 0) { d.armL = [-3.0 * celeb, -0.5 * celeb]; d.armR = [-3.0 * celeb, 0.5 * celeb]; d.hop = Math.abs(Math.sin(t * 7 + 1.8)) * 0.9 * celeb; }
   }
+  // ---- background crew: hammering, carrying a plank, working up on the platform
+  const sw = Math.sin(t * 8);
+  const nA = { x: -11, z: -1.5, ry: 2.2, armR: [-1.0 - 1.0 * Math.max(0, sw), 0], armL: [-0.6, 0], hp: 0.1, hy: 0.0 };
+  const per = 11, ps = t % per, fwd = ps < 4.5, mv = ps < 4.5 || (ps > 5.5 && ps < 10);
+  const kk = fwd ? ease(ps / 4.5) : ps > 5.5 && ps < 10 ? 1 - ease((ps - 5.5) / 4.5) : (ps >= 10 ? 0 : 1);
+  const nB = { x: lerp(13, 2.2, kk), z: lerp(-0.6, -2.8, kk), ry: fwd || ps >= 10 ? -1.55 : 1.55, ph: t * 7, amt: mv ? 0.9 : 0, armL: [-1.3, 0.1], armR: [-1.3, -0.1] };
+  const nC = { x: 4.8, y: 4.7, z: -5.4, ry: -0.7, armR: [-1.0 - 1.0 * Math.max(0, Math.sin(t * 7 + 1)), 0], armL: [-0.6, 0], hp: 0.12 };
   // faces
   const face = (who, base, extra) => {
     const mth = mouthFor(who, t); if (mth) return mth;
@@ -133,7 +149,7 @@ function acting(t) {
     Jess: face("Jess", celeb > 0.5 ? "cheer" : "smile", celeb > 0.5 ? "cheer" : null),
     Dev: face("Dev", "smile", celeb > 0.5 ? "cheer" : (t > L(7) + 2.4 && t < LE(9) ? "oops" : null)),
   };
-  return { Mac: m, Jess: j, Dev: d, face: f };
+  return { Mac: m, Jess: j, Dev: d, N1: nA, N2: nB, N3: nC, face: f };
 }
 
 // ── camera ──────────────────────────────────────────────────────────────────────────────────────
@@ -150,9 +166,12 @@ const SHOTS = [
   { look: [[17, 3.8, 6.6]], az: [-8, -3], el: 2, d: [11, 8.6] },
   { look: [[-2.2, 3.9, 4.4]], az: [15, 10], el: 2, d: [10, 8.4] },
   { look: [[2.3, 3.7, 4.5]], az: [-8, -2], el: 4, d: [16, 14], vv: 2.0, lyV: 1.9 },
-  { look: [[-2.2, 3.9, 4.4]], az: [20, 8], el: 3, d: [10.5, 9] },
+  { look: [[-2.2, 3.9, 4.4]], az: [16, 10], el: 3, d: [11, 9.5], lyV: 1.6 },
+  { look: [[0.3, 3.8, 4.5]], az: [-6, 0], el: 3, d: [14, 12.5], vv: 1.55, lyV: 1.6 },
+  { look: [[-2.2, 3.9, 4.4]], az: [12, 8], el: 2, d: [9.5, 8], lyV: 1.6 },
+  { look: [[-2.2, 3.9, 4.4]], az: [20, 8], el: 3, d: [10.5, 9], lyV: 1.6 },
   { look: [[2.3, 3.8, 4.5]], az: [0, 0], el: 5, d: [18, 15.5], vv: 2.05 },
-  { look: [[-2.2, 4.2, 4.4]], az: [8, 0], el: 2, d: [8.5, 15], vv: 1.3 },
+  { look: [[-2.2, 4.2, 4.4]], az: [8, 0], el: 2, d: [8.5, 15], vv: 1.3, lyV: 1.8 },
 ];
 const cutAt = (i) => (i === 0 ? 0 : L(i) - 0.25);
 function placeCamera(t) {
@@ -182,7 +201,7 @@ const clockStr = "7:02 AM";
 function drawOverlays(t) {
   const o = OV();
   // 1) the Constra logo pops when Mac names it
-  { const a = wordT(4, 6) - 0.1, k = win(t, a, a + 2.4); if (k > 0.01) pop(ctx, o.x, o.y, k, () => { card(600, 230); ctx.drawImage(icon, -250, -72, 130, 130); ctx.fillStyle = "#151617"; ctx.font = `900 92px ${DISP}`; ctx.textBaseline = "middle"; ctx.fillText("CONSTRA", -102, -6); ctx.font = `600 30px ${UI}`; ctx.fillStyle = "#4B4D50"; ctx.fillText("Run the job, not the paperwork.", -250, 82); ctx.textBaseline = "alphabetic"; }); }
+  { const a = W_(4, /konstra/i, 0.9) - 0.1, k = win(t, a, a + 2.4); if (k > 0.01) pop(ctx, o.x, o.y, k, () => { card(600, 230); ctx.drawImage(icon, -250, -72, 130, 130); ctx.fillStyle = "#151617"; ctx.font = `900 92px ${DISP}`; ctx.textBaseline = "middle"; ctx.fillText("CONSTRA", -102, -6); ctx.font = `600 30px ${UI}`; ctx.fillStyle = "#4B4D50"; ctx.fillText("Run the job, not the paperwork.", -250, 82); ctx.textBaseline = "alphabetic"; }); }
   // 2) Jess clocks in: photo, location, time
   { const k = win(t, L(5) + 0.1, LE(5) + 0.7); if (k > 0.01) pop(ctx, o.x, o.y + 10, k, () => { card(640, 330, "#2EAA62");
       ctx.fillStyle = "#2EAA62"; ctx.beginPath(); ctx.arc(-262, -92, 34, 0, 7); ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 8; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath(); ctx.moveTo(-278, -92); ctx.lineTo(-266, -80); ctx.lineTo(-244, -106); ctx.stroke();
@@ -202,19 +221,53 @@ function drawOverlays(t) {
     chips.forEach(([h1, h2, col, off], i) => { const k = win(t, a + off, LE(9) + 0.5); if (k > 0.01) pop(ctx, o.x, o.y + i * 150 - 20, k, () => { card(540, 126, col); ctx.fillStyle = "#77797C"; ctx.font = `700 26px ${UI}`; ctx.fillText(h1, -240, -6); ctx.fillStyle = "#151617"; ctx.font = `900 60px ${DISP}`; ctx.fillText(h2, -240, 46); }); }); }
   // 6) the timesheet, and its tags
   { const a = L(10) + 0.2, k = win(t, a, LE(10) + 0.6, 0.45, 0.35); if (k > 0.01) { const dw = V ? 600 : 460, dh = dw * doc.height / doc.width; ctx.save(); ctx.translate(V ? W / 2 : W * 0.78, V ? H * 0.2 + dh * 0.25 : H * 0.4); ctx.rotate(0.05 * (1 - clamp(k) * 0.5) - 0.03); ctx.scale(k, k); ctx.globalAlpha = clamp(k * 1.5); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12; ctx.fillStyle = "#fff"; ctx.fillRect(-dw / 2 - 4, -dh / 2 - 4, dw + 8, dh + 8); ctx.shadowColor = "transparent"; ctx.drawImage(doc, -dw / 2, -dh / 2, dw, dh); ctx.restore();
-      const tags = [["PDF", wordT(10, 12), "#e0342a"], ["EXCEL", wordT(10, 14), "#1E7A45"], ["OVERTIME ✓", wordT(10, 16), "#151617"]];
+      const tags = [["PDF", W_(10, /^pdf$/i, 0.5), "#e0342a"], ["EXCEL", W_(10, /^excel/i, 0.6), "#1E7A45"], ["OVERTIME ✓", W_(10, /overtime/i, 0.8), "#151617"]];
       tags.forEach(([s, at, col], i) => { const kk = easeBack((t - at) / 0.3) * (1 - ease((t - (LE(10) + 0.5)) / 0.3)); if (kk > 0.01) pop(ctx, (V ? W / 2 - 330 : W * 0.78 - 340) + (i === 2 ? 40 : 0), (V ? H * 0.2 + dh * 0.25 - 90 : H * 0.4 - 100) + i * 82, kk, () => { ctx.font = `800 36px ${UI}`; const w = ctx.measureText(s).width + 44; ctx.fillStyle = col; rr(-w / 2, -30, w, 60, 30); ctx.fill(); ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.fillText(s, 0, 12); ctx.textAlign = "left"; }); }); } }
-  // 7) everything in one app
-  { const items = [["Estimates", 0, "#F5C400", "#151617"], ["Invoices", 1, "#fff", "#151617"], ["RFIs", 3, "#fff", "#151617"], ["Change orders", 4, "#fff", "#151617"], ["Works offline", 9, "#151617", "#F5C400"]];
-    const a = L(11), fin = (t > LE(11) + 0.4) ? 1 - ease((t - (LE(11) + 0.4)) / 0.3) : 1;
-    items.forEach(([s, wi, bg, fg], i) => { const at = wordT(11, wi); const kk = easeBack((t - at + 0.05) / 0.3) * fin; if (kk > 0.01) { const x = V ? W * 0.5 : W * 0.77, y = (V ? H * 0.115 : H * 0.17) + i * (V ? 98 : 96); pop(ctx, x, y, kk, () => { ctx.font = `800 46px ${UI}`; const w = ctx.measureText(s).width + 80; ctx.shadowColor = "rgba(0,0,0,.3)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 6; ctx.fillStyle = bg; rr(-w / 2, -36, w, 72, 36); ctx.fill(); ctx.shadowColor = "transparent"; ctx.fillStyle = fg; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(s, 0, 2); ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; }); } }); }
+  // 7a) hours track themselves
+  { const k = win(t, L(11) + 0.1, LE(11) + 0.6); if (k > 0.01) pop(ctx, o.x, o.y + 40, k, () => { card(660, 420, "#0ea5e9");
+      ctx.fillStyle = "#151617"; ctx.font = `900 44px ${DISP}`; ctx.fillText("HOURS THIS WEEK", -296, -126); ctx.fillStyle = "#2EAA62"; ctx.beginPath(); ctx.arc(150, -140, 9, 0, 7); ctx.fill(); ctx.fillStyle = "#1E7A45"; ctx.font = `700 24px ${UI}`; ctx.fillText("2 clocked in", 168, -131);
+      [["Jess", 38.5], ["Dev", 41.0], ["Sam", 36.0]].forEach(([n, h], i) => { const y = -60 + i * 92, g = easeOut((t - (L(11) + 0.35 + i * 0.25)) / 0.8), bw = 400, mx = 45;
+        ctx.fillStyle = "#151617"; ctx.font = `700 34px ${UI}`; ctx.fillText(n, -296, y + 12); ctx.fillStyle = "#e6e9ec"; rr(-190, y - 14, bw, 34, 17); ctx.fill();
+        const w1 = Math.min(h, 40) / mx * bw * g; ctx.fillStyle = "#0ea5e9"; rr(-190, y - 14, Math.max(w1, 0.1), 34, 17); ctx.fill();
+        if (h > 40) { const w2 = (h - 40) / mx * bw * g; ctx.fillStyle = "#F5C400"; ctx.fillRect(-190 + 40 / mx * bw * g - 6, y - 14, w2 + 6, 34); }
+        ctx.fillStyle = "#4B4D50"; ctx.font = `800 30px ${UI}`; ctx.textAlign = "right"; ctx.fillText((h * g).toFixed(1) + "h", 318, y + 12); ctx.textAlign = "left"; });
+      ctx.fillStyle = "#77797C"; ctx.font = `600 22px ${UI}`; ctx.fillText("Yellow = overtime  ·  sample data", -296, 168); }); }
+  // 7b) schedule, daily tasks and progress
+  { const k = win(t, L(12) + 0.1, LE(12) + 0.6); if (k > 0.01) pop(ctx, o.x, o.y + 60, k, () => { card(660, 480, "#8b5cf6");
+      ctx.fillStyle = "#151617"; ctx.font = `900 42px ${DISP}`; ctx.fillText("CREW SCHEDULE", -296, -170);
+      const days = ["Mon", "Tue", "Wed", "Thu", "Fri"], cols = ["#0ea5e9", "#F5C400", "#0ea5e9", "#2EAA62", "#F5C400"], t0 = W_(12, /schedule/i, 0.4);
+      days.forEach((d, i) => { const x = -296 + i * 122, kk = easeBack((t - t0 - i * 0.08) / 0.3); ctx.fillStyle = "#77797C"; ctx.font = `700 22px ${UI}`; ctx.fillText(d, x + 30, -128); ctx.save(); ctx.globalAlpha = clamp(kk * 2); ctx.fillStyle = cols[i]; rr(x, -112, 108, 22, 8); ctx.fill(); ctx.fillStyle = cols[(i + 2) % 5]; rr(x, -84, 108, 22, 8); ctx.fill(); ctx.restore(); });
+      ctx.fillStyle = "#151617"; ctx.font = `900 34px ${DISP}`; ctx.fillText("TODAY'S TASKS", -296, -22);
+      [["Frame north wall", W_(12, /daily/i, 0.4)], ["Install window headers", W_(12, /daily/i, 0.5) + 0.35], ["Sheathing", W_(12, /tasks/i, 0.6) + 0.3]].forEach(([n, at], i) => { const y = 28 + i * 46, kk = easeBack((t - at) / 0.3), done = i < 2;
+        ctx.fillStyle = done ? "#2EAA62" : "#e6e9ec"; rr(-296, y - 20, 30, 30, 8); ctx.fill(); if (done && kk > 0.3) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(-289, y - 4); ctx.lineTo(-282, y + 3); ctx.lineTo(-272, y - 13); ctx.stroke(); }
+        ctx.fillStyle = "#151617"; ctx.font = `600 30px ${UI}`; ctx.fillText(n, -250, y + 4); });
+      const pg = easeOut((t - W_(12, /progress/i, 0.7)) / 0.8); ctx.fillStyle = "#4B4D50"; ctx.font = `700 24px ${UI}`; ctx.fillText("Dundas St Reno", -296, 178); ctx.textAlign = "right"; ctx.fillText(Math.round(68 * pg) + "%", 316, 178); ctx.textAlign = "left";
+      ctx.fillStyle = "#e6e9ec"; rr(-296, 192, 612, 18, 9); ctx.fill(); ctx.fillStyle = "#2EAA62"; rr(-296, 192, Math.max(0.1, 612 * 0.68 * pg), 18, 9); ctx.fill(); }); }
+  // 7c) the AI assistant answers
+  { const a = W_(13, /assistant/i, 0.4) + 0.2, b = L(14) + 0.7, k = win(t, a, b); if (k > 0.01) pop(ctx, o.x, o.y + 20, k, () => { card(640, 360, "#F5C400");
+      ctx.drawImage(icon, -296, -150, 52, 52); ctx.fillStyle = "#151617"; ctx.font = `900 40px ${DISP}`; ctx.textBaseline = "middle"; ctx.fillText("ASK CONSTRA", -230, -124); ctx.textBaseline = "alphabetic";
+      const q = easeBack((t - W_(13, /^how$/i, 0.7) - 0.05) / 0.3); if (q > 0.01) { ctx.save(); ctx.globalAlpha = clamp(q * 2); ctx.fillStyle = "#F5C400"; rr(-20, -88, 336, 78, 26); ctx.fill(); ctx.fillStyle = "#151617"; ctx.font = `700 28px ${UI}`; ctx.fillText("How many hours did", 0, -52); ctx.fillText("Jess work?", 0, -22); ctx.restore(); }
+      const r = easeBack((t - (LE(13) + 0.35)) / 0.3), dots = t > LE(13) - 0.1 && t < LE(13) + 0.35;
+      if (dots) { ctx.fillStyle = "#e9edf1"; rr(-296, 14, 130, 62, 26); ctx.fill(); ctx.fillStyle = "#77797C"; for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(-262 + i * 32, 45 - Math.abs(Math.sin(t * 9 + i)) * 7, 8, 0, 7); ctx.fill(); } }
+      if (r > 0.01) { ctx.save(); ctx.globalAlpha = clamp(r * 2); ctx.fillStyle = "#e9edf1"; rr(-296, 14, 520, 130, 26); ctx.fill(); ctx.fillStyle = "#151617"; ctx.font = `700 32px ${UI}`; ctx.fillText("Jess worked 38.5 hours", -272, 62); ctx.fillText("this week, on 2 jobs.", -272, 104); ctx.restore(); }
+      ctx.fillStyle = "#77797C"; ctx.font = `600 22px ${UI}`; ctx.fillText("sample data", -296, 168); }); }
+  // 7) how much is in the app: the count, then the pieces
+  { const fin = (t > LE(14) + 0.4) ? 1 - ease((t - (LE(14) + 0.4)) / 0.3) : 1, t0 = W_(14, /twenty/i);
+    const kc = easeBack((t - t0 + 0.1) / 0.35) * fin;
+    if (kc > 0.01) { const n = Math.round(26 * easeOut((t - t0) / 0.9)); pop(ctx, V ? W / 2 : W * 0.77, V ? H * 0.115 : H * 0.17, kc, () => { card(V ? 520 : 480, 190, "#F5C400"); ctx.fillStyle = "#151617"; ctx.font = `900 150px ${DISP}`; ctx.textAlign = "right"; ctx.fillText(String(n), -10, 54); ctx.textAlign = "left"; ctx.font = `900 52px ${DISP}`; ctx.fillText("TOOLS", 8, 8); ctx.font = `700 30px ${UI}`; ctx.fillStyle = "#4B4D50"; ctx.fillText("in one app", 8, 52); }); }
+    const items = [["Estimates", /estimates/i, "#F5C400", "#151617"], ["Invoices", /invoices/i, "#fff", "#151617"], ["RFIs", /^R$/i, "#fff", "#151617"], ["Change orders", /change/i, "#fff", "#151617"], ["+ 23 premade Excel templates", /twenty-three|^three/i, "#1E7A45", "#fff"], ["Works offline", /signal/i, "#151617", "#F5C400"]];
+    ctx.font = `800 40px ${UI}`; const ws = items.map((it) => ctx.measureText(it[0]).width + 70);
+    const rows = V ? [[0, 1, 2], [3], [4], [5]] : [[0], [1], [2], [3], [4], [5]];
+    rows.forEach((row, r) => { const tot = row.reduce((a2, k) => a2 + ws[k], 0) + (row.length - 1) * 16; let x = (V ? W / 2 : W * 0.77) - tot / 2; const y = V ? H * 0.115 + 170 + r * 84 : H * 0.17 + 160 + r * 82;
+      for (const k of row) { const [s2, re, bg, fg] = items[k], at = W_(14, re, 0.5), kk = easeBack((t - at + 0.05) / 0.3) * fin; if (kk > 0.01) pop(ctx, x + ws[k] / 2, y, kk, () => { ctx.font = `800 40px ${UI}`; ctx.shadowColor = "rgba(0,0,0,.3)"; ctx.shadowBlur = 16; ctx.shadowOffsetY = 5; ctx.fillStyle = bg; rr(-ws[k] / 2, -32, ws[k], 64, 32); ctx.fill(); ctx.shadowColor = "transparent"; ctx.fillStyle = fg; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(s2, 0, 2); ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; }); x += ws[k] + 16; } }); }
 }
 
 // ── captions, Roblox-chat style ────────────────────────────────────────────────────────────────
 function wrap(text, maxW) { const ws = text.split(" "), lines = []; let cur = ""; for (const w of ws) { const t2 = cur ? cur + " " + w : w; if (ctx.measureText(t2).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t2; } if (cur) lines.push(cur); return lines; }
+const ln0len = (i) => LINES[i].text.length;
 function drawCaption(t) {
   const i = lineAt(t); if (i < 0 || t > END_AT - 0.05) return;
-  const ln = LINES[i], size = V ? 52 : 40, maxW = (V ? W - 150 : W * 0.6);
+  const ln = LINES[i], size = (V ? 52 : 40) * (ln0len(i) > 95 ? 0.82 : 1), maxW = (V ? W - 150 : W * 0.6);
   ctx.font = `700 ${size}px ${UI}`; const toks = ln.text.split(" "); const nW = words[i].length;
   const lines = wrap(ln.text, maxW), lh = size * 1.28, h = lines.length * lh + 70, w = Math.min(maxW + 70, Math.max(...lines.map((s) => ctx.measureText(s).width)) + 70 + 0);
   const cx = W / 2, y = V ? H * 0.8 - h / 2 + 30 : H - h - 56, a = clamp((t - L(i) + 0.15) / 0.12) * (1 - ease((t - LE(i) - 0.25) / 0.15));
@@ -235,10 +288,10 @@ function drawBrand(t) {
 }
 
 function drawEnd(t) {
-  const a = L(13) + 0.1, k = easeOut((t - (END_AT - 0.35)) / 0.7);
+  const a = L(16) + 0.1, k = easeOut((t - (END_AT - 0.35)) / 0.7);
   // tagline words land with the voice
-  const tl = [["RUN THE JOB,", 2], ["NOT THE", 4], ["PAPERWORK.", 5]]; const size = V ? 118 : 100;
-  tl.forEach(([w, wi], i) => { const at = wordT(13, wi) - 0.05; if (t < at) return; const kk = easeBack((t - at) / 0.35) * (1 - ease((t - (END_AT - 0.1)) / 0.3)); if (kk <= 0.01) return;
+  const tl = [["RUN THE JOB,", /^run$/i], ["NOT THE", /^not$/i], ["PAPERWORK.", /paperwork/i]]; const size = V ? 118 : 100;
+  tl.forEach(([w, wi], i) => { const at = W_(16, wi, 0.8) - 0.05; if (t < at) return; const kk = easeBack((t - at) / 0.35) * (1 - ease((t - (END_AT - 0.1)) / 0.3)); if (kk <= 0.01) return;
     ctx.save(); ctx.globalAlpha = clamp(kk * 2); ctx.translate(V ? W / 2 : W * 0.77, (V ? H * 0.12 : H * 0.28) + i * size * 1.0); ctx.scale(0.8 + 0.2 * kk, 0.8 + 0.2 * kk); ctx.textAlign = "center"; ctx.font = `900 ${size}px ${DISP}`; ctx.lineWidth = size * 0.11; ctx.strokeStyle = "rgba(10,12,20,.7)"; ctx.lineJoin = "round"; ctx.strokeText(w, 0, 0); ctx.fillStyle = i === 2 ? "#F5C400" : "#fff"; ctx.fillText(w, 0, 0); ctx.restore(); });
   if (k <= 0) return;
   ctx.save(); ctx.globalAlpha = k * 0.88; ctx.fillStyle = "#0e1118"; ctx.fillRect(0, 0, W, H); ctx.restore();
@@ -254,14 +307,15 @@ function drawEnd(t) {
 // ── one frame ───────────────────────────────────────────────────────────────────────────────────
 window.drawFrame = (t) => {
   const st = acting(t);
-  for (const k of ["Mac", "Jess", "Dev"]) { av[k].set({ ...st[k], tag: true }); av[k].setFace(st.face[k]); }
+  for (const k of ["Mac", "Jess", "Dev"]) av[k].setFace(st.face[k]);
   // sprites over heads
   const qa = lineAt(t);
   world.qs.forEach((q, i) => { const on = (t > L(3) + 1.5 && t < LE(3) + 0.2) || (t > L(1) + 1.3 && t < LE(1) + 0.4); q.visible = on; if (on) { const base = t < L(3) ? [-2.2, 7.7, 4.4] : [0.4, 8.4, 4.5]; q.position.set(base[0] + (i - 2.5) * 1.4, base[1] + Math.sin(t * 3 + i) * 0.35 + (i % 2) * 0.5, base[2] + 0.5); q.scale.setScalar(1.1 + 0.2 * Math.sin(t * 4 + i)); } });
   world.ok.visible = t > L(5) + 0.9 && t < LE(5) + 0.6; world.ok.position.set(POS.Jess[0], 8.5 + Math.sin(t * 5) * 0.15, POS.Jess[1]);
   world.ex.visible = t > L(7) + 0.5 && t < LE(8) + 0.4; world.ex.position.set(-2.2, 8.6 + Math.sin(t * 6) * 0.2, 4.4);
-  world.burst(0, wordT(4, 6) - 0.05, [-2.2, 5.5, 4.4]); world.burst(1, L(12) + 0.55, [2.5, 6, 5]);
-  world.update(t); const si = placeCamera(t); const tg = [0, 3, 7, 10, 12].includes(si); for (const k of Object.keys(av)) av[k].set({ ...st[k], tag: tg });
+  world.burst(0, W_(4, /konstra/i, 0.9) - 0.05, [-2.2, 5.5, 4.4]); world.burst(1, L(15) + 0.55, [2.5, 6, 5]);
+  world.update(t); const si = placeCamera(t); const tg = [0, 3, 7, 10, 15].includes(si); for (const k of Object.keys(av)) av[k].set({ ...st[k], tag: tg && !/^N/.test(k) });
+  av.Mac.clip.visible = t < W_(4, /konstra/i, 0.9) - 0.7;
   renderer.render(world.scene, camera);
   ctx.clearRect(0, 0, W, H); ctx.drawImage(glCanvas, 0, 0);
   drawOverlays(t); drawEnd(t); drawBrand(t); drawCaption(t);
@@ -303,9 +357,9 @@ async function mixAudio() {
   const ping = (t, f, v) => { const o = A.createOscillator(); o.frequency.value = f; const g = A.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7); o.connect(g).connect(comp); o.start(t); o.stop(t + 0.8); };
   const blip = (t, f, v = 0.12) => { const o = A.createOscillator(); o.type = "triangle"; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * 1.6, t + 0.08); const g = A.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16); o.connect(g).connect(comp); o.start(t); o.stop(t + 0.2); };
   const bt = L(7) + 0.35; ping(bt, 1568, 0.2); ping(bt + 0.11, 2093, 0.18);
-  for (const t of [wordT(4, 6) - 0.1, L(5) + 0.1, L(6) + 0.3, L(9) + 0.35, L(9) + 1.25, L(10) + 0.2, wordT(10, 12), wordT(10, 14), wordT(10, 16), wordT(11, 0), wordT(11, 1), wordT(11, 3), wordT(11, 4), wordT(11, 9)]) blip(t, 520 + (t * 37 % 5) * 60);
+  for (const t of [W_(4, /konstra/i, 0.9) - 0.1, L(5) + 0.1, L(6) + 0.3, L(9) + 0.35, L(9) + 1.25, L(10) + 0.2, W_(10, /^pdf$/i, 0.5), W_(10, /^excel/i, 0.6), W_(10, /overtime/i, 0.8), L(11) + 0.3, L(12) + 0.3, W_(12, /daily/i, 0.4), W_(12, /progress/i, 0.7), W_(13, /^how$/i, 0.7), LE(13) + 0.35, W_(14, /twenty/i), W_(14, /estimates/i), W_(14, /invoices/i), W_(14, /^R$/i), W_(14, /change/i), W_(14, /twenty-three|^three/i, 0.6), W_(14, /signal/i, 0.9)]) blip(t, 520 + (t * 37 % 5) * 60);
   // confetti pops
-  for (const t of [wordT(4, 6) - 0.05, L(12) + 0.55]) { const s = A.createBufferSource(); s.buffer = noiseBuf; const bp = A.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1800; const g = A.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35); s.connect(bp).connect(g).connect(comp); s.start(t); s.stop(t + 0.5); }
+  for (const t of [W_(4, /konstra/i, 0.9) - 0.05, L(15) + 0.55]) { const s = A.createBufferSource(); s.buffer = noiseBuf; const bp = A.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1800; const g = A.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35); s.connect(bp).connect(g).connect(comp); s.start(t); s.stop(t + 0.5); }
   // a little foot-stomp bed for the hammering and the run
   for (let k = 0; k < 40; k++) { const tt = 3.5 + k * 0.33; if (tt < L(7) + 0.9 && Math.floor(tt * 3) % 2 === 0) { const o = A.createOscillator(); o.type = "square"; o.frequency.value = 180; const g = A.createGain(); g.gain.setValueAtTime(0.0001, tt); g.gain.exponentialRampToValueAtTime(0.035, tt + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.05); o.connect(g).connect(duck); o.start(tt); o.stop(tt + 0.07); } }
   return await A.startRendering();

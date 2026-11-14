@@ -5,20 +5,23 @@ import fs from "fs";
 // and "Constra" is respelled "Konstra" so it reads CON-stra.
 const K = "Konstra";
 export const LINES = [
-  { id: 1, who: "mac",  v: "en-US-AndrewNeural", rate: "-4%", t: "Hey. I'm Mac. I run a framing crew." },
-  { id: 2, who: "mac",  v: "en-US-AndrewNeural", rate: "+2%", t: "Every Friday, same story... Who worked Tuesday?" },
-  { id: 3, who: "jess", v: "en-US-AriaNeural",   rate: "+8%", t: "Mac! I was on Queen Street!" },
-  { id: 4, who: "mac",  v: "en-US-AndrewNeural", rate: "-2%", t: "Or was it the other job? Nobody knows." },
-  { id: 5, who: "mac",  v: "en-US-AndrewNeural", rate: "-4%", t: `So I put the whole crew on ${K}.` },
-  { id: 6, who: "jess", v: "en-US-AriaNeural",   rate: "+6%", t: "Clocked in. Photo, location, done." },
-  { id: 7, who: "mac",  v: "en-US-AndrewNeural", rate: "-2%", t: "And now I can see who's really on site." },
-  { id: 8, who: "mac",  v: "en-US-AndrewNeural", rate: "+2%", t: "Hold on... Dev just left the site. On the clock!" },
-  { id: 9, who: "dev",  v: "en-US-GuyNeural",    rate: "+0%", t: "Uh... lunch run?" },
-  { id: 10, who: "mac", v: "en-US-AndrewNeural", rate: "-2%", t: `${K} told me. The exact time, and how far you went.` },
-  { id: 11, who: "mac", v: "en-US-AndrewNeural", rate: "-2%", t: "Come Friday, the timesheets are just there. My logo on top. PDF or Excel. Overtime worked out." },
-  { id: 12, who: "mac", v: "en-US-AndrewNeural", rate: "+0%", t: "Estimates, invoices, R F Is, change orders. One app. And it works when the signal drops." },
-  { id: 13, who: "mac", v: "en-US-AndrewNeural", rate: "-4%", t: `It's free while it's launching. Get your crew on ${K}.` },
-  { id: 14, who: "mac", v: "en-US-AndrewNeural", rate: "-6%", t: `${K}. Run the job, not the paperwork.` },
+  { id: 1, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-4%", t: "Hey, I'm Mac. I run a framing crew." },
+  { id: 2, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+2%", t: "Every Friday, same story... who worked Tuesday?" },
+  { id: 3, who: "jess", v: "en-US-AvaMultilingualNeural", rate: "+8%", t: "Mac! I was on Queen Street!" },
+  { id: 4, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-2%", t: "Or was it the other job? Honestly... nobody knows." },
+  { id: 5, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-4%", t: `So I put my whole crew on ${K}.` },
+  { id: 6, who: "jess", v: "en-US-AvaMultilingualNeural", rate: "+6%", t: "Clocked in. Photo, location, done." },
+  { id: 7, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-2%", t: "And now I can actually see who's on site." },
+  { id: 8, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+2%", t: "Wait... Dev just left the site. On the clock!" },
+  { id: 9, who: "dev", v: "en-US-BrianMultilingualNeural", rate: "+0%", t: "Uh... lunch run?" },
+  { id: 10, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-2%", t: `${K} told me. The exact time, and how far you went.` },
+  { id: 11, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-2%", t: "Come Friday, the timesheets are just there. My logo on top. PDF or Excel. Overtime already worked out." },
+  { id: 12, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+2%", t: "Hours track themselves. Every worker, every job." },
+  { id: 13, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+2%", t: "I plan the crew's schedule, and see daily tasks and progress at a glance." },
+  { id: 14, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+0%", t: "There's even an AI assistant. Just ask it. How many hours did Jess work?" },
+  { id: 15, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "+0%", t: "Twenty-six tools, in one app. Estimates, invoices, R F Is, change orders, plus twenty-three premade Excel templates you can customize. And it all works when the signal drops." },
+  { id: 16, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-4%", t: `It's free while it's launching. Get your crew on ${K}.` },
+  { id: 17, who: "mac", v: "en-US-AndrewMultilingualNeural", rate: "-6%", t: `${K}. Run the job, not the paperwork.` },
 ];
 if (process.argv[1].endsWith("voice.mjs")) {
   for (const L of LINES) {
