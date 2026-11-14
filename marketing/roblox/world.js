@@ -41,7 +41,8 @@ function faceTex(state, o = {}) {
     if (o.stache) { g.fillStyle = o.hair || "#3a2519"; g.beginPath(); g.moveTo(128, 152); g.quadraticCurveTo(94, 134, 70, 156); g.quadraticCurveTo(100, 168, 128, 160); g.quadraticCurveTo(156, 168, 186, 156); g.quadraticCurveTo(162, 134, 128, 152); g.fill(); }
   });
 }
-const torsoTex = (shirt, vest, label, coat) => canvasTex(256, 256, (g) => {
+const torsoTex = (shirt, vest, label, coat, suit) => canvasTex(256, 256, (g) => {
+  if (suit) { const [jk, tie] = suit.split('|'); g.fillStyle = jk; g.fillRect(0, 0, 256, 256); g.fillStyle = '#f4f4f1'; g.beginPath(); g.moveTo(92, 0); g.lineTo(164, 0); g.lineTo(128, 130); g.fill(); g.fillStyle = tie; g.beginPath(); g.moveTo(120, 14); g.lineTo(136, 14); g.lineTo(142, 160); g.lineTo(128, 178); g.lineTo(114, 160); g.fill(); g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.moveTo(60, 0); g.lineTo(98, 0); g.lineTo(128, 128); g.lineTo(58, 70); g.fill(); g.beginPath(); g.moveTo(196, 0); g.lineTo(158, 0); g.lineTo(128, 128); g.lineTo(198, 70); g.fill(); g.fillStyle = '#fff'; g.fillRect(170, 150, 40, 10); g.fillStyle = 'rgba(0,0,0,.3)'; for (const y of [190, 224]) { g.beginPath(); g.arc(150, y, 6, 0, 7); g.fill(); } return; }
   if (coat) { g.fillStyle = '#b08d57'; g.fillRect(0, 0, 256, 256); g.fillStyle = '#e9e6df'; g.beginPath(); g.moveTo(96, 0); g.lineTo(160, 0); g.lineTo(128, 96); g.fill(); g.fillStyle = '#7a1f1a'; g.beginPath(); g.moveTo(120, 30); g.lineTo(136, 30); g.lineTo(142, 150); g.lineTo(128, 164); g.lineTo(114, 150); g.fill(); g.fillStyle = '#8f6d3c'; g.beginPath(); g.moveTo(64, 0); g.lineTo(100, 0); g.lineTo(128, 110); g.lineTo(60, 60); g.fill(); g.beginPath(); g.moveTo(192, 0); g.lineTo(156, 0); g.lineTo(128, 110); g.lineTo(196, 60); g.fill(); g.fillStyle = '#5a3b22'; g.fillRect(0, 176, 256, 22); g.fillStyle = '#d8b24a'; g.fillRect(118, 174, 20, 26); for (const y of [118, 150, 214]) { g.fillStyle = '#4a3220'; g.beginPath(); g.arc(150, y, 6, 0, 7); g.fill(); } return; }
   g.fillStyle = shirt; g.fillRect(0, 0, 256, 256);
   g.fillStyle = vest; g.fillRect(34, 0, 188, 256); g.fillStyle = shirt; g.beginPath(); g.moveTo(98, 0); g.lineTo(128, 52); g.lineTo(158, 0); g.fill();
@@ -65,7 +66,7 @@ export function createAvatar(o) {
   const mk = (x) => { const g = new THREE.Group(); g.position.set(x, 2, 0); pivot.add(g); box(g, 0.98, 1.6, 0.98, o.pants, 0, -0.8, 0); box(g, 1.02, 0.45, 1.12, "#3b2a20", 0, -1.78, 0.05); return g; };
   const legL = mk(-0.5), legR = mk(0.5);
   // torso
-  const tt = torsoTex(o.shirt, o.vest, o.name, o.coat); const torso = box(pivot, 2, 2, 1, new THREE.MeshStandardMaterial({ map: tt, roughness: 0.55 }), 0, 3, 0);
+  const tt = torsoTex(o.shirt, o.vest, o.name, o.coat, o.suit); const torso = box(pivot, 2, 2, 1, new THREE.MeshStandardMaterial({ map: tt, roughness: 0.55 }), 0, 3, 0);
   // arms: sleeve + hand
   const arm = (x) => { const g = new THREE.Group(); g.position.set(x, 3.9, 0); pivot.add(g); box(g, 0.98, 1.2, 0.98, o.shirt, 0, -0.6, 0); box(g, 0.94, 0.85, 0.94, o.glove || skin, 0, -1.55, 0); return g; };
   const armL = arm(-1.5), armR = arm(1.5);
@@ -82,6 +83,8 @@ export function createAvatar(o) {
   box(hat, 1.0, 0.12, 0.8, o.hat, 0, 0.0, 0.85, { roughness: 0.35 });
   box(hat, 0.22, 0.14, 1.2, o.hat, 0, 0.56, 0, { roughness: 0.35 });
   const st = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.34), new THREE.MeshBasicMaterial({ map: hatSticker, transparent: true })); st.position.set(0, 0.24, 0.755); st.rotation.x = -0.25; hat.add(st);
+  if (o.noHat) hat.visible = false;
+  if (o.hairTop) { box(head, 1.26, 0.34, 1.26, o.hairColor, 0, 1.12, -0.02, { roughness: 0.8 }).geometry = rb(1.26, 0.34, 1.26, 0.14); box(head, 0.14, 0.5, 1.1, o.hairColor, 0.64, 0.82, -0.05); box(head, 0.14, 0.5, 1.1, o.hairColor, -0.64, 0.82, -0.05); }
   if (o.fedora) { hat.visible = false; const fd = new THREE.Group(); fd.position.set(0, 1.12, 0); head.add(fd); box(fd, 2.0, 0.1, 2.0, '#4a3a2c', 0, 0, 0).geometry = rb(2.0, 0.1, 2.0, 0.05); box(fd, 1.25, 0.62, 1.25, '#5a4636', 0, 0.34, 0); box(fd, 1.28, 0.16, 1.28, '#1d1612', 0, 0.12, 0); }
   if (o.coat) { box(pivot, 2.1, 1.5, 1.14, '#b08d57', 0, 1.7, 0); box(pivot, 2.12, 0.18, 1.16, '#5a3b22', 0, 2.2, 0); }
   // hair
