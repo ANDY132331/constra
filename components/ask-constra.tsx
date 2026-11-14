@@ -399,7 +399,7 @@ export function AskConstra() {
               onClick={() => ask(input)}
               disabled={!input.trim() || streaming}
               aria-label="Ask"
-              className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl bg-amber-500 disabled:bg-white/[0.06] disabled:cursor-not-allowed text-black transition-all active:scale-95 hover:bg-amber-400"
+              className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl bg-amber-500 disabled:bg-white/[0.06] disabled:cursor-not-allowed text-black transition-all active:scale-95 hover:bg-amber-400"
             >
               {streaming ? (
                 <Loader2 size={15} className="animate-spin text-white/40" />

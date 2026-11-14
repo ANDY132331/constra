@@ -292,7 +292,7 @@ export default function SafetyPage() {
                     {reporter && <span className="truncate">{reporter.name}</span>}
                     {reporter && <span>·</span>}
                     <span className="flex-shrink-0">
-                      {new Date(incident.date).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                      {new Date(incident.date).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                     </span>
                   </div>
                   {incident.reportedToOSHA && (

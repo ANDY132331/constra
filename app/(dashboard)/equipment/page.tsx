@@ -223,7 +223,7 @@ export default function EquipmentPage() {
                     </div>
                     {eq.certExpiry && (
                       <div className={endOfDay(eq.certExpiry).getTime() < Date.now() ? "text-red-400" : ""}>
-                        Cert: {new Date(eq.certExpiry).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "2-digit" })}
+                        Cert: {new Date(eq.certExpiry).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
                       </div>
                     )}
                   </div>

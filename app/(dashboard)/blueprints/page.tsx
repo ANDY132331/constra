@@ -309,7 +309,7 @@ export default function BlueprintsPage() {
               </div>
               <div>
                 <p className="text-[12px] font-semibold text-white/30">No blueprints yet</p>
-                <p className="text-[10px] text-white/15 mt-0.5 leading-relaxed">Upload a PDF or image to get started</p>
+                <p className="text-[10px] text-white/40 mt-0.5 leading-relaxed">Upload a PDF or image to get started</p>
               </div>
               <button
                 onClick={() => fileInputRef.current?.click()}

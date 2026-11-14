@@ -7,6 +7,7 @@ import { Header } from "@/components/header";
 import { SearchModal } from "@/components/search-modal";
 import { EscapeToClose } from "@/components/escape-to-close";
 import { DialogSemantics } from "@/components/dialog-semantics";
+import { FieldNames } from "@/components/field-names";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineBanner } from "@/components/offline-banner";
 import { NotifPermissionPrompt } from "@/components/notif-permission-prompt";
@@ -181,6 +182,7 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
               <ErrorBoundary fallback={null}><SearchModal /></ErrorBoundary>
               <EscapeToClose />
               <DialogSemantics />
+              <FieldNames />
               <ErrorBoundary fallback={null}><OfflineBanner /></ErrorBoundary>
               <ErrorBoundary fallback={null}><NotifPermissionPrompt /></ErrorBoundary>
               <ErrorBoundary fallback={null}><SiteWatcher /></ErrorBoundary>

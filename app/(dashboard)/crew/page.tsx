@@ -339,7 +339,7 @@ function WorkerDetail({ worker, now, weekHours, totalHours, rate, canEdit, canRe
                   <span className="text-white/80 min-w-0 truncate">{c.name}</span>
                   {c.expiryDate && (
                     <span className={`flex-shrink-0 text-[12px] font-semibold tabular-nums ${expired ? "text-red-400" : soon ? "text-amber-400" : "text-white/50"}`}>
-                      {expired ? "Expired " : "Exp. "}{new Date(c.expiryDate).toLocaleDateString("en-CA", { month: "short", year: "2-digit" })}
+                      {expired ? "Expired " : "Exp. "}{new Date(c.expiryDate).toLocaleDateString("en-CA", { month: "short", year: "numeric" })}
                     </span>
                   )}
                 </li>

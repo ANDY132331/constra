@@ -1699,14 +1699,15 @@ html[data-theme="light"] header:not(.lp-nav) { box-shadow: 0 1px 0 var(--c-rule)
 /* Yellow text that sits on a solid yellow fill stays dark */
 [data-theme="light"] .bg-amber-500 .text-amber-400, [data-theme="light"] .bg-amber-400 .text-amber-400 { color: #1A1600 !important; }
 
-[data-theme="dark"] .text-white\/10, [data-theme="dark"] .text-white\/15,
-[data-theme="dark"] .text-white\/20 { color: rgba(255,255,255,0.4) !important; }
+[data-theme="dark"] .text-white\/10, [data-theme="dark"] .text-white\/15 { color: rgba(255,255,255,0.4) !important; }
+/* /20 is used for 10px captions as well as icons, and 0.4 measured 3.8:1 on a card; 0.48 clears 4.5:1 */
+[data-theme="dark"] .text-white\/20 { color: rgba(255,255,255,0.48) !important; }
 /* Secondary text tiers. /35–/45 were left at their raw alpha, so they read *dimmer* than the
    lifted /30 and measured 3.2–4.4:1 on the #111 ground; each tier now clears 4.5:1 in order. */
 [data-theme="dark"] .text-white\/25, [data-theme="dark"] .text-white\/30 { color: rgba(255,255,255,0.5) !important; }
 [data-theme="dark"] .text-white\/35, [data-theme="dark"] .text-white\/40 { color: rgba(255,255,255,0.54) !important; }
 [data-theme="dark"] .text-white\/45 { color: rgba(255,255,255,0.58) !important; }
-[data-theme="dark"] [class*="placeholder:text-white"]::placeholder { color: rgba(255,255,255,0.34) !important; }
+[data-theme="dark"] [class*="placeholder:text-white"]::placeholder { color: rgba(255,255,255,0.46) !important; }
 
 /* ── Light-mode mappings for remaining theme classes (generated) ── */
 [data-theme="light"] .bg-\[\#080808\]\/90 { background-color: rgba(245,244,241,0.9) !important; }
@@ -1896,3 +1897,19 @@ html[data-text-size="xl"] main.main-scroll { padding-left: 25px; padding-right: 
   html[data-text-size="large"] main.main-scroll { padding-left: 26.88px; padding-right: 26.88px; }
   html[data-text-size="xl"] main.main-scroll { padding-left: 30px; padding-right: 30px; }
 }
+
+/* Coloured labels on tinted cards (a red "Overdue" on a faint red card read 3.6:1): the dark theme
+   takes the 300 shade of the hue, which clears 4.5:1 on those grounds. */
+:root:not([data-theme="light"]) .text-red-400\/60,
+:root:not([data-theme="light"]) .text-red-400\/70,
+:root:not([data-theme="light"]) .text-red-400\/80 { color: #fca5a5; }
+:root:not([data-theme="light"]) .text-amber-400\/60,
+:root:not([data-theme="light"]) .text-amber-400\/70,
+:root:not([data-theme="light"]) .text-amber-400\/80 { color: #fcd34d; }
+:root:not([data-theme="light"]) .text-emerald-400\/60,
+:root:not([data-theme="light"]) .text-emerald-400\/70,
+:root:not([data-theme="light"]) .text-emerald-400\/80 { color: #6ee7b7; }
+
+/* White text on the red buttons: red-500 measured 3.8:1; red-600 clears 4.5:1 in both themes. */
+.bg-red-500.text-white { background-color: #dc2626; }
+.bg-red-500.text-white:hover, .bg-red-500.text-white.hover\:bg-red-400:hover { background-color: #b91c1c; }
