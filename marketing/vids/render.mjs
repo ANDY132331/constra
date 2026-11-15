@@ -38,9 +38,9 @@ if (mode === "stills") {
   console.log("stills ->", ST);
 } else {
   const light = process.env.LIGHT === "1";
-  const res = await p.evaluate((br) => window.encodeAll(br), light ? (fmt === "v" ? 3_000_000 : 3_500_000) : (fmt === "v" ? 7_500_000 : 9_000_000));
+  const res = await p.evaluate(([br, ab, cb, sc]) => window.encodeAll(br, ab, cb, sc), [process.env.BR ? +process.env.BR : light ? (fmt === "v" ? 3_000_000 : 3_500_000) : (fmt === "v" ? 7_500_000 : 9_000_000), +(process.env.AB || 192000), process.env.CBR === "1", +(process.env.SCALE || 1)]);
   fs.mkdirSync(path.join(ROOT, "marketing", "promo-videos"), { recursive: true });
-  const f = path.join(ROOT, "marketing", "promo-videos", `${name}-${fmt === "v" ? "vertical" : "wide"}${light ? "-share" : ""}.mp4`);
+  const f = path.join(ROOT, "marketing", "promo-videos", `${name}-${fmt === "v" ? "vertical" : "wide"}${process.env.BR ? "-upload" : light ? "-share" : ""}.mp4`);
   fs.writeFileSync(f, Buffer.from(res.video, "base64")); console.log("wrote", f, Math.round(fs.statSync(f).size / 1024), "KB", "peak", res.peak);
 }
 await b.close();

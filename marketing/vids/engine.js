@@ -70,16 +70,16 @@ export async function start(scene) {
   }
   const b64 = async (x) => { const u = new Uint8Array(x instanceof Blob ? await x.arrayBuffer() : x); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
   window.still = async (t) => { window.drawFrame(t); return await b64(await new Promise((r) => out.toBlob(r, "image/png"))); };
-  window.encodeAll = async (bitrate) => {
-    const { Muxer, ArrayBufferTarget } = window.Mp4Muxer;
-    const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: W, height: H, frameRate: FPS }, audio: { codec: "aac", numberOfChannels: 2, sampleRate: 48000 }, fastStart: "in-memory" });
+  window.encodeAll = async (bitrate, abr = 192000, cbr = false, scale = 1) => {
+    const { Muxer, ArrayBufferTarget } = window.Mp4Muxer; const EW = Math.round(W * scale / 2) * 2, EH = Math.round(H * scale / 2) * 2, sc = scale < 1 ? Object.assign(document.createElement("canvas"), { width: EW, height: EH }) : out, sg = scale < 1 ? sc.getContext("2d") : null;
+    const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: "avc", width: EW, height: EH, frameRate: FPS }, audio: { codec: "aac", numberOfChannels: 2, sampleRate: 48000 }, fastStart: "in-memory" });
     let err = null; const venc = new VideoEncoder({ output: (c, m) => muxer.addVideoChunk(c, m), error: (e) => { err = String(e); } });
-    venc.configure({ codec: V ? "avc1.640033" : "avc1.640034", width: W, height: H, bitrate, framerate: FPS, latencyMode: "quality", bitrateMode: "variable" });
+    venc.configure({ codec: V ? "avc1.640033" : "avc1.640034", width: EW, height: EH, bitrate, framerate: FPS, latencyMode: cbr ? "realtime" : "quality", bitrateMode: cbr ? "constant" : "variable" });
     const audio = await mixAudio(), Lc = audio.getChannelData(0), Rc = audio.getChannelData(1); let peak = 0; for (let i = 0; i < Lc.length; i++) peak = Math.max(peak, Math.abs(Lc[i]), Math.abs(Rc[i])); const g = peak > 0.97 ? 0.97 / peak : 1;
-    const aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => { err = String(e); } }); aenc.configure({ codec: "mp4a.40.2", sampleRate: 48000, numberOfChannels: 2, bitrate: 192000 });
+    const aenc = new AudioEncoder({ output: (c, m) => muxer.addAudioChunk(c, m), error: (e) => { err = String(e); } }); aenc.configure({ codec: "mp4a.40.2", sampleRate: 48000, numberOfChannels: 2, bitrate: abr });
     for (let off = 0; off < Lc.length; off += 1024) { const n = Math.min(1024, Lc.length - off), d = new Float32Array(n * 2); for (let k = 0; k < n; k++) { d[k] = Lc[off + k] * g; d[n + k] = Rc[off + k] * g; } const ad = new AudioData({ format: "f32-planar", sampleRate: 48000, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round(off / 48000 * 1e6), data: d }); aenc.encode(ad); ad.close(); }
     await aenc.flush(); const total = Math.round(DURATION * FPS);
-    for (let i = 0; i < total; i++) { window.drawFrame(i / FPS); const f = new VideoFrame(out, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) }); venc.encode(f, { keyFrame: i % 60 === 0 }); f.close(); while (venc.encodeQueueSize > 6) await new Promise((r) => setTimeout(r, 8)); if (i % 150 === 0) console.log(`frame ${i}/${total}`); }
+    for (let i = 0; i < total; i++) { window.drawFrame(i / FPS); if (sg) sg.drawImage(out, 0, 0, EW, EH); const f = new VideoFrame(sc, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) }); venc.encode(f, { keyFrame: i % 60 === 0 }); f.close(); while (venc.encodeQueueSize > 6) await new Promise((r) => setTimeout(r, 8)); if (i % 150 === 0) console.log(`frame ${i}/${total}`); }
     await venc.flush(); muxer.finalize(); if (err) throw new Error(err);
     return { video: await b64(muxer.target.buffer), peak: +peak.toFixed(3), gain: +g.toFixed(3) };
   };
