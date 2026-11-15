@@ -14,6 +14,8 @@ const file = (f, type) => ({ contentType: type, body: fs.readFileSync(f) });
 const MIME = { ".png": "image/png", ".jpg": "image/jpeg", ".json": "application/json", ".mp3": "audio/mpeg", ".js": "text/javascript", ".svg": "image/svg+xml" };
 await p.route("https://vid.local/**", (r) => {
   const n = decodeURIComponent(new URL(r.request().url()).pathname);
+  if (n.startsWith("/three/")) return r.fulfill(file(`${ROOT}/node_modules/three/${n.slice(7)}`, "text/javascript"));
+  if (n.startsWith("/cine/")) return r.fulfill(file(`${HERE}/cine/${n.slice(6)}`, "text/javascript"));
   if (n === "/stage.js") return r.fulfill(file(`${HERE}/stage.js`, "text/javascript"));
   if (n === "/puppet.js") return r.fulfill(file(`${HERE}/puppet.js`, "text/javascript"));
   if (n === "/engine.js") return r.fulfill(file(`${HERE}/engine.js`, "text/javascript"));
@@ -24,6 +26,7 @@ await p.route("https://vid.local/**", (r) => {
   if (n === "/icon.png") return r.fulfill(file(`${ROOT}/public/icon-192.png`, "image/png"));
   return r.fulfill({ contentType: "text/html", body: `<!doctype html><body style="margin:0;background:#000"><canvas id="out"></canvas>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=IBM+Plex+Mono:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=Caveat:wght@700&family=Oswald:wght@500;700&display=swap">
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
 <script src="/mux.js"></script><script type="module">import { start } from "/engine.js"; import scene from "/scene.js"; await Promise.all(["800 40px 'Barlow Condensed'","700 30px 'IBM Plex Mono'","600 30px 'IBM Plex Sans'","700 40px Caveat","700 40px Oswald"].map((f)=>document.fonts.load(f))); await document.fonts.ready; await start(scene);</script></body>` });
 });
 await p.route("https://fonts.googleapis.com/**", (r) => r.continue()); await p.route("https://fonts.gstatic.com/**", (r) => r.continue());
