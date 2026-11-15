@@ -1,0 +1,17 @@
+[
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "-8%", "pitch": "-2Hz", "gap": 0.9, "text": "Seven a m. New site. New crew." },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "-8%", "pitch": "-2Hz", "gap": 0.7, "text": "Every block has a story. This one's mine." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+0%", "gap": 0.8, "text": "You the new guy?" },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "-2%", "gap": 0.4, "text": "Kai. Electrician." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+2%", "gap": 0.5, "text": "Welcome to the crew. Hard hat's mandatory." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "+4%", "gap": 0.5, "text": "And don't lose the notebook. Mine got rained on." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+6%", "gap": 0.4, "text": "Forget the notebook. Clock in on Constra." },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "+0%", "gap": 0.5, "text": "Photo and G P S? Say less." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+4%", "gap": 0.4, "text": "Timesheets build themselves. Overtime's already worked out. P D F or Excel." },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "+0%", "gap": 0.5, "text": "Hold up. No paperwork?" },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-2%", "gap": 0.4, "text": "Not on my site." },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "-6%", "pitch": "-2Hz", "gap": 0.9, "text": "So I got to work. Sunup to sundown. Even when the signal drops, it keeps up." },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "-6%", "pitch": "-2Hz", "gap": 0.5, "text": "Schedules. Invoices. Daily reports. Twenty-six tools, and twenty-three Excel templates." },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "-6%", "pitch": "-2Hz", "gap": 0.5, "text": "And it's free while it's launching." },
+  { "who": "Kai", "voice": "en-US-ChristopherNeural", "rate": "-8%", "pitch": "-2Hz", "gap": 0.8, "text": "Constra. Run the job, not the paperwork." }
+]

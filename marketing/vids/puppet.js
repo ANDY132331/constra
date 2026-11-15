@@ -59,6 +59,7 @@ function drawProp(c, kind, st, p) {
   else if (kind === "notebook") { c.rotate(-0.1); c.fillStyle = "#3f7d4e"; rr(c, -34, -88, 68, 92, 6); c.fill(); so(); c.fillStyle = "#e9dcc0"; c.fillRect(-26, -80, 56, 76); c.strokeStyle = "#d9a441"; c.lineWidth = 5; c.beginPath(); c.arc(14, -30, 14, 0, 7); c.stroke(); c.fillStyle = "#222"; for (let i = 0; i < 6; i++) { c.beginPath(); c.arc(-34, -78 + i * 14, 4, 0, 7); c.fill(); } if (p.soggy) { c.fillStyle = p.bgCol || "#cfe6ff"; c.beginPath(); c.arc(34, -88, 17, 0, 7); c.fill(); c.fillStyle = "#7fb8e8"; for (let i = 0; i < 3; i++) { const k = ((p.t || 0) * 1.6 + i * 0.37) % 1; c.beginPath(); c.ellipse(-16 + i * 20, 8 + k * 70, 5, 8, 0, 0, 7); c.globalAlpha = 1 - k; c.fill(); c.globalAlpha = 1; } } }
   else if (kind === "papers") { for (let i = 0; i < 4; i++) { c.save(); c.rotate((i - 1.5) * 0.08); c.fillStyle = "#f6f4ee"; rr(c, -34, -82 + i * -4, 68, 88, 3); c.fill(); so(); c.strokeStyle = "rgba(0,0,0,0.25)"; c.lineWidth = 2; for (let l = 0; l < 4; l++) { c.beginPath(); c.moveTo(-24, -64 + l * 14); c.lineTo(24, -64 + l * 14); c.stroke(); } c.restore(); } }
   else if (kind === "pen") { c.rotate(0.5); c.fillStyle = "#2a62c9"; rr(c, -6, -70, 12, 80, 5); c.fill(); so(); c.fillStyle = "#222"; c.beginPath(); c.moveTo(-6, 10); c.lineTo(6, 10); c.lineTo(0, 24); c.fill(); }
+  else if (kind === "hammer") { c.rotate(p.propRot ?? 0.2); c.fillStyle = "#8a5a2b"; rr(c, -7, -96, 14, 100, 6); c.fill(); so(); c.fillStyle = "#9aa3ad"; rr(c, -30, -118, 60, 28, 6); c.fill(); so(); c.fillStyle = "#c9d1d9"; c.fillRect(-26, -114, 52, 7); }
   else if (kind === "spoon") { c.rotate(0.3); c.fillStyle = "#8a5a2b"; rr(c, -5, -110, 10, 96, 5); c.fill(); so(); c.fillStyle = "#a8703a"; c.beginPath(); c.ellipse(0, -118, 20, 26, 0, 0, 7); c.fill(); so(); }
   c.restore();
 }
@@ -95,6 +96,7 @@ export function drawPuppet(c, ch, p, st) {
   if (ch.vest) { c.beginPath(); c.moveTo(-62 * bw, -250); c.lineTo(-20, -262); c.lineTo(0, -214); c.lineTo(20, -262); c.lineTo(62 * bw, -250); c.lineTo(62 * bw, -122); c.lineTo(-62 * bw, -122); c.closePath(); fill(ch.vest); c.fillStyle = "#e9f2ff"; c.fillRect(-62 * bw, -196, 124 * bw, 14); c.fillRect(-62 * bw, -158, 124 * bw, 14); if (O) { c.lineWidth = O * 0.5; c.strokeStyle = L; c.strokeRect(-62 * bw, -196, 124 * bw, 14); c.strokeRect(-62 * bw, -158, 124 * bw, 14); } }
   if (ch.tie) { c.beginPath(); c.moveTo(-12, -258); c.lineTo(12, -258); c.lineTo(16, -190); c.lineTo(0, -166); c.lineTo(-16, -190); c.closePath(); fill(ch.tie); }
   c.fillStyle = "#2a2018"; c.fillRect(-62 * bw, -138, 124 * bw, 14); if (O) { c.lineWidth = O * 0.6; c.strokeStyle = L; c.strokeRect(-62 * bw, -138, 124 * bw, 14); }
+  if (ch.chain) { c.strokeStyle = "#e0b43a"; c.lineWidth = 5; c.beginPath(); c.moveTo(-24 * bw, -258); c.quadraticCurveTo(0, -196, 24 * bw, -258); c.stroke(); c.beginPath(); c.arc(0, -207, 9, 0, 7); fill("#e0b43a"); }
   if (ch.logo) { c.fillStyle = ch.logo; c.beginPath(); c.arc(-30 * bw, -226, 10, 0, 7); c.fill(); }
   if (st.halftone) { c.save(); c.beginPath(); rr(c, -62 * bw, -262, 124 * bw, 142, 36); c.clip(); c.fillStyle = "rgba(0,0,0,0.22)"; for (let y = -262; y < -120; y += 11) for (let x = 6 + ((y / 11) & 1) * 5; x < 62; x += 10) { const r = 1.5 + (x / 62) * 3 * ((y + 262) / 142); c.beginPath(); c.arc(x, y, r * 0.9, 0, 7); c.fill(); } c.restore(); }
   c.restore();
@@ -112,6 +114,18 @@ export function drawPuppet(c, ch, p, st) {
   // neck + head
   c.fillStyle = ch.skin; c.beginPath(); rr(c, -16, -276 + bob * 0.8, 32, 28, 6); fill(ch.skin);
   c.save(); c.translate(0, headY); c.rotate(p.tilt || 0);
+  if (ch.hairStyle === "braids") {
+    const tt = p.t || 0, wk = Math.sin(walk) * amt;
+    for (const sd of [-1, 1]) for (let i = 0; i < 6; i++) {
+      const x0 = sd * (44 + i * 7.5), y0 = -26 + i * 11, len = 9 + (i % 3), base = sd * (0.04 + i * 0.012), sway = Math.sin(tt * 3.1 + i * 0.8 + sd) * 0.06 + wk * 0.16 * sd * 0.5 + (p.tilt || 0) * 0.4;
+      let px = x0, py = y0, ang = base;
+      for (let k = 0; k < len; k++) {
+        ang += sway * 0.22 + sd * 0.012; const step = 15 + (i % 2) * 1.5; px += Math.sin(ang) * step * 0.9 + sd * 0.5; py += Math.cos(ang * 0.4) * step;
+        c.save(); c.translate(px, py); c.rotate(ang + (k % 2 ? 0.5 : -0.5)); c.beginPath(); c.ellipse(0, 0, 9, 11, 0, 0, 7); fill(k % 2 ? ch.hair : "#241a14"); c.restore();
+      }
+      c.beginPath(); c.arc(px, py + 8, 6, 0, 7); fill(ch.bead || "#e0b43a");
+    }
+  }
   c.beginPath(); c.ellipse(-64, 8, 13, 17, 0, 0, 7); fill(ch.skin); c.beginPath(); c.ellipse(64, 8, 13, 17, 0, 0, 7); fill(ch.skin);
   c.beginPath(); c.ellipse(0, 0, 66, 62, 0, 0, 7); fill(ch.skin);
   if (p.flush) { c.fillStyle = `rgba(255,70,50,${p.flush})`; c.beginPath(); c.ellipse(0, 0, 66, 62, 0, 0, 7); c.fill(); }
@@ -125,6 +139,7 @@ export function drawPuppet(c, ch, p, st) {
   const hat = ch.hat;
   if (ch.hairStyle && ch.hairStyle !== "bald") {
     if (ch.hairStyle === "ponytail" || ch.hairStyle === "long" || ch.hairStyle === "short") { c.beginPath(); c.ellipse(0, -26, 68, 42, 0, Math.PI, 0); c.lineTo(68, -22); c.quadraticCurveTo(36, -34, 4, -50); c.quadraticCurveTo(-30, -30, -68, -18); c.closePath(); if (!hat) fill(ch.hair); else { c.save(); c.beginPath(); c.rect(-70, -44, 20, 40); c.rect(50, -44, 20, 40); c.fillStyle = ch.hair; c.fill(); c.restore(); } }
+    if (ch.hairStyle === "braids") { c.beginPath(); c.ellipse(0, -26, 68, 42, 0, Math.PI, 0); c.lineTo(68, -22); c.quadraticCurveTo(36, -34, 4, -50); c.quadraticCurveTo(-30, -30, -68, -18); c.closePath(); if (!hat) { fill(ch.hair); c.strokeStyle = "rgba(255,255,255,0.16)"; c.lineWidth = 3.5; for (let i = -3; i <= 3; i++) { c.beginPath(); c.moveTo(i * 8, -56 + Math.abs(i) * 1.5); c.quadraticCurveTo(i * 17, -40, i * 26, -22 + Math.abs(i) * 2); c.stroke(); } } else { c.save(); c.beginPath(); c.rect(-70, -44, 20, 40); c.rect(50, -44, 20, 40); c.fillStyle = ch.hair; c.fill(); c.restore(); } }
     if (ch.hairStyle === "curly") { for (let i = -3; i <= 3; i++) { c.beginPath(); c.arc(i * 21, -50 + Math.abs(i) * 7, 24, 0, 7); fill(ch.hair); } }
   }
   if (hat) {
