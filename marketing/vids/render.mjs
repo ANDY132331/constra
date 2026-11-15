@@ -14,6 +14,8 @@ const file = (f, type) => ({ contentType: type, body: fs.readFileSync(f) });
 const MIME = { ".png": "image/png", ".jpg": "image/jpeg", ".json": "application/json", ".mp3": "audio/mpeg", ".js": "text/javascript", ".svg": "image/svg+xml" };
 await p.route("https://vid.local/**", (r) => {
   const n = decodeURIComponent(new URL(r.request().url()).pathname);
+  if (n === "/stage.js") return r.fulfill(file(`${HERE}/stage.js`, "text/javascript"));
+  if (n === "/puppet.js") return r.fulfill(file(`${HERE}/puppet.js`, "text/javascript"));
   if (n === "/engine.js") return r.fulfill(file(`${HERE}/engine.js`, "text/javascript"));
   if (n === "/scene.js" || n === "/lines.json") return r.fulfill(file(`${HERE}/${name}${n}`, n.endsWith("json") ? "application/json" : "text/javascript"));
   if (n === "/mux.js") return r.fulfill(file(`${ROOT}/.tmp-ad/node_modules/mp4-muxer/build/mp4-muxer.js`, "text/javascript"));

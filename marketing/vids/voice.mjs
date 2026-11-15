@@ -8,6 +8,7 @@ const lines = JSON.parse(fs.readFileSync(`${here}${name}/lines.json`, "utf8"));
 const OUT = process.env.OUT || `vids/${name}/vo`; fs.mkdirSync(OUT, { recursive: true });
 for (let i = 0; i < lines.length; i++) {
   const L = lines[i], id = i + 1; if (process.env.ONLY && +process.env.ONLY !== id) continue;
+  const n0 = String(id).padStart(2, "0"); if (!process.env.FORCE && fs.existsSync(`${OUT}/vo-${n0}.mp3`) && fs.statSync(`${OUT}/vo-${n0}.mp3`).size > 2000) { console.log(id, "kept"); continue; }
   let chunks, words;
   for (let a = 0; a < 6; a++) {
     const t = new MsEdgeTTS(); await t.setMetadata(L.voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, { wordBoundaryEnabled: true });

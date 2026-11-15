@@ -1,33 +1,42 @@
 # Constra promo videos
 
-Four spots, each with its own look, voice and pace. Every one has a vertical file (1080x1920, for Reels, TikTok, Shorts, Stories) and a wide file (1920x1080, for the website, YouTube, LinkedIn). Files ending `-share` are compressed for sending and posting.
+Two sets. Every video has a vertical file (1080x1920, for Reels, TikTok, Shorts, Stories) and a wide file (1920x1080, for the website, YouTube, LinkedIn). Files ending `-share` are compressed for sending and posting.
 
-| File | Look | Voice | Length | Idea |
-|---|---|---|---|---|
-| `watch-it-work-*` | Dark and yellow, the real app on a phone, tap ripples, callout chips | Ava (calm, friendly) | about 75 s | A guided tour: dashboard, clock-in with photo + GPS, timesheets, crew plan, invoices, projects, reports, 23 Excel templates, the AI assistant, offline sync |
-| `group-chat-*` | Bright, light, a crew text thread | Andrew, Ava, Brian, Guy (narrator) | about 95 s | Friday 4:58 PM: nobody knows who worked Tuesday. Monday 7:02 AM: everyone clocks in |
-| `field-guide-*` | Blueprint paper, line-work that draws itself | Ryan (dry British narrator) | about 100 s | A nature documentary about the contractor in the wild |
-| `paperwork-stop-*` | Loud poster type, hard colour blocks, hazard tape | Christopher (high energy) | about 50 s | "Stop doing paperwork": fast kinetic type, real app screens swing in |
+## Comedy sketches with animated characters (this folder)
 
-The app screens in `watch-it-work` and `paperwork-stop` are real captures of Constra running on its demo data. The crew, jobs and hours shown are made-up examples, not real customers. The bar chart in `field-guide` is labelled as example hours. Nothing here is a testimonial, a customer logo or a user count.
+Each one has real jokes, cartoon people who walk, talk (lips follow the voice), gesture and react, its own art style and its own cast of voices. The real app appears on screen at the moment the story needs it.
 
-Nothing shows prices or plans, so the clips are also safe to use in store listings.
+| File | Art style | Cast and voices | Idea |
+|---|---|---|---|
+| `story-notebook-*` | Thick-outline cartoon, a sunny job site | Mac (Andrew), Jess (Ava), Dev (Brian) | Payroll day. Dev's notebook has been rained on, spilled on and bitten. Jess has a phone. |
+| `story-monster-*` | Cut-paper stop-motion at 12 fps, a night office | Dev (Brian), Jess (Ava), the Timesheet Monster (Christopher, pitched down), a trailer narrator (Guy) | A movie-trailer parody. A man, a pen, and a stack of timesheets that eats overtime. |
+| `story-cooking-*` | Clean flat shapes, a TV cooking set | Chef Mac (Andrew), sceptical Jess (Ava) | "Cooking with Constra": a recipe for a stress-free Friday. |
+| `story-interview-*` | Pop-art comic with halftone dots | Jess in HR (Ava), the Notebook (William, Australian), Constra the phone (Eric) | A job interview for site timekeeper. Two candidates. One gets hired. |
+
+## Explainers (`explainers/`)
+
+Motion graphics and screen walkthroughs with no characters: `watch-it-work` (the real app on a phone), `group-chat` (a text thread), `field-guide` (a blueprint documentary) and `paperwork-stop` (kinetic type).
+
+## Honest notes
+
+- The app screens are real captures of Constra on its demo data. The crew, jobs and hours shown are made-up examples. There are no testimonials, customer logos, user counts or prices anywhere.
+- The voices are Microsoft Edge's free neural read-aloud voices. Nobody has listened to the final mixes yet, so play each one before posting.
 
 ## Re-making them
 
-The source is in `marketing/vids/`, with one folder per video holding `lines.json` (the script) and `scene.js` (the picture). The voices are Microsoft Edge's free neural read-aloud voices, so there is no API key.
+The source is in `marketing/vids/`: `engine.js` (timeline, sound, encoding), `puppet.js` (the character rig and four art styles), `stage.js` (shared staging and sound effects), and one folder per video with `lines.json` (the script) and `scene.js` (the picture).
 
 ```bash
 # 1. voices (run from .tmp-ad, where msedge-tts is installed; copy marketing/vids/voice.mjs there as vids-voice.mjs)
-cd .tmp-ad && node vids-voice.mjs group-chat
-#    a line that comes back as 0 bytes: ONLY=9 node vids-voice.mjs group-chat
+cd .tmp-ad && node vids-voice.mjs story-notebook
+#    lines already recorded are kept; FORCE=1 re-records everything; ONLY=7 redoes one line
 
 # 2. check the look
-node marketing/vids/render.mjs group-chat stills v 5,20,40
+node marketing/vids/render.mjs story-notebook stills v 5,20,40
 
 # 3. render (LIGHT=1 makes the smaller -share file)
-LIGHT=1 node marketing/vids/render.mjs group-chat video v      # vertical
-LIGHT=1 node marketing/vids/render.mjs group-chat video h      # wide
+LIGHT=1 node marketing/vids/render.mjs story-notebook video v      # vertical
+LIGHT=1 node marketing/vids/render.mjs story-notebook video h      # wide
 ```
 
-To change what a voice says, edit `lines.json` and redo step 1. "Constra" is spoken as "Konstra" so it reads CON-stra.
+To change what a character says, edit `lines.json`, delete that line's files in `.tmp-ad/vids/<name>/vo`, and run step 1 again. "Constra" is spoken as "Konstra" so it reads CON-stra.

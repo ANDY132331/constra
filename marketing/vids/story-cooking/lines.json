@@ -1,0 +1,21 @@
+[
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+6%", "gap": 0.5, "text": "Welcome back to Cooking with Constra! Today, a classic. The stress-free Friday." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+4%", "gap": 0.5, "text": "Mac, you've burned the last four Fridays." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+2%", "gap": 0.4, "text": "That was the old recipe. Jess, the ingredients, please." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+6%", "gap": 0.4, "text": "One crew. Six workers. Slightly tired." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+8%", "gap": 0.5, "text": "Now add one clock-in, with a photo and G P S. Just a pinch!" },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+4%", "gap": 0.4, "text": "A pinch of what?" },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+4%", "gap": 0.3, "text": "Location. Fresh from the field." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+2%", "gap": 0.6, "text": "Now we let the hours simmer." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+4%", "gap": 0.4, "text": "For how long?" },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+4%", "gap": 0.3, "text": "All week. They add themselves up. The overtime is already seasoned." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+4%", "gap": 0.5, "text": "And the timesheet?" },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+10%", "gap": 0.3, "text": "Ding! Perfect. P D F or Excel. Served hot." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+2%", "gap": 0.6, "text": "Huh. That actually looks good." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+6%", "gap": 0.4, "text": "Garnish with a schedule, a few invoices, and twenty-three Excel templates." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+4%", "gap": 0.4, "text": "Does it need an oven? Or a signal?" },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+4%", "gap": 0.3, "text": "Nope! It works offline, and syncs when you're back online. No oven. No problem." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+8%", "gap": 0.5, "text": "And it's free while it's launching. Bon appetit!" },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "-2%", "gap": 0.6, "text": "I'm still burning dinner, though." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+0%", "gap": 0.6, "text": "Constra. Run the job, not the paperwork." }
+]

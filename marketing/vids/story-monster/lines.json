@@ -1,0 +1,22 @@
+[
+  { "who": "Narrator", "voice": "en-US-GuyNeural", "rate": "-4%", "pitch": "-4Hz", "gap": 0.5, "text": "This Friday. One man. One pen. And a stack of timesheets that will not die." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "-2%", "gap": 0.6, "text": "It's nine p m. I've been here since five." },
+  { "who": "Monster", "voice": "en-US-ChristopherNeural", "rate": "-14%", "pitch": "-14Hz", "gap": 0.7, "text": "You forgot Tuesday." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "+4%", "gap": 0.3, "text": "I did not forget Tuesday!" },
+  { "who": "Monster", "voice": "en-US-ChristopherNeural", "rate": "-14%", "pitch": "-14Hz", "gap": 0.5, "text": "Where were you on Tuesday, Dev?" },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "+2%", "gap": 0.5, "text": "Tuesday was... a blur." },
+  { "who": "Monster", "voice": "en-US-ChristopherNeural", "rate": "-12%", "pitch": "-14Hz", "gap": 0.5, "text": "Your overtime does not add up. So I am going to eat it." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "+10%", "gap": 0.3, "text": "No! Not the overtime!" },
+  { "who": "Narrator", "voice": "en-US-GuyNeural", "rate": "-4%", "pitch": "-4Hz", "gap": 0.6, "text": "All hope was lost. Then, a light, from the doorway." },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+8%", "gap": 0.6, "text": "Dev! Put down the pen!" },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "+8%", "gap": 0.3, "text": "Jess? It's too late! It's eating the Tuesdays!" },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+4%", "gap": 0.5, "text": "Not if we use... Constra." },
+  { "who": "Monster", "voice": "en-US-ChristopherNeural", "rate": "-10%", "pitch": "-12Hz", "gap": 0.5, "text": "Constra? What is... Constra?" },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+6%", "gap": 0.5, "text": "Every clock in, with a photo and G P S. The hours add up on their own. Overtime, worked out." },
+  { "who": "Monster", "voice": "en-US-ChristopherNeural", "rate": "-4%", "pitch": "-8Hz", "gap": 0.4, "text": "No... No! I'm... shrinking!" },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+6%", "gap": 0.5, "text": "And now, one tap. P D F, or Excel." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "-4%", "gap": 0.9, "text": "Is it... over?" },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+2%", "gap": 0.5, "text": "It's nine oh two. Go home, Dev." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "-2%", "gap": 0.6, "text": "Home. I remember home." },
+  { "who": "Narrator", "voice": "en-US-GuyNeural", "rate": "-6%", "pitch": "-4Hz", "gap": 0.7, "text": "Constra. Free while it's launching. Run the job, not the paperwork." }
+]

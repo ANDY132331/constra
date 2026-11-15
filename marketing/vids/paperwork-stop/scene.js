@@ -9,7 +9,7 @@ const SL = [
   { bg: YEL, extra: "dots", words: [["FRIDAY", /Friday/, INK, 1.5, 0.27], ["9 PM?", /night/, INK, 2.3, 0.42], ["STOP.", /Stop/, RED, 2.6, 0.68]] },
   { bg: WHITE, extra: "sheets", words: [["CHASING", /Chasing/, INK, 1.7, 0.28], ["INVOICES?", /invoices/, INK, 1.4, 0.41], ["STOP.", /Stop/, RED, 2.9, 0.68]] },
   { bg: INK, extra: "q", words: [["GUESSING", /Guessing/, WHITE, 1.5, 0.22], ["WHO WAS", /who/, YEL, 1.0, 0.35], ["ON SITE?", /site/, YEL, 1.3, 0.45], ["DEFINITELY", /Definitely/, WHITE, 1.1, 0.6], ["STOP.", /stop/, RED, 2.6, 0.74]] },
-  { bg: YEL, extra: "dots", phone: ["time-tracking", /Clock/, -0.1], words: [["CONSTRA", /Constra/, INK, 1.45, 0.14], ["CLOCK IN", /Clock/, WHITE, 1.15, 0.255]] },
+  { bg: YEL, extra: "dots", phone: ["time-tracking", /Clock/, -0.1], words: [["CONSTRA", /K?C?onstra/i, INK, 1.45, 0.14], ["CLOCK IN", /Clock/, WHITE, 1.15, 0.255]] },
   { bg: INK, extra: "grid", phone: ["timesheets", /Timesheets/, 0.09], words: [["TIMESHEETS.", /Timesheets/, WHITE, 1.15, 0.13], ["DONE.", /Done/, YEL, 2.2, 0.26]] },
   { bg: WHITE, extra: "dots", phone: ["crew-plan", /Schedules/, -0.08], words: [["SCHEDULES.", /Schedules/, INK, 1.2, 0.13], ["PLANNED.", /Planned/, RED, 1.6, 0.26]] },
   { bg: YEL, extra: "dots", phone: ["invoices", /Invoices/, 0.08], words: [["INVOICES.", /Invoices/, INK, 1.3, 0.13], ["SENT.", /Sent/, RED, 2.3, 0.26]] },
