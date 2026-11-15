@@ -1,0 +1,15 @@
+[
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+6%", "gap": 0.35, "text": "Stop. Stop doing paperwork." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+10%", "gap": 0.25, "text": "Timesheets on a Friday night? Stop." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+10%", "gap": 0.2, "text": "Chasing invoices? Stop." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+10%", "gap": 0.2, "text": "Guessing who was on site? Definitely stop." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+8%", "gap": 0.35, "text": "Constra. Clock in with a photo and G P S." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+10%", "gap": 0.2, "text": "Timesheets. Done." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+10%", "gap": 0.15, "text": "Schedules. Planned." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+10%", "gap": 0.15, "text": "Invoices. Sent." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+10%", "gap": 0.15, "text": "Reports. Filed." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+8%", "gap": 0.3, "text": "Twenty-six tools. Twenty-three Excel templates. One app." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+8%", "gap": 0.3, "text": "It works offline. It works on any phone. It works for any trade." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+6%", "gap": 0.3, "text": "And it's free, while it's launching." },
+  { "who": "Voice", "voice": "en-US-ChristopherNeural", "rate": "+2%", "gap": 0.4, "text": "Constra. Run the job. Not the paperwork." }
+]
