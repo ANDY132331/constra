@@ -536,6 +536,8 @@ export default function LandingPage() {
           <nav aria-label="Footer" className="lp-footer-links">
             <Link href="/login">Sign in</Link>
             <Link href="/onboarding">Create account</Link>
+            <Link href="/for">Trades</Link>
+            <Link href="/solutions">Solutions</Link>
             <Link href="/support">Support</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>

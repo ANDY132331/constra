@@ -80,3 +80,8 @@ Keep it to one message and one follow-up. Do not paste it in bulk.
 ## 6. What to measure
 
 Sign-ups per source (the UTM tags), not views. After two weeks keep the one or two formats that bring sign-ups and drop the rest.
+
+## 7. Landing pages (live on the site)
+
+Twelve trade pages (`/for/<trade>`) and six keyword pages (`/solutions/<slug>`) are in the sitemap for search and make good ad destinations. Each ad should point to the page that matches its audience, for example electricians to `/for/electricians`, GPS-time-clock ads to `/solutions/gps-time-tracking-for-crews`, and "free timesheet template" ads to `/solutions/free-construction-timesheet-template`. The Start free buttons already carry `utm_source=seo` and a campaign tag. Add your own `utm_source` (tiktok, meta, google) in the ad link.
+The copy only describes features that work today (clock-in with photo and GPS, timesheets, daily reports, invoices, Excel templates, offline). Crew Plan and Schedule are left out until migrations 013 to 015 are applied.
