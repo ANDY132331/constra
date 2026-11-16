@@ -16,6 +16,7 @@ await p.route("https://vid.local/**", (r) => {
   const n = decodeURIComponent(new URL(r.request().url()).pathname);
   if (n.startsWith("/three/")) return r.fulfill(file(`${ROOT}/node_modules/three/${n.slice(7)}`, "text/javascript"));
   if (n.startsWith("/cine/")) return r.fulfill(file(`${HERE}/cine/${n.slice(6)}`, "text/javascript"));
+  if (n === "/stickkit.js") return r.fulfill(file(`${HERE}/stickkit.js`, "text/javascript"));
   if (n === "/stick.js") return r.fulfill(file(`${HERE}/stick.js`, "text/javascript"));
   if (n === "/stage.js") return r.fulfill(file(`${HERE}/stage.js`, "text/javascript"));
   if (n === "/puppet.js") return r.fulfill(file(`${HERE}/puppet.js`, "text/javascript"));

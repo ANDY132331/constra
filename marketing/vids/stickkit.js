@@ -1,0 +1,17 @@
+// Small shared pieces for the stick-figure films: phone-style alerts, a siren flash, title scribbles, confetti.
+import { clamp, ease, easeOut, easeBack, rnd } from "/engine.js";
+
+// a phone notification card that drops in from the top. title and body are what the feature actually reports.
+export function notif(c, W, y, label, title, body, a, dark = false) {
+  if (a <= 0.01) return; const w = W * 0.86, h = 190, x = W / 2 - w / 2, yy = y - (1 - Math.min(1, a)) * 260;
+  c.save(); c.globalAlpha = Math.min(1, a * 1.6); c.shadowColor = "rgba(0,0,0,0.35)"; c.shadowBlur = 30; c.shadowOffsetY = 12; c.fillStyle = dark ? "#1b1e24" : "#fffef8"; c.strokeStyle = "#151617"; c.lineWidth = 6; c.beginPath(); c.roundRect(x, yy, w, h, 28); c.fill(); c.stroke(); c.shadowColor = "transparent";
+  c.fillStyle = "#F5C400"; c.beginPath(); c.roundRect(x + 24, yy + 24, 74, 74, 16); c.fill(); c.fillStyle = "#1a1600"; c.font = "800 52px 'Barlow Condensed', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("C", x + 61, yy + 62);
+  c.textAlign = "left"; c.fillStyle = dark ? "#9a9c9f" : "#6b6d70"; c.font = "600 26px 'IBM Plex Mono', monospace"; c.fillText(label, x + 122, yy + 40); c.fillStyle = dark ? "#fff" : "#151617"; c.font = "800 50px 'Barlow Condensed', sans-serif"; c.fillText(title, x + 122, yy + 88); c.fillStyle = dark ? "#cfd0d2" : "#4B4D50"; c.font = "500 34px 'IBM Plex Sans', sans-serif"; c.fillText(body, x + 28, yy + 148); c.restore();
+}
+// red pulse at the edges of the frame
+export function siren(c, W, H, t, a) { if (a <= 0.01) return; const p = 0.5 + 0.5 * Math.sin(t * 14), g = c.createRadialGradient(W / 2, H / 2, H * 0.25, W / 2, H / 2, H * 0.75); g.addColorStop(0, "rgba(224,48,30,0)"); g.addColorStop(1, `rgba(224,48,30,${(0.35 + 0.35 * p) * a})`); c.fillStyle = g; c.fillRect(0, 0, W, H); }
+// a scribbled title with a red underline
+export function scribble(c, W, y, text, a, size = 120, col = "#151617") { if (a <= 0.01) return; c.save(); c.translate(W / 2, y); c.rotate(-0.03); c.scale(Math.min(a, 1.1), Math.min(a, 1.1)); c.globalAlpha = Math.min(1, a * 1.4); c.font = `700 ${size}px Caveat, cursive`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = col; c.fillText(text, 0, 0); c.strokeStyle = "#e0301e"; c.lineWidth = 10; c.beginPath(); c.moveTo(-W * 0.34, size * 0.62); c.quadraticCurveTo(0, size * 0.76, W * 0.34, size * 0.6); c.stroke(); c.restore(); }
+export function confetti(c, W, H, k) { for (let i = 0; i < 40; i++) { const kk = k * 0.55 + rnd(i + 3) * 0.2, x = rnd(i * 5 + 1) * W, y = -40 + kk * H * 1.1; c.fillStyle = ["#F5C400", "#e0301e", "#3a8fe0", "#22a85a"][i % 4]; c.save(); c.translate(x, y); c.rotate(kk * 9 + i); c.fillRect(-9, -5, 18, 10); c.restore(); } }
+export const tapRipple = (c, x, y, d) => { if (d < 0 || d > 0.8) return; const u = d / 0.8; c.strokeStyle = `rgba(245,196,0,${1 - u})`; c.lineWidth = 10; c.beginPath(); c.arc(x, y, 20 + u * 90, 0, 7); c.stroke(); };
+export const stamp = (c, x, y, text, t0, t, col = "#1e7a45") => { const u = clamp((t - t0) / 0.2); if (u <= 0) return; c.save(); c.translate(x, y); c.rotate(-0.14); c.scale(2.2 - 1.2 * easeOut(u), 2.2 - 1.2 * easeOut(u)); c.globalAlpha = u; c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 12; c.beginPath(); c.roundRect(-260, -70, 520, 140, 20); c.stroke(); c.font = "800 88px 'Barlow Condensed', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(text, 0, 4); c.restore(); };

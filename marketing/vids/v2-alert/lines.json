@@ -1,0 +1,7 @@
+[
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-4%", "gap": 1.6, "text": "Everybody on site today?" },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "-8%", "gap": 0.4, "text": "Yep. Totally here." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-4%", "gap": 3.6, "text": "One point two kilometres. For a coffee." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "-4%", "gap": 1.7, "text": "It was a really good coffee." },
+  { "who": "Voice", "voice": "en-US-GuyNeural", "rate": "-4%", "pitch": "-3Hz", "gap": 1.8, "text": "A phone alert when someone leaves the job. Constra." }
+]

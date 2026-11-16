@@ -1,0 +1,7 @@
+[
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-2%", "gap": 1.4, "text": "Budget's fine. Keep going." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "+6%", "gap": 6.2, "text": "Everybody stop!" },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-2%", "gap": 0.5, "text": "Eighty percent? We're not even half done!" },
+  { "who": "Jess", "voice": "en-US-AvaMultilingualNeural", "rate": "+2%", "gap": 1.0, "text": "Good thing the app told us." },
+  { "who": "Voice", "voice": "en-US-GuyNeural", "rate": "-4%", "pitch": "-3Hz", "gap": 1.8, "text": "Job costs, flagged at eighty percent. Constra." }
+]
