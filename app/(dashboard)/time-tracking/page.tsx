@@ -438,7 +438,7 @@ export default function TimeTrackingPage() {
     workers, clockEntries, projects, currentUser,
     addClockEntry, updateClockEntry, deleteClockEntry, updateWorker,
     getWorkerById, getProjectById, companyId, companyName,
-    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules: customOvertimeRules,
   } = useStore();
 
   // The overtime banner used to hardcode 8h a day and 44h a week. Payroll uses the
@@ -453,7 +453,7 @@ export default function TimeTrackingPage() {
       enabled: overtimeEnabled,
       dailyThreshold: overtimeDailyThreshold,
       weeklyThreshold: overtimeWeeklyThreshold,
-      multiplier: overtimeMultiplier,
+      multiplier: overtimeMultiplier, rules: customOvertimeRules,
     }).overtimeHours;
   };
 
@@ -465,8 +465,8 @@ export default function TimeTrackingPage() {
     enabled: overtimeEnabled,
     dailyThreshold: overtimeDailyThreshold,
     weeklyThreshold: overtimeWeeklyThreshold,
-    multiplier: overtimeMultiplier,
-  }), [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
+    multiplier: overtimeMultiplier, rules: customOvertimeRules,
+  }), [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, customOvertimeRules]);
   const [tick, setTick] = useState(0);
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [isOnline, setIsOnline] = useState(true);

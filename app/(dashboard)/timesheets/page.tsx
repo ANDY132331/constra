@@ -43,7 +43,7 @@ function presetRange(p: Preset, today: Date): [Date, Date] {
 export default function TimesheetsPage() {
   const {
     workers, projects, clockEntries, currentUser, companyName, companyLogo,
-    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules,
   } = useStore();
   const canSeeCrew = isForemanOrAbove(currentUser.role);
 
@@ -75,8 +75,8 @@ export default function TimesheetsPage() {
     // Crew see their own sheet only, whatever is picked
     workerIds: !canSeeCrew ? [currentUser.id] : person === "all" ? undefined : [person],
     projectId: job === "all" ? undefined : job,
-    overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier },
-  }), [clockEntries, workers, projects, start, end, canSeeCrew, currentUser.id, person, job, overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
+    overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier, rules: overtimeRules },
+  }), [clockEntries, workers, projects, start, end, canSeeCrew, currentUser.id, person, job, overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules]);
 
   const download = async (kind: "pdf" | "xlsx") => {
     if (busy) return;

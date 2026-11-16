@@ -23,6 +23,8 @@ import { subscribeToPush } from "@/lib/push-client";
 import { getClient, SUPABASE_ENABLED } from "@/lib/supabase/client";
 import { ConfirmModal } from "@/components/confirm-modal";
 import { useUnsavedGuard } from "@/lib/use-unsaved-guard";
+import { OvertimeRulesEditor, toDrafts, fromDrafts, type DraftRule } from "@/components/overtime-rules-editor";
+import { legacyToRules, rulesToLegacy } from "@/lib/overtime";
 import { isAdminOrAbove } from "@/lib/permissions";
 
 type Tab = "company" | "preferences" | "workers" | "roles" | "notifications" | "security" | "access";
@@ -111,7 +113,7 @@ function SettingsInner() {
     customRoles, addCustomRole, deleteCustomRole,
     companyAddress, businessNumber, defaultTaxRate, inviteCode,
     setCompanyAddress, setBusinessNumber, setDefaultTaxRate,
-    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules,
     setOvertimeSettings,
     companyLogo, setCompanyLogo,
     companyId, permissionsPin, setPermissionsPin,
@@ -146,23 +148,16 @@ function SettingsInner() {
   }, [companyName, businessNumber, companyAddress, defaultTaxRate]);
 
   // ── Overtime form ─────────────────────────────────────────────────────────────
-  const [overtimeForm, setOvertimeForm] = useState({
-    enabled: overtimeEnabled,
-    dailyThreshold: overtimeDailyThreshold != null ? String(overtimeDailyThreshold) : "",
-    weeklyThreshold: overtimeWeeklyThreshold != null ? String(overtimeWeeklyThreshold) : "40",
-    multiplier: String(overtimeMultiplier),
-  });
+  // The rules the company has now: custom ones if set, otherwise the old daily/weekly fields as rules
+  const savedDrafts: DraftRule[] = toDrafts(overtimeRules ?? legacyToRules(overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier));
+  const savedKey = JSON.stringify([overtimeEnabled, savedDrafts]);
+  const [overtimeForm, setOvertimeForm] = useState<{ enabled: boolean; rules: DraftRule[] }>({ enabled: overtimeEnabled, rules: savedDrafts });
   const [overtimeSaved, setOvertimeSaved] = useState(false);
   // Sync from store once Supabase data loads
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOvertimeForm({
-      enabled: overtimeEnabled,
-      dailyThreshold: overtimeDailyThreshold != null ? String(overtimeDailyThreshold) : "",
-      weeklyThreshold: overtimeWeeklyThreshold != null ? String(overtimeWeeklyThreshold) : "40",
-      multiplier: String(overtimeMultiplier),
-    });
-  }, [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
+    setOvertimeForm({ enabled: overtimeEnabled, rules: JSON.parse(savedKey)[1] });
+  }, [savedKey, overtimeEnabled]);
 
   // ── Roles ─────────────────────────────────────────────────────────────────────
   const [newRole, setNewRole] = useState("");
@@ -287,11 +282,7 @@ function SettingsInner() {
     companyForm.businessNumber !== businessNumber ||
     companyForm.address !== companyAddress ||
     companyForm.taxRate !== String(defaultTaxRate);
-  const overtimeDirty =
-    overtimeForm.enabled !== overtimeEnabled ||
-    overtimeForm.dailyThreshold !== (overtimeDailyThreshold != null ? String(overtimeDailyThreshold) : "") ||
-    overtimeForm.weeklyThreshold !== (overtimeWeeklyThreshold != null ? String(overtimeWeeklyThreshold) : "40") ||
-    overtimeForm.multiplier !== String(overtimeMultiplier);
+  const overtimeDirty = JSON.stringify([overtimeForm.enabled, overtimeForm.rules]) !== savedKey;
   useUnsavedGuard(companyDirty || overtimeDirty);
 
   // ── Confirmation dialogs ──────────────────────────────────────────────────────
@@ -312,15 +303,12 @@ function SettingsInner() {
   };
 
   const saveOvertime = () => {
-    const daily = overtimeForm.dailyThreshold === "" ? null : parseFloat(overtimeForm.dailyThreshold);
-    const weekly = overtimeForm.weeklyThreshold === "" ? null : parseFloat(overtimeForm.weeklyThreshold);
-    const mult = parseFloat(overtimeForm.multiplier);
-    setOvertimeSettings({
-      enabled: overtimeForm.enabled,
-      dailyThreshold: daily != null && !isNaN(daily) ? daily : null,
-      weeklyThreshold: weekly != null && !isNaN(weekly) ? weekly : null,
-      multiplier: !isNaN(mult) && mult > 0 ? mult : 1.5,
-    });
+    const rules = fromDrafts(overtimeForm.rules);
+    // Rules the original fields can hold are saved the original way; only richer ones use the new column
+    const legacy = rulesToLegacy(rules);
+    setOvertimeSettings(legacy
+      ? { enabled: overtimeForm.enabled, ...legacy, rules: null }
+      : { enabled: overtimeForm.enabled, dailyThreshold: null, weeklyThreshold: null, multiplier: rules[0]?.multiplier ?? 1.5, rules });
     setOvertimeSaved(true);
     setTimeout(() => setOvertimeSaved(false), 2500);
     toast.success("Overtime settings saved");
@@ -598,49 +586,7 @@ function SettingsInner() {
                 </button>
               </div>
 
-              {overtimeForm.enabled && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={lbl}>Daily Threshold (hrs)</label>
-                    <input
-                      className={inp}
-                      type="number" inputMode="numeric"
-                      min="1"
-                      step="0.5"
-                      value={overtimeForm.dailyThreshold}
-                      placeholder="e.g. 8 (leave blank to skip)"
-                      onChange={(e) => setOvertimeForm((f) => ({ ...f, dailyThreshold: e.target.value }))}
-                    />
-                    <p className="text-[10px] text-white/25 mt-1">Hours/day before daily OT kicks in. Leave blank to disable.</p>
-                  </div>
-                  <div>
-                    <label className={lbl}>Weekly Threshold (hrs)</label>
-                    <input
-                      className={inp}
-                      type="number" inputMode="numeric"
-                      min="1"
-                      step="0.5"
-                      value={overtimeForm.weeklyThreshold}
-                      placeholder="e.g. 40 (leave blank to skip)"
-                      onChange={(e) => setOvertimeForm((f) => ({ ...f, weeklyThreshold: e.target.value }))}
-                    />
-                    <p className="text-[10px] text-white/25 mt-1">Regular hours/week after daily OT removed. Leave blank to disable.</p>
-                  </div>
-                  <div>
-                    <label className={lbl}>Overtime Multiplier</label>
-                    <input
-                      className={inp}
-                      type="number" inputMode="numeric"
-                      min="1"
-                      step="0.25"
-                      value={overtimeForm.multiplier}
-                      placeholder="1.5"
-                      onChange={(e) => setOvertimeForm((f) => ({ ...f, multiplier: e.target.value }))}
-                    />
-                    <p className="text-[10px] text-white/25 mt-1">e.g. 1.5 = time-and-a-half, 2.0 = double time.</p>
-                  </div>
-                </div>
-              )}
+              {overtimeForm.enabled && <OvertimeRulesEditor rules={overtimeForm.rules} onChange={(r) => setOvertimeForm((f) => ({ ...f, rules: r }))} />}
 
               <button onClick={saveOvertime} className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-[13px] px-4 py-2 rounded-full transition-colors">
                 Save Overtime Rules

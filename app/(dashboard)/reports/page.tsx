@@ -49,7 +49,7 @@ export default function ReportsPage() {
   const spendOf = useProjectSpend();
   const {
     workers, projects, clockEntries, currency, currentUser, companyName, companyLogo,
-    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules,
   } = useStore();
   const router = useRouter();
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -168,7 +168,7 @@ export default function ReportsPage() {
               enabled: overtimeEnabled,
               dailyThreshold: overtimeDailyThreshold,
               weeklyThreshold: overtimeWeeklyThreshold,
-              multiplier: overtimeMultiplier,
+              multiplier: overtimeMultiplier, rules: overtimeRules,
             })
           : null;
         return {
@@ -185,7 +185,7 @@ export default function ReportsPage() {
       .filter((w) => w.hoursThisPeriod > 0)
       .sort((a, b) => b.hoursThisPeriod - a.hoursThisPeriod)
       .slice(0, 5);
-  }, [workers, periodEntries, overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
+  }, [workers, periodEntries, overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules]);
 
   const activeWorkers = workers.filter((w) => w.clockedIn).length;
 
@@ -193,8 +193,8 @@ export default function ReportsPage() {
     enabled: overtimeEnabled,
     dailyThreshold: overtimeDailyThreshold,
     weeklyThreshold: overtimeWeeklyThreshold,
-    multiplier: overtimeMultiplier,
-  }), [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier]);
+    multiplier: overtimeMultiplier, rules: overtimeRules,
+  }), [overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules]);
 
   // A shift with no clock-out has no hours to pay yet, so it is left out of the figures on
   // screen, the payroll file and the PDF. Say so, or running Friday payroll quietly
@@ -236,7 +236,7 @@ export default function ReportsPage() {
               <button
                 onClick={async () => {
                   setPdfLoading(true);
-                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } }); toast.success(withRunningNote("PDF downloaded")); }
+                  try { await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier, rules: overtimeRules } }); toast.success(withRunningNote("PDF downloaded")); }
                   catch { toast.error("Failed to export PDF"); }
                   finally { setPdfLoading(false); }
                 }}
@@ -484,7 +484,7 @@ export default function ReportsPage() {
                 onClick={async () => {
                   setPdfLoading(true);
                   try {
-                    await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier } });
+                    await exportReportPdf({ workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime: { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier, rules: overtimeRules } });
                     toast.success(withRunningNote("PDF downloaded"));
                   } catch {
                     toast.error("Failed to export PDF");

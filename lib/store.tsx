@@ -1,5 +1,6 @@
 "use client";
 
+import type { OvertimeRule } from "./overtime";
 import {
   createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode,
 } from "react";
@@ -127,6 +128,8 @@ type StoreState = {
   overtimeDailyThreshold: number | null;
   overtimeWeeklyThreshold: number | null;
   overtimeMultiplier: number;
+  /** Custom overtime rules (migration 016); null means the daily/weekly fields above apply */
+  overtimeRules: OvertimeRule[] | null;
   inviteCode: string;
   companyLogo: string;
   permissionsPin: string;
@@ -234,7 +237,7 @@ type StoreCtx = StoreState & {
   setCompanyAddress: (a: string) => void;
   setBusinessNumber: (b: string) => void;
   setDefaultTaxRate: (r: number) => void;
-  setOvertimeSettings: (s: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number }) => void;
+  setOvertimeSettings: (s: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number; rules?: OvertimeRule[] | null }) => void;
   setPermissionsPin: (hashedPin: string) => void;
 
   setCompanyName: (name: string) => void;
@@ -301,6 +304,7 @@ function defaultState(): StoreState {
     overtimeDailyThreshold: null,
     overtimeWeeklyThreshold: 40,
     overtimeMultiplier: 1.5,
+    overtimeRules: null,
     inviteCode: "",
     companyLogo: "",
     permissionsPin: "",
@@ -378,6 +382,7 @@ function loadState(): StoreState {
       overtimeDailyThreshold: parsed.overtimeDailyThreshold ?? null,
       overtimeWeeklyThreshold: parsed.overtimeWeeklyThreshold ?? 40,
       overtimeMultiplier: parsed.overtimeMultiplier ?? 1.5,
+      overtimeRules: parsed.overtimeRules ?? null,
       inviteCode: parsed.inviteCode ?? "",
       permissionsPin: parsed.permissionsPin ?? "",
     };
@@ -427,6 +432,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Keep a ref so action callbacks can read current state without stale closure
   const stateRef = useRef(state);
   const companyIdRef = useRef<string | null>(null);
+  /** Whether this company has custom overtime rules saved, so clearing them is written back */
+  const hadOvertimeRulesRef = useRef(false);
   const isOnlineRef = useRef(typeof navigator !== "undefined" ? navigator.onLine : true);
   const savingCountRef = useRef(0);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -605,6 +612,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       const co = companiesData as { name: string; plan: string; subscription_status?: string; trial_ends_at?: string; language: string; currency: string; industry: string; invite_code?: string; address?: string; business_number?: string; logo?: string; default_tax_rate?: number; overtime_enabled?: boolean; overtime_daily_threshold?: number | null; overtime_weekly_threshold?: number | null; overtime_multiplier?: number; custom_roles?: string[]; permissions_pin?: string; payroll_email?: string | null; payroll_email_on?: boolean } | null;
 
+      hadOvertimeRulesRef.current = !!(co as { overtime_rules?: unknown[] | null } | null)?.overtime_rules?.length;
+
       const isPro = true; // free during launch period
 
       setState((s) => ({
@@ -672,6 +681,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         overtimeDailyThreshold: co?.overtime_daily_threshold ?? null,
         overtimeWeeklyThreshold: co?.overtime_weekly_threshold ?? 40,
         overtimeMultiplier: co?.overtime_multiplier ?? 1.5,
+        overtimeRules: ((co as unknown as { overtime_rules?: OvertimeRule[] | null } | null)?.overtime_rules?.length ? (co as unknown as { overtime_rules: OvertimeRule[] }).overtime_rules : null),
         companyLogo: co?.logo ?? s.companyLogo,
       }));
     }
@@ -1668,14 +1678,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [up]);
 
   const setOvertimeSettings = useCallback((
-    s2: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number },
+    s2: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number; rules?: OvertimeRule[] | null },
   ) => {
+    const rules = s2.rules?.length ? s2.rules : null;
     up((s) => ({
       ...s,
       overtimeEnabled: s2.enabled,
       overtimeDailyThreshold: s2.dailyThreshold,
       overtimeWeeklyThreshold: s2.weeklyThreshold,
       overtimeMultiplier: s2.multiplier,
+      overtimeRules: rules,
     }));
     bg(() => getClient().from("companies").update({
       overtime_enabled: s2.enabled,
@@ -1683,6 +1695,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       overtime_weekly_threshold: s2.weeklyThreshold,
       overtime_multiplier: s2.multiplier,
     }).eq("id", companyIdRef.current!), "setOvertimeSettings");
+    // Custom rules live in their own column (migration 016). Only touch it when rules are in use,
+    // or were, so a company that never uses them can still save before 016 is applied.
+    if (rules || hadOvertimeRulesRef.current) {
+      hadOvertimeRulesRef.current = !!rules;
+      bg(() => getClient().from("companies").update({ overtime_rules: rules }).eq("id", companyIdRef.current!), "setOvertimeRules");
+    }
   }, [up]);
 
   const setPermissionsPin = useCallback((hashedPin: string) => {

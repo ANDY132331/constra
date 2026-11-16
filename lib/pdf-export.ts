@@ -4,6 +4,7 @@ import { moneyTotals, lineAmount } from "@/lib/money";
 import { hoursBetween, LONG_SHIFT_HOURS } from "./hours";
 import { isOverdue } from "./invoice-status";
 import { saveFile } from "@/lib/native";
+import { cleanRules, describeRules, type OvertimeRule } from "./overtime";
 
 type PdfReportInput = {
   workers: Worker[];
@@ -15,7 +16,7 @@ type PdfReportInput = {
   currency: string;
   companyName?: string;
   companyLogo?: string;
-  overtime?: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number };
+  overtime?: { enabled: boolean; dailyThreshold: number | null; weeklyThreshold: number | null; multiplier: number; rules?: OvertimeRule[] | null };
 };
 
 function fmt(n: number, currency: string) {
@@ -166,7 +167,7 @@ export async function exportReportPdf(input: PdfReportInput) {
   doc.setTextColor(200, 200, 196);
   doc.text(`${fmtDay(periodStart)} – ${fmtDay(periodEnd)}`, W - M, 18, { align: "right" });
   doc.text(`Generated ${new Date().toLocaleDateString("en-CA", { dateStyle: "long" })}`, W - M, 24, { align: "right" });
-  doc.text(otSettings.enabled ? `Overtime at ${otSettings.multiplier}× pay` : "Overtime not applied", W - M, 30, { align: "right" });
+  doc.text(otSettings.enabled ? (cleanRules(otSettings.rules).length ? `Overtime: ${describeRules(cleanRules(otSettings.rules))}` : `Overtime at ${otSettings.multiplier}× pay`) : "Overtime not applied", W - M, 30, { align: "right" });
   doc.setTextColor(...HV);
   doc.text("CONFIDENTIAL", W - M, 36, { align: "right" });
 

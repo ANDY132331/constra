@@ -4,7 +4,7 @@
 
 import type { ClockEntry, Worker, Project } from "./mock-data";
 import type { OvertimeSettings } from "./overtime";
-import { computeWorkerOvertime } from "./overtime";
+import { computeWorkerOvertime, cleanRules, describeRules } from "./overtime";
 import { hoursBetween } from "./hours";
 import { saveFile } from "@/lib/native";
 
@@ -41,7 +41,7 @@ export type PayrollAdapter = {
     rows: PayrollRow[],
     periodLabel: string,
     overtimeSummaries?: WorkerOvertimeSummary[],
-    multiplier?: number,
+    multiplier?: number | string,
   ) => string;
 };
 
@@ -149,7 +149,7 @@ const csvAdapter: PayrollAdapter = {
     if (overtimeSummaries && overtimeSummaries.length > 0) {
       lines.push(
         "",
-        `# ── Overtime Breakdown (${multiplier ?? 1.5}× multiplier) ──`,
+        `# ── Overtime Breakdown (${typeof multiplier === "string" ? multiplier : `${multiplier ?? 1.5}× multiplier`}) ──`,
         ["Worker", "Email", "Regular Hrs", "OT Hrs", "Regular Pay ($)", "OT Pay ($)", "Total Pay ($)"]
           .map(escapeCsv).join(","),
         ...overtimeSummaries.map((s) =>
@@ -277,7 +277,7 @@ export function exportPayroll(
       ? buildOvertimeSummaries(entries, workers, periodStart, periodEnd, overtimeSettings)
       : undefined;
 
-  const content = adapter.serialize(rows, periodLabel, overtimeSummaries, overtimeSettings?.multiplier);
+  const content = adapter.serialize(rows, periodLabel, overtimeSummaries, cleanRules(overtimeSettings?.rules).length ? describeRules(cleanRules(overtimeSettings?.rules)) : overtimeSettings?.multiplier);
   // BOM so Excel reads names with accents correctly (not for QuickBooks IIF)
   const blob = new Blob([adapter.fileExtension === "csv" ? "\uFEFF" + content : content], { type: adapter.mimeType });
   // Keep the name plain ASCII: en dashes, commas and accents from a period label trip up
