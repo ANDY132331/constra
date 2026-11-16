@@ -18,6 +18,7 @@ await p.route("https://vid.local/**", (r) => {
   if (n.startsWith("/cine/")) return r.fulfill(file(`${HERE}/cine/${n.slice(6)}`, "text/javascript"));
   if (n === "/stickkit.js") return r.fulfill(file(`${HERE}/stickkit.js`, "text/javascript"));
   if (n === "/stick.js") return r.fulfill(file(`${HERE}/stick.js`, "text/javascript"));
+  if (n === "/sitebg.js") return r.fulfill(file(`${HERE}/sitebg.js`, "text/javascript"));
   if (n === "/stage.js") return r.fulfill(file(`${HERE}/stage.js`, "text/javascript"));
   if (n === "/puppet.js") return r.fulfill(file(`${HERE}/puppet.js`, "text/javascript"));
   if (n === "/engine.js") return r.fulfill(file(`${HERE}/engine.js`, "text/javascript"));

@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { scribble, stamp, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,11 +12,11 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), e: E.L(4) }; T.list = T.l2 + 0.2; T.found = T.l3 + 0.2; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "trench");
     const listOn = t > T.list, found = t > T.found;
     // Dev pacing and looking around until he finds it
     const dx = found ? W * 0.3 : W * 0.3 + Math.sin(t * 1.6) * W * 0.16;
-    const dev = { x: dx, y: gy, s, flip: Math.cos(t * 1.6) > 0 ? 1 : -1, hat: "#ff7a1c", t, mood: found ? "happy" : "shock", mouth: E.mouth("Dev", t), pose: found ? POSE.cheer(t) : POSE.walk(t * 0.7, 0.9), seed: 2, sweat: !found };
+    const dev = { kind: "skeleton", x: dx, y: gy, s, flip: Math.cos(t * 1.6) > 0 ? 1 : -1, hat: "#ff7a1c", t, mood: found ? "happy" : "shock", mouth: E.mouth("Dev", t), pose: found ? POSE.cheer(t) : POSE.walk(t * 0.7, 0.9), seed: 2, sweat: !found };
     drawStick(c, dev);
     const son = { x: W * 0.86, y: gy, s, flip: -1, t, mood: "smug", mouth: E.mouth("Sonia", t), pose: t > T.l2 ? POSE.point(t) : POSE.idle(t), seed: 3, hair: "pony" };
     if (t > T.l2 - 0.5) drawStick(c, son);

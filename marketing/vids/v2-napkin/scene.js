@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { notif, siren, scribble, tapRipple, stamp, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,7 +12,7 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), l4: E.L(4), e: E.L(5) }; T.spill = T.l2 + 0.9; T.tap = E.W_(4, /tap/i, 1.0) + 0.1; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "trailer");
     const spilled = t > T.spill, tapped = t > T.tap;
     // napkin pinned on the wall
     const nx = W * 0.5, ny = H * 0.3, wob = spilled && t < T.spill + 0.5 ? Math.sin(t * 40) * 5 : 0;
@@ -23,7 +24,7 @@ export default {
     if (tapped) { const u = easeBack((t - T.tap) / 0.5); c.save(); c.translate(nx, ny); c.scale(u, u); c.fillStyle = "#fffef8"; c.strokeStyle = "#151617"; c.lineWidth = 6; c.beginPath(); c.roundRect(-300, -190, 600, 380, 14); c.fill(); c.stroke(); c.fillStyle = "#F5C400"; c.fillRect(-294, -184, 588, 84); c.fillStyle = "#151617"; c.font = "800 70px 'Barlow Condensed', sans-serif"; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText("INVOICE", -260, -142); c.font = "500 40px 'IBM Plex Mono', monospace"; c.fillText("Kitchen remodel", -260, -50); c.fillText("Cabinets", -260, 20); c.fillText("Labour", -260, 80); c.textAlign = "right"; c.fillText("1", 260, 20); c.fillText("2", 260, 80); c.restore(); }
     // people
     const mac = { x: W * 0.16, y: gy, s, flip: 1, hat: "#ffffff", t, mood: spilled && !tapped ? "shock" : tapped ? "smug" : "happy", mouth: E.mouth("Mac", t), pose: tapped ? POSE.hold(t) : spilled ? POSE.panic(t) : POSE.point(t), seed: 1, prop: tapped ? "phone" : null, screen: "#F5C400", sweat: spilled && !tapped };
-    const rob = { x: W * 0.84, y: gy, s, flip: -1, t, mood: spilled && !tapped ? "angry" : "neutral", mouth: E.mouth("Rob", t), pose: t > T.l1 && t < T.l1 + 1 ? POSE.point(t) : spilled && !tapped ? POSE.shrug(t) : POSE.idle(t), seed: 2, prop: !spilled ? "coffee" : null, hair: null };
+    const rob = { kind: "skeleton", x: W * 0.84, y: gy, s, flip: -1, t, mood: spilled && !tapped ? "angry" : "neutral", mouth: E.mouth("Rob", t), pose: t > T.l1 && t < T.l1 + 1 ? POSE.point(t) : spilled && !tapped ? POSE.shrug(t) : POSE.idle(t), seed: 2, prop: !spilled ? "coffee" : null, hair: null };
     drawStick(c, mac); drawStick(c, rob);
     if (spilled) { c.fillStyle = "rgba(100,60,25,0.8)"; c.beginPath(); c.ellipse(W * 0.7, gy + 10, 70 * easeOut((t - T.spill) / 0.5), 14, 0, 0, 7); c.fill(); }
     tapRipple(c, W * 0.16 + 60, gy - 230, t - T.tap);

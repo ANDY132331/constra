@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { scribble, stamp, confetti, tapRipple } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,11 +12,11 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), e: E.L(4) }; T.send = E.W_(2, /link/i, 0.5); T.view = T.send + 1.2; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "skyline");
     const sent = t > T.send, view = t > T.view;
     const ring = t < T.l2 ? Math.sin(t * 40) * 3 : 0;
     const mac = { x: W * 0.2, y: gy, s, flip: 1, hat: "#ffffff", t, mood: t > T.l2 ? "happy" : "angry", mouth: E.mouth("Mac", t), pose: t > T.l2 ? POSE.hold(t) : POSE.panic(t), seed: 1, prop: t > T.l2 ? "phone" : null, screen: "#F5C400", sweat: t < T.l2 };
-    const cliff = { x: W * 0.82, y: gy, s, flip: -1, t, mood: view ? "happy" : "angry", mouth: E.mouth("Cliff", t), pose: view ? POSE.hold(t) : t > T.l1 ? POSE.point(t) : POSE.idle(t), seed: 2, hair: "pony", prop: "phone", screen: view ? "#2eaa62" : "#F5C400" };
+    const cliff = { kind: "skeleton", x: W * 0.82, y: gy, s, flip: -1, t, mood: view ? "happy" : "angry", mouth: E.mouth("Cliff", t), pose: view ? POSE.hold(t) : t > T.l1 ? POSE.point(t) : POSE.idle(t), seed: 2, hair: "pony", prop: "phone", screen: view ? "#2eaa62" : "#F5C400" };
     drawStick(c, mac); drawStick(c, cliff);
     if (t < T.l2) { c.save(); c.translate(W / 2 + ring, H * 0.3); c.fillStyle = "#fffef8"; c.strokeStyle = "#151617"; c.lineWidth = 6; c.beginPath(); c.roundRect(-300, -90, 600, 180, 20); c.fill(); c.stroke(); c.fillStyle = "#151617"; c.font = "800 60px 'Barlow Condensed', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("CLIENT  ·  CALLING", 0, 0); c.restore(); }
     if (sent) { const u = easeBack((t - T.send) / 0.45); const fx = lerp(W * 0.3, W * 0.8, easeOut(clamp((t - T.send) / 0.9))), fy = gy - 330 - Math.sin(clamp((t - T.send) / 0.9) * Math.PI) * 200; if (!view) { c.save(); c.translate(fx, fy); c.scale(u, u); c.fillStyle = "#F5C400"; c.strokeStyle = "#151617"; c.lineWidth = 6; c.beginPath(); c.roundRect(-120, -40, 240, 80, 14); c.fill(); c.stroke(); c.fillStyle = "#1a1600"; c.font = "800 44px 'Barlow Condensed', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("PROGRESS LINK", 0, 2); c.restore(); } }

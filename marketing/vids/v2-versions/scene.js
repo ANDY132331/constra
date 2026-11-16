@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { scribble, stamp, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,10 +12,10 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), e: E.L(4) }; T.add = [T.l1 + 0.3, T.l1 + 1.2, T.l1 + 2.1, T.l1 + 2.9]; T.fix = T.l2 + 0.5; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "trailer");
     const n = T.add.filter((a) => t > a).length, fixed = t > T.fix;
     const dev = { x: W * 0.2, y: gy, s, flip: 1, hat: "#ff7a1c", t, mood: fixed ? "happy" : n > 2 ? "shock" : "neutral", mouth: E.mouth("Dev", t), pose: fixed ? POSE.cheer(t) : n > 2 ? POSE.panic(t) : POSE.idle(t), seed: 2, sweat: n > 2 && !fixed };
-    const son = { x: W * 0.84, y: gy, s, flip: -1, t, mood: "smug", mouth: E.mouth("Sonia", t), pose: t > T.l2 ? POSE.point(t) : POSE.idle(t), seed: 3, hair: "pony" };
+    const son = { kind: "robot", x: W * 0.84, y: gy, s, flip: -1, t, mood: "smug", mouth: E.mouth("Sonia", t), pose: t > T.l2 ? POSE.point(t) : POSE.idle(t), seed: 3, hair: "pony" };
     drawStick(c, dev); if (t > T.l2 - 0.5) drawStick(c, son);
     if (!fixed) NAMES.forEach((nm, i) => { const a = T.add[i]; if (t < a) return; const u = easeOut(clamp((t - a) / 0.35)); c.save(); c.translate(W / 2 + (i % 2 ? 40 : -40), H * 0.18 + i * 120 + (1 - u) * -60); c.rotate((i % 2 ? 1 : -1) * 0.03); c.globalAlpha = u; c.fillStyle = "#fffef8"; c.strokeStyle = "#151617"; c.lineWidth = 5; c.beginPath(); c.roundRect(-340, -44, 680, 88, 10); c.fill(); c.stroke(); c.fillStyle = "#b9382c"; c.fillRect(-326, -30, 44, 60); c.fillStyle = "#fff"; c.font = "800 22px 'Barlow Condensed', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("PDF", -304, 0); c.fillStyle = "#151617"; c.font = "500 38px 'IBM Plex Mono', monospace"; c.textAlign = "left"; c.fillText(nm, -260, 2); c.restore(); });
     if (fixed) { const u = easeBack((t - T.fix) / 0.5); c.save(); c.translate(W / 2, H * 0.3); c.scale(u, u); c.fillStyle = "#fffef8"; c.strokeStyle = "#151617"; c.lineWidth = 6; c.beginPath(); c.roundRect(-380, -200, 760, 400, 16); c.fill(); c.stroke(); c.fillStyle = "#151617"; c.font = "800 56px 'Barlow Condensed', sans-serif"; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText("CONTRACT", -340, -140);

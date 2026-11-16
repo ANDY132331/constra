@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { notif, siren, scribble, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -16,7 +17,7 @@ export default {
     const { W, H, V } = E, gy = H * 0.78, s = 3.0, cxC = W * 0.33;
     const cd = t - T.cross, shake = cd >= 0 && cd < 0.5 ? (1 - cd / 0.5) * 10 : 0;
     c.save(); c.translate((rnd(Math.floor(t * 50) + 1) - 0.5) * shake, (rnd(Math.floor(t * 50) + 4) - 0.5) * shake);
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "sunset");
     // the geofence: a dashed circle on the ground around the job
     c.save(); c.strokeStyle = "#e0301e"; c.lineWidth = 8; c.setLineDash([26, 20]); c.lineDashOffset = -t * 30; c.beginPath(); c.ellipse(cxC, gy + 44, W * 0.3, 100, 0, 0, 7); c.stroke(); c.restore(); c.fillStyle = "rgba(224,48,30,0.07)"; c.beginPath(); c.ellipse(cxC, gy + 44, W * 0.3, 100, 0, 0, 7); c.fill();
     c.fillStyle = "#F5C400"; c.strokeStyle = "#151617"; c.lineWidth = 6; c.beginPath(); c.roundRect(W * 0.05, gy - 330, 230, 70, 8); c.fill(); c.stroke(); c.fillStyle = "#151617"; c.font = "800 44px 'Barlow Condensed', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("JOB SITE", W * 0.05 + 115, gy - 295); c.beginPath(); c.moveTo(W * 0.05 + 115, gy - 260); c.lineTo(W * 0.05 + 115, gy); c.stroke();

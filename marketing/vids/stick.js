@@ -18,7 +18,7 @@ export const POSE = {
 };
 
 // p: { x, y (feet), s, flip, col, lw, hat, hair, mood, mouth 0..1, pose (joint spec), rot (deg, about the feet), look [dx,dy], prop, boil, t, sweat, seed }
-export function drawStick(c, p) {
+function _drawStick(c, p) {
   const S = p.s ?? 1, col = p.col ?? "#151617", lw = (p.lw ?? 9) * S, J = p.pose || POSE.idle(p.t || 0), lean = (J.lean || 0) * R, hop = (J.hop || 0) + (p.hop || 0);
   const frame = Math.floor((p.t || 0) * 12), b = p.boil ?? 1.6;
   const jx = (k) => (rnd(frame * 53 + (p.seed || 1) * 17 + k * 7 + 1) - 0.5) * b * 2;
@@ -72,4 +72,39 @@ export function notebookBg(c, W, H, gy, t, o = {}) {
   c.strokeStyle = "rgba(220,70,70,0.45)"; c.lineWidth = 3; c.beginPath(); c.moveTo(W * 0.1, 0); c.lineTo(W * 0.1, H); c.stroke();
   c.fillStyle = "rgba(120,100,70,0.2)"; for (let y = 160; y < H - 100; y += 330) { c.beginPath(); c.arc(30, y, 13, 0, 7); c.fill(); }
   const fr = Math.floor(t * 8); c.strokeStyle = "#151617"; c.lineWidth = 8; c.lineCap = "round"; c.beginPath(); c.moveTo(-20, gy); for (let x = 0; x <= W + 20; x += 40) c.lineTo(x, gy + (rnd(fr * 3 + x) - 0.5) * 5); c.stroke();
+}
+
+// Character kinds: "skeleton" (bones and a skull) and "robot" (steel body, visor eyes, antenna). Anything else is the plain marker stickman.
+export function drawStick(c, p) {
+  if (!p.kind) return _drawStick(c, p);
+  const S = p.s ?? 1, fl = p.flip ?? 1, t = p.t || 0, sk = p.kind === "skeleton";
+  const base = { ...p, kind: null, hat: sk ? p.hat : null, hair: null };
+  // pass 1: dark outline, pass 2: the coloured body
+  _drawStick(c, { ...base, col: "#151617", lw: (p.lw ?? 9) + 5, noFace: true });
+  const pos = _drawStick(c, { ...base, col: sk ? "#f1ecdb" : "#8d98a8", noShadow: true, mood: "neutral", mouth: 0, sweat: false, hat: null });
+  const hx = pos.hx, hy = pos.hy, r = 27 * S, m = Math.min(1, p.mouth || 0);
+  c.save(); c.lineJoin = "round"; c.lineCap = "round"; c.strokeStyle = "#151617"; c.lineWidth = 6 * S;
+  const hipY = p.y - ((p.pose?.hop || 0) + (p.hop || 0)) * S - 86 * S;
+  if (sk) {
+    // ribs
+    c.strokeStyle = "#151617"; c.lineWidth = 7 * S; for (let i = 0; i < 4; i++) { const yy = hipY + (hy - hipY) * (0.28 + i * 0.16), w = (26 - i * 3) * S; c.beginPath(); c.moveTo(hx - w * 0.5 + (hipY - hy) * 0.0, yy); c.lineTo(hx + w * 0.5, yy); c.stroke(); } c.strokeStyle = "#f1ecdb"; c.lineWidth = 3.4 * S; for (let i = 0; i < 4; i++) { const yy = hipY + (hy - hipY) * (0.28 + i * 0.16), w = (26 - i * 3) * S; c.beginPath(); c.moveTo(hx - w * 0.5, yy); c.lineTo(hx + w * 0.5, yy); c.stroke(); }
+    // skull
+    c.strokeStyle = "#151617"; c.lineWidth = 6 * S; c.fillStyle = "#f1ecdb"; c.beginPath(); c.arc(hx, hy - 2 * S, r * 0.95, 0, 7); c.fill(); c.stroke();
+    if (p.hat) { c.fillStyle = p.hat; c.beginPath(); c.arc(hx, hy - 6 * S, r, Math.PI * 1.02, Math.PI * 1.98); c.closePath(); c.fill(); c.stroke(); c.beginPath(); c.moveTo(hx - r * 1.2, hy - 6 * S); c.lineTo(hx + r * 1.2, hy - 6 * S); c.stroke(); }
+    c.fillStyle = "#151617"; for (const sd of [-1, 1]) { c.beginPath(); c.ellipse(hx + sd * 10 * S + fl * 2 * S, hy + 1 * S, 7 * S, (p.mood === "shock" ? 10 : 8) * S, 0, 0, 7); c.fill(); }
+    c.beginPath(); c.moveTo(hx + fl * 2 * S, hy + 10 * S); c.lineTo(hx + fl * 2 * S - 3 * S, hy + 17 * S); c.lineTo(hx + fl * 2 * S + 3 * S, hy + 17 * S); c.closePath(); c.fill();
+    // jaw with teeth that opens when talking
+    const jy = hy + 20 * S + m * 9 * S; c.fillStyle = "#f1ecdb"; c.beginPath(); c.roundRect(hx - 13 * S, jy - 6 * S, 26 * S, 12 * S, 4 * S); c.fill(); c.stroke(); c.lineWidth = 2.4 * S; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(hx + i * 5 * S, jy - 6 * S); c.lineTo(hx + i * 5 * S, jy + 6 * S); c.stroke(); }
+  } else {
+    // steel chest plate and a yellow light
+    c.fillStyle = "#8d98a8"; c.lineWidth = 6 * S; const cy = hipY + (hy - hipY) * 0.52; c.beginPath(); c.roundRect(hx - 24 * S, cy - 30 * S, 48 * S, 60 * S, 8 * S); c.fill(); c.stroke(); c.fillStyle = "#F5C400"; c.beginPath(); c.arc(hx, cy, 8 * S + Math.sin(t * 6) * S, 0, 7); c.fill(); c.stroke();
+    // square head with visor
+    c.fillStyle = "#c5cdd8"; c.beginPath(); c.roundRect(hx - r, hy - r + 2 * S, r * 2, r * 1.8, 8 * S); c.fill(); c.stroke();
+    c.fillStyle = "#151617"; c.beginPath(); c.roundRect(hx - r * 0.82, hy - 8 * S, r * 1.64, 18 * S, 6 * S); c.fill(); c.fillStyle = p.mood === "angry" ? "#ff4a3a" : "#5af0c8"; const bl = (t * 1.2 % 3.6 < 0.12) ? 0.2 : 1; for (const sd of [-1, 1]) { c.beginPath(); c.ellipse(hx + sd * 11 * S, hy + 1 * S, 5 * S, 5 * S * bl, 0, 0, 7); c.fill(); }
+    // mouth grille that lights up with speech
+    c.strokeStyle = "#151617"; c.lineWidth = 3 * S; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(hx + i * 6 * S, hy + 16 * S); c.lineTo(hx + i * 6 * S, hy + (16 + 5 + m * 7) * S); c.stroke(); }
+    // antenna
+    c.lineWidth = 5 * S; c.beginPath(); c.moveTo(hx, hy - r + 2 * S); c.lineTo(hx + Math.sin(t * 5) * 3 * S, hy - r - 18 * S); c.stroke(); c.fillStyle = "#e0301e"; c.beginPath(); c.arc(hx + Math.sin(t * 5) * 3 * S, hy - r - 22 * S, 6 * S, 0, 7); c.fill(); c.stroke();
+  }
+  c.restore(); return pos;
 }

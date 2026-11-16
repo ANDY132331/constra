@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { scribble, stamp, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,12 +12,12 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), e: E.L(4) }; T.fly = T.l1 - 0.3; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "sunset");
     const fb = t - T.fly, flew = t > T.fly;
     // wind streaks
     if (t > T.fly - 0.6 && t < T.l2) { c.strokeStyle = "rgba(70,120,190,0.5)"; c.lineWidth = 6; c.lineCap = "round"; for (let i = 0; i < 6; i++) { const x = ((t * 900 + i * 320) % (W + 400)) - 200, y = H * 0.15 + i * 140; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 220, y + Math.sin(t * 6 + i) * 14); c.stroke(); } }
     const kai = { x: W * 0.35, y: gy, s, flip: -1, hat: "#F5C400", hair: "braids", t, mood: t > T.l3 ? "smug" : flew && t < T.l2 ? "shock" : "neutral", mouth: E.mouth("Kai", t), pose: flew && t < T.l2 ? POSE.panic(t) : t > T.l2 ? POSE.hold(t) : POSE.hold(t), seed: 3, prop: t > T.l2 ? "phone" : null, screen: "#1e6fb0", sweat: flew && t < T.l2 };
-    const mac = { x: W * 0.8, y: gy, s, flip: -1, hat: "#ffffff", t, mood: "happy", mouth: E.mouth("Mac", t), pose: t > T.l2 ? POSE.point(t) : POSE.idle(t), seed: 1 };
+    const mac = { kind: "robot", x: W * 0.8, y: gy, s, flip: -1, hat: "#ffffff", t, mood: "happy", mouth: E.mouth("Mac", t), pose: t > T.l2 ? POSE.point(t) : POSE.idle(t), seed: 1 };
     drawStick(c, mac); drawStick(c, kai);
     // paper blueprint: held, then flies off
     if (t < T.fly + 2.2) { const u = clamp(fb / 2.2); const x = flew ? lerp(W * 0.3, W * 1.3, easeOut(u)) : W * 0.28, y = flew ? gy - 330 - Math.sin(u * 7) * 90 - u * 300 : gy - 330, rot = flew ? u * 9 : -0.1; c.save(); c.translate(x, y); c.rotate(rot); c.fillStyle = "#2a5fa8"; c.strokeStyle = "#151617"; c.lineWidth = 5; c.beginPath(); c.rect(-120, -80, 240, 160); c.fill(); c.stroke(); c.strokeStyle = "rgba(255,255,255,0.6)"; c.lineWidth = 3; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(-100, -50 + i * 34); c.lineTo(100 - i * 20, -50 + i * 34); c.stroke(); } c.restore(); }

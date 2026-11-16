@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { phoneInset, chip, pop, bed, sfx, loadShots, endCard } from "/stage.js";
 
 // "The cardboard cutout": top panel is the job site, bottom panel is a beach. Dev sent a cardboard copy of himself to clock in.
@@ -19,7 +20,7 @@ export default {
     c.fillStyle = "#f6f1e3"; c.fillRect(0, 0, W, H);
     // ── top panel: the job site (notebook paper)
     c.save(); c.beginPath(); c.rect(0, 0, W, half - 6); c.clip();
-    const gy1 = half - 120; notebookBg(c, W, half, gy1, t);
+    const gy1 = half - 120; siteBg(c, W, half, gy1, t, "skyline");
     // a hard-hat sign and a fence, drawn like marker doodles
     c.strokeStyle = "#151617"; c.lineWidth = 7; c.fillStyle = "#F5C400"; c.beginPath(); c.rect(W * 0.04, gy1 - 300, 230, 76); c.fill(); c.stroke(); c.fillStyle = "#151617"; c.font = "800 46px 'Barlow Condensed', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("JOB SITE", W * 0.04 + 115, gy1 - 262); c.beginPath(); c.moveTo(W * 0.04 + 115, gy1 - 224); c.lineTo(W * 0.04 + 115, gy1); c.stroke();
     // the cardboard cutout of Dev, standing at the gate

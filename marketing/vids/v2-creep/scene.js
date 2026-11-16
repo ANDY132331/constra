@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { siren, scribble, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,14 +12,14 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), l4: E.L(4), e: E.L(5) }; T.add = [T.l1 + 1.2, T.l2 + 0.2, T.l2 + 1.2, T.l2 + 3.2]; T.fix = T.l3 + 1.4; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "framing");
     const n = T.add.filter((a) => t > a).length, fixed = t > T.fix, sag = fixed ? 0 : n;
     const bx = W * 0.12, by = H * 0.17, bw = W * 0.76, pct = fixed ? 0.7 : Math.min(1.25, 0.35 + n * 0.22);
     c.fillStyle = "#fffef8"; c.strokeStyle = "#151617"; c.lineWidth = 8; c.beginPath(); c.roundRect(bx, by, bw, 70, 14); c.fill();
     c.save(); c.beginPath(); c.roundRect(bx + 4, by + 4, bw - 8, 62, 10); c.clip(); c.fillStyle = fixed ? "#2eaa62" : pct > 1 ? "#e0301e" : "#F5C400"; c.fillRect(bx + 4, by + 4, (bw - 8) * Math.min(1, pct), 62); c.restore();
     c.beginPath(); c.roundRect(bx, by, bw, 70, 14); c.stroke(); c.fillStyle = "#151617"; c.font = "800 50px 'Barlow Condensed', sans-serif"; c.textAlign = "left"; c.fillText("BUDGET", bx, by - 18);
     const mac = { x: W * 0.3, y: gy, s, flip: 1, hat: "#ffffff", t, mood: fixed ? "smug" : sag > 1 ? "shock" : "happy", mouth: E.mouth("Mac", t), pose: fixed ? POSE.hold(t) : sag ? { ...POSE.slump(t), lean: 8 + sag * 6 } : POSE.idle(t), seed: 1, sweat: sag > 2, prop: fixed ? "phone" : null, screen: "#F5C400" };
-    const cliff = { x: W * 0.82, y: gy, s, flip: -1, t, mood: "happy", mouth: E.mouth("Cliff", t), pose: n && !fixed ? POSE.point(t) : POSE.idle(t), seed: 2, hair: "pony" };
+    const cliff = { kind: "robot", x: W * 0.82, y: gy, s, flip: -1, t, mood: "happy", mouth: E.mouth("Cliff", t), pose: n && !fixed ? POSE.point(t) : POSE.idle(t), seed: 2, hair: "pony" };
     drawStick(c, mac); drawStick(c, cliff);
     ITEMS.forEach((txt, i) => {
       const a = T.add[i]; if (t < a - 0.5) return;

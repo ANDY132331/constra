@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, paper, notebookBg } from "/stick.js";
+import { drawStick, POSE, paper } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { phoneInset, chip, pop, bed, sfx, loadShots, endCard } from "/stage.js";
 
 // "Friday 4:59": a stick-figure disaster. Three workers dump their timesheets on the boss, the tower falls, one tap fixes it.
@@ -30,7 +31,7 @@ export default {
     // punch-in before the crash, shake on it
     const zIn = 1 + 0.12 * ease((t - (T.be - 0.8)) / 0.9) * (1 - ease((t - (T.crash + 0.4)) / 0.5)), cd = t - T.crash, shake = cd >= 0 && cd < 0.5 ? (1 - cd / 0.5) * 16 : 0;
     c.save(); c.translate(W * 0.3 + (rnd(Math.floor(t * 50) + 1) - 0.5) * shake, gy * 0.9 + (rnd(Math.floor(t * 50) + 4) - 0.5) * shake); c.scale(zIn, zIn); c.translate(-W * 0.3, -gy * 0.9);
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "trailer");
     // the clock on the wall: 4:59, ticking, until the end
     { const cx = W * 0.8, cy = H * 0.17, done = t > T.e - 0.2; c.strokeStyle = "#151617"; c.lineWidth = 8; c.fillStyle = "#fffef8"; c.beginPath(); c.arc(cx, cy, 110, 0, 7); c.fill(); c.stroke(); for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283; c.lineWidth = 5; c.beginPath(); c.moveTo(cx + Math.cos(a) * 92, cy + Math.sin(a) * 92); c.lineTo(cx + Math.cos(a) * 104, cy + Math.sin(a) * 104); c.stroke(); }
       const mA = (done ? 0 : -0.1 + Math.sin(t * 9) * 0.02) - 1.5708 + (done ? 0 : -0.1), hA = (done ? 0 : -0.5236) - 1.5708 - 0.0; c.lineWidth = 9; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(hA) * 62, cy + Math.sin(hA) * 62); c.stroke(); c.lineWidth = 6; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(mA) * 90, cy + Math.sin(mA) * 90); c.stroke(); c.fillStyle = "#e0301e"; c.beginPath(); c.arc(cx, cy, 8, 0, 7); c.fill(); }

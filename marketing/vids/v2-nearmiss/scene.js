@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { scribble, stamp } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,7 +12,7 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), e: E.L(4) }; T.swing = T.l1 - 0.2; T.flash = E.W_(3, /photo/i, 0.6) + 0.1; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "highrise");
     const swung = t > T.swing, logged = t > T.flash, bt = t - T.swing;
     const ang = swung && bt < 2.2 ? Math.sin(bt * 3.2) * 0.9 * (1 - bt / 2.4) : 0, bx = W * 0.62, by = H * 0.06;
     c.save(); c.translate(bx, by); c.rotate(ang); c.strokeStyle = "#151617"; c.lineWidth = 8; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 560); c.stroke(); c.fillStyle = "#e0701e"; c.beginPath(); c.roundRect(-210, 560, 420, 46, 6); c.fill(); c.stroke(); c.restore();

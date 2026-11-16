@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { notif, siren, scribble, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -12,7 +13,7 @@ export default {
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.7;
     const frozen = t >= T.alert && t < T.thaw, ct = frozen ? T.alert : t;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "framing");
     // the job-cost meter, drawn like a thermometer on its side
     const mx = W * 0.1, my = H * 0.3, mw = W * 0.8, mh = 90, pct = t < T.start ? 0 : clamp((Math.min(t, T.alert) - T.start) / (T.alert - T.start)) * 0.8 + (t > T.thaw ? 0 : 0);
     c.fillStyle = "#fffef8"; c.strokeStyle = "#151617"; c.lineWidth = 8; c.beginPath(); c.roundRect(mx, my, mw, mh, 16); c.fill(); c.save(); c.beginPath(); c.roundRect(mx + 4, my + 4, (mw - 8) * pct, mh - 8, 12); c.fillStyle = pct > 0.75 ? "#e0301e" : "#F5C400"; c.fill(); c.restore(); c.beginPath(); c.roundRect(mx, my, mw, mh, 16); c.stroke();

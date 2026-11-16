@@ -1,5 +1,6 @@
 import { clamp, lerp, ease, easeOut, easeBack, rnd, loadImg } from "/engine.js";
-import { drawStick, POSE, notebookBg } from "/stick.js";
+import { drawStick, POSE } from "/stick.js";
+import { siteBg } from "/sitebg.js";
 import { scribble, confetti } from "/stickkit.js";
 import { bed, sfx, endCard } from "/stage.js";
 
@@ -11,13 +12,13 @@ export default {
   async init(E) { ICON = await loadImg("/icon.png"); T = { l1: E.L(1), l2: E.L(2), l3: E.L(3), l4: E.L(4), e: E.L(5) }; T.deck = T.l3 + 0.4; },
   draw(t, c, E) {
     const { W, H, V } = E, gy = H * 0.8, s = 2.8;
-    notebookBg(c, W, H, gy, t);
+    siteBg(c, W, H, gy, t, "concrete");
     const cols = Math.min(14, Math.floor(2 + t * 1.1)), deck = t > T.deck, gx = W * 0.1, gyy = H * 0.2, cw = (W * 0.8) / 14, rh = 56;
     c.save(); c.globalAlpha = deck ? 1 - clamp((t - T.deck) / 0.4) : 1; c.strokeStyle = "#151617"; c.lineWidth = 4; c.fillStyle = "#fffef8"; c.fillRect(gx, gyy, cw * cols, rh * 7);
     for (let i = 0; i <= cols; i++) { c.beginPath(); c.moveTo(gx + i * cw, gyy); c.lineTo(gx + i * cw, gyy + rh * 7); c.stroke(); }
     for (let r = 0; r <= 7; r++) { c.beginPath(); c.moveTo(gx, gyy + r * rh); c.lineTo(gx + cw * cols, gyy + r * rh); c.stroke(); } c.restore();
     if (!deck) { c.fillStyle = "#c2336b"; c.font = "700 80px Caveat, cursive"; c.textAlign = "center"; c.fillText(t < T.l1 - 0.5 ? "MONDAY" : t < T.l2 - 0.2 ? "TUESDAY... WEDNESDAY..." : "FRIDAY", W / 2, gyy - 30); }
-    const dev = { x: W * 0.3, y: gy, s, flip: 1, hat: "#ff7a1c", t, mood: deck ? "shock" : t > T.l2 ? "sad" : "angry", mouth: E.mouth("Dev", t), pose: deck ? POSE.shrug(t) : POSE.slump(t), seed: 2, sweat: !deck && t > T.l1, prop: !deck ? "paper" : null };
+    const dev = { kind: "skeleton", x: W * 0.3, y: gy, s, flip: 1, hat: "#ff7a1c", t, mood: deck ? "shock" : t > T.l2 ? "sad" : "angry", mouth: E.mouth("Dev", t), pose: deck ? POSE.shrug(t) : POSE.slump(t), seed: 2, sweat: !deck && t > T.l1, prop: !deck ? "paper" : null };
     const son = { x: W * 0.82, y: gy, s, flip: -1, t, mood: "smug", mouth: E.mouth("Sonia", t), pose: t > T.l3 ? POSE.point(t) : POSE.idle(t), seed: 3, hair: "pony" };
     drawStick(c, dev); if (t > T.l3 - 0.4) drawStick(c, son);
     if (deck) NAMES.forEach((nm, i) => {
