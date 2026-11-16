@@ -15,7 +15,7 @@ export const loadImg = (src) => new Promise((res, rej) => { const i = new Image(
 export async function start(scene) {
   const V = MODE === "v", W = V ? 1080 : 1920, H = V ? 1920 : 1080, FPS = 30;
   const out = document.getElementById("out"); out.width = W; out.height = H; const ctx = out.getContext("2d");
-  const lines = await (await fetch("/lines.json")).json(); const N = lines.length;
+  const lines = await (await fetch("/lines.json")).json().catch(() => []); const N = lines.length;
   const bufs = [], words = [], gains = [], VO_AT = [], VO_END = [];
   let DURATION = 0;
   const E = { W, H, V, FPS, lines, N, words, VO_AT, VO_END, scene, get DURATION() { return DURATION; } };
@@ -36,7 +36,7 @@ export async function start(scene) {
       const d = b.getChannelData(0); let s = 0, c = 0; for (let k = 0; k < d.length; k++) if (Math.abs(d[k]) > 0.01) { s += d[k] * d[k]; c++; } const rms = Math.sqrt(s / Math.max(1, c)); gains.push(clamp(0.115 / Math.max(rms, 0.01), 0.55, 2.4));
       t += lines[i].gap ?? 0.35; VO_AT.push(t); const lw = words[i][words[i].length - 1], sp = lw ? lw.t + lw.d : b.duration; const dur = Math.min(b.duration, sp + 0.4); VO_END.push(t + dur); t += dur;
     }
-    DURATION = t + (scene.endHold ?? 3);
+    DURATION = N === 0 ? (scene.duration ?? 20) : t + (scene.endHold ?? 3);
     if (scene.init) await scene.init(E, ctx);
     return { duration: +DURATION.toFixed(2), lines: VO_AT.map((a, i) => [+a.toFixed(2), +VO_END[i].toFixed(2)]), W, H };
   };

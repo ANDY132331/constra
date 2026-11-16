@@ -16,10 +16,12 @@ await p.route("https://vid.local/**", (r) => {
   const n = decodeURIComponent(new URL(r.request().url()).pathname);
   if (n.startsWith("/three/")) return r.fulfill(file(`${ROOT}/node_modules/three/${n.slice(7)}`, "text/javascript"));
   if (n.startsWith("/cine/")) return r.fulfill(file(`${HERE}/cine/${n.slice(6)}`, "text/javascript"));
+  if (n === "/stick.js") return r.fulfill(file(`${HERE}/stick.js`, "text/javascript"));
   if (n === "/stage.js") return r.fulfill(file(`${HERE}/stage.js`, "text/javascript"));
   if (n === "/puppet.js") return r.fulfill(file(`${HERE}/puppet.js`, "text/javascript"));
   if (n === "/engine.js") return r.fulfill(file(`${HERE}/engine.js`, "text/javascript"));
   if (name.startsWith("sh-")) { if (n === "/scene.js") return r.fulfill(file(`${HERE}/shorts/scene.js`, "text/javascript")); if (n === "/lines.json" || n === "/scenario.json") return r.fulfill(file(`${ROOT}/.tmp-ad/vids/${name}${n}`, "application/json")); if (n.startsWith("/lib/")) return r.fulfill(file(`${HERE}/shorts${n}`, "text/javascript")); }
+  if (n === "/lines.json" && !fs.existsSync(`${HERE}/${name}/lines.json`)) return r.fulfill({ contentType: "application/json", body: "[]" });
   if (n === "/scene.js" || n === "/lines.json") return r.fulfill(file(`${HERE}/${name}${n}`, n.endsWith("json") ? "application/json" : "text/javascript"));
   if (n === "/mux.js") return r.fulfill(file(`${ROOT}/.tmp-ad/node_modules/mp4-muxer/build/mp4-muxer.js`, "text/javascript"));
   if (n.startsWith("/vo/")) return r.fulfill(file(`${VO}/${path.basename(n)}`, MIME[path.extname(n)]));

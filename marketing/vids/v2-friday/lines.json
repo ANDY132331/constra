@@ -1,0 +1,7 @@
+[
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-6%", "gap": 2.1, "text": "Four fifty-nine. Friday." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-2%", "gap": 0.5, "text": "Everyone's hours. In my hands. By five." },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "-4%", "gap": 3.3, "text": "Boss. Tap here." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-6%", "gap": 1.5, "text": "...That's it?" },
+  { "who": "Voice", "voice": "en-US-GuyNeural", "rate": "-4%", "pitch": "-3Hz", "gap": 1.3, "text": "Timesheets that build themselves. Constra." }
+]

@@ -1,0 +1,7 @@
+[
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-4%", "gap": 2.2, "text": "Dev's here early. Good man." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-2%", "gap": 3.2, "text": "Wait. That's a photo of cardboard." },
+  { "who": "Mac", "voice": "en-US-AndrewMultilingualNeural", "rate": "-2%", "gap": 0.5, "text": "And the location says... a beach?" },
+  { "who": "Dev", "voice": "en-US-BrianMultilingualNeural", "rate": "-6%", "gap": 1.0, "text": "I can explain." },
+  { "who": "Voice", "voice": "en-US-GuyNeural", "rate": "-4%", "pitch": "-3Hz", "gap": 2.6, "text": "A photo and a location on every clock-in. Constra." }
+]
