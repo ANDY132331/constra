@@ -2,17 +2,9 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { HardHat, MapPin, Camera, Check, AlertTriangle, ArrowRight, Plus, WifiOff } from "lucide-react";
-import LiveSite from "@/components/landing/live-site";
-import SavingsCalc from "@/components/landing/savings-calc";
-import AppTour from "@/components/landing/app-tour";
-import RealPhotos from "@/components/landing/real-photos";
-import RealClips from "@/components/landing/real-clips";
-import DayHero from "@/components/landing/day-hero";
-import ProductReveal from "@/components/landing/product-reveal";
-import FlyIn from "@/components/landing/fly-in";
+import { HardHat, MapPin, Check, AlertTriangle, ArrowRight, ArrowLeft, Plus, WifiOff, FileSpreadsheet, Wallet } from "lucide-react";
 import { PLAY_STORE_URL } from "@/lib/store-app";
-
+import "./landing.css";
 
 function readOnboarded(): boolean {
   try {
@@ -25,41 +17,16 @@ function readOnboarded(): boolean {
 const noopSubscribe = () => () => {};
 
 const DAY = [
-  {
-    time: "06:58",
-    title: "Crew clocks in",
-    body: "A selfie and GPS fix are checked against the site's geofence. Punches from the truck stop or the couch get flagged for review.",
-    chip: { icon: "pin", text: "38 m from site · inside 500 m" },
-  },
-  {
-    time: "09:40",
-    title: "Hazard logged",
-    body: "Open trench, no barricade. Photo, severity and location go into the safety log before anyone forgets.",
-    chip: { icon: "alert", text: "Near miss · Medium" },
-  },
-  {
-    time: "13:15",
-    title: "Change order raised",
-    body: "The client wants pot lights in the hallway. Price it, send it, and the project budget updates when they approve.",
-    chip: { icon: "plus", text: "CO-07 · +$1,180" },
-  },
-  {
-    time: "16:30",
-    title: "Daily report done",
-    body: "Hours, weather, completed tasks and site photos are already in the report. Review it and share it.",
-    chip: { icon: "check", text: "6 crew · 47.5 h · 12 photos" },
-  },
-  {
-    time: "17:05",
-    title: "Invoice out the door",
-    body: "Turn the estimate into an invoice and email a branded PDF to the client the same day the work was done.",
-    chip: { icon: "check", text: "INV-0142 · $8,420.00 · Sent" },
-  },
+  { time: "06:58", title: "Crew clocks in", body: "A selfie and GPS fix are checked against the site's geofence. Punches from the truck stop or the couch get flagged for review.", chip: { icon: "pin", text: "38 m from site · inside 500 m" }, c: "#FF6B3D" },
+  { time: "09:40", title: "Hazard logged", body: "Open trench, no barricade. Photo, severity and location go into the safety log before anyone forgets.", chip: { icon: "alert", text: "Near miss · Medium" }, c: "#8CC3F4" },
+  { time: "13:15", title: "Change order raised", body: "The client wants pot lights in the hallway. Price it, send it, and the project budget updates when they approve.", chip: { icon: "plus", text: "CO-07 · +$1,180" }, c: "#F6B1CF" },
+  { time: "16:30", title: "Daily report done", body: "Hours, weather, completed tasks and site photos are already in the report. Review it and share it.", chip: { icon: "check", text: "6 crew · 47.5 h · 12 photos" }, c: "#F5C400" },
+  { time: "17:05", title: "Invoice out the door", body: "Turn the estimate into an invoice and email a branded PDF to the client the same day the work was done.", chip: { icon: "check", text: "INV-0142 · $8,420.00 · Sent" }, c: "#B7E08F" },
 ] as const;
 
-const FEATURES: { group: string; items: [string, string][] }[] = [
+const FEATURES: { group: string; color: string; items: [string, string][] }[] = [
   {
-    group: "Crew",
+    group: "Crew", color: "#FF6B3D",
     items: [
       ["GPS clock-in", "Selfie + location on every punch, per-site geofence"],
       ["Site alerts", "A phone alert when someone on the clock leaves the job, with the time and distance"],
@@ -69,7 +36,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
     ],
   },
   {
-    group: "Hours & money",
+    group: "Hours & money", color: "#F5C400",
     items: [
       ["Timesheets", "One page per worker with your logo, as a PDF or Excel file"],
       ["Payroll export", "Hours to CSV, QuickBooks or Gusto; invoices to QuickBooks Online"],
@@ -80,7 +47,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
     ],
   },
   {
-    group: "Site",
+    group: "Site", color: "#8CC3F4",
     items: [
       ["Daily reports", "Hours, weather, tasks and photos, compiled for you"],
       ["Safety log", "Near misses, injuries and hazards with photos"],
@@ -90,7 +57,7 @@ const FEATURES: { group: string; items: [string, string][] }[] = [
     ],
   },
   {
-    group: "Plans & files",
+    group: "Plans & files", color: "#F6B1CF",
     items: [
       ["Blueprints", "Upload drawings and open them on site"],
       ["Documents", "Contracts, permits and specs, versioned by project"],
@@ -112,90 +79,180 @@ const FAQ: [string, string][] = [
   ["Can I take my data and leave?", "Yes. Invoices, reports and timesheets export to PDF, Excel or CSV, and you can delete your account from Settings at any time."],
 ];
 
+// The phone in the middle of the page flips between real screens from the app
+const SCREENS = [
+  { label: "Clock in", src: "/site/app-clock.webp", alt: "Constra time screen: a worker on site for 8 hours 8 minutes with a Clock Out button" },
+  { label: "Invoices", src: "/site/app-invoices.webp", alt: "Constra invoices list with outstanding, collected and overdue totals" },
+  { label: "Daily report", src: "/site/app-daily-report.webp", alt: "Constra daily report screen" },
+  { label: "Dashboard", src: "/site/app-dashboard.webp", alt: "Constra dashboard with today's crew and jobs" },
+];
+
+const TALK = [
+  { tab: "On site only", color: "#1E7A45", r: "-4deg", icon: "pin", text: "Every punch has a photo and a GPS fix. Clock in from the truck stop and it gets flagged." },
+  { tab: "Builds itself", color: "#FF6B3D", r: "3deg", icon: "sheet", text: "Hours, overtime and job costs add up as the crew works. Friday is a button, not a night shift." },
+  { tab: "No signal? Fine", color: "#2F6FB5", r: "-2deg", icon: "wifi", text: "Basements, backroads, bad towers. Everything saves on the phone and syncs when signal returns." },
+  { tab: "Paid by Friday", color: "#B8860B", r: "4deg", icon: "wallet", text: "Export hours to CSV, QuickBooks or Gusto. Invoices go out as branded PDFs the same day." },
+];
+
 function Chip({ icon, text }: { icon: string; text: string }) {
   const Icon = icon === "pin" ? MapPin : icon === "alert" ? AlertTriangle : icon === "plus" ? Plus : Check;
   return (
-    <span className="lp-chip">
-      <Icon size={12} strokeWidth={2.5} aria-hidden />
+    <span className="mp-chip">
+      <Icon size={13} strokeWidth={2.5} aria-hidden />
       {text}
     </span>
   );
 }
 
-function PhoneMock() {
+function Spark({ style }: { style: React.CSSProperties }) {
   return (
-    <div className="lp-phone" aria-label="Example of the Constra clock-in screen" role="img">
-      <div className="lp-phone-bar">
-        <span>7:02</span>
-        <span className="lp-phone-notch" />
-        <span>5G</span>
-      </div>
-      <div className="lp-phone-body">
-        <p className="lp-mono lp-dim">Tue, Sep 29 · Dundas St. Reno</p>
-        <p className="lp-phone-hello">Morning, Marco</p>
-
-        <div className="lp-clock">
-          <div className="lp-clock-top">
-            <span className="lp-live"><span className="lp-dot" />On site</span>
-            <span className="lp-mono">06:58 in</span>
-          </div>
-          <p className="lp-clock-time">4:12<span>:08</span></p>
-          <div className="lp-clock-rows">
-            <div><MapPin size={13} aria-hidden /><span>38 m from site</span><b>Verified</b></div>
-            <div><Camera size={13} aria-hidden /><span>Photo on punch</span><b>Verified</b></div>
-          </div>
-          <div className="lp-clock-btn">Clock out</div>
-        </div>
-
-        <p className="lp-mono lp-dim lp-phone-label">Today&apos;s crew · 6 on site</p>
-        <div className="lp-crew">
-          {[
-            ["MR", "Marco R.", "Framing", "#1F6F8B"],
-            ["AK", "Aisha K.", "Electrical", "#8B5A1F"],
-            ["DL", "Dev L.", "Labour", "#3D6B2E"],
-          ].map(([i, n, t, c]) => (
-            <div key={n} className="lp-crew-row">
-              <span className="lp-avatar" style={{ background: c }}>{i}</span>
-              <span>{n}</span>
-              <span className="lp-dim">{t}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <svg className="mp-spark" viewBox="0 0 24 24" aria-hidden style={style}>
+      <path d="M12 1C12 8 16 12 23 12C16 12 12 16 12 23C12 16 8 12 1 12C8 12 12 8 12 1Z" fill="none" stroke="#151617" strokeWidth="1" strokeLinejoin="round" />
+    </svg>
   );
 }
 
-function InvoiceSlip() {
+/* Flat shapes for the yellow scene. Drawn here, not taken from anywhere. */
+function Cone() {
   return (
-    <div className="lp-slip" aria-hidden>
-      <div className="lp-slip-head">
-        <span className="lp-mono">INV-0142</span>
-        <span className="lp-paid">Sent</span>
-      </div>
-      <p className="lp-slip-total">$8,420.00</p>
-      <div className="lp-slip-lines">
-        <div><span>Drywall, 2nd floor</span><span>$5,600.00</span></div>
-        <div><span>CO-07 Pot lights</span><span>$1,180.00</span></div>
-        <div><span>HST 13%</span><span>$968.66</span></div>
-      </div>
-    </div>
+    <svg viewBox="0 0 120 140" aria-hidden>
+      <rect x="6" y="118" width="108" height="16" rx="5" fill="#151617" />
+      <path d="M60 8 L98 118 H22 Z" fill="#FF6B3D" stroke="#151617" strokeWidth="5" strokeLinejoin="round" />
+      <path d="M46 52 H74 L80 70 H40 Z" fill="#fff" />
+    </svg>
+  );
+}
+function Hat() {
+  return (
+    <svg viewBox="0 0 160 110" aria-hidden>
+      <path d="M18 88 C18 38 50 14 80 14 C110 14 142 38 142 88 Z" fill="#fff" stroke="#151617" strokeWidth="5" strokeLinejoin="round" />
+      <rect x="68" y="6" width="24" height="46" rx="8" fill="#FF6B3D" stroke="#151617" strokeWidth="5" />
+      <rect x="6" y="86" width="148" height="18" rx="9" fill="#151617" />
+    </svg>
+  );
+}
+function Level() {
+  return (
+    <svg viewBox="0 0 200 60" aria-hidden>
+      <rect x="4" y="8" width="192" height="44" rx="10" fill="#8CC3F4" stroke="#151617" strokeWidth="5" />
+      <rect x="76" y="18" width="48" height="24" rx="12" fill="#fff" stroke="#151617" strokeWidth="4" />
+      <circle cx="100" cy="30" r="7" fill="#1E7A45" />
+    </svg>
+  );
+}
+function Tape() {
+  return (
+    <svg viewBox="0 0 140 140" aria-hidden>
+      <circle cx="70" cy="70" r="62" fill="#F6B1CF" stroke="#151617" strokeWidth="5" />
+      <circle cx="70" cy="70" r="26" fill="#fff" stroke="#151617" strokeWidth="5" />
+      <path d="M100 98 H136 V114 H92" fill="#fff" stroke="#151617" strokeWidth="5" strokeLinejoin="round" />
+      <path d="M44 44 L96 96" stroke="#151617" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function Clip() {
+  return (
+    <svg viewBox="0 0 120 150" aria-hidden>
+      <rect x="8" y="14" width="104" height="132" rx="14" fill="#fff" stroke="#151617" strokeWidth="5" />
+      <rect x="38" y="4" width="44" height="24" rx="8" fill="#1E7A45" stroke="#151617" strokeWidth="5" />
+      <path d="M28 62 H92 M28 88 H92 M28 114 H66" stroke="#151617" strokeWidth="6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function Bolt() {
+  return (
+    <svg viewBox="0 0 120 120" aria-hidden>
+      <path d="M60 4 L74 40 L112 40 L82 62 L94 104 L60 80 L26 104 L38 62 L8 40 L46 40 Z" fill="#fff" stroke="#151617" strokeWidth="5" strokeLinejoin="round" />
+    </svg>
   );
 }
 
-function PayrollCard() {
-  const bars = [0, 27, 35, 31.5, 27, 27, 5];
+/* "Press Space to jump": a worker hops over cones. Starts only when asked, and only listens while it is on screen. */
+function JumpGame() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const jumpRef = useRef<() => void>(() => {});
+  const [label, setLabel] = useState("Press Space to jump");
+
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return;
+    const ctx = cv.getContext("2d");
+    if (!ctx) return;
+    const H = 240;
+    const ground = H - 56; let W = 600, raf = 0, last = 0, inView = false;
+    const g = { mode: "idle" as "idle" | "play" | "over", y: 0, vy: 0, score: 0, speed: 420, cones: [] as { x: number }[], t: 0, next: 500 };
+    const resize = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = cv.clientWidth;
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    const jump = () => {
+      if (g.mode === "idle" || g.mode === "over") {
+        g.mode = "play"; g.y = 0; g.vy = 0; g.score = 0; g.speed = 420; g.cones = []; g.next = 500; setLabel("");
+      }
+      if (g.y === 0) g.vy = 820;
+    };
+    jumpRef.current = jump;
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = "#151617"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, ground + 0.5); ctx.lineTo(W, ground + 0.5); ctx.stroke();
+      // hills
+      ctx.beginPath(); ctx.moveTo(0, ground - 30);
+      for (let x = 0; x <= W; x += 20) ctx.lineTo(x, ground - 34 - Math.sin((x + g.t * 40) / 90) * 16);
+      ctx.stroke();
+      // cones
+      for (const c of g.cones) {
+        ctx.fillStyle = "#FF6B3D"; ctx.strokeStyle = "#151617"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(c.x + 17, ground - 46); ctx.lineTo(c.x + 32, ground); ctx.lineTo(c.x + 2, ground); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#fff"; ctx.fillRect(c.x + 11, ground - 26, 12, 6);
+      }
+      // worker
+      const px = 90, fy = ground - g.y, run = g.y === 0 && g.mode === "play" ? Math.sin(g.t * 18) * 9 : 0;
+      ctx.strokeStyle = "#151617"; ctx.lineWidth = 5; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(px, fy - 30); ctx.lineTo(px - 8 + run, fy); ctx.moveTo(px, fy - 30); ctx.lineTo(px + 8 - run, fy); ctx.stroke();
+      ctx.fillStyle = "#FF6B3D"; ctx.fillRect(px - 11, fy - 62, 22, 34);
+      ctx.fillStyle = "#FFD9B8"; ctx.beginPath(); ctx.arc(px, fy - 74, 11, 0, 7); ctx.fill();
+      ctx.fillStyle = "#F5C400"; ctx.beginPath(); ctx.arc(px, fy - 77, 12, Math.PI, 0); ctx.fill(); ctx.fillRect(px - 15, fy - 78, 30, 4);
+      ctx.fillStyle = "#151617"; ctx.font = "500 14px ui-monospace, monospace"; ctx.textAlign = "right";
+      ctx.fillText(g.mode === "idle" ? "" : String(Math.floor(g.score)).padStart(5, "0"), W - 16, 26);
+    };
+    const step = (now: number) => {
+      raf = requestAnimationFrame(step);
+      const dt = Math.min(0.04, (now - (last || now)) / 1000); last = now;
+      if (!inView) return;
+      g.t += dt;
+      if (g.mode === "play") {
+        g.score += dt * 10; g.speed = 420 + g.score * 1.4;
+        g.vy -= 2300 * dt; g.y = Math.max(0, g.y + g.vy * dt); if (g.y === 0 && g.vy < 0) g.vy = 0;
+        g.cones.forEach((c) => { c.x -= g.speed * dt; });
+        g.cones = g.cones.filter((c) => c.x > -50);
+        g.next -= g.speed * dt;
+        if (g.next <= 0) { g.cones.push({ x: W + 20 }); g.next = 380 + Math.random() * 360; }
+        if (g.cones.some((c) => c.x < 90 + 12 && c.x + 32 > 90 - 12 && g.y < 40)) { g.mode = "over"; setLabel("Oops. Press Space to go again"); }
+      }
+      draw();
+    };
+    const io = new IntersectionObserver(([e]) => { inView = !!e?.isIntersecting && e.intersectionRatio > 0.5; }, { threshold: [0, 0.5, 1] });
+    io.observe(cv);
+    const key = (e: KeyboardEvent) => {
+      if (!inView || (e.code !== "Space" && e.code !== "ArrowUp")) return;
+      const t = e.target as HTMLElement | null;
+      if (t && /input|textarea|select/i.test(t.tagName)) return;
+      e.preventDefault(); jump();
+    };
+    window.addEventListener("keydown", key);
+    window.addEventListener("resize", resize);
+    raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); io.disconnect(); window.removeEventListener("keydown", key); window.removeEventListener("resize", resize); };
+  }, []);
+
   return (
-    <div className="lp-float" aria-hidden>
-      <div className="lp-float-top">
-        <span className="lp-mono">Payroll · this week</span>
-        <span className="lp-ready">Ready</span>
-      </div>
-      <p className="lp-float-total">$5,506.88</p>
-      <div className="lp-float-bars">
-        {bars.map((h, i) => <span key={i} style={{ height: `${(h / 35) * 100}%` }} />)}
-      </div>
-      <p className="lp-mono lp-float-meta">152.5 h · 20 h overtime</p>
+    <div className="mp-game">
+      <canvas ref={ref} role="img" aria-label="A small game: a worker jumps over traffic cones. Press space or tap to jump." onPointerDown={() => jumpRef.current()} />
+      {label && <button type="button" className="mp-pill" onClick={() => jumpRef.current()}>{label}</button>}
     </div>
   );
 }
@@ -203,34 +260,39 @@ function PayrollCard() {
 export default function LandingPage() {
   const alreadyIn = useSyncExternalStore(noopSubscribe, readOnboarded, () => false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const tiltRef = useRef<HTMLDivElement>(null);
-  const [overShot, setOverShot] = useState(true);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [shot, setShot] = useState(0);
 
-  // Hero mockups lean toward the pointer
+  // The big scroll scene: write progress to CSS variables so nothing re-renders while scrolling
   useEffect(() => {
-    const tilt = tiltRef.current;
-    const hero = tilt?.closest(".lp-hero") as HTMLElement | null;
-    if (!tilt || !hero || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const root = rootRef.current, track = trackRef.current;
+    if (!root || !track) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const clamp = (v: number) => Math.min(1, Math.max(0, v));
     let raf = 0;
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType === "touch") return;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = hero.getBoundingClientRect();
-        tilt.style.setProperty("--tx", (((e.clientX - r.left) / r.width - 0.5) * 2).toFixed(3));
-        tilt.style.setProperty("--ty", (((e.clientY - r.top) / r.height - 0.5) * 2).toFixed(3));
-      });
+    const update = () => {
+      raf = 0;
+      root.classList.toggle("scrolled", root.scrollTop > 40);
+      if (reduce) return;
+      const r = track.getBoundingClientRect();
+      const p = clamp(-r.top / Math.max(1, r.height - window.innerHeight));
+      const ease = (v: number) => 1 - Math.pow(1 - v, 3);
+      track.style.setProperty("--d", clamp(p / 0.2).toFixed(3));
+      track.style.setProperty("--f", ease(clamp((p - 0.14) / 0.42)).toFixed(3));
+      track.style.setProperty("--m", ease(clamp((p - 0.3) / 0.4)).toFixed(3));
+      track.style.setProperty("--o", ease(clamp((p - 0.62) / 0.22)).toFixed(3));
     };
-    const onLeave = () => { tilt.style.setProperty("--tx", "0"); tilt.style.setProperty("--ty", "0"); };
-    hero.addEventListener("pointermove", onMove);
-    hero.addEventListener("pointerleave", onLeave);
-    return () => { cancelAnimationFrame(raf); hero.removeEventListener("pointermove", onMove); hero.removeEventListener("pointerleave", onLeave); };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    root.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { root.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); };
   }, []);
 
+  // The page scrolls inside this fixed container, so in-page anchors need manual scrolling
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    // The page scrolls inside this fixed container, so in-page anchors need manual scrolling.
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest('a[href^="#"]') as HTMLAnchorElement | null;
       const id = a?.getAttribute("href")?.slice(1);
@@ -238,210 +300,158 @@ export default function LandingPage() {
       if (!target) return;
       e.preventDefault();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      root.scrollTo({ top: target.getBoundingClientRect().top + root.scrollTop - 64, behavior: reduce ? "auto" : "smooth" });
+      root.scrollTo({ top: target.getBoundingClientRect().top + root.scrollTop - 90, behavior: reduce ? "auto" : "smooth" });
     };
     root.addEventListener("click", onClick);
     return () => root.removeEventListener("click", onClick);
   }, []);
 
-  useEffect(() => {
-    const root = rootRef.current;
-    const shot = root?.querySelector(".dh") as HTMLElement | null;
-    if (!root || !shot) return;
-    const onScroll = () => setOverShot(root.scrollTop < shot.offsetHeight - 70);
-    onScroll();
-    root.addEventListener("scroll", onScroll, { passive: true });
-    return () => root.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Cards marked .lp-spot light up under the pointer. One listener, written to CSS vars,
-  // so nothing re-renders as the mouse moves.
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const onMove = (e: PointerEvent) => {
-      const card = (e.target as HTMLElement).closest(".lp-spot") as HTMLElement | null;
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      card.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      card.style.setProperty("--my", `${e.clientY - r.top}px`);
-    };
-    root.addEventListener("pointermove", onMove, { passive: true });
-    return () => root.removeEventListener("pointermove", onMove);
-  }, []);
-
-  // Sections ease in as they scroll into view. Nothing is hidden until this has run, and
-  // people who ask for less motion never get the effect.
+  // Headings and blocks ease in as they scroll into view; nothing is hidden until this has run
   useEffect(() => {
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>(".lp-section-head, .lp-spec-col, .lp-day-shots figure, .lp-timeline li, .lp-price-card, .lp-faq-list details, .lp-field-list > div, .lp-tally, .lp-calc-card, .lp-watch-frame, .lp-hero-copy, .lp-hero-visual, .lp-reveal-frame"));
+    const els = Array.from(root.querySelectorAll<HTMLElement>(".mp-big, .mp-label, .mp-group, .mp-tile, .mp-frame, .mp-price-card, .mp-faq-list details, .mp-watch-grid p"));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add("rv-in"); io.unobserve(e.target); } });
-    }, { root, rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    }, { root, rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
     els.forEach((el, i) => { el.classList.add("rv"); el.style.setProperty("--rv-d", `${(i % 4) * 70}ms`); io.observe(el); });
     return () => { io.disconnect(); els.forEach((el) => el.classList.remove("rv", "rv-in")); };
   }, []);
 
   const startHref = alreadyIn ? "/dashboard" : "/onboarding";
   const startLabel = alreadyIn ? "Open dashboard" : "Start free";
+  const flip = (d: number) => setShot((s) => (s + d + SCREENS.length) % SCREENS.length);
 
   return (
-    <div ref={rootRef} className="lp">
-      <style>{CSS}</style>
+    <div ref={rootRef} className="mp">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON_LD }} />
+      <a href="#main" className="mp-skip">Skip to content</a>
 
-      <a href="#main" className="lp-skip">Skip to content</a>
+      <div className="mp-bar">Pre-launch · Free while we launch<span className="mp-bar-x"> · Works with no signal</span></div>
 
-      <header className={`lp-nav${overShot ? " lp-nav-day" : ""}`}>
-        <div className="lp-wrap lp-nav-inner">
-          <Link href="/" className="lp-brand" aria-label="Constra home">
-            <span className="lp-brand-mark"><HardHat size={16} strokeWidth={2.5} aria-hidden /></span>
+      <div className="mp-head" role="banner">
+        <div className="mp-head-in">
+          <Link href="/" className="mp-logo" aria-label="Constra home">
+            <span className="mp-logo-mark"><HardHat size={18} strokeWidth={2.5} aria-hidden /></span>
             Constra
           </Link>
-          <nav className="lp-nav-links" aria-label="Main">
-            <a href="#how">How it works</a>
-            <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
+          <nav className="mp-nav" aria-label="Main">
+            <span className="mp-nav-links">
+              <a className="mp-pill" href="#how">How it works</a>
+              <a className="mp-pill" href="#features">Features</a>
+              <a className="mp-pill" href="#faq">FAQ</a>
+            </span>
+            {!alreadyIn && <Link href="/login" className="mp-pill mp-signin">Sign in</Link>}
+            <Link href={startHref} className="mp-pill mp-pill-coral">{startLabel}</Link>
           </nav>
-          <div className="lp-nav-cta">
-            {!alreadyIn && <Link href="/login" className="lp-link">Sign in</Link>}
-            <Link href={startHref} className="lp-btn lp-btn-sm">{startLabel}</Link>
-          </div>
         </div>
-      </header>
+      </div>
 
       <main id="main">
-        <DayHero startHref={startHref} startLabel={startLabel} />
-        <FlyIn />
-        <ProductReveal />
-
-        {/* Product */}
-        <section className="lp-hero">
-          <div className="lp-wrap lp-hero-grid">
-            <div className="lp-hero-copy">
-              <p className="lp-kicker">For contractors and trade crews</p>
-              <h2 className="lp-h1">Not the<br />paperwork.</h2>
-              <p className="lp-lede">
-                Constra puts GPS-verified timesheets, daily reports, safety logs, change orders and invoices in one app, on the phones your crew already carries.
-              </p>
-              <div className="lp-hero-ctas">
-                <Link href={startHref} className="lp-btn">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
-                <a href="#day" className="lp-btn lp-btn-ghost">See a day on site</a>
+        {/* Headline, then the colour floods in */}
+        <div ref={trackRef} className="mp-track">
+          <div className="mp-stage">
+            <div className="mp-hero">
+              <Spark style={{ left: "13%", top: "19%", ["--s" as string]: "34px" }} />
+              <Spark style={{ right: "17%", top: "15%", ["--s" as string]: "26px", ["--dl" as string]: "-2s" }} />
+              <Spark style={{ left: "7%", top: "66%", ["--s" as string]: "30px", ["--dl" as string]: "-4s" }} />
+              <Spark style={{ right: "9%", top: "58%", ["--s" as string]: "38px", ["--dl" as string]: "-1s" }} />
+              <Spark style={{ left: "46%", top: "74%", ["--s" as string]: "24px", ["--dl" as string]: "-3s" }} />
+              <h1 className="mp-h1" aria-label="Run the job, not the paperwork">
+                <span aria-hidden>Run the job</span>
+                <span aria-hidden>not the</span>
+                <span aria-hidden>paperwork</span>
+              </h1>
+              <span className="mp-side mp-side-l" aria-hidden>GPS + photo<br />clock-in</span>
+              <span className="mp-side mp-side-r" aria-hidden>Works<br />offline</span>
+              <div className="mp-hero-foot">
+                <p>The free crew app for small contractors. Timesheets build themselves, and Friday payroll is one button.</p>
+                <div className="mp-hero-btns">
+                  <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
+                  <a href="#how" className="mp-pill mp-pill-big">See how it works</a>
+                </div>
               </div>
-              <ul className="lp-facts" aria-label="Quick facts">
-                <li>No credit card</li>
-                <li>Android, iPhone &amp; web</li>
-                <li>15 languages</li>
-              </ul>
             </div>
-            <div className="lp-hero-visual">
-              <div className="lp-tilt" ref={tiltRef}>
-                <PhoneMock />
-                <InvoiceSlip />
-                <PayrollCard />
+
+            <div className="mp-disc" style={{ left: "10%", top: "36%", width: 170, height: 170 }} aria-hidden />
+            <div className="mp-disc" style={{ left: "46%", top: "62%", width: 100, height: 100 }} aria-hidden />
+            <div className="mp-disc" style={{ left: "74%", top: "78%", width: 230, height: 230 }} aria-hidden />
+
+            <div className="mp-flood" aria-label="The Constra app">
+              <div className="mp-deco" style={{ left: "5%", top: "16%", width: "clamp(90px, 15vw, 210px)", ["--r" as string]: "-10deg" }}><Hat /></div>
+              <div className="mp-deco" style={{ left: "17%", top: "58%", width: "clamp(70px, 11vw, 150px)", ["--r" as string]: "8deg", ["--dl" as string]: "-2s" }}><Cone /></div>
+              <div className="mp-deco hide-sm" style={{ left: "3%", top: "76%", width: "clamp(110px, 16vw, 230px)", ["--r" as string]: "-6deg", ["--dl" as string]: "-4s" }}><Level /></div>
+              <div className="mp-deco" style={{ right: "6%", top: "14%", width: "clamp(80px, 13vw, 180px)", ["--r" as string]: "10deg", ["--dl" as string]: "-1s" }}><Clip /></div>
+              <div className="mp-deco" style={{ right: "17%", top: "56%", width: "clamp(80px, 12vw, 170px)", ["--r" as string]: "-8deg", ["--dl" as string]: "-3s" }}><Tape /></div>
+              <div className="mp-deco hide-sm" style={{ right: "4%", top: "78%", width: "clamp(60px, 8vw, 110px)", ["--r" as string]: "14deg", ["--dl" as string]: "-5s" }}><Bolt /></div>
+
+              <div className="mp-phone-wrap">
+                <div className="mp-phone">
+                  {SCREENS.map((s, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={s.src} src={s.src} alt={i === shot ? s.alt : ""} aria-hidden={i !== shot} width={780} height={1688} className={i === shot ? "on" : ""} decoding="async" />
+                  ))}
+                </div>
               </div>
-              <div className="lp-hero-shadow" aria-hidden />
-            </div>
-          </div>
-        </section>
 
-        {/* Replaces */}
-        <section className="lp-tape-band" aria-label="What Constra replaces">
-          <div className="lp-tape" aria-hidden />
-          <div className="lp-wrap lp-replaces">
-            <p className="lp-replaces-label">Replaces</p>
-            <ul>
-              <li>Paper timesheets</li>
-              <li>The crew group chat</li>
-              <li>A shoebox of receipts</li>
-              <li>The invoice spreadsheet</li>
-              <li>Three other apps</li>
-            </ul>
+              <div className="mp-ctrl">
+                <button type="button" className="mp-pill mp-pill-round" onClick={() => flip(-1)} aria-label="Previous screen"><ArrowLeft size={22} aria-hidden /></button>
+                <span className="mp-pill mp-pill-ink" aria-live="polite">{SCREENS[shot].label}</span>
+                <button type="button" className="mp-pill mp-pill-round" onClick={() => flip(1)} aria-label="Next screen"><ArrowRight size={22} aria-hidden /></button>
+              </div>
+            </div>
           </div>
-          <div className="lp-tape" aria-hidden />
-        </section>
+        </div>
 
-        {/* The 30-second ad: the problem, then the real app */}
-        <section id="watch" className="lp-watch" aria-label="See Constra in 30 seconds">
-          <div className="lp-wrap lp-watch-grid">
-            <div>
-              <p className="lp-kicker">See it in 30 seconds</p>
-              <h2 className="lp-h2">Friday payroll,<br />without the guessing.</h2>
-              <p className="lp-section-note">
-                Your crew clocks in on their own phones. You hear when someone walks off site on the clock, and timesheets come out with your logo, ready for payroll. Every screen in the video is the real app.
-              </p>
-              <Link href={startHref} className="lp-btn lp-watch-cta">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
-            </div>
-            <div className="lp-watch-frame">
-              <video
-                src="/marketing/constra-ad-web.mp4"
-                poster="/marketing/constra-ad-poster.webp"
-                controls
-                playsInline
-                preload="none"
-                aria-label="Constra in 30 seconds: from paper timesheets to the app"
-              />
-            </div>
-          </div>
+        {/* What are we talking about */}
+        <section id="how" className="mp-talk" aria-label="What Constra is">
+          <h2>What is Constra?<br />What are we<br />talking about?</h2>
+          <p>(Not another spreadsheet. Promise.)</p>
         </section>
+        <div className="mp-cards" role="list" aria-label="What Constra does">
+          {TALK.map((c) => (
+            <div key={c.tab} role="listitem" className="mp-card" style={{ ["--tab" as string]: c.color, ["--r" as string]: c.r }}>
+              <div className="mp-card-tab">{c.tab}</div>
+              <div className="mp-card-body">
+                <p>{c.text}</p>
+                {c.icon === "pin" ? <MapPin size={110} strokeWidth={1.6} aria-hidden /> : c.icon === "sheet" ? <FileSpreadsheet size={110} strokeWidth={1.6} aria-hidden /> : c.icon === "wifi" ? <WifiOff size={110} strokeWidth={1.6} aria-hidden /> : <Wallet size={110} strokeWidth={1.6} aria-hidden />}
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* A day on site */}
-        <section id="day" className="lp-day">
-          <div className="lp-wrap">
-            <div className="lp-section-head">
-              <p className="lp-kicker lp-kicker-inv">How it works</p>
-              <h2 className="lp-h2">One day on site,<br />start to invoice.</h2>
-            </div>
-            <div className="lp-day-shots">
-              {[
-                ["morning", "6:58 AM", "Crew clocks in inside the fence"],
-                ["midday", "12:00 PM", "Level 4 steel going up"],
-                ["afternoon", "4:00 PM", "Deck poured, report sent"],
-              ].map(([slug, time, caption]) => (
-                <figure key={slug}>
-                  <img src={`/site/site-${slug}.webp`} width={1400} height={864} loading="lazy" decoding="async" alt={`The same job site at ${time}: ${caption.toLowerCase()}`} />
-                  <figcaption>
-                    <span className="lp-mono">{time}</span>
-                    {caption}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-
-            <ol className="lp-timeline">
-              {DAY.map((s) => (
-                <li key={s.time}>
-                  <time className="lp-time">{s.time}</time>
-                  <h3>{s.title}</h3>
-                  <p>{s.body}</p>
-                  <Chip icon={s.chip.icon} text={s.chip.text} />
-                </li>
-              ))}
-            </ol>
+        <section id="day" className="mp-day" aria-label="One day on site">
+          <div className="mp-wrap">
+            <p className="mp-label">How it works</p>
+            <h2 className="mp-big">One day on site,<br />start to invoice.</h2>
           </div>
+          <ol className="mp-day-row" style={{ listStyle: "none" }}>
+            {DAY.map((s) => (
+              <li key={s.time} className="mp-day-card" style={{ ["--c" as string]: s.c }}>
+                <time>{s.time}</time>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+                <Chip icon={s.chip.icon} text={s.chip.text} />
+              </li>
+            ))}
+          </ol>
         </section>
 
-        <AppTour />
-
         {/* Features */}
-        <section id="features" className="lp-features">
-          <div className="lp-wrap">
-            <div className="lp-section-head lp-section-head-row">
-              <h2 className="lp-h2">Everything the site needs.<br />Nothing extra to buy.</h2>
-              <p className="lp-section-note">Every tool is included on every account. No add-ons and no per-project fees.</p>
+        <section id="features" className="mp-feat">
+          <div className="mp-wrap">
+            <p className="mp-label">Everything included on every account</p>
+            <div className="mp-letters" role="heading" aria-level={2} aria-label="Features">
+              {"Features".split("").map((l, i) => <span key={i} aria-hidden>{l}</span>)}
             </div>
-            <div className="lp-spec">
+            <div className="mp-groups">
               {FEATURES.map((g) => (
-                <div key={g.group} className="lp-spec-col lp-spot">
-                  <h3 className="lp-spec-group">{g.group}</h3>
+                <div key={g.group} className="mp-group" style={{ ["--g" as string]: g.color }}>
+                  <h3>{g.group}</h3>
                   <dl>
                     {g.items.map(([k, v]) => (
-                      <div key={k} className="lp-spec-row">
-                        <dt>{k}</dt>
-                        <dd>{v}</dd>
-                      </div>
+                      <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
                     ))}
                   </dl>
                 </div>
@@ -450,64 +460,63 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <LiveSite />
-
-        {/* Field-ready */}
-        <section className="lp-field">
-          <div className="lp-wrap lp-field-grid">
+        {/* The 30-second ad */}
+        <section id="watch" className="mp-watch" aria-label="See Constra in 30 seconds">
+          <div className="mp-wrap mp-watch-grid">
             <div>
-              <p className="lp-kicker">Built for the field</p>
-              <h2 className="lp-h2">Made for gloves, glare<br />and one bar of signal.</h2>
-              <p className="lp-section-note">
-                Big tap targets, a high-contrast interface and no training day. If your crew can send a text, they can clock in.
-              </p>
+              <p className="mp-label">See it in 30 seconds</p>
+              <h2 className="mp-big">Friday payroll,<br />without the guessing.</h2>
+              <p>Your crew clocks in on their own phones. You hear when someone walks off site on the clock, and timesheets come out with your logo, ready for payroll. Every screen in the video is the real app.</p>
+              <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
             </div>
-            <dl className="lp-field-list">
-              <div><dt><WifiOff size={18} aria-hidden /> Offline</dt><dd>Clock-ins, reports and photos save on the phone and sync when signal returns.</dd></div>
-              <div><dt><MapPin size={18} aria-hidden /> Geofence</dt><dd>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</dd></div>
-              <div><dt><span className="lp-field-num">15</span> Languages</dt><dd>Menus and sign-up in 15 languages, from Spanish and Polish to Hindi, Arabic and Chinese. Each person picks their own.</dd></div>
-              <div><dt><span className="lp-field-num">OT</span> Overtime</dt><dd>Daily and weekly overtime calculated from the punches, ready for payroll.</dd></div>
-            </dl>
+            <div className="mp-frame">
+              <video src="/marketing/constra-ad-web.mp4" poster="/marketing/constra-ad-poster.webp" controls playsInline preload="none" aria-label="Constra in 30 seconds: from paper timesheets to the app" />
+            </div>
           </div>
         </section>
 
-        <RealClips />
-
-        <RealPhotos />
-
-        <SavingsCalc />
+        {/* Built for the field */}
+        <section className="mp-field">
+          <div className="mp-wrap">
+            <p className="mp-label">Built for the field</p>
+            <h2 className="mp-big">Made for gloves, glare<br />and one bar of signal.</h2>
+            <div className="mp-field-grid">
+              <div className="mp-tile" style={{ ["--bg" as string]: "#8CC3F4" }}><b>Offline</b><h3>No signal, no problem</h3><p>Clock-ins, reports and photos save on the phone and sync when signal returns.</p></div>
+              <div className="mp-tile" style={{ ["--bg" as string]: "#B7E08F" }}><b>500 m</b><h3>Geofence</h3><p>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</p></div>
+              <div className="mp-tile" style={{ ["--bg" as string]: "#F6B1CF" }}><b>15</b><h3>Languages</h3><p>Menus and sign-up in 15 languages, from Spanish and Polish to Hindi, Arabic and Chinese. Each person picks their own.</p></div>
+              <div className="mp-tile" style={{ ["--bg" as string]: "#F5C400" }}><b>OT</b><h3>Overtime your way</h3><p>Pick a ready-made rule set or write your own, then overtime is worked out from the punches, ready for payroll.</p></div>
+            </div>
+          </div>
+        </section>
 
         {/* Pricing */}
-        <section id="pricing" className="lp-pricing">
-          <div className="lp-wrap lp-pricing-grid">
+        <section id="pricing" className="mp-price">
+          <div className="mp-wrap mp-price-grid">
             <div>
-              <p className="lp-kicker">Pricing</p>
-              <h2 className="lp-h2">Free during launch.</h2>
-              <p className="lp-section-note">Every feature, unlimited crew, no credit card. Sign up, invite your crew and run your next job on it.</p>
+              <p className="mp-label">Pricing</p>
+              <h2 className="mp-big">Free during launch.</h2>
+              <p style={{ fontSize: 19, maxWidth: "44ch", margin: "20px 0 0" }}>Every feature, unlimited crew, no credit card. Sign up, invite your crew and run your next job on it.</p>
             </div>
-            <div className="lp-price-card lp-spot">
-              <div className="lp-price-top">
-                <span className="lp-mono">Constra · Launch</span>
-                <span className="lp-price">$0</span>
-              </div>
+            <div className="mp-price-card">
+              <div className="mp-price-top"><span style={{ font: "500 13px var(--mono)", letterSpacing: ".1em", textTransform: "uppercase" }}>Constra · Launch</span><b>$0</b></div>
               <ul>
                 {["Unlimited crew and projects", "GPS + photo clock-in, with site alerts", "Timesheets with your logo (PDF and Excel)", "Estimates, invoices and change orders", "Live job costs against budget", "Payroll export (CSV, QuickBooks, Gusto)", "Daily reports, safety logs and AI assistant"].map((f) => (
-                  <li key={f}><Check size={15} strokeWidth={2.5} aria-hidden />{f}</li>
+                  <li key={f}><Check size={17} strokeWidth={2.8} aria-hidden />{f}</li>
                 ))}
               </ul>
-              <Link href={startHref} className="lp-btn lp-btn-block">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
+              <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big" style={{ width: "100%" }}>{startLabel} <ArrowRight size={20} aria-hidden /></Link>
             </div>
           </div>
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="lp-faq">
-          <div className="lp-wrap lp-faq-grid">
-            <h2 className="lp-h2">Questions<br />from the site.</h2>
-            <div className="lp-faq-list">
+        <section id="faq" className="mp-faq">
+          <div className="mp-wrap">
+            <h2 className="mp-big">Questions<br />from the site.</h2>
+            <div className="mp-faq-list">
               {FAQ.map(([q, a]) => (
                 <details key={q}>
-                  <summary>{q}<Plus size={18} aria-hidden /></summary>
+                  <summary>{q}<Plus size={24} aria-hidden /></summary>
                   <p>{a}</p>
                 </details>
               ))}
@@ -515,25 +524,26 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="lp-final">
-          <div className="lp-wrap lp-final-inner">
-            <h2 className="lp-h2">Get your crew on it<br />before Monday.</h2>
-            <div className="lp-final-ctas">
-              <Link href={startHref} className="lp-btn lp-btn-ink">{startLabel} <ArrowRight size={16} aria-hidden /></Link>
-              {PLAY_STORE_URL && <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="lp-link lp-link-ink">Get the Android app</a>}
+        {/* Final call */}
+        <section className="mp-final">
+          <div className="mp-wrap">
+            <h2 className="mp-big">Get your crew on it<br />before Monday.</h2>
+            <div className="mp-final-btns">
+              <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
+              {PLAY_STORE_URL && <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="mp-link">Get the Android app</a>}
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="lp-footer">
-        <div className="lp-wrap lp-footer-inner">
+      <footer className="mp-foot">
+        <JumpGame />
+        <div className="mp-wrap mp-foot-row">
           <div>
-            <span className="lp-brand"><span className="lp-brand-mark"><HardHat size={14} strokeWidth={2.5} aria-hidden /></span>Constra</span>
-            <p className="lp-dim">Run the job, not the paperwork. Pre-launch: free while we launch.</p>
+            <strong style={{ font: "700 20px var(--display)", textTransform: "uppercase" }}>Constra</strong>
+            <p style={{ margin: "4px 0 0", color: "var(--ink2)" }}>Run the job, not the paperwork. Pre-launch: free while we launch.</p>
           </div>
-          <nav aria-label="Footer" className="lp-footer-links">
+          <nav aria-label="Footer">
             <Link href="/login">Sign in</Link>
             <Link href="/onboarding">Create account</Link>
             <Link href="/for">Trades</Link>
@@ -543,10 +553,9 @@ export default function LandingPage() {
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
           </nav>
-          <p className="lp-dim lp-mono lp-copy">© {new Date().getFullYear()} Constra · getconstra.com</p>
+          <p style={{ margin: 0, font: "400 13px var(--mono)", color: "var(--ink2)", width: "100%" }}>© {new Date().getFullYear()} Constra · getconstra.com</p>
         </div>
       </footer>
-
     </div>
   );
 }
@@ -568,518 +577,3 @@ const JSON_LD = JSON.stringify([
     mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
   },
 ]).replace(/</g, "\\u003c");
-
-const CSS = `
-.lp-nav.lp-nav-dark{background:rgba(9,10,19,.28); border-bottom-color:rgba(255,255,255,.08); color:#F2F0EB}
-.lp-nav-dark .lp-nav-links a{color:rgba(242,240,235,.72)}
-.lp-nav-dark .lp-nav-links a:hover{color:#F7F5F0}
-.lp-nav-dark .lp-link{text-decoration-color:rgba(255,255,255,.3)}
-.lp-nav{transition:background .35s, border-color .35s, color .35s}
-/* Over the dusk hero: clear, with white type, like the sky behind it */
-.lp-nav.lp-nav-day{background:linear-gradient(180deg,rgba(14,10,24,.6),rgba(14,10,24,0)); backdrop-filter:none; -webkit-backdrop-filter:none; border-bottom-color:transparent; color:#fff}
-.lp-nav-day .lp-nav-links a{color:rgba(255,255,255,.88)}
-.lp-nav-day .lp-nav-links a:hover{color:#fff}
-.lp-nav-day .lp-link{text-decoration-color:rgba(255,255,255,.45)}
-.lp-nav-day .lp-btn-sm{background:transparent; color:#fff; box-shadow:none; border-color:rgba(255,255,255,.85)}
-.lp-nav-day .lp-btn-sm:hover{background:#fff; color:#141414}
-
-.lp{
-  /* Daylight palette, continuing the hero's sky: a pale blue-grey ground, white cards with
-     square corners, dark condensed type and hi-vis yellow. The night tokens remain for the
-     few dark objects (phone frames, the 3D stage, the calculator card, the footer). */
-  --ground:#EEF3F7; --paper:#FFFFFF; --ink:#151617; --ink2:#45484C; --ink3:#65686D;
-  --rule:#D3DBE2; --hv:#F5C400; --hv-ink:#1A1600; --go:#1E7A45; --stop:#B9382C;
-  --sky:#D4EBFA; --gold:#7A5C00;
-  --night:#121418; --night2:#1B1E24; --night-rule:#2E323B; --night-ink:#ECEAE5; --night-dim:#A2A4A8;
-  color-scheme:light;
-  --display:var(--font-barlow-condensed),'Arial Narrow',sans-serif;
-  --sans:var(--font-plex-sans),system-ui,sans-serif; --mono:var(--font-plex-mono),ui-monospace,monospace;
-  position:fixed; inset:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;
-  background:var(--ground); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
-  -webkit-font-smoothing:antialiased;
-}
-.lp *{box-sizing:border-box}
-:where(.lp) a{color:inherit}
-.lp :focus-visible{outline:3px solid var(--ink); outline-offset:3px}
-.lp-day :focus-visible,.lp-footer :focus-visible{outline-color:var(--hv)}
-.lp-wrap{max-width:1200px; margin:0 auto; padding-inline:24px}
-.lp-mono{font-family:var(--mono); font-size:12px; letter-spacing:.02em}
-.lp-dim{color:var(--ink3)}
-.lp-skip{position:absolute; left:-9999px; top:8px; z-index:100; background:var(--ink); color:var(--paper); padding:8px 12px}
-.lp-skip:focus{left:8px}
-
-/* Nav */
-.lp-nav{position:sticky; top:0; z-index:40; background:color-mix(in srgb,var(--ground) 92%,transparent); backdrop-filter:saturate(1.2) blur(10px); border-bottom:1px solid var(--rule); padding-top:env(safe-area-inset-top,0px)}
-.lp-nav-inner{height:60px; display:flex; align-items:center; gap:32px}
-.lp-brand{display:inline-flex; align-items:center; gap:10px; font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:.02em; text-transform:uppercase; text-decoration:none}
-.lp-brand-mark{width:30px; height:30px; background:var(--hv); color:var(--hv-ink); display:grid; place-items:center; border-radius:3px}
-.lp-nav-links{display:flex; gap:28px; margin-right:auto}
-.lp-nav-links a{text-decoration:none; font-size:14px; font-weight:500; color:var(--ink2)}
-.lp-nav-links a:hover{color:var(--ink)}
-.lp-nav-cta{display:flex; align-items:center; gap:18px}
-.lp-link{font-size:14px; font-weight:500; text-decoration:underline; text-underline-offset:4px; text-decoration-color:var(--rule)}
-.lp-link:hover{text-decoration-color:currentColor}
-
-/* Buttons */
-.lp-btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:0 22px; background:var(--hv); color:var(--hv-ink); font-weight:600; font-size:15px; text-decoration:none; border:1.5px solid var(--hv-ink); border-radius:3px; box-shadow:0 3px 0 var(--hv-ink); transition:transform .12s, box-shadow .12s}
-.lp-btn:hover{transform:translateY(-1px); box-shadow:0 4px 0 var(--hv-ink)}
-.lp-btn:active{transform:translateY(3px); box-shadow:0 0 0 var(--hv-ink)}
-.lp-btn-sm{min-height:38px; padding:0 14px; font-size:14px; box-shadow:0 2px 0 var(--hv-ink)}
-.lp-btn-ghost{background:transparent; color:var(--ink); border-color:var(--ink); box-shadow:none}
-.lp-btn-ghost:hover{background:var(--paper); box-shadow:none}
-.lp-btn-ink{background:var(--ink); color:var(--ground); border-color:var(--ink); box-shadow:0 3px 0 var(--hv)}
-.lp-btn-block{width:100%}
-
-/* Type */
-.lp-kicker{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--ink2); margin:0 0 16px; display:flex; align-items:center; gap:10px}
-.lp-kicker::before{content:""; width:18px; height:8px; background:repeating-linear-gradient(135deg,#111214 0 4px,var(--hv) 4px 8px)}
-.lp-kicker-inv{color:var(--night-dim)}
-.lp-kicker-inv::before{background:repeating-linear-gradient(135deg,var(--hv) 0 4px,var(--night) 4px 8px)}
-.lp-h1,.lp-h2{font-family:var(--display); font-weight:800; text-transform:uppercase; line-height:.92; letter-spacing:-.005em; margin:0; text-wrap:balance}
-.lp-h1{font-size:clamp(52px,8.4vw,112px)}
-.lp-h2{font-size:clamp(38px,5.2vw,68px)}
-.lp-lede{font-size:clamp(17px,1.5vw,19px); color:var(--ink2); max-width:52ch; margin:24px 0 32px}
-.lp-section-head{margin-bottom:48px}
-.lp-section-head-row{display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap}
-.lp-section-note{color:var(--ink2); max-width:44ch; margin:20px 0 0}
-.lp-section-head-row .lp-section-note{margin:0}
-
-/* Hero */
-.lp-hero{padding-block:72px 88px}
-.lp-hero-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:48px; align-items:center}
-.lp-hero-ctas{display:flex; gap:12px; flex-wrap:wrap}
-.lp-facts{list-style:none; padding:0; margin:28px 0 0; display:flex; flex-wrap:wrap; gap:8px 22px; font-family:var(--mono); font-size:12.5px; color:var(--ink2)}
-.lp-facts li{display:flex; align-items:center; gap:8px}
-.lp-facts li::before{content:""; width:6px; height:6px; background:var(--go); border-radius:50%}
-.lp-hero-visual{position:relative; display:flex; justify-content:center; padding-bottom:40px}
-
-.lp-phone{width:300px; max-width:100%; background:var(--night); border-radius:34px; padding:10px; border:1px solid #000; box-shadow:0 30px 60px -20px rgba(20,22,23,.45), 0 0 0 6px #2A2C2E inset}
-.lp-phone-bar{display:flex; justify-content:space-between; align-items:center; color:var(--night-ink); font-family:var(--mono); font-size:11px; padding:6px 16px 8px}
-.lp-phone-notch{width:72px; height:18px; background:#000; border-radius:10px}
-.lp-phone-body{background:#101112; border-radius:24px; padding:18px 16px 20px; color:var(--night-ink)}
-.lp-phone-body .lp-dim{color:var(--night-dim)}
-.lp-phone-hello{font-family:var(--display); font-weight:800; font-size:26px; text-transform:uppercase; margin:4px 0 14px; line-height:1}
-.lp-clock{background:var(--night2); border:1px solid var(--night-rule); border-radius:14px; padding:14px}
-.lp-clock-top{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--night-dim)}
-.lp-live{display:inline-flex; align-items:center; gap:6px; color:#5BD08A; font-weight:600}
-.lp-dot{width:7px; height:7px; border-radius:50%; background:#5BD08A}
-.lp-clock-time{font-family:var(--display); font-weight:800; font-size:54px; line-height:1; margin:8px 0 12px; font-variant-numeric:tabular-nums}
-.lp-clock-time span{color:var(--night-dim); font-size:30px}
-.lp-clock-rows{display:grid; gap:6px; font-size:12px}
-.lp-clock-rows div{display:grid; grid-template-columns:16px 1fr auto; gap:8px; align-items:center; color:var(--night-dim)}
-.lp-clock-rows b{color:#5BD08A; font-weight:600; font-size:11px}
-.lp-clock-btn{margin-top:14px; background:var(--hv); color:var(--hv-ink); text-align:center; font-weight:600; font-size:14px; border-radius:10px; padding:11px}
-.lp-phone-label{margin:16px 0 8px}
-.lp-crew{display:grid; gap:8px}
-.lp-crew-row{display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:center; font-size:13px}
-.lp-avatar{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:10px; font-weight:600; color:#fff}
-
-.lp-slip{position:absolute; left:-8px; bottom:-12px; width:228px; background:var(--paper); border:1px solid var(--rule); border-top:4px solid var(--ink); padding:14px 16px; box-shadow:0 18px 40px -18px rgba(20,22,23,.4); transform:rotate(-2.5deg)}
-.lp-slip-head{display:flex; justify-content:space-between; align-items:center}
-.lp-paid{font-size:11px; font-weight:600; color:var(--go); border:1px solid currentColor; padding:1px 6px; border-radius:2px}
-.lp-slip-total{font-family:var(--display); font-weight:800; font-size:34px; margin:6px 0 8px; font-variant-numeric:tabular-nums}
-.lp-slip-lines{display:grid; gap:4px; font-size:12px; color:var(--ink2); border-top:1px dashed var(--rule); padding-top:8px}
-.lp-slip-lines div{display:flex; justify-content:space-between; gap:12px; font-variant-numeric:tabular-nums}
-
-/* Tape band */
-.lp-tape{height:14px; background:repeating-linear-gradient(135deg,#111214 0 14px,var(--hv) 14px 28px)}
-.lp-tape-band{background:var(--hv)}
-.lp-replaces{display:flex; align-items:center; gap:24px; padding-block:20px; flex-wrap:wrap}
-.lp-replaces-label{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin:0; color:var(--hv-ink)}
-.lp-replaces ul{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:6px 0}
-.lp-replaces li{font-family:var(--display); font-weight:700; font-size:22px; text-transform:uppercase; color:var(--hv-ink); text-decoration:line-through; text-decoration-thickness:2px}
-.lp-replaces li+li::before{content:"/"; text-decoration:none; display:inline-block; margin:0 14px; opacity:.4}
-
-/* Day */
-.lp-day{background:var(--night); color:var(--night-ink); padding-block:96px}
-.lp-timeline{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--night-rule)}
-.lp-timeline li{padding:24px 20px 8px 0; position:relative; display:flex; flex-direction:column; gap:10px}
-.lp-timeline li::before{content:""; position:absolute; top:-5px; left:0; width:9px; height:9px; background:var(--hv)}
-.lp-time{font-family:var(--mono); font-size:13px; color:var(--hv)}
-.lp-timeline h3{font-family:var(--display); font-weight:700; font-size:26px; text-transform:uppercase; line-height:1; margin:0}
-.lp-timeline p{margin:0; color:var(--night-dim); font-size:14.5px}
-.lp-chip{margin-top:auto; align-self:flex-start; display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11.5px; color:var(--night-ink); background:var(--night2); border:1px solid var(--night-rule); padding:5px 8px; border-radius:2px}
-
-/* Features */
-.lp-features{padding-block:96px}
-.lp-spec{display:grid; grid-template-columns:repeat(4,1fr); border-top:2px solid var(--ink)}
-.lp-spec-col{padding:20px 20px 0 0}
-.lp-spec-col+.lp-spec-col{padding-left:20px; border-left:1px solid var(--rule)}
-.lp-spec-group{font-family:var(--mono); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin:0 0 8px; color:var(--ink2)}
-.lp-spec dl{margin:0}
-.lp-spec-row{padding:14px 0; border-bottom:1px solid var(--rule)}
-.lp-spec-row dt{font-weight:600; font-size:16px}
-.lp-spec-row dd{margin:4px 0 0; font-size:14px; color:var(--ink2)}
-
-/* Field */
-.lp-field{padding-block:96px; background:var(--paper); border-block:1px solid var(--rule)}
-.lp-field-grid{display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start}
-.lp-watch{padding:110px 0 40px}
-.lp-watch-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:64px; align-items:center}
-.lp-watch-cta{margin-top:28px; display:inline-flex}
-.lp-watch-frame{justify-self:center; width:100%; max-width:360px; aspect-ratio:9/16; border-radius:36px; overflow:hidden; background:#000; box-shadow:0 0 0 6px #1b1c1f, 0 40px 90px rgba(0,0,0,0.55), 0 0 80px rgba(245,196,0,0.10)}
-.lp-watch-frame video{width:100%; height:100%; object-fit:cover; display:block}
-.lp-field-list{margin:0; display:grid; gap:0}
-.lp-field-list div{display:grid; grid-template-columns:150px 1fr; gap:20px; padding:20px 0; border-bottom:1px solid var(--rule)}
-.lp-field-list div:first-child{border-top:1px solid var(--rule)}
-.lp-field-list dt{font-weight:600; display:flex; align-items:center; gap:10px}
-.lp-field-list dd{margin:0; color:var(--ink2); font-size:15px}
-.lp-field-num{font-family:var(--display); font-weight:800; font-size:22px; line-height:1; background:var(--hv); color:var(--hv-ink); padding:2px 5px; border-radius:2px}
-
-/* Pricing */
-.lp-pricing{padding-block:96px}
-.lp-pricing-grid{display:grid; grid-template-columns:1fr minmax(0,440px); gap:64px; align-items:center}
-.lp-price-card{background:radial-gradient(520px circle at var(--mx,50%) var(--my,0%), rgba(245,196,0,.10), transparent 60%), var(--paper); border:1px solid var(--rule); border-radius:18px; padding:28px; box-shadow:0 30px 80px -30px rgba(245,196,0,.25), inset 0 1px 0 rgba(255,255,255,.05); position:relative}
-.lp-price-top{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--rule); padding-bottom:16px; margin-bottom:16px}
-.lp-price{font-family:var(--display); font-weight:800; font-size:64px; line-height:1}
-.lp-price-card ul{list-style:none; padding:0; margin:0 0 24px; display:grid; gap:10px; font-size:15px}
-.lp-price-card li{display:flex; gap:10px; align-items:flex-start}
-.lp-price-card li svg{color:var(--go); flex-shrink:0; margin-top:3px}
-
-/* FAQ */
-.lp-faq{padding-block:96px; border-top:1px solid var(--rule)}
-.lp-faq-grid{display:grid; grid-template-columns:1fr 1.6fr; gap:64px; align-items:start}
-.lp-faq-list{border-top:2px solid var(--ink)}
-.lp-faq details{border-bottom:1px solid var(--rule)}
-.lp-faq summary{list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 0; font-weight:600; font-size:17px}
-.lp-faq summary::-webkit-details-marker{display:none}
-.lp-faq summary svg{flex-shrink:0; transition:transform .2s}
-.lp-faq details[open] summary svg{transform:rotate(45deg)}
-.lp-faq details p{margin:-6px 0 20px; color:var(--ink2); max-width:62ch}
-
-/* Final */
-.lp-final{background:var(--hv); color:var(--hv-ink); border-top:14px solid transparent; border-image:repeating-linear-gradient(135deg,#111214 0 14px,var(--hv) 14px 28px) 14}
-.lp-final-inner{padding-block:80px; display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap}
-.lp-final-ctas{display:flex; align-items:center; gap:24px; flex-wrap:wrap}
-.lp-link-ink{color:var(--hv-ink); text-decoration-color:rgba(26,22,0,.4)}
-
-/* Hero 3D */
-.lp-hero-visual{perspective:1600px; perspective-origin:50% 40%}
-.lp-tilt{position:relative; transform-style:preserve-3d; transform:rotateY(calc(-14deg + var(--tx,0) * 8deg)) rotateX(calc(6deg - var(--ty,0) * 6deg)); transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.lp-tilt .lp-phone{position:relative; transform:translateZ(0)}
-.lp-tilt .lp-slip{left:-84px; bottom:-14px; transform:translateZ(70px) rotate(-2.5deg)}
-.lp-float{position:absolute; right:-78px; top:-30px; width:200px; background:var(--night2); color:var(--night-ink); border:1px solid #000; border-top:4px solid var(--hv); padding:12px 14px 12px; transform:translateZ(120px) rotate(1.5deg); box-shadow:0 26px 44px -18px rgba(0,0,0,.55); animation:lp-bob 7s ease-in-out infinite}
-@keyframes lp-bob{50%{translate:0 -9px}}
-.lp-float-top{display:flex; justify-content:space-between; align-items:center; color:var(--night-dim)}
-.lp-float-top .lp-mono{font-size:10.5px}
-.lp-ready{font-size:10.5px; font-weight:600; color:#7BD69E; border:1px solid #2F5E40; padding:1px 6px; border-radius:2px}
-.lp-float-total{font-family:var(--display); font-weight:800; font-size:30px; line-height:1; margin:10px 0 10px; letter-spacing:.01em}
-.lp-float-bars{display:flex; align-items:flex-end; gap:4px; height:34px; border-bottom:1px solid var(--night-rule)}
-.lp-float-bars span{flex:1; background:var(--hv); min-height:2px}
-.lp-float-meta{margin:8px 0 0; color:var(--night-dim); font-size:10.5px !important}
-.lp-hero-shadow{position:absolute; left:18%; right:18%; bottom:4px; height:28px; background:radial-gradient(closest-side,rgba(20,22,23,.3),transparent); pointer-events:none}
-
-/* Live site (3D) */
-.lp-sitecam{background:var(--night); color:var(--night-ink); padding-block:96px 104px}
-.lp-sitecam .lp-section-note{color:var(--night-dim)}
-.lp-live-head{display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap; margin-bottom:40px}
-.lp-stage3d{position:relative; height:clamp(440px,52vw,620px); border:1px solid var(--night-rule); background:#CFE5F5; overflow:hidden; isolation:isolate}
-.lp-stage3d::before{content:""; position:absolute; inset:0 0 auto; height:6px; z-index:2; background:repeating-linear-gradient(135deg,var(--hv) 0 10px,var(--night) 10px 20px)}
-.lp-stage3d-flat{height:auto; min-height:0; padding:64px 20px 20px; background:var(--night2)}
-.lp-scene{position:absolute; inset:0}
-.lp-scene canvas{display:block; width:100% !important; height:100% !important; cursor:grab}
-.lp-hud{position:absolute; z-index:3; display:flex; align-items:center; gap:10px; background:rgba(21,22,23,.82); backdrop-filter:blur(8px); border:1px solid var(--night-rule); padding:8px 12px}
-.lp-hud-clock{top:22px; left:20px}
-.lp-hud-clock .lp-mono{color:var(--night-dim)}
-.lp-hud-clock b{font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:.02em; min-width:86px; font-variant-numeric:tabular-nums}
-.lp-live-dot{width:8px; height:8px; border-radius:50%; background:var(--night-rule)}
-.lp-live-dot[data-on="true"]{background:#2EAA62; box-shadow:0 0 0 4px rgba(46,170,98,.2)}
-.lp-hud-ctrl{left:20px; right:20px; bottom:20px; max-width:440px; display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; gap:4px 12px}
-.lp-play{grid-row:1/3; width:38px; height:38px; display:grid; place-items:center; background:var(--hv); color:var(--hv-ink); border:0; border-radius:2px; cursor:pointer}
-.lp-play:focus-visible{outline:3px solid var(--night-ink); outline-offset:2px}
-.lp-scrub{grid-column:2; align-self:end; height:4px; background:var(--night-rule); overflow:hidden}
-.lp-scrub span{display:block; height:100%; background:var(--hv); transform-origin:left}
-.lp-scrub-l,.lp-scrub-r{grid-row:2; font-size:10.5px !important; color:var(--night-dim)}
-.lp-scrub-l{grid-column:2; justify-self:start}
-.lp-scrub-r{grid-column:2; justify-self:end}
-.lp-feed{position:absolute; z-index:3; top:22px; right:20px; width:min(340px,40%); list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
-.lp-feed-item{display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:center; background:rgba(21,22,23,.86); backdrop-filter:blur(8px); border:1px solid var(--night-rule); padding:8px 10px; opacity:0; transform:translateX(16px); transition:opacity .35s, transform .35s, border-color .35s}
-.lp-feed-item.is-on{opacity:1; transform:none}
-.lp-feed-item.is-new{border-color:var(--hv)}
-.lp-feed-icon{width:28px; height:28px; display:grid; place-items:center; background:var(--night2); color:var(--hv); border-radius:2px}
-.lp-feed-item[data-tone="go"] .lp-feed-icon{color:#7BD69E}
-.lp-feed-item[data-tone="warn"] .lp-feed-icon{color:#FF8A70}
-.lp-feed-text{display:flex; flex-direction:column; min-width:0}
-.lp-feed-text b{font-size:13px; font-weight:600; line-height:1.3}
-.lp-feed-text span{font-size:12px; color:var(--night-dim); line-height:1.35}
-.lp-feed-item time{font-size:10.5px !important; color:var(--night-dim); align-self:start; padding-top:2px}
-.lp-stage3d-flat .lp-feed{position:static; width:auto}
-.lp-stage3d-flat .lp-hud-clock{top:20px}
-
-/* A day on site: real renders of the same job site */
-.lp-day-shots{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:48px}
-.lp-day-shots figure{margin:0; border:1px solid var(--night-rule); background:#1B1A22; overflow:hidden}
-.lp-day-shots img{display:block; width:100%; height:auto; aspect-ratio:1400/864; object-fit:cover}
-.lp-day-shots figcaption{display:flex; flex-direction:column; gap:3px; padding:12px 14px 14px; font-size:13px; color:var(--night-ink); border-top:1px solid var(--night-rule)}
-.lp-day-shots figcaption .lp-mono{color:var(--hv); font-size:11px; letter-spacing:.08em}
-.lp-scene-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#1B1A22; display:block}
-.lp-stage3d-flat .lp-scene-video{position:relative; inset:auto; height:auto; aspect-ratio:1200/740}
-
-/* Sample-day tally that hands off into the 3D site */
-.lp-tallies{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--night-rule); border:1px solid var(--night-rule); margin-bottom:28px}
-.lp-tally{background:#16151C; padding:18px 20px; display:flex; flex-direction:column; gap:4px}
-.lp-tally-n{font-family:var(--display); font-weight:800; font-size:clamp(30px,4.2vw,46px); line-height:1; letter-spacing:.01em; color:var(--hv); font-variant-numeric:tabular-nums}
-.lp-tally-l{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--night-dim)}
-
-/* The actual app: screen recording + real screens */
-.lp-tour{padding-block:96px; background:var(--paper); border-block:1px solid var(--rule)}
-.lp-tour-grid{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center}
-.lp-tour-tabs{display:flex; flex-wrap:wrap; gap:8px; margin-top:28px}
-.lp-tour-tabs button{font:inherit; font-size:13px; font-weight:600; padding:9px 15px; min-height:40px; background:transparent; color:var(--ink2); border:1.5px solid var(--rule); border-radius:999px; cursor:pointer; transition:background .15s, border-color .15s, color .15s}
-.lp-tour-tabs button:hover{border-color:var(--ink3); color:var(--ink)}
-.lp-tour-tabs button.is-on{background:var(--hv); border-color:var(--hv); color:var(--hv-ink)}
-.lp-tour-caption{margin:16px 0 0; color:var(--ink2); font-size:14px; min-height:2.6em; max-width:40ch}
-.lp-tour-devices{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start}
-.lp-device{margin:0; display:flex; flex-direction:column; gap:10px}
-.lp-device-screen{background:var(--night); border:1px solid #000; border-radius:26px; padding:7px; box-shadow:0 26px 54px -24px rgba(20,22,23,.5), 0 0 0 5px #2A2C2E inset; overflow:hidden}
-.lp-device-screen video,.lp-device-screen img{display:block; width:100%; height:auto; aspect-ratio:390/844; object-fit:cover; border-radius:20px; background:#0a0a0a}
-.lp-device figcaption{font-size:11px; color:var(--ink3); text-align:center; letter-spacing:.04em}
-.lp-device-video{transform:translateY(-10px)}
-.lp-device-shot{transform:translateY(16px)}
-
-/* Real clips (hidden until lib/site-clips.ts lists some) */
-.lp-clips{padding-block:96px; background:var(--night); color:var(--night-ink)}
-.lp-clips .lp-section-note{color:var(--night-dim)}
-.lp-clip-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px}
-.lp-clip{margin:0}
-.lp-clip-frame{border:1px solid var(--night-rule); background:#000; overflow:hidden}
-.lp-clip-frame video,.lp-clip-frame img{display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover}
-.lp-clip figcaption{display:flex; flex-direction:column; gap:3px; padding:12px 2px 0; font-size:13px; color:var(--night-ink)}
-.lp-clip-credit{font-family:var(--mono); font-size:11px; color:var(--night-dim)}
-
-/* Photos from real sites (hidden until lib/site-photos.ts lists some) */
-.lp-real{padding-block:96px; border-top:1px solid var(--rule)}
-.lp-real-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px}
-.lp-real figure{margin:0; border:1px solid var(--rule); background:var(--paper)}
-.lp-real img{display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover}
-.lp-real figcaption{padding:12px 14px; font-size:13px; color:var(--ink2); border-top:1px solid var(--rule)}
-
-/* Savings calculator */
-.lp-calc{padding-block:96px; border-top:1px solid var(--rule)}
-.lp-calc-grid{display:grid; grid-template-columns:.9fr 1.1fr; gap:56px; align-items:center}
-.lp-calc-card{background:var(--night2); color:var(--night-ink); border:1px solid #000; padding:28px 28px 22px; box-shadow:8px 8px 0 var(--hv); display:grid; gap:22px}
-.lp-calc-label{display:flex; justify-content:space-between; align-items:baseline; gap:16px; margin-bottom:10px; font-size:14px}
-.lp-calc-label label{color:var(--night-dim)}
-.lp-calc-label output{font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:.02em; font-variant-numeric:tabular-nums}
-.lp-calc input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:0; cursor:pointer; background:linear-gradient(90deg,var(--hv) var(--pct),var(--night-rule) var(--pct)); margin:0}
-.lp-calc input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:24px; height:24px; background:var(--paper); border:3px solid var(--hv); border-radius:2px; box-shadow:0 2px 0 #000}
-.lp-calc input[type=range]::-moz-range-thumb{width:20px; height:20px; background:var(--paper); border:3px solid var(--hv); border-radius:2px}
-.lp-calc input[type=range]:focus-visible{outline:3px solid var(--hv); outline-offset:6px}
-.lp-calc-out{display:grid; grid-template-columns:1fr 1.4fr; gap:1px; background:var(--night-rule); border:1px solid var(--night-rule); margin-top:4px}
-.lp-calc-out div{background:var(--night2); padding:14px 16px; display:flex; flex-direction:column; gap:4px}
-.lp-calc-out .lp-mono{color:var(--night-dim); font-size:11px; text-transform:uppercase; letter-spacing:.08em}
-.lp-calc-out b{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,40px); line-height:1; font-variant-numeric:tabular-nums}
-.lp-calc-big b{color:var(--hv)}
-.lp-calc-foot{margin:0; color:var(--night-dim); font-size:11.5px !important; line-height:1.5}
-
-/* Footer */
-.lp-footer{background:var(--night); color:var(--night-ink); padding-block:48px calc(48px + env(safe-area-inset-bottom,0px))}
-.lp-footer .lp-dim{color:var(--night-dim); font-size:14px; margin:10px 0 0}
-.lp-footer-inner{display:grid; grid-template-columns:1fr auto; gap:32px 48px}
-.lp-footer-links{display:flex; flex-wrap:wrap; gap:12px 28px; align-items:flex-start}
-.lp-footer-links a{text-decoration:none; font-size:14px; color:var(--night-ink)}
-.lp-footer-links a:hover{color:var(--hv)}
-.lp-copy{grid-column:1/-1; border-top:1px solid var(--night-rule); padding-top:20px; margin:0 !important; font-size:12px !important}
-
-@media (max-width:1000px){
-  .lp-timeline{grid-template-columns:1fr; border-top:0; border-left:1px solid var(--night-rule); margin-left:4px}
-  .lp-timeline li{padding:0 0 32px 24px}
-  .lp-timeline li::before{top:4px; left:-5px}
-  .lp-spec{grid-template-columns:1fr 1fr}
-  .lp-spec-col:nth-child(3){padding-left:0; border-left:0}
-  .lp-spec-col:nth-child(n+3){padding-top:32px}
-}
-@media (max-width:860px){
-  .lp-nav-links{display:none}
-  .lp-nav-cta{margin-left:auto}
-  .lp-hero{padding-block:40px 56px}
-  .lp-hero-grid,.lp-field-grid,.lp-pricing-grid,.lp-faq-grid,.lp-calc-grid,.lp-tour-grid,.lp-watch-grid{grid-template-columns:1fr; gap:40px}
-  .lp-watch{padding:72px 0 24px}
-  .lp-watch-frame{max-width:320px}
-  .lp-tour{padding-block:64px}
-  .lp-device-video,.lp-device-shot{transform:none}
-  .lp-calc{padding-block:64px}
-  .lp-hero-visual{padding-bottom:56px}
-  .lp-slip{left:auto; right:50%; margin-right:40px; width:210px}
-  .lp-day,.lp-features,.lp-field,.lp-pricing,.lp-faq{padding-block:64px}
-  .lp-day-shots{grid-template-columns:1fr; gap:12px; margin-bottom:36px}
-  .lp-day-shots figure:nth-child(n+3){display:none}
-  .lp-footer-inner{grid-template-columns:1fr}
-}
-@media (max-width:600px){
-  .lp-wrap{padding-inline:16px}
-  .lp-nav-cta{gap:14px}
-  .lp-brand{font-size:20px}
-  .lp-spec{grid-template-columns:1fr}
-  .lp-spec-col,.lp-spec-col+.lp-spec-col{padding:24px 0 0; border-left:0}
-  .lp-field-list div{grid-template-columns:1fr; gap:6px}
-  .lp-slip{right:auto; left:0; margin:0; width:200px; transform:rotate(-2deg)}
-  .lp-hero-visual{justify-content:flex-end}
-  .lp-phone{width:260px}
-  .lp-replaces li{font-size:18px}
-  .lp-price-card{box-shadow:4px 4px 0 var(--ink)}
-  .lp-tour-devices{gap:12px}
-  .lp-device-screen{border-radius:20px; padding:5px}
-  .lp-device-screen video,.lp-device-screen img{border-radius:16px}
-  .lp-calc-card{padding:22px 18px 18px; box-shadow:5px 5px 0 var(--hv)}
-  .lp-calc-out{grid-template-columns:1fr}
-}
-@media (max-width:860px){
-  .lp-tilt .lp-slip{left:-70px; right:auto; margin:0}
-  .lp-float{right:-40px}
-  .lp-sitecam{padding-block:64px 72px}
-  .lp-tallies{grid-template-columns:1fr 1fr}
-  .lp-stage3d{height:auto; display:flex; flex-direction:column}
-  .lp-scene{position:relative; inset:auto; height:min(440px,100vw)}
-  .lp-scene-video{position:relative; inset:auto; height:min(440px,100vw); order:0}
-  .lp-feed{position:relative; top:auto; right:auto; width:auto; padding:12px; gap:6px; flex-direction:column-reverse}
-  .lp-feed-item:not(.is-on){display:none}
-  .lp-feed-item.is-on:not(.is-new){opacity:.62}
-  .lp-hud-ctrl{position:relative; order:2; inset:auto; max-width:none; margin:0 12px; border-width:1px 0 0; background:transparent; backdrop-filter:none; padding:12px 0 4px}
-  .lp-feed{order:3; min-height:236px; justify-content:flex-end}
-  .lp-feed-item.is-old{display:none}
-  .lp-hud-clock{top:18px; left:12px; padding:6px 10px}
-  .lp-hud-clock b{font-size:18px; min-width:72px}
-}
-@media (max-width:600px){
-  .lp-tilt{transform:rotateY(-8deg) rotateX(4deg)}
-  .lp-tilt .lp-slip{left:-78px; width:190px}
-  .lp-hero-visual{margin-top:12px}
-  .lp-float{right:-4px; top:-6px; width:142px; padding:9px 10px; transform:translateZ(110px) rotate(1.5deg)}
-  .lp-float-top .lp-mono{font-size:9.5px}
-  .lp-ready{display:none}
-  .lp-float-meta{display:none}
-  .lp-float-total{font-size:24px; margin:6px 0 8px}
-  .lp-float-bars{height:24px}
-}
-@media (prefers-reduced-motion:reduce){
-  .lp *{transition:none !important}
-  .lp-float{animation:none}
-}
-/* On the hi-vis band the ink button stays black, whatever the page palette is */
-.lp-final .lp-btn-ink{background:#111214; color:var(--hv); border-color:#111214; box-shadow:0 3px 0 #000}
-
-/* Product reveal */
-.lp-reveal{position:relative; overflow:hidden; padding-block:48px 128px}
-.lp-reveal::before{content:""; position:absolute; inset:0; pointer-events:none;
-  background-image:linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-  background-size:56px 56px;
-  -webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 22%, #000 25%, transparent 75%); mask-image:radial-gradient(ellipse 70% 55% at 50% 22%, #000 25%, transparent 75%)}
-.lp-reveal > *{position:relative}
-.lp-reveal-head{display:flex; flex-direction:column; align-items:center; text-align:center}
-.lp-pill-eyebrow{display:inline-flex; align-items:center; gap:10px; margin:0 0 22px; padding:4px 14px 4px 4px; border-radius:999px; border:1px solid var(--rule); background:rgba(255,255,255,.03); font-size:13px; color:var(--ink2)}
-.lp-pill-eyebrow span{background:rgba(245,196,0,.14); color:var(--hv); border-radius:999px; padding:3px 10px; font-size:12px; font-weight:600}
-.lp-reveal-h2{font-family:var(--display); font-weight:800; text-transform:uppercase; font-size:clamp(44px,7vw,96px); line-height:.9; margin:0; text-wrap:balance}
-.lp-grad-text{background:linear-gradient(92deg,#FFE58A 0%,#F5C400 38%,#FF9F43 100%); -webkit-background-clip:text; background-clip:text; color:transparent}
-.lp-reveal-stage{position:relative; max-width:1180px; margin:60px auto 0; padding-inline:24px; perspective:1400px}
-.lp-reveal-glow{position:absolute; inset:6% 6% -6%; pointer-events:none; filter:blur(48px); opacity:calc(.25 + var(--p,0) * .75);
-  background:radial-gradient(ellipse at 50% 35%, rgba(245,196,0,.38), rgba(255,140,40,.14) 42%, transparent 72%)}
-.lp-reveal-frame{position:relative; border-radius:16px; padding:8px; background:linear-gradient(180deg,#171A22,#0E1016); border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 50px 140px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.08);
-  transform-origin:50% 0; will-change:transform;
-  transform:translateY(calc((1 - var(--p,0)) * 40px)) rotateX(calc((1 - var(--p,0)) * 26deg)) scale(calc(.88 + var(--p,0) * .12))}
-.lp-reveal-bar{display:flex; align-items:center; gap:6px; padding:4px 6px 10px}
-.lp-reveal-bar i{width:10px; height:10px; border-radius:50%; background:#2B2F39}
-.lp-reveal-bar span{margin-left:10px; font-family:var(--mono); font-size:11px; color:var(--ink3); background:rgba(255,255,255,.04); border-radius:6px; padding:3px 10px}
-.lp-reveal-frame img{display:block; width:100%; height:auto; border-radius:9px}
-
-/* Spotlight cards */
-.lp-spec{border-top:none; gap:16px}
-.lp-spec .lp-spec-col,.lp-spec .lp-spec-col+.lp-spec-col{position:relative; padding:24px; border:1px solid var(--rule); border-radius:18px;
-  background:radial-gradient(420px circle at var(--mx,50%) var(--my,-30%), rgba(245,196,0,.09), transparent 62%), var(--paper)}
-.lp-spot::after{content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px; pointer-events:none; opacity:0; transition:opacity .35s;
-  background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%), rgba(255,214,90,.75), transparent 62%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude}
-.lp-spot:hover::after{opacity:1}
-.lp-spec-row:last-child{border-bottom:none; padding-bottom:0}
-
-@media (max-width:640px){
-  .lp-reveal{padding-block:32px 88px}
-  .lp-reveal-stage{margin-top:40px; padding-inline:16px}
-}
-@media (prefers-reduced-motion: reduce){
-  .lp-reveal-frame{transform:none}
-}
-
-.rv{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.7,.2,1) var(--rv-d,0ms), transform .7s cubic-bezier(.2,.7,.2,1) var(--rv-d,0ms)}
-.rv.rv-in{opacity:1; transform:none}
-/* ── Daylight sections ─────────────────────────────────────────────── */
-.lp-kicker::before{background:repeating-linear-gradient(135deg,#151617 0 4px,var(--hv) 4px 8px)}
-.lp-kicker-inv{color:var(--ink2)}
-.lp-kicker-inv::before{background:repeating-linear-gradient(135deg,#151617 0 4px,var(--hv) 4px 8px)}
-.lp-btn-ghost:hover{background:var(--paper)}
-.lp-btn-ink{color:#fff}
-
-/* Office view: light stage, the dashboard on a white frame */
-.lp-reveal{background:linear-gradient(180deg,var(--sky) 0%,var(--ground) 38%)}
-.lp-reveal::before{background-image:linear-gradient(rgba(21,22,23,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(21,22,23,.06) 1px, transparent 1px)}
-.lp-pill-eyebrow{background:var(--paper); border-color:var(--rule)}
-.lp-pill-eyebrow span{background:var(--hv); color:var(--hv-ink)}
-.lp-grad-text{background:none; color:var(--ink); box-shadow:inset 0 -.2em 0 var(--hv)}
-.lp-reveal-glow{background:radial-gradient(ellipse at 50% 35%, rgba(245,196,0,.28), rgba(120,170,220,.14) 46%, transparent 72%)}
-.lp-reveal-frame{border-radius:4px; background:#fff; border:1px solid var(--rule); box-shadow:0 40px 100px -30px rgba(20,40,60,.35)}
-.lp-reveal-bar i{background:#D9DEE3}
-.lp-reveal-bar span{background:#F1F4F7; color:var(--ink3)}
-.lp-reveal-frame img{border-radius:2px}
-
-/* Product: the dark phone and payroll card stay as objects on the light ground */
-.lp-hero{background:var(--ground)}
-.lp-slip{border-radius:2px}
-
-/* A day on site */
-.lp-day{background:var(--paper); color:var(--ink); border-block:1px solid var(--rule)}
-.lp-day-shots figure{border:1px solid var(--rule); background:var(--paper); box-shadow:0 18px 40px -26px rgba(20,40,60,.35)}
-.lp-day-shots figcaption{color:var(--ink); border-top:1px solid var(--rule)}
-.lp-day-shots figcaption .lp-mono{color:var(--gold)}
-.lp-timeline{border-top:2px solid var(--ink)}
-.lp-time{color:var(--gold); font-weight:600}
-.lp-timeline p{color:var(--ink2)}
-.lp-chip{color:var(--ink); background:var(--ground); border-color:var(--rule)}
-
-/* Watch: the phone video sits on the light ground */
-.lp-watch-frame{box-shadow:0 0 0 6px #1b1c1f, 0 40px 90px -20px rgba(20,40,60,.4)}
-
-/* Feature cards: flat white, square corners */
-.lp-spec .lp-spec-col,.lp-spec .lp-spec-col+.lp-spec-col{border-radius:2px; background:var(--paper); box-shadow:0 1px 0 rgba(20,40,60,.04)}
-.lp-spec-group{color:var(--ink); font-weight:600}
-.lp-spec-group::before{content:""; display:inline-block; width:10px; height:10px; background:var(--hv); margin-right:10px; vertical-align:-1px}
-.lp-spot::after{background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%), rgba(245,196,0,.9), transparent 62%)}
-
-/* Live site: light section, the 3D stage stays a dark screen */
-.lp-sitecam{background:linear-gradient(180deg,var(--ground),var(--sky)); color:var(--ink)}
-.lp-sitecam .lp-section-note{color:var(--ink2)}
-.lp-stage3d{border-color:#0d0f12; box-shadow:0 40px 90px -36px rgba(20,40,60,.45)}
-.lp-tallies{background:var(--rule); border-color:var(--rule)}
-.lp-tally{background:var(--paper)}
-.lp-tally-n{color:var(--ink)}
-.lp-tally-n::after{content:""; display:block; width:28px; height:4px; background:var(--hv); margin-top:8px}
-.lp-tally-l{color:var(--ink3)}
-
-/* Field */
-.lp-field{background:var(--paper)}
-
-/* Real clips (if any are listed) */
-.lp-clips{background:var(--ground); color:var(--ink)}
-.lp-clips .lp-section-note{color:var(--ink2)}
-.lp-clip-frame{border-color:var(--rule)}
-.lp-clip figcaption{color:var(--ink)}
-.lp-clip-credit{color:var(--ink3)}
-
-/* App tour */
-.lp-tour{background:var(--paper)}
-
-/* Pricing: one white card with a hard yellow offset, like the hero's buttons */
-.lp-price-card{background:var(--paper); border:1.5px solid var(--ink); border-radius:2px; box-shadow:10px 10px 0 var(--hv)}
-.lp-pricing{background:linear-gradient(180deg,var(--ground),var(--sky))}
-
-/* FAQ */
-.lp-faq{background:var(--ground)}
-.lp-faq details{background:transparent}
-.lp-faq summary:hover{color:var(--ink2)}
-
-/* Footer: ink, the one dark band */
-.lp-footer{background:#111316}
-@media (max-width:600px){
-  .lp-price-card{box-shadow:6px 6px 0 var(--hv)}
-}
-`;

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Barlow_Condensed, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Barlow_Condensed, IBM_Plex_Sans, IBM_Plex_Mono, Archivo } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { StoreProvider } from "@/lib/store";
@@ -35,6 +35,14 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
   // Small labels only; not worth delaying the first screen for
   preload: false,
+});
+
+// Big friendly headlines on the homepage
+const archivo = Archivo({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const barlowCondensed = Barlow_Condensed({
@@ -102,7 +110,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${plexSans.variable} ${plexMono.variable} ${barlowCondensed.variable} dark antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${plexSans.variable} ${plexMono.variable} ${barlowCondensed.variable} ${archivo.variable} dark antialiased`}
       data-theme="light"
       style={{ height: "100dvh", overflow: "hidden" }}
       suppressHydrationWarning
