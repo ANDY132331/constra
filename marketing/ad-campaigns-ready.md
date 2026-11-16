@@ -1,7 +1,7 @@
 # Ad campaigns, ready but not running
 
 Nothing here is live. No money has been spent and nothing has been posted. Everything below is set up so you can switch it on in an afternoon.
-The 100 short videos are in `marketing/promo-videos/drafts/` (the list, with a caption and a landing page for each, is `CATALOG.csv` in the same folder). Fifty-odd of them are also uploaded as private drafts on the Constra YouTube channel.
+The 100 short videos are in `marketing/promo-videos/drafts/` (the list, with a caption and a landing page for each, is `CATALOG.csv` in the same folder). Only a few are on the Constra YouTube channel so far: YouTube stopped uploads after 10 videos today (the daily limit for a new, unverified channel). Verify the channel with your phone in YouTube Studio to raise the limit, then the rest can go up as private drafts, a few at a time. Upload defaults (private, with the description and link) are already set on the channel.
 
 ## Before any money is spent
 

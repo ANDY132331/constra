@@ -23,11 +23,11 @@ function prep(s) {
   fs.writeFileSync(path.join(dir, "lines.json"), JSON.stringify(lines));
   fs.writeFileSync(path.join(dir, "scenario.json"), JSON.stringify({ ...s, lines: s.lines }));
 }
-const sh = (c, args, cwd, env = {}) => new Promise((res) => { const p = spawn(c, args, { cwd, env: { ...process.env, ...env }, stdio: "ignore", shell: false }); p.on("close", res); });
+const sh = (c, args, cwd, env = {}, ms = 900000) => new Promise((res) => { const p = spawn(c, args, { cwd, env: { ...process.env, ...env }, stdio: "ignore", shell: false }); const timer = setTimeout(() => { try { p.kill("SIGKILL"); } catch {} }, ms); p.on("close", () => { clearTimeout(timer); res(); }); });
 async function voices(s) {
   const cwd = path.join(ROOT, ".tmp-ad");
   for (let a = 0; a < 5; a++) {
-    await sh("node", ["vids-voice.mjs", "sh-" + s.id], cwd);
+    await sh("node", ["vids-voice.mjs", "sh-" + s.id], cwd, {}, 150000);
     const vo = path.join(cwd, "vids", "sh-" + s.id, "vo"); const n = s.lines.length + 1;
     const ok = fs.existsSync(vo) && Array.from({ length: n }, (_, i) => path.join(vo, `vo-${String(i + 1).padStart(2, "0")}.mp3`)).every((f) => fs.existsSync(f) && fs.statSync(f).size > 2000);
     if (ok) return true;
