@@ -1,0 +1,8 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "Kitchen remodel. The quote, on a napkin." },
+  { "who": "Rob", "voice": "en-GB-RyanNeural", "rate": "-4%", "gap": 1.6, "text": "Lovely. Could I get that in writing?" },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "+4%", "gap": 0.6, "text": "It is in writing!" },
+  { "who": "Rob", "voice": "en-GB-RyanNeural", "rate": "-6%", "gap": 1.2, "text": "That is a coffee stain, Mac." },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "+0%", "gap": 0.8, "text": "One tap. Estimate. Invoice." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "Estimates and invoices, from one app. Constra." }
+]

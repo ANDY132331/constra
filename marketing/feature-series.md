@@ -12,10 +12,10 @@ Feature work that needs the database update (migrations 013, 014, 015) is marked
 | 4 | Site alerts (phone alert when someone leaves the job) | The coffee run, 1.2 km away | Stick | Done: `04 The coffee run` |
 | 5 | Forgot-to-clock-out reminder | Clocked in all night, still in bed | Stick (night) | Done: `05 Still clocked in` |
 | 6 | Job costs against budget, flagged at 80% | The siren at eighty percent, everyone freezes | Stick | Done: `06 Eighty percent` |
-| 7 | Safety log (near misses, hazards, photos) | Hazard hunter | 8-bit game | Queued |
-| 8 | Estimates and invoices (quote to invoice in one step) | The quote on a napkin | Animated people | Queued |
-| 9 | Change orders (priced, approved, tracked against budget) | Scope creep snowball | Stick | Queued |
-| 10 | Excel templates (23 ready-made sheets) | Building a spreadsheet by hand vs a deck of templates | Stick | Queued |
+| 7 | Safety log (near misses, hazards, photos) | Hazard hunter | Stick | Done: `07 Near miss` |
+| 8 | Estimates and invoices (quote to invoice in one step) | The quote on a napkin | Stick | Done: `08 The napkin` |
+| 9 | Change orders (priced, approved, tracked against budget) | Scope creep snowball | Stick | Done: `09 Scope creep` |
+| 10 | Excel templates (23 ready-made sheets) | Building a spreadsheet by hand vs a deck of templates | Stick | Done: `10 The spreadsheet` |
 | 11 | Daily reports (hours, weather, tasks, photos) | The report writes itself | Animated people | Queued |
 | 12 | Punch lists and RFIs | The final walk, items turning green | 8-bit game | Queued |
 | 13 | Equipment and materials (service dates, cert expiry, low stock) | The ladder that is always somewhere else | Stick | Queued |

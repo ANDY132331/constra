@@ -1,0 +1,8 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "Day one. One small kitchen." },
+  { "who": "Cliff", "voice": "en-US-SteffanNeural", "rate": "+4%", "gap": 1.0, "text": "Quick thing. Can we add a window?" },
+  { "who": "Cliff", "voice": "en-US-SteffanNeural", "rate": "+10%", "gap": 1.6, "text": "And an island. And heated floors. And a tiny moat?" },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "+2%", "gap": 1.0, "text": "Sure. Every one gets a change order." },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "-2%", "gap": 0.5, "text": "Priced. Approved. Tracked against the budget." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.4, "text": "Change orders, before the work. Constra." }
+]

@@ -1,0 +1,7 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "A near miss. Nobody got hurt. Nobody wrote it down." },
+  { "who": "Kai", "voice": "en-AU-NatashaNeural", "rate": "+6%", "gap": 1.4, "text": "That beam just missed my head!" },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "-2%", "gap": 1.2, "text": "I will remember it." },
+  { "who": "Kai", "voice": "en-AU-NatashaNeural", "rate": "+0%", "gap": 2.2, "text": "Or I log it. Photo. Note. Done." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 2.2, "text": "Safety log. Near misses and hazards, on record. Constra." }
+]

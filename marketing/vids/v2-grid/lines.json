@@ -1,0 +1,8 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "Monday. Dev starts a spreadsheet." },
+  { "who": "Dev", "voice": "en-IE-ConnorNeural", "rate": "-4%", "gap": 1.4, "text": "Just one more column." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "Friday. One more column." },
+  { "who": "Sonia", "voice": "en-GB-SoniaNeural", "rate": "+0%", "gap": 1.4, "text": "Or pick one of twenty three ready made templates." },
+  { "who": "Dev", "voice": "en-IE-ConnorNeural", "rate": "+2%", "gap": 0.8, "text": "They were just sitting there?" },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 2.2, "text": "Excel templates, ready to fill in. Constra." }
+]
