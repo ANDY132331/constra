@@ -4,8 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { HardHat, MapPin, Check, AlertTriangle, ArrowRight, ArrowLeft, Plus, WifiOff, FileSpreadsheet, Wallet } from "lucide-react";
 import { PLAY_STORE_URL } from "@/lib/store-app";
-import "./landing.css";
-import "./landing-blue.css";
+import "./home.css";
 
 function readOnboarded(): boolean {
   try {
@@ -18,16 +17,16 @@ function readOnboarded(): boolean {
 const noopSubscribe = () => () => {};
 
 const DAY = [
-  { time: "06:58", title: "Crew clocks in", body: "A selfie and GPS fix are checked against the site's geofence. Punches from the truck stop or the couch get flagged for review.", chip: { icon: "pin", text: "38 m from site · inside 500 m" }, c: "#FF6B3D" },
-  { time: "09:40", title: "Hazard logged", body: "Open trench, no barricade. Photo, severity and location go into the safety log before anyone forgets.", chip: { icon: "alert", text: "Near miss · Medium" }, c: "#8CC3F4" },
-  { time: "13:15", title: "Change order raised", body: "The client wants pot lights in the hallway. Price it, send it, and the project budget updates when they approve.", chip: { icon: "plus", text: "CO-07 · +$1,180" }, c: "#F6B1CF" },
-  { time: "16:30", title: "Daily report done", body: "Hours, weather, completed tasks and site photos are already in the report. Review it and share it.", chip: { icon: "check", text: "6 crew · 47.5 h · 12 photos" }, c: "#F5C400" },
-  { time: "17:05", title: "Invoice out the door", body: "Turn the estimate into an invoice and email a branded PDF to the client the same day the work was done.", chip: { icon: "check", text: "INV-0142 · $8,420.00 · Sent" }, c: "#B7E08F" },
+  { time: "06:58", title: "Crew clocks in", body: "A selfie and GPS fix are checked against the site's geofence. Punches from the truck stop or the couch get flagged for review.", chip: { icon: "pin", text: "38 m from site · inside 500 m" }, c: "#F5C400", fg: "#12161C" },
+  { time: "09:40", title: "Hazard logged", body: "Open trench, no barricade. Photo, severity and location go into the safety log before anyone forgets.", chip: { icon: "alert", text: "Near miss · Medium" }, c: "#0B4FC4", fg: "#FFFFFF" },
+  { time: "13:15", title: "Change order raised", body: "The client wants pot lights in the hallway. Price it, send it, and the project budget updates when they approve.", chip: { icon: "plus", text: "CO-07 · +$1,180" }, c: "#FF6B3D", fg: "#12161C" },
+  { time: "16:30", title: "Daily report done", body: "Hours, weather, completed tasks and site photos are already in the report. Review it and share it.", chip: { icon: "check", text: "6 crew · 47.5 h · 12 photos" }, c: "#12161C", fg: "#FFFFFF" },
+  { time: "17:05", title: "Invoice out the door", body: "Turn the estimate into an invoice and email a branded PDF to the client the same day the work was done.", chip: { icon: "check", text: "INV-0142 · $8,420.00 · Sent" }, c: "#FFFFFF", fg: "#12161C" },
 ] as const;
 
 const FEATURES: { group: string; color: string; items: [string, string][] }[] = [
   {
-    group: "Crew", color: "#FF6B3D",
+    group: "Crew", color: "#F5C400",
     items: [
       ["GPS clock-in", "Selfie + location on every punch, per-site geofence"],
       ["Site alerts", "A phone alert when someone on the clock leaves the job, with the time and distance"],
@@ -37,7 +36,7 @@ const FEATURES: { group: string; color: string; items: [string, string][] }[] = 
     ],
   },
   {
-    group: "Hours & money", color: "#F5C400",
+    group: "Hours & money", color: "#FF6B3D",
     items: [
       ["Timesheets", "One page per worker with your logo, as a PDF or Excel file"],
       ["Payroll export", "Hours to CSV, QuickBooks or Gusto; invoices to QuickBooks Online"],
@@ -48,7 +47,7 @@ const FEATURES: { group: string; color: string; items: [string, string][] }[] = 
     ],
   },
   {
-    group: "Site", color: "#8CC3F4",
+    group: "Site", color: "#BBD6FF",
     items: [
       ["Daily reports", "Hours, weather, tasks and photos, compiled for you"],
       ["Safety log", "Near misses, injuries and hazards with photos"],
@@ -58,7 +57,7 @@ const FEATURES: { group: string; color: string; items: [string, string][] }[] = 
     ],
   },
   {
-    group: "Plans & files", color: "#F6B1CF",
+    group: "Plans & files", color: "#E4E0D2",
     items: [
       ["Blueprints", "Upload drawings and open them on site"],
       ["Documents", "Contracts, permits and specs, versioned by project"],
@@ -89,10 +88,10 @@ const SCREENS = [
 ];
 
 const TALK = [
-  { tab: "On site only", color: "#1E7A45", r: "-4deg", icon: "pin", text: "Every punch has a photo and a GPS fix. Clock in from the truck stop and it gets flagged." },
-  { tab: "Builds itself", color: "#FF6B3D", r: "3deg", icon: "sheet", text: "Hours, overtime and job costs add up as the crew works. Friday is a button, not a night shift." },
-  { tab: "No signal? Fine", color: "#2F6FB5", r: "-2deg", icon: "wifi", text: "Basements, backroads, bad towers. Everything saves on the phone and syncs when signal returns." },
-  { tab: "Paid by Friday", color: "#B8860B", r: "4deg", icon: "wallet", text: "Export hours to CSV, QuickBooks or Gusto. Invoices go out as branded PDFs the same day." },
+  { tab: "On site only", color: "#0B4FC4", fg: "#FFFFFF", r: "-4deg", icon: "pin", text: "Every punch has a photo and a GPS fix. Clock in from the truck stop and it gets flagged." },
+  { tab: "Builds itself", color: "#12161C", fg: "#FFFFFF", r: "3deg", icon: "sheet", text: "Hours, overtime and job costs add up as the crew works. Friday is a button, not a night shift." },
+  { tab: "No signal? Fine", color: "#FF6B3D", fg: "#12161C", r: "-2deg", icon: "wifi", text: "Basements, backroads, bad towers. Everything saves on the phone and syncs when signal returns." },
+  { tab: "Paid by Friday", color: "#F5C400", fg: "#12161C", r: "4deg", icon: "wallet", text: "Export hours to CSV, QuickBooks or Gusto. Invoices go out as branded PDFs the same day." },
 ];
 
 function Chip({ icon, text }: { icon: string; text: string }) {
@@ -144,7 +143,7 @@ function Level() {
 function Tape() {
   return (
     <svg viewBox="0 0 140 140" aria-hidden>
-      <circle cx="70" cy="70" r="62" fill="#F6B1CF" stroke="#151617" strokeWidth="5" />
+      <circle cx="70" cy="70" r="62" fill="#BBD6FF" stroke="#151617" strokeWidth="5" />
       <circle cx="70" cy="70" r="26" fill="#fff" stroke="#151617" strokeWidth="5" />
       <path d="M100 98 H136 V114 H92" fill="#fff" stroke="#151617" strokeWidth="5" strokeLinejoin="round" />
       <path d="M44 44 L96 96" stroke="#151617" strokeWidth="4" strokeLinecap="round" />
@@ -262,38 +261,41 @@ export default function LandingPage() {
   const alreadyIn = useSyncExternalStore(noopSubscribe, readOnboarded, () => false);
   const rootRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const blueRef = useRef<HTMLElement>(null);
   const [shot, setShot] = useState(0);
 
-  // The big scroll scene: write progress to CSS variables so nothing re-renders while scrolling
+  // The opening scene: write progress to CSS variables so nothing re-renders while scrolling or moving the mouse
   useEffect(() => {
     const root = rootRef.current, track = trackRef.current;
     if (!root || !track) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const clamp = (v: number) => Math.min(1, Math.max(0, v));
-    let raf = 0;
+    const ease = (v: number) => 1 - Math.pow(1 - v, 3);
+    let raf = 0, praf = 0;
     const update = () => {
       raf = 0;
       root.classList.toggle("scrolled", root.scrollTop > 40);
       if (reduce) return;
-      const blue = blueRef.current;
-      if (blue) {
-        const br = blue.getBoundingClientRect();
-        blue.style.setProperty("--bp", clamp((window.innerHeight - br.top) / (window.innerHeight + br.height)).toFixed(3));
-      }
       const r = track.getBoundingClientRect();
       const p = clamp(-r.top / Math.max(1, r.height - window.innerHeight));
-      const ease = (v: number) => 1 - Math.pow(1 - v, 3);
-      track.style.setProperty("--d", clamp(p / 0.2).toFixed(3));
-      track.style.setProperty("--f", ease(clamp((p - 0.14) / 0.42)).toFixed(3));
-      track.style.setProperty("--m", ease(clamp((p - 0.3) / 0.4)).toFixed(3));
-      track.style.setProperty("--o", ease(clamp((p - 0.62) / 0.22)).toFixed(3));
+      track.style.setProperty("--m", ease(clamp((p - 0.04) / 0.36)).toFixed(3));
+      track.style.setProperty("--f", ease(clamp((p - 0.1) / 0.4)).toFixed(3));
+      track.style.setProperty("--w", ease(clamp((p - 0.46) / 0.2)).toFixed(3));
+      track.style.setProperty("--h", clamp((p - 0.6) / 0.2).toFixed(3));
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    const onMove = (e: PointerEvent) => {
+      if (reduce || e.pointerType !== "mouse") return;
+      cancelAnimationFrame(praf);
+      praf = requestAnimationFrame(() => {
+        track.style.setProperty("--mx", ((e.clientX / window.innerWidth - 0.5) * 2).toFixed(3));
+        track.style.setProperty("--my", ((e.clientY / window.innerHeight - 0.5) * 2).toFixed(3));
+      });
+    };
     update();
     root.addEventListener("scroll", onScroll, { passive: true });
+    root.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("resize", onScroll);
-    return () => { root.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); };
+    return () => { root.removeEventListener("scroll", onScroll); root.removeEventListener("pointermove", onMove); window.removeEventListener("resize", onScroll); cancelAnimationFrame(raf); cancelAnimationFrame(praf); };
   }, []);
 
   // The page scrolls inside this fixed container, so in-page anchors need manual scrolling
@@ -325,16 +327,6 @@ export default function LandingPage() {
     return () => { io.disconnect(); els.forEach((el) => el.classList.remove("rv", "rv-in")); };
   }, []);
 
-  // The pointers on the blueprint screen appear one after another as it scrolls into view
-  useEffect(() => {
-    const root = rootRef.current, blue = blueRef.current;
-    if (!root || !blue || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-    blue.classList.add("arm");
-    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { blue.classList.add("live"); io.disconnect(); } }, { root, threshold: 0.3 });
-    io.observe(blue);
-    return () => { io.disconnect(); blue.classList.remove("arm", "live"); };
-  }, []);
-
   const startHref = alreadyIn ? "/dashboard" : "/onboarding";
   const startLabel = alreadyIn ? "Open dashboard" : "Start free";
   const flip = (d: number) => setShot((s) => (s + d + SCREENS.length) % SCREENS.length);
@@ -359,66 +351,114 @@ export default function LandingPage() {
               <a className="mp-pill" href="#faq">FAQ</a>
             </span>
             {!alreadyIn && <Link href="/login" className="mp-pill mp-signin">Sign in</Link>}
-            <Link href={startHref} className="mp-pill mp-pill-coral">{startLabel}</Link>
+            <Link href={startHref} className="mp-pill mp-pill-orange">{startLabel}</Link>
           </nav>
         </div>
       </div>
 
       <main id="main">
-        {/* Headline, then the colour floods in */}
+        {/* Opening scene: yellow hero, the phone rises in, blueprint blue floods around it */}
         <div ref={trackRef} className="mp-track">
           <div className="mp-stage">
             <div className="mp-hero">
-              <Spark style={{ left: "13%", top: "19%", ["--s" as string]: "34px" }} />
-              <Spark style={{ right: "17%", top: "15%", ["--s" as string]: "26px", ["--dl" as string]: "-2s" }} />
-              <Spark style={{ left: "7%", top: "66%", ["--s" as string]: "30px", ["--dl" as string]: "-4s" }} />
-              <Spark style={{ right: "9%", top: "58%", ["--s" as string]: "38px", ["--dl" as string]: "-1s" }} />
-              <Spark style={{ left: "46%", top: "74%", ["--s" as string]: "24px", ["--dl" as string]: "-3s" }} />
+              <Spark style={{ left: "24%", top: "14%", ["--s" as string]: "30px" }} />
+              <Spark style={{ right: "22%", top: "13%", ["--s" as string]: "24px", ["--dl" as string]: "-2s" }} />
+              <Spark style={{ left: "10%", top: "70%", ["--s" as string]: "28px", ["--dl" as string]: "-4s" }} />
+              <Spark style={{ right: "9%", top: "68%", ["--s" as string]: "34px", ["--dl" as string]: "-1s" }} />
+              <div className="mp-pop" style={{ left: "2.5%", top: "34%", width: "clamp(70px, 11vw, 160px)", ["--r" as string]: "-12deg", ["--pd" as string]: ".5s", ["--z" as string]: 18 }}><Hat /></div>
+              <div className="mp-pop hide-sm" style={{ left: "3%", top: "56%", width: "clamp(50px, 7vw, 100px)", ["--r" as string]: "8deg", ["--pd" as string]: ".7s", ["--z" as string]: 26 }}><Cone /></div>
+              <div className="mp-pop" style={{ right: "2.5%", top: "34%", width: "clamp(56px, 9vw, 130px)", ["--r" as string]: "10deg", ["--pd" as string]: ".6s", ["--z" as string]: -18 }}><Clip /></div>
+              <div className="mp-pop hide-sm" style={{ right: "3%", top: "56%", width: "clamp(56px, 8vw, 120px)", ["--r" as string]: "-8deg", ["--pd" as string]: ".8s", ["--z" as string]: -26 }}><Tape /></div>
+              <div className="mp-pop hide-sm" style={{ left: "2.5%", top: "17%", width: "clamp(70px, 9vw, 130px)", ["--r" as string]: "-5deg", ["--pd" as string]: ".9s", ["--z" as string]: 12 }}><Level /></div>
+              <div className="mp-pop hide-sm" style={{ right: "3.5%", top: "16%", width: "clamp(40px, 5vw, 76px)", ["--r" as string]: "14deg", ["--pd" as string]: "1s", ["--z" as string]: -12 }}><Bolt /></div>
+
               <h1 className="mp-h1" aria-label="Run the job, not the paperwork">
                 <span aria-hidden>Run the job</span>
                 <span aria-hidden>not the</span>
                 <span aria-hidden>paperwork</span>
               </h1>
-              <span className="mp-side mp-side-l" aria-hidden>GPS + photo<br />clock-in</span>
-              <span className="mp-side mp-side-r" aria-hidden>Works<br />offline</span>
+
               <div className="mp-hero-foot">
-                <p>The free crew app for small contractors. Timesheets build themselves, and Friday payroll is one button.</p>
-                <div className="mp-hero-btns">
-                  <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
+                <div className="mp-hero-l mp-intro">
+                  <p>The free crew app for small contractors. Timesheets build themselves, and Friday payroll is one button.</p>
+                  <Link href={startHref} className="mp-pill mp-pill-orange mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
+                </div>
+                <div className="mp-hero-r mp-intro">
                   <a href="#how" className="mp-pill mp-pill-big">See how it works</a>
+                  <small>GPS + photo clock-in<br />Works offline</small>
                 </div>
               </div>
             </div>
 
-            <div className="mp-disc" style={{ left: "10%", top: "36%", width: 170, height: 170 }} aria-hidden />
-            <div className="mp-disc" style={{ left: "46%", top: "62%", width: 100, height: 100 }} aria-hidden />
-            <div className="mp-disc" style={{ left: "74%", top: "78%", width: 230, height: 230 }} aria-hidden />
+            <div className="mp-flood">
+              <p className="mp-flood-label"><i /> Every screen is the real app</p>
+              <div className="mp-words" aria-hidden>
+                <span><i>Every</i><i>punch</i></span>
+                <span><i>is</i><i>checked.</i></span>
+              </div>
+              <h2 className="mp-sr">Every punch is checked.</h2>
+              <figure className="mp-float mp-float-a">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/site/site-morning.webp" width={1400} height={864} loading="lazy" decoding="async" alt="A 3D view of a job site in the morning" />
+                <figcaption>06:58 · Crew clocks in</figcaption>
+              </figure>
+              <figure className="mp-float mp-float-b">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/site/site-midday.webp" width={1400} height={864} loading="lazy" decoding="async" alt="The same job site at midday with steel going up" />
+                <figcaption>12:00 · Level 4 steel</figcaption>
+              </figure>
+              <figure className="mp-float mp-float-c">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/site/site-afternoon.webp" width={1400} height={864} loading="lazy" decoding="async" alt="The same job site in the afternoon with the deck poured" />
+                <figcaption>16:00 · Report sent</figcaption>
+              </figure>
+            </div>
 
-            <div className="mp-flood" aria-label="The Constra app">
-              <div className="mp-deco" style={{ left: "5%", top: "16%", width: "clamp(90px, 15vw, 210px)", ["--r" as string]: "-10deg" }}><Hat /></div>
-              <div className="mp-deco" style={{ left: "17%", top: "58%", width: "clamp(70px, 11vw, 150px)", ["--r" as string]: "8deg", ["--dl" as string]: "-2s" }}><Cone /></div>
-              <div className="mp-deco hide-sm" style={{ left: "3%", top: "76%", width: "clamp(110px, 16vw, 230px)", ["--r" as string]: "-6deg", ["--dl" as string]: "-4s" }}><Level /></div>
-              <div className="mp-deco" style={{ right: "6%", top: "14%", width: "clamp(80px, 13vw, 180px)", ["--r" as string]: "10deg", ["--dl" as string]: "-1s" }}><Clip /></div>
-              <div className="mp-deco" style={{ right: "17%", top: "56%", width: "clamp(80px, 12vw, 170px)", ["--r" as string]: "-8deg", ["--dl" as string]: "-3s" }}><Tape /></div>
-              <div className="mp-deco hide-sm" style={{ right: "4%", top: "78%", width: "clamp(60px, 8vw, 110px)", ["--r" as string]: "14deg", ["--dl" as string]: "-5s" }}><Bolt /></div>
-
-              <div className="mp-phone-wrap">
-                <div className="mp-phone">
-                  {SCREENS.map((s, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={s.src} src={s.src} alt={i === shot ? s.alt : ""} aria-hidden={i !== shot} width={780} height={1688} className={i === shot ? "on" : ""} decoding="async" />
-                  ))}
+            <div className="mp-phone-wrap">
+              <div className="mp-tilt">
+                <div className="mp-phone-in">
+                  <div className="mp-phone-box">
+                    <div className="mp-phone">
+                      {SCREENS.map((s, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={s.src} src={s.src} alt={i === shot ? s.alt : ""} aria-hidden={i !== shot} width={780} height={1688} className={i === shot ? "on" : ""} decoding="async" fetchPriority={i === 0 ? "high" : "auto"} />
+                      ))}
+                    </div>
+                    {shot === 0 && ([
+                      { x: 28, y: 22, t: "GPS checked at punch", s: "Where they clocked in", side: "l" },
+                      { x: 65, y: 11.7, t: "Export to CSV", s: "One tap to payroll", side: "r" },
+                      { x: 12, y: 52, t: "Overtime flagged", s: "Before payroll, not after", side: "l" },
+                      { x: 49, y: 62, t: "Hours add up live", s: "Today across the crew", side: "l" },
+                      { x: 85, y: 76, t: "Clock a worker out", s: "From the same list", side: "r" },
+                    ] as const).map((h, i) => (
+                      <div key={h.t} className={"mp-hs mp-hs-" + h.side} style={{ left: h.x + "%", top: h.y + "%", ["--i" as string]: i, ["--x" as string]: h.x }}>
+                        <span className="mp-hs-dot" aria-hidden />
+                        <span className="mp-hs-chip"><em>{h.t}</em>{h.s}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="mp-ctrl">
-                <button type="button" className="mp-pill mp-pill-round" onClick={() => flip(-1)} aria-label="Previous screen"><ArrowLeft size={22} aria-hidden /></button>
-                <span className="mp-pill mp-pill-ink" aria-live="polite">{SCREENS[shot].label}</span>
-                <button type="button" className="mp-pill mp-pill-round" onClick={() => flip(1)} aria-label="Next screen"><ArrowRight size={22} aria-hidden /></button>
-              </div>
+            <div className="mp-ctrl">
+              <button type="button" className="mp-pill mp-pill-round" onClick={() => flip(-1)} aria-label="Previous screen"><ArrowLeft size={22} aria-hidden /></button>
+              <span className="mp-pill mp-pill-yellow" aria-live="polite">{SCREENS[shot].label}</span>
+              <button type="button" className="mp-pill mp-pill-round" onClick={() => flip(1)} aria-label="Next screen"><ArrowRight size={22} aria-hidden /></button>
             </div>
           </div>
         </div>
+
+        <section className="mp-spec" aria-label="At a glance">
+          <div className="mp-wrap">
+            <dl>
+              <div><dt>Crew size</dt><dd>Unlimited</dd></div>
+              <div><dt>Signal needed</dt><dd>None</dd></div>
+              <div><dt>Cost</dt><dd>Free while we launch</dd></div>
+              <div><dt>Works on</dt><dd>Any phone</dd></div>
+            </dl>
+          </div>
+        </section>
 
         {/* What are we talking about */}
         <section id="how" className="mp-talk" aria-label="What Constra is">
@@ -427,7 +467,7 @@ export default function LandingPage() {
         </section>
         <div className="mp-cards" role="list" aria-label="What Constra does">
           {TALK.map((c) => (
-            <div key={c.tab} role="listitem" className="mp-card" style={{ ["--tab" as string]: c.color, ["--r" as string]: c.r }}>
+            <div key={c.tab} role="listitem" className="mp-card" style={{ ["--tab" as string]: c.color, ["--tabfg" as string]: c.fg, ["--r" as string]: c.r }}>
               <div className="mp-card-tab">{c.tab}</div>
               <div className="mp-card-body">
                 <p>{c.text}</p>
@@ -437,62 +477,6 @@ export default function LandingPage() {
           ))}
         </div>
 
-        {/* Blueprint: a real screen with pointers at the parts that matter */}
-        <section ref={blueRef} className="mp-blue" aria-label="Every punch, checked">
-          <div className="mp-blue-in">
-            <p className="mp-mono-label"><i /> Every screen is the real app</p>
-            <div className="mp-blue-stage">
-              <div className="mp-blue-words" aria-hidden>
-                <span><i>Every</i><i>punch</i></span>
-                <span><i>is</i><i>checked.</i></span>
-              </div>
-              <h2 className="mp-sr">Every punch, checked.</h2>
-
-              <figure className="mp-float mp-float-a" style={{ ["--k" as string]: "-90" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/site/site-morning.webp" width={1400} height={864} loading="lazy" decoding="async" alt="A 3D view of a job site in the morning" />
-                <figcaption>06:58 · Crew clocks in</figcaption>
-              </figure>
-              <figure className="mp-float mp-float-b" style={{ ["--k" as string]: "70" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/site/site-midday.webp" width={1400} height={864} loading="lazy" decoding="async" alt="The same job site at midday with steel going up" />
-                <figcaption>12:00 · Level 4 steel</figcaption>
-              </figure>
-              <figure className="mp-float mp-float-c" style={{ ["--k" as string]: "-50" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/site/site-afternoon.webp" width={1400} height={864} loading="lazy" decoding="async" alt="The same job site in the afternoon with the deck poured" />
-                <figcaption>16:00 · Report sent</figcaption>
-              </figure>
-
-              <div className="mp-blue-phone">
-                <div className="mp-phone mp-phone-flat">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="on" src="/site/app-clock.webp" width={780} height={1688} loading="lazy" decoding="async" alt="Constra time screen with a worker on site, an overtime warning, today's hours and a Clock Out button" />
-                </div>
-                {([
-                  { x: 28, y: 22, t: "GPS checked at punch", s: "Where they clocked in", side: "l" },
-                  { x: 65, y: 11.7, t: "Export to CSV", s: "One tap to payroll", side: "r" },
-                  { x: 12, y: 52, t: "Overtime flagged", s: "Before payroll, not after", side: "l" },
-                  { x: 49, y: 62, t: "Hours add up live", s: "Today across the crew", side: "l" },
-                  { x: 85, y: 76, t: "Clock a worker out", s: "From the same list", side: "r" },
-                ] as const).map((h, i) => (
-                  <div key={h.t} className={"mp-hs mp-hs-" + h.side} style={{ left: h.x + "%", top: h.y + "%", ["--i" as string]: i, ["--x" as string]: h.x }}>
-                    <span className="mp-hs-dot" aria-hidden />
-                    <span className="mp-hs-chip"><em>{h.t}</em>{h.s}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <dl className="mp-meta">
-              <div><dt>Crew size</dt><dd>Unlimited</dd></div>
-              <div><dt>Signal needed</dt><dd>None</dd></div>
-              <div><dt>Cost</dt><dd>Free while we launch</dd></div>
-              <div><dt>Works on</dt><dd>Any phone</dd></div>
-            </dl>
-          </div>
-        </section>
-
         {/* A day on site */}
         <section id="day" className="mp-day" aria-label="One day on site">
           <div className="mp-wrap">
@@ -501,7 +485,7 @@ export default function LandingPage() {
           </div>
           <ol className="mp-day-row" style={{ listStyle: "none" }}>
             {DAY.map((s) => (
-              <li key={s.time} className="mp-day-card" style={{ ["--c" as string]: s.c }}>
+              <li key={s.time} className="mp-day-card" style={{ ["--c" as string]: s.c, ["--fg" as string]: s.fg }}>
                 <time>{s.time}</time>
                 <h3>{s.title}</h3>
                 <p>{s.body}</p>
@@ -540,7 +524,7 @@ export default function LandingPage() {
               <p className="mp-label">See it in 30 seconds</p>
               <h2 className="mp-big">Friday payroll,<br />without the guessing.</h2>
               <p>Your crew clocks in on their own phones. You hear when someone walks off site on the clock, and timesheets come out with your logo, ready for payroll. Every screen in the video is the real app.</p>
-              <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
+              <Link href={startHref} className="mp-pill mp-pill-orange mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
             </div>
             <div className="mp-frame">
               <video src="/marketing/constra-ad-web.mp4" poster="/marketing/constra-ad-poster.webp" controls playsInline preload="none" aria-label="Constra in 30 seconds: from paper timesheets to the app" />
@@ -554,10 +538,10 @@ export default function LandingPage() {
             <p className="mp-label">Built for the field</p>
             <h2 className="mp-big">Made for gloves, glare<br />and one bar of signal.</h2>
             <div className="mp-field-grid">
-              <div className="mp-tile" style={{ ["--bg" as string]: "#8CC3F4" }}><b>Offline</b><h3>No signal, no problem</h3><p>Clock-ins, reports and photos save on the phone and sync when signal returns.</p></div>
-              <div className="mp-tile" style={{ ["--bg" as string]: "#B7E08F" }}><b>500 m</b><h3>Geofence</h3><p>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</p></div>
-              <div className="mp-tile" style={{ ["--bg" as string]: "#F6B1CF" }}><b>15</b><h3>Languages</h3><p>Menus and sign-up in 15 languages, from Spanish and Polish to Hindi, Arabic and Chinese. Each person picks their own.</p></div>
-              <div className="mp-tile" style={{ ["--bg" as string]: "#F5C400" }}><b>OT</b><h3>Overtime your way</h3><p>Pick a ready-made rule set or write your own, then overtime is worked out from the punches, ready for payroll.</p></div>
+              <div className="mp-tile" style={{ ["--bg" as string]: "#0B4FC4", ["--tfg" as string]: "#FFFFFF" }}><b>Offline</b><h3>No signal, no problem</h3><p>Clock-ins, reports and photos save on the phone and sync when signal returns.</p></div>
+              <div className="mp-tile" style={{ ["--bg" as string]: "#F5C400" }}><b>500 m</b><h3>Geofence</h3><p>Set each site&apos;s radius on a map. 500 m by default, adjustable per project.</p></div>
+              <div className="mp-tile" style={{ ["--bg" as string]: "#12161C", ["--tfg" as string]: "#FFFFFF" }}><b>15</b><h3>Languages</h3><p>Menus and sign-up in 15 languages, from Spanish and Polish to Hindi, Arabic and Chinese. Each person picks their own.</p></div>
+              <div className="mp-tile" style={{ ["--bg" as string]: "#FF6B3D" }}><b>OT</b><h3>Overtime your way</h3><p>Pick a ready-made rule set or write your own, then overtime is worked out from the punches, ready for payroll.</p></div>
             </div>
           </div>
         </section>
@@ -577,7 +561,7 @@ export default function LandingPage() {
                   <li key={f}><Check size={17} strokeWidth={2.8} aria-hidden />{f}</li>
                 ))}
               </ul>
-              <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big" style={{ width: "100%" }}>{startLabel} <ArrowRight size={20} aria-hidden /></Link>
+              <Link href={startHref} className="mp-pill mp-pill-orange mp-pill-big" style={{ width: "100%" }}>{startLabel} <ArrowRight size={20} aria-hidden /></Link>
             </div>
           </div>
         </section>
@@ -602,7 +586,7 @@ export default function LandingPage() {
           <div className="mp-wrap">
             <h2 className="mp-big">Get your crew on it<br />before Monday.</h2>
             <div className="mp-final-btns">
-              <Link href={startHref} className="mp-pill mp-pill-coral mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
+              <Link href={startHref} className="mp-pill mp-pill-orange mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
               {PLAY_STORE_URL && <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="mp-link">Get the Android app</a>}
             </div>
           </div>
