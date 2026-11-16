@@ -1,0 +1,7 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "The client calls. Again." },
+  { "who": "Cliff", "voice": "en-US-SteffanNeural", "rate": "+6%", "gap": 1.0, "text": "How is the job going? Is it done? When is it done?" },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "-2%", "gap": 1.0, "text": "Here is a link. No login. No prices. Just progress." },
+  { "who": "Cliff", "voice": "en-US-SteffanNeural", "rate": "-4%", "gap": 1.2, "text": "Oh nice. I can just look." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "A client progress link. Constra." }
+]

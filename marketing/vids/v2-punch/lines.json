@@ -1,0 +1,7 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "The final walk. The client has a clipboard." },
+  { "who": "Cliff", "voice": "en-US-SteffanNeural", "rate": "+4%", "gap": 1.2, "text": "Scuff on the wall. Loose handle. Paint touch up." },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "+2%", "gap": 0.8, "text": "On the punch list. We tick them off as we go." },
+  { "who": "Cliff", "voice": "en-US-SteffanNeural", "rate": "-2%", "gap": 1.2, "text": "All green. Huh. Done already?" },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "Punch lists and R F Is, closed out properly. Constra." }
+]

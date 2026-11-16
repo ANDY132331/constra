@@ -1,0 +1,7 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "The only copy of the drawings. On a windy day." },
+  { "who": "Kai", "voice": "en-AU-NatashaNeural", "rate": "+6%", "gap": 1.4, "text": "My blueprint! It is flying away!" },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "+0%", "gap": 1.0, "text": "Relax. They are on your phone." },
+  { "who": "Kai", "voice": "en-AU-NatashaNeural", "rate": "-2%", "gap": 1.0, "text": "The wind cannot steal those." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "Blueprints on site, in your pocket. Constra." }
+]

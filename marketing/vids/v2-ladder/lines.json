@@ -1,0 +1,7 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "Where is the ladder? Nobody knows." },
+  { "who": "Dev", "voice": "en-IE-ConnorNeural", "rate": "-2%", "gap": 1.2, "text": "It was here. It is always somewhere else." },
+  { "who": "Sonia", "voice": "en-GB-SoniaNeural", "rate": "+0%", "gap": 1.0, "text": "Equipment list. Where it is, when it is due for service, and what is running low." },
+  { "who": "Dev", "voice": "en-IE-ConnorNeural", "rate": "+2%", "gap": 0.8, "text": "Found it. Third floor. Of course." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "Equipment and materials, tracked. Constra." }
+]

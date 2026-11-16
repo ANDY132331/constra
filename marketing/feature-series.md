@@ -16,12 +16,12 @@ Feature work that needs the database update (migrations 013, 014, 015) is marked
 | 8 | Estimates and invoices (quote to invoice in one step) | The quote on a napkin | Stick | Done: `08 The napkin` |
 | 9 | Change orders (priced, approved, tracked against budget) | Scope creep snowball | Stick | Done: `09 Scope creep` |
 | 10 | Excel templates (23 ready-made sheets) | Building a spreadsheet by hand vs a deck of templates | Stick | Done: `10 The spreadsheet` |
-| 11 | Daily reports (hours, weather, tasks, photos) | The report writes itself | Animated people | Queued |
-| 12 | Punch lists and RFIs | The final walk, items turning green | 8-bit game | Queued |
-| 13 | Equipment and materials (service dates, cert expiry, low stock) | The ladder that is always somewhere else | Stick | Queued |
-| 14 | Client progress link (no login, no prices) | The impatient client | Animated people | Queued |
-| 15 | Blueprints on site | The wind steals the drawing | Stick | Queued |
-| 16 | Documents (contracts, permits, specs, versioned) | Which version is final | Stick | Queued |
+| 11 | Daily reports (hours, weather, tasks, photos) | The report writes itself | Animated people | Done: `11 The report writes itself` |
+| 12 | Punch lists and RFIs | The final walk, items turning green | 8-bit game | Done: `12 The final walk` |
+| 13 | Equipment and materials (service dates, cert expiry, low stock) | The ladder that is always somewhere else | Stick | Done: `13 The ladder` |
+| 14 | Client progress link (no login, no prices) | The impatient client | Animated people | Done: `14 The impatient client` |
+| 15 | Blueprints on site | The wind steals the drawing | Stick | Done: `15 Windy day` |
+| 16 | Documents (contracts, permits, specs, versioned) | Which version is final | Stick | Done: `16 Which one is final` |
 | 17 | Photos sorted by project and day | The photo avalanche | Stick | Queued |
 | 18 | Morning brief | Boss, coffee, and the summary | Animated people | Queued |
 | 19 | Ask Constra (the AI assistant over your numbers) | Ask the phone which jobs lose money | Animated people | Queued |

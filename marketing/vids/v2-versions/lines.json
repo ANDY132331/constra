@@ -1,0 +1,7 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "Which contract is the final one?" },
+  { "who": "Dev", "voice": "en-IE-ConnorNeural", "rate": "+2%", "gap": 1.2, "text": "Contract final. Contract final two. Contract final final." },
+  { "who": "Sonia", "voice": "en-GB-SoniaNeural", "rate": "+0%", "gap": 1.0, "text": "One document. Every version kept. The latest on top." },
+  { "who": "Dev", "voice": "en-IE-ConnorNeural", "rate": "-2%", "gap": 1.0, "text": "That is a relief." },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "Documents, with versions. Constra." }
+]

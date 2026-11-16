@@ -1,0 +1,7 @@
+[
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.0, "text": "Nine at night. The daily report is due." },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "-6%", "gap": 1.4, "text": "What was the weather? Who was here? What did we even do?" },
+  { "who": "Clara", "voice": "en-CA-ClaraNeural", "rate": "+2%", "gap": 1.0, "text": "The app already has it. Hours, weather, tasks, photos." },
+  { "who": "Mac", "voice": "en-CA-LiamNeural", "rate": "+0%", "gap": 0.8, "text": "I can go to bed?" },
+  { "who": "Voice", "voice": "en-US-RogerNeural", "rate": "-4%", "gap": 1.2, "text": "Daily reports that fill in from the day. Constra." }
+]
