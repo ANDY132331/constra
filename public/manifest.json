@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Constra — Field Workforce Management",
+  "name": "Constra — Run the job, not the paperwork",
   "short_name": "Constra",
-  "description": "Construction workforce management for field teams",
+  "description": "The crew app for small contractors: GPS clock-in, timesheets, invoices and daily reports. Works offline.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

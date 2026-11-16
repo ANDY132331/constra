@@ -531,7 +531,7 @@ export default function LandingPage() {
         <div className="lp-wrap lp-footer-inner">
           <div>
             <span className="lp-brand"><span className="lp-brand-mark"><HardHat size={14} strokeWidth={2.5} aria-hidden /></span>Constra</span>
-            <p className="lp-dim">Field workforce management for construction and trades.</p>
+            <p className="lp-dim">Run the job, not the paperwork. Pre-launch: free while we launch.</p>
           </div>
           <nav aria-label="Footer" className="lp-footer-links">
             <Link href="/login">Sign in</Link>
@@ -539,6 +539,7 @@ export default function LandingPage() {
             <Link href="/for">Trades</Link>
             <Link href="/solutions">Solutions</Link>
             <Link href="/support">Support</Link>
+            <a href="https://www.youtube.com/@getconstra" target="_blank" rel="noopener noreferrer">YouTube</a>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
           </nav>

@@ -309,7 +309,7 @@ function LoginForm() {
             </div>
             <div>
               <h1 className="text-2xl font-black text-white tracking-tight">Constra</h1>
-              <p className="text-[10px] text-white/30 tracking-widest uppercase">Field Workforce Management</p>
+              <p className="text-[10px] text-white/30 tracking-widest uppercase">Run the job, not the paperwork</p>
             </div>
           </div>
 
