@@ -19,6 +19,7 @@ await p.route("https://vid.local/**", (r) => {
   if (n === "/stage.js") return r.fulfill(file(`${HERE}/stage.js`, "text/javascript"));
   if (n === "/puppet.js") return r.fulfill(file(`${HERE}/puppet.js`, "text/javascript"));
   if (n === "/engine.js") return r.fulfill(file(`${HERE}/engine.js`, "text/javascript"));
+  if (name.startsWith("sh-")) { if (n === "/scene.js") return r.fulfill(file(`${HERE}/shorts/scene.js`, "text/javascript")); if (n === "/lines.json" || n === "/scenario.json") return r.fulfill(file(`${ROOT}/.tmp-ad/vids/${name}${n}`, "application/json")); if (n.startsWith("/lib/")) return r.fulfill(file(`${HERE}/shorts${n}`, "text/javascript")); }
   if (n === "/scene.js" || n === "/lines.json") return r.fulfill(file(`${HERE}/${name}${n}`, n.endsWith("json") ? "application/json" : "text/javascript"));
   if (n === "/mux.js") return r.fulfill(file(`${ROOT}/.tmp-ad/node_modules/mp4-muxer/build/mp4-muxer.js`, "text/javascript"));
   if (n.startsWith("/vo/")) return r.fulfill(file(`${VO}/${path.basename(n)}`, MIME[path.extname(n)]));
@@ -40,7 +41,7 @@ if (mode === "stills") {
   const light = process.env.LIGHT === "1";
   const res = await p.evaluate(([br, ab, cb, sc]) => window.encodeAll(br, ab, cb, sc), [process.env.BR ? +process.env.BR : light ? (fmt === "v" ? 3_000_000 : 3_500_000) : (fmt === "v" ? 7_500_000 : 9_000_000), +(process.env.AB || 192000), process.env.CBR === "1", +(process.env.SCALE || 1)]);
   fs.mkdirSync(path.join(ROOT, "marketing", "promo-videos"), { recursive: true });
-  const f = path.join(ROOT, "marketing", "promo-videos", `${name}-${fmt === "v" ? "vertical" : "wide"}${process.env.BR ? "-upload" : light ? "-share" : ""}.mp4`);
+  const f = process.env.OUTFILE || path.join(ROOT, "marketing", "promo-videos", `${name}-${fmt === "v" ? "vertical" : "wide"}${process.env.BR ? "-upload" : light ? "-share" : ""}.mp4`);
   fs.writeFileSync(f, Buffer.from(res.video, "base64")); console.log("wrote", f, Math.round(fs.statSync(f).size / 1024), "KB", "peak", res.peak);
 }
 await b.close();

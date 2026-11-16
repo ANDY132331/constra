@@ -1,0 +1,46 @@
+[
+  {
+    "id": "s001", "title": "Who worked Tuesday", "bg": "site", "cast": ["Mac", "Jess", "Dev"], "hook": "Payroll day",
+    "lines": [
+      ["Mac", "Okay. Who worked Tuesday?", "neutral"],
+      ["Jess", "Me. Queen Street. Eight hours.", "happy"],
+      ["Dev", "Me too! I was... everywhere.", "smug", "shock"],
+      ["Jess", "Dev. You were asleep in the truck.", "angry", "sad", "BUSTED", "rim"],
+      ["Mac", "Photo and G P S. Next week, it just knows.", "happy"]
+    ],
+    "feature": "time-tracking", "featureAt": 4, "chips": ["PHOTO + GPS"]
+  },
+  {
+    "id": "s002", "title": "The client asks for one small change", "bg": "office", "cast": ["Tony", "Priya"], "hook": "One small change",
+    "lines": [
+      ["Tony", "Can we just move the whole kitchen? Tiny change.", "happy"],
+      ["Priya", "That's a change order, Tony.", "neutral"],
+      ["Tony", "Change order? It's one wall!", "angry", "shock"],
+      ["Priya", "One wall, forty hours, and a new quote.", "smug", "sad", "INVOICED", "trombone"],
+      ["Tony", "Fine. Send it.", "sad"]
+    ],
+    "feature": "invoices", "featureAt": 3, "chips": ["INVOICES"]
+  },
+  {
+    "id": "s003", "title": "Overtime math", "bg": "kitchen", "cast": ["Bea", "Dev"], "hook": "Overtime math", "sign": "BREAK ROOM",
+    "lines": [
+      ["Bea", "Dev, how many hours did you work?", "neutral"],
+      ["Dev", "Maybe forty. Maybe a hundred. Time is a feeling.", "happy"],
+      ["Bea", "I cannot pay a feeling.", "angry", "shock", "NO", "boing"],
+      ["Dev", "The app says forty-six. Overtime already worked out.", "smug"],
+      ["Bea", "Finally. A coworker who can count.", "happy", "happy", "", "rim"]
+    ],
+    "feature": "timesheets", "featureAt": 3, "chips": ["OVERTIME ✓"]
+  },
+  {
+    "id": "s004", "title": "The notebook is missing", "bg": "night", "cast": ["Kai", "Mac"], "hook": "9 PM. Friday.", "music": "tense",
+    "lines": [
+      ["Mac", "Kai. Have you seen my notebook?", "sad"],
+      ["Kai", "The one with every crew's hours?", "neutral", "shock"],
+      ["Mac", "The only copy.", "sad", "sad", "", "trombone"],
+      ["Kai", "Boss. Open your phone.", "smug"],
+      ["Mac", "...They're all here. Photo and G P S.", "happy", "happy", "SAVED", "sparkle"]
+    ],
+    "feature": "time-tracking", "featureAt": 4, "chips": ["EVERY PUNCH"]
+  }
+]

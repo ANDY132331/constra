@@ -4,7 +4,7 @@ import fs from "fs";
 //   node vids-voice.mjs <name>  (copy of this file placed in .tmp-ad so msedge-tts resolves)     -> reads marketing/vids/<name>/lines.json, writes vids/<name>/vo/vo-NN.mp3 + .json
 //   ONLY=7 node ../marketing/vids/voice.mjs <name>   -> redo one line (the endpoint sometimes returns 0 bytes)
 const name = process.argv[2]; const here = "../marketing/vids/";
-const lines = JSON.parse(fs.readFileSync(`${here}${name}/lines.json`, "utf8"));
+const lines = JSON.parse(fs.readFileSync(fs.existsSync(`vids/${name}/lines.json`) ? `vids/${name}/lines.json` : `${here}${name}/lines.json`, "utf8"));
 const OUT = process.env.OUT || `vids/${name}/vo`; fs.mkdirSync(OUT, { recursive: true });
 for (let i = 0; i < lines.length; i++) {
   const L = lines[i], id = i + 1; if (process.env.ONLY && +process.env.ONLY !== id) continue;
