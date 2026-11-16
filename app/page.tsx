@@ -5,6 +5,7 @@ import Link from "next/link";
 import { HardHat, MapPin, Check, AlertTriangle, ArrowRight, ArrowLeft, Plus, WifiOff, FileSpreadsheet, Wallet } from "lucide-react";
 import { PLAY_STORE_URL } from "@/lib/store-app";
 import "./landing.css";
+import "./landing-blue.css";
 
 function readOnboarded(): boolean {
   try {
@@ -210,7 +211,7 @@ function JumpGame() {
         ctx.fillStyle = "#fff"; ctx.fillRect(c.x + 11, ground - 26, 12, 6);
       }
       // worker
-      const px = 90, fy = ground - g.y, run = g.y === 0 && g.mode === "play" ? Math.sin(g.t * 18) * 9 : 0;
+      const px = Math.round(W / 2), fy = ground - g.y, run = g.y === 0 && g.mode === "play" ? Math.sin(g.t * 18) * 9 : 0;
       ctx.strokeStyle = "#151617"; ctx.lineWidth = 5; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(px, fy - 30); ctx.lineTo(px - 8 + run, fy); ctx.moveTo(px, fy - 30); ctx.lineTo(px + 8 - run, fy); ctx.stroke();
       ctx.fillStyle = "#FF6B3D"; ctx.fillRect(px - 11, fy - 62, 22, 34);
@@ -231,7 +232,7 @@ function JumpGame() {
         g.cones = g.cones.filter((c) => c.x > -50);
         g.next -= g.speed * dt;
         if (g.next <= 0) { g.cones.push({ x: W + 20 }); g.next = 380 + Math.random() * 360; }
-        if (g.cones.some((c) => c.x < 90 + 12 && c.x + 32 > 90 - 12 && g.y < 40)) { g.mode = "over"; setLabel("Oops. Press Space to go again"); }
+        if (g.cones.some((c) => c.x < W / 2 + 12 && c.x + 32 > W / 2 - 12 && g.y < 40)) { g.mode = "over"; setLabel("Oops. Press Space to go again"); }
       }
       draw();
     };
@@ -261,6 +262,7 @@ export default function LandingPage() {
   const alreadyIn = useSyncExternalStore(noopSubscribe, readOnboarded, () => false);
   const rootRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const blueRef = useRef<HTMLElement>(null);
   const [shot, setShot] = useState(0);
 
   // The big scroll scene: write progress to CSS variables so nothing re-renders while scrolling
@@ -274,6 +276,11 @@ export default function LandingPage() {
       raf = 0;
       root.classList.toggle("scrolled", root.scrollTop > 40);
       if (reduce) return;
+      const blue = blueRef.current;
+      if (blue) {
+        const br = blue.getBoundingClientRect();
+        blue.style.setProperty("--bp", clamp((window.innerHeight - br.top) / (window.innerHeight + br.height)).toFixed(3));
+      }
       const r = track.getBoundingClientRect();
       const p = clamp(-r.top / Math.max(1, r.height - window.innerHeight));
       const ease = (v: number) => 1 - Math.pow(1 - v, 3);
@@ -316,6 +323,16 @@ export default function LandingPage() {
     }, { root, rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
     els.forEach((el, i) => { el.classList.add("rv"); el.style.setProperty("--rv-d", `${(i % 4) * 70}ms`); io.observe(el); });
     return () => { io.disconnect(); els.forEach((el) => el.classList.remove("rv", "rv-in")); };
+  }, []);
+
+  // The pointers on the blueprint screen appear one after another as it scrolls into view
+  useEffect(() => {
+    const root = rootRef.current, blue = blueRef.current;
+    if (!root || !blue || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+    blue.classList.add("arm");
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { blue.classList.add("live"); io.disconnect(); } }, { root, threshold: 0.3 });
+    io.observe(blue);
+    return () => { io.disconnect(); blue.classList.remove("arm", "live"); };
   }, []);
 
   const startHref = alreadyIn ? "/dashboard" : "/onboarding";
@@ -419,6 +436,62 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        {/* Blueprint: a real screen with pointers at the parts that matter */}
+        <section ref={blueRef} className="mp-blue" aria-label="Every punch, checked">
+          <div className="mp-blue-in">
+            <p className="mp-mono-label"><i /> Every screen is the real app</p>
+            <div className="mp-blue-stage">
+              <div className="mp-blue-words" aria-hidden>
+                <span><i>Every</i><i>punch</i></span>
+                <span><i>is</i><i>checked.</i></span>
+              </div>
+              <h2 className="mp-sr">Every punch, checked.</h2>
+
+              <figure className="mp-float mp-float-a" style={{ ["--k" as string]: "-90" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/site/site-morning.webp" width={1400} height={864} loading="lazy" decoding="async" alt="A 3D view of a job site in the morning" />
+                <figcaption>06:58 · Crew clocks in</figcaption>
+              </figure>
+              <figure className="mp-float mp-float-b" style={{ ["--k" as string]: "70" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/site/site-midday.webp" width={1400} height={864} loading="lazy" decoding="async" alt="The same job site at midday with steel going up" />
+                <figcaption>12:00 · Level 4 steel</figcaption>
+              </figure>
+              <figure className="mp-float mp-float-c" style={{ ["--k" as string]: "-50" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/site/site-afternoon.webp" width={1400} height={864} loading="lazy" decoding="async" alt="The same job site in the afternoon with the deck poured" />
+                <figcaption>16:00 · Report sent</figcaption>
+              </figure>
+
+              <div className="mp-blue-phone">
+                <div className="mp-phone mp-phone-flat">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="on" src="/site/app-clock.webp" width={780} height={1688} loading="lazy" decoding="async" alt="Constra time screen with a worker on site, an overtime warning, today's hours and a Clock Out button" />
+                </div>
+                {([
+                  { x: 28, y: 22, t: "GPS checked at punch", s: "Where they clocked in", side: "l" },
+                  { x: 65, y: 11.7, t: "Export to CSV", s: "One tap to payroll", side: "r" },
+                  { x: 12, y: 52, t: "Overtime flagged", s: "Before payroll, not after", side: "l" },
+                  { x: 49, y: 62, t: "Hours add up live", s: "Today across the crew", side: "l" },
+                  { x: 85, y: 76, t: "Clock a worker out", s: "From the same list", side: "r" },
+                ] as const).map((h, i) => (
+                  <div key={h.t} className={"mp-hs mp-hs-" + h.side} style={{ left: h.x + "%", top: h.y + "%", ["--i" as string]: i, ["--x" as string]: h.x }}>
+                    <span className="mp-hs-dot" aria-hidden />
+                    <span className="mp-hs-chip"><em>{h.t}</em>{h.s}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <dl className="mp-meta">
+              <div><dt>Crew size</dt><dd>Unlimited</dd></div>
+              <div><dt>Signal needed</dt><dd>None</dd></div>
+              <div><dt>Cost</dt><dd>Free while we launch</dd></div>
+              <div><dt>Works on</dt><dd>Any phone</dd></div>
+            </dl>
+          </div>
+        </section>
 
         {/* A day on site */}
         <section id="day" className="mp-day" aria-label="One day on site">

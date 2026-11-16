@@ -197,4 +197,4 @@
 /* Links inside the page inherit colour; pills must not */
 .mp .mp-pill { color: var(--ink); }
 .mp .mp-pill-ink { color: #fff; }
-.mp-game .mp-pill { top: 30%; }
+.mp-game .mp-pill { top: 20%; }
