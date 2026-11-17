@@ -99,7 +99,7 @@
 
 /* The phone: rises into the middle as you scroll; leans toward the pointer; bobs gently */
 .mp-phone-wrap { position: absolute; z-index: 6; left: 50%; top: 50%; transform: translate(-50%, -50%) translateY(calc((1 - var(--m, 0)) * 55svh)) rotate(calc((1 - var(--m, 0)) * 9deg)); }
-.mp-tilt { transform: perspective(1300px) rotateY(calc(var(--mx, 0) * 7deg)) rotateX(calc(var(--my, 0) * -5deg)); transition: transform .15s ease-out; }
+.mp-tilt { transform: perspective(1300px) rotateY(calc(var(--mx, 0) * 7deg + (1 - var(--m, 0)) * -26deg)) rotateX(calc(var(--my, 0) * -5deg + (1 - var(--m, 0)) * 8deg)); scale: calc(.9 + var(--m, 0) * .1); transition: transform .15s ease-out; }
 .mp-phone-in { animation: mp-rise 1.2s cubic-bezier(.2, .8, .2, 1) .1s backwards, mp-bob 5.5s ease-in-out 1.4s infinite; }
 @keyframes mp-rise { from { transform: translateY(46svh) rotate(14deg); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes mp-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
@@ -110,8 +110,15 @@
 @keyframes mp-glow { 0%, 100% { transform: scale(.9); } 50% { transform: scale(1.08); } }
 .mp-phone::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.32) 50%, transparent 62%); transform: translateX(-130%); animation: mp-shine 6.5s ease-in-out 2.6s infinite; }
 @keyframes mp-shine { 0% { transform: translateX(-130%); } 28%, 100% { transform: translateX(130%); } }
-.mp-phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; }
-.mp-phone img.on { opacity: 1; }
+.mp-phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.07); transition: opacity .4s, transform .6s cubic-bezier(.2, .9, .2, 1); }
+.mp-phone img.on { opacity: 1; transform: none; }
+/* a yellow bar sweeps across the screen every time the screen changes */
+.mp-swipe { position: absolute; inset: 0; z-index: 4; pointer-events: none; background: linear-gradient(90deg, transparent 20%, rgba(245,196,0,.55) 50%, transparent 80%); transform: translateX(-110%); animation: mp-sweep .7s ease-out both; }
+@keyframes mp-sweep { 0% { transform: translateX(-110%); } 100% { transform: translateX(110%); } }
+/* rings that ping outward from the phone */
+.mp-radar { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; opacity: var(--w, 0); }
+.mp-radar i { position: absolute; width: 96vmin; height: 96vmin; margin: -48vmin 0 0 -48vmin; border-radius: 50%; border: 2px solid rgba(255,253,240,.4); opacity: 0; animation: mp-radar 5.4s ease-out infinite; animation-delay: calc(var(--k) * 1.8s); }
+@keyframes mp-radar { 0% { transform: scale(.3); opacity: .8; } 100% { transform: scale(1.3); opacity: 0; } }
 
 /* Blue floods out from behind the phone */
 .mp-flood { position: absolute; inset: 0; z-index: 2; color: #FFFDF0; overflow: hidden; clip-path: circle(calc(var(--f, 0) * 142vmax) at 50% 78%);
@@ -122,7 +129,8 @@
 .mp-words { position: absolute; left: 0; right: 0; top: 24%; display: grid; grid-template-columns: 1fr 1fr; align-items: center; width: min(1360px, 100% - 40px); margin-inline: auto; opacity: var(--w, 0); }
 .mp-words::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px; background: var(--hv); box-shadow: 0 0 22px rgba(245,196,0,.6); transform: scaleX(var(--w, 0)); }
 .mp-words span { position: relative; display: grid; row-gap: 26px; font: 400 clamp(44px, 6.4vw, 108px)/.88 var(--display); letter-spacing: -.045em; text-transform: uppercase; white-space: nowrap; }
-.mp-words i { font-style: normal; }
+/* each word lands on its own, one after the other */
+.mp-words i { font-style: normal; --wr: clamp(0, calc(var(--w, 0) * 2.4 - var(--wi, 0) * .4), 1); opacity: var(--wr); translate: 0 calc((1 - var(--wr)) * 46px); rotate: calc((1 - var(--wr)) * -7deg); }
 .mp-words span:first-child { justify-items: end; padding-right: calc(var(--pw) / 2 + 18px); transform: translateX(calc((1 - var(--w, 0)) * -60px)); }
 .mp-words span:last-child { justify-items: start; padding-left: calc(var(--pw) / 2 + 18px); transform: translateX(calc((1 - var(--w, 0)) * 60px)); }
 .mp-flood-label { position: absolute; right: max(20px, 4vw); top: 118px; display: flex; align-items: center; gap: 10px; margin: 0; font: 500 13px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(255,253,240,.85); opacity: var(--w, 0); }
@@ -130,7 +138,10 @@
 
 /* Job-site photos that drift in at the edges */
 .mp-float { position: absolute; margin: 0; width: clamp(150px, 15vw, 230px); border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,253,240,.35); background: var(--blue-d); box-shadow: 0 24px 50px rgba(0,0,0,.35);
-  opacity: var(--w, 0); transform: translateY(calc((1 - var(--w, 0)) * 50px)); }
+  opacity: var(--w, 0); transform: translateY(calc((1 - var(--w, 0)) * 50px)) rotate(calc((1 - var(--w, 0)) * var(--fr, 8deg) * 2 + var(--fr, 8deg))); animation: mp-bob 6s ease-in-out infinite; animation-delay: var(--fd, 0s); }
+.mp-float-a { --fr: -3deg; --fd: 0s; }
+.mp-float-b { --fr: 4deg; --fd: -2s; }
+.mp-float-c { --fr: -4deg; --fd: -4s; }
 .mp-float img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
 .mp-float figcaption { padding: 9px 12px; font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(255,253,240,.9); }
 .mp-float-a { left: 3%; top: 19%; }
@@ -138,8 +149,13 @@
 .mp-float-c { left: 6%; bottom: 10%; }
 
 /* Pointers: a pulsing dot on the screen and a chip on a thin line that names what it is */
-.mp-hs { position: absolute; width: 0; height: 0; z-index: 4; opacity: clamp(0, calc(var(--h, 0) * 7 - var(--i)), 1); }
-.mp-hs-dot { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 5px solid var(--hv); animation: mp-ping 2.2s ease-out infinite; animation-delay: calc(var(--i) * .35s); }
+.mp-hs { --rv: clamp(0, calc(var(--h, 0) * 7 - var(--i)), 1); position: absolute; width: 0; height: 0; z-index: 4; opacity: var(--rv); }
+.mp-hs-r .mp-hs-chip { translate: calc((1 - var(--rv)) * -26px) 0; }
+.mp-hs-l .mp-hs-chip { translate: calc((1 - var(--rv)) * 26px) 0; }
+.mp-hs-chip::before { scale: var(--rv) 1; }
+.mp-hs-r .mp-hs-chip::before { transform-origin: right center; }
+.mp-hs-l .mp-hs-chip::before { transform-origin: left center; }
+.mp-hs-dot { scale: calc(.4 + var(--rv) * .6); position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 5px solid var(--hv); animation: mp-ping 2.2s ease-out infinite; animation-delay: calc(var(--i) * .35s); }
 @keyframes mp-ping { 0% { box-shadow: 0 0 0 0 rgba(245,196,0,.55); } 80%, 100% { box-shadow: 0 0 0 16px rgba(245,196,0,0); } }
 .mp-hs-chip { position: absolute; top: 0; transform: translateY(-50%); white-space: nowrap; display: block; padding: 9px 13px 9px 12px; border-radius: 10px; background: rgba(4,34,79,.86); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255,253,240,.3); font: 500 12px/1.3 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: rgba(255,253,240,.9); }
@@ -151,7 +167,9 @@
 .mp-hs-l .mp-hs-chip::before { left: 100%; width: calc(var(--pw) * var(--x) / 100 + 28px); }
 
 .mp-ctrl { position: absolute; z-index: 7; left: 0; right: 0; bottom: 3.4svh; display: flex; align-items: center; justify-content: center; gap: clamp(12px, 5vw, 80px); opacity: var(--w, 0); }
-.mp-ctrl .mp-pill-yellow { min-width: 190px; min-height: 56px; font-size: 21px; }
+.mp-ctrl .mp-pill-yellow { min-width: 190px; min-height: 56px; font-size: 21px; translate: 0 calc((1 - var(--w, 0)) * 50px); animation: mp-nudge 2.8s ease-in-out infinite; }
+.mp-ctrl .mp-pill-round { translate: 0 calc((1 - var(--w, 0)) * 70px); }
+@keyframes mp-nudge { 0%, 100% { box-shadow: 0 4px 0 var(--ink), 0 0 0 0 rgba(245,196,0,.6); } 60% { box-shadow: 0 4px 0 var(--ink), 0 0 0 14px rgba(245,196,0,0); } }
 
 @media (max-width: 760px) {
   .mp-stage { --pw: calc(min(54svh, 560px) * 0.4621); }
@@ -174,8 +192,7 @@
   .mp-words::before { display: none; }
   .mp-words span { display: inline; font-size: clamp(38px, 11.2vw, 60px); line-height: .92; padding: 0 !important; transform: none !important; white-space: normal; }
   .mp-words span:first-child::after { content: " "; }
-  .mp-words i { display: inline; }
-  .mp-words i + i::before { content: " "; }
+  .mp-words i { display: inline-block; margin-right: .24em; }
   .mp-flood-label { top: 98px; left: 20px; right: auto; }
   /* On a phone the chips sit across the screen: there is no room beside it */
   .mp-hs { left: 0 !important; right: 0; width: auto; }
@@ -202,6 +219,11 @@
   .mp-float { display: none; }
   .mp-tilt, .mp-phone-in, .mp-pop, .mp-pop svg, .mp-spark, .mp-hs-dot, .mp-intro { animation: none; transform: none; }
   .mp-h1 .l { translate: none; }
+  .mp-radar, .mp-swipe { display: none; }
+  .mp-words i, .mp-hs-chip, .mp-hs-dot, .mp-ctrl .mp-pill-yellow, .mp-ctrl .mp-pill-round, .mp-tilt { translate: none; rotate: none; scale: none; animation: none; }
+  .mp-hs-chip::before { scale: none; }
+  .mp-words i { opacity: 1; }
+  .mp-float { animation: none; }
   .mp-h1 .l > span, .mp-h1 .l2 > span::after, .mp-sticker svg, .mp-phone-box::before, .mp-phone::after { animation: none; }
   .mp-h1 .l2 > span::after { transform: scaleX(1) rotate(-1.6deg); }
   .mp-scrap { display: none; }

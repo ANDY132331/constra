@@ -454,9 +454,10 @@ export default function LandingPage() {
 
             <div className="mp-flood">
               <p className="mp-flood-label"><i /> Every screen is the real app</p>
+              <div className="mp-radar" aria-hidden><i style={{ ["--k" as string]: 0 }} /><i style={{ ["--k" as string]: 1 }} /><i style={{ ["--k" as string]: 2 }} /></div>
               <div className="mp-words" aria-hidden>
-                <span><i>Every</i><i>punch</i></span>
-                <span><i>is</i><i>checked.</i></span>
+                <span><i style={{ ["--wi" as string]: 0 }}>Every</i><i style={{ ["--wi" as string]: 1 }}>punch</i></span>
+                <span><i style={{ ["--wi" as string]: 2 }}>is</i><i style={{ ["--wi" as string]: 3 }}>checked.</i></span>
               </div>
               <h2 className="mp-sr">Every punch is checked.</h2>
               <figure className="mp-float mp-float-a">
@@ -481,6 +482,7 @@ export default function LandingPage() {
                 <div className="mp-phone-in">
                   <div className="mp-phone-box">
                     <div className="mp-phone">
+                      <span key={shot} className="mp-swipe" aria-hidden />
                       {SCREENS.map((s, i) => (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img key={s.src} src={s.src} alt={i === shot ? s.alt : ""} aria-hidden={i !== shot} width={780} height={1688} className={i === shot ? "on" : ""} decoding="async" fetchPriority={i === 0 ? "high" : "auto"} />
