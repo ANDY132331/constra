@@ -319,7 +319,7 @@ export default function LandingPage() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>(".mp-big, .mp-label, .mp-group, .mp-tile, .mp-frame, .mp-price-card, .mp-faq-list details, .mp-watch-grid p"));
+    const els = Array.from(root.querySelectorAll<HTMLElement>(".mp-big, .mp-label, .mp-group, .mp-day-card, .mp-tile, .mp-frame, .mp-price-card, .mp-faq-list details, .mp-watch-grid p"));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add("rv-in"); io.unobserve(e.target); } });
     }, { root, rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
@@ -484,8 +484,8 @@ export default function LandingPage() {
             <h2 className="mp-big">One day on site,<br />start to invoice.</h2>
           </div>
           <ol className="mp-day-row" style={{ listStyle: "none" }}>
-            {DAY.map((s) => (
-              <li key={s.time} className="mp-day-card" style={{ ["--c" as string]: s.c, ["--fg" as string]: s.fg }}>
+            {DAY.map((s, i) => (
+              <li key={s.time} className="mp-day-card" style={{ ["--c" as string]: s.c, ["--fg" as string]: s.fg, ["--i" as string]: i, ["--tilt" as string]: i % 2 ? "1.6deg" : "-1.6deg" }}>
                 <time>{s.time}</time>
                 <h3>{s.title}</h3>
                 <p>{s.body}</p>

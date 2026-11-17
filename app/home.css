@@ -208,6 +208,23 @@
 .mp-day-card time { font: 400 clamp(64px, 8vw, 96px)/.9 var(--display); letter-spacing: -.05em; }
 .mp-day-card h3 { margin: 0; font: 600 26px/1.05 var(--display); letter-spacing: -.02em; }
 .mp-day-card p { margin: 0; font-size: 16.5px; line-height: 1.4; }
+.mp-day-card { position: relative; overflow: hidden; }
+.mp-day-card::after { content: ""; position: absolute; right: -50px; bottom: -50px; width: 190px; height: 190px; border-radius: 50%; background: currentColor; opacity: .09; }
+@media (prefers-reduced-motion: no-preference) {
+  .mp .mp-day-card.rv { opacity: 0; transform: translateY(90px) rotate(calc(var(--tilt) * 4)) scale(.86); transition: opacity .5s ease, transform .9s cubic-bezier(.2, 1.5, .4, 1); transition-delay: 0ms; }
+  .mp .mp-day-card.rv-in { opacity: 1; transform: rotate(var(--tilt)); transition-delay: calc(var(--i) * 130ms); }
+  .mp .mp-day-card.rv-in:hover { transform: translateY(-14px) rotate(0deg) scale(1.035); transition: transform .35s cubic-bezier(.2, 1.5, .4, 1); transition-delay: 0ms; }
+  .mp .mp-day-card.rv time { display: inline-block; transform-origin: left bottom; }
+  .mp .mp-day-card.rv-in time { animation: mp-tick .8s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(var(--i) * 130ms + 250ms); }
+  .mp .mp-day-card.rv-in h3, .mp .mp-day-card.rv-in p { animation: mp-fadeup .6s ease both; animation-delay: calc(var(--i) * 130ms + 450ms); }
+  .mp .mp-day-card.rv-in p { animation-delay: calc(var(--i) * 130ms + 580ms); }
+  .mp .mp-day-card.rv-in .mp-chip { animation: mp-popin .6s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(var(--i) * 130ms + 760ms); }
+  .mp .mp-day-card.rv-in::after { animation: mp-grow 1s ease both; animation-delay: calc(var(--i) * 130ms + 200ms); }
+  .mp .mp-day-card.rv-in:hover time { animation: mp-wiggle .5s ease; }
+}
+@keyframes mp-tick { from { transform: translateY(60%) rotate(-10deg) scale(.5); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes mp-grow { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes mp-wiggle { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-5deg) scale(1.06); } 65% { transform: rotate(3deg) scale(1.03); } }
 .mp-chip { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; background: var(--paper); color: var(--ink); border-radius: 999px; padding: 9px 14px; font: 500 13px/1 var(--mono); }
 
 /* Features */
