@@ -296,5 +296,91 @@
 .mp-foot-row a { text-underline-offset: 4px; }
 
 /* Things ease up into place as they scroll in */
-.mp .rv { opacity: 0; transform: translateY(26px); transition: opacity .6s ease, transform .6s ease; transition-delay: var(--rv-d, 0ms); }
-.mp .rv.rv-in { opacity: 1; transform: none; }
+.mp .rv { opacity: 0; translate: 0 26px; transition: opacity .6s ease, translate .6s ease; transition-delay: var(--rv-d, 0ms); }
+.mp .rv.rv-in { opacity: 1; translate: 0 0; }
+
+/* More movement for the sections below the cards. Individual transform properties (translate, rotate, scale)
+   are used so they never fight the tilts the elements already carry in `transform`. */
+@media (prefers-reduced-motion: no-preference) {
+  .mp .mp-day-card.rv, .mp .mp-day-card.rv-in { translate: none; }
+
+  /* heading and aside of the "what are we talking about" block swing in */
+  .mp .mp-talk h2.rv { translate: -90px 0; opacity: 0; transition: opacity .7s ease, translate .9s cubic-bezier(.2, 1.2, .3, 1); }
+  .mp .mp-talk h2.rv-in { translate: 0 0; opacity: 1; }
+  .mp .mp-talk p.rv { translate: 70px 0; }
+  .mp .mp-talk p.rv-in { translate: 0 0; transition-delay: 250ms; }
+
+  /* tilted cards pop up and settle, then the little drawing bobs */
+  .mp .mp-card.rv { opacity: 0; translate: 0 90px; rotate: 9deg; scale: .88; transition: opacity .5s ease, translate .9s cubic-bezier(.2, 1.5, .4, 1), rotate .9s cubic-bezier(.2, 1.5, .4, 1), scale .9s cubic-bezier(.2, 1.5, .4, 1), transform .25s; }
+  .mp .mp-card.rv-in { opacity: 1; translate: 0 0; rotate: 0deg; scale: 1; }
+  .mp .mp-card.rv-in svg { animation: mp-bob 3.2s ease-in-out infinite; animation-delay: var(--rv-d, 0ms); }
+  .mp .mp-card.rv-in .mp-card-tab { animation: mp-popin .6s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(var(--rv-d, 0ms) + 250ms); }
+
+  /* FEATURES: every letter drops in one by one, and wiggles when touched */
+  .mp .mp-letters.rv { opacity: 1; translate: none; }
+  .mp .mp-letters.rv span { opacity: 0; }
+  .mp .mp-letters.rv-in span { animation: mp-letter .8s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(var(--k, 0) * 70ms); cursor: default; }
+  .mp .mp-letters.rv-in span:hover { animation: mp-wiggle .5s ease; }
+
+  /* feature boxes: rows slide in after the box lands, box lifts on hover */
+  .mp .mp-group.rv { transition: opacity .6s ease, translate .6s ease, box-shadow .25s ease; }
+  .mp .mp-group.rv-in:hover { translate: 0 -6px; box-shadow: 0 14px 0 var(--ink); transition-delay: 0ms; }
+  .mp .mp-group.rv-in h3 { animation: mp-popin .55s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(var(--rv-d, 0ms) + 200ms); }
+  .mp .mp-group.rv-in dl div { animation: mp-fadeup .5s ease both; }
+  .mp .mp-group.rv-in dl div:nth-child(1) { animation-delay: calc(var(--rv-d, 0ms) + 350ms); }
+  .mp .mp-group.rv-in dl div:nth-child(2) { animation-delay: calc(var(--rv-d, 0ms) + 450ms); }
+  .mp .mp-group.rv-in dl div:nth-child(3) { animation-delay: calc(var(--rv-d, 0ms) + 550ms); }
+  .mp .mp-group.rv-in dl div:nth-child(4) { animation-delay: calc(var(--rv-d, 0ms) + 650ms); }
+  .mp .mp-group.rv-in dl div:nth-child(5) { animation-delay: calc(var(--rv-d, 0ms) + 750ms); }
+  .mp .mp-group.rv-in dl div:nth-child(n+6) { animation-delay: calc(var(--rv-d, 0ms) + 850ms); }
+
+  /* video frame zooms up, its yellow shadow slides out */
+  .mp .mp-frame.rv { translate: 0 40px; scale: .86; rotate: -3deg; box-shadow: 0 0 0 var(--hv); transition: opacity .6s ease, translate .9s cubic-bezier(.2, 1.3, .4, 1), scale .9s cubic-bezier(.2, 1.3, .4, 1), rotate .9s cubic-bezier(.2, 1.3, .4, 1), box-shadow .9s ease .3s; }
+  .mp .mp-frame.rv-in { scale: 1; rotate: 0deg; box-shadow: 0 10px 0 var(--hv); }
+  .mp .mp-watch-grid p.rv { translate: 50px 0; }
+
+  /* field tiles come in from alternating sides and tilt on hover */
+  .mp .mp-tile:nth-child(odd) { --dir: -1; }
+  .mp .mp-tile:nth-child(even) { --dir: 1; }
+  .mp .mp-tile.rv { translate: calc(var(--dir, -1) * 70px) 50px; rotate: calc(var(--dir, -1) * 5deg); transition: opacity .6s ease, translate .9s cubic-bezier(.2, 1.4, .4, 1), rotate .9s cubic-bezier(.2, 1.4, .4, 1); }
+  .mp .mp-tile.rv-in { translate: 0 0; rotate: 0deg; }
+  .mp .mp-tile.rv-in:hover { translate: 0 -10px; rotate: calc(var(--dir, -1) * 1.8deg); transition-delay: 0ms; }
+  .mp .mp-tile.rv-in b { display: inline-block; animation: mp-tick .8s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: calc(var(--rv-d, 0ms) + 300ms); }
+
+  /* pricing card swings in, checks tick in one by one */
+  .mp .mp-price-card.rv { translate: 60px 40px; rotate: -7deg; scale: .92; transition: opacity .6s ease, translate .9s cubic-bezier(.2, 1.4, .4, 1), rotate .9s cubic-bezier(.2, 1.4, .4, 1), scale .9s cubic-bezier(.2, 1.4, .4, 1), transform .3s ease; }
+  .mp .mp-price-card.rv-in { translate: 0 0; rotate: 0deg; scale: 1; }
+  .mp .mp-price-card.rv-in:hover { transform: rotate(0deg) translateY(-6px); }
+  .mp .mp-price-card.rv-in .mp-price-top b { display: inline-block; animation: mp-tick .9s cubic-bezier(.2, 1.7, .4, 1) both; animation-delay: .35s; }
+  .mp .mp-price-card.rv-in li { animation: mp-fadeup .5s ease both; }
+  .mp .mp-price-card.rv-in li:nth-child(1) { animation-delay: .5s; }
+  .mp .mp-price-card.rv-in li:nth-child(2) { animation-delay: .6s; }
+  .mp .mp-price-card.rv-in li:nth-child(3) { animation-delay: .7s; }
+  .mp .mp-price-card.rv-in li:nth-child(4) { animation-delay: .8s; }
+  .mp .mp-price-card.rv-in li:nth-child(n+5) { animation-delay: .9s; }
+
+  /* FAQ rows slide in from alternating sides; answers fade open */
+  .mp .mp-faq-list details:nth-child(odd).rv { translate: -50px 0; }
+  .mp .mp-faq-list details:nth-child(even).rv { translate: 50px 0; }
+  .mp .mp-faq-list details.rv-in { translate: 0 0; }
+  .mp .mp-faq-list details { transition: background .2s ease; }
+  .mp .mp-faq-list details:hover { background: #fff; }
+  .mp .mp-faq-list details[open] p { animation: mp-fadeup .4s ease both; }
+
+  /* final blue section: the grid slowly drifts, buttons bob */
+  .mp .mp-final::before { animation: mp-grid 12s linear infinite; }
+  .mp .mp-final .mp-pill { animation: mp-bob 2.6s ease-in-out infinite; }
+}
+@keyframes mp-letter { from { opacity: 0; translate: 0 .7em; rotate: -20deg; scale: .5; } to { opacity: 1; translate: 0 0; rotate: 0deg; scale: 1; } }
+@keyframes mp-grid { to { background-position: 56px 56px, 56px 56px; } }
+@keyframes mp-scroll { to { transform: translateX(-50%); } }
+
+/* Scrolling strip */
+.mp-marquee-wrap { overflow: hidden; padding: 30px 0 40px; }
+.mp-marquee { overflow: hidden; background: var(--ink); color: var(--hv); padding: 18px 0; transform: rotate(-1.6deg); width: 106%; margin-left: -3%; border-block: 3px solid var(--hv); }
+.mp-marquee-track { display: flex; width: max-content; animation: mp-scroll 30s linear infinite; }
+.mp-marquee-track > span { display: flex; flex: none; }
+.mp-marquee i { font: 400 clamp(28px, 4vw, 52px)/1 var(--display); font-style: normal; text-transform: uppercase; letter-spacing: -.02em; white-space: nowrap; padding-right: 28px; display: inline-flex; align-items: center; gap: 28px; }
+.mp-marquee i b { color: var(--orange); font-weight: 400; }
+.mp-marquee:hover .mp-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .mp-marquee-track { animation: none; } .mp-marquee { overflow-x: auto; } }

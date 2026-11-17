@@ -319,7 +319,7 @@ export default function LandingPage() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>(".mp-big, .mp-label, .mp-group, .mp-day-card, .mp-tile, .mp-frame, .mp-price-card, .mp-faq-list details, .mp-watch-grid p"));
+    const els = Array.from(root.querySelectorAll<HTMLElement>(".mp-big, .mp-label, .mp-talk h2, .mp-talk p, .mp-card, .mp-letters, .mp-group, .mp-day-card, .mp-tile, .mp-frame, .mp-price-card, .mp-faq-list details, .mp-watch-grid p"));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add("rv-in"); io.unobserve(e.target); } });
     }, { root, rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
@@ -540,7 +540,7 @@ export default function LandingPage() {
           <div className="mp-wrap">
             <p className="mp-label">Everything included on every account</p>
             <div className="mp-letters" role="heading" aria-level={2} aria-label="Features">
-              {"Features".split("").map((l, i) => <span key={i} aria-hidden>{l}</span>)}
+              {"Features".split("").map((l, i) => <span key={i} aria-hidden style={{ ["--k" as string]: i }}>{l}</span>)}
             </div>
             <div className="mp-groups">
               {FEATURES.map((g) => (
@@ -585,6 +585,21 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Scrolling strip */}
+        <div className="mp-marquee-wrap" aria-hidden>
+         <div className="mp-marquee">
+          <div className="mp-marquee-track">
+            {[0, 1].map((n) => (
+              <span key={n}>
+                {["Clock in", "Hours add up", "Invoices out", "Daily reports", "Works offline", "Crew on site", "Paid Friday"].map((w) => (
+                  <i key={w}>{w}<b>✦</b></i>
+                ))}
+              </span>
+            ))}
+          </div>
+         </div>
+        </div>
 
         {/* Pricing */}
         <section id="pricing" className="mp-price">
