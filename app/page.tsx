@@ -412,10 +412,32 @@ export default function LandingPage() {
               <div className="mp-pop hide-sm" style={{ left: "2.5%", top: "17%", width: "clamp(70px, 9vw, 130px)", ["--r" as string]: "-5deg", ["--pd" as string]: ".9s", ["--z" as string]: 12 }}><Level /></div>
               <div className="mp-pop hide-sm" style={{ right: "3.5%", top: "16%", width: "clamp(40px, 5vw, 76px)", ["--r" as string]: "14deg", ["--pd" as string]: "1s", ["--z" as string]: -12 }}><Bolt /></div>
 
+              {[
+                { l: "8%", d: "2.0s", t: "5.2s", x: "-60px", r: "260deg" },
+                { l: "22%", d: "2.3s", t: "4.6s", x: "40px", r: "-200deg" },
+                { l: "37%", d: "2.1s", t: "5.8s", x: "-30px", r: "320deg" },
+                { l: "52%", d: "2.6s", t: "4.9s", x: "70px", r: "-280deg" },
+                { l: "66%", d: "2.2s", t: "5.5s", x: "-50px", r: "240deg" },
+                { l: "80%", d: "2.5s", t: "4.7s", x: "50px", r: "-300deg" },
+                { l: "91%", d: "2.4s", t: "5.3s", x: "-40px", r: "200deg" },
+              ].map((s, i) => (
+                <i key={i} className="mp-scrap" aria-hidden style={{ left: s.l, ["--sd" as string]: s.d, ["--st" as string]: s.t, ["--sx" as string]: s.x, ["--sr" as string]: s.r }} />
+              ))}
+
+              <div className="mp-sticker" aria-hidden>
+                <svg viewBox="0 0 120 120">
+                  <defs><path id="mp-circ" d="M60,60 m-45,0 a45,45 0 1,1 90,0 a45,45 0 1,1 -90,0" /></defs>
+                  <text><textPath href="#mp-circ" textLength="280" lengthAdjust="spacing">FREE FOR CREWS • NO CARD • </textPath></text>
+                </svg>
+                <b>$0</b>
+              </div>
+
               <h1 className="mp-h1" aria-label="Run the job, not the paperwork">
-                <span aria-hidden>Run the job</span>
-                <span aria-hidden>not the</span>
-                <span aria-hidden>paperwork</span>
+                {["Run the job", "not the", "paperwork"].map((t, i) => (
+                  <span key={t} className={"l l" + i} aria-hidden style={{ ["--ld" as string]: 0.1 + i * 0.14 + "s", ["--p" as string]: [10, -14, 18][i], ["--dir" as string]: i % 2 ? 1 : -1 }}>
+                    <span>{t}</span>
+                  </span>
+                ))}
               </h1>
 
               <div className="mp-hero-foot">

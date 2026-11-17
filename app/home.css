@@ -55,9 +55,29 @@
 .mp-track { position: relative; height: 380svh; }
 .mp-stage { --pw: calc(min(72svh, 760px) * 0.4621); position: sticky; top: 0; height: 100svh; min-height: 640px; overflow: hidden; }
 
-.mp-hero { position: absolute; inset: 0; z-index: 1; background: var(--hv); display: flex; flex-direction: column; align-items: center; padding: 96px 16px 0; text-align: center; }
-.mp-h1 { margin: 0; font: 400 min(13.4vw, 21.5svh)/.86 var(--display); letter-spacing: -.045em; text-transform: uppercase; color: var(--ink); }
-.mp-h1 span { display: block; }
+.mp-hero { --fs: min(13.4vw, 21.5svh); position: absolute; inset: 0; z-index: 1; background: var(--hv); display: flex; flex-direction: column; align-items: center; padding: 96px 16px 0; text-align: center; overflow: hidden; }
+.mp-h1 { margin: 0; font: 400 var(--fs)/.86 var(--display); letter-spacing: -.045em; text-transform: uppercase; color: var(--ink); }
+/* each line slides up out of a mask, leans with the pointer, and spreads apart as the phone rises */
+.mp-h1 .l { display: block; overflow: hidden; padding: .03em .04em .05em; margin: -.03em -.04em -.05em;
+  translate: calc(var(--mx, 0) * var(--p, 0) * 1px + var(--m, 0) * var(--dir, 0) * 140px) calc(var(--m, 0) * -30px); }
+.mp-h1 .l > span { display: inline-block; position: relative; animation: mp-line 1s cubic-bezier(.2, .9, .2, 1) var(--ld, 0s) backwards; }
+@keyframes mp-line { from { transform: translateY(108%) rotate(5deg); } to { transform: none; } }
+/* "paperwork" gets crossed out, then paper scraps tumble away */
+.mp-h1 .l2 > span::after { content: ""; position: absolute; left: -1.5%; right: -1.5%; top: 50%; height: .12em; margin-top: -.06em; background: var(--orange); box-shadow: 0 .03em 0 var(--ink); transform-origin: left center; transform: scaleX(0) rotate(-1.6deg); animation: mp-strike .55s cubic-bezier(.7, 0, .2, 1) 1.6s forwards; }
+@keyframes mp-strike { to { transform: scaleX(1) rotate(-1.6deg); } }
+.mp-scrap { position: absolute; z-index: 1; top: calc(96px + var(--fs) * 2.1); width: 22px; height: 28px; background: #fff; border-radius: 2px; box-shadow: 0 2px 0 rgba(18,22,28,.25); pointer-events: none; opacity: 0;
+  background-image: repeating-linear-gradient(0deg, transparent 0 5px, rgba(18,22,28,.2) 5px 6px); background-size: 100% 100%;
+  animation: mp-scrap var(--st, 5s) ease-in var(--sd, 2s) infinite; }
+@keyframes mp-scrap { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 8% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--sx, 0), 48svh) rotate(var(--sr, 200deg)); } }
+/* a spinning "free" sticker */
+.mp-sticker { position: absolute; z-index: 2; right: 15%; top: 64%; width: clamp(96px, 9vw, 132px); aspect-ratio: 1; border-radius: 50%; background: var(--ink); color: var(--hv); display: grid; place-items: center; box-shadow: 0 5px 0 rgba(18,22,28,.25); pointer-events: none;
+  animation: mp-stick 1s cubic-bezier(.3, 1.7, .5, 1) 1.5s backwards; transform: rotate(-8deg); }
+.mp-sticker svg { position: absolute; inset: 0; width: 100%; height: 100%; animation: mp-spin 16s linear infinite; }
+.mp-sticker text { fill: currentColor; font: 600 10.5px var(--display); letter-spacing: .06em; }
+.mp-sticker b { font: 400 clamp(26px, 2.8vw, 40px)/1 var(--display); color: #fff; letter-spacing: -.04em; }
+@keyframes mp-stick { from { transform: scale(0) rotate(-160deg); opacity: 0; } to { transform: scale(1) rotate(-8deg); opacity: 1; } }
+@keyframes mp-spin { to { transform: rotate(360deg); } }
+@media (max-width: 1000px) { .mp-sticker { display: none; } }
 .mp-spark { position: absolute; width: var(--s, 28px); height: var(--s, 28px); animation: mp-float 6s ease-in-out infinite; animation-delay: var(--dl, 0s); pointer-events: none; }
 @keyframes mp-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-14px) rotate(12deg); } }
 
@@ -85,6 +105,11 @@
 @keyframes mp-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
 .mp-phone-box { position: relative; }
 .mp-phone { position: relative; height: min(72svh, 760px); aspect-ratio: 780 / 1688; border-radius: 46px; border: 9px solid var(--ink); background: var(--ink); overflow: hidden; box-shadow: 0 34px 70px rgba(18,22,28,.35); }
+/* a glow that breathes behind the phone, and a shine that sweeps across the screen */
+.mp-phone-box::before { content: ""; position: absolute; z-index: -1; inset: 4% -45% -6%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,107,61,.6), rgba(255,107,61,0) 72%); pointer-events: none; opacity: calc(1 - var(--f, 0) * 1.5); animation: mp-glow 3.4s ease-in-out infinite; }
+@keyframes mp-glow { 0%, 100% { transform: scale(.9); } 50% { transform: scale(1.08); } }
+.mp-phone::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.32) 50%, transparent 62%); transform: translateX(-130%); animation: mp-shine 6.5s ease-in-out 2.6s infinite; }
+@keyframes mp-shine { 0% { transform: translateX(-130%); } 28%, 100% { transform: translateX(130%); } }
 .mp-phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; }
 .mp-phone img.on { opacity: 1; }
 
@@ -131,7 +156,8 @@
 @media (max-width: 760px) {
   .mp-stage { --pw: calc(min(54svh, 560px) * 0.4621); }
   .mp-phone { height: min(54svh, 560px); border-width: 7px; border-radius: 36px; }
-  .mp-h1 { font-size: min(13.4vw, 17svh); }
+  .mp-hero { --fs: min(13.4vw, 17svh); }
+  .mp-scrap { display: none; }
   /* two tools sit in the gap above the phone instead of on top of the headline */
   .mp-pop { top: 55% !important; width: 17vw !important; }
   .mp-pop:nth-of-type(1) { left: 4% !important; right: auto !important; }
@@ -175,6 +201,11 @@
   .mp-flood-label { position: relative; left: auto; right: auto; top: auto; justify-content: center; margin-bottom: 30px; }
   .mp-float { display: none; }
   .mp-tilt, .mp-phone-in, .mp-pop, .mp-pop svg, .mp-spark, .mp-hs-dot, .mp-intro { animation: none; transform: none; }
+  .mp-h1 .l { translate: none; }
+  .mp-h1 .l > span, .mp-h1 .l2 > span::after, .mp-sticker svg, .mp-phone-box::before, .mp-phone::after { animation: none; }
+  .mp-h1 .l2 > span::after { transform: scaleX(1) rotate(-1.6deg); }
+  .mp-scrap { display: none; }
+  .mp-sticker { animation: none; }
 }
 
 /* Band of facts under the scene, then the curve into the page */
