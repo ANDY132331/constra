@@ -327,6 +327,46 @@ export default function LandingPage() {
     return () => { io.disconnect(); els.forEach((el) => el.classList.remove("rv", "rv-in")); };
   }, []);
 
+  // The day-on-site cards flip through on their own while visible; any touch, hover or scroll by the visitor pauses it
+  useEffect(() => {
+    const root = rootRef.current;
+    const row = root?.querySelector<HTMLElement>(".mp-day-row");
+    if (!root || !row || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+    let visible = false;
+    let pausedUntil = 0;
+    let programmatic = 0;
+    const pause = (ms = 9000) => { pausedUntil = Date.now() + ms; };
+    const step = () => {
+      if (!visible || Date.now() < pausedUntil) return;
+      const cards = Array.from(row.querySelectorAll<HTMLElement>(".mp-day-card"));
+      if (cards.length < 2) return;
+      const x = row.scrollLeft;
+      const atEnd = x + row.clientWidth >= row.scrollWidth - 8;
+      const next = atEnd ? cards[0] : cards.find((c) => c.offsetLeft - cards[0].offsetLeft > x + 8) ?? cards[0];
+      programmatic = Date.now() + 1200;
+      row.scrollTo({ left: next.offsetLeft - cards[0].offsetLeft, behavior: "smooth" });
+    };
+    const id = window.setInterval(step, 3400);
+    const io = new IntersectionObserver((es) => { visible = es[0].isIntersecting; }, { root, threshold: 0.5 });
+    io.observe(row);
+    const onUser = () => pause();
+    const onScroll = () => { if (Date.now() > programmatic) pause(); };
+    row.addEventListener("pointerdown", onUser);
+    row.addEventListener("mouseenter", onUser);
+    row.addEventListener("wheel", onUser, { passive: true });
+    row.addEventListener("touchstart", onUser, { passive: true });
+    row.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.clearInterval(id);
+      io.disconnect();
+      row.removeEventListener("pointerdown", onUser);
+      row.removeEventListener("mouseenter", onUser);
+      row.removeEventListener("wheel", onUser);
+      row.removeEventListener("touchstart", onUser);
+      row.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
   const startHref = alreadyIn ? "/dashboard" : "/onboarding";
   const startLabel = alreadyIn ? "Open dashboard" : "Start free";
   const flip = (d: number) => setShot((s) => (s + d + SCREENS.length) % SCREENS.length);
