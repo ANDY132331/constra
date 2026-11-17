@@ -199,7 +199,7 @@
   .mp-hs-dot { left: calc(var(--x) * 1% - 9px); }
   .mp-hs-chip::before { display: none; }
   .mp-hs-chip, .mp-hs-r .mp-hs-chip, .mp-hs-l .mp-hs-chip { left: 50%; right: auto; top: 32px; transform: translateX(-50%); font-size: 11px; }
-  .mp-phone-box > .mp-hs:nth-child(3), .mp-phone-box > .mp-hs:nth-child(6) { display: none; }
+  .mp-phone-box > .mp-hs:nth-child(3), .mp-phone-box > .mp-hs:nth-child(5) { display: none; }
 }
 
 /* When people ask for less motion nothing sticks or floods: the same content, laid out plainly */
