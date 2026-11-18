@@ -23,7 +23,7 @@ import {
   notifyNewPunchItem, notifyPhotoUploaded, notifyProjectStatusChange,
 } from "@/lib/notifications";
 import {
-  dbToWorker, workerToDb,
+  dbToWorker, workerToDb, type DbProfile,
   dbToProject, projectToDb, dbToTask, taskToDb,
   dbToClockEntry, clockEntryToDb,
   dbToPunchItem, punchItemToDb,
@@ -565,6 +565,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { data: scheduleEventsData },
         { data: timeOffData },
         { data: crewPlanData, error: crewPlanError },
+        { data: crewDirData },
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("company_id", companyId),
         supabase.from("companies").select("*").eq("id", companyId).single(),
@@ -601,7 +602,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         // Two weeks back is plenty of history for the plan; it's mostly about the days ahead
         supabase.from("crew_assignments").select("*").eq("company_id", companyId)
           .gte("work_date", new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10)).limit(2000),
+        // Names only (no pay, email or phone). Workers can't read other people's full profile rows
+        // once migration 018 is live, so this is how they still see who is on the crew. Before 018
+        // the view doesn't exist, the call errors, and the full rows above are all there is.
+        supabase.from("crew_directory").select("id, company_id, name, initials, role, custom_role, color, photo_url").eq("company_id", companyId),
       ]);
+
+      // Full rows for everyone the caller may see in full; everybody else comes from the name-only list
+      const fullRows = (profilesData ?? []) as DbProfile[];
+      const haveFull = new Set(fullRows.map((r) => r.id));
+      const profileRows: DbProfile[] = [
+        ...fullRows,
+        ...((crewDirData ?? []) as Pick<DbProfile, "id" | "company_id" | "name" | "initials" | "role" | "custom_role" | "color" | "photo_url">[])
+          .filter((r) => !haveFull.has(r.id))
+          .map((r) => ({ ...r, email: "", phone: "", clocked_in: false, clock_in_time: null, hourly_rate: 0, device_history: null, granted_pages: null })),
+      ];
 
       // Group tasks by project_id for efficient lookup
       const tasksByProject: Record<string, DbTask[]> = {};
@@ -637,7 +652,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const openWorkerIds = new Set(
             (clockData ?? []).filter((e) => !(e as { clock_out?: string | null }).clock_out).map((e) => (e as { worker_id: string }).worker_id),
           );
-          return (profilesData ?? []).map((row) => {
+          return profileRows.map((row) => {
             const w = dbToWorker(row);
             const hasOpenEntry = openWorkerIds.has(w.id);
             if (w.clockedIn !== hasOpenEntry) return { ...w, clockedIn: hasOpenEntry, ...(!hasOpenEntry ? { clockInTime: undefined, clockInGps: undefined } : {}) };
