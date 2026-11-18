@@ -1,4 +1,4 @@
--- Constra: migrations 013 + 014 + 015 + 016 + 017 + 018 combined. Paste into Supabase SQL Editor (project twusgbelcyocbwnvricz) and Run.
+-- Constra: migrations 013 + 014 + 015 + 016 + 017 + 018 + 019 combined. Paste into Supabase SQL Editor (project twusgbelcyocbwnvricz) and Run.
 
 -- ===== supabase-migration-013.sql =====
 -- Migration 013: role-based write rules + missing schedule_events table
@@ -552,6 +552,7 @@ begin
 end $$;
 
 
+
 -- ===== supabase-migration-018.sql =====
 -- Migration 018: workers no longer see each other's pay rate, email or phone
 --
@@ -559,15 +560,16 @@ end $$;
 -- read coworkers' hourly rates, emails and phone numbers straight from the database API even though
 -- the app never showed them.
 --
--- 1. A RESTRICTIVE select policy limits full profile rows to: your own row, or anyone who runs the
---    crew (Admin, Project Manager, Foreman, or someone an Admin granted the Crew page). Restrictive
---    policies are ANDed with the existing ones, so this works whatever they are called and can
---    only remove access.
+-- 1. A RESTRICTIVE select policy limits full profile rows to: your own row, or Admins, Project Managers
+--    and anyone an Admin granted the Crew page. Foremen get the name-only list like Workers do, so
+--    pay rates are visible to the office only. Restrictive policies are ANDed with the existing ones,
+--    so this works whatever they are called and can only remove access.
 -- 2. crew_directory is a name-only view of the same company (no pay, email, phone, device history or
 --    page grants) so a Worker's app can still show who is on the crew in chat, tasks and schedules.
 --
 -- Requires nothing but the earlier schema. Safe to run more than once. Server routes use the service
--- role and are not affected. Foremen still see full rows (they manage hours).
+-- role and are not affected. Foremen can still run the day (clock people in, see hours) because that
+-- uses clock_entries, not the profile row.
 
 create or replace function public.can_see_crew()
 returns boolean
@@ -579,7 +581,7 @@ as $$
   select exists (
     select 1 from public.profiles me
     where me.id = auth.uid()
-      and (me.role in ('Admin', 'Project Manager', 'Foreman') or '/crew' = any (coalesce(me.granted_pages, '{}')))
+      and (me.role in ('Admin', 'Project Manager') or '/crew' = any (coalesce(me.granted_pages, '{}')))
   )
 $$;
 
@@ -597,6 +599,67 @@ create or replace view public.crew_directory as
   select id, company_id, name, initials, role, custom_role, color, photo_url
   from public.profiles
   where company_id = public.my_company_id();
+
+revoke all on public.crew_directory from public, anon;
+grant select on public.crew_directory to authenticated;
+
+
+-- ===== supabase-migration-019.sql =====
+-- Migration 019: Workers see only their own clock-ins, hour adjustments, time off and crew plan
+--
+-- Clock entries carry GPS positions and clock-in selfie links, hour adjustments carry the reason an
+-- Admin changed someone's hours, and time-off requests are personal. Until now every member of a
+-- company could read all of them for every coworker straight from the database API.
+--
+-- A RESTRICTIVE select policy (ANDed with the existing ones, so it only ever removes access) now lets
+-- a person read these rows when they are their own, or when they run the day: Admin, Project Manager,
+-- Foreman, or someone an Admin granted the Crew or Reports page. Foremen keep the hours they need.
+--
+-- Workers still need to know who is on site, so crew_directory (migration 018) gains a clocked_in
+-- flag worked out from open clock entries. It carries no times, places or photos.
+--
+-- Requires 018. Safe to run more than once. Server routes use the service role and are not affected.
+
+create or replace function public.can_see_hours()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles me
+    where me.id = auth.uid()
+      and (me.role in ('Admin', 'Project Manager', 'Foreman')
+           or coalesce(me.granted_pages, '{}') && array['/crew', '/reports'])
+  )
+$$;
+
+revoke all on function public.can_see_hours() from public, anon;
+grant execute on function public.can_see_hours() to authenticated;
+
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['clock_entries', 'hours_adjustments', 'time_off_requests', 'crew_assignments']
+  loop
+    if to_regclass('public.' || t) is not null then
+      execute format('drop policy if exists %I on public.%I', t || '_own_or_manager', t);
+      execute format(
+        'create policy %I on public.%I as restrictive for select to authenticated using (worker_id = auth.uid() or public.can_see_hours())',
+        t || '_own_or_manager', t
+      );
+    end if;
+  end loop;
+end $$;
+
+-- New columns may only be added at the end of a view, so clocked_in goes last
+create or replace view public.crew_directory as
+  select p.id, p.company_id, p.name, p.initials, p.role, p.custom_role, p.color, p.photo_url,
+         exists (select 1 from public.clock_entries ce where ce.worker_id = p.id and ce.clock_out is null) as clocked_in
+  from public.profiles p
+  where p.company_id = public.my_company_id();
 
 revoke all on public.crew_directory from public, anon;
 grant select on public.crew_directory to authenticated;

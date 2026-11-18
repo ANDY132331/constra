@@ -605,7 +605,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         // Names only (no pay, email or phone). Workers can't read other people's full profile rows
         // once migration 018 is live, so this is how they still see who is on the crew. Before 018
         // the view doesn't exist, the call errors, and the full rows above are all there is.
-        supabase.from("crew_directory").select("id, company_id, name, initials, role, custom_role, color, photo_url").eq("company_id", companyId),
+        // Migration 019 adds clocked_in to it; asking for that column before 019 would make the whole call fail
+        supabase.from("crew_directory").select("*").eq("company_id", companyId),
       ]);
 
       // Full rows for everyone the caller may see in full; everybody else comes from the name-only list
@@ -613,9 +614,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const haveFull = new Set(fullRows.map((r) => r.id));
       const profileRows: DbProfile[] = [
         ...fullRows,
-        ...((crewDirData ?? []) as Pick<DbProfile, "id" | "company_id" | "name" | "initials" | "role" | "custom_role" | "color" | "photo_url">[])
+        ...((crewDirData ?? []) as (Pick<DbProfile, "id" | "company_id" | "name" | "initials" | "role" | "custom_role" | "color" | "photo_url"> & { clocked_in?: boolean })[])
           .filter((r) => !haveFull.has(r.id))
-          .map((r) => ({ ...r, email: "", phone: "", clocked_in: false, clock_in_time: null, hourly_rate: 0, device_history: null, granted_pages: null })),
+          .map((r) => ({ ...r, email: "", phone: "", clocked_in: r.clocked_in ?? false, clock_in_time: null, hourly_rate: 0, device_history: null, granted_pages: null })),
       ];
 
       // Group tasks by project_id for efficient lookup
@@ -654,7 +655,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           );
           return profileRows.map((row) => {
             const w = dbToWorker(row);
-            const hasOpenEntry = openWorkerIds.has(w.id);
+            // Someone whose clock entries this person can't read (a Worker looking at a coworker) is
+            // on site when the name-only list says so, since there are no entries here to prove it
+            const hasOpenEntry = openWorkerIds.has(w.id) || (!haveFull.has(w.id) && w.clockedIn);
             if (w.clockedIn !== hasOpenEntry) return { ...w, clockedIn: hasOpenEntry, ...(!hasOpenEntry ? { clockInTime: undefined, clockInGps: undefined } : {}) };
             return w;
           });

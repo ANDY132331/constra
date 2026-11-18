@@ -4,15 +4,16 @@
 -- read coworkers' hourly rates, emails and phone numbers straight from the database API even though
 -- the app never showed them.
 --
--- 1. A RESTRICTIVE select policy limits full profile rows to: your own row, or anyone who runs the
---    crew (Admin, Project Manager, Foreman, or someone an Admin granted the Crew page). Restrictive
---    policies are ANDed with the existing ones, so this works whatever they are called and can
---    only remove access.
+-- 1. A RESTRICTIVE select policy limits full profile rows to: your own row, or Admins, Project Managers
+--    and anyone an Admin granted the Crew page. Foremen get the name-only list like Workers do, so
+--    pay rates are visible to the office only. Restrictive policies are ANDed with the existing ones,
+--    so this works whatever they are called and can only remove access.
 -- 2. crew_directory is a name-only view of the same company (no pay, email, phone, device history or
 --    page grants) so a Worker's app can still show who is on the crew in chat, tasks and schedules.
 --
 -- Requires nothing but the earlier schema. Safe to run more than once. Server routes use the service
--- role and are not affected. Foremen still see full rows (they manage hours).
+-- role and are not affected. Foremen can still run the day (clock people in, see hours) because that
+-- uses clock_entries, not the profile row.
 
 create or replace function public.can_see_crew()
 returns boolean
@@ -24,7 +25,7 @@ as $$
   select exists (
     select 1 from public.profiles me
     where me.id = auth.uid()
-      and (me.role in ('Admin', 'Project Manager', 'Foreman') or '/crew' = any (coalesce(me.granted_pages, '{}')))
+      and (me.role in ('Admin', 'Project Manager') or '/crew' = any (coalesce(me.granted_pages, '{}')))
   )
 $$;
 
