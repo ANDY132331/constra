@@ -40,15 +40,17 @@ begin
     if to_regclass('public.' || t) is not null then
       execute format('drop policy if exists %I on public.%I', t || '_own_or_manager', t);
       execute format(
-        'create policy %I on public.%I as restrictive for select to authenticated using (worker_id = auth.uid() or public.can_see_hours())',
+        'create policy %I on public.%I as restrictive for select to authenticated using (worker_id = (select auth.uid()) or (select public.can_see_hours()))',
         t || '_own_or_manager', t
       );
     end if;
   end loop;
 end $$;
 
--- New columns may only be added at the end of a view, so clocked_in goes last
-create or replace view public.crew_directory as
+-- Dropped and recreated (not CREATE OR REPLACE) so running this again, or running 018 again
+-- afterwards, never fails on the column list
+drop view if exists public.crew_directory;
+create view public.crew_directory as
   select p.id, p.company_id, p.name, p.initials, p.role, p.custom_role, p.color, p.photo_url,
          exists (select 1 from public.clock_entries ce where ce.worker_id = p.id and ce.clock_out is null) as clocked_in
   from public.profiles p

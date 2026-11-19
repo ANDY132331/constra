@@ -35,11 +35,12 @@ grant execute on function public.can_see_crew() to authenticated;
 drop policy if exists profiles_crew_gate on public.profiles;
 create policy profiles_crew_gate on public.profiles
   as restrictive for select to authenticated
-  using (id = auth.uid() or public.can_see_crew());
+  using (id = (select auth.uid()) or (select public.can_see_crew()));
 
 -- Owner-rights view (the default), so it reads profiles past the policy above, but only for the
 -- caller's own company and only these columns.
-create or replace view public.crew_directory as
+drop view if exists public.crew_directory;
+create view public.crew_directory as
   select id, company_id, name, initials, role, custom_role, color, photo_url
   from public.profiles
   where company_id = public.my_company_id();

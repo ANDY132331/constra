@@ -659,6 +659,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             // on site when the name-only list says so, since there are no entries here to prove it
             const hasOpenEntry = openWorkerIds.has(w.id) || (!haveFull.has(w.id) && w.clockedIn);
             if (w.clockedIn !== hasOpenEntry) return { ...w, clockedIn: hasOpenEntry, ...(!hasOpenEntry ? { clockInTime: undefined, clockInGps: undefined } : {}) };
+            // A Foreman clocking someone in can no longer write that person's profile row (they can't see it,
+            // so the update changes nothing), which leaves clock_in_time empty there. The open entry has it.
+            if (hasOpenEntry && !w.clockInTime) {
+              const open = (clockData ?? []).find((e) => (e as { worker_id: string; clock_out?: string | null }).worker_id === w.id && !(e as { clock_out?: string | null }).clock_out) as { clock_in?: string } | undefined;
+              if (open?.clock_in) return { ...w, clockInTime: new Date(open.clock_in) };
+            }
             return w;
           });
         })(),

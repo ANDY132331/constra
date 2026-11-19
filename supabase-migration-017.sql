@@ -44,7 +44,7 @@ begin
     if to_regclass('public.' || t.tbl) is not null then
       execute format('drop policy if exists %I on public.%I', t.tbl || '_role_gate', t.tbl);
       execute format(
-        'create policy %I on public.%I as restrictive for select to authenticated using (public.can_see_page(%L))',
+        'create policy %I on public.%I as restrictive for select to authenticated using ((select public.can_see_page(%L)))',
         t.tbl || '_role_gate', t.tbl, t.page
       );
     end if;

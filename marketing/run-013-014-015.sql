@@ -497,6 +497,8 @@ end $$;
 alter table public.companies add column if not exists overtime_rules jsonb;
 
 
+
+
 -- ===== supabase-migration-017.sql =====
 -- Migration 017: finance data is readable only by people who may see those pages
 --
@@ -544,13 +546,12 @@ begin
     if to_regclass('public.' || t.tbl) is not null then
       execute format('drop policy if exists %I on public.%I', t.tbl || '_role_gate', t.tbl);
       execute format(
-        'create policy %I on public.%I as restrictive for select to authenticated using (public.can_see_page(%L))',
+        'create policy %I on public.%I as restrictive for select to authenticated using ((select public.can_see_page(%L)))',
         t.tbl || '_role_gate', t.tbl, t.page
       );
     end if;
   end loop;
 end $$;
-
 
 
 -- ===== supabase-migration-018.sql =====
@@ -591,11 +592,12 @@ grant execute on function public.can_see_crew() to authenticated;
 drop policy if exists profiles_crew_gate on public.profiles;
 create policy profiles_crew_gate on public.profiles
   as restrictive for select to authenticated
-  using (id = auth.uid() or public.can_see_crew());
+  using (id = (select auth.uid()) or (select public.can_see_crew()));
 
 -- Owner-rights view (the default), so it reads profiles past the policy above, but only for the
 -- caller's own company and only these columns.
-create or replace view public.crew_directory as
+drop view if exists public.crew_directory;
+create view public.crew_directory as
   select id, company_id, name, initials, role, custom_role, color, photo_url
   from public.profiles
   where company_id = public.my_company_id();
@@ -647,15 +649,17 @@ begin
     if to_regclass('public.' || t) is not null then
       execute format('drop policy if exists %I on public.%I', t || '_own_or_manager', t);
       execute format(
-        'create policy %I on public.%I as restrictive for select to authenticated using (worker_id = auth.uid() or public.can_see_hours())',
+        'create policy %I on public.%I as restrictive for select to authenticated using (worker_id = (select auth.uid()) or (select public.can_see_hours()))',
         t || '_own_or_manager', t
       );
     end if;
   end loop;
 end $$;
 
--- New columns may only be added at the end of a view, so clocked_in goes last
-create or replace view public.crew_directory as
+-- Dropped and recreated (not CREATE OR REPLACE) so running this again, or running 018 again
+-- afterwards, never fails on the column list
+drop view if exists public.crew_directory;
+create view public.crew_directory as
   select p.id, p.company_id, p.name, p.initials, p.role, p.custom_role, p.color, p.photo_url,
          exists (select 1 from public.clock_entries ce where ce.worker_id = p.id and ce.clock_out is null) as clocked_in
   from public.profiles p

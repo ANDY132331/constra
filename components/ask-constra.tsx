@@ -271,6 +271,9 @@ export function AskConstra() {
     }
   }, [input]);
 
+  // Finance and cost answers come from numbers only the office can see (job cost uses everyone's pay rate)
+  if (store.currentUser.role !== "Admin" && store.currentUser.role !== "Project Manager") return null;
+
   return (
     <div className="bg-[#0f0d0a] border border-amber-500/20 rounded-2xl overflow-hidden">
       {/* ── Header ── */}

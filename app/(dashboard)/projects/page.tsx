@@ -600,10 +600,16 @@ export default function ProjectsPage() {
                       </div>
                     </div>
                     <div>
-                      <p className={`text-[12px] font-semibold ${overBudget ? "text-red-400" : "text-white/70"}`}>
-                        {formatCurrencyCompact(spendOf(project).total, currency as never)}
-                      </p>
-                      <p className="text-[10px] text-white/25">/ {formatCurrencyCompact(project.budget, currency as never)}</p>
+                      {isAdmin ? (
+                        <>
+                          <p className={`text-[12px] font-semibold ${overBudget ? "text-red-400" : "text-white/70"}`}>
+                            {formatCurrencyCompact(spendOf(project).total, currency as never)}
+                          </p>
+                          <p className="text-[10px] text-white/25">/ {formatCurrencyCompact(project.budget, currency as never)}</p>
+                        </>
+                      ) : (
+                        <p className="text-[12px] font-semibold text-white/70">{formatCurrencyCompact(project.budget, currency as never)}</p>
+                      )}
                     </div>
                     <span className="text-[12px] text-white/45">
                       {new Date(project.endDate).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
@@ -708,6 +714,12 @@ export default function ProjectsPage() {
                         <div className="text-center border-x border-white/[0.06]"><p className="text-[14px] font-bold text-white">{project.tasks.length}</p><p className="text-[10px] text-white/30">Total Tasks</p></div>
                         <div className="text-center"><p className="text-[14px] font-bold text-white">{project.workerIds.length}</p><p className="text-[10px] text-white/30">Workers</p></div>
                       </div>
+                      {!isAdmin ? (
+                        <div className="bg-white/[0.03] rounded-lg p-3 flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wide text-white/25">Budget</span>
+                          <span className="text-[13px] font-bold text-white">{formatCurrencyCompact(project.budget, currency as never)}</span>
+                        </div>
+                      ) : (
                       <div className="bg-white/[0.03] rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wide text-white/25">Budget</span>
@@ -720,6 +732,7 @@ export default function ProjectsPage() {
                           <span className="text-[11px] text-white/30">/ {formatCurrencyCompact(project.budget, currency as never)}</span>
                         </div>
                       </div>
+                      )}
                       <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
                         <div className="flex items-center gap-2">
                           {manager && (

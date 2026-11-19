@@ -76,7 +76,8 @@ function runShared(payload: BriefPayload) {
 
 export function DailyBriefCard() {
   const spendOf = useProjectSpend();
-  const { workers, projects, punchItems, safetyIncidents, companyName, invoices, clockEntries } = useStore();
+  const { workers, projects, punchItems, safetyIncidents, companyName, invoices, clockEntries, currentUser } = useStore();
+  const canSeeSpend = currentUser.role === "Admin" || currentUser.role === "Project Manager";
   const [{ text, loading, error, at: generatedAt }, setBrief] = useState<BriefState>(shared);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -106,7 +107,7 @@ export function DailyBriefCard() {
         const tasksOverdue = p.tasks.filter(
           (t) => t.status !== "completed" && endOfDay(t.endDate) < now
         ).length;
-        const budgetPct = spendOf(p).revisedBudget > 0 ? Math.round((spendOf(p).total / spendOf(p).revisedBudget) * 100) : null;
+        const budgetPct = canSeeSpend && spendOf(p).revisedBudget > 0 ? Math.round((spendOf(p).total / spendOf(p).revisedBudget) * 100) : null;
         return { name: p.name, progress: projectProgress(p), tasksTotal: p.tasks.length, tasksDue, tasksOverdue, budgetPct };
       });
 
@@ -158,7 +159,7 @@ export function DailyBriefCard() {
       overdueInvoices,
       overBudgetProjects: overBudgetProjects.map((p) => ({ name: p.name, budgetPct: p.budgetPct })),
     };
-  }, [workers, projects, punchItems, safetyIncidents, companyName, invoices, spendOf]);
+  }, [workers, projects, punchItems, safetyIncidents, companyName, invoices, spendOf, canSeeSpend]);
 
   // Regenerate is an explicit user action, so it always starts a fresh run.
   const generate = useCallback(() => runShared(buildPayload()), [buildPayload]);
