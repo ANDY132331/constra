@@ -74,6 +74,8 @@ what arrives, so it never touches the live database. Takes about five minutes.
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54399 NEXT_PUBLIC_SUPABASE_ANON_KEY=test npm run build
 # preview_start constra-sync-test (next start on 3006, same two variables plus a dummy service key)
 node .claude/skills/field-testing/scripts/offline-sync.mjs
+# and, with the same build and server, who-sees-what for each role plus sync between people:
+node .claude/skills/field-testing/scripts/roles.mjs
 ```
 
 Stop the server and rebuild normally afterwards, because this build has the mock's address in it.
