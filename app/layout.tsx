@@ -92,8 +92,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Pinch-to-zoom stays on (WCAG 1.4.4). Inputs are already forced to 16px on touch screens in
+  // globals.css, so iOS no longer needs the zoom lock to stop it zooming when a field is focused
   viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#E7E5E0" },

@@ -742,7 +742,7 @@ export default function DashboardPage() {
           <div className={`flex-1 rounded-2xl p-4 border ${dk ? "bg-white/[0.05] border-amber-500/15" : "bg-white/70 border-amber-400/30 backdrop-blur-sm"}`}>
             <div className="flex items-end gap-1 mb-1">
               <span className={`text-[44px] font-black leading-none tabular-nums ${dk ? "text-white" : "text-gray-900"}`}>{clockedInWorkers.length}</span>
-              <span className={`text-[14px] font-bold mb-2 ${dk ? "text-amber-400/50" : "text-amber-600/60"}`}>/{workers.length}</span>
+              <span className={`text-[14px] font-bold mb-2 ${dk ? "text-amber-400/80" : "text-amber-800"}`}>/{workers.length}</span>
             </div>
             <p className={`text-[10px] font-black uppercase tracking-[0.14em] ${dk ? "text-amber-500/70" : "text-[#7A5C00]"}`}>Crew on Site</p>
             <div className="flex items-center gap-1.5 mt-2">
@@ -1068,7 +1068,7 @@ export default function DashboardPage() {
         <div className="px-5 pt-7">
           <div className="flex items-center justify-between mb-3.5">
             <h3 className="text-[15px] font-bold text-white">Issues</h3>
-            <Link href="/punch-list" className="text-[11px] text-amber-400/80 flex items-center gap-1">
+            <Link href="/punch-list" className="-my-3 py-3 text-[11px] text-amber-400/80 flex items-center gap-1">
               Punch list <ArrowRight size={11} />
             </Link>
           </div>

@@ -314,7 +314,7 @@ export default function ProjectsPage() {
         )}
 
         {/* Stats row */}
-        <div className="px-5 mb-4 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-5 mb-4 flex gap-2 overflow-x-auto no-scrollbar" tabIndex={0} role="region" aria-label="Project summary, scrolls sideways">
           <div className="bg-[#131110] border border-white/[0.07] rounded-full px-3 py-1.5 text-[12px] font-bold text-white/70 whitespace-nowrap flex items-center gap-1.5">
             <span className="text-white font-bold">{projects.filter((p) => !p.pendingApproval).length}</span> Total
           </div>

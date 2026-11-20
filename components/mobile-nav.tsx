@@ -68,6 +68,7 @@ export function MobileNav() {
 
   return (
     <nav
+      aria-label="Quick navigation"
       className="lg:hidden fixed bottom-0 inset-x-0 z-40"
       style={{
         background: dk ? "rgba(20,21,22,0.97)" : "rgba(245,244,241,0.97)",

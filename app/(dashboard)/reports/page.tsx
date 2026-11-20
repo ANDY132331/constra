@@ -310,7 +310,7 @@ export default function ReportsPage() {
                 <p className="text-[11px] text-white/25 text-center">No hours this period</p>
               </div>
             ) : (
-              <div className="flex items-end gap-1 h-28 overflow-x-auto no-scrollbar">
+              <div className="flex items-end gap-1 h-28 overflow-x-auto no-scrollbar" tabIndex={0} role="region" aria-label="Chart, scrolls sideways">
                 {dailyBars.map((d, i) => {
                   const pct = (d.hours / maxBarH) * 100;
                   return (
@@ -423,7 +423,7 @@ export default function ReportsPage() {
             <div className="px-4 mt-4">
               <div className="bg-[#131110] border border-white/[0.07] rounded-2xl p-4">
                 <p className="text-[13px] font-bold text-white mb-3">Cost per Project</p>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
                   <table className="w-full text-[11px] min-w-[420px]">
                     <thead>
                       <tr className="border-b border-white/[0.06]">
@@ -575,7 +575,7 @@ export default function ReportsPage() {
               <p className="text-[12px] text-white/25 text-center">No hours logged this period.<br />Clock in workers to see data.</p>
             </div>
           ) : (
-            <div className="flex items-end gap-1.5 h-32 overflow-x-auto">
+            <div className="flex items-end gap-1.5 h-32 overflow-x-auto" tabIndex={0} role="region" aria-label="Chart, scrolls sideways">
               {dailyBars.map((d, i) => {
                 const pct = (d.hours / maxBarH) * 100;
                 return (
@@ -655,7 +655,7 @@ export default function ReportsPage() {
               <h3 className="text-[14px] font-bold text-white">Cost per Project</h3>
               <span className="text-[11px] text-white/30">Labour × rate + budget · {periodLabel}</span>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
               <table className="w-full text-[12px]">
                 <thead>
                   <tr className="border-b border-white/[0.06]">

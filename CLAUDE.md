@@ -19,6 +19,7 @@ Stack: Next.js 16 (Turbopack, middleware lives in `proxy.ts`), React 19, Tailwin
 - Crew flows end to end, with `constra-offline` running: `node .claude/skills/field-testing/scripts/field-run.mjs <port>` (the `field-testing` skill).
 - Real offline sync against a mock database: `offline-sync.mjs` in the same skill. Run it after changing the offline queue, `bg()`, `public/sw.js` or uploads.
 - Who can see what, per role, plus cross-device sync: `roles.mjs` in the same skill (same production build and mock setup as `offline-sync.mjs`). Run it after changing RLS migrations, what `loadAllData` fetches, or any screen that shows pay, money or other people's details.
+- Screen quality, with `constra-offline` running: `ui-sweep.mjs` (layout, tap targets, names, crashes; pass `w-marco` or `w-dev` for foreman/worker) and `a11y.mjs` (axe-core contrast and structure, dark and light) in the same skill. Run them after adding or restyling a screen.
 
 ## Shipping
 

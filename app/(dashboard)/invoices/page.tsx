@@ -224,7 +224,7 @@ export default function InvoicesPage() {
           </div>
           {overdueCount > 0 && (
             <div className="flex-shrink-0 bg-red-500/[0.08] border border-red-500/20 rounded-2xl px-4 py-3.5">
-              <p className="text-[11px] text-red-400/70 font-medium mb-1">Overdue</p>
+              <p className="text-[11px] text-red-400 font-medium mb-1">Overdue</p>
               <p className="text-[20px] font-bold text-red-400 leading-none">{overdueCount}</p>
             </div>
           )}

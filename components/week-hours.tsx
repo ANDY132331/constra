@@ -152,7 +152,7 @@ export function WeekHours({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="text-[13px] font-semibold text-white truncate flex items-center gap-1.5">
-                      {r.live && <span className="crew-pulse w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" aria-label="On shift now" />}
+                      {r.live && <span className="crew-pulse w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" role="img" aria-label="On shift now" />}
                       {r.worker.name}
                     </p>
                     <p className="text-[13px] font-bold text-white tabular-nums flex-shrink-0">

@@ -210,7 +210,7 @@ export function DailyBriefCard() {
             aria-label={collapsed ? "Expand" : "Collapse"}
             aria-expanded={!collapsed}
             onClick={() => setCollapsed((v) => !v)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-white/50 hover:bg-white/[0.05] transition-colors"
+            className="w-11 h-11 -m-2 flex items-center justify-center rounded-lg text-white/25 hover:text-white/50 hover:bg-white/[0.05] transition-colors"
           >
             {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
           </button>

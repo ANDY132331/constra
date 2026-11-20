@@ -197,7 +197,7 @@ export function Sidebar({ open, onClose }: { open?: boolean; onClose?: () => voi
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2">
+      <nav aria-label="Main menu" className="flex-1 overflow-y-auto py-3 px-2">
         <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] px-3 mb-2">
           {t.nav.mainMenu}
         </p>
