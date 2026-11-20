@@ -11,7 +11,7 @@ import { formatCurrencyCompact } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { PAYROLL_ADAPTERS, exportPayroll } from "@/lib/payroll-export";
 import { exportReportPdf } from "@/lib/pdf-export";
-import { computeWorkerOvertime } from "@/lib/overtime";
+import { workerOvertime } from "@/lib/overtime";
 import { hoursBetween } from "@/lib/hours";
 import { useProjectSpend } from "@/lib/project-spend";
 
@@ -164,7 +164,7 @@ export default function ReportsPage() {
         const h = workerEntries.reduce((s, e) => s + hoursBetween(e.clockIn, e.clockOut!), 0);
         const projectCount = new Set(workerEntries.map((e) => e.projectId)).size;
         const ot = overtimeEnabled
-          ? computeWorkerOvertime(workerEntries, w.hourlyRate ?? 0, {
+          ? workerOvertime(w, workerEntries, {
               enabled: overtimeEnabled,
               dailyThreshold: overtimeDailyThreshold,
               weeklyThreshold: overtimeWeeklyThreshold,

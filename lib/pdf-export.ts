@@ -30,7 +30,7 @@ function fmtHours(n: number) {
 export async function exportReportPdf(input: PdfReportInput) {
   const { default: jsPDF } = await import("jspdf");
   const { default: autoTable } = await import("jspdf-autotable");
-  const { computeWorkerOvertime } = await import("./overtime");
+  const { workerOvertime } = await import("./overtime");
 
   const { workers, projects, clockEntries, periodStart, periodEnd, periodLabel, currency, companyName, companyLogo, overtime } = input;
   const company = companyName || "Constra";
@@ -62,15 +62,16 @@ export async function exportReportPdf(input: PdfReportInput) {
   const h2 = (n: number) => n.toFixed(2);
 
   // ── Payroll per worker (overtime-aware) ────────────────────────────────────
-  type Row = { id: string; name: string; role: string; rate: number; reg: number; ot: number; regPay: number; otPay: number; gross: number };
+  type Row = { id: string; name: string; role: string; salaried: boolean; rate: number; reg: number; ot: number; regPay: number; otPay: number; gross: number };
   const rows: Row[] = [];
   for (const w of workers) {
     const mine = entries.filter((e) => e.workerId === w.id);
     if (!mine.length) continue;
-    const rate = w.hourlyRate ?? 0;
-    const b = computeWorkerOvertime(mine, rate, otSettings);
+    const salaried = w.payType === "salary";
+    const rate = salaried ? 0 : (w.hourlyRate ?? 0);
+    const b = workerOvertime(w, mine, otSettings);
     rows.push({
-      id: w.id, name: w.name, role: w.customRole || w.role || "", rate,
+      id: w.id, name: w.name, role: w.customRole || w.role || "", salaried, rate,
       reg: b.regularHours, ot: b.overtimeHours, regPay: b.regularPay, otPay: b.overtimePay, gross: b.totalPay,
     });
   }
@@ -79,7 +80,7 @@ export async function exportReportPdf(input: PdfReportInput) {
     (t, r) => ({ reg: t.reg + r.reg, ot: t.ot + r.ot, regPay: t.regPay + r.regPay, otPay: t.otPay + r.otPay, gross: t.gross + r.gross }),
     { reg: 0, ot: 0, regPay: 0, otPay: 0, gross: 0 },
   );
-  const missingRates = rows.filter((r) => !(r.rate > 0)).map((r) => r.name);
+  const missingRates = rows.filter((r) => !r.salaried && !(r.rate > 0)).map((r) => r.name);
   // A shift nobody closed keeps counting, so call it out rather than quietly paying it
   const longShifts = entries
     .filter((e) => hrs(e) >= LONG_SHIFT_HOURS)
@@ -234,7 +235,7 @@ export async function exportReportPdf(input: PdfReportInput) {
       ...tableBase,
       startY: y,
       head: [["WORKER", "ROLE", "RATE", "REG H", "OT H", "REGULAR PAY", "OT PAY", "GROSS"]],
-      body: rows.map((r) => [r.name, r.role, r.rate > 0 ? money(r.rate) : "—", h2(r.reg), r.ot > 0 ? h2(r.ot) : "—", money(r.regPay), r.otPay > 0 ? money(r.otPay) : "—", money(r.gross)]),
+      body: rows.map((r) => [r.name, r.role, r.salaried ? "Salary" : r.rate > 0 ? money(r.rate) : "—", h2(r.reg), r.ot > 0 ? h2(r.ot) : "—", money(r.regPay), r.otPay > 0 ? money(r.otPay) : "—", money(r.gross)]),
       foot: [["Total", "", "", h2(T.reg), h2(T.ot), money(T.regPay), money(T.otPay), money(T.gross)]],
       columnStyles: {
         0: { textColor: INK, fontStyle: "bold" },

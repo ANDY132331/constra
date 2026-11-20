@@ -37,6 +37,9 @@ export type Worker = {
   clockInTime?: Date;
   clockInGps?: GpsLocation;
   hourlyRate: number;
+  /** "salary": hours are still tracked, but pay isn't worked out from them and overtime doesn't apply.
+   *  Absent means hourly, and it is always absent until migration 020 is live. */
+  payType?: "hourly" | "salary";
   certifications?: WorkerCertification[];
   deviceHistory?: Array<{ ua: string; firstSeen: Date; lastSeen: Date }>;
   /** Explicit page hrefs this worker can access. undefined = use role defaults. */

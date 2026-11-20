@@ -37,11 +37,12 @@ const lbl = "block text-[10px] font-bold text-white/35 uppercase tracking-wider 
 type FormState = {
   name: string; customRole: string; role: Worker["role"];
   email: string; phone: string; color: string; hourlyRate: string; photo: string;
+  payType: "hourly" | "salary";
 };
 
 const blank: FormState = {
   name: "", customRole: "", role: "Worker",
-  email: "", phone: "", color: "#3b82f6", hourlyRate: "", photo: "",
+  email: "", phone: "", color: "#3b82f6", hourlyRate: "", photo: "", payType: "hourly",
 };
 
 // Hours Adjustment Modal
@@ -376,6 +377,8 @@ export default function CrewPage() {
     currentUser, hoursAdjustments, addHoursAdjustment, getWorkerTotalHours,
     currency, inviteCode, companyName, clockEntries,
   } = useStore();
+  // Pay type needs migration 020; until a profile row carries it, the choice isn't offered
+  const payTypesLive = workers.some((w) => w.payType !== undefined);
   const router = useRouter();
   const t = useT();
 
@@ -446,7 +449,7 @@ export default function CrewPage() {
     setForm({
       name: w.name, customRole: w.customRole, role: w.role,
       email: w.email, phone: w.phone, color: w.color,
-      hourlyRate: w.hourlyRate ? String(w.hourlyRate) : "", photo: w.photo ?? "",
+      hourlyRate: w.hourlyRate ? String(w.hourlyRate) : "", photo: w.photo ?? "", payType: w.payType ?? "hourly",
     });
     setCertifications(w.certifications ? [...w.certifications] : []);
     setEditId(w.id);
@@ -479,6 +482,7 @@ export default function CrewPage() {
         color: form.color,
         photo: form.photo || undefined,
         hourlyRate: parseFloat(form.hourlyRate) || 0,
+        ...(payTypesLive ? { payType: form.payType } : {}),
         certifications: certifications.length > 0 ? certifications : undefined,
       });
       toast.success(`${form.name.trim()} updated`);
@@ -499,6 +503,7 @@ export default function CrewPage() {
             color: form.color,
             photo: form.photo || null,
             hourlyRate: form.hourlyRate,
+            payType: payTypesLive ? form.payType : undefined,
           }),
         });
         const data = await res.json();
@@ -520,6 +525,7 @@ export default function CrewPage() {
           color: form.color,
           photo: form.photo || undefined,
           hourlyRate: parseFloat(form.hourlyRate) || 0,
+          ...(payTypesLive ? { payType: form.payType } : {}),
           certifications: certifications.length > 0 ? certifications : undefined,
           projectIds: [],
           clockedIn: false,
@@ -577,7 +583,7 @@ export default function CrewPage() {
       now={now}
       weekHours={weekHoursOf(worker.id, clockEntries, now)}
       totalHours={getWorkerTotalHours(worker.id)}
-      rate={canSeeFinancials && worker.hourlyRate > 0 ? `${getCurrencySymbol(currency)}${worker.hourlyRate}/hr` : null}
+      rate={canSeeFinancials && worker.payType === "salary" ? "Salary" : canSeeFinancials && worker.hourlyRate > 0 ? `${getCurrencySymbol(currency)}${worker.hourlyRate}/hr` : null}
       canEdit={canEdit}
       canRemove={canEdit && worker.id !== currentUser.id}
       onClose={onClose}
@@ -829,8 +835,26 @@ export default function CrewPage() {
                 </div>
               </div>
 
+              {payTypesLive && (
+                <div>
+                  <label className={lbl}>How they are paid</label>
+                  <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="How they are paid">
+                    {([["hourly", "By the hour"], ["salary", "Salary"]] as const).map(([v, label]) => (
+                      <button key={v} type="button" role="radio" aria-checked={form.payType === v}
+                        onClick={() => setForm((f) => ({ ...f, payType: v }))}
+                        className={`min-h-[44px] rounded-xl border text-[13px] font-bold transition-colors ${form.payType === v ? "bg-amber-500/15 border-amber-500/40 text-amber-300" : "bg-white/[0.04] border-white/[0.08] text-white/60"}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {form.payType === "salary" && (
+                    <p className="mt-2 text-[11px] leading-relaxed text-white/40">Hours are still tracked. No overtime is worked out, and payroll exports show &ldquo;Salary&rdquo; instead of a rate. The cost per hour below is only used for job costing.</p>
+                  )}
+                </div>
+              )}
+
               <div>
-                <label className={lbl}>Hourly Rate ({getCurrencySymbol(currency)})</label>
+                <label className={lbl}>{form.payType === "salary" ? "Cost per hour, for job costing" : "Hourly Rate"} ({getCurrencySymbol(currency)})</label>
                 <input className={inp} type="number" inputMode="decimal" min="0" placeholder="0"
                   value={form.hourlyRate} onChange={(e) => setForm((f) => ({ ...f, hourlyRate: e.target.value }))} />
               </div>

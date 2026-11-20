@@ -4,7 +4,7 @@
 
 import type { ClockEntry, Worker, Project } from "./mock-data";
 import type { OvertimeSettings } from "./overtime";
-import { computeWorkerOvertime, cleanRules, describeRules } from "./overtime";
+import { workerOvertime, isSalaried, cleanRules, describeRules } from "./overtime";
 import { hoursBetween } from "./hours";
 import { saveFile } from "@/lib/native";
 
@@ -19,6 +19,8 @@ export type PayrollRow = {
   hoursWorked: number;
   hourlyRate: number;
   grossPay: number;
+  /** Paid a salary: hours are listed but no rate or gross is worked out from them */
+  salaried?: boolean;
 };
 
 // Per-worker overtime breakdown for the whole export period
@@ -61,7 +63,8 @@ function buildRows(
       const worker = workerMap.get(e.workerId);
       const project = projectMap.get(e.projectId);
       const hours = (hoursBetween(e.clockIn, e.clockOut!));
-      const rate = worker?.hourlyRate ?? 0;
+      const salaried = isSalaried(worker);
+      const rate = salaried ? 0 : (worker?.hourlyRate ?? 0);
       return {
         workerName: worker?.name ?? "Unknown",
         workerEmail: worker?.email ?? "",
@@ -73,6 +76,7 @@ function buildRows(
         hoursWorked: Math.round(hours * 100) / 100,
         hourlyRate: rate,
         grossPay: Math.round(hours * rate * 100) / 100,
+        salaried,
       };
     })
     .sort((a, b) => a.workerName.localeCompare(b.workerName) || a.date.localeCompare(b.date));
@@ -98,7 +102,7 @@ function buildOvertimeSummaries(
   const summaries: WorkerOvertimeSummary[] = [];
   for (const [workerId, workerEntries] of byWorker) {
     const worker = workerMap.get(workerId);
-    const breakdown = computeWorkerOvertime(workerEntries, worker?.hourlyRate ?? 0, settings);
+    const breakdown = workerOvertime(worker, workerEntries, settings);
     summaries.push({
       workerName: worker?.name ?? "Unknown",
       workerEmail: worker?.email ?? "",
@@ -135,7 +139,7 @@ const csvAdapter: PayrollAdapter = {
       "",
       header.map(escapeCsv).join(","),
       ...rows.map((r) =>
-        [r.workerName, r.workerEmail, r.role, r.projectName, r.date, r.clockIn, r.clockOut, r.hoursWorked, r.hourlyRate, r.grossPay]
+        [r.workerName, r.workerEmail, r.role, r.projectName, r.date, r.clockIn, r.clockOut, r.hoursWorked, r.salaried ? "Salary" : r.hourlyRate, r.salaried ? "" : r.grossPay]
           .map(escapeCsv).join(",")
       ),
     ];

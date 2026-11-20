@@ -243,3 +243,19 @@ function computeWithRules(entries: ClockEntry[], hourlyRate: number, rules: Over
     totalPay: r2(regularPay + premiumPay),
   };
 }
+
+/** Salaried people are overtime-exempt and their pay isn't worked out from hours; their hours are still counted */
+export const isSalaried = (w?: { payType?: string } | null) => w?.payType === "salary";
+
+/**
+ * Hours and pay for one person, the way payroll should see them. Everything that shows or exports
+ * overtime goes through here so a salaried person is never shown overtime or an hourly pay figure.
+ */
+export function workerOvertime(
+  worker: { hourlyRate?: number; payType?: string } | null | undefined,
+  entries: ClockEntry[],
+  settings: OvertimeSettings,
+) {
+  if (isSalaried(worker)) return computeWorkerOvertime(entries, 0, { ...settings, enabled: false });
+  return computeWorkerOvertime(entries, worker?.hourlyRate ?? 0, settings);
+}

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const { name, role, customRole, email, phone, color, hourlyRate, photo } = body;
+  const { name, role, customRole, email, phone, color, hourlyRate, photo, payType } = body;
 
   if (!name?.trim()) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
     photo_url: photo ?? null,
     clocked_in: false,
     hourly_rate: parseFloat(hourlyRate) || 0,
+    // Only written when asked for, so adding hourly crew still works before migration 020
+    ...(payType === "salary" ? { pay_type: "salary" } : {}),
   });
 
   if (profileErr) {

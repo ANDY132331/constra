@@ -56,7 +56,7 @@ import { sendPushEvent } from "@/lib/push-client";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { isForemanOrAbove } from "@/lib/permissions";
 import { hoursBetween, elapsedLabel, isImplausibleShift, LONG_SHIFT_HOURS } from "@/lib/hours";
-import { computeWorkerOvertime, weekStartOf } from "@/lib/overtime";
+import { workerOvertime, weekStartOf } from "@/lib/overtime";
 import { WeekHours } from "@/components/week-hours";
 import { fmtDistance, isAwayFromSite, siteMoves } from "@/lib/site-presence";
 
@@ -449,7 +449,7 @@ export default function TimeTrackingPage() {
     if (!overtimeEnabled) return 0;
     const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0, 0, 0, 0);
     const entries = clockEntries.filter((e) => e.workerId === workerId && e.clockOut && new Date(e.clockIn) >= weekStart);
-    return computeWorkerOvertime(entries, rate, {
+    return workerOvertime(workers.find((x) => x.id === workerId) ?? { hourlyRate: rate }, entries, {
       enabled: overtimeEnabled,
       dailyThreshold: overtimeDailyThreshold,
       weeklyThreshold: overtimeWeeklyThreshold,

@@ -36,6 +36,8 @@ export type DbProfile = {
   clocked_in: boolean;
   clock_in_time: string | null;
   hourly_rate: number;
+  /** Migration 020. Absent before it runs, so it is only written once a row has shown it exists */
+  pay_type?: string;
   device_history: Array<{ ua: string; firstSeen: string; lastSeen: string }> | null;
   granted_pages: string[] | null;
   /** Migration 015. Absent before it runs, so it's never written by workerToDb */
@@ -58,6 +60,7 @@ export function dbToWorker(row: DbProfile): Worker {
     clockedIn: row.clocked_in,
     clockInTime: row.clock_in_time ? new Date(row.clock_in_time) : undefined,
     hourlyRate: Number(row.hourly_rate),
+    payType: row.pay_type === "salary" ? "salary" : row.pay_type === "hourly" ? "hourly" : undefined,
     deviceHistory: row.device_history?.map((d) => ({
       ua: d.ua,
       firstSeen: new Date(d.firstSeen),
@@ -83,6 +86,7 @@ export function workerToDb(w: Worker, companyId: string): Omit<DbProfile, "creat
     clocked_in: w.clockedIn,
     clock_in_time: w.clockInTime?.toISOString() ?? null,
     hourly_rate: w.hourlyRate,
+    ...(w.payType ? { pay_type: w.payType } : {}),
     device_history:
       w.deviceHistory?.map((d) => ({
         ua: d.ua,

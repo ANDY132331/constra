@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import type { ClockEntry, Worker } from "@/lib/mock-data";
 import { hoursBetween } from "@/lib/hours";
-import { computeWorkerOvertime, type OvertimeSettings } from "@/lib/overtime";
+import { workerOvertime, type OvertimeSettings } from "@/lib/overtime";
 import { ink } from "@/lib/utils";
 
 /** The slice of an entry this summary reads. Running shifts come in with no clockOut. */
@@ -64,7 +64,7 @@ export function WeekHours({
       const worker = getWorker(id);
       if (!worker) return [];
       // Same engine payroll uses, so this never promises overtime payroll won't pay
-      const ot = overtime.enabled ? computeWorkerOvertime(p.done, worker.hourlyRate ?? 0, overtime).overtimeHours : 0;
+      const ot = overtime.enabled ? workerOvertime(worker, p.done, overtime).overtimeHours : 0;
       return [{ worker, ...p, overtime: ot }];
     }).sort((a, b) => b.hours - a.hours);
     const overtimeTotal = rows.reduce((s, r) => s + r.overtime, 0);

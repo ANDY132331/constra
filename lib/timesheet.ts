@@ -3,7 +3,7 @@
 
 import type { ClockEntry, Project, Worker } from "./mock-data";
 import { hoursBetween } from "./hours";
-import { computeWorkerOvertime, type OvertimeSettings } from "./overtime";
+import { workerOvertime, type OvertimeSettings } from "./overtime";
 
 export type TimesheetShift = {
   id: string;
@@ -94,7 +94,7 @@ export function buildTimesheet({
       return { date, shifts, hours: shifts.reduce((s, x) => s + x.hours, 0) };
     });
     // The payroll engine decides overtime, so a timesheet never promises what payroll won't pay
-    const split = computeWorkerOvertime(mine, worker.hourlyRate ?? 0, overtime);
+    const split = workerOvertime(worker, mine, overtime);
     const total = days.reduce((s, d) => s + d.hours, 0);
     people.push({
       worker,

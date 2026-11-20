@@ -18,11 +18,11 @@ fs.mkdirSync(OUT, { recursive: true });
 const id = (n) => `${String(n).repeat(8)}-${String(n).repeat(4)}-4${String(n).repeat(3)}-8${String(n).repeat(3)}-${String(n).repeat(12)}`;
 const CO = id(1), OTHER_CO = id(9), PROJ = id(7);
 const now = new Date().toISOString();
-const person = (n, name, role, rate, extra = {}) => ({ id: id(n), company_id: CO, name, initials: name.split(" ").map((x) => x[0]).join(""), role, custom_role: role, email: `${name.split(" ")[0].toLowerCase()}@leakcheck.test`, phone: `555-010${n}`, color: "#3b82f6", clocked_in: false, hourly_rate: rate, granted_pages: null, created_at: now, ...extra });
+const person = (n, name, role, rate, extra = {}) => ({ id: id(n), company_id: CO, name, initials: name.split(" ").map((x) => x[0]).join(""), role, custom_role: role, email: `${name.split(" ")[0].toLowerCase()}@leakcheck.test`, phone: `555-010${n}`, color: "#3b82f6", clocked_in: false, hourly_rate: rate, pay_type: "hourly", granted_pages: null, created_at: now, ...extra });
 const U = {
   owner: person(2, "Olive Owner", "Admin", 61.11),
   pm: person(3, "Pat Manager", "Project Manager", 52.22),
-  foreman: person(4, "Fred Foreman", "Foreman", 43.33),
+  foreman: person(4, "Fred Foreman", "Foreman", 43.33, { pay_type: "salary" }),
   w1: person(5, "Wendy One", "Worker", 24.44),
   w2: person(6, "Walt Two", "Worker", 27.77),
 };
@@ -163,6 +163,17 @@ check("owner: crew page lists everyone by name", ["Wendy One", "Walt Two", "Fred
 await owner.page.getByText("Wendy One").first().click().catch(() => {});
 await owner.page.waitForTimeout(1200);
 const detail = (await owner.page.locator("body").innerText()) + (await owner.page.content());
+await open(owner.page, "/crew"); // the previous step left Wendy's sheet open
+await owner.page.getByText("Fred Foreman").first().click().catch(() => {});
+await owner.page.waitForTimeout(800);
+const sheetText = await owner.page.locator("body").innerText();
+check("owner: a salaried person's record says Salary, not an hourly rate", /Rate\s*Salary/.test(sheetText) && !sheetText.includes("43.33"), sheetText.replace(/\s+/g, " ").slice(0, 160));
+await owner.page.getByRole("button", { name: "Edit", exact: true }).last().click().catch(() => {});
+await owner.page.waitForTimeout(800);
+const salaryRadio = owner.page.getByRole("radio", { name: "Salary" });
+const hourlyRadio = owner.page.getByRole("radio", { name: "By the hour" });
+await owner.page.screenshot({ path: OUT + "/pay-toggle.png" });
+check("owner: editing a salaried person shows Salary selected", (await salaryRadio.getAttribute("aria-checked").catch(() => null)) === "true" && (await hourlyRadio.getAttribute("aria-checked").catch(() => null)) === "false", "radios on screen: " + (await owner.page.getByRole("radio").count()) + ", salary=" + (await salaryRadio.getAttribute("aria-checked").catch(() => "none")) + " (screenshot " + OUT + "/pay-toggle.png)");
 check("owner: opening a worker shows their email or pay", ["wendy@leakcheck.test", "24.44"].some((x) => detail.includes(x)), "neither shown after opening Wendy One");
 await owner.ctx.close();
 for (const k of ["pm", "foreman", "w1", "w2"]) { const r = await sweep(k); await r.ctx.close(); }
