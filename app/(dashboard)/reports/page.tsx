@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { isAdminOrAbove } from "@/lib/permissions";
 import { Clock, DollarSign, TrendingUp, Users, FileDown, AlertCircle, BarChart2, ChevronDown, FileText } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { formatCurrencyCompact } from "@/lib/currency";
+import { formatCurrencyCompact, formatCurrency } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
 import { PAYROLL_ADAPTERS, exportPayroll } from "@/lib/payroll-export";
 import { exportReportPdf } from "@/lib/pdf-export";
@@ -186,6 +186,73 @@ export default function ReportsPage() {
       .sort((a, b) => b.hoursThisPeriod - a.hoursThisPeriod)
       .slice(0, 5);
   }, [workers, periodEntries, overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules]);
+
+  // Everyone with closed shifts in the period, with what payroll would pay them: the same engine as the
+  // payroll export, so this table and the file agree. Salaried people show hours but no pay.
+  const payrollRows = useMemo(() => {
+    const settings = { enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold, multiplier: overtimeMultiplier, rules: overtimeRules };
+    return workers
+      .map((w) => {
+        const mine = periodEntries.filter((e) => e.workerId === w.id);
+        const b = workerOvertime(w, mine, settings);
+        return {
+          id: w.id, name: w.name, role: w.customRole || w.role, color: w.color, initials: w.initials,
+          salaried: w.payType === "salary",
+          noRate: w.payType !== "salary" && !(w.hourlyRate > 0),
+          hours: Math.round((b.regularHours + b.overtimeHours) * 100) / 100,
+          overtime: b.overtimeHours,
+          pay: b.totalPay,
+        };
+      })
+      .filter((r) => r.hours > 0)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [workers, periodEntries, overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules]);
+  const payrollTotal = payrollRows.reduce((s, r) => s + r.pay, 0);
+  const payrollHours = payrollRows.reduce((s, r) => s + r.hours, 0);
+
+  // One card, shown in both the phone and the laptop layout
+  const payrollCard = (
+      <div className="bg-[#111111] border border-white/[0.06] rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[14px] font-bold text-white">Payroll Summary</h3>
+          <span className="text-[11px] text-white/30">{periodLabel}</span>
+        </div>
+        {payrollRows.length === 0 ? (
+          <p className="text-[12px] text-white/25 py-4">No closed shifts in this period yet.</p>
+        ) : (
+          <>
+            <ul className="divide-y divide-white/[0.05]" aria-label="Pay per worker">
+              {payrollRows.map((r) => (
+                <li key={r.id} className="flex items-center gap-3 py-2.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black flex-shrink-0"
+                    style={{ backgroundColor: r.color + "20", color: ink(r.color) }}>{r.initials}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-white/85 truncate">{r.name}</p>
+                    <p className="text-[11px] text-white/35 truncate">
+                      {r.hours.toFixed(1)}h{r.overtime > 0 ? <span className="text-amber-400"> · {r.overtime.toFixed(1)}h overtime</span> : null}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    {r.salaried ? (
+                      <span className="text-[12px] font-bold text-white/55">Salary</span>
+                    ) : r.noRate ? (
+                      <span className="text-[11px] font-bold text-amber-400">No rate set</span>
+                    ) : (
+                      <span className="text-[14px] font-black text-white tabular-nums">{formatCurrency(r.pay, currency as never)}</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-3 pt-3 border-t border-white/[0.08] flex items-center justify-between">
+              <span className="text-[12px] font-bold text-white/60">{payrollHours.toFixed(1)}h in total</span>
+              <span className="text-[16px] font-black text-white tabular-nums">{formatCurrency(payrollTotal, currency as never)}</span>
+            </div>
+            <p className="mt-2 text-[10px] leading-relaxed text-white/30">Closed shifts only. Hourly pay follows your overtime rules in Settings. Salaried people are listed by hours and are not included in the total.</p>
+          </>
+        )}
+      </div>
+  );
 
   const activeWorkers = workers.filter((w) => w.clockedIn).length;
 
@@ -459,6 +526,7 @@ export default function ReportsPage() {
             </div>
           );
         })()}
+        <div className="px-4 mt-4">{payrollCard}</div>
       </div>
 
       {/* DESKTOP */}
@@ -747,6 +815,8 @@ export default function ReportsPage() {
           </div>
         )}
       </div>
+
+      {payrollCard}
     </div>
     </>
   );
