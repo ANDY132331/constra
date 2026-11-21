@@ -122,3 +122,12 @@ construction management, crew scheduling, time tracking, invoicing, field servic
 ## Phone screenshots (updated 13 Nov 2026)
 
 `phone1`–`phone8` in this folder and in `play-store-upload/2 - Phone Screenshots/` are real captures of the app (not mockups), 1080 × 1920 (9:16), no transparency, in the order to upload: dashboard, hours this week, timesheets, Excel templates, crew plan, invoices, time off, crew. Google Play needs the long side to be at most twice the short side, so the earlier 1170 × 2532 images were too tall. Regenerate with `node app-store-screenshots/capture.mjs` (the `play-*` files in `.tmp-shots/out`).
+
+---
+
+## v2 listing images (2026-11-21) — these are the ones on the Play listing
+
+`v2/` holds the current Play Store images, built from real app screens with headlines in the website palette
+(yellow, blue, ink, orange). 8 phone screenshots (1080x1920), 4 tablet screenshots (2560x1440, used for both 7- and
+10-inch) and the 1024x500 feature graphic. The older files above are the previous raw captures (they show a dev
+badge and an old "Field Management" label) and are kept only for reference.
