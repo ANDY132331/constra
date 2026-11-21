@@ -257,6 +257,48 @@ function JumpGame() {
   );
 }
 
+
+/** What the paperwork costs today. Only the visitor's own numbers go in, and nothing here is a promise about results. */
+const REGION_CURRENCY: Record<string, string> = { US: "USD", CA: "CAD", GB: "GBP", AU: "AUD", NZ: "NZD", IE: "EUR", DE: "EUR", FR: "EUR", ES: "EUR", IT: "EUR", NL: "EUR", MX: "MXN", ZA: "ZAR", IN: "INR", AE: "AED" };
+function PaperworkCalc({ href, label }: { href: string; label: string }) {
+  const [hours, setHours] = useState(6);
+  const [rate, setRate] = useState(45);
+  // The visitor's own region picks the currency symbol; the server render and first paint use USD
+  const currency = useSyncExternalStore(noopSubscribe, () => {
+    try { const region = (navigator.language || "en-US").split("-")[1]?.toUpperCase(); return (region && REGION_CURRENCY[region]) || "USD"; } catch { return "USD"; }
+  }, () => "USD");
+  const money = (n: number) => { try { return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(n); } catch { return "$" + Math.round(n).toLocaleString(); } };
+  const yearHours = Math.round(hours * 52);
+  const yearCost = Math.round(hours * 52 * rate);
+  return (
+    <section className="mp-calc" aria-label="What paperwork costs you">
+      <div className="mp-wrap mp-calc-grid">
+        <div>
+          <p className="mp-label">Do the maths</p>
+          <h2 className="mp-big">What is the paperwork costing you?</h2>
+          <p className="mp-calc-lede">Timesheets, payroll, invoices, daily reports. Put in your own numbers. Nothing is stored and nothing here is a promise about results.</p>
+        </div>
+        <div className="mp-calc-card">
+          <label className="mp-calc-row" htmlFor="calc-hours">
+            <span>Hours a week on paperwork <b>{hours} h</b></span>
+            <input id="calc-hours" type="range" min={1} max={30} step={1} value={hours} onChange={(e) => setHours(Number(e.target.value))} />
+          </label>
+          <label className="mp-calc-row" htmlFor="calc-rate">
+            <span>What an hour of your time is worth <b>{money(rate)}</b></span>
+            <input id="calc-rate" type="range" min={15} max={150} step={5} value={rate} onChange={(e) => setRate(Number(e.target.value))} />
+          </label>
+          <div className="mp-calc-out" aria-live="polite">
+            <p><strong>{yearHours.toLocaleString()}</strong> hours a year</p>
+            <p><strong>{money(yearCost)}</strong> of your time</p>
+          </div>
+          <p className="mp-calc-note">Constra is built to take timesheets, payroll exports and daily reports off that list: the hours are recorded as people clock in, and Friday payroll is one button.</p>
+          <Link href={href} className="mp-pill mp-pill-orange mp-pill-big">{label} <ArrowRight size={20} aria-hidden /></Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   const alreadyIn = useSyncExternalStore(noopSubscribe, readOnboarded, () => false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -319,7 +361,7 @@ export default function LandingPage() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>(".mp-big, .mp-label, .mp-talk h2, .mp-talk p, .mp-card, .mp-letters, .mp-group, .mp-day-card, .mp-tile, .mp-frame, .mp-price-card, .mp-faq-list details, .mp-watch-grid p"));
+    const els = Array.from(root.querySelectorAll<HTMLElement>(".mp-big, .mp-label, .mp-calc-card, .mp-talk h2, .mp-talk p, .mp-card, .mp-letters, .mp-group, .mp-day-card, .mp-tile, .mp-frame, .mp-price-card, .mp-faq-list details, .mp-watch-grid p"));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { (e.target as HTMLElement).classList.add("rv-in"); io.unobserve(e.target); } });
     }, { root, rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
@@ -624,6 +666,8 @@ export default function LandingPage() {
           </div>
          </div>
         </div>
+
+        <PaperworkCalc href={startHref} label={startLabel} />
 
         {/* Pricing */}
         <section id="pricing" className="mp-price">

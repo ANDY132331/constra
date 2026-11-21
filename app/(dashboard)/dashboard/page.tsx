@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useT } from "@/lib/i18n";
-import { formatCurrencyCompact } from "@/lib/currency";
+import { formatCurrencyCompact, formatCurrency } from "@/lib/currency";
+import { workerOvertime } from "@/lib/overtime";
 import type { Worker, Project, Invoice } from "@/lib/mock-data";
 import Link from "next/link";
 import { DailyBriefCard } from "@/components/daily-brief-card";
@@ -307,6 +308,7 @@ export default function DashboardPage() {
     workers, projects, punchItems, clockEntries, activityFeed,
     currentUser, getWorkerById, getProjectById, currency,
     invoices, changeOrders, updateWorker, updateClockEntry, addActivity, theme,
+    overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules,
   } = useStore();
   const dk = theme !== "light"; // dark mode flag for hero section
   const t = useT();
@@ -446,6 +448,15 @@ export default function DashboardPage() {
     };
 
     const totalToday = myTodayHours + liveElapsed;
+    // What the closed shifts this week come to, worked out by the same engine payroll uses, so it
+    // matches Friday. Only for hourly people with a rate; salaried and unset workers see no figure.
+    const showPay = currentUser.payType !== "salary" && (currentUser.hourlyRate ?? 0) > 0;
+    const estPay = showPay
+      ? workerOvertime(currentUser, myEntries.filter((e) => e.clockOut && new Date(e.clockIn) >= wkStart), {
+          enabled: overtimeEnabled, dailyThreshold: overtimeDailyThreshold, weeklyThreshold: overtimeWeeklyThreshold,
+          multiplier: overtimeMultiplier, rules: overtimeRules,
+        }).totalPay
+      : 0;
     const dayTarget = 8;
     const weekTarget = 40;
     const dayPct = Math.min((totalToday / dayTarget) * 100, 100);
@@ -589,15 +600,18 @@ export default function DashboardPage() {
             { label: "Today", value: totalToday.toFixed(1) + "h", pct: dayPct, color: "#3b82f6", sub: `${dayTarget}h target` },
             { label: "This Week", value: (myWeekHours + liveElapsed).toFixed(1) + "h", pct: weekPct, color: "#d97706", sub: `${weekTarget}h target` },
             { label: "Days In", value: String(workedDays), pct: (workedDays / 5) * 100, color: "#16a34a", sub: "this week" },
-          ].map(({ label, value, pct, color, sub }) => (
+            ...(showPay ? [{ label: "Est. Pay", value: formatCurrency(estPay, currency as never), pct: 0, color: "#a855f7", sub: "closed shifts, before tax", noBar: true }] : []),
+          ].map(({ label, value, pct, color, sub, noBar }: { label: string; value: string; pct: number; color: string; sub: string; noBar?: boolean }) => (
             <div key={label} className={`flex-shrink-0 min-w-[120px] rounded-2xl p-3.5 ${dk ? "bg-[#111] border border-white/[0.06]" : "bg-white border border-gray-200 shadow-sm"}`}>
               <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${dk ? "text-white/30" : "text-gray-400"}`}>{label}</p>
               <p className={`text-[20px] font-black leading-none ${dk ? "text-white" : "text-gray-900"}`}>{value}</p>
               <p className={`text-[10px] mt-0.5 mb-2 ${dk ? "text-white/25" : "text-gray-400"}`}>{sub}</p>
               {/* Progress bar */}
-              <div className={`h-1 rounded-full overflow-hidden ${dk ? "bg-white/[0.06]" : "bg-gray-100"}`}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
-              </div>
+              {!noBar && (
+                <div className={`h-1 rounded-full overflow-hidden ${dk ? "bg-white/[0.06]" : "bg-gray-100"}`}>
+                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
+                </div>
+              )}
             </div>
           ))}
         </div>
