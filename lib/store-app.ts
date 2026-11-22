@@ -4,9 +4,9 @@
 export const STORE_APP_COOKIE = "constra_app";
 export const ANDROID_APP_REFERRER = "android-app://com.getconstra.app";
 
-// Null until the Play listing is public (it 404s during closed testing). Set it to
-// https://play.google.com/store/apps/details?id=com.getconstra.app to bring the links back.
-export const PLAY_STORE_URL: string | null = null;
+// The Play listing is public (live since 2026-11-21). Set this back to null if it is ever taken down or paused,
+// because the links below would then 404.
+export const PLAY_STORE_URL: string | null = "https://play.google.com/store/apps/details?id=com.getconstra.app";
 
 /** True for the iOS shell (its user agent) or the Android TWA (its launch referrer or cookie). */
 export function fromStoreApp(request: Request): boolean {

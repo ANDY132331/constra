@@ -1,11 +1,12 @@
 import { toast } from "sonner";
+import { PLAY_STORE_URL } from "@/lib/store-app";
 
 export const inviteLink = (code: string) => `${window.location.origin}/login?join=${code}`;
 
 /** Opens the phone's share sheet with the join link and code, or copies them where there isn't one. */
 export async function shareInvite(code: string, companyName: string): Promise<void> {
   const url = inviteLink(code);
-  const text = `Join ${companyName || "our company"} on Constra so you can clock in from your phone. Your invite code is ${code}.`;
+  const text = `Join ${companyName || "our company"} on Constra so you can clock in from your phone. Your invite code is ${code}.${PLAY_STORE_URL ? ` Android app: ${PLAY_STORE_URL}` : ""}`;
   try {
     if (navigator.share) {
       await navigator.share({ title: "Join us on Constra", text, url });
