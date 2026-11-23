@@ -120,13 +120,15 @@ await new Promise((r) => server.listen(54399, "127.0.0.1", r));
 const b64 = (v) => Buffer.from(JSON.stringify(v)).toString("base64url");
 const browser = await chromium.launch({ channel: "msedge", args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] });
 async function as(u) {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, permissions: ["geolocation", "camera", "microphone"], geolocation: { latitude: 43.65, longitude: -79.39 }, bypassCSP: true, serviceWorkers: "block" });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, permissions: ["geolocation", "camera", "microphone"], geolocation: { latitude: 43.65, longitude: -79.39 }, bypassCSP: true, serviceWorkers: "block", locale: process.env.LOCALE || "en-US" });
   const exp = Math.floor(Date.now() / 1000) + 36000;
   const token = `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub: u.id, exp, role: "authenticated", aud: "authenticated" })}.sig`;
   await ctx.addCookies([{ name: "sb-127-auth-token", value: `base64-${b64({ access_token: token, refresh_token: "r", token_type: "bearer", expires_in: 36000, expires_at: exp, user: { id: u.id, aud: "authenticated", role: "authenticated", email: u.email, app_metadata: {}, user_metadata: {}, created_at: now } })}`, url: APP }]);
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
+  // Quiet errors too (React reports a hydration mismatch only as a console error): everything except failed requests to the mock
+  page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|net::ERR|favicon|Vercel Web Analytics|_vercel\/insights|MIME type|WebSocket connection to 'ws:\/\/127/.test(m.text())) errors.push("console: " + m.text().replace(/\s+/g, " ").slice(0, 160)); });
   return { ctx, page, errors };
 }
 const results = [];
@@ -168,7 +170,10 @@ await owner.page.getByText("Fred Foreman").first().click().catch(() => {});
 await owner.page.waitForTimeout(800);
 const sheetText = await owner.page.locator("body").innerText();
 check("owner: a salaried person's record says Salary, not an hourly rate", /Rate\s*Salary/.test(sheetText) && !sheetText.includes("43.33"), sheetText.replace(/\s+/g, " ").slice(0, 160));
-await owner.page.getByRole("button", { name: "Edit", exact: true }).last().click().catch(() => {});
+const editBtn = owner.page.getByRole("button", { name: "Edit", exact: true }).last();
+await editBtn.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
+await owner.page.waitForTimeout(600); // let the sheet finish sliding up
+await editBtn.click({ timeout: 5000 }).catch(() => {});
 await owner.page.waitForTimeout(800);
 const salaryRadio = owner.page.getByRole("radio", { name: "Salary" });
 const hourlyRadio = owner.page.getByRole("radio", { name: "By the hour" });
