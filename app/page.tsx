@@ -267,7 +267,11 @@ function PaperworkCalc({ href, label }: { href: string; label: string }) {
   const currency = useSyncExternalStore(noopSubscribe, () => {
     try { const region = (navigator.language || "en-US").split("-")[1]?.toUpperCase(); return (region && REGION_CURRENCY[region]) || "USD"; } catch { return "USD"; }
   }, () => "USD");
-  const money = (n: number) => { try { return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(n); } catch { return "$" + Math.round(n).toLocaleString(); } };
+  // Numbers are written with the server's own locale (en-US) on first paint and switch to the visitor's after the
+  // page loads. Using the visitor's locale straight away drew "US$45" where the server drew "$45", which React
+  // reports as a hydration mismatch (#418) for everyone outside the US.
+  const locale = useSyncExternalStore(noopSubscribe, () => { try { return navigator.language || "en-US"; } catch { return "en-US"; } }, () => "en-US");
+  const money = (n: number) => { try { return new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(n); } catch { return "$" + Math.round(n).toLocaleString("en-US"); } };
   const yearHours = Math.round(hours * 52);
   const yearCost = Math.round(hours * 52 * rate);
   return (
@@ -288,7 +292,7 @@ function PaperworkCalc({ href, label }: { href: string; label: string }) {
             <input id="calc-rate" type="range" min={15} max={150} step={5} value={rate} onChange={(e) => setRate(Number(e.target.value))} />
           </label>
           <div className="mp-calc-out" aria-live="polite">
-            <p><strong>{yearHours.toLocaleString()}</strong> hours a year</p>
+            <p><strong>{yearHours.toLocaleString(locale)}</strong> hours a year</p>
             <p><strong>{money(yearCost)}</strong> of your time</p>
           </div>
           <p className="mp-calc-note">Constra is built to take timesheets, payroll exports and daily reports off that list: the hours are recorded as people clock in, and Friday payroll is one button.</p>
