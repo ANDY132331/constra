@@ -165,7 +165,7 @@ export default function TimesheetsPage() {
         </div>
 
         {canSeeCrew && !companyLogo && (
-          <Link href="/settings" className="flex items-center gap-2 text-[12px] text-white/60 hover:text-white/80 transition-colors">
+          <Link href="/settings" className="flex items-center gap-2 text-[12px] text-white/60 hover:text-white/80 transition-colors min-h-[44px]">
             <ImagePlus size={14} className="text-amber-400 flex-shrink-0" />
             Add your company logo in Settings and it goes on every timesheet.
           </Link>

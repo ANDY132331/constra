@@ -244,7 +244,7 @@ function WorkerRow({ worker, now, weekHours, selected, onSelect }: {
       <CrewAvatar worker={worker} />
       <span className="flex-1 min-w-0">
         <span className="block text-[14px] font-semibold text-white truncate">{worker.name}</span>
-        <span className="flex items-center gap-1.5 text-[12px] text-white/60 min-w-0">
+        <span className="flex items-center gap-1.5 text-[12px] text-white/70 min-w-0">
           <span className="truncate">{worker.customRole || worker.role}</span>
           {alert && (
             <span className={`flex-shrink-0 inline-flex items-center gap-0.5 font-semibold ${alert === "expired" ? "text-red-400" : "text-amber-400"}`}>
@@ -259,7 +259,7 @@ function WorkerRow({ worker, now, weekHours, selected, onSelect }: {
         ) : (
           <span className="block text-[14px] font-semibold text-white/70 tabular-nums">{weekHours.toFixed(1)}h</span>
         )}
-        <span className="block text-[11px] text-white/50">{worker.clockedIn ? "this shift" : "this week"}</span>
+        <span className="block text-[11px] text-white/60">{worker.clockedIn ? "this shift" : "this week"}</span>
       </span>
       <ChevronRight size={16} className="text-white/30 flex-shrink-0 lg:hidden" />
     </button>

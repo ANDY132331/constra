@@ -9,7 +9,8 @@ const BASE = "http://localhost:3004";
 const SEED = fs.readFileSync(".claude/skills/browser-testing/scripts/seed.js", "utf8");
 const PAGES = ["/dashboard", "/time-tracking", "/timesheets", "/projects", "/tasks", "/crew", "/schedule", "/crew-plan", "/time-off", "/safety", "/punch-list", "/rfis", "/equipment", "/materials", "/documents", "/blueprints", "/photos", "/daily-reports", "/messages", "/invoices", "/estimates", "/change-orders", "/budget", "/insurance", "/reports", "/templates", "/settings"];
 const ROLE = process.argv[2] ?? "w-aisha";
-const VIEWS = [["phone", { width: 390, height: 844 }, true]];
+const SIZES = { phone: ["phone", { width: 390, height: 844 }, true], small: ["small", { width: 320, height: 640 }, true], tablet: ["tablet", { width: 820, height: 1180 }, true], desktop: ["desktop", { width: 1366, height: 768 }, false] };
+const VIEWS = [SIZES[process.env.VIEW || "phone"]]; // VIEW=small|tablet|desktop to check other screen sizes
 
 const browser = await chromium.launch({ channel: "msedge" });
 const findings = [];
