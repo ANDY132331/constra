@@ -205,7 +205,7 @@ export function SplashScreen({ exiting = false }: { exiting?: boolean }) {
           className="ss-tag text-[10.5px] tracking-[0.22em] uppercase"
           style={{ color: "rgba(255,255,255,0.28)", fontFamily: "var(--font-geist-sans)" }}
         >
-          Field Workforce &middot; Construction &amp; Trades
+          Run the job, not the paperwork
         </p>
       </div>
 

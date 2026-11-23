@@ -418,7 +418,7 @@ export default function LandingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON_LD }} />
       <a href="#main" className="mp-skip">Skip to content</a>
 
-      <div className="mp-bar">Pre-launch · Free while we launch<span className="mp-bar-x"> · Works with no signal</span></div>
+      <div className="mp-bar">Now on Google Play · Free while we launch<span className="mp-bar-x"> · Works with no signal</span></div>
 
       <div className="mp-head" role="banner">
         <div className="mp-head-in">
@@ -710,7 +710,7 @@ export default function LandingPage() {
             <h2 className="mp-big">Get your crew on it<br />before Monday.</h2>
             <div className="mp-final-btns">
               <Link href={startHref} className="mp-pill mp-pill-orange mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
-              {PLAY_STORE_URL && <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="mp-link">Get the Android app</a>}
+              {PLAY_STORE_URL && <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="mp-pill mp-pill-yellow mp-pill-big">Get it on Google Play</a>}
             </div>
           </div>
         </section>
@@ -721,7 +721,7 @@ export default function LandingPage() {
         <div className="mp-wrap mp-foot-row">
           <div>
             <strong style={{ font: "700 20px var(--display)", textTransform: "uppercase" }}>Constra</strong>
-            <p style={{ margin: "4px 0 0", color: "var(--ink2)" }}>Run the job, not the paperwork. Pre-launch: free while we launch.</p>
+            <p style={{ margin: "4px 0 0", color: "var(--ink2)" }}>Run the job, not the paperwork. Free while we launch.</p>
           </div>
           <nav aria-label="Footer">
             <Link href="/login">Sign in</Link>

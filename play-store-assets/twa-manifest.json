@@ -1,7 +1,7 @@
 {
   "packageId": "com.getconstra.app",
   "host": "getconstra.com",
-  "name": "Constra — Field Workforce Management",
+  "name": "Constra: Crew Timesheets & GPS",
   "launcherName": "Constra",
   "display": "standalone",
   "orientation": "portrait",

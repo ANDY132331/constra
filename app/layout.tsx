@@ -54,13 +54,13 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://getconstra.com"),
-  title: "Constra — Run the job, not the paperwork",
-  description: "The crew app for small contractors: clock in with a photo and GPS, timesheets build themselves, invoices, daily reports and safety logs. Works offline. Free while we launch.",
-  keywords: ["construction management", "workforce management", "time tracking", "crew scheduling", "invoicing", "punch list", "construction app", "trade contractor software"],
+  title: "Constra: Crew Timesheets & GPS | Run the job, not the paperwork",
+  description: "The free crew app for small contractors: GPS clock-in with a photo, timesheets and payroll export, invoices and daily reports. Works offline. Free while we launch.",
+  keywords: ["crew timesheets", "GPS clock in", "contractor time tracking", "construction payroll", "crew scheduling", "construction app", "construction management", "invoicing", "punch list", "works offline"],
   authors: [{ name: "Constra" }],
   openGraph: {
-    title: "Constra — Run the job, not the paperwork",
-    description: "The crew app for small contractors: GPS clock-in with a photo, automatic timesheets, invoices and daily reports. Works offline. Free while we launch.",
+    title: "Constra: Crew Timesheets & GPS | Run the job, not the paperwork",
+    description: "The free crew app for small contractors: GPS clock-in with a photo, timesheets and payroll export, invoices and daily reports. Works offline. Free while we launch.",
     type: "website",
     url: "https://getconstra.com",
     locale: "en_CA",
@@ -76,8 +76,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Constra — Run the job, not the paperwork",
-    description: "GPS clock-in with a photo, automatic timesheets, invoices and daily reports for small crews. Free while we launch.",
+    title: "Constra: Crew Timesheets & GPS | Run the job, not the paperwork",
+    description: "The free crew app for small contractors: GPS clock-in with a photo, timesheets and payroll export, invoices and daily reports. Works offline. Free while we launch.",
     images: ["https://getconstra.com/opengraph-image"],
   },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Constra" },

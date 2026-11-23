@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Constra — Run the job, not the paperwork",
+  "name": "Constra: Crew Timesheets & GPS",
   "short_name": "Constra",
-  "description": "The crew app for small contractors: GPS clock-in, timesheets, invoices and daily reports. Works offline.",
+  "description": "The free crew app for small contractors: GPS clock-in with a photo, timesheets and payroll export, invoices and daily reports. Works offline.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
