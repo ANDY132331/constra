@@ -9,8 +9,8 @@ import { fromStoreApp } from "@/lib/store-app";
 import { answerLocally } from "@/lib/help-guide";
 
 // The built-in guide answers on its own when no AI provider key is set, or when the provider fails.
-function localReply(question: string, storeApp: boolean) {
-  return new Response(answerLocally(question, { storeApp }), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+function localReply(question: string, storeApp: boolean, history: string[] = []) {
+  return new Response(answerLocally(question, { storeApp, history }), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
 }
 
 export async function GET(request: Request) {
@@ -273,9 +273,11 @@ export async function POST(request: Request) {
     return new Response("No messages provided", { status: 400 });
   }
 
-  const lastQuestion = [...userMessages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const askedByUser = userMessages.filter((m) => m.role === "user").map((m) => m.content);
+  const lastQuestion = askedByUser[askedByUser.length - 1] ?? "";
+  const earlierQuestions = askedByUser.slice(0, -1).slice(-3);
   // No AI key configured: answer from the built-in guide instead of failing.
-  if (!apiKey) return localReply(lastQuestion, fromStoreApp(request));
+  if (!apiKey) return localReply(lastQuestion, fromStoreApp(request), earlierQuestions);
 
   const page = typeof body.page === "string" ? body.page.slice(0, 100) : "";
   const system = [
@@ -310,7 +312,7 @@ export async function POST(request: Request) {
     if (!groqRes.ok || !groqRes.body) {
       const errText = await groqRes.text().catch(() => "");
       console.error("[/api/chat] Groq error:", groqRes.status, errText);
-      return localReply(lastQuestion, fromStoreApp(request));
+      return localReply(lastQuestion, fromStoreApp(request), earlierQuestions);
     }
 
     // Groq returns OpenAI-compatible SSE — parse and forward text chunks
@@ -361,6 +363,6 @@ export async function POST(request: Request) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[/api/chat] fetch error:", msg);
-    return localReply(lastQuestion, fromStoreApp(request));
+    return localReply(lastQuestion, fromStoreApp(request), earlierQuestions);
   }
 }

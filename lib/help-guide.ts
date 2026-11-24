@@ -1,208 +1,304 @@
-// Built-in help for the in-app assistant. It needs no outside AI service and no keys: it matches
-// what the person typed against a guide of how Constra works and returns the best steps.
+// Built-in help for the in-app assistant. It needs no outside AI service and no keys.
+// It reads the knowledge base in help-kb.ts and finds the best answer for whatever the person typed:
+// it ignores filler words, treats synonyms alike (punch = clock, crew = team = workers), stems words
+// (clocking = clock), forgives typos (clokc), and uses the previous question for short follow-ups.
 // /api/chat uses it whenever the AI provider is not configured or is unavailable.
 
-type Topic = {
-  id: string;
-  words: string[]; // lowercase words/phrases; longer phrases score higher
-  answer: string;
-  /** hide from the store apps (no prices or payment instructions there) */
-  billing?: boolean;
-};
-
-const TOPICS: Topic[] = [
-  {
-    id: "clock-in",
-    words: ["clock in", "clock out", "clocking", "punch in", "punch out", "start shift", "end shift", "start my day", "time clock"],
-    answer: "To clock in: open the app, tap **Time** (or the big Clock In button on your home screen), allow location, take a quick photo if it asks, then confirm. Tap **Clock Out** when you finish.\n\nNo signal? It still works. Your clock-in saves on the phone and sends itself when you're back online.",
-  },
-  {
-    id: "cant-clock",
-    words: ["cant clock", "can't clock", "cannot clock", "wont clock", "won't clock", "gps", "location", "not on site", "too far", "wrong location", "geofence"],
-    answer: "If clocking in won't work:\n1. Turn location on for the app (phone Settings → Apps → Constra → Permissions → Location → Allow).\n2. If it asks for a photo, allow the camera too.\n3. Step outside or near a window for a better GPS lock and try again.\n4. No signal is fine. It saves and syncs later.\n\nStill stuck? Tell your foreman or admin. They can fix your time from Time Tracking → your name → Edit entry.",
-  },
-  {
-    id: "edit-time",
-    words: ["edit time", "fix my time", "wrong hours", "forgot to clock", "missed punch", "change hours", "edit entry", "adjust hours", "forgot clock", "wrong time"],
-    answer: "Hours are fixed by a foreman, project manager or admin: Time Tracking → tap the person → **Edit entry** (change the in and out times or add a missed shift). Workers can't edit their own hours, so message your foreman and they'll correct it.",
-  },
-  {
-    id: "timesheets",
-    words: ["timesheet", "timesheets", "export hours", "download hours", "hours report", "weekly hours", "pdf hours"],
-    answer: "Timesheets: menu → **Timesheets**. Pick the dates, a person and a job, then tap **Download PDF** or **Download Excel**. Both carry your company logo and have one page per worker.\n\nAdmins can also tap **Email it now** to send the PDF and Excel to the payroll email you saved.",
-  },
-  {
-    id: "payroll",
-    words: ["payroll", "pay run", "gusto", "quickbooks", "overtime", "pay period", "paycheque", "paycheck", "salary", "salaried"],
-    answer: "Payroll (admins): **Reports → Export Payroll**. Pick Gusto for a CSV, or QuickBooks (Online gets a summary of hours to enter by hand, Desktop gets an IIF file). Overtime is worked out from the hours automatically. People set to **Salary** show as Salary with no hourly pay.\n\nTo set a person as hourly or salary: Crew → tap them → Edit → Pay type.",
-  },
-  {
-    id: "my-pay",
-    words: ["my pay", "how much will i get", "est pay", "estimated pay", "my earnings", "what do i earn", "my rate"],
-    answer: "Workers see their own hours and estimated pay on the home screen (**Est. Pay**). It only shows your own numbers. If it says **No rate set**, ask your admin to enter your pay rate on the Crew screen.",
-  },
-  {
-    id: "invite",
-    words: ["invite", "add worker", "add crew", "add someone", "new worker", "new crew", "join company", "invite code", "sign up code", "qr code", "add employee", "add a worker"],
-    answer: "To add someone: **Crew → Add Worker**. Share the company invite code (or its QR) from Crew or Settings → Company. They download the app, sign up and enter the code (it looks like CN-XXXX-XXXX, upper or lower case both work).\n\nCode not working? Check it's typed exactly. An admin can make a new one in Settings → Company.",
-  },
-  {
-    id: "roles",
-    words: ["role", "roles", "permission", "permissions", "access", "cant see", "can't see", "cannot see", "missing page", "foreman", "project manager", "admin only", "who can see"],
-    answer: "Roles: **Worker** (clock in, own hours, schedule, punch list, messages), **Foreman** and **Project Manager** (plus tasks, RFIs, equipment, materials, documents, reports), **Admin** (everything, including crew, money and settings).\n\nIf someone can't see a page they need, an admin can change their role (Crew → tap them → Edit) or give them a specific page (Settings → Access Control).",
-  },
-  {
-    id: "crew-plan",
-    words: ["crew plan", "assign", "assignments", "who is working", "tomorrow", "send to crew", "job for the day", "plan the day", "daily plan"],
-    answer: "Crew Plan (foreman or admin): pick the day, add people to each job, set a start time, then tap **Send to crew**. Everyone gets a notification with the job, start time and address. One job per person per day.\n\nWorkers see their own job under **My plan**.",
-  },
-  {
-    id: "time-off",
-    words: ["time off", "day off", "days off", "vacation", "sick", "request off", "holiday", "leave"],
-    answer: "Time off: menu → **Time Off** → ask for days (a reason is optional). Foremen and admins get a notification and tap Approve or Decline, and you're notified of the answer. Approved days show as **Off** in the crew plan.",
-  },
-  {
-    id: "schedule",
-    words: ["schedule", "calendar", "shift schedule", "my schedule", "events"],
-    answer: "Schedule: menu → **Schedule**. Workers see their own jobs and events, and foremen and admins see the whole crew. Add an event with the + button, choose the job, day and time.",
-  },
-  {
-    id: "projects",
-    words: ["project", "projects", "job site", "new job", "create project", "add project", "archive", "address"],
-    answer: "Projects: menu → **Projects → New project**. Add the name, job site address, dates and crew. Each project holds its own tasks, RFIs, documents, photos and budget. When a job's done, **archive** it. Nothing is deleted.",
-  },
-  {
-    id: "tasks",
-    words: ["task", "tasks", "to do", "todo", "assign task"],
-    answer: "Tasks: menu → **Tasks**. Foremen and above can create, assign and edit tasks per project. Workers see the tasks assigned to them and can mark them done.",
-  },
-  {
-    id: "punch",
-    words: ["punch list", "deficiency", "deficiencies", "snag", "closeout", "close-out"],
-    answer: "Punch list: menu → **Punch List**. Add an item, attach a photo and assign it. Everyone on the job can see it, and each item has a PDF button. Tick items off as they're fixed.",
-  },
-  {
-    id: "rfi",
-    words: ["rfi", "rfis", "request for information", "clarification"],
-    answer: "RFIs: menu → **RFIs → New RFI**. Write the question, pick the project and who it goes to. When it's answered, add the answer and close it. Each RFI has a PDF button with your company logo.",
-  },
-  {
-    id: "daily-report",
-    words: ["daily report", "daily reports", "site report", "diary", "weather"],
-    answer: "Daily reports: menu → **Daily Reports → New report**. Add the date, job, crew on site, work done, weather and photos. They save offline and sync later, and each one has a PDF button.",
-  },
-  {
-    id: "photos",
-    words: ["photo", "photos", "pictures", "pics", "camera", "upload picture"],
-    answer: "Photos: menu → **Photos**, or add one inside a task, punch item or daily report. Photos taken without signal are stored on the phone and upload when you're back online. If the camera won't open, allow Camera for the app in phone Settings.",
-  },
-  {
-    id: "documents",
-    words: ["document", "documents", "blueprint", "blueprints", "drawing", "drawings", "plans", "upload file", "pdf plans"],
-    answer: "Documents and blueprints: menu → **Documents** or **Blueprints** (foreman and above). Open a project and upload files. They're shared with everyone assigned to that job.",
-  },
-  {
-    id: "equipment",
-    words: ["equipment", "tool", "tools", "machine", "materials", "material", "inventory"],
-    answer: "Equipment and materials: menu → **Equipment** or **Materials** (foreman and above). Add the item, set the job and who has it, and update it as it moves.",
-  },
-  {
-    id: "safety",
-    words: ["safety", "incident", "toolbox", "hazard", "injury", "near miss"],
-    answer: "Safety: menu → **Safety**. Log an observation, incident or toolbox talk with the date, job, people involved and photos. Incidents have a PDF button.\n\nIn an emergency, call local emergency services first. The app is for the record afterwards.",
-  },
-  {
-    id: "messages",
-    words: ["message", "messages", "chat", "text crew", "group chat", "dm", "direct message"],
-    answer: "Messages: tap **Messages** to chat with your crew by project or company-wide. Messages sent without signal send when you reconnect.",
-  },
-  {
-    id: "invoices",
-    words: ["invoice", "invoices", "bill client", "send invoice", "estimate", "estimates", "quote", "change order", "change orders", "budget"],
-    answer: "Money tools (admin only): **Estimates**, **Invoices**, **Change Orders** and **Budget** are in the menu. Create one, pick the project, add line items, then email it or download the PDF. Invoices can also export to QuickBooks as a CSV.\n\nClients pay the contractor directly. There is no online card payment inside Constra.",
-  },
-  {
-    id: "reports",
-    words: ["report", "reports", "summary", "totals", "labour cost", "labor cost"],
-    answer: "Reports (admins): menu → **Reports**. You get a payroll summary, hours by person and job, and project costs. Download any of them as PDF or CSV. The **Payroll Summary** card shows each person's hours and pay at a glance.",
-  },
-  {
-    id: "offline",
-    words: ["offline", "no signal", "no internet", "no service", "no wifi", "no wi-fi", "sync", "syncing", "not syncing", "doesnt sync", "doesn't sync", "reconnect"],
-    answer: "Constra works with no signal. Clock-ins, reports, tasks, photos, messages and more save on the phone and send themselves when you reconnect. To force it, pull down to refresh on any screen.\n\nThings that need a connection: adding a new crew member, emailing an invoice, and seeing changes other people just made.",
-  },
-  {
-    id: "install",
-    words: ["install", "download app", "play store", "google play", "app store", "iphone", "android", "home screen", "get the app", "update the app"],
-    answer: "Android: install **Constra: Crew Timesheets & GPS** from Google Play. iPhone: open getconstra.com in Safari → Share → **Add to Home Screen**.\n\nThe app updates itself. If something looks old, close it fully and open it again, or clear the app's storage (your account and data stay safe online).",
-  },
-  {
-    id: "login",
-    words: ["login", "log in", "sign in", "password", "forgot password", "reset password", "locked out", "cant log", "can't log", "cannot log"],
-    answer: "Can't sign in? On the sign-in screen tap **Forgot password**. We email you a reset link (check spam). Make sure you use the same email you signed up with. To change your password later: Settings → Security.\n\nStill stuck? Email support@getconstra.com.",
-  },
-  {
-    id: "notifications",
-    words: ["notification", "notifications", "alerts", "not getting", "push", "reminder", "reminders"],
-    answer: "Notifications: Settings → **Notifications**, make sure they're on. Also allow notifications for the app in your phone settings. Owners get an alert when someone leaves a job site while clocked in, and anyone still clocked in after 10 hours gets a reminder.",
-  },
-  {
-    id: "settings",
-    words: ["settings", "dark mode", "light mode", "theme", "text size", "bigger text", "font", "language", "logo", "company name"],
-    answer: "Settings: menu → **Settings**. There you can change theme (dark or light), text size (Normal, Large, Extra large) and language. Admins also set the company name, logo and invite code. The logo shows up on every PDF.",
-  },
-  {
-    id: "delete",
-    words: ["delete account", "delete my account", "remove account", "close account", "cancel account", "privacy", "my data"],
-    answer: "To delete your account: Settings → Security → **Delete account**. This is permanent. Your privacy details are at getconstra.com/privacy. Questions about your data? Email support@getconstra.com.",
-  },
-  {
-    id: "price",
-    billing: true,
-    words: ["price", "pricing", "cost", "how much", "free", "pay for", "subscription", "plan", "upgrade", "cancel plan", "billing", "pro plan", "trial"],
-    answer: "Constra is free while we launch, with every feature, unlimited projects and unlimited crew. Plan changes go through support@getconstra.com, no penalties and no hidden fees.",
-  },
-  {
-    id: "feedback",
-    words: ["feedback", "suggest", "suggestion", "idea", "feature request", "bug", "broken", "problem", "issue", "not working", "doesnt work", "doesn't work", "glitch", "crash", "error"],
-    answer: "Sorry about that. Try these first: close the app fully and reopen it, check you're online, and pull down to refresh.\n\nStill broken? Menu → **Send feedback** goes straight to the Constra team, who reply by email. You can also reach us at support@getconstra.com or 672-338-9890.",
-  },
-];
-
-const GREETING = /^(hi|hello|hey|yo|good (morning|afternoon|evening)|sup|help)\b/i;
-const THANKS = /\b(thanks|thank you|thx|cheers|ty)\b/i;
-
-function normalize(s: string): string {
-  return s.toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function score(question: string, words: string[]): number {
-  let total = 0;
-  for (const w of words) {
-    const nw = normalize(w);
-    if (!nw) continue;
-    if (nw.includes(" ")) { if (question.includes(nw)) total += 3 + nw.split(" ").length; }
-    else if (new RegExp(`(^| )${nw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}( |$)`).test(question)) total += 2;
-  }
-  return total;
-}
+import { ENTRIES as KB, type Entry } from "./help-kb";
 
 export const HELP_FOLLOWUP = "Anything else? You can also call 672-338-9890 or email support@getconstra.com.";
 
-/** Best answer for a question, or a friendly menu when nothing matches. `storeApp` hides price/plan topics. */
-export function answerLocally(question: string, opts: { storeApp?: boolean; role?: string } = {}): string {
-  const q = normalize(question);
-  if (!q) return "Ask me anything about Constra, like clocking in, timesheets, crew or payroll.";
-  if (THANKS.test(q) && q.split(" ").length <= 4) return "You're welcome! Ask if you need anything else.";
-  const topics = TOPICS.filter((t) => !(opts.storeApp && t.billing));
-  const ranked = topics.map((t) => ({ t, s: score(q, t.words) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s);
-  if (ranked.length) {
-    const best = ranked[0];
-    const second = ranked[1] && ranked[1].s >= best.s - 1 && ranked[1].s >= 3 ? ranked[1] : null;
-    return second ? `${best.t.answer}\n\n---\n\n${second.t.answer}` : best.t.answer;
+// ---------- words ----------
+
+const STOP = new Set(("a an the to of in on at for and or but if so as is it its be am are was were been being do does did done have has had having " +
+  "i me my mine we us our you your he she they them their this that these those there here what whats where when why who whom whose which how " +
+  "can could would should will shall may might must just really very also too please pls hi hello hey tell show give let lets want need get got gets " +
+  "know like about some any with without from into over than then now up out off again still ever one thing things stuff way ok okay thanks thank " +
+  "im ive id ill youre thats whats theres page screen tab menu button section right now currently actually exactly today tonight").split(" "));
+
+// Groups of words that mean the same thing for our purposes. The first word is the shared root.
+const SYN_GROUPS: string[][] = [
+  ["clock", "punch", "checkin", "timeclock"],
+  ["pay", "wage", "paycheck", "paycheque", "earn", "income", "payslip", "compensation"],
+  ["crew", "team", "worker", "employee", "staff", "guy", "people", "labourer", "laborer", "member", "personnel"],
+  ["job", "project", "site", "jobsite", "worksite"],
+  ["admin", "boss", "owner", "supervisor", "employer"],
+  ["photo", "picture", "pic", "image", "selfie", "camera"],
+  ["remove", "delete", "erase", "terminate", "kick", "discard"],
+  ["add", "create", "new", "make", "register", "setup"],
+  ["edit", "fix", "change", "correct", "update", "adjust", "modify", "wrong"],
+  ["cant", "cannot", "unable", "wont", "couldnt", "wouldnt"],
+  ["not", "doesnt", "isnt", "dont", "didnt", "wasnt", "never", "wont"],
+  ["export", "download", "save", "backup"],
+  ["pdf", "print", "printout"],
+  ["email", "mail", "gmail"],
+  ["signal", "internet", "wifi", "connection", "reception", "offline", "online", "network"],
+  ["login", "signin", "logon"],
+  ["invoice", "bill"],
+  ["estimate", "quote", "bid", "proposal", "quotation"],
+  ["alert", "notification", "notify", "reminder", "push", "ping"],
+  ["bug", "glitch", "crash", "freeze", "lag", "laggy", "slow", "broken", "error", "problem", "issue", "hang", "stuck"],
+  ["incident", "accident", "injury", "hurt", "injured", "hazard", "unsafe"],
+  ["vacation", "holiday", "pto", "leave", "sick"],
+  ["break", "lunch", "coffee"],
+  ["overtime", "ot"],
+  ["salary", "salaried"],
+  ["phone", "mobile", "cell", "smartphone"],
+  ["app", "application", "software"],
+  ["hour", "hours"],
+  ["worker", "labor"],
+  ["plan", "planning", "dispatch"],
+  ["schedule", "calendar", "roster"],
+  ["remove", "cancel"],
+  ["password", "passcode", "pin"],
+  ["price", "pricing", "cost", "fee", "subscription", "charge", "billing"],
+  ["doc", "document", "file", "paperwork"],
+  ["drawing", "blueprint", "plans"],
+  ["where", "locate", "find", "look"],
+  ["open", "access", "reach", "go"],
+];
+
+const ROOT = new Map<string, string>();
+for (const g of SYN_GROUPS) for (const w of g) if (!ROOT.has(w)) ROOT.set(w, g[0]);
+
+function stem(w: string): string {
+  let s = w;
+  if (s.length > 5 && s.endsWith("ing")) s = s.slice(0, -3);
+  else if (s.length > 4 && s.endsWith("ied")) s = s.slice(0, -3) + "y";
+  else if (s.length > 4 && s.endsWith("ed")) s = s.slice(0, -2);
+  else if (s.length > 4 && s.endsWith("ies")) s = s.slice(0, -3) + "y";
+  else if (s.length > 4 && s.endsWith("es") && !s.endsWith("ses")) s = s.slice(0, -2);
+  else if (s.length > 3 && s.endsWith("s") && !s.endsWith("ss")) s = s.slice(0, -1);
+  if (s.length > 4 && s.endsWith("e")) s = s.slice(0, -1);
+  if (s.length > 3 && /(.)\1$/.test(s) && !s.endsWith("ll") && !s.endsWith("ss")) s = s.slice(0, -1); // clockk, adding -> add
+  return s;
+}
+
+function canon(w: string): string {
+  const direct = ROOT.get(w);
+  if (direct) return stem(direct);
+  const st = stem(w);
+  return stem(ROOT.get(st) ?? st);
+}
+
+/** words -> comparable tokens (no apostrophes, no filler, stemmed, synonyms merged) */
+function tokens(text: string, keepStop = false): string[] {
+  const clean = text.toLowerCase().replace(/[’`]/g, "'").replace(/'/g, "").replace(/[^a-z0-9 ]+/g, " ");
+  const out: string[] = [];
+  for (const raw of clean.split(/\s+/)) {
+    if (!raw) continue;
+    if (!keepStop && STOP.has(raw)) continue;
+    out.push(canon(raw));
   }
-  if (GREETING.test(q) && q.split(" ").length <= 4) {
-    return "Hi! I can help with clocking in, timesheets, payroll, crew, schedules, time off, projects, safety and more. What do you need?";
+  return out;
+}
+
+// ---------- index (built once) ----------
+
+type Indexed = { entry: Entry; w: Map<string, number>; bigrams: Set<string>; size: number; phrases: { text: string; n: number }[] };
+
+function norm(text: string): string {
+  return text.toLowerCase().replace(/[’`]/g, "'").replace(/'/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/ +/g, " ").trim();
+}
+
+let INDEX: Indexed[] | null = null;
+let IDF = new Map<string, number>();
+let VOCAB: string[] = [];
+const RAWSTEM = new Map<string, { word: string; n: number }>(); // the same words by stem, for typo matching
+const RAW = new Map<string, number>(); // every real word we know (before synonyms merge), with how often it appears
+
+const META: Entry[] = [
+  { id: "meta-who", title: "About this assistant", k: "who are you|what are you|are you a bot|are you ai|are you real|are you a person|are you human|what can you do|what can i ask|what can you help with|help me|how do you work|are you chatgpt|your name",
+    a: "I'm Constra's built-in help assistant. I answer from the app's own guide, so I know how Constra works: clocking in, timesheets, payroll, crew, schedule, time off, projects, safety, invoices, offline use and your account. I'm not a person, so for anything I can't answer call 672-338-9890 or email support@getconstra.com." },
+];
+
+function build() {
+  if (INDEX) return;
+  const all = [...KB, ...META];
+  const df = new Map<string, number>();
+  const idx: Indexed[] = all.map((entry) => {
+    const w = new Map<string, number>();
+    const bigrams = new Set<string>();
+    for (const t of tokens(entry.title)) w.set(t, Math.max(w.get(t) ?? 0, 1.4));
+    const phrases: { text: string; n: number }[] = [];
+    for (const word of norm(entry.title + " " + entry.k.split("|").join(" ")).split(" ")) if (word.length >= 5 || (word.length >= 4 && !STOP.has(word))) RAW.set(word, (RAW.get(word) ?? 0) + 1);
+    for (const phrase of entry.k.split("|")) {
+      const text = norm(phrase);
+      if (text) phrases.push({ text, n: text.split(" ").length });
+      const toks = tokens(phrase);
+      for (const t of toks) if (!w.has(t)) w.set(t, 1);
+      for (let i = 0; i + 1 < toks.length; i++) bigrams.add(toks[i] + " " + toks[i + 1]);
+    }
+    for (const t of w.keys()) df.set(t, (df.get(t) ?? 0) + 1);
+    return { entry, w, bigrams, size: w.size, phrases };
+  });
+  const n = idx.length;
+  for (const [t, d] of df) IDF.set(t, Math.log(1 + n / d));
+  VOCAB = [...df.keys()];
+  for (const g of SYN_GROUPS) for (const w of g) if (w.length >= 4) RAW.set(w, (RAW.get(w) ?? 0) + 0.5);
+  for (const [w, n] of RAW) { const st = stem(w); const cur = RAWSTEM.get(st); if (!cur || n > cur.n) RAWSTEM.set(st, { word: w, n }); }
+  INDEX = idx;
+}
+
+// ---------- typo forgiveness ----------
+
+function editDistance(a: string, b: string, max: number): number {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  const prev2: number[] = [];
+  let prev: number[] = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, (prev2[j - 2] ?? 99) + 1); // swapped letters
+      cur[j] = v;
+    }
+    for (let j = 0; j <= b.length; j++) prev2[j] = prev[j];
+    prev = cur;
   }
-  return "I'm not sure about that one. Try asking about clocking in, timesheets, payroll, adding crew, the schedule, time off, projects, photos or offline use.\n\nFor anything else, call 672-338-9890 or email support@getconstra.com and a person will help.";
+  return prev[b.length];
+}
+
+/** Fix a misspelled word by finding the closest word we know (ties go to the more common word). */
+function fixWord(word: string): string {
+  if (word.length < 4 || STOP.has(word) || RAW.has(word) || /d/.test(word)) return word;
+  const ws = stem(word);
+  if (RAWSTEM.has(ws)) return word; // a real word in another form (clocked, workers)
+  const max = ws.length <= 5 ? 1 : 2;
+  let best = word, bestD = max + 1, bestN = -1;
+  for (const [v, info] of RAWSTEM) {
+    const d = editDistance(ws, v, max);
+    if (d < bestD || (d === bestD && info.n > bestN)) { best = info.word; bestD = d; bestN = info.n; }
+  }
+  return bestD <= max ? best : word;
+}
+
+/** The question with every misspelled word fixed, still in plain words (used for whole-phrase matching). */
+function fixedNorm(text: string): string {
+  build();
+  return norm(text).split(" ").map((w) => (w ? fixWord(w) : w)).join(" ");
+}
+
+/** Question -> comparable tokens, with typos fixed first. */
+function queryTokens(text: string): string[] {
+  build();
+  const out: string[] = [];
+  for (const raw of fixedNorm(text).split(" ")) {
+    if (!raw || STOP.has(raw)) continue;
+    out.push(canon(raw));
+  }
+  return out;
+}
+
+// ---------- ranking ----------
+
+type Ranked = { e: Indexed; score: number; coverage: number };
+
+function rank(weights: Map<string, number>, seq: string[], qNorm: string, where: boolean, howTo: boolean): Ranked[] {
+  build();
+  let mass = 0;
+  for (const [t, wt] of weights) mass += (IDF.get(t) ?? 1.2) * wt;
+  const padded = ` ${qNorm} `;
+  const out: Ranked[] = [];
+  for (const e of INDEX!) {
+    let s = 0, matched = 0;
+    for (const [t, wt] of weights) {
+      const ew = e.w.get(t);
+      if (!ew) continue;
+      const v = (IDF.get(t) ?? 1.2) * wt;
+      s += v * ew;
+      matched += v;
+    }
+    // a whole phrase from the guide appearing in the question is the strongest signal
+    let phrase = 0;
+    for (const p of e.phrases) if (p.n >= 2 ? padded.includes(` ${p.text} `) : false) phrase = Math.max(phrase, 4 + 0.8 * p.n);
+    if (padded === ` ${qNorm} ` && e.phrases.some((p) => p.text === qNorm)) phrase += 6;
+    s += phrase;
+    if (s === 0) continue;
+    for (let i = 0; i + 1 < seq.length; i++) if (e.bigrams.has(seq[i] + " " + seq[i + 1])) s += 1.6 * Math.min(IDF.get(seq[i]) ?? 1, IDF.get(seq[i + 1]) ?? 1);
+    s = s / Math.pow(e.size, 0.12);
+    const isScreen = e.entry.id.startsWith("screen-");
+    if (where && isScreen) s *= 1.25;
+    if (howTo && isScreen) s *= 0.8;
+    if (howTo && !isScreen && !e.entry.id.startsWith("meta")) s *= 1.08;
+    out.push({ e, score: s, coverage: phrase ? Math.max(matched / (mass || 1), 0.6) : matched / (mass || 1) });
+  }
+  return out.sort((a, b) => b.score - a.score);
+}
+
+const GREETING = /^(hi|hello|hey|yo|hiya|howdy|sup|good (morning|afternoon|evening|day)|hola|bonjour)\b/i;
+const THANKS = /\b(thanks|thank you|thx|thankyou|cheers|appreciate|ty)\b/i;
+const BYE = /^(bye|goodbye|see you|later|cya|that is all|that's all|thats all|no thanks)\b/i;
+
+/** Best answer for a question. `history` is the person's earlier questions, used for short follow-ups. */
+export function answerLocally(question: string, opts: { storeApp?: boolean; role?: string; history?: string[] } = {}): string {
+  const raw = (question ?? "").trim();
+  if (!raw) return "Ask me anything about Constra, like clocking in, timesheets, crew or payroll.";
+  const plain = raw.toLowerCase().replace(/[’]/g, "'");
+  const words = plain.split(/\s+/).filter(Boolean);
+  if (words.length <= 4 && THANKS.test(plain) && !/\b(how|where|why|what)\b/.test(plain)) return "You're welcome! Ask if you need anything else.";
+  if (words.length <= 4 && BYE.test(plain)) return "Take care! I'm here whenever you need help.";
+  build();
+
+  const seqRaw = queryTokens(raw);
+  const qNorm = fixedNorm(raw);
+  const seq = seqRaw;
+
+  const where = /\b(where|find|locate|open|which (menu|tab|screen|page)|what is|what does|who can see)\b/.test(plain);
+  const howTo = /\b(how|steps|way to|can i|do i)\b/.test(plain);
+  const weights = new Map<string, number>();
+  for (const t of seq) weights.set(t, 1);
+
+  let ranked = rank(weights, seq, qNorm, where, howTo);
+  let best = ranked[0];
+
+  // Short follow-ups ("what about workers?", "and pay?") borrow from the previous question.
+  const prev = (opts.history ?? []).filter((h) => h && h.trim().toLowerCase() !== plain).slice(-1)[0];
+  if (prev && (seq.length <= 3 || !best || best.coverage < 0.5)) {
+    const ptoks = queryTokens(prev);
+    const merged = new Map(weights);
+    for (const t of ptoks) if (!merged.has(t)) merged.set(t, 0.45);
+    const r2 = rank(merged, [...ptoks, ...seq], fixedNorm(prev + " " + raw), where, howTo);
+    if (r2[0] && (!best || r2[0].score > best.score * 1.15)) { ranked = r2; best = r2[0]; }
+  }
+
+  const usable = (r: Ranked) => !(opts.storeApp && r.e.entry.billing);
+  ranked = ranked.filter(usable);
+  best = ranked[0];
+
+  if (!best) {
+    if (GREETING.test(plain)) return "Hi! I can help with clocking in, timesheets, payroll, crew, schedules, time off, projects, safety and more. What do you need?";
+    return fallback(opts.storeApp);
+  }
+
+  const strong = best.coverage >= 0.5 && best.score >= 1.8;
+  const maybe = best.coverage >= 0.28 && best.score >= 1.0;
+  if (!strong && !maybe) {
+    if (GREETING.test(plain)) return "Hi! I can help with clocking in, timesheets, payroll, crew, schedules, time off, projects, safety and more. What do you need?";
+    return fallback(opts.storeApp, ranked.slice(0, 3).filter((r) => r.score >= 0.6).map((r) => r.e.entry.title));
+  }
+
+  const related = ranked.slice(1).filter((r) => r.score >= best.score * (strong ? 0.82 : 0.7) && r.coverage >= 0.35).slice(0, 2);
+  let text = strong ? best.e.entry.a : `I think you're asking about **${best.e.entry.title}**:\n\n${best.e.entry.a}`;
+  if (related.length) text += `\n\nRelated: ${related.map((r) => `**${r.e.entry.title}**`).join(", ")}. Ask about any of them.`;
+  return text;
+}
+
+function fallback(storeApp?: boolean, suggestions: string[] = []): string {
+  void storeApp;
+  const list = suggestions.length ? `\n\nDid you mean: ${suggestions.map((s) => `**${s}**`).join(", ")}?` : "";
+  return "I'm not sure about that one. Try asking about clocking in, timesheets, payroll, adding crew, the schedule, time off, projects, photos, invoices or offline use." + list + "\n\nFor anything else, call 672-338-9890 or email support@getconstra.com and a person will help.";
+}
+
+/** Titles of everything the guide knows, for a help menu or tests. */
+export function helpTopics(): { id: string; title: string }[] {
+  return KB.map((e) => ({ id: e.id, title: e.title }));
+}
+
+/** For tests: which entry id wins for a question (no formatting). */
+export function bestTopicId(question: string, history: string[] = []): string | null {
+  const text = answerLocally(question, { history });
+  const hit = [...KB, ...META].find((e) => text.includes(e.a.slice(0, 60)));
+  return hit?.id ?? null;
 }
