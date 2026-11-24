@@ -6,13 +6,19 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { fromStoreApp } from "@/lib/store-app";
+import { answerLocally } from "@/lib/help-guide";
+
+// The built-in guide answers on its own when no AI provider key is set, or when the provider fails.
+function localReply(question: string, storeApp: boolean) {
+  return new Response(answerLocally(question, { storeApp }), { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+}
 
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ configured: false });
   void request;
-  return Response.json({ configured: !!process.env.GROQ_API_KEY });
+  return Response.json({ configured: true });
 }
 
 const SYSTEM_PROMPT = `You are the Constra AI assistant — a helpful, concise support agent built into the Constra construction workforce management app. You help field crews, foremen, project managers, and admins get answers fast.
@@ -250,10 +256,6 @@ export async function POST(request: Request) {
   if (!rateLimit(`chat-day:${user.id}`, 300, 86_400_000)) return rateLimitResponse();
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    console.error("[chat] GROQ_API_KEY missing");
-    return new Response("Support chat is unavailable right now.", { status: 503 });
-  }
 
   let body: { messages?: { role: string; content: string }[]; page?: unknown };
   try {
@@ -270,6 +272,10 @@ export async function POST(request: Request) {
   if (!userMessages.length) {
     return new Response("No messages provided", { status: 400 });
   }
+
+  const lastQuestion = [...userMessages].reverse().find((m) => m.role === "user")?.content ?? "";
+  // No AI key configured: answer from the built-in guide instead of failing.
+  if (!apiKey) return localReply(lastQuestion, fromStoreApp(request));
 
   const page = typeof body.page === "string" ? body.page.slice(0, 100) : "";
   const system = [
@@ -304,7 +310,7 @@ export async function POST(request: Request) {
     if (!groqRes.ok || !groqRes.body) {
       const errText = await groqRes.text().catch(() => "");
       console.error("[/api/chat] Groq error:", groqRes.status, errText);
-      return new Response(`Groq error ${groqRes.status}: ${errText}`, { status: 502 });
+      return localReply(lastQuestion, fromStoreApp(request));
     }
 
     // Groq returns OpenAI-compatible SSE — parse and forward text chunks
@@ -355,6 +361,6 @@ export async function POST(request: Request) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[/api/chat] fetch error:", msg);
-    return new Response(`Server error: ${msg}`, { status: 502 });
+    return localReply(lastQuestion, fromStoreApp(request));
   }
 }
