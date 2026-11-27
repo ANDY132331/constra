@@ -23,9 +23,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid file" }, { status: 400 });
   }
 
-  const { data: profile } = await authClient.from("profiles").select("company_id").eq("id", user.id).single();
+  const { data: profile } = await authClient.from("profiles").select("company_id, role, granted_pages").eq("id", user.id).single();
   if (!profile?.company_id || !path.startsWith(`${profile.company_id}/`)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Clock-in photos are "{companyId}/{workerId}/{time}.jpg": a selfie plus when it was taken. Only that
+  // worker, or someone who runs the day (same rule as can_see_hours() in migration 019), may open one.
+  if (bucket === "clock-photos" && path.split("/")[1] !== user.id) {
+    const seesHours = ["Admin", "Project Manager", "Foreman"].includes(profile.role ?? "")
+      || ((profile.granted_pages as string[] | null) ?? []).some((p) => p === "/crew" || p === "/reports");
+    if (!seesHours) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const service = await createServiceClient();

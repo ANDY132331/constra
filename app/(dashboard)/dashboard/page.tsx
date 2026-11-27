@@ -307,7 +307,7 @@ export default function DashboardPage() {
   const {
     workers, projects, punchItems, clockEntries, activityFeed,
     currentUser, getWorkerById, getProjectById, currency,
-    invoices, changeOrders, updateWorker, updateClockEntry, addActivity, theme,
+    invoices, changeOrders, updateWorker, updateClockEntry, theme,
     overtimeEnabled, overtimeDailyThreshold, overtimeWeeklyThreshold, overtimeMultiplier, overtimeRules,
   } = useStore();
   const dk = theme !== "light"; // dark mode flag for hero section
@@ -443,8 +443,8 @@ export default function DashboardPage() {
       const now = new Date();
       const entry = [...clockEntries].reverse().find((e) => e.workerId === currentUser.id && !e.clockOut);
       if (entry) updateClockEntry(entry.id, { clockOut: now });
+      // No activity-feed entry: the feed is company-wide, so it would tell coworkers when this person finished
       updateWorker(currentUser.id, { clockedIn: false, clockInTime: undefined });
-      addActivity({ type: "clock-out", description: `${currentUser.name} clocked out`, workerId: currentUser.id, timestamp: now });
     };
 
     const totalToday = myTodayHours + liveElapsed;
