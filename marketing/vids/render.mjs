@@ -16,6 +16,7 @@ await p.route("https://vid.local/**", (r) => {
   const n = decodeURIComponent(new URL(r.request().url()).pathname);
   if (n.startsWith("/three/")) return r.fulfill(file(`${ROOT}/node_modules/three/${n.slice(7)}`, "text/javascript"));
   if (n.startsWith("/cine/")) return r.fulfill(file(`${HERE}/cine/${n.slice(6)}`, "text/javascript"));
+  if (n.startsWith("/gta/")) return r.fulfill(file(`${HERE}/gta/${n.slice(5)}`, "text/javascript"));
   if (n === "/stickkit.js") return r.fulfill(file(`${HERE}/stickkit.js`, "text/javascript"));
   if (n === "/stick.js") return r.fulfill(file(`${HERE}/stick.js`, "text/javascript"));
   if (n === "/sitebg.js") return r.fulfill(file(`${HERE}/sitebg.js`, "text/javascript"));
@@ -38,7 +39,12 @@ await p.route("https://fonts.googleapis.com/**", (r) => r.continue()); await p.r
 await p.goto(`https://vid.local/?mode=${fmt}`, { waitUntil: "domcontentloaded", timeout: 120000 });
 await p.waitForFunction(() => window.prepare, null, { timeout: 120000 });
 const info = await p.evaluate(() => window.prepare()); console.log("timeline", JSON.stringify(info));
-if (mode === "stills") {
+if (mode === "sheet") { // node render.mjs <name> sheet v 0.5,3,...  -> one contact sheet PNG of the listed times
+  const ts = (arg ?? "1,4,7,10,13,16,19,21.5,23,27").split(",").map(Number);
+  const b64 = await p.evaluate(async (ts) => { const out = document.getElementById("out"), cols = 5, tw = Math.round(out.width / 4.5), th = Math.round(out.height / 4.5), rows = Math.ceil(ts.length / cols), sh = document.createElement("canvas"); sh.width = cols * tw; sh.height = rows * th; const g = sh.getContext("2d");
+    for (let i = 0; i < ts.length; i++) { window.drawFrame(ts[i]); g.drawImage(out, (i % cols) * tw, Math.floor(i / cols) * th, tw, th); g.fillStyle = "#fff"; g.font = "bold 16px sans-serif"; g.fillText(ts[i].toFixed(1), (i % cols) * tw + 6, Math.floor(i / cols) * th + 18); } return sh.toDataURL("image/png").split(",")[1]; }, ts);
+  fs.writeFileSync(path.join(ST, `${name}-sheet.png`), Buffer.from(b64, "base64")); console.log("sheet ->", path.join(ST, `${name}-sheet.png`));
+} else if (mode === "stills") {
   for (const t of (arg ?? "1,5,9").split(",").map(Number)) { const d = await p.evaluate((t) => window.still(t), t); fs.writeFileSync(path.join(ST, `${name}-${fmt}-${t}.png`), Buffer.from(d, "base64")); }
   console.log("stills ->", ST);
 } else {
