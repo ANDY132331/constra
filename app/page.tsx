@@ -72,7 +72,7 @@ const FAQ: [string, string][] = [
   ["Do my workers each need to sign up?", "They join your company with an invite code from Settings. It takes about a minute and they only see what their role allows."],
   ["What happens when there's no signal on site?", "Clock-ins and updates are saved on the phone and sync automatically when the connection comes back."],
   ["Can someone clock in from home?", "Every punch records GPS and a photo. If it's outside the geofence you set for that project, it's flagged so you can review it before payroll."],
-  ["Does it work on iPhone and Android?", "Yes. Constra runs in the browser on any phone or computer, and you can add it to your home screen like an app. Store apps for iPhone and Android are in testing."],
+  ["Does it work on iPhone and Android?", "Yes. On Android, get it from Google Play. On iPhone, add it to your home screen from Safari (getconstra.com/install shows how). It also runs in the browser on any computer."],
   ["Does it track my crew all day?", "No. It checks location at clock-in and clock-out, and every few minutes while someone is clocked in with the app open, only to notice when they leave or return to the job site. It saves the time and distance, not a trail of where they went, and stops at clock-out."],
   ["How do hours get into payroll?", "Export hours as a CSV, a Gusto-ready CSV, a QuickBooks Desktop file or a summary to enter in QuickBooks Online, with overtime split out where you've turned it on."],
   ["What does it cost?", "Constra is free during launch, with every feature included and no credit card required."],
@@ -715,6 +715,7 @@ export default function LandingPage() {
             <div className="mp-final-btns">
               <Link href={startHref} className="mp-pill mp-pill-orange mp-pill-big">{startLabel} <ArrowRight size={20} aria-hidden /></Link>
               {PLAY_STORE_URL && <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="mp-pill mp-pill-yellow mp-pill-big">Get it on Google Play</a>}
+              <Link href="/install" className="mp-pill mp-pill-ink mp-pill-big">On iPhone? Add it in 3 taps</Link>
             </div>
           </div>
         </section>

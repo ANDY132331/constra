@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { HardHat, RefreshCw } from "lucide-react";
+import { reportError } from "@/lib/report-error";
 
 export default function GlobalError({
   error,
@@ -13,6 +14,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error(error);
+    reportError("boundary", error, error.digest);
   }, [error]);
 
   return (
@@ -24,7 +26,7 @@ export default function GlobalError({
         <h1 className="text-[22px] font-black text-white mb-2">Something went wrong</h1>
         <p className="text-[13px] text-white/40 mb-4">
           An unexpected error occurred. Try refreshing the page — if it keeps happening, contact{" "}
-          <a href="mailto:hello@getconstra.com" className="text-amber-400 hover:text-amber-300">hello@getconstra.com</a>.
+          <a href="mailto:support@getconstra.com" className="text-amber-400 hover:text-amber-300">support@getconstra.com</a>.
         </p>
         {(error.message || error.digest) && (
           <div className="mb-6 text-left bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 space-y-1">

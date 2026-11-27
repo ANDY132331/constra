@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ANDROID_APP_REFERRER, STORE_APP_COOKIE, fromStoreApp } from "@/lib/store-app";
 
-const PUBLIC_PATHS = ["/demo", "/for", "/solutions", "/login", "/onboarding", "/auth", "/terms", "/privacy", "/support", "/reset-password", "/share/", "/pay/", "/co/", "/delete-account", "/.well-known/", "/opengraph-image", "/sitemap", "/robots"];
+const PUBLIC_PATHS = ["/demo", "/install", "/for", "/solutions", "/login", "/onboarding", "/auth", "/terms", "/privacy", "/support", "/reset-password", "/share/", "/pay/", "/co/", "/delete-account", "/.well-known/", "/opengraph-image", "/sitemap", "/robots"];
 
 export async function proxy(request: NextRequest) {
   const response = await route(request);

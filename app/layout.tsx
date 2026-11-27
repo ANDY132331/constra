@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { StoreProvider } from "@/lib/store";
 import PwaInstall from "@/components/pwa-install";
+import ErrorReporter from "@/components/error-reporter";
 import { ThemeApplier } from "@/components/theme-applier";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -125,6 +126,7 @@ export default function RootLayout({
           <ThemeApplier />
           {children}
           <PwaInstall />
+          <ErrorReporter />
           <Analytics />
           <Toaster richColors position="top-center" />
         </StoreProvider>
